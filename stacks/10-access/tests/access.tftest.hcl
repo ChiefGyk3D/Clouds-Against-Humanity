@@ -276,3 +276,19 @@ run "an_empty_admin_list_is_rejected" {
   }
   expect_failures = [var.admin_user_ids]
 }
+
+run "the_two_connectors_reboot_at_different_times" {
+  command = plan
+  assert {
+    condition     = length(regexall("reboot_time\\s*=\\s*\"03:00\"", file("${path.module}/main.tf"))) == 1 && length(regexall("reboot_time\\s*=\\s*\"04:00\"", file("${path.module}/main.tf"))) == 1
+    error_message = "Connector a must reboot at 03:00 and connector b at 04:00, so they never reboot together."
+  }
+  assert {
+    condition     = length(regexall("reboot_time\\s*=", file("${path.module}/main.tf"))) == 2
+    error_message = "Each connector module block must set its own reboot_time."
+  }
+  assert {
+    condition     = length(regexall("admin_ssh_public_key\\s*=\\s*var.admin_ssh_public_key", file("${path.module}/main.tf"))) == 2
+    error_message = "Both connectors must receive the admin public key."
+  }
+}

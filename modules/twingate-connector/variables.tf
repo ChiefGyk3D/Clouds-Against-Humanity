@@ -50,3 +50,23 @@ variable "twingate_network" {
     error_message = "twingate_network must be the bare Twingate network subdomain (lowercase letters, digits, hyphens), not a URL and with no quotes."
   }
 }
+
+variable "admin_ssh_public_key" {
+  type        = string
+  description = "Public key (type and key, no comment) for the cah-admin user. Key-only access; no password exists."
+
+  validation {
+    condition     = can(regex("^ssh-(ed25519|rsa) [A-Za-z0-9+/=]+$", var.admin_ssh_public_key))
+    error_message = "admin_ssh_public_key must be '<ssh-ed25519|ssh-rsa> <key>' with no comment field."
+  }
+}
+
+variable "reboot_time" {
+  type        = string
+  description = "HH:MM (UTC) when unattended-upgrades may reboot this droplet. Give each connector a different time so they never reboot together."
+
+  validation {
+    condition     = can(regex("^([01][0-9]|2[0-3]):[0-5][0-9]$", var.reboot_time))
+    error_message = "reboot_time must be HH:MM in 24-hour time, for example 03:00."
+  }
+}

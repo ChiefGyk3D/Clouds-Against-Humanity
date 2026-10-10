@@ -33,6 +33,10 @@ module "connector_a" {
   instance            = "a"
   twingate_network    = var.twingate_network
 
+  admin_ssh_public_key = var.admin_ssh_public_key
+  # Staggered, so the two connectors never reboot together.
+  reboot_time = "03:00"
+
   # The outbound rules must exist before the droplet boots and starts to install.
   depends_on = [module.connector_firewall]
 }
@@ -48,6 +52,10 @@ module "connector_b" {
   ssh_key_fingerprint = data.digitalocean_ssh_key.admin.fingerprint
   instance            = "b"
   twingate_network    = var.twingate_network
+
+  admin_ssh_public_key = var.admin_ssh_public_key
+  # Staggered, so the two connectors never reboot together.
+  reboot_time = "04:00"
 
   depends_on = [module.connector_firewall]
 }

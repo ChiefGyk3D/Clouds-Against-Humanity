@@ -11,6 +11,9 @@ variables {
   ssh_key_fingerprint = "aa:bb:cc:dd"
   instance            = "a"
   twingate_network    = "acme"
+
+  admin_ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAItest"
+  reboot_time          = "03:00"
 }
 
 run "droplet_is_tagged_at_creation_inside_the_vpc" {
@@ -183,4 +186,163 @@ run "outputs_never_carry_connector_secrets" {
     ])
     error_message = "A module output carries a connector access or refresh token."
   }
+}
+
+# Hardening of the rendered cloud-init. The yamldecode calls double as the
+# valid-YAML check: an invalid document fails the run.
+
+run "cloud_init_is_valid_yaml_with_a_key_only_admin_user" {
+  command = plan
+  assert {
+    condition     = yamldecode(digitalocean_droplet.connector.user_data).disable_root == true && yamldecode(digitalocean_droplet.connector.user_data).ssh_pwauth == false
+    error_message = "Root login and SSH passwords must be disabled in cloud-init."
+  }
+  assert {
+    condition     = length(yamldecode(digitalocean_droplet.connector.user_data).users) == 1 && yamldecode(digitalocean_droplet.connector.user_data).users[0].name == "cah-admin"
+    error_message = "Exactly one user, cah-admin, must be declared (no default ubuntu user)."
+  }
+  assert {
+    condition     = yamldecode(digitalocean_droplet.connector.user_data).users[0].ssh_authorized_keys == ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAItest"]
+    error_message = "cah-admin must carry the admin public key."
+  }
+  assert {
+    condition     = yamldecode(digitalocean_droplet.connector.user_data).users[0].lock_passwd == true && yamldecode(digitalocean_droplet.connector.user_data).users[0].sudo == "ALL=(ALL) NOPASSWD:ALL"
+    error_message = "cah-admin must have a locked password and key-based passwordless sudo."
+  }
+}
+
+run "sshd_dropin_has_the_hardening_settings" {
+  command = plan
+  assert {
+    condition = alltrue([
+      for line in [
+        "PermitRootLogin no", "PasswordAuthentication no", "KbdInteractiveAuthentication no",
+        "PubkeyAuthentication yes", "X11Forwarding no", "AllowUsers cah-admin",
+        "MaxAuthTries 3", "LoginGraceTime 20",
+      ] :
+      contains(split("\n", one([for f in yamldecode(digitalocean_droplet.connector.user_data).write_files : f.content if f.path == "/etc/ssh/sshd_config.d/99-cah-hardening.conf"])), line)
+    ])
+    error_message = "The sshd drop-in must contain every hardening line."
+  }
+  assert {
+    condition     = !can(regex("(?i)PermitRootLogin\\s+(yes|prohibit-password|without-password)", digitalocean_droplet.connector.user_data))
+    error_message = "No part of the user_data may allow root login."
+  }
+}
+
+run "unattended_upgrades_reboot_at_the_instance_time" {
+  command = plan
+  variables {
+    reboot_time = "04:00"
+  }
+  assert {
+    condition     = strcontains(one([for f in yamldecode(digitalocean_droplet.connector.user_data).write_files : f.content if f.path == "/etc/apt/apt.conf.d/52cah-unattended-upgrades"]), "Unattended-Upgrade::Automatic-Reboot-Time \"04:00\";")
+    error_message = "The reboot time must come from the reboot_time input."
+  }
+  assert {
+    condition = alltrue([
+      for line in ["Unattended-Upgrade::Automatic-Reboot \"true\";", "Unattended-Upgrade::Automatic-Reboot-WithUsers \"true\";", "Unattended-Upgrade::Remove-Unused-Dependencies \"true\";"] :
+      strcontains(one([for f in yamldecode(digitalocean_droplet.connector.user_data).write_files : f.content if f.path == "/etc/apt/apt.conf.d/52cah-unattended-upgrades"]), line)
+    ])
+    error_message = "Automatic reboot (with users) and unused-dependency removal must be on."
+  }
+  assert {
+    condition     = strcontains(one([for f in yamldecode(digitalocean_droplet.connector.user_data).write_files : f.content if f.path == "/etc/cron.d/twingate-connector-update"]), "30 4 * * 0 root")
+    error_message = "The weekly connector update must run half an hour after the reboot time."
+  }
+}
+
+run "update_time_carries_across_the_hour_and_midnight" {
+  command = plan
+  variables {
+    reboot_time = "23:45"
+  }
+  assert {
+    condition     = strcontains(one([for f in yamldecode(digitalocean_droplet.connector.user_data).write_files : f.content if f.path == "/etc/cron.d/twingate-connector-update"]), "15 0 * * 0 root")
+    error_message = "23:45 plus 30 minutes must be 00:15."
+  }
+}
+
+run "chrony_and_sysctl_are_configured_without_touching_ip_forward" {
+  command = plan
+  assert {
+    condition     = contains(yamldecode(digitalocean_droplet.connector.user_data).packages, "chrony") && contains(yamldecode(digitalocean_droplet.connector.user_data).packages, "unattended-upgrades")
+    error_message = "chrony and unattended-upgrades must be installed."
+  }
+  assert {
+    condition = alltrue([
+      for k in ["net.ipv4.tcp_syncookies = 1", "net.ipv4.conf.all.log_martians = 1", "net.ipv4.conf.all.accept_redirects = 0", "net.ipv4.conf.all.accept_source_route = 0", "net.ipv4.conf.all.rp_filter = 2"] :
+      strcontains(one([for f in yamldecode(digitalocean_droplet.connector.user_data).write_files : f.content if f.path == "/etc/sysctl.d/99-cah-hardening.conf"]), k)
+    ])
+    error_message = "The sysctl drop-in must carry the safe hardening settings."
+  }
+  assert {
+    condition     = !can(regex("(?m)^\\s*net\\.ipv[46]\\.(conf\\.[a-z]+\\.)?(ip_)?forwarding\\s*=", digitalocean_droplet.connector.user_data))
+    error_message = "The sysctl drop-in must not change forwarding; the connector may need it."
+  }
+}
+
+run "tokens_appear_only_in_the_install_step" {
+  command = apply
+
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "FAKE-ACCESS-TOKEN-2"
+      refresh_token = "FAKE-REFRESH-TOKEN-2"
+    }
+  }
+
+  assert {
+    condition     = length(regexall("FAKE-ACCESS-TOKEN-2", digitalocean_droplet.connector.user_data)) == 1 && length(regexall("FAKE-REFRESH-TOKEN-2", digitalocean_droplet.connector.user_data)) == 1
+    error_message = "Each token must appear exactly once, in the install command."
+  }
+  assert {
+    condition     = !anytrue([for f in yamldecode(digitalocean_droplet.connector.user_data).write_files : strcontains(f.content, "FAKE-ACCESS-TOKEN-2") || strcontains(f.content, "FAKE-REFRESH-TOKEN-2")])
+    error_message = "No file written by cloud-init (all of them under world-readable paths) may contain a token."
+  }
+  assert {
+    condition     = length([for c in yamldecode(digitalocean_droplet.connector.user_data).runcmd : c if strcontains(jsonencode(c), "FAKE-ACCESS-TOKEN-2")]) == 1
+    error_message = "The tokens belong to exactly one runcmd step, the connector install."
+  }
+}
+
+run "reboot_time_rejects_a_bad_hour" {
+  command = plan
+  variables {
+    reboot_time = "24:00"
+  }
+  expect_failures = [var.reboot_time]
+}
+
+run "reboot_time_rejects_a_bad_minute" {
+  command = plan
+  variables {
+    reboot_time = "03:60"
+  }
+  expect_failures = [var.reboot_time]
+}
+
+run "reboot_time_rejects_a_missing_zero_pad" {
+  command = plan
+  variables {
+    reboot_time = "3:00"
+  }
+  expect_failures = [var.reboot_time]
+}
+
+run "admin_key_rejects_a_comment_and_a_newline" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AAAA user@host"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_yaml_injection" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AAAA\n  - evil"
+  }
+  expect_failures = [var.admin_ssh_public_key]
 }

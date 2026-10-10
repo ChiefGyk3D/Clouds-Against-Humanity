@@ -22,11 +22,43 @@ What the tests prove (`tofu test`, no cloud account needed):
 
 DigitalOcean droplets always have a public address. You cannot remove it. So the control is a firewall that is attached by tag at creation and allows no inbound traffic at all. The droplet is created with the baseline tag, so there is no moment when it is open. You reach the host by its private IP through Twingate: the connector on the droplet dials out to Twingate, and your client reaches it through that outbound connection.
 
+## 2a. Droplet hardening
+
+Each connector's cloud-init (`modules/twingate-connector/cloud-init.yaml.tftpl`) sets up:
+
+- One login user, `cah-admin`, with the admin public key and passwordless sudo. No password exists (`lock_passwd`), root is disabled (`disable_root`) and the default `ubuntu` user is not created.
+- An sshd drop-in, `/etc/ssh/sshd_config.d/99-cah-hardening.conf`: no root login, no passwords, no keyboard-interactive, public keys only, no X11 forwarding, `AllowUsers cah-admin`, `MaxAuthTries 3`, `LoginGraceTime 20`.
+- `unattended-upgrades` for security updates, with automatic reboot (also when someone is logged in) at `reboot_time` and removal of unused dependencies. The stack passes `03:00` to connector a and `04:00` to connector b (UTC), so they never reboot together.
+- `chrony` for time sync (UDP 123 outbound is already allowed).
+- A sysctl drop-in: loose reverse-path filtering, no ICMP redirects, no source routing, SYN cookies, martian logging. It does not touch `ip_forward`.
+- A weekly connector update, half an hour after each connector's reboot time on Sundays (see the install route below), so the sibling is idle while one restarts.
+
+Follow-ups, not done yet:
+
+- Lock the droplet metadata endpoint (169.254.169.254) to root. Today any process on the droplet can read the cloud-init user-data from it, and that includes the connector tokens. This needs a real droplet to test, so it waits.
+- Audit logging (auditd, or shipping auth logs off the droplet).
+- Moving the Twingate install to a pinned package source once Twingate documents one (below).
+
+## 2b. How the connector is installed and updated
+
+What Twingate's documentation says, read 2026-10-10:
+
+- The Linux connector page ([connectors-on-linux](https://www.twingate.com/docs/connectors-on-linux)) says the systemd install "can be performed in a single command with the necessary environment variables set" and gives that command only in the Admin Console. It documents `/etc/twingate/connector.conf` with three required settings (`TWINGATE_NETWORK`, `TWINGATE_ACCESS_TOKEN`, `TWINGATE_REFRESH_TOKEN`), the service name `twingate-connector`, and `systemctl` start, stop, restart and enable. It does not document an apt repository, a GPG key or a checksum for the connector.
+- The update guide ([systemd-service](https://twingate.com/docs/systemd-service)) upgrades with `apt update`, `apt install -yq twingate-connector` and `systemctl restart twingate-connector`. There is no built-in self-updater. Twingate's documented mechanism is a weekly cron job running those commands, scheduled off-peak, with two or more connectors per remote network so one can update without downtime.
+
+So no signed install route is documented, and this repository keeps the vendor's `setup.sh` (`https://binaries.twingate.com/connector/setup.sh`, fetched over TLS 1.2+ under `pipefail`). I read the script on 2026-10-10: on Debian and Ubuntu it adds `https://packages.twingate.com/apt/gpg.key` as a `signed-by` keyring and installs the `twingate-connector` package from `https://packages.twingate.com/apt/`, writes the three settings to `connector.conf` (mode 0600, directory 0700) and enables the service. That is a hint, not documentation, and the script is not version-pinned or checksummed, so a change on Twingate's side reaches new droplets. I did not copy the repository lines out of the script into this repository, because the docs do not promise them.
+
+The script does not write `TWINGATE_LABEL_DEPLOYED_BY` to the config, so that label is most likely ignored. It is harmless and kept; do not rely on it.
+
+The weekly update is the documented cron job, as `/etc/cron.d/twingate-connector-update`, because `cron.weekly` would run both connectors at the same moment.
+
 ## 3. Accepted residual risk
 
 The connector token appears in OpenTofu state and in the droplet's cloud-init user-data. It is marked sensitive, and the token is revocable and belongs to a single connector, so each of the two connectors has its own. Two things for you to do and check: keep the state in Spacelift, and in Spacelift restrict who can read the stack's state and outputs to the people who need it.
 
 To rotate the token, replace `module.connector_a.twingate_connector_tokens.this` (or `module.connector_b...` for the other one). Rotate one connector at a time so the other keeps serving. Because the state lives in Spacelift, this is not a local `tofu apply` from a laptop. Do it as a Spacelift run with the replace option for that address (or taint the resource through Spacelift's run options), then read the plan before confirming.
+
+To rotate the admin SSH key: put the new public key in `ADMIN_SSH_PUBLIC_KEY`, register it on the DigitalOcean account, and set `ADMIN_SSH_KEY_NAME` to its name. The key is in `user_data`, so this rebuilds both droplets; do it with the same one-at-a-time care (target one module per run). To change the reboot windows, edit `reboot_time` in the stack; that also rebuilds the droplet.
 
 Rotation is not free. The new token changes the rendered cloud-init `user_data`, and per the DigitalOcean provider's behavior a `user_data` change forces a new droplet; confirm in the plan output before approving the run. If so, rotation destroys and recreates that connector's droplet: expect a short outage of that connector and probably a new private IP, and its SSH Twingate resource follows the new address. The other connector keeps Twingate access up meanwhile.
 
@@ -39,13 +71,13 @@ Verified so far:
 - Twingate provider 3.8.0, verified 2026-10-10: the provider reads `TWINGATE_API_TOKEN` and `TWINGATE_NETWORK`. The DigitalOcean provider reads `DIGITALOCEAN_TOKEN`.
 - In provider 3.8.0 the `protocols` setting on `twingate_resource` is an attribute object, not a block. The SSH resources in `stacks/10-access/main.tf` are written that way.
 - `twingate_network` must be the bare subdomain (lowercase letters, digits, hyphens), not a URL. It is validated in the connector module and again in the stack.
-- The cloud-init install runs under `bash -o pipefail` with `curl -fsSL --proto '=https' --tlsv1.2 --retry 5`, so a failed download shows up as a failed cloud-init run instead of a silent half-install.
+- The cloud-init install (`setup.sh`, see 2b) runs under `bash -o pipefail` with `curl -fsSL --proto '=https' --tlsv1.2 --retry 5`, so a failed download shows up as a failed cloud-init run instead of a silent half-install.
 
 Verify before apply (not confirmed yet):
 
 - [ ] The connector firewall's outbound ports (tcp 30000-31000, udp 19302-19308, udp 443 in `stacks/10-access/main.tf`) against Twingate's current firewall requirements page.
   Verified on:
-- [ ] `TWINGATE_LABEL_DEPLOYED_BY` in the install command in `modules/twingate-connector/cloud-init.yaml.tftpl` is still a supported setting.
+- [ ] `TWINGATE_LABEL_DEPLOYED_BY` in the install command in `modules/twingate-connector/cloud-init.yaml.tftpl` is a supported setting. The 2026-10-10 reading of `setup.sh` shows it is not written to the config, so it is probably a no-op.
   Verified on:
 - [ ] Whether the install page expects the bare subdomain or a full URL for `TWINGATE_NETWORK`.
   Verified on:
