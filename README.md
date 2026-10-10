@@ -11,6 +11,7 @@ Clouds-Against-Humanity/
   scripts/cost_check.py                    cost gate
   tests/test_cost_check.py                 pytest for the gate
   docs/cost-prices.json                    price table from the DO sizes API
+  docs/cost.md                             cost gate explained
   docs/stages/approved.json                approved totals + allowed sources
   modules/vpc/                             per-region VPC
   modules/firewall/                        tag-based deny-inbound firewall
@@ -18,7 +19,7 @@ Clouds-Against-Humanity/
   stacks/00-foundation/                    project, tag, VPC, baseline firewall
   stacks/10-access/                        connector, connector firewall, group, SSH resource
   .github/workflows/ci.yml                 GYST callers + tofu-test + CI green
-  docs/stages/00-foundation.md, 01-access.md, cost.md   guides
+  docs/stages/00-foundation.md, 01-access.md   stage guides
 ```
 
 Modules are reusable building blocks. Stacks are the things you actually apply, one Spacelift stack each. Each module and stack has its tests in `<module or stack>/tests/*.tftest.hcl`.

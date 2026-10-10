@@ -1,6 +1,7 @@
 # Clouds Against Humanity: Foundation and Access (Stages 0-1)
 
 Status: DRAFT for review. Date: 2026-10-10.
+Amended 2026-10-10 after implementation: outbound includes tcp 80 and tcp 53; no droplet-baseline module.
 Scope: stages 0 and 1 only. Later stages get their own spec, plan and cost approval.
 
 ## 1. Purpose
@@ -41,7 +42,7 @@ Clouds-Against-Humanity/
   stacks/
     00-foundation/     DO project, per-region VPC, tag-based firewall
     10-access/         Twingate connector droplet, groups, resources
-  modules/             droplet-baseline, vpc, twingate-connector
+  modules/             vpc, twingate-connector
   docs/
     stages/            one guide per stage: decisions, cost, verify, runbook
     cost.md            price table from the DO sizes API + stage totals
@@ -76,7 +77,8 @@ Checklist, each item verified and recorded in `docs/stages/00-foundation.md`:
 - DO project.
 - VPC per region (private range chosen to avoid overlap with homelab ranges).
 - Cloud Firewall attached by tag: no inbound at all, no public SSH, outbound
-  limited to what the connector and package updates need (443, DNS, NTP).
+  limited to what the connector and package updates need (443, 80 for
+  package mirrors, DNS on 53 tcp and udp, NTP on 123 udp).
 - Common tag convention applied at droplet creation, so the firewall is in
   force from the first boot.
 

@@ -25,7 +25,7 @@ jobs:
       python-versions: '["3.12", "3.13"]'
       install-command: pip install pytest
       test-command: python -I -m pytest tests -q
-      lint-install-command: pip install ruff
+      lint-install-command: pip install ruff==0.17.0
       lint-command: ruff check scripts tests
       workflow-lint: false
       docker-build: false
