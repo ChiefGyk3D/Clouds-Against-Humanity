@@ -28,7 +28,7 @@ Do these by hand in the DigitalOcean console and the password manager before the
 
 ## 3. Choices to confirm before apply
 
-- Region: `nyc3` is the default. It is the region that carries the `$6` price for `s-1vcpu-1gb` in the price table; a different region needs its price checked first.
+- Region: `nyc3` is the default. The price table (`docs/cost-prices.json`) is not region-specific; it records list prices retrieved on 2026-10-10 for the listed sizes. Check the availability and price of a size in another region before changing region.
 - VPC CIDR: confirm that `10.77.0.0/24` does not overlap any home or lab range you connect to. Compare against your router's routing table. Record only "no overlap confirmed" in this repo, never the ranges themselves. If it overlaps, set `vpc_ip_range` to another private range.
 - License of this repository: choose it before the repository goes public.
 

@@ -17,7 +17,7 @@ Source of prices: `docs/cost-prices.json`, retrieved 2026-10-10 from the Digital
 - a size is missing from the price table;
 - backups are requested while the backup price is unverified (see below);
 - the approved total is itself above the ceiling;
-- a droplet is declared in a source file that is not listed under `allowed_sources`, so a droplet cannot be added without being costed.
+- a costed resource type (droplet, volume, load balancer, and so on) appears in a source file that is not listed under `allowed_sources`, so such a resource cannot be added without being costed. Today only the droplet in the connector module file is allow-listed.
 
 To add a paid resource, add it to a `cost.json`, raise the approved total on purpose in `approved.json`, and have the new total approved before the change merges.
 

@@ -21,7 +21,7 @@ Clouds-Against-Humanity/
   docs/stages/00-foundation.md, 01-access.md, cost.md   guides
 ```
 
-Modules are reusable building blocks. Stacks are the things you actually apply, one Spacelift stack each. Each module and stack has tests under `tests/*.tftest.hcl`.
+Modules are reusable building blocks. Stacks are the things you actually apply, one Spacelift stack each. Each module and stack has its tests in `<module or stack>/tests/*.tftest.hcl`.
 
 ## Run the checks
 
@@ -30,6 +30,9 @@ Install OpenTofu 1.8 or newer and Python 3, then:
 ```bash
 # cost gate: totals the planned resources and compares with docs/stages/approved.json
 python3 -I scripts/cost_check.py --root .
+
+# tests for the cost gate (needs a virtualenv with pytest installed)
+python3 -I -m pytest tests -q
 
 # tests for one module or stack (no cloud account needed, providers are mocked)
 tofu -chdir=modules/firewall init -backend=false

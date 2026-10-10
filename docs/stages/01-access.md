@@ -3,7 +3,7 @@
 ## 1. What this stage builds
 
 - One `s-1vcpu-1gb` droplet running the Twingate connector inside the VPC. It is created with `ubuntu-24-04-x64`, monitoring on, backups off and IPv6 off.
-- A connector-only firewall that adds outbound ports on top of the baseline firewall's defaults. It has no inbound rules.
+- A connector firewall, attached by the connector tag, with no inbound rules and eight outbound rules: the firewall module's five defaults (tcp 443, 80 and 53; udp 53 and 123) plus three Twingate ports (tcp 30000-31000, udp 19302-19308, udp 443). The baseline firewall also applies to the droplet through its own tag.
 - A Twingate admin group, `cah-nyc3-admins`.
 - A per-host Twingate resource for the connector's private address, limited to TCP port 22.
 
@@ -22,11 +22,11 @@ DigitalOcean droplets always have a public address. You cannot remove it. So the
 
 ## 3. Accepted residual risk
 
-The connector token appears in OpenTofu state and in the droplet's cloud-init user-data. It is marked sensitive, the state lives in Spacelift with restricted access, and the token is revocable and belongs to a single connector. To rotate it, run:
+The connector token appears in OpenTofu state and in the droplet's cloud-init user-data. It is marked sensitive, and the token is revocable and belongs to a single connector. Two things for you to do and check: keep the state in Spacelift, and in Spacelift restrict who can read the stack's state and outputs to the people who need it.
 
-```bash
-tofu apply -replace=module.connector.twingate_connector_tokens.this
-```
+To rotate the token, replace `module.connector.twingate_connector_tokens.this`. Because the state lives in Spacelift, this is not a local `tofu apply` from a laptop. Do it as a Spacelift run with the replace option for that address (or taint the resource through Spacelift's run options), then read the plan before confirming.
+
+Rotation is not free. The new token changes the rendered cloud-init `user_data`, and per the DigitalOcean provider's behavior a `user_data` change forces a new droplet; confirm in the plan output before approving the run. If so, rotation destroys and recreates the connector droplet: expect a short outage and probably a new private IP, and the SSH Twingate resource follows the new address.
 
 ## 4. Vendor facts to record when verified
 
@@ -80,4 +80,4 @@ Later droplets will need an inbound rule allowing TCP 22 from the connector tag,
 
 ## 8. Rollback
 
-Run `destroy` on the stack. The connector token dies with the connector. Stage 0 is untouched.
+Destroy `cah-10-access` first, then `cah-00-foundation` if you want stage 0 gone too: stage 0's VPC, project and tag are in use by stage 1, so the order matters. The connector token dies with the connector.
