@@ -54,3 +54,79 @@ run "tokens_never_leave_the_module" {
     error_message = "No output may mention or expose connector tokens."
   }
 }
+
+run "network_slug_accepts_bare_subdomain" {
+  command = plan
+  variables {
+    twingate_network = "acme-2"
+  }
+  assert {
+    condition     = strcontains(digitalocean_droplet.connector.user_data, "TWINGATE_NETWORK='acme-2'")
+    error_message = "A bare subdomain must be accepted."
+  }
+}
+
+run "network_slug_rejects_single_quote" {
+  command = plan
+  variables {
+    twingate_network = "acme'; id #"
+  }
+  expect_failures = [var.twingate_network]
+}
+
+run "network_slug_rejects_double_quote" {
+  command = plan
+  variables {
+    twingate_network = "acme\"x"
+  }
+  expect_failures = [var.twingate_network]
+}
+
+run "network_slug_rejects_full_url" {
+  command = plan
+  variables {
+    twingate_network = "https://acme.twingate.com"
+  }
+  expect_failures = [var.twingate_network]
+}
+
+run "install_fails_loudly_when_download_fails" {
+  command = plan
+  assert {
+    condition     = strcontains(digitalocean_droplet.connector.user_data, "pipefail") && strcontains(digitalocean_droplet.connector.user_data, "--proto '=https' --tlsv1.2")
+    error_message = "The install pipeline must use pipefail and hardened curl."
+  }
+}
+
+run "outputs_never_carry_connector_secrets" {
+  command = apply
+
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "FAKE-ACCESS-TOKEN-1"
+      refresh_token = "FAKE-REFRESH-TOKEN-1"
+    }
+  }
+
+  # Test setup sanity: the fake values really reach the droplet user_data.
+  assert {
+    condition     = strcontains(digitalocean_droplet.connector.user_data, "FAKE-ACCESS-TOKEN-1") && strcontains(digitalocean_droplet.connector.user_data, "FAKE-REFRESH-TOKEN-1")
+    error_message = "Test setup: fake tokens must flow into user_data."
+  }
+
+  # The test can only name outputs it knows, so pin the output set: adding any
+  # output (whatever its name) must be a deliberate edit of this list.
+  assert {
+    condition     = jsonencode(sort(flatten(regexall("output \"([a-z_]+)\"", file("${path.module}/outputs.tf"))))) == jsonencode(["droplet_name", "droplet_urn", "private_ip", "remote_network_id", "size"])
+    error_message = "outputs.tf declares an output this test does not inspect. Add it here only after proving it carries no connector secret."
+  }
+
+  assert {
+    condition = !anytrue([
+      for v in [output.droplet_name, output.droplet_urn, output.private_ip, output.remote_network_id, output.size] :
+      strcontains(tostring(v), "FAKE-ACCESS-TOKEN-1") || strcontains(tostring(v), "FAKE-REFRESH-TOKEN-1")
+    ])
+    error_message = "A module output carries a connector access or refresh token."
+  }
+}

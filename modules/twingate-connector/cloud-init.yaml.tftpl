@@ -4,4 +4,4 @@ package_upgrade: true
 packages:
   - unattended-upgrades
 runcmd:
-  - [bash, -c, "curl -fsSL https://binaries.twingate.com/connector/setup.sh | TWINGATE_ACCESS_TOKEN='${access_token}' TWINGATE_REFRESH_TOKEN='${refresh_token}' TWINGATE_NETWORK='${network}' TWINGATE_LABEL_DEPLOYED_BY='opentofu' bash"]
+  - [bash, -o, pipefail, -c, "curl -fsSL --proto '=https' --tlsv1.2 --retry 5 https://binaries.twingate.com/connector/setup.sh | TWINGATE_ACCESS_TOKEN='${access_token}' TWINGATE_REFRESH_TOKEN='${refresh_token}' TWINGATE_NETWORK='${network}' TWINGATE_LABEL_DEPLOYED_BY='opentofu' bash"]
