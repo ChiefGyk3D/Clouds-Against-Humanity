@@ -35,9 +35,9 @@ Do these by hand in the DigitalOcean console and the password manager before the
 ## 4. Bootstrap order
 
 1. Create the Doppler project `clouds-against-humanity` with a `prd` config holding `DIGITALOCEAN_TOKEN` (Token A).
-2. Create the Spacelift stack `cah-00-foundation` rooted at `stacks/00-foundation`, with the OpenTofu binary and autodeploy off.
-3. Feed the Doppler secrets into the stack's environment by whichever mechanism the free plans support. Verify this at setup time: either Doppler's native Spacelift sync, or a Spacelift context filled once by hand.
-4. Run a proposed run, read the plan, then confirm it. The plan should show a project, a tag, a VPC and a firewall, and nothing else.
+2. Create the Spacelift stack `cah-00-foundation` rooted at `stacks/00-foundation`, with OpenTofu as the workflow tool (the Terraform vendor setting with `OPEN_TOFU`, because the standalone OpenTofu vendor is not enabled on this account) and autodeploy off.
+3. Feed the Doppler secrets into the stack's environment. Doppler has no native Spacelift integration and this Spacelift plan has no OIDC token, so a Spacelift context holds one read-only Doppler service token and a hook fetches the rest. Setup, rotation and troubleshooting are in [Spacelift and Doppler secrets](../spacelift-secrets.md).
+4. Trigger a tracked run on `main`. Autodeploy is off, so it stops after the plan and waits for you. A proposed run (a pull request plan) gets no credentials by design, so it cannot be used for this. Read the plan, then confirm it. The plan should show a project, a tag, a VPC and a firewall, and nothing else.
 
 ## 5. Verify
 
