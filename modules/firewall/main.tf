@@ -10,6 +10,12 @@ locals {
 }
 
 # No inbound_rule block: DigitalOcean denies all inbound traffic that no rule allows.
+#
+# Trivy DIG-0003 flags egress to any address. It is accepted here: outbound is
+# restricted to specific ports (never "all"), inbound is zero, and the hosts
+# these droplets must reach (Twingate relays, package mirrors, DNS and NTP
+# servers) have no fixed addresses, so there is no address list to pin.
+#trivy:ignore:AVD-DIG-0003
 resource "digitalocean_firewall" "this" {
   name = "${var.layer}-${var.region}-${var.purpose}"
   tags = [var.tag]
