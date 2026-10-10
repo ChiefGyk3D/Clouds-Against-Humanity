@@ -13,7 +13,7 @@ variables {
 run "connector_size_comes_from_the_cost_manifest" {
   command = plan
   assert {
-    condition     = module.connector.size == jsondecode(file("${path.module}/cost.json")).resources[0].size
+    condition     = module.connector.size == one([for r in jsondecode(file("${path.module}/cost.json")).resources : r if r.name == "connector"]).size
     error_message = "The droplet size must be read from cost.json so the cost gate is the single source."
   }
 }
@@ -28,6 +28,10 @@ run "connector_has_its_own_tag_and_outbound_only_firewall" {
     condition     = module.connector_firewall.inbound_rule_count == 0
     error_message = "The connector firewall must also have zero inbound rules."
   }
+  assert {
+    condition     = module.connector_firewall.outbound_rule_count == 8
+    error_message = "Connector firewall must be the module's 5 default outbound rules plus the 3 Twingate extras."
+  }
 }
 
 run "ssh_is_reachable_only_as_a_restricted_twingate_resource" {
@@ -35,6 +39,30 @@ run "ssh_is_reachable_only_as_a_restricted_twingate_resource" {
   assert {
     condition     = twingate_resource.connector_ssh.name == "cah-nyc3-connector-ssh"
     error_message = "SSH access must be a named, per-host Twingate resource."
+  }
+  assert {
+    condition     = twingate_resource.connector_ssh.protocols.allow_icmp == false
+    error_message = "ICMP must not be allowed to the SSH resource."
+  }
+  assert {
+    condition     = twingate_resource.connector_ssh.protocols.tcp.policy == "RESTRICTED"
+    error_message = "TCP must be RESTRICTED."
+  }
+  assert {
+    condition     = toset(twingate_resource.connector_ssh.protocols.tcp.ports) == toset(["22"]) && length(twingate_resource.connector_ssh.protocols.tcp.ports) == 1
+    error_message = "TCP must be restricted to exactly port 22."
+  }
+  assert {
+    condition     = twingate_resource.connector_ssh.protocols.udp.policy == "DENY_ALL"
+    error_message = "UDP must be denied."
+  }
+  assert {
+    condition     = twingate_resource.connector_ssh.address == module.connector.private_ip
+    error_message = "The SSH resource must target the private IP."
+  }
+  assert {
+    condition     = one([for g in twingate_resource.connector_ssh.access_group : g.group_id]) == twingate_group.admins.id
+    error_message = "Access must be granted to the admins group only."
   }
   assert {
     condition     = twingate_group.admins.name == "cah-nyc3-admins"
