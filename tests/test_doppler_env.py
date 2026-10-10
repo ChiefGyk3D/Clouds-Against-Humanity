@@ -131,7 +131,7 @@ def test_no_names_fails(sandbox):
     assert "no secret names" in result.stdout
 
 
-@pytest.mark.parametrize("bad", ["1ABC", "A-B", "A;B", "A=B", "$(id)"])
+@pytest.mark.parametrize("bad", ["1ABC", "A-B", "A;B", "=B", "A=", "A=B=C", "$(id)"])
 def test_invalid_name_fails_before_anything_runs(sandbox, bad):
     result = run(sandbox, f"'{bad}'")
     assert "rc=1" in result.stdout
@@ -160,6 +160,39 @@ def test_multiple_names_all_loaded(sandbox):
     )
     assert "rc=0" in result.stdout
     assert "::add-mask tw_secret_456" in result.stdout
+
+
+def test_var_equals_name_maps_doppler_name_to_env_var(sandbox):
+    result = run(
+        sandbox,
+        "TF_VAR_admin_user_ids=ADMIN_USER_IDS",
+        {"STUB_ADMIN_USER_IDS": '["abc"]'},
+    )
+    out = result.stdout
+    assert "rc=0" in out
+    assert "loaded ADMIN_USER_IDS as TF_VAR_admin_user_ids" in out
+    assert '::add-mask ["abc"]' in out
+
+
+def test_mapped_var_is_what_the_phase_sees(sandbox):
+    _, bin_dir = sandbox
+    _write_exec(bin_dir / "doppler", DOPPLER_STUB)
+    env = {
+        "PATH": str(bin_dir),
+        "DOPPLER_TOKEN": "t",
+        "DOPPLER_PROJECT": "p",
+        "DOPPLER_CONFIG": "prd",
+        "TF_VAR_spacelift_run_type": "TRACKED",
+        "TF_VAR_spacelift_commit_branch": "main",
+        "STUB_ADMIN_USER_IDS": '["abc"]',
+    }
+    cmd = f'. "{SCRIPT}"; cah_doppler_env TF_VAR_admin_user_ids=ADMIN_USER_IDS; env'
+    result = subprocess.run(
+        ["/bin/sh", "-c", cmd], env=env, capture_output=True, text=True, check=False
+    )
+    out = result.stdout
+    assert 'TF_VAR_admin_user_ids=["abc"]' in out
+    assert "\nADMIN_USER_IDS=" not in out
 
 
 def test_bad_checksum_refuses_to_run_downloaded_cli(sandbox):
@@ -206,5 +239,7 @@ def test_config_names_are_valid_and_carry_no_values():
     for stack, hooks in _config_calls().items():
         for names in hooks.values():
             assert names, stack
-            for name in names:
-                assert re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name), (stack, name)
+            for arg in names:
+                var, _, src = arg.partition("=")
+                for name in (var, src or var):
+                    assert re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name), (stack, arg)

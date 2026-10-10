@@ -18,7 +18,7 @@ stacks:
   cah-10-access:
     before_init:
       - . /mnt/workspace/source/scripts/spacelift/doppler-env.sh
-      - cah_doppler_env DIGITALOCEAN_TOKEN TWINGATE_API_TOKEN TWINGATE_NETWORK TF_VAR_twingate_network TF_VAR_admin_ssh_public_key TF_VAR_admin_user_ids
+      - cah_doppler_env DIGITALOCEAN_TOKEN TWINGATE_API_TOKEN TWINGATE_NETWORK TF_VAR_twingate_network=TWINGATE_NETWORK TF_VAR_admin_ssh_public_key=ADMIN_SSH_PUBLIC_KEY TF_VAR_admin_user_ids=ADMIN_USER_IDS
     before_apply:
       - . /mnt/workspace/source/scripts/spacelift/doppler-env.sh
-      - cah_doppler_env DIGITALOCEAN_TOKEN TWINGATE_API_TOKEN TWINGATE_NETWORK TF_VAR_twingate_network TF_VAR_admin_ssh_public_key TF_VAR_admin_user_ids
+      - cah_doppler_env DIGITALOCEAN_TOKEN TWINGATE_API_TOKEN TWINGATE_NETWORK TF_VAR_twingate_network=TWINGATE_NETWORK TF_VAR_admin_ssh_public_key=ADMIN_SSH_PUBLIC_KEY TF_VAR_admin_user_ids=ADMIN_USER_IDS

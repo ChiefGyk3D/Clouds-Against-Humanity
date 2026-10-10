@@ -27,8 +27,9 @@ Values are never written here. This table is the inventory to check when a token
 |---|---|---|---|---|
 | `DIGITALOCEAN_TOKEN` | Doppler `prd` | stacks 00 and 10 (OpenTofu provider) | custom scopes, write on project, vpc, firewall, tag, droplet, ssh_key; read on image, region, size, actions | 90 days |
 | Doppler service token `spacelift` | Spacelift context `cah-doppler`, variable `DOPPLER_TOKEN` (write-only) | the hook script | read-only, config `prd` only | 90 days |
-| `TWINGATE_API_TOKEN`, `TWINGATE_NETWORK`, `TF_VAR_twingate_network` | Doppler `prd` | stack 10 | Twingate API | per the Twingate token |
-| `TF_VAR_admin_ssh_public_key`, `TF_VAR_admin_user_ids` | Doppler `prd` | stack 10 | not secret credentials, but account-specific | none |
+| `TWINGATE_API_TOKEN` | Doppler `prd` | stack 10 | Twingate "Read, Write & Provision" key | 90 days |
+| `TWINGATE_NETWORK` | Doppler `prd` | stack 10 (also exported as `TF_VAR_twingate_network`) | not a credential; the tenant name | none |
+| `ADMIN_SSH_PUBLIC_KEY`, `ADMIN_USER_IDS` | Doppler `prd` | stack 10 (exported as `TF_VAR_admin_ssh_public_key` and `TF_VAR_admin_user_ids`) | not credentials, but account-specific | none |
 
 The context also holds two plain variables, `DOPPLER_PROJECT` and `DOPPLER_CONFIG`.
 
@@ -79,9 +80,10 @@ Replace the value in Doppler. The next tracked run picks it up. Rotating the con
 
 ### Add a secret to a stack
 
-1. Add it to Doppler (`doppler secrets set NAME -p clouds-against-humanity -c prd`).
-2. Add `NAME` to both the `before_init` and `before_apply` lines for that stack in `.spacelift/config.yml`. A test checks that the two lists match.
-3. Open a pull request; merge once CI is green.
+1. Add it to Doppler (`doppler secrets set NAME -p clouds-against-humanity -c prd`). Doppler only allows uppercase letters, digits and underscores in names.
+2. If OpenTofu reads it as a variable, the environment variable must be exactly `TF_VAR_<variable name>`, which is lowercase. Write the argument as `TF_VAR_my_var=MY_VAR` and the hook fetches `MY_VAR` and exports it as `TF_VAR_my_var`. Plain `NAME` fetches and exports under the same name.
+3. Add the argument to both the `before_init` and `before_apply` lines for that stack in `.spacelift/config.yml`. A test checks that the two lists match.
+4. Open a pull request; merge once CI is green.
 
 ### Add a stack
 

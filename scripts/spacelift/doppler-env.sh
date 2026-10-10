@@ -3,7 +3,12 @@
 # Usage, from a Spacelift hook (see .spacelift/config.yml), as two commands:
 #
 #   . /mnt/workspace/source/scripts/spacelift/doppler-env.sh
-#   cah_doppler_env NAME [NAME ...]
+#   cah_doppler_env ARG [ARG ...]
+#
+# Each ARG is either NAME (fetch NAME from Doppler, export it as NAME) or
+# VAR=NAME (fetch NAME from Doppler, export it as VAR). The second form exists
+# because Doppler only allows uppercase secret names, while OpenTofu reads a
+# variable named foo only from the exact environment variable TF_VAR_foo.
 #
 # It is sourced, not executed, so the exported variables reach the phase that
 # follows. Sourcing only defines functions: arguments to a sourced file are not
@@ -90,13 +95,19 @@ cah_doppler_env() {
     cah_doppler_log "no secret names given"
     return 1
   fi
-  for _name in "$@"; do
-    case "$_name" in
-      '' | [0-9]* | *[!A-Za-z0-9_]*)
-        cah_doppler_log "invalid secret name: $_name"
-        return 1
-        ;;
+  for _arg in "$@"; do
+    case "$_arg" in
+      *=*) _var=${_arg%%=*} _src=${_arg#*=} ;;
+      *) _var=$_arg _src=$_arg ;;
     esac
+    for _n in "$_var" "$_src"; do
+      case "$_n" in
+        '' | [0-9]* | *[!A-Za-z0-9_]*)
+          cah_doppler_log "invalid secret name: $_arg"
+          return 1
+          ;;
+      esac
+    done
   done
 
   for _var in DOPPLER_TOKEN DOPPLER_PROJECT DOPPLER_CONFIG; do
@@ -109,19 +120,23 @@ cah_doppler_env() {
 
   cah_doppler_install || return 1
 
-  for _name in "$@"; do
-    if ! _val=$(doppler secrets get "$_name" --plain --no-check-version \
+  for _arg in "$@"; do
+    case "$_arg" in
+      *=*) _var=${_arg%%=*} _src=${_arg#*=} ;;
+      *) _var=$_arg _src=$_arg ;;
+    esac
+    if ! _val=$(doppler secrets get "$_src" --plain --no-check-version \
       --project "$DOPPLER_PROJECT" --config "$DOPPLER_CONFIG" 2>/dev/null); then
-      cah_doppler_log "could not read $_name from Doppler"
+      cah_doppler_log "could not read $_src from Doppler"
       return 1
     fi
     if [ -z "$_val" ]; then
-      cah_doppler_log "$_name is empty in Doppler"
+      cah_doppler_log "$_src is empty in Doppler"
       return 1
     fi
     echo "::add-mask $_val"
-    export "$_name=$_val"
-    cah_doppler_log "loaded $_name"
+    export "$_var=$_val"
+    cah_doppler_log "loaded $_src as $_var"
   done
   unset _val
 }
