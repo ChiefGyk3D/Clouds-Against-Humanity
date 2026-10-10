@@ -18,3 +18,11 @@ output "outbound_rules" {
     "${r.protocol}/${r.port_range}/${join(",", sort(tolist(r.destination_addresses)))}"
   ])
 }
+
+# Sorted "<protocol>/<port_range>/<source tags>" descriptors for the inbound rules.
+output "inbound_rules" {
+  value = sort([
+    for r in digitalocean_firewall.this.inbound_rule :
+    "${r.protocol}/${r.port_range}/${join(",", sort(tolist(r.source_tags)))}"
+  ])
+}

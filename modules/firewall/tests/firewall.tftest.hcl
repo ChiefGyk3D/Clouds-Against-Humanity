@@ -81,3 +81,48 @@ run "extra_outbound_is_appended" {
     error_message = "Extra rules must be appended with the same any-address destinations."
   }
 }
+
+run "inbound_from_tag_renders_only_tag_sourced_rules" {
+  command = plan
+  variables {
+    inbound_from_tag_rules = [
+      { protocol = "tcp", port_range = "22" },
+      { protocol = "udp", port_range = "9999" },
+    ]
+  }
+  assert {
+    condition     = output.inbound_rule_count == 2
+    error_message = "Exactly the listed inbound rules must render."
+  }
+  assert {
+    condition     = jsonencode(output.inbound_rules) == jsonencode(sort(["tcp/22/cah-baseline-nyc3", "udp/9999/cah-baseline-nyc3"]))
+    error_message = "Each inbound rule must be sourced from this firewall's own tag and nothing else."
+  }
+  assert {
+    condition = alltrue([
+      for r in digitalocean_firewall.this.inbound_rule :
+      length(coalesce(r.source_addresses, [])) == 0 && length(coalesce(r.source_droplet_ids, [])) == 0 && length(coalesce(r.source_load_balancer_uids, [])) == 0 && toset(r.source_tags) == toset(["cah-baseline-nyc3"])
+    ])
+    error_message = "Inbound rules must carry source_tags equal to the module tag and no source addresses."
+  }
+  assert {
+    condition     = output.outbound_rule_count == 5
+    error_message = "Inbound rules must not change the outbound set."
+  }
+}
+
+run "an_inbound_rule_with_an_unknown_protocol_is_rejected" {
+  command = plan
+  variables {
+    inbound_from_tag_rules = [{ protocol = "icmp", port_range = "22" }]
+  }
+  expect_failures = [var.inbound_from_tag_rules]
+}
+
+run "an_inbound_rule_with_an_empty_port_range_is_rejected" {
+  command = plan
+  variables {
+    inbound_from_tag_rules = [{ protocol = "tcp", port_range = "" }]
+  }
+  expect_failures = [var.inbound_from_tag_rules]
+}

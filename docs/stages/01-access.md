@@ -4,7 +4,7 @@
 
 - One Twingate remote network (site), created by OpenTofu and named `access-nyc3`, and an existing DigitalOcean SSH key that the stack looks up by name (it does not register one). Both connectors share them.
 - Two `s-1vcpu-1gb` droplets, `access-nyc3-connector-a` and `access-nyc3-connector-b`, each running a Twingate connector inside the VPC. Twingate recommends at least two active connectors, so one can be down without losing access. Each is created with `ubuntu-24-04-x64`, monitoring on, backups off and IPv6 off.
-- A connector firewall, attached by the connector tag, with no inbound rules and seven outbound rules: the firewall module's five defaults (tcp 443, 80 and 53; udp 53 and 123) plus tcp 30000-31000 and outbound UDP on every port (1-65535). Twingate's [outbound allowlist article](https://help.twingate.com/articles/1198271128-allowlist-for-outbound-connections-to-twingate-infrastructure) requires outbound UDP to any port for peer-to-peer connections; inbound stays denied. The baseline firewall also applies to the droplet through its own tag.
+- A connector firewall, attached by the connector tag, with one inbound rule (TCP 22, only from droplets that carry the connector tag) and seven outbound rules: the firewall module's five defaults (tcp 443, 80 and 53; udp 53 and 123) plus tcp 30000-31000 and outbound UDP on every port (1-65535). Twingate's [outbound allowlist article](https://help.twingate.com/articles/1198271128-allowlist-for-outbound-connections-to-twingate-infrastructure) requires outbound UDP to any port for peer-to-peer connections. Nothing outside the connector tag can reach the droplet inbound. The baseline firewall also applies to the droplet through its own tag.
 - A Twingate admin group, `cah-nyc3-admins`.
 - Two per-host Twingate resources, one for each connector's private address, each limited to TCP port 22.
 
@@ -12,7 +12,7 @@ Cost: $12.00/month, approved total $12.00 (see [cost](../cost.md)).
 
 What the tests prove (`tofu test`, no cloud account needed):
 
-- There are zero inbound rules.
+- The connector firewall has exactly one inbound rule, TCP 22 sourced from the connector tag and never from an address. The stage 0 baseline firewall still has zero inbound rules. The firewall module rejects an inbound rule whose protocol is not tcp or udp or whose port range is empty.
 - Both droplets are named per instance, carry the baseline and connector tags at creation, and are listed in the project.
 - The site is created once, in the stack, and shared by both connectors. The SSH key is looked up by name and never registered. The module's `instance` input accepts one lowercase letter or digit and nothing else.
 - Each SSH resource allows only TCP 22, denies UDP and has ICMP off.
@@ -20,7 +20,7 @@ What the tests prove (`tofu test`, no cloud account needed):
 
 ## 2. Why there is no public SSH
 
-DigitalOcean droplets always have a public address. You cannot remove it. So the control is a firewall that is attached by tag at creation and allows no inbound traffic at all. The droplet is created with the baseline tag, so there is no moment when it is open. You reach the host by its private IP through Twingate: the connector on the droplet dials out to Twingate, and your client reaches it through that outbound connection.
+DigitalOcean droplets always have a public address. You cannot remove it. So the control is a firewall that is attached by tag at creation and allows no inbound traffic from outside. The one exception, TCP 22 between the connectors themselves, is described in section 2c. The droplet is created with the baseline tag, so there is no moment when it is open. You reach the host by its private IP through Twingate: the connector on the droplet dials out to Twingate, and your client reaches it through that outbound connection.
 
 ## 2a. Droplet hardening
 
@@ -60,6 +60,14 @@ The repository is `https://packages.twingate.com/apt/`, signed with the key at `
 The `TWINGATE_LABEL_DEPLOYED_BY` label is no longer set; Twingate's own Terraform guide does not use it.
 
 The weekly update is the documented cron job, as `/etc/cron.d/twingate-connector-update`, because `cron.weekly` would run both connectors at the same moment.
+
+## 2c. Why the connectors may reach each other's SSH
+
+Both connectors sit in one Twingate remote network, and each has a Twingate SSH resource at its own private address. Twingate chooses which connector carries a session, so a session to connector b's address can be routed through connector a. Connector a then has to open TCP 22 to connector b inside the VPC, and DigitalOcean cloud firewalls filter VPC-internal traffic too. With zero inbound rules that connection timed out during the SSH banner exchange, while the connector's own address kept working. Twingate's [connector best practices](https://www.twingate.com/docs/connector-best-practices) say every connector in a remote network needs identical network reach, so every connector must be able to reach every connector-address resource.
+
+The fix is the firewall module's `inbound_from_tag_rules`, which the connector firewall sets to TCP 22. Each rule uses `source_tags` equal to the firewall's own tag, so only droplets carrying the connector tag can connect. There are no source addresses and no `0.0.0.0/0`.
+
+Access from outside is unchanged: there is still no public inbound, and SSH is reachable only through Twingate. After the apply, verify it from a host outside the VPC, for example `nmap -Pn -p 22 <droplet public address>` should report the port filtered, and the SSH resources should work from the client for both connector addresses.
 
 ## 3. Accepted residual risk
 
@@ -128,7 +136,7 @@ If both connectors are down there is no way in, and the DigitalOcean recovery op
 
 ## 7. Stage 3 note
 
-Later droplets will need an inbound rule allowing TCP 22 from the connector tag, because DigitalOcean firewalls also filter VPC-internal traffic. The baseline firewall's zero inbound rules apply between droplets in the same VPC too.
+Later droplets will need an inbound rule allowing TCP 22 from the connector tag, because DigitalOcean firewalls also filter VPC-internal traffic. The baseline firewall's zero inbound rules apply between droplets in the same VPC too. The connectors already have this rule between themselves (section 2c); a later droplet gets its own firewall with the connector tag as the source.
 
 ## 8. Rollback
 
