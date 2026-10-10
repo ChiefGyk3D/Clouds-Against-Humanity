@@ -38,3 +38,17 @@ variable "inbound_from_tag_rules" {
     error_message = "Each inbound rule needs protocol tcp or udp and a non-empty port_range."
   }
 }
+
+variable "outbound_to_tag_rules" {
+  type = list(object({
+    protocol   = string
+    port_range = string
+  }))
+  default     = []
+  description = "Outbound rules that reach only droplets carrying this firewall's own tag (no addresses). Empty means none."
+
+  validation {
+    condition     = alltrue([for r in var.outbound_to_tag_rules : contains(["tcp", "udp"], r.protocol) && length(r.port_range) > 0])
+    error_message = "Each outbound-to-tag rule needs protocol tcp or udp and a non-empty port_range."
+  }
+}

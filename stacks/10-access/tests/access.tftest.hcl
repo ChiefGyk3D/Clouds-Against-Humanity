@@ -132,7 +132,7 @@ run "an_empty_ssh_key_name_is_rejected" {
   expect_failures = [var.admin_ssh_key_name]
 }
 
-run "connector_has_its_own_tag_and_a_peer_ssh_only_inbound_firewall" {
+run "connector_has_its_own_tag_and_a_peer_ssh_only_firewall" {
   command = plan
   assert {
     condition     = digitalocean_tag.connector.name == "cah-connector-nyc3"
@@ -147,8 +147,8 @@ run "connector_has_its_own_tag_and_a_peer_ssh_only_inbound_firewall" {
     error_message = "The only inbound rule must be tcp 22 sourced from the connector tag, never an address."
   }
   assert {
-    condition     = module.connector_firewall.outbound_rule_count == 7
-    error_message = "Connector firewall must be the module's 5 default outbound rules plus the 2 Twingate extras."
+    condition     = module.connector_firewall.outbound_rule_count == 8
+    error_message = "Connector firewall must be the module's 5 default outbound rules, the 2 Twingate extras and the one tag-scoped SSH rule."
   }
   assert {
     condition = jsonencode(module.connector_firewall.outbound_rules) == jsonencode(sort([
@@ -161,6 +161,10 @@ run "connector_has_its_own_tag_and_a_peer_ssh_only_inbound_firewall" {
       "udp/1-65535/0.0.0.0/0,::/0",
     ]))
     error_message = "Connector firewall outbound must be exactly the five defaults plus tcp 30000-31000 and udp 1-65535 (Twingate peer-to-peer needs outbound UDP to any port), each to 0.0.0.0/0 and ::/0."
+  }
+  assert {
+    condition     = jsonencode(module.connector_firewall.outbound_tag_rules) == jsonencode(["tcp/22/cah-connector-nyc3"])
+    error_message = "The only tag-scoped outbound rule must be tcp 22 destined to the connector tag, so a connector can open SSH to its peer and nothing else."
   }
 }
 

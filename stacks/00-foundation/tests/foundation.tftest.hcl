@@ -34,3 +34,15 @@ run "foundation_declares_no_costed_resources" {
     error_message = "Stage 0 must cost nothing."
   }
 }
+
+run "baseline_firewall_has_no_tag_scoped_rules_in_either_direction" {
+  command = plan
+  assert {
+    condition     = module.baseline_firewall.inbound_rule_count == 0 && module.baseline_firewall.outbound_rule_count == 5
+    error_message = "The baseline firewall must keep zero inbound rules and exactly its five default outbound rules."
+  }
+  assert {
+    condition     = length(module.baseline_firewall.outbound_tag_rules) == 0 && length(module.baseline_firewall.inbound_rules) == 0
+    error_message = "The baseline firewall must not carry any tag-scoped rule; that is the connector firewall's job."
+  }
+}
