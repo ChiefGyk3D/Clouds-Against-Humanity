@@ -63,10 +63,10 @@ variable "admin_ssh_public_key" {
 
 variable "reboot_time" {
   type        = string
-  description = "HH:MM (UTC) when unattended-upgrades may reboot this droplet. Give each connector a different time so they never reboot together."
+  description = "HH:MM (America/New_York, the droplet's local time) when unattended-upgrades may reboot this droplet. Give each connector a different time so they never reboot together."
 
   validation {
     condition     = can(regex("^([01][0-9]|2[0-3]):[0-5][0-9]$", var.reboot_time))
-    error_message = "reboot_time must be HH:MM in 24-hour time, for example 03:00."
+    error_message = "reboot_time must be HH:MM in 24-hour time, for example 04:00."
   }
 }

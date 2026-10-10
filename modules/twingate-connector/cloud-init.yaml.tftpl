@@ -4,6 +4,8 @@
 # sshd settings below are the second layer. Changing this file changes
 # user_data, which forces a droplet rebuild.
 disable_root: true
+# Local time, so the reboot window and the weekly update below are Eastern.
+timezone: America/New_York
 ssh_pwauth: false
 package_update: true
 package_upgrade: true
@@ -22,6 +24,12 @@ users:
       - ${admin_ssh_public_key}
 
 write_files:
+  # First boot races Ubuntu's own apt-daily and unattended-upgrades for the
+  # dpkg lock; wait for it instead of failing the Twingate install.
+  - path: /etc/apt/apt.conf.d/99cah-lock-wait
+    permissions: "0644"
+    content: |
+      DPkg::Lock::Timeout "300";
   - path: /etc/ssh/sshd_config.d/99-cah-hardening.conf
     permissions: "0644"
     content: |
@@ -81,4 +89,35 @@ runcmd:
   - [sysctl, --system]
   - [bash, -c, "sshd -t && systemctl restart ssh"]
   - [systemctl, enable, --now, chrony]
-  - [bash, -o, pipefail, -c, "curl -fsSL --proto '=https' --tlsv1.2 --retry 5 https://binaries.twingate.com/connector/setup.sh | TWINGATE_ACCESS_TOKEN='${access_token}' TWINGATE_REFRESH_TOKEN='${refresh_token}' TWINGATE_NETWORK='${network}' TWINGATE_LABEL_DEPLOYED_BY='opentofu' bash"]
+  # Twingate's setup.sh runs under set -e and writes the connector config only
+  # at its very end, so a failed apt call leaves nothing behind and the script
+  # is safe to run again. Retry up to 10 times, 30 seconds apart. The tokens
+  # appear only in this step; never add set -x here.
+  - - bash
+    - -o
+    - pipefail
+    - -c
+    - |
+      export TWINGATE_ACCESS_TOKEN='${access_token}' TWINGATE_REFRESH_TOKEN='${refresh_token}' TWINGATE_NETWORK='${network}' TWINGATE_LABEL_DEPLOYED_BY='opentofu'
+      for attempt in $(seq 1 10); do
+        if curl -fsSL --proto '=https' --tlsv1.2 --retry 5 https://binaries.twingate.com/connector/setup.sh | bash; then
+          echo "cah: connector install succeeded on attempt $attempt"
+          exit 0
+        fi
+        echo "cah: connector install attempt $attempt of 10 failed"
+        sleep 30
+      done
+      echo "cah: connector install failed after 10 attempts" >&2
+      exit 1
+  # Leave the outcome where someone can read it later. No token is read here.
+  - - bash
+    - -c
+    - |
+      umask 027
+      {
+        echo "== date"; date
+        echo "== systemctl is-active twingate-connector"; systemctl is-active twingate-connector
+        echo "== journalctl -u twingate-connector (last 50)"; journalctl -u twingate-connector -n 50 --no-pager
+        echo "== /var/log/cloud-init-output.log (last 50)"; tail -n 50 /var/log/cloud-init-output.log
+      } > /var/log/cah-connector-install.log 2>&1
+      chmod 0640 /var/log/cah-connector-install.log

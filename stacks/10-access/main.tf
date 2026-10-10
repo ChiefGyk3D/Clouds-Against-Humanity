@@ -34,8 +34,8 @@ module "connector_a" {
   twingate_network    = var.twingate_network
 
   admin_ssh_public_key = var.admin_ssh_public_key
-  # Staggered, so the two connectors never reboot together.
-  reboot_time = "03:00"
+  # Eastern time, staggered so the two connectors never reboot together.
+  reboot_time = "04:00"
 
   # The outbound rules must exist before the droplet boots and starts to install.
   depends_on = [module.connector_firewall]
@@ -54,15 +54,17 @@ module "connector_b" {
   twingate_network    = var.twingate_network
 
   admin_ssh_public_key = var.admin_ssh_public_key
-  # Staggered, so the two connectors never reboot together.
-  reboot_time = "04:00"
+  # Eastern time, staggered so the two connectors never reboot together.
+  reboot_time = "05:00"
 
   depends_on = [module.connector_firewall]
 }
 
 # The baseline firewall already denies all inbound traffic. This one only adds
-# the outbound ports the connector needs. Verify the list against Twingate's
-# current firewall documentation before apply and record the date in the stage guide.
+# the outbound ports the connector needs. Twingate's allowlist article
+# (https://help.twingate.com/articles/1198271128-allowlist-for-outbound-connections-to-twingate-infrastructure)
+# requires outbound UDP to any port for peer-to-peer connections, so UDP is
+# open outbound only; inbound stays deny-all. Record the check date in the stage guide.
 module "connector_firewall" {
   source  = "../../modules/firewall"
   layer   = "access"
@@ -71,8 +73,7 @@ module "connector_firewall" {
   tag     = digitalocean_tag.connector.name
   extra_outbound_rules = [
     { protocol = "tcp", port_range = "30000-31000" },
-    { protocol = "udp", port_range = "19302-19308" },
-    { protocol = "udp", port_range = "443" },
+    { protocol = "udp", port_range = "1-65535" },
   ]
 }
 
