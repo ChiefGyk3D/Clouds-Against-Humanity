@@ -2,7 +2,7 @@
 
 ## 1. What this stage builds
 
-- One Twingate remote network (site), created by OpenTofu and named `access-nyc3`, and one DigitalOcean SSH key, `access-nyc3-admin`. Both connectors share them.
+- One Twingate remote network (site), created by OpenTofu and named `access-nyc3`, and an existing DigitalOcean SSH key that the stack looks up by name (it does not register one). Both connectors share them.
 - Two `s-1vcpu-1gb` droplets, `access-nyc3-connector-a` and `access-nyc3-connector-b`, each running a Twingate connector inside the VPC. Twingate recommends at least two active connectors, so one can be down without losing access. Each is created with `ubuntu-24-04-x64`, monitoring on, backups off and IPv6 off.
 - A connector firewall, attached by the connector tag, with no inbound rules and eight outbound rules: the firewall module's five defaults (tcp 443, 80 and 53; udp 53 and 123) plus three Twingate ports (tcp 30000-31000, udp 19302-19308, udp 443). The baseline firewall also applies to the droplet through its own tag.
 - A Twingate admin group, `cah-nyc3-admins`.
@@ -14,7 +14,7 @@ What the tests prove (`tofu test`, no cloud account needed):
 
 - There are zero inbound rules.
 - Both droplets are named per instance, carry the baseline and connector tags at creation, and are listed in the project.
-- The site and the SSH key are each created once, in the stack, and shared by both connectors. The module's `instance` input accepts one lowercase letter or digit and nothing else.
+- The site is created once, in the stack, and shared by both connectors. The SSH key is looked up by name and never registered. The module's `instance` input accepts one lowercase letter or digit and nothing else.
 - Each SSH resource allows only TCP 22, denies UDP and has ICMP off.
 - Connector tokens never appear in module outputs. The output test pins the declared output names, so adding an output means editing that list on purpose.
 
@@ -66,7 +66,7 @@ Known follow-up: the provider emits a deprecation warning when `access_group` is
    | `baseline_tag` | `TF_VAR_baseline_tag` |
    | `region` | `TF_VAR_region` |
 
-3. Add to Doppler: `DIGITALOCEAN_TOKEN`, `TWINGATE_API_TOKEN`, `TWINGATE_NETWORK`, `ADMIN_SSH_PUBLIC_KEY` and `ADMIN_USER_IDS`. Doppler only allows uppercase names, so the hook (`.spacelift/config.yml`) maps them to the lowercase environment variables OpenTofu reads: `TF_VAR_twingate_network` (from `TWINGATE_NETWORK`), `TF_VAR_admin_ssh_public_key` and `TF_VAR_admin_user_ids`. `ADMIN_USER_IDS` is required (the stack has no default and rejects an empty list, so a missing value cannot create an unreachable host); it is a JSON list of Twingate user ids, for example `["<user id>"]`. Strip the comment field from the SSH public key before storing it (keep only `<type> <key>`): comments often hold a user and machine name, and the key goes to DigitalOcean and into state. The two network values are the bare subdomain.
+3. Add to Doppler: `DIGITALOCEAN_TOKEN`, `TWINGATE_API_TOKEN`, `TWINGATE_NETWORK`, `ADMIN_SSH_PUBLIC_KEY`, `ADMIN_SSH_KEY_NAME` and `ADMIN_USER_IDS`. Doppler only allows uppercase names, so the hook (`.spacelift/config.yml`) maps them to the lowercase environment variables OpenTofu reads: `TF_VAR_twingate_network` (from `TWINGATE_NETWORK`), `TF_VAR_admin_ssh_public_key`, `TF_VAR_admin_ssh_key_name` and `TF_VAR_admin_user_ids`. `ADMIN_USER_IDS` is required (the stack has no default and rejects an empty list, so a missing value cannot create an unreachable host); it is a JSON list of Twingate user ids, for example `["<user id>"]`. Strip the comment field from the SSH public key before storing it (keep only `<type> <key>`): comments often hold a user and machine name, and the key goes into the droplet's cloud-init and into state. `ADMIN_SSH_KEY_NAME` is the name of that same key as it is already registered on the DigitalOcean account. The key must already be there: the stack looks it up by name and does not register it, because DigitalOcean refuses a second registration of the same key with a 422 "SSH Key is already in use". If the name is wrong, the plan fails at the lookup. The two network values are the bare subdomain.
 4. Check that no Twingate site named `access-<region>` (for example `access-nyc3`) exists in the admin console. OpenTofu now creates the site itself; a hand-made site with that name makes the apply fail or leaves a duplicate, so rename or delete the hand-made one first.
 5. Trigger a tracked run on `main`; it stops after the plan because autodeploy is off. Proposed runs get no credentials by design. Read the plan, then confirm.
 
@@ -83,4 +83,4 @@ Later droplets will need an inbound rule allowing TCP 22 from the connector tag,
 
 ## 8. Rollback
 
-Destroy `cah-10-access` first, then `cah-00-foundation` if you want stage 0 gone too: stage 0's VPC, project and tag are in use by stage 1, so the order matters. The connector tokens die with the connectors, and the site and SSH key go with the stack.
+Destroy `cah-10-access` first, then `cah-00-foundation` if you want stage 0 gone too: stage 0's VPC, project and tag are in use by stage 1, so the order matters. The connector tokens die with the connectors, and the site goes with the stack. The SSH key was never created by the stack, so it stays on the account.

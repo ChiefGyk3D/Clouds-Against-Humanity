@@ -29,7 +29,7 @@ Values are never written here. This table is the inventory to check when a token
 | Doppler service token `spacelift` | Spacelift context `cah-doppler`, variable `DOPPLER_TOKEN` (write-only) | the hook script | read-only, config `prd` only | 90 days |
 | `TWINGATE_API_TOKEN` | Doppler `prd` | stack 10 | Twingate "Read, Write & Provision" key | 90 days |
 | `TWINGATE_NETWORK` | Doppler `prd` | stack 10 (also exported as `TF_VAR_twingate_network`) | not a credential; the tenant name | none |
-| `ADMIN_SSH_PUBLIC_KEY`, `ADMIN_USER_IDS` | Doppler `prd` | stack 10 (exported as `TF_VAR_admin_ssh_public_key` and `TF_VAR_admin_user_ids`) | not credentials, but account-specific | none |
+| `ADMIN_SSH_PUBLIC_KEY`, `ADMIN_SSH_KEY_NAME`, `ADMIN_USER_IDS` | Doppler `prd` | stack 10 (exported as `TF_VAR_admin_ssh_public_key`, `TF_VAR_admin_ssh_key_name` and `TF_VAR_admin_user_ids`) | not credentials, but account-specific | none |
 
 The context also holds two plain variables, `DOPPLER_PROJECT` and `DOPPLER_CONFIG`.
 
