@@ -26,6 +26,16 @@ users:
 write_files:
   # First boot races Ubuntu's own apt-daily and unattended-upgrades for the
   # dpkg lock; wait for it instead of failing the Twingate install.
+  # The connector config, written directly as in Twingate's own Terraform
+  # (https://www.twingate.com/docs/terraform-aws). Root-only. The tokens appear
+  # here and nowhere else in this file.
+  - path: /etc/twingate/connector.conf
+    permissions: "0600"
+    owner: root:root
+    content: |
+      TWINGATE_URL=https://${network}.twingate.com
+      TWINGATE_ACCESS_TOKEN=${access_token}
+      TWINGATE_REFRESH_TOKEN=${refresh_token}
   - path: /etc/apt/apt.conf.d/99cah-lock-wait
     permissions: "0644"
     content: |
@@ -89,18 +99,29 @@ runcmd:
   - [sysctl, --system]
   - [bash, -c, "sshd -t && systemctl restart ssh"]
   - [systemctl, enable, --now, chrony]
-  # Twingate's setup.sh runs under set -e and writes the connector config only
-  # at its very end, so a failed apt call leaves nothing behind and the script
-  # is safe to run again. Retry up to 10 times, 30 seconds apart. The tokens
-  # appear only in this step; never add set -x here.
+  # Install the connector from Twingate's signed apt repository and start it,
+  # the way their Terraform guide does, instead of running their setup.sh (an
+  # installer that is piped into bash can have its script swallowed by apt's
+  # package configuration). The repository key is checked against a pinned
+  # fingerprint before it is trusted. Success means the service is active.
+  # Retry up to 10 times, 30 seconds apart. Never add set -x here.
   - - bash
     - -o
     - pipefail
     - -c
     - |
-      export TWINGATE_ACCESS_TOKEN='${access_token}' TWINGATE_REFRESH_TOKEN='${refresh_token}' TWINGATE_NETWORK='${network}' TWINGATE_LABEL_DEPLOYED_BY='opentofu'
+      export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a
+      KEYRING=/usr/share/keyrings/twingate-connector-keyring.gpg
+      FPR=EC952DEE4701A407A82B0C505C363F09A9174A9E
       for attempt in $(seq 1 10); do
-        if curl -fsSL --proto '=https' --tlsv1.2 --retry 5 https://binaries.twingate.com/connector/setup.sh | bash; then
+        if curl -fsSL --proto '=https' --tlsv1.2 --retry 5 -o /root/twingate.gpg.key https://packages.twingate.com/apt/gpg.key \
+          && gpg --show-keys --with-colons /root/twingate.gpg.key | grep -q "^fpr:::::::::$FPR:" \
+          && gpg --dearmor --yes -o "$KEYRING" /root/twingate.gpg.key \
+          && echo "deb [signed-by=$KEYRING] https://packages.twingate.com/apt/ /" > /etc/apt/sources.list.d/twingate.list \
+          && apt-get update -q \
+          && apt-get install -yq twingate-connector \
+          && systemctl enable --now twingate-connector \
+          && sleep 5 && systemctl is-active --quiet twingate-connector; then
           echo "cah: connector install succeeded on attempt $attempt"
           exit 0
         fi
