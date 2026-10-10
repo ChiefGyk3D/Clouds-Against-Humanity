@@ -33,6 +33,16 @@ variable "admin_ssh_public_key" {
   type = string
 }
 
+variable "admin_ssh_key_name" {
+  type        = string
+  description = "Name of an SSH key already registered on the DigitalOcean account. Not a secret, but account-specific, so it is supplied from Doppler."
+
+  validation {
+    condition     = length(var.admin_ssh_key_name) > 0
+    error_message = "admin_ssh_key_name must name an SSH key that is already registered on the DigitalOcean account."
+  }
+}
+
 variable "admin_user_ids" {
   type        = list(string)
   description = "Twingate user ids placed in the admin group. Required; supplied from Doppler, never committed."

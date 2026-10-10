@@ -1,4 +1,10 @@
-mock_provider "digitalocean" {}
+mock_provider "digitalocean" {
+  mock_data "digitalocean_ssh_key" {
+    defaults = {
+      fingerprint = "aa:bb:cc:dd:ee:ff"
+    }
+  }
+}
 mock_provider "twingate" {}
 
 variables {
@@ -8,6 +14,7 @@ variables {
   baseline_tag         = "cah-baseline-nyc3"
   twingate_network     = "acme"
   admin_ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAItest"
+  admin_ssh_key_name   = "existing-key-name"
   admin_user_ids       = ["fake-user-id-1"]
 }
 
@@ -85,24 +92,44 @@ run "project_lists_both_droplets" {
   }
 }
 
-run "site_and_ssh_key_are_created_once_and_shared" {
+run "site_is_created_once_and_shared" {
   command = plan
   assert {
     condition     = twingate_remote_network.this.name == "access-nyc3" && twingate_remote_network.this.location == "OTHER"
     error_message = "The stack creates one remote network named access-<region>."
   }
   assert {
-    condition     = digitalocean_ssh_key.admin.name == "access-nyc3-admin"
-    error_message = "The stack creates one SSH key named access-<region>-admin."
-  }
-  assert {
-    condition     = length(regexall("resource \"twingate_remote_network\"", file("${path.module}/main.tf"))) == 1 && length(regexall("resource \"digitalocean_ssh_key\"", file("${path.module}/main.tf"))) == 1
-    error_message = "The remote network and the SSH key must each be declared exactly once."
+    condition     = length(regexall("resource \"twingate_remote_network\"", file("${path.module}/main.tf"))) == 1
+    error_message = "The remote network must be declared exactly once."
   }
   assert {
     condition     = length(regexall("remote_network_id\\s*=\\s*twingate_remote_network.this.id", file("${path.module}/main.tf"))) == 4
     error_message = "Both connectors and both SSH resources must use the one shared remote network."
   }
+}
+
+run "admin_ssh_key_is_looked_up_never_registered" {
+  command = plan
+  assert {
+    condition     = data.digitalocean_ssh_key.admin.name == "existing-key-name"
+    error_message = "The stack must look the admin key up by the supplied name."
+  }
+  assert {
+    condition     = !strcontains(file("${path.module}/main.tf"), "resource \"digitalocean_ssh_key\"")
+    error_message = "The key already exists on the account (a duplicate gets a 422), so the stack must not register it."
+  }
+  assert {
+    condition     = length(regexall("ssh_key_fingerprint\\s*=\\s*data.digitalocean_ssh_key.admin.fingerprint", file("${path.module}/main.tf"))) == 2
+    error_message = "Both connectors must take the looked-up key's fingerprint."
+  }
+}
+
+run "an_empty_ssh_key_name_is_rejected" {
+  command = plan
+  variables {
+    admin_ssh_key_name = ""
+  }
+  expect_failures = [var.admin_ssh_key_name]
 }
 
 run "connector_has_its_own_tag_and_outbound_only_firewall" {
@@ -248,4 +275,20 @@ run "an_empty_admin_list_is_rejected" {
     admin_user_ids = []
   }
   expect_failures = [var.admin_user_ids]
+}
+
+run "the_two_connectors_reboot_at_different_times" {
+  command = plan
+  assert {
+    condition     = length(regexall("reboot_time\\s*=\\s*\"03:00\"", file("${path.module}/main.tf"))) == 1 && length(regexall("reboot_time\\s*=\\s*\"04:00\"", file("${path.module}/main.tf"))) == 1
+    error_message = "Connector a must reboot at 03:00 and connector b at 04:00, so they never reboot together."
+  }
+  assert {
+    condition     = length(regexall("reboot_time\\s*=", file("${path.module}/main.tf"))) == 2
+    error_message = "Each connector module block must set its own reboot_time."
+  }
+  assert {
+    condition     = length(regexall("admin_ssh_public_key\\s*=\\s*var.admin_ssh_public_key", file("${path.module}/main.tf"))) == 2
+    error_message = "Both connectors must receive the admin public key."
+  }
 }

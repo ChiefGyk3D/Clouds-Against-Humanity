@@ -15,9 +15,10 @@ resource "twingate_remote_network" "this" {
   location = "OTHER"
 }
 
-resource "digitalocean_ssh_key" "admin" {
-  name       = "access-${var.region}-admin"
-  public_key = var.admin_ssh_public_key
+# The admin key is already registered on the DigitalOcean account, and the API
+# refuses a second registration of the same key (422), so look it up by name.
+data "digitalocean_ssh_key" "admin" {
+  name = var.admin_ssh_key_name
 }
 
 module "connector_a" {
@@ -28,9 +29,13 @@ module "connector_a" {
   tags                = [var.baseline_tag, digitalocean_tag.connector.name]
   size                = local.connector_a.size
   remote_network_id   = twingate_remote_network.this.id
-  ssh_key_fingerprint = digitalocean_ssh_key.admin.fingerprint
+  ssh_key_fingerprint = data.digitalocean_ssh_key.admin.fingerprint
   instance            = "a"
   twingate_network    = var.twingate_network
+
+  admin_ssh_public_key = var.admin_ssh_public_key
+  # Staggered, so the two connectors never reboot together.
+  reboot_time = "03:00"
 
   # The outbound rules must exist before the droplet boots and starts to install.
   depends_on = [module.connector_firewall]
@@ -44,9 +49,13 @@ module "connector_b" {
   tags                = [var.baseline_tag, digitalocean_tag.connector.name]
   size                = local.connector_b.size
   remote_network_id   = twingate_remote_network.this.id
-  ssh_key_fingerprint = digitalocean_ssh_key.admin.fingerprint
+  ssh_key_fingerprint = data.digitalocean_ssh_key.admin.fingerprint
   instance            = "b"
   twingate_network    = var.twingate_network
+
+  admin_ssh_public_key = var.admin_ssh_public_key
+  # Staggered, so the two connectors never reboot together.
+  reboot_time = "04:00"
 
   depends_on = [module.connector_firewall]
 }
