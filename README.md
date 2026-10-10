@@ -10,9 +10,13 @@ This first release covers two stages: stage 0 (foundation) and stage 1 (access).
 Clouds-Against-Humanity/
   scripts/cost_check.py                    cost gate
   tests/test_cost_check.py                 pytest for the gate
+  scripts/spacelift/doppler-env.sh         hook that loads Doppler secrets into a run
+  tests/test_doppler_env.py                pytest for the hook and its config
+  .spacelift/config.yml                    which secrets each stack loads
   docs/cost-prices.json                    price table from the DO sizes API
   docs/cost.md                             cost gate explained
   docs/stages/approved.json                approved totals + allowed sources
+  docs/spacelift-secrets.md                how secrets reach a run, rotation, upgrades
   modules/vpc/                             per-region VPC
   modules/firewall/                        tag-based deny-inbound firewall
   modules/twingate-connector/              remote network, connector, droplet
@@ -47,6 +51,7 @@ Run the second pair for each of `modules/vpc`, `modules/firewall`, `modules/twin
 - [Stage 0: foundation](docs/stages/00-foundation.md)
 - [Stage 1: access](docs/stages/01-access.md)
 - [Cost](docs/cost.md)
+- [Spacelift and Doppler secrets](docs/spacelift-secrets.md)
 
 ## Public by design
 
@@ -54,4 +59,4 @@ This repository is public from its first commit, so the GitHub code-scanning and
 
 ## Secrets
 
-Secrets live in Doppler; nothing in this repository is a credential.
+Secrets live in Doppler; nothing in this repository is a credential. Spacelift holds one read-only Doppler token and fetches the rest at run time; see [Spacelift and Doppler secrets](docs/spacelift-secrets.md) for how that works and how to rotate it.

@@ -1,0 +1,24 @@
+# Spacelift runtime configuration. Documented in docs/spacelift-secrets.md.
+#
+# Each stack loads only the Doppler secrets it needs, by name, and only on a
+# tracked or destroy run from main (the script enforces that). before_apply
+# repeats the load because the apply phase can run in a fresh container after
+# the run waits for confirmation.
+version: "1"
+
+stacks:
+  cah-00-foundation:
+    before_init:
+      - . /mnt/workspace/source/scripts/spacelift/doppler-env.sh
+      - cah_doppler_env DIGITALOCEAN_TOKEN
+    before_apply:
+      - . /mnt/workspace/source/scripts/spacelift/doppler-env.sh
+      - cah_doppler_env DIGITALOCEAN_TOKEN
+
+  cah-10-access:
+    before_init:
+      - . /mnt/workspace/source/scripts/spacelift/doppler-env.sh
+      - cah_doppler_env DIGITALOCEAN_TOKEN TWINGATE_API_TOKEN TWINGATE_NETWORK TF_VAR_twingate_network=TWINGATE_NETWORK TF_VAR_admin_ssh_public_key=ADMIN_SSH_PUBLIC_KEY TF_VAR_admin_user_ids=ADMIN_USER_IDS
+    before_apply:
+      - . /mnt/workspace/source/scripts/spacelift/doppler-env.sh
+      - cah_doppler_env DIGITALOCEAN_TOKEN TWINGATE_API_TOKEN TWINGATE_NETWORK TF_VAR_twingate_network=TWINGATE_NETWORK TF_VAR_admin_ssh_public_key=ADMIN_SSH_PUBLIC_KEY TF_VAR_admin_user_ids=ADMIN_USER_IDS
