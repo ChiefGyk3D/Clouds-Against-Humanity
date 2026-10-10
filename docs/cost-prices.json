@@ -1,0 +1,15 @@
+{
+  "retrieved": "2026-10-10",
+  "source": "DigitalOcean sizes API, regular (non-s5) droplets",
+  "backups_fraction": 0.2,
+  "backups_fraction_verified": false,
+  "droplets": {
+    "s-1vcpu-512mb-10gb": 4,
+    "s-1vcpu-1gb": 6,
+    "s-1vcpu-1gb-intel": 7,
+    "s-1vcpu-2gb": 12,
+    "s-2vcpu-2gb": 18,
+    "s-2vcpu-4gb": 24,
+    "s-4vcpu-8gb": 48
+  }
+}

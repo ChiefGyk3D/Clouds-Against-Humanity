@@ -1,0 +1,10 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+!*.tftest.hcl
+__pycache__/
+.pytest_cache/
+.venv/
+.superpowers/
