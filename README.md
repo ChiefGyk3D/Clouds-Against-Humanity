@@ -48,9 +48,9 @@ Run the second pair for each of `modules/vpc`, `modules/firewall`, `modules/twin
 - [Stage 1: access](docs/stages/01-access.md)
 - [Cost](docs/cost.md)
 
-## Going public
+## Public by design
 
-CI has `dependency-review` switched off while the repository is private, because the check needs a public repository (or a paid plan). When the repository goes public, turn it on: set `dependency-review: true` in the `security` job of `.github/workflows/ci.yml`. Also confirm the license choice listed in the stage 0 guide first.
+This repository is public from its first commit, so the GitHub code-scanning and dependency-review checks run in CI. Everything that varies per person or per account (tokens, tenant names, user ids, address ranges you do not want shared) is a Doppler variable, not a file. If a piece ever cannot meet that rule, it moves to a separate private repository and this one calls it.
 
 ## Secrets
 

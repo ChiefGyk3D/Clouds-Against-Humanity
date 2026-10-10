@@ -40,8 +40,6 @@ jobs:
     with:
       codeql-languages: actions
       pip-audit-requirements: ""
-      # off while the repo is private; turn on when it goes public
-      dependency-review: false
 
   # Repo-specific: GYST has no tofu-test leg yet. See Task 9, step 9, for the
   # proposal to move this into git-your-ship-together.
