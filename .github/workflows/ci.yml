@@ -28,6 +28,7 @@ jobs:
       lint-install-command: pip install ruff
       lint-command: ruff check scripts tests
       workflow-lint: false
+      docker-build: false
 
   security:
     uses: ChiefGyk3D/git-your-ship-together/.github/workflows/security.yml@faba0b7d1ab65e9033bef1acfa93d6d57b5808c0 # v1.21.0
@@ -39,10 +40,13 @@ jobs:
     with:
       codeql-languages: actions
       pip-audit-requirements: ""
+      # off while the repo is private; turn on when it goes public
+      dependency-review: false
 
   # Repo-specific: GYST has no tofu-test leg yet. See Task 9, step 9, for the
   # proposal to move this into git-your-ship-together.
   tofu-test:
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     permissions:
       contents: read
