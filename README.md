@@ -19,9 +19,9 @@ Clouds-Against-Humanity/
   docs/spacelift-secrets.md                how secrets reach a run, rotation, upgrades
   modules/vpc/                             per-region VPC
   modules/firewall/                        tag-based deny-inbound firewall
-  modules/twingate-connector/              remote network, connector, droplet
+  modules/twingate-connector/              connector and its droplet
   stacks/00-foundation/                    project, tag, VPC, baseline firewall
-  stacks/10-access/                        connector, connector firewall, group, SSH resource
+  stacks/10-access/                        site, SSH key, two connectors, connector firewall, group, SSH resources
   .github/workflows/ci.yml                 GYST callers + tofu-test + CI green
   docs/stages/00-foundation.md, 01-access.md   stage guides
 ```

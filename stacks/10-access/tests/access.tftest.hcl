@@ -14,8 +14,94 @@ variables {
 run "connector_size_comes_from_the_cost_manifest" {
   command = plan
   assert {
-    condition     = module.connector.size == one([for r in jsondecode(file("${path.module}/cost.json")).resources : r if r.name == "connector"]).size
-    error_message = "The droplet size must be read from cost.json so the cost gate is the single source."
+    condition     = module.connector_a.size == one([for r in jsondecode(file("${path.module}/cost.json")).resources : r if r.name == "connector-a"]).size
+    error_message = "Connector a's droplet size must be read from cost.json so the cost gate is the single source."
+  }
+  assert {
+    condition     = module.connector_b.size == one([for r in jsondecode(file("${path.module}/cost.json")).resources : r if r.name == "connector-b"]).size
+    error_message = "Connector b's droplet size must be read from cost.json so the cost gate is the single source."
+  }
+  assert {
+    condition     = module.connector_a.size == module.connector_b.size
+    error_message = "Both connectors must be the same size."
+  }
+}
+
+run "two_connectors_with_distinct_names" {
+  command = plan
+  assert {
+    condition     = module.connector_a.droplet_name == "access-nyc3-connector-a" && module.connector_b.droplet_name == "access-nyc3-connector-b"
+    error_message = "The droplets must be named access-<region>-connector-a and -b."
+  }
+  assert {
+    condition     = module.connector_a.droplet_name != module.connector_b.droplet_name
+    error_message = "The two connectors must have distinct names."
+  }
+  assert {
+    condition     = length(jsondecode(file("${path.module}/cost.json")).resources) == 2
+    error_message = "cost.json must list exactly the two connector droplets."
+  }
+}
+
+run "both_droplets_carry_the_baseline_and_connector_tags" {
+  command = plan
+  # Module outputs deliberately never expose tags, so read what each module block is given.
+  assert {
+    condition     = length(regexall("tags\\s*=\\s*\\[var.baseline_tag, digitalocean_tag.connector.name\\]", file("${path.module}/main.tf"))) == 2
+    error_message = "Both connector modules must be tagged with the baseline tag and the connector tag."
+  }
+  assert {
+    condition     = length(regexall("depends_on\\s*=\\s*\\[module.connector_firewall\\]", file("${path.module}/main.tf"))) == 2
+    error_message = "Both connectors must wait for the connector firewall."
+  }
+}
+
+run "project_lists_both_droplets" {
+  command = plan
+
+  # The mock provider gives every droplet the same URN, so give each its own.
+  override_module {
+    target = module.connector_a
+    outputs = {
+      droplet_name = "a"
+      droplet_urn  = "do:droplet:a"
+      private_ip   = "10.0.0.1"
+      size         = "s-1vcpu-1gb"
+    }
+  }
+  override_module {
+    target = module.connector_b
+    outputs = {
+      droplet_name = "b"
+      droplet_urn  = "do:droplet:b"
+      private_ip   = "10.0.0.2"
+      size         = "s-1vcpu-1gb"
+    }
+  }
+
+  assert {
+    condition     = digitalocean_project_resources.access.resources == toset(["do:droplet:a", "do:droplet:b"])
+    error_message = "The project must list both connector droplet URNs."
+  }
+}
+
+run "site_and_ssh_key_are_created_once_and_shared" {
+  command = plan
+  assert {
+    condition     = twingate_remote_network.this.name == "access-nyc3" && twingate_remote_network.this.location == "OTHER"
+    error_message = "The stack creates one remote network named access-<region>."
+  }
+  assert {
+    condition     = digitalocean_ssh_key.admin.name == "access-nyc3-admin"
+    error_message = "The stack creates one SSH key named access-<region>-admin."
+  }
+  assert {
+    condition     = length(regexall("resource \"twingate_remote_network\"", file("${path.module}/main.tf"))) == 1 && length(regexall("resource \"digitalocean_ssh_key\"", file("${path.module}/main.tf"))) == 1
+    error_message = "The remote network and the SSH key must each be declared exactly once."
+  }
+  assert {
+    condition     = length(regexall("remote_network_id\\s*=\\s*twingate_remote_network.this.id", file("${path.module}/main.tf"))) == 4
+    error_message = "Both connectors and both SSH resources must use the one shared remote network."
   }
 }
 
@@ -48,39 +134,95 @@ run "connector_has_its_own_tag_and_outbound_only_firewall" {
   }
 }
 
-run "ssh_is_reachable_only_as_a_restricted_twingate_resource" {
+run "connector_a_ssh_is_reachable_only_as_a_restricted_twingate_resource" {
   command = plan
   assert {
-    condition     = twingate_resource.connector_ssh.name == "cah-nyc3-connector-ssh"
+    condition     = twingate_resource.connector_a_ssh.name == "cah-nyc3-connector-a-ssh"
     error_message = "SSH access must be a named, per-host Twingate resource."
   }
   assert {
-    condition     = twingate_resource.connector_ssh.protocols.allow_icmp == false
+    condition     = twingate_resource.connector_a_ssh.protocols.allow_icmp == false
     error_message = "ICMP must not be allowed to the SSH resource."
   }
   assert {
-    condition     = twingate_resource.connector_ssh.protocols.tcp.policy == "RESTRICTED"
+    condition     = twingate_resource.connector_a_ssh.protocols.tcp.policy == "RESTRICTED"
     error_message = "TCP must be RESTRICTED."
   }
   assert {
-    condition     = toset(twingate_resource.connector_ssh.protocols.tcp.ports) == toset(["22"]) && length(twingate_resource.connector_ssh.protocols.tcp.ports) == 1
+    condition     = toset(twingate_resource.connector_a_ssh.protocols.tcp.ports) == toset(["22"]) && length(twingate_resource.connector_a_ssh.protocols.tcp.ports) == 1
     error_message = "TCP must be restricted to exactly port 22."
   }
   assert {
-    condition     = twingate_resource.connector_ssh.protocols.udp.policy == "DENY_ALL"
+    condition     = twingate_resource.connector_a_ssh.protocols.udp.policy == "DENY_ALL"
     error_message = "UDP must be denied."
   }
   assert {
-    condition     = twingate_resource.connector_ssh.address == module.connector.private_ip
+    condition     = twingate_resource.connector_a_ssh.address == module.connector_a.private_ip
     error_message = "The SSH resource must target the private IP."
   }
   assert {
-    condition     = one([for g in twingate_resource.connector_ssh.access_group : g.group_id]) == twingate_group.admins.id
+    condition     = one([for g in twingate_resource.connector_a_ssh.access_group : g.group_id]) == twingate_group.admins.id
     error_message = "Access must be granted to the admins group only."
   }
   assert {
     condition     = twingate_group.admins.name == "cah-nyc3-admins"
     error_message = "Access is granted to one named group."
+  }
+}
+
+run "connector_b_ssh_is_reachable_only_as_a_restricted_twingate_resource" {
+  command = plan
+  assert {
+    condition     = twingate_resource.connector_b_ssh.name == "cah-nyc3-connector-b-ssh"
+    error_message = "SSH access must be a named, per-host Twingate resource."
+  }
+  assert {
+    condition     = twingate_resource.connector_b_ssh.protocols.allow_icmp == false
+    error_message = "ICMP must not be allowed to the SSH resource."
+  }
+  assert {
+    condition     = twingate_resource.connector_b_ssh.protocols.tcp.policy == "RESTRICTED"
+    error_message = "TCP must be RESTRICTED."
+  }
+  assert {
+    condition     = toset(twingate_resource.connector_b_ssh.protocols.tcp.ports) == toset(["22"]) && length(twingate_resource.connector_b_ssh.protocols.tcp.ports) == 1
+    error_message = "TCP must be restricted to exactly port 22."
+  }
+  assert {
+    condition     = twingate_resource.connector_b_ssh.protocols.udp.policy == "DENY_ALL"
+    error_message = "UDP must be denied."
+  }
+  assert {
+    condition     = twingate_resource.connector_b_ssh.address == module.connector_b.private_ip
+    error_message = "The SSH resource must target the private IP."
+  }
+  assert {
+    condition     = one([for g in twingate_resource.connector_b_ssh.access_group : g.group_id]) == twingate_group.admins.id
+    error_message = "Access must be granted to the admins group only."
+  }
+  assert {
+    condition     = twingate_group.admins.name == "cah-nyc3-admins"
+    error_message = "Access is granted to one named group."
+  }
+}
+
+run "ssh_resources_are_two_and_each_restricted_to_tcp_22" {
+  command = plan
+  assert {
+    condition     = length(regexall("resource \"twingate_resource\"", file("${path.module}/main.tf"))) == 2
+    error_message = "There must be exactly two Twingate resources, one per connector."
+  }
+  assert {
+    condition     = alltrue([for r in [twingate_resource.connector_a_ssh, twingate_resource.connector_b_ssh] : toset(r.protocols.tcp.ports) == toset(["22"]) && length(r.protocols.tcp.ports) == 1 && r.protocols.tcp.policy == "RESTRICTED"])
+    error_message = "Each SSH resource must be restricted to TCP 22."
+  }
+}
+
+run "private_ips_output_is_a_map_of_both_connectors" {
+  command = plan
+  assert {
+    condition     = jsonencode(sort(keys(output.connector_private_ips))) == jsonencode(["a", "b"])
+    error_message = "connector_private_ips must be keyed a and b."
   }
 }
 

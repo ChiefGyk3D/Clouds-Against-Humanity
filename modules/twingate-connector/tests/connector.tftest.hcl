@@ -2,13 +2,15 @@ mock_provider "digitalocean" {}
 mock_provider "twingate" {}
 
 variables {
-  layer            = "access"
-  region           = "nyc3"
-  vpc_id           = "vpc-test"
-  tags             = ["cah-baseline-nyc3", "cah-connector-nyc3"]
-  size             = "s-1vcpu-1gb"
-  ssh_public_key   = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAItest test"
-  twingate_network = "acme"
+  layer               = "access"
+  region              = "nyc3"
+  vpc_id              = "vpc-test"
+  tags                = ["cah-baseline-nyc3", "cah-connector-nyc3"]
+  size                = "s-1vcpu-1gb"
+  remote_network_id   = "remote-network-test"
+  ssh_key_fingerprint = "aa:bb:cc:dd"
+  instance            = "a"
+  twingate_network    = "acme"
 }
 
 run "droplet_is_tagged_at_creation_inside_the_vpc" {
@@ -22,9 +24,56 @@ run "droplet_is_tagged_at_creation_inside_the_vpc" {
     error_message = "The connector must live in the given VPC."
   }
   assert {
-    condition     = digitalocean_droplet.connector.name == "access-nyc3-connector"
-    error_message = "Name must be <layer>-<region>-connector."
+    condition     = digitalocean_droplet.connector.name == "access-nyc3-connector-a"
+    error_message = "Name must be <layer>-<region>-connector-<instance>."
   }
+}
+
+run "connector_and_droplet_names_carry_the_instance" {
+  command = plan
+  variables {
+    instance = "b"
+  }
+  assert {
+    condition     = twingate_connector.this.name == "access-nyc3-connector-b" && digitalocean_droplet.connector.name == "access-nyc3-connector-b"
+    error_message = "Both the Twingate connector and the droplet must be named with the instance letter."
+  }
+}
+
+run "shared_site_and_key_come_from_the_caller" {
+  command = plan
+  assert {
+    condition     = twingate_connector.this.remote_network_id == "remote-network-test" && contains(digitalocean_droplet.connector.ssh_keys, "aa:bb:cc:dd")
+    error_message = "The connector must use the caller's remote network and SSH key fingerprint."
+  }
+  assert {
+    condition     = !strcontains(file("${path.module}/main.tf"), "twingate_remote_network") && !strcontains(file("${path.module}/main.tf"), "digitalocean_ssh_key")
+    error_message = "The remote network and SSH key are shared, so the module must not create them."
+  }
+}
+
+run "instance_rejects_uppercase" {
+  command = plan
+  variables {
+    instance = "A"
+  }
+  expect_failures = [var.instance]
+}
+
+run "instance_rejects_more_than_one_character" {
+  command = plan
+  variables {
+    instance = "ab"
+  }
+  expect_failures = [var.instance]
+}
+
+run "instance_rejects_empty" {
+  command = plan
+  variables {
+    instance = ""
+  }
+  expect_failures = [var.instance]
 }
 
 run "no_paid_extras_and_no_ipv6" {
@@ -118,18 +167,18 @@ run "outputs_never_carry_connector_secrets" {
   # The test can only name outputs it knows, so pin the output set: adding any
   # output (whatever its name) must be a deliberate edit of this list.
   assert {
-    condition     = length(regexall("output \"", file("${path.module}/outputs.tf"))) == 5
-    error_message = "outputs.tf must declare exactly 5 outputs. Add one only after proving it carries no connector secret and extending this test."
+    condition     = length(regexall("output \"", file("${path.module}/outputs.tf"))) == 4
+    error_message = "outputs.tf must declare exactly 4 outputs. Add one only after proving it carries no connector secret and extending this test."
   }
 
   assert {
-    condition     = jsonencode(sort(flatten(regexall("output \"([A-Za-z0-9_-]+)\"", file("${path.module}/outputs.tf"))))) == jsonencode(["droplet_name", "droplet_urn", "private_ip", "remote_network_id", "size"])
+    condition     = jsonencode(sort(flatten(regexall("output \"([A-Za-z0-9_-]+)\"", file("${path.module}/outputs.tf"))))) == jsonencode(["droplet_name", "droplet_urn", "private_ip", "size"])
     error_message = "outputs.tf declares an output this test does not inspect. Add it here only after proving it carries no connector secret."
   }
 
   assert {
     condition = !anytrue([
-      for v in [output.droplet_name, output.droplet_urn, output.private_ip, output.remote_network_id, output.size] :
+      for v in [output.droplet_name, output.droplet_urn, output.private_ip, output.size] :
       strcontains(tostring(v), "FAKE-ACCESS-TOKEN-1") || strcontains(tostring(v), "FAKE-REFRESH-TOKEN-1")
     ])
     error_message = "A module output carries a connector access or refresh token."
