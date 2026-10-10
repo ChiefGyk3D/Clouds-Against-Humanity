@@ -94,8 +94,8 @@ run "no_paid_extras_and_no_ipv6" {
 run "cloud_init_installs_connector_for_the_network" {
   command = plan
   assert {
-    condition     = strcontains(digitalocean_droplet.connector.user_data, "TWINGATE_NETWORK='acme'")
-    error_message = "cloud-init must set the Twingate network."
+    condition     = strcontains(digitalocean_droplet.connector.user_data, "TWINGATE_URL=https://acme.twingate.com")
+    error_message = "cloud-init must point the connector at the Twingate network."
   }
 }
 
@@ -113,7 +113,7 @@ run "network_slug_accepts_bare_subdomain" {
     twingate_network = "acme-2"
   }
   assert {
-    condition     = strcontains(digitalocean_droplet.connector.user_data, "TWINGATE_NETWORK='acme-2'")
+    condition     = strcontains(digitalocean_droplet.connector.user_data, "TWINGATE_URL=https://acme-2.twingate.com")
     error_message = "A bare subdomain must be accepted."
   }
 }
@@ -282,7 +282,7 @@ run "chrony_and_sysctl_are_configured_without_touching_ip_forward" {
   }
 }
 
-run "tokens_appear_only_in_the_install_step" {
+run "tokens_appear_only_in_the_root_only_config" {
   command = apply
 
   override_resource {
@@ -295,15 +295,19 @@ run "tokens_appear_only_in_the_install_step" {
 
   assert {
     condition     = length(regexall("FAKE-ACCESS-TOKEN-2", digitalocean_droplet.connector.user_data)) == 1 && length(regexall("FAKE-REFRESH-TOKEN-2", digitalocean_droplet.connector.user_data)) == 1
-    error_message = "Each token must appear exactly once, in the install command."
+    error_message = "Each token must appear exactly once, in the connector config."
   }
   assert {
-    condition     = !anytrue([for f in yamldecode(digitalocean_droplet.connector.user_data).write_files : strcontains(f.content, "FAKE-ACCESS-TOKEN-2") || strcontains(f.content, "FAKE-REFRESH-TOKEN-2")])
-    error_message = "No file written by cloud-init (all of them under world-readable paths) may contain a token."
+    condition = alltrue([
+      for f in yamldecode(digitalocean_droplet.connector.user_data).write_files :
+      f.path == "/etc/twingate/connector.conf" && f.permissions == "0600" && f.owner == "root:root"
+      if strcontains(f.content, "FAKE-ACCESS-TOKEN-2") || strcontains(f.content, "FAKE-REFRESH-TOKEN-2")
+    ]) && length([for f in yamldecode(digitalocean_droplet.connector.user_data).write_files : f if strcontains(f.content, "FAKE-ACCESS-TOKEN-2")]) == 1
+    error_message = "The tokens may only be written to /etc/twingate/connector.conf, mode 0600, owned by root."
   }
   assert {
-    condition     = length([for c in yamldecode(digitalocean_droplet.connector.user_data).runcmd : c if strcontains(jsonencode(c), "FAKE-ACCESS-TOKEN-2")]) == 1
-    error_message = "The tokens belong to exactly one runcmd step, the connector install."
+    condition     = !anytrue([for c in yamldecode(digitalocean_droplet.connector.user_data).runcmd : strcontains(jsonencode(c), "FAKE-ACCESS-TOKEN-2") || strcontains(jsonencode(c), "FAKE-REFRESH-TOKEN-2")])
+    error_message = "No runcmd step may carry a token."
   }
 }
 
@@ -358,17 +362,49 @@ run "apt_waits_for_the_dpkg_lock" {
   }
 }
 
+run "installer_does_not_run_the_vendor_script_or_pipe_into_a_shell" {
+  command = plan
+  assert {
+    condition     = !anytrue([for c in yamldecode(digitalocean_droplet.connector.user_data).runcmd : strcontains(jsonencode(c), "setup.sh")])
+    error_message = "Twingate's setup.sh must not be run; piped into bash it can lose the rest of the script to apt."
+  }
+  assert {
+    condition     = !anytrue([for c in yamldecode(digitalocean_droplet.connector.user_data).runcmd : can(regex("\\|\\s*(ba|da)?sh\\b", jsonencode(c)))])
+    error_message = "Nothing may be piped into a shell."
+  }
+}
+
+run "repository_key_is_pinned_and_service_is_verified" {
+  command = plan
+  assert {
+    condition = alltrue([
+      for c in yamldecode(digitalocean_droplet.connector.user_data).runcmd :
+      strcontains(jsonencode(c), "FPR=EC952DEE4701A407A82B0C505C363F09A9174A9E") && strcontains(jsonencode(c), "gpg --show-keys --with-colons") && strcontains(jsonencode(c), "signed-by=$KEYRING") && strcontains(jsonencode(c), "https://packages.twingate.com/apt/")
+      if strcontains(jsonencode(c), "apt-get install -yq twingate-connector")
+    ])
+    error_message = "The Twingate repository key must be checked against the pinned fingerprint and the repository must be signed-by that key."
+  }
+  assert {
+    condition = alltrue([
+      for c in yamldecode(digitalocean_droplet.connector.user_data).runcmd :
+      strcontains(jsonencode(c), "systemctl enable --now twingate-connector") && strcontains(jsonencode(c), "systemctl is-active --quiet twingate-connector") && strcontains(jsonencode(c), "DEBIAN_FRONTEND=noninteractive")
+      if strcontains(jsonencode(c), "apt-get install -yq twingate-connector")
+    ])
+    error_message = "An attempt only counts as a success when the service is active, and apt must run non-interactively."
+  }
+}
+
 run "installer_is_retried_a_bounded_number_of_times" {
   command = plan
   assert {
-    condition     = length([for c in yamldecode(digitalocean_droplet.connector.user_data).runcmd : c if strcontains(jsonencode(c), "setup.sh")]) == 1
-    error_message = "setup.sh must be invoked from exactly one runcmd step."
+    condition     = length([for c in yamldecode(digitalocean_droplet.connector.user_data).runcmd : c if strcontains(jsonencode(c), "apt-get install -yq twingate-connector")]) == 1
+    error_message = "The connector package must be installed from exactly one runcmd step."
   }
   assert {
     condition = alltrue([
       for c in yamldecode(digitalocean_droplet.connector.user_data).runcmd :
       strcontains(jsonencode(c), "seq 1 10") && strcontains(jsonencode(c), "sleep 30") && strcontains(jsonencode(c), "exit 1") && strcontains(jsonencode(c), "pipefail")
-      if strcontains(jsonencode(c), "setup.sh")
+      if strcontains(jsonencode(c), "apt-get install -yq twingate-connector")
     ])
     error_message = "The install step must retry 10 times, 30 seconds apart, under pipefail, and exit 1 when every attempt fails."
   }
