@@ -17,7 +17,11 @@ Source of prices: `docs/cost-prices.json`, retrieved 2026-10-10 from the Digital
 - a size is missing from the price table;
 - backups are requested while the backup price is unverified (see below);
 - the approved total is itself above the ceiling;
-- a costed resource type (droplet, volume, load balancer, and so on) appears in a source file that is not listed under `allowed_sources`, so such a resource cannot be added without being costed. Today only the droplet in the connector module file is allow-listed.
+- a `digitalocean_*` resource type that is not on the free list appears in any `.tf` file. The gate is an allowlist: `digitalocean_project`, `digitalocean_project_resources`, `digitalocean_tag`, `digitalocean_vpc`, `digitalocean_firewall` and `digitalocean_ssh_key` are free, and the droplet is allowed only in the file listed under `allowed_sources` (the connector module). Anything else, such as a NAT gateway, app, container registry, Kubernetes node pool or CDN, is refused by name and file;
+- no `stacks/*/cost.json` manifest exists, or the number of `twingate-connector` module blocks differs from the number of `droplet` entries in the manifests, or a connector module block uses `count` or `for_each` (the connector is costed as one instance);
+- a module source is not local (`./` or `../`), or a `*.tf.json` file exists, because the gate cannot read either.
+
+The gate parses HCL with regular expressions and does not execute it, so it is a guardrail, not a proof: it will not see a resource type built dynamically or a paid resource created outside this repo.
 
 To add a paid resource, add it to a `cost.json`, raise the approved total on purpose in `approved.json`, and have the new total approved before the change merges.
 
