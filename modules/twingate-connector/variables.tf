@@ -20,9 +20,24 @@ variable "size" {
   description = "Droplet size slug. The stack reads it from cost.json."
 }
 
-variable "ssh_public_key" {
+variable "remote_network_id" {
   type        = string
-  description = "Admin public key. SSH is reachable only through Twingate."
+  description = "Twingate remote network (site) shared by every connector of the stack."
+}
+
+variable "ssh_key_fingerprint" {
+  type        = string
+  description = "Fingerprint of the stack's admin SSH key. SSH is reachable only through Twingate."
+}
+
+variable "instance" {
+  type        = string
+  description = "One lowercase letter or digit that tells this connector from its siblings (a, b)."
+
+  validation {
+    condition     = can(regex("^[a-z0-9]$", var.instance))
+    error_message = "instance must be a single lowercase letter or digit."
+  }
 }
 
 variable "twingate_network" {

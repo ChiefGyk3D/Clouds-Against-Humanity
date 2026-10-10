@@ -1,6 +1,7 @@
 {
   "stage": 1,
   "resources": [
-    { "name": "connector", "kind": "droplet", "size": "s-1vcpu-1gb", "backups": false }
+    { "name": "connector-a", "kind": "droplet", "size": "s-1vcpu-1gb", "backups": false },
+    { "name": "connector-b", "kind": "droplet", "size": "s-1vcpu-1gb", "backups": false }
   ]
 }

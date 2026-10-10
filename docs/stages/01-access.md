@@ -2,18 +2,20 @@
 
 ## 1. What this stage builds
 
-- One `s-1vcpu-1gb` droplet running the Twingate connector inside the VPC. It is created with `ubuntu-24-04-x64`, monitoring on, backups off and IPv6 off.
+- One Twingate remote network (site), created by OpenTofu and named `access-nyc3`, and one DigitalOcean SSH key, `access-nyc3-admin`. Both connectors share them.
+- Two `s-1vcpu-1gb` droplets, `access-nyc3-connector-a` and `access-nyc3-connector-b`, each running a Twingate connector inside the VPC. Twingate recommends at least two active connectors, so one can be down without losing access. Each is created with `ubuntu-24-04-x64`, monitoring on, backups off and IPv6 off.
 - A connector firewall, attached by the connector tag, with no inbound rules and eight outbound rules: the firewall module's five defaults (tcp 443, 80 and 53; udp 53 and 123) plus three Twingate ports (tcp 30000-31000, udp 19302-19308, udp 443). The baseline firewall also applies to the droplet through its own tag.
 - A Twingate admin group, `cah-nyc3-admins`.
-- A per-host Twingate resource for the connector's private address, limited to TCP port 22.
+- Two per-host Twingate resources, one for each connector's private address, each limited to TCP port 22.
 
-Cost: $6.00/month, approved total $6.00 (see [cost](../cost.md)).
+Cost: $12.00/month, approved total $12.00 (see [cost](../cost.md)).
 
 What the tests prove (`tofu test`, no cloud account needed):
 
 - There are zero inbound rules.
-- The baseline tag is set on the droplet at creation.
-- The SSH resource allows only TCP 22, denies UDP and has ICMP off.
+- Both droplets are named per instance, carry the baseline and connector tags at creation, and are listed in the project.
+- The site and the SSH key are each created once, in the stack, and shared by both connectors. The module's `instance` input accepts one lowercase letter or digit and nothing else.
+- Each SSH resource allows only TCP 22, denies UDP and has ICMP off.
 - Connector tokens never appear in module outputs. The output test pins the declared output names, so adding an output means editing that list on purpose.
 
 ## 2. Why there is no public SSH
@@ -22,11 +24,11 @@ DigitalOcean droplets always have a public address. You cannot remove it. So the
 
 ## 3. Accepted residual risk
 
-The connector token appears in OpenTofu state and in the droplet's cloud-init user-data. It is marked sensitive, and the token is revocable and belongs to a single connector. Two things for you to do and check: keep the state in Spacelift, and in Spacelift restrict who can read the stack's state and outputs to the people who need it.
+The connector token appears in OpenTofu state and in the droplet's cloud-init user-data. It is marked sensitive, and the token is revocable and belongs to a single connector, so each of the two connectors has its own. Two things for you to do and check: keep the state in Spacelift, and in Spacelift restrict who can read the stack's state and outputs to the people who need it.
 
-To rotate the token, replace `module.connector.twingate_connector_tokens.this`. Because the state lives in Spacelift, this is not a local `tofu apply` from a laptop. Do it as a Spacelift run with the replace option for that address (or taint the resource through Spacelift's run options), then read the plan before confirming.
+To rotate the token, replace `module.connector_a.twingate_connector_tokens.this` (or `module.connector_b...` for the other one). Rotate one connector at a time so the other keeps serving. Because the state lives in Spacelift, this is not a local `tofu apply` from a laptop. Do it as a Spacelift run with the replace option for that address (or taint the resource through Spacelift's run options), then read the plan before confirming.
 
-Rotation is not free. The new token changes the rendered cloud-init `user_data`, and per the DigitalOcean provider's behavior a `user_data` change forces a new droplet; confirm in the plan output before approving the run. If so, rotation destroys and recreates the connector droplet: expect a short outage and probably a new private IP, and the SSH Twingate resource follows the new address.
+Rotation is not free. The new token changes the rendered cloud-init `user_data`, and per the DigitalOcean provider's behavior a `user_data` change forces a new droplet; confirm in the plan output before approving the run. If so, rotation destroys and recreates that connector's droplet: expect a short outage of that connector and probably a new private IP, and its SSH Twingate resource follows the new address. The other connector keeps Twingate access up meanwhile.
 
 ## 4. Vendor facts to record when verified
 
@@ -35,7 +37,7 @@ Record each date here when you check it.
 Verified so far:
 
 - Twingate provider 3.8.0, verified 2026-10-10: the provider reads `TWINGATE_API_TOKEN` and `TWINGATE_NETWORK`. The DigitalOcean provider reads `DIGITALOCEAN_TOKEN`.
-- In provider 3.8.0 the `protocols` setting on `twingate_resource` is an attribute object, not a block. The SSH resource in `stacks/10-access/main.tf` is written that way.
+- In provider 3.8.0 the `protocols` setting on `twingate_resource` is an attribute object, not a block. The SSH resources in `stacks/10-access/main.tf` are written that way.
 - `twingate_network` must be the bare subdomain (lowercase letters, digits, hyphens), not a URL. It is validated in the connector module and again in the stack.
 - The cloud-init install runs under `bash -o pipefail` with `curl -fsSL --proto '=https' --tlsv1.2 --retry 5`, so a failed download shows up as a failed cloud-init run instead of a silent half-install.
 
@@ -65,14 +67,15 @@ Known follow-up: the provider emits a deprecation warning when `access_group` is
    | `region` | `TF_VAR_region` |
 
 3. Add to Doppler: `DIGITALOCEAN_TOKEN`, `TWINGATE_API_TOKEN`, `TWINGATE_NETWORK`, `ADMIN_SSH_PUBLIC_KEY` and `ADMIN_USER_IDS`. Doppler only allows uppercase names, so the hook (`.spacelift/config.yml`) maps them to the lowercase environment variables OpenTofu reads: `TF_VAR_twingate_network` (from `TWINGATE_NETWORK`), `TF_VAR_admin_ssh_public_key` and `TF_VAR_admin_user_ids`. `ADMIN_USER_IDS` is required (the stack has no default and rejects an empty list, so a missing value cannot create an unreachable host); it is a JSON list of Twingate user ids, for example `["<user id>"]`. Strip the comment field from the SSH public key before storing it (keep only `<type> <key>`): comments often hold a user and machine name, and the key goes to DigitalOcean and into state. The two network values are the bare subdomain.
-4. Trigger a tracked run on `main`; it stops after the plan because autodeploy is off. Proposed runs get no credentials by design. Read the plan, then confirm.
+4. Check that no Twingate site named `access-<region>` (for example `access-nyc3`) exists in the admin console. OpenTofu now creates the site itself; a hand-made site with that name makes the apply fail or leaves a duplicate, so rename or delete the hand-made one first.
+5. Trigger a tracked run on `main`; it stops after the plan because autodeploy is off. Proposed runs get no credentials by design. Read the plan, then confirm.
 
 ## 6. Verify
 
-1. The connector shows online in the Twingate admin console.
-2. From a Twingate client: `ssh <user>@<connector private IP>` works.
-3. From outside Twingate: `nmap -Pn -p 22,80,443 <connector public IP>` shows the ports filtered. Scanning your own droplet is authorized.
-4. `python3 -I scripts/cost_check.py --root .` still reports `$6.00`.
+1. Both connectors show online in the Twingate admin console, under the one site `access-<region>`.
+2. From a Twingate client: `ssh <user>@<connector private IP>` works for each connector's private IP (`connector_private_ips` output, keys `a` and `b`).
+3. From outside Twingate: `nmap -Pn -p 22,80,443 <connector public IP>` shows the ports filtered on both droplets. Scanning your own droplet is authorized.
+4. `python3 -I scripts/cost_check.py --root .` still reports `$12.00`.
 
 ## 7. Stage 3 note
 
@@ -80,4 +83,4 @@ Later droplets will need an inbound rule allowing TCP 22 from the connector tag,
 
 ## 8. Rollback
 
-Destroy `cah-10-access` first, then `cah-00-foundation` if you want stage 0 gone too: stage 0's VPC, project and tag are in use by stage 1, so the order matters. The connector token dies with the connector.
+Destroy `cah-10-access` first, then `cah-00-foundation` if you want stage 0 gone too: stage 0's VPC, project and tag are in use by stage 1, so the order matters. The connector tokens die with the connectors, and the site and SSH key go with the stack.
