@@ -65,9 +65,18 @@ The weekly update is the documented cron job, as `/etc/cron.d/twingate-connector
 
 Both connectors sit in one Twingate remote network, and each has a Twingate SSH resource at its own private address. Twingate chooses which connector carries a session, so a session to connector b's address can be routed through connector a. Connector a then has to open TCP 22 to connector b inside the VPC, and DigitalOcean cloud firewalls filter VPC-internal traffic too. With zero inbound rules that connection timed out during the SSH banner exchange, while the connector's own address kept working. Twingate's [connector best practices](https://www.twingate.com/docs/connector-best-practices) say every connector in a remote network needs identical network reach, so every connector must be able to reach every connector-address resource.
 
-The fix is the firewall module's `inbound_from_tag_rules`, which the connector firewall sets to TCP 22. Each rule uses `source_tags` equal to the firewall's own tag, so only droplets carrying the connector tag can connect. There are no source addresses and no `0.0.0.0/0`.
+The fix needs both directions, because the two connectors play different roles in one session. The target must accept the connection (inbound) and the sender must be allowed to open it (outbound). DigitalOcean allows outbound traffic only when an outbound rule permits it; the connector firewall's other outbound rules (tcp 443, 80, 53 and 30000-31000, udp) do not include TCP 22, so the first fix, inbound alone, still timed out. Replies to an admitted connection are stateful and need no rule.
 
-Access from outside is unchanged: there is still no public inbound, and SSH is reachable only through Twingate. After the apply, verify it from a host outside the VPC, for example `nmap -Pn -p 22 <droplet public address>` should report the port filtered, and the SSH resources should work from the client for both connector addresses.
+- Receive, on the target: the firewall module's `inbound_from_tag_rules`, which the connector firewall sets to TCP 22. Each rule uses `source_tags` equal to the firewall's own tag, so only droplets carrying the connector tag can connect.
+- Send, from the source: the module's `outbound_to_tag_rules`, also TCP 22. Each rule uses `destination_tags` equal to the firewall's own tag, so a connector can open SSH only to droplets carrying the connector tag.
+
+Neither rule has an address and neither uses `0.0.0.0/0`. The baseline firewall has neither variable set, so it still has zero inbound rules and only its five address-based outbound rules.
+
+Access from outside is unchanged: there is still no public inbound, and SSH is reachable only through Twingate. After the apply, verify:
+
+- From connector a (over Twingate SSH), check the peer's private address directly: `timeout 5 bash -c '</dev/tcp/<connector b private ip>/22' && echo open || echo blocked`. It should print `open`; do the same from b to a. Before the outbound rule it printed `blocked`.
+- From a host outside the VPC, `nmap -Pn -p 22 <droplet public address>` should still report the port filtered.
+- The SSH resources should work from the Twingate client for both connector addresses.
 
 ## 3. Accepted residual risk
 

@@ -61,11 +61,15 @@ module "connector_b" {
 }
 
 # The baseline firewall already denies all inbound traffic. This one adds the
-# outbound ports the connector needs and one inbound rule, TCP 22 from other
+# outbound ports the connector needs and TCP 22 in both directions between
 # droplets with the connector tag. Twingate may route a session to either
 # connector, so each must reach the other's SSH (all connectors in a remote
 # network need identical reach:
-# https://www.twingate.com/docs/connector-best-practices). SSH is still only
+# https://www.twingate.com/docs/connector-best-practices). The target needs the
+# inbound rule to accept, and the sender needs the outbound rule to open the
+# connection: DigitalOcean firewalls are stateful for replies, but a new
+# connection is allowed out only if an outbound rule permits it. Both rules name
+# the connector tag, never an address. SSH is still only
 # reachable from outside through Twingate; there is no public inbound. Twingate's allowlist article
 # (https://help.twingate.com/articles/1198271128-allowlist-for-outbound-connections-to-twingate-infrastructure)
 # requires outbound UDP to any port for peer-to-peer connections, so UDP is
@@ -77,6 +81,9 @@ module "connector_firewall" {
   purpose = "connector"
   tag     = digitalocean_tag.connector.name
   inbound_from_tag_rules = [
+    { protocol = "tcp", port_range = "22" },
+  ]
+  outbound_to_tag_rules = [
     { protocol = "tcp", port_range = "22" },
   ]
   extra_outbound_rules = [
