@@ -132,15 +132,19 @@ run "an_empty_ssh_key_name_is_rejected" {
   expect_failures = [var.admin_ssh_key_name]
 }
 
-run "connector_has_its_own_tag_and_outbound_only_firewall" {
+run "connector_has_its_own_tag_and_a_peer_ssh_only_inbound_firewall" {
   command = plan
   assert {
     condition     = digitalocean_tag.connector.name == "cah-connector-nyc3"
     error_message = "Connector tag must be cah-connector-<region>."
   }
   assert {
-    condition     = module.connector_firewall.inbound_rule_count == 0
-    error_message = "The connector firewall must also have zero inbound rules."
+    condition     = module.connector_firewall.inbound_rule_count == 1
+    error_message = "The connector firewall must have exactly one inbound rule (tcp 22 from the connector tag)."
+  }
+  assert {
+    condition     = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(["tcp/22/cah-connector-nyc3"])
+    error_message = "The only inbound rule must be tcp 22 sourced from the connector tag, never an address."
   }
   assert {
     condition     = module.connector_firewall.outbound_rule_count == 7
