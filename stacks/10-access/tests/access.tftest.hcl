@@ -143,8 +143,8 @@ run "connector_has_its_own_tag_and_outbound_only_firewall" {
     error_message = "The connector firewall must also have zero inbound rules."
   }
   assert {
-    condition     = module.connector_firewall.outbound_rule_count == 8
-    error_message = "Connector firewall must be the module's 5 default outbound rules plus the 3 Twingate extras."
+    condition     = module.connector_firewall.outbound_rule_count == 7
+    error_message = "Connector firewall must be the module's 5 default outbound rules plus the 2 Twingate extras."
   }
   assert {
     condition = jsonencode(module.connector_firewall.outbound_rules) == jsonencode(sort([
@@ -154,10 +154,9 @@ run "connector_has_its_own_tag_and_outbound_only_firewall" {
       "udp/53/0.0.0.0/0,::/0",
       "udp/123/0.0.0.0/0,::/0",
       "tcp/30000-31000/0.0.0.0/0,::/0",
-      "udp/19302-19308/0.0.0.0/0,::/0",
-      "udp/443/0.0.0.0/0,::/0",
+      "udp/1-65535/0.0.0.0/0,::/0",
     ]))
-    error_message = "Connector firewall outbound must be exactly the five defaults plus tcp 30000-31000, udp 19302-19308 and udp 443, each to 0.0.0.0/0 and ::/0."
+    error_message = "Connector firewall outbound must be exactly the five defaults plus tcp 30000-31000 and udp 1-65535 (Twingate peer-to-peer needs outbound UDP to any port), each to 0.0.0.0/0 and ::/0."
   }
 }
 
@@ -280,8 +279,8 @@ run "an_empty_admin_list_is_rejected" {
 run "the_two_connectors_reboot_at_different_times" {
   command = plan
   assert {
-    condition     = length(regexall("reboot_time\\s*=\\s*\"03:00\"", file("${path.module}/main.tf"))) == 1 && length(regexall("reboot_time\\s*=\\s*\"04:00\"", file("${path.module}/main.tf"))) == 1
-    error_message = "Connector a must reboot at 03:00 and connector b at 04:00, so they never reboot together."
+    condition     = length(regexall("reboot_time\\s*=\\s*\"04:00\"", file("${path.module}/main.tf"))) == 1 && length(regexall("reboot_time\\s*=\\s*\"05:00\"", file("${path.module}/main.tf"))) == 1
+    error_message = "Connector a must reboot at 04:00 and connector b at 05:00 Eastern, so they never reboot together."
   }
   assert {
     condition     = length(regexall("reboot_time\\s*=", file("${path.module}/main.tf"))) == 2

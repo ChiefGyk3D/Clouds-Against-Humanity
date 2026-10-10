@@ -346,3 +346,86 @@ run "admin_key_rejects_yaml_injection" {
   }
   expect_failures = [var.admin_ssh_public_key]
 }
+
+# First-boot install resilience. The apt lock race with Ubuntu's own unattended
+# upgrades made the one-shot install abort before it wrote the connector config.
+
+run "apt_waits_for_the_dpkg_lock" {
+  command = plan
+  assert {
+    condition     = strcontains(one([for f in yamldecode(digitalocean_droplet.connector.user_data).write_files : f.content if f.path == "/etc/apt/apt.conf.d/99cah-lock-wait"]), "DPkg::Lock::Timeout \"300\";")
+    error_message = "apt must wait up to 300 seconds for the dpkg lock."
+  }
+}
+
+run "installer_is_retried_a_bounded_number_of_times" {
+  command = plan
+  assert {
+    condition     = length([for c in yamldecode(digitalocean_droplet.connector.user_data).runcmd : c if strcontains(jsonencode(c), "setup.sh")]) == 1
+    error_message = "setup.sh must be invoked from exactly one runcmd step."
+  }
+  assert {
+    condition = alltrue([
+      for c in yamldecode(digitalocean_droplet.connector.user_data).runcmd :
+      strcontains(jsonencode(c), "seq 1 10") && strcontains(jsonencode(c), "sleep 30") && strcontains(jsonencode(c), "exit 1") && strcontains(jsonencode(c), "pipefail")
+      if strcontains(jsonencode(c), "setup.sh")
+    ])
+    error_message = "The install step must retry 10 times, 30 seconds apart, under pipefail, and exit 1 when every attempt fails."
+  }
+  assert {
+    condition     = !can(regex("(?m)^\\s*(set -[a-z]*x|bash -x)", digitalocean_droplet.connector.user_data))
+    error_message = "Shell tracing would print the tokens into the cloud-init log."
+  }
+}
+
+run "install_outcome_is_logged_without_tokens" {
+  command = apply
+
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "FAKE-ACCESS-TOKEN-3"
+      refresh_token = "FAKE-REFRESH-TOKEN-3"
+    }
+  }
+
+  assert {
+    condition     = length([for c in yamldecode(digitalocean_droplet.connector.user_data).runcmd : c if strcontains(jsonencode(c), "/var/log/cah-connector-install.log")]) == 1
+    error_message = "Exactly one step must write /var/log/cah-connector-install.log."
+  }
+  assert {
+    condition = alltrue([
+      for c in yamldecode(digitalocean_droplet.connector.user_data).runcmd :
+      strcontains(jsonencode(c), "systemctl is-active twingate-connector") && strcontains(jsonencode(c), "journalctl -u twingate-connector -n 50") && strcontains(jsonencode(c), "tail -n 50 /var/log/cloud-init-output.log") && strcontains(jsonencode(c), "chmod 0640")
+      if strcontains(jsonencode(c), "/var/log/cah-connector-install.log")
+    ])
+    error_message = "The log step must record the service state, the last 50 journal lines and the cloud-init output tail, at mode 0640."
+  }
+  assert {
+    condition = !anytrue([
+      for c in yamldecode(digitalocean_droplet.connector.user_data).runcmd :
+      strcontains(jsonencode(c), "FAKE-ACCESS-TOKEN-3") || strcontains(jsonencode(c), "FAKE-REFRESH-TOKEN-3") || strcontains(jsonencode(c), "TWINGATE_ACCESS_TOKEN") || strcontains(jsonencode(c), "TWINGATE_REFRESH_TOKEN")
+      if strcontains(jsonencode(c), "/var/log/cah-connector-install.log")
+    ])
+    error_message = "The log step must not read or print a token."
+  }
+}
+
+run "droplet_clock_is_eastern" {
+  command = plan
+  assert {
+    condition     = yamldecode(digitalocean_droplet.connector.user_data).timezone == "America/New_York"
+    error_message = "The reboot window and the weekly update are Eastern time, so the droplet timezone must be America/New_York."
+  }
+}
+
+run "eastern_schedule_for_connector_a_and_b" {
+  command = plan
+  variables {
+    reboot_time = "05:00"
+  }
+  assert {
+    condition     = strcontains(one([for f in yamldecode(digitalocean_droplet.connector.user_data).write_files : f.content if f.path == "/etc/cron.d/twingate-connector-update"]), "30 5 * * 0 root")
+    error_message = "A 05:00 reboot must put the Sunday connector update at 05:30."
+  }
+}

@@ -4,7 +4,7 @@
 
 - One Twingate remote network (site), created by OpenTofu and named `access-nyc3`, and an existing DigitalOcean SSH key that the stack looks up by name (it does not register one). Both connectors share them.
 - Two `s-1vcpu-1gb` droplets, `access-nyc3-connector-a` and `access-nyc3-connector-b`, each running a Twingate connector inside the VPC. Twingate recommends at least two active connectors, so one can be down without losing access. Each is created with `ubuntu-24-04-x64`, monitoring on, backups off and IPv6 off.
-- A connector firewall, attached by the connector tag, with no inbound rules and eight outbound rules: the firewall module's five defaults (tcp 443, 80 and 53; udp 53 and 123) plus three Twingate ports (tcp 30000-31000, udp 19302-19308, udp 443). The baseline firewall also applies to the droplet through its own tag.
+- A connector firewall, attached by the connector tag, with no inbound rules and seven outbound rules: the firewall module's five defaults (tcp 443, 80 and 53; udp 53 and 123) plus tcp 30000-31000 and outbound UDP on every port (1-65535). Twingate's [outbound allowlist article](https://help.twingate.com/articles/1198271128-allowlist-for-outbound-connections-to-twingate-infrastructure) requires outbound UDP to any port for peer-to-peer connections; inbound stays denied. The baseline firewall also applies to the droplet through its own tag.
 - A Twingate admin group, `cah-nyc3-admins`.
 - Two per-host Twingate resources, one for each connector's private address, each limited to TCP port 22.
 
@@ -28,10 +28,17 @@ Each connector's cloud-init (`modules/twingate-connector/cloud-init.yaml.tftpl`)
 
 - One login user, `cah-admin`, with the admin public key and passwordless sudo. No password exists (`lock_passwd`), root is disabled (`disable_root`) and the default `ubuntu` user is not created.
 - An sshd drop-in, `/etc/ssh/sshd_config.d/99-cah-hardening.conf`: no root login, no passwords, no keyboard-interactive, public keys only, no X11 forwarding, `AllowUsers cah-admin`, `MaxAuthTries 3`, `LoginGraceTime 20`.
-- `unattended-upgrades` for security updates, with automatic reboot (also when someone is logged in) at `reboot_time` and removal of unused dependencies. The stack passes `03:00` to connector a and `04:00` to connector b (UTC), so they never reboot together.
+- The droplet clock is `America/New_York`, so every time below is Eastern.
+- `unattended-upgrades` for security updates, with automatic reboot (also when someone is logged in) at `reboot_time` and removal of unused dependencies. Updates and the install of the connector wait for the dpkg lock for up to 300 seconds (`/etc/apt/apt.conf.d/99cah-lock-wait`), so first boot does not fail while Ubuntu's own apt jobs run.
 - `chrony` for time sync (UDP 123 outbound is already allowed).
 - A sysctl drop-in: loose reverse-path filtering, no ICMP redirects, no source routing, SYN cookies, martian logging. It does not touch `ip_forward`.
 - A weekly connector update, half an hour after each connector's reboot time on Sundays (see the install route below), so the sibling is idle while one restarts.
+
+Update schedule (Eastern time):
+
+- Security updates install daily.
+- A droplet reboots only when an update requires it, at 04:00 (connector a) or 05:00 (connector b).
+- The connector package updates on Sundays at 04:30 (a) and 05:30 (b).
 
 Follow-ups, not done yet:
 
@@ -47,6 +54,8 @@ What Twingate's documentation says, read 2026-10-10:
 - The update guide ([systemd-service](https://twingate.com/docs/systemd-service)) upgrades with `apt update`, `apt install -yq twingate-connector` and `systemctl restart twingate-connector`. There is no built-in self-updater. Twingate's documented mechanism is a weekly cron job running those commands, scheduled off-peak, with two or more connectors per remote network so one can update without downtime.
 
 So no signed install route is documented, and this repository keeps the vendor's `setup.sh` (`https://binaries.twingate.com/connector/setup.sh`, fetched over TLS 1.2+ under `pipefail`). I read the script on 2026-10-10: on Debian and Ubuntu it adds `https://packages.twingate.com/apt/gpg.key` as a `signed-by` keyring and installs the `twingate-connector` package from `https://packages.twingate.com/apt/`, writes the three settings to `connector.conf` (mode 0600, directory 0700) and enables the service. That is a hint, not documentation, and the script is not version-pinned or checksummed, so a change on Twingate's side reaches new droplets. I did not copy the repository lines out of the script into this repository, because the docs do not promise them.
+
+On first boot the install step retries `setup.sh` up to 10 times, 30 seconds apart, because the script runs under `set -e` and writes the connector config only at the very end: an apt call that fails on Ubuntu's own first-boot apt jobs aborts it with nothing written, and running it again is safe. After the retries, a second step writes the service state, the last 50 journal lines and the last 50 lines of the cloud-init output to `/var/log/cah-connector-install.log` (root, mode 0640; no token is read or printed).
 
 The script does not write `TWINGATE_LABEL_DEPLOYED_BY` to the config, so that label is most likely ignored. It is harmless and kept; do not rely on it.
 
@@ -75,7 +84,7 @@ Verified so far:
 
 Verify before apply (not confirmed yet):
 
-- [ ] The connector firewall's outbound ports (tcp 30000-31000, udp 19302-19308, udp 443 in `stacks/10-access/main.tf`) against Twingate's current firewall requirements page.
+- [ ] The connector firewall's outbound ports (tcp 30000-31000 and udp 1-65535 in `stacks/10-access/main.tf`) against Twingate's [outbound allowlist article](https://help.twingate.com/articles/1198271128-allowlist-for-outbound-connections-to-twingate-infrastructure).
   Verified on:
 - [ ] `TWINGATE_LABEL_DEPLOYED_BY` in the install command in `modules/twingate-connector/cloud-init.yaml.tftpl` is a supported setting. The 2026-10-10 reading of `setup.sh` shows it is not written to the config, so it is probably a no-op.
   Verified on:
@@ -108,6 +117,15 @@ Known follow-up: the provider emits a deprecation warning when `access_group` is
 2. From a Twingate client: `ssh <user>@<connector private IP>` works for each connector's private IP (`connector_private_ips` output, keys `a` and `b`).
 3. From outside Twingate: `nmap -Pn -p 22,80,443 <connector public IP>` shows the ports filtered on both droplets. Scanning your own droplet is authorized.
 4. `python3 -I scripts/cost_check.py --root .` still reports `$12.00`.
+
+## 6a. If a connector shows offline
+
+SSH to a connector goes through Twingate, so it is impossible while that connector is the only path in. Try the other connector first: if `access-nyc3-connector-b` is online, SSH to connector a's private IP through it as `cah-admin`, then:
+
+- `sudo systemctl status twingate-connector` shows whether the service exists and runs. "Unit not found" means the installer never finished.
+- `sudo cat /var/log/cah-connector-install.log` holds the service state, the last 50 journal lines and the cloud-init output tail, written at the end of first boot. `sudo tail -n 100 /var/log/cloud-init-output.log` shows the full install attempts (`cah: connector install attempt N of 10 failed`).
+
+If both connectors are down there is no way in, and the DigitalOcean recovery options are limited. The account has no console password by design, so the Droplet web console is not an option, and password reset is deliberately not wired up. The droplets are stateless (nothing on them is kept), so the cheap, honest recovery is to rebuild: in a Spacelift run, replace the affected `module.connector_a.digitalocean_droplet.connector` (and the connector token resource, so the new droplet gets a fresh token), read the plan, then confirm. Expect a few minutes of outage for that connector.
 
 ## 7. Stage 3 note
 
