@@ -7,7 +7,8 @@ variables {
   project_id           = "project-test"
   baseline_tag         = "cah-baseline-nyc3"
   twingate_network     = "acme"
-  admin_ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAItest test"
+  admin_ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAItest"
+  admin_user_ids       = ["fake-user-id-1"]
 }
 
 run "connector_size_comes_from_the_cost_manifest" {
@@ -31,6 +32,19 @@ run "connector_has_its_own_tag_and_outbound_only_firewall" {
   assert {
     condition     = module.connector_firewall.outbound_rule_count == 8
     error_message = "Connector firewall must be the module's 5 default outbound rules plus the 3 Twingate extras."
+  }
+  assert {
+    condition = jsonencode(module.connector_firewall.outbound_rules) == jsonencode(sort([
+      "tcp/443/0.0.0.0/0,::/0",
+      "tcp/80/0.0.0.0/0,::/0",
+      "tcp/53/0.0.0.0/0,::/0",
+      "udp/53/0.0.0.0/0,::/0",
+      "udp/123/0.0.0.0/0,::/0",
+      "tcp/30000-31000/0.0.0.0/0,::/0",
+      "udp/19302-19308/0.0.0.0/0,::/0",
+      "udp/443/0.0.0.0/0,::/0",
+    ]))
+    error_message = "Connector firewall outbound must be exactly the five defaults plus tcp 30000-31000, udp 19302-19308 and udp 443, each to 0.0.0.0/0 and ::/0."
   }
 }
 
@@ -76,4 +90,20 @@ run "a_quoted_network_value_is_rejected_at_the_stack_boundary" {
     twingate_network = "acme\"; rm -rf /"
   }
   expect_failures = [var.twingate_network]
+}
+
+run "a_baseline_tag_without_the_cah_prefix_is_rejected" {
+  command = plan
+  variables {
+    baseline_tag = "some-other-tag"
+  }
+  expect_failures = [var.baseline_tag]
+}
+
+run "an_empty_admin_list_is_rejected" {
+  command = plan
+  variables {
+    admin_user_ids = []
+  }
+  expect_failures = [var.admin_user_ids]
 }

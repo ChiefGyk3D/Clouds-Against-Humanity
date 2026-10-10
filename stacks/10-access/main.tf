@@ -16,6 +16,9 @@ module "connector" {
   size             = local.connector.size
   ssh_public_key   = var.admin_ssh_public_key
   twingate_network = var.twingate_network
+
+  # The outbound rules must exist before the droplet boots and starts to install.
+  depends_on = [module.connector_firewall]
 }
 
 # The baseline firewall already denies all inbound traffic. This one only adds

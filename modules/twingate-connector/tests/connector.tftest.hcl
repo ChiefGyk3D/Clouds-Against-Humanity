@@ -118,7 +118,12 @@ run "outputs_never_carry_connector_secrets" {
   # The test can only name outputs it knows, so pin the output set: adding any
   # output (whatever its name) must be a deliberate edit of this list.
   assert {
-    condition     = jsonencode(sort(flatten(regexall("output \"([a-z_]+)\"", file("${path.module}/outputs.tf"))))) == jsonencode(["droplet_name", "droplet_urn", "private_ip", "remote_network_id", "size"])
+    condition     = length(regexall("output \"", file("${path.module}/outputs.tf"))) == 5
+    error_message = "outputs.tf must declare exactly 5 outputs. Add one only after proving it carries no connector secret and extending this test."
+  }
+
+  assert {
+    condition     = jsonencode(sort(flatten(regexall("output \"([A-Za-z0-9_-]+)\"", file("${path.module}/outputs.tf"))))) == jsonencode(["droplet_name", "droplet_urn", "private_ip", "remote_network_id", "size"])
     error_message = "outputs.tf declares an output this test does not inspect. Add it here only after proving it carries no connector secret."
   }
 

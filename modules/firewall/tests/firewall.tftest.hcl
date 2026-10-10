@@ -39,6 +39,27 @@ run "default_outbound_is_the_five_expected_rules" {
   }
 }
 
+run "default_outbound_is_exactly_these_rules" {
+  command = plan
+  assert {
+    condition = jsonencode(output.outbound_rules) == jsonencode(sort([
+      "tcp/443/0.0.0.0/0,::/0",
+      "tcp/80/0.0.0.0/0,::/0",
+      "tcp/53/0.0.0.0/0,::/0",
+      "udp/53/0.0.0.0/0,::/0",
+      "udp/123/0.0.0.0/0,::/0",
+    ]))
+    error_message = "Default outbound must be exactly tcp 443/80/53 and udp 53/123, each to 0.0.0.0/0 and ::/0."
+  }
+  assert {
+    condition = jsonencode(sort([
+      for r in digitalocean_firewall.this.outbound_rule :
+      "${r.protocol}/${r.port_range}/${join(",", sort(tolist(r.destination_addresses)))}"
+    ])) == jsonencode(output.outbound_rules)
+    error_message = "The outbound_rules output must describe the resource's real rules."
+  }
+}
+
 run "extra_outbound_is_appended" {
   command = plan
   variables {
@@ -47,5 +68,16 @@ run "extra_outbound_is_appended" {
   assert {
     condition     = output.outbound_rule_count == 6
     error_message = "Extra outbound rules must be appended to the defaults."
+  }
+  assert {
+    condition = jsonencode(output.outbound_rules) == jsonencode(sort([
+      "tcp/443/0.0.0.0/0,::/0",
+      "tcp/80/0.0.0.0/0,::/0",
+      "tcp/53/0.0.0.0/0,::/0",
+      "udp/53/0.0.0.0/0,::/0",
+      "udp/123/0.0.0.0/0,::/0",
+      "tcp/30000-31000/0.0.0.0/0,::/0",
+    ]))
+    error_message = "Extra rules must be appended with the same any-address destinations."
   }
 }

@@ -12,6 +12,11 @@ variable "project_id" {
 
 variable "baseline_tag" {
   type = string
+
+  validation {
+    condition     = startswith(var.baseline_tag, "cah-baseline-")
+    error_message = "baseline_tag must start with \"cah-baseline-\" so the connector droplet is covered by the baseline firewall."
+  }
 }
 
 variable "twingate_network" {
@@ -30,6 +35,10 @@ variable "admin_ssh_public_key" {
 
 variable "admin_user_ids" {
   type        = list(string)
-  default     = []
-  description = "Twingate user ids placed in the admin group. Supplied from Doppler, never committed."
+  description = "Twingate user ids placed in the admin group. Required; supplied from Doppler, never committed."
+
+  validation {
+    condition     = length(var.admin_user_ids) > 0
+    error_message = "admin_user_ids must list at least one Twingate user. A missing Doppler value would otherwise create a host nobody can reach."
+  }
 }
