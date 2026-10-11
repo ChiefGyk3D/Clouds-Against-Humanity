@@ -59,7 +59,7 @@ So there is never a moment where both are restarting.
 
 ### One resource per host and port, never "the whole VPC"
 
-It would be one line to create a resource for `10.77.0.0/24` with all ports open. That would rebuild a VPN with extra steps. Each resource here is a single private address with `tcp` restricted to port 22, UDP denied and ICMP off. When stage 3 adds workloads, each gets its own narrow resource.
+It would be one line to create a resource for `10.78.0.0/24` with all ports open. That would rebuild a VPN with extra steps. Each resource here is a single private address with `tcp` restricted to port 22, UDP denied and ICMP off. When stage 3 adds workloads, each gets its own narrow resource.
 
 ### Access is a group, and the group is code
 

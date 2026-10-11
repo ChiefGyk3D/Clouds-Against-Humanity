@@ -7,7 +7,7 @@ Every DigitalOcean droplet gets a public IP address, and you cannot remove it. S
 | Piece | Built by | Purpose |
 |---|---|---|
 | Project `clouds-against-humanity` | stage 0 | Groups the resources in the console and for billing |
-| VPC `10.77.0.0/24` in `tor1` | stage 0, `modules/vpc` | Private network for the droplets; one per region |
+| VPC `10.78.0.0/24` in `tor1` | stage 0, `modules/vpc` | Private network for the droplets; one per region |
 | Tag `cah-baseline-tor1` | stage 0 | Anything carrying it gets the baseline firewall |
 | Baseline firewall | stage 0, `modules/firewall` | Zero inbound rules, five narrow outbound rules |
 | Tag `cah-connector-tor1` | stage 1 | Marks the connector droplets |
@@ -72,7 +72,7 @@ The droplets are created with `ipv6 = false`. Nothing needs it yet, and an addre
 
 ### VPC range chosen to avoid the homelab
 
-`10.77.0.0/24` is the default. The stage 0 guide asks you to confirm it does not overlap any network you will route to, and to record only "no overlap confirmed" in the repo, never your actual home ranges. Overlapping ranges are a pain the moment you connect the two sides (stage 2).
+`10.78.0.0/24` is the default. The stage 0 guide asks you to confirm it does not overlap any network you will route to, and to record only "no overlap confirmed" in the repo, never your actual home ranges. Overlapping ranges are a pain the moment you connect the two sides (stage 2).
 
 ## For stage 3 and later
 

@@ -3,7 +3,7 @@
 ## 1. What this stage builds
 
 - A DigitalOcean project to group the resources.
-- One VPC (private network) in `tor1`, default range `10.77.0.0/24`.
+- One VPC (private network) in `tor1`, default range `10.78.0.0/24`.
 - A baseline tag, `cah-baseline-tor1`.
 - A baseline firewall attached to that tag with zero inbound rules. DigitalOcean denies any inbound traffic that no rule allows, so every droplet that carries the tag is closed to the internet from the moment it exists.
 
@@ -29,7 +29,7 @@ Do these by hand in the DigitalOcean console and the password manager before the
 ## 3. Choices to confirm before apply
 
 - Region: `tor1` is the default. The price table (`docs/cost-prices.json`) is not region-specific; it records list prices retrieved on 2026-10-10 for the listed sizes. Check the availability and price of a size in another region before changing region.
-- VPC CIDR: confirm that `10.77.0.0/24` does not overlap any home or lab range you connect to. Compare against your router's routing table. Record only "no overlap confirmed" in this repo, never the ranges themselves. If it overlaps, set `vpc_ip_range` to another private range.
+- VPC CIDR: DigitalOcean rejects a VPC range that overlaps another VPC anywhere in the account, even in a different region (`422 This range/size overlaps with another VPC network`). A default VPC cannot be deleted, so an old region's VPC can keep its range for good: pick a range no VPC in the account already uses. Also confirm that `10.78.0.0/24` does not overlap any home or lab range you connect to. Compare against your router's routing table. Record only "no overlap confirmed" in this repo, never the ranges themselves. If it overlaps, set `vpc_ip_range` to another private range.
 - License of this repository: MIT (see `LICENSE`), matching the author's other repositories.
 
 ## 4. Bootstrap order

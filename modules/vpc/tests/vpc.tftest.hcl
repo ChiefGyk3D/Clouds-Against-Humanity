@@ -3,7 +3,7 @@ mock_provider "digitalocean" {}
 variables {
   layer    = "foundation"
   region   = "tor1"
-  ip_range = "10.77.0.0/24"
+  ip_range = "10.78.0.0/24"
 }
 
 run "name_follows_layer_region_role" {

@@ -6,7 +6,7 @@ variable "region" {
 
 variable "vpc_ip_range" {
   type        = string
-  default     = "10.77.0.0/24"
+  default     = "10.78.0.0/24"
   description = "Private CIDR. Must not overlap any homelab range (confirmed in the stage 0 guide before apply)."
 }
 
