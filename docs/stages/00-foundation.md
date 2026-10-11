@@ -17,9 +17,9 @@ Do these by hand in the DigitalOcean console and the password manager before the
   Verified on:
 - [ ] Billing alerts set at $10 and $25 (below the $30 ceiling).
   Verified on:
-- [ ] Token A: write scope, 90-day expiry, stored only in Doppler, used only by Spacelift.
+- [ ] Token A: custom write scopes from [the scope table](../spacelift-secrets.md#4a-digitalocean-token-scopes), 90-day expiry, stored only in Doppler, used only by Spacelift.
   Verified on:
-- [ ] Token B: read scope, 90-day expiry, for interactive tooling.
+- [ ] Token B: custom read-only scopes from the same table, 90-day expiry, for interactive tooling.
   Verified on:
 - [ ] The token currently behind the `do-droplets` MCP server is identified; if it is write-scoped, it is replaced with Token B.
   Verified on:

@@ -25,7 +25,7 @@ Values are never written here. This table is the inventory to check when a token
 
 | Secret | Lives in | Used by | Scope | Lifetime |
 |---|---|---|---|---|
-| `DIGITALOCEAN_TOKEN` | Doppler `prd` | stacks 00 and 10 (OpenTofu provider) | custom scopes, write on project, vpc, firewall, tag, droplet, ssh_key; read on image, region, size, actions | 90 days |
+| `DIGITALOCEAN_TOKEN` | Doppler `prd` | stacks 00 and 10 (OpenTofu provider) | custom scopes, see [section 4a](#4a-digitalocean-token-scopes) | 90 days |
 | Doppler service token `spacelift` | Spacelift context `cah-doppler`, variable `DOPPLER_TOKEN` (write-only) | the hook script | read-only, config `prd` only | 90 days |
 | `TWINGATE_API_TOKEN` | Doppler `prd` | stack 10 | Twingate "Read, Write & Provision" key | 90 days |
 | `TWINGATE_NETWORK` | Doppler `prd` | stack 10 (also exported as `TF_VAR_twingate_network`) | not a credential; the tenant name | none |
@@ -54,13 +54,34 @@ Record the real expiry dates in your password manager, not in this repository. A
 4. Spacelift stacks carry the label `cah`, so the context attaches itself.
 5. This repository's `.spacelift/config.yml` and `scripts/spacelift/doppler-env.sh`.
 
+## 4a. DigitalOcean token scopes
+
+Create both tokens under DigitalOcean console, API, Tokens, Generate New Token, **Custom scopes** (never "Full access"). Pick exactly these.
+
+**Token A** (write; Doppler `DIGITALOCEAN_TOKEN`, used only by Spacelift). One row per OpenTofu resource the stacks manage:
+
+| Scope group | Actions to tick | Why |
+|---|---|---|
+| project | create, read, update, delete | `digitalocean_project` and `digitalocean_project_resources` |
+| vpc | create, read, update, delete | `digitalocean_vpc`; droplet creation also reads it |
+| firewall | create, read, update, delete | `digitalocean_firewall` |
+| tag | create, read, delete | `digitalocean_tag` (tags have no update) |
+| droplet | create, read, update, delete | `digitalocean_droplet` |
+| ssh_key | **read** | the stack looks the admin key up by name (`data.digitalocean_ssh_key`) and never registers it, so create and delete are not needed |
+| image, region, size | read | resolved when a droplet is created |
+| actions | read | the provider polls droplet actions while it builds |
+
+**Token B** (read only; interactive tooling and the `do-droplets` MCP server): `read` on the same groups, nothing else. It cannot change anything, so a leak costs you visibility, not infrastructure.
+
+Derived from the resources in `modules/` and the stack roots (`data "digitalocean_ssh_key"`, `digitalocean_droplet`, `digitalocean_firewall`, `digitalocean_project`, `digitalocean_project_resources`, `digitalocean_tag`, `digitalocean_vpc`). It has not been proven by a run with a minimal token. If a plan fails with `401` or `403`, the error names the missing scope: add that one and update this table.
+
 ## 5. Rotation
 
 Do these in order and never paste a token into a chat, an issue, a commit or a log.
 
 ### DigitalOcean token (Token A), every 90 days
 
-1. DigitalOcean console, API, Tokens: generate a new token with the same custom scopes and a 90-day expiry.
+1. DigitalOcean console, API, Tokens: generate a new token with the scopes in [section 4a](#4a-digitalocean-token-scopes) and a 90-day expiry.
 2. Store it: `doppler secrets set DIGITALOCEAN_TOKEN -p clouds-against-humanity -c prd` (it prompts for the value, so it stays out of your shell history).
 3. Trigger a run on stack 00 and read the plan. It should show no changes.
 4. Revoke the old token in the console.
