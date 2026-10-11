@@ -48,7 +48,7 @@ flowchart TB
 
 ### Two connectors, not one
 
-Twingate recommends at least two active connectors per remote network so one can be down without losing access. That matters more than usual here, because **SSH to a connector goes through Twingate**: if the only connector dies, so does the only way in. Two `s-1vcpu-1gb` droplets cost $12 a month instead of $6, and that was the cheapest insurance on the bill.
+Twingate recommends at least two active connectors per remote network so one can be down without losing access. That matters more than usual here, because **SSH to a connector goes through Twingate**: if the only connector dies, so does the only way in. Two `s-1vcpu-1gb-intel` droplets cost $14 a month instead of $7, and that was the cheapest insurance on the bill.
 
 They are also deliberately out of step:
 

@@ -6,7 +6,7 @@ variables {
   region              = "nyc3"
   vpc_id              = "vpc-test"
   tags                = ["cah-baseline-nyc3", "cah-connector-nyc3"]
-  size                = "s-1vcpu-1gb"
+  size                = "s-1vcpu-1gb-intel"
   remote_network_id   = "remote-network-test"
   ssh_key_fingerprint = "aa:bb:cc:dd"
   instance            = "a"
@@ -82,7 +82,7 @@ run "instance_rejects_empty" {
 run "no_paid_extras_and_no_ipv6" {
   command = plan
   assert {
-    condition     = digitalocean_droplet.connector.size == "s-1vcpu-1gb"
+    condition     = digitalocean_droplet.connector.size == "s-1vcpu-1gb-intel"
     error_message = "Size must come from the variable."
   }
   assert {

@@ -3,12 +3,12 @@
 ## 1. What this stage builds
 
 - One Twingate remote network (site), created by OpenTofu and named `access-nyc3`, and an existing DigitalOcean SSH key that the stack looks up by name (it does not register one). Both connectors share them.
-- Two `s-1vcpu-1gb` droplets, `access-nyc3-connector-a` and `access-nyc3-connector-b`, each running a Twingate connector inside the VPC. Twingate recommends at least two active connectors, so one can be down without losing access. Each is created with `ubuntu-24-04-x64`, monitoring on, backups off and IPv6 off.
+- Two `s-1vcpu-1gb-intel` droplets, `access-nyc3-connector-a` and `access-nyc3-connector-b`, each running a Twingate connector inside the VPC. Twingate recommends at least two active connectors, so one can be down without losing access. Each is created with `ubuntu-24-04-x64`, monitoring on, backups off and IPv6 off.
 - A connector firewall, attached by the connector tag, with one inbound rule (TCP 22, only from droplets that carry the connector tag) and seven outbound rules: the firewall module's five defaults (tcp 443, 80 and 53; udp 53 and 123) plus tcp 30000-31000 and outbound UDP on every port (1-65535). Twingate's [outbound allowlist article](https://help.twingate.com/articles/1198271128-allowlist-for-outbound-connections-to-twingate-infrastructure) requires outbound UDP to any port for peer-to-peer connections. Nothing outside the connector tag can reach the droplet inbound. The baseline firewall also applies to the droplet through its own tag.
 - A Twingate admin group, `cah-nyc3-admins`.
 - Two per-host Twingate resources, one for each connector's private address, each limited to TCP port 22.
 
-Cost: $12.00/month, approved total $12.00 (see [cost](../cost.md)).
+Cost: $14.00/month, approved total $14.00 (see [cost](../cost.md)).
 
 What the tests prove (`tofu test`, no cloud account needed):
 
@@ -132,7 +132,7 @@ Known follow-up: the provider emits a deprecation warning when `access_group` is
 1. Both connectors show online in the Twingate admin console, under the one site `access-<region>`.
 2. From a Twingate client: `ssh <user>@<connector private IP>` works for each connector's private IP (`connector_private_ips` output, keys `a` and `b`).
 3. From outside Twingate: `nmap -Pn -p 22,80,443 <connector public IP>` shows the ports filtered on both droplets. Scanning your own droplet is authorized.
-4. `python3 -I scripts/cost_check.py --root .` still reports `$12.00`.
+4. `python3 -I scripts/cost_check.py --root .` still reports `$14.00`.
 
 ## 6a. If a connector shows offline
 

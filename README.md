@@ -58,7 +58,7 @@ That is not "VPNs are always wrong". WireGuard is a very different animal from a
 | Stage | What | Monthly | Status |
 |---|---|---|---|
 | 0 | Foundation: project, VPC, baseline firewall with zero inbound rules | $0 | Built |
-| 1 | Access: two Twingate connectors, connector firewall, per-host SSH resources | $12 | Built |
+| 1 | Access: two Twingate connectors, connector firewall, per-host SSH resources | $14 | Built |
 | 2 | Logs to the on-prem SIEM, cloud-to-home access | | Planned |
 | 3 | Workload host: Portainer, five daemons, Discord-to-Matrix bridge, Spaces bucket, Functions | est. $17 | Planned |
 | 4 | Grafana, on-prem | | Planned |

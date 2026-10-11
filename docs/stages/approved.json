@@ -1,6 +1,6 @@
 {
   "stage": 1,
-  "approved_monthly_total": 12.0,
+  "approved_monthly_total": 14.0,
   "ceiling": 30.0,
   "allowed_sources": {
     "digitalocean_droplet": ["modules/twingate-connector/main.tf"]

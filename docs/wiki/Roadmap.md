@@ -5,7 +5,7 @@ The environment grows one stage at a time. Each stage gets its own design, its o
 ```mermaid
 flowchart LR
     s0["Stage 0<br/>Foundation<br/>$0<br/>BUILT"]:::done
-    s1["Stage 1<br/>Access: 2 Twingate connectors<br/>$12<br/>BUILT"]:::done
+    s1["Stage 1<br/>Access: 2 Twingate connectors<br/>$14<br/>BUILT"]:::done
     s2["Stage 2<br/>Logs to the on-prem SIEM,<br/>cloud-to-home access<br/>PLANNED"]:::plan
     s3["Stage 3<br/>Workload host: Portainer,<br/>five daemons, Matrix bridge,<br/>Spaces bucket, Functions<br/>est. $17<br/>PLANNED"]:::plan
     s4["Stage 4<br/>Grafana, runs on-prem<br/>PLANNED"]:::plan

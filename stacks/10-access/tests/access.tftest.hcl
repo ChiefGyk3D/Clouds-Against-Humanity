@@ -73,7 +73,7 @@ run "project_lists_both_droplets" {
       droplet_name = "a"
       droplet_urn  = "do:droplet:a"
       private_ip   = "10.0.0.1"
-      size         = "s-1vcpu-1gb"
+      size         = "s-1vcpu-1gb-intel"
     }
   }
   override_module {
@@ -82,7 +82,7 @@ run "project_lists_both_droplets" {
       droplet_name = "b"
       droplet_urn  = "do:droplet:b"
       private_ip   = "10.0.0.2"
-      size         = "s-1vcpu-1gb"
+      size         = "s-1vcpu-1gb-intel"
     }
   }
 

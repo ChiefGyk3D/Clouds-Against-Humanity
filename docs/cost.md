@@ -5,7 +5,9 @@ Working ceiling: $30 per month for stages 0 to 4. Each stage must be costed and 
 | Stage | Adds | Monthly | Running |
 |---|---|---|---|
 | 0 | Hardening, repo, CI, Spacelift/Doppler wiring | $0 | $0 |
-| 1 | Two Twingate connector droplets (`s-1vcpu-1gb`, list price $6 each) | $12 | $12 |
+| 1 | Two Twingate connector droplets (`s-1vcpu-1gb-intel`, list price $7 each) | $14 | $14 |
+
+The plain `s-1vcpu-1gb` ($6) is not offered in nyc3 on every account (a new account got `422 Size is not available in this region`), so stage 1 uses the Intel variant of the same size for $1 more per droplet. Check the sizes API for your own account and region before picking one.
 
 Source of prices: `docs/cost-prices.json`, retrieved 2026-10-10 from the DigitalOcean sizes API.
 
@@ -28,7 +30,7 @@ None of this is in `approved.json` yet. Droplet backups are off in every row; th
 
 `scripts/cost_check.py` reads each stack's `cost.json` (the planned droplets, their sizes and whether backups are on), looks each size up in the price table and adds them up. It fails if:
 
-- the total is above the approved total in `docs/stages/approved.json` (currently stage 1, $12.00, ceiling $30.00);
+- the total is above the approved total in `docs/stages/approved.json` (currently stage 1, $14.00, ceiling $30.00);
 - a size is missing from the price table;
 - backups are requested while the backup price is unverified (see below);
 - the approved total is itself above the ceiling;

@@ -61,7 +61,7 @@ The droplets dial out. You dial out. Twingate introduces the two of you, checks 
 | Stage | Status | Monthly cost |
 |---|---|---|
 | 0: foundation (project, VPC, baseline firewall) | Built | $0 |
-| 1: access (two Twingate connectors) | Built | $12 |
+| 1: access (two Twingate connectors) | Built | $14 |
 | 2: logging back to the on-prem SIEM | Planned | not yet approved |
 | 3: workload host (Portainer, five daemons, Discord-to-Matrix bridge), Spaces bucket, Functions | Planned | est. $17, not yet approved |
 | 4: Grafana (runs on-prem) | Planned | not yet approved |
