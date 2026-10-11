@@ -64,7 +64,7 @@ The droplets dial out. You dial out. Twingate introduces the two of you, checks 
 | 0: foundation (project, VPC, baseline firewall) | Built | $0 |
 | 1: access (two Twingate connectors) | Built | $12 |
 | 2: logging back to the on-prem SIEM | Planned | not yet approved |
-| 3: workload host (Portainer, five daemons, Discord-to-Matrix bridge), Spaces bucket, Functions | Planned | est. $17, not yet approved |
+| 3: workload host (Portainer, five daemons; the Discord bridge is hosted by the Matrix provider), Spaces bucket, Functions | Planned | est. $17, not yet approved |
 | 4: Grafana (runs on-prem) | Planned | not yet approved |
 
 Working ceiling: $30 per month across stages 0 to 4. The [cost gate](CI-Tests-and-Cost-Gate.md) fails any pull request that would push the planned bill above what was approved.

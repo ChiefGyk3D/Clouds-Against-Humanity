@@ -1,6 +1,6 @@
 # Clouds Against Humanity: Stage 3 Workloads
 
-Status: DRAFT for review. Date: 2026-10-11.
+Status: DRAFT for review. Date: 2026-10-11. Revised 2026-10-11 (later): the homeserver is hosted by etke.cc, which supplies a Discord bridge; the bridge is no longer part of the cloud scope by default (sections 5.4 and 9). The self-hosted bridge stays in this document as the fallback.
 Tooling: OpenTofu throughout; where this document or a conversation says "Terraform", read OpenTofu.
 Scope: stage 3 only. It depends on stages 0 and 1 (built) and on parts of stage 2 (planned) that are called out below. Nothing in this document is approved to cost money yet; the numbers are here so the approval can be made on purpose.
 
@@ -15,7 +15,7 @@ Success looks like:
 - The five daemons running from their published images, taking their secrets from Doppler, with their state in an S3-compatible bucket rather than on the droplet, so the droplet is disposable (section 7).
 - The one-shot jobs among them offered a path to DigitalOcean Functions, the Lambda equivalent, where the fit is real (section 3a).
 - A "cloud-optimized install" for each daemon: the small set of changes that turns software written for Docker on a Raspberry Pi into something that can lose its host and not care (section 6a).
-- The Discord-to-Matrix bridge running wherever the homeserver can reach it (section 5.4 explains why that may not be this droplet).
+- The Discord-to-Matrix bridge provided by the homeserver host (etke.cc's `mautrix-discord`, section 5.4a), tested against real use first. A self-hosted `matrix-appservice-discord` on this droplet is the fallback if the hosted one falls short (sections 5.4 and 9).
 - A written cost, approved before the first apply, and a cost gate that knows about the new droplet and the bucket.
 
 Non-goals: Kubernetes (section 8), a managed database, block storage volumes, load balancers, running an LLM in the cloud, and anything that needs a public listener.
@@ -171,7 +171,34 @@ A new module, `modules/docker-host`, built from the connector module's cloud-ini
 
 Unattended upgrades will restart the Docker daemon when it is updated; with `live-restore` the containers keep running through it. Portainer CE updates itself only when its stack is redeployed, so pin its image tag and bump it in a pull request.
 
-### 5.4 Where the bridge runs
+### 5.4a Update: the homeserver is hosted by etke.cc
+
+The homeserver is a managed Matrix server at etke.cc, not something this environment runs. That settles the placement question in the table below: the bridge belongs next to the homeserver, and etke.cc offers one.
+
+What was read on 2026-10-11 from etke.cc's own pages (https://etke.cc/bridges/ and https://etke.cc/help/bridges/mautrix-discord/):
+
+- They install and support a Discord bridge on the customer's server, **powered by mautrix-discord**, available pre-installed or added to an existing server. They do not list matrix-appservice-discord. A price is not stated; the services page says everything beyond the base service is an optional add-on, so the order form decides.
+- Their guide uses a **bot token** (`login-token bot <token>`) and bridges a guild with `guilds bridge GUILD_ID --entire`. It warns that QR-code login is a self-bot, which Discord forbids. This corrects the first draft of section 9, which said `mautrix/discord` works only by signing in as a user account.
+- Messages from Matrix users who have not logged in to the bridge go out through a **relay** login (`bridge.relay.enabled` in the bridge config, then `set-relay` per room; `admin_only` defaults to true). Per the mautrix general relay documentation, relayed users' messages get a display-name prefix and their reactions are not bridged. Whether etke.cc enables or lets the customer configure relay mode was not found and has to be asked.
+
+It is therefore two-way, but not the same behaviour as `matrix-appservice-discord`:
+
+| Aspect | matrix-appservice-discord (the old bridge) | mautrix-discord from etke.cc |
+|---|---|---|
+| Runs | where we host it | on the etke.cc server, managed |
+| Discord login | a bot, with guild-owner consent | a bot token (recommended); user-token and QR login exist but are self-bot territory |
+| Matrix to Discord | per-user webhooks | relay login with a name prefix, unless the user logs in |
+| Existing room plumbing | supported | different model (portal rooms); mappings do not carry over |
+| Reactions from relayed Matrix users | bridged | not bridged |
+| Maintenance | stale since 2023 | active |
+
+The existing bridge's room mappings live in its own database, so moving to the hosted bridge means re-bridging each channel. History already on the Matrix side stays where it is.
+
+**Test before moving anything.** Order the add-on, bridge one spare channel and one spare room, and check: Discord messages arrive with the right sender; a Matrix message appears on Discord with a readable name; replies, edits and attachments work; reactions behave as needed. If it falls short, section 5.4's self-hosted path is the fallback, and it needs the stage 2 cloud-to-home link to etke.cc's homeserver because the homeserver must reach port 9005 and the bridge must call the client API.
+
+With the hosted bridge, none of the following is needed for it: a bridge port in the workload firewall, a Twingate resource for 9005, a bridge database backup, or a bridge image build. The cost lines in section 4 already assume the bridge is not on the droplet.
+
+### 5.4 Where the bridge runs (self-hosted fallback)
 
 An application service is a two-way contract with the homeserver. The bridge calls the homeserver's client API (outbound from the bridge, port 443 or 8448 on the homeserver), and the homeserver pushes every event to the bridge's `url` from the registration file (inbound to the bridge, TCP 9005). So the bridge and the homeserver must reach each other, in both directions, and this environment allows neither direction from the public internet.
 
@@ -270,8 +297,8 @@ Triggers to revisit: the ceiling is raised past $40, a workload needs more than 
 
 Facts checked 2026-10-11 and decisions this document asks for.
 
-1. **matrix-appservice-discord is stale.** Its last release is 4.0.0 from 2023-09-15 and the `develop` branch has no commit since that date. It supports Node 18 to 20 only, and both of those lines have reached end of life. The `halfshot/matrix-appservice-discord` tag on Docker Hub was last pushed about six years ago, so the image must be built from the tagged source. It still works and it is the right class of bridge for the job: a proper Discord **bot** with guild-owner consent, which is how a community server is bridged. The alternative, [mautrix/discord](https://github.com/mautrix/discord) (Go, actively developed), is a *puppeting* bridge that signs in as a Discord user account; that is automation of a user account, which Discord's terms forbid, and it is aimed at bridging one person's DMs and servers, not a server for its members. Decision: keep matrix-appservice-discord, build its image ourselves from the pinned tag on a supported Node 20 base, record the staleness as an accepted risk, and check for an active fork before the stage is built.
-2. **Where is the homeserver** (section 5.4)? Decides whether the bridge is on this droplet at all.
+1. **matrix-appservice-discord is stale (relevant only if the hosted bridge falls short).** Its last release is 4.0.0 from 2023-09-15 and the `develop` branch has no commit since that date. It supports Node 18 to 20 only, and both of those lines have reached end of life. The `halfshot/matrix-appservice-discord` tag on Docker Hub was last pushed about six years ago, so the image must be built from the tagged source. It still works and it is the right class of bridge for the job: a proper Discord **bot** with guild-owner consent, which is how a community server is bridged. The alternative, [mautrix/discord](https://github.com/mautrix/discord) (Go, actively developed), can sign in as a Discord user account, which Discord's terms forbid for automation, but it also supports a bot-token login that avoids that (etke.cc's own guide uses it, section 5.4a); its model is portal rooms and a relay login, a different shape from a plumbed bot. Decision (revised): use etke.cc's hosted mautrix-discord first and test it (section 5.4a). If it falls short, keep matrix-appservice-discord as the self-hosted fallback and build its image ourselves from the pinned tag on a supported Node 20 base, record the staleness as an accepted risk, and check for an active fork before the stage is built.
+2. **Where is the homeserver** (section 5.4)? Settled: etke.cc hosts it and offers a mautrix-discord bridge (section 5.4a). Open: the add-on price, whether relay mode is enabled, and the test in 5.4a. The self-hosted bridge on this droplet is the fallback only.
 3. **A plus the Spaces bucket at $29, B alone at $30, or a raised ceiling** (section 4). The draft recommends A plus the bucket, which depends on the cloud-optimized install work in section 6a being done for at least the state backend.
 3a. **Spaces at $5 or a free-tier bucket at a second provider** (section 3b). Spaces keeps everything in one account and inside the cost gate; B2 or R2 is free at this size but is a second account and outside this repository.
 3b. **Which jobs become Functions first** (section 3a). The draft says the penguin-overlord runners and solarstorm_scout, with Boon-Tube and Star-Daemon following once they have a `--once` mode and bucket state. Functions are deployed by `doctl`, not OpenTofu, so they live in each daemon's own repository and outside the cost gate.

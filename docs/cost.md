@@ -13,7 +13,7 @@ Source of prices: `docs/cost-prices.json`, retrieved 2026-10-10 from the Digital
 
 ## Stage 3 estimate (not approved)
 
-Stage 3 adds one Docker host running Portainer CE, five small daemons, an S3-compatible bucket for their state and, depending on where the Matrix homeserver is, a Discord-to-Matrix bridge. The jobs that already run on a timer move to DigitalOcean Functions. Stages 2 and 4 are planned to add $0 to the cloud bill (logs and Grafana run on-prem), so this is the only remaining paid stage. The design draft is [2026-10-11 stage 3 workloads](superpowers/specs/2026-10-11-stage-3-workloads-design.md); what it prices:
+Stage 3 adds one Docker host running Portainer CE, five small daemons, an S3-compatible bucket for their state and no bridge of our own: the Matrix homeserver is hosted by etke.cc, which supplies a Discord bridge (any add-on price is theirs, not part of this bill). The jobs that already run on a timer move to DigitalOcean Functions. Stages 2 and 4 are planned to add $0 to the cloud bill (logs and Grafana run on-prem), so this is the only remaining paid stage. The design draft is [2026-10-11 stage 3 workloads](superpowers/specs/2026-10-11-stage-3-workloads-design.md); what it prices:
 
 | Option | Droplet | Spaces bucket | Functions | Running | Fits $30? |
 |---|---|---|---|---|---|
