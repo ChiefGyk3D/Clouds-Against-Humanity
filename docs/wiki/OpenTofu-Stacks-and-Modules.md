@@ -8,6 +8,8 @@ OpenTofu is the open-source fork of Terraform, maintained under the Linux Founda
 
 CI pins OpenTofu `1.12.6`; anything `1.8` or newer runs the tests locally.
 
+For a line-by-line explanation of every variable, resource and output, read the [Terraform reference](Terraform-Reference.md).
+
 ## Modules versus stacks
 
 ```mermaid

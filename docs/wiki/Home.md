@@ -21,6 +21,7 @@ If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md).
 | 4 | [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) | VPC, tag-based firewalls, and why tags beat addresses |
 | 5 | [Droplet hardening](Droplet-Hardening.md) | What cloud-init does to a connector before anyone logs in |
 | 6 | [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) | Why OpenTofu, and why the code is split into layered stacks |
+| 6b | [Terraform reference](Terraform-Reference.md) | Every variable, resource and output in the code, explained line by line |
 | 7 | [Spacelift](Spacelift.md) | How a change gets from a pull request to real infrastructure |
 | 8 | [Doppler and secrets](Doppler-and-Secrets.md) | Where every secret lives and how it reaches a run |
 | 9 | [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) | What runs on every pull request and why the bill cannot surprise anyone |
