@@ -22,7 +22,7 @@
 | **Portainer** | A web UI for a Docker host: stacks, containers, logs. Community Edition is free. It talks to Docker over the local socket, which is root on the host, so its UI is reached only through Twingate here. |
 | **Proposed run** | A Spacelift plan for a pull request. Gets no credentials in this repo. |
 | **Relay** | Twingate component that joins a client and connector when a direct path is impossible, without terminating the encryption. |
-| **Remote network (site)** | Twingate's name for a network that connectors serve, here `access-nyc3`. |
+| **Remote network (site)** | Twingate's name for a network that connectors serve, here `access-tor1`. |
 | **Resource** | In Twingate, one destination (address plus allowed ports) that a group can be granted. |
 | **SASE / SSE** | Secure Access Service Edge / Security Service Edge. Vendor categories that bundle ZTNA with other network security services. |
 | **Spacelift** | Hosted runner for infrastructure as code: plans, applies, holds state, waits for approval. |

@@ -18,17 +18,17 @@ Source: [How Twingate works](https://www.twingate.com/docs/how-twingate-works).
 ```mermaid
 flowchart TB
     subgraph tg["Twingate (managed as code)"]
-        site["Remote network (site)<br/>access-nyc3"]:::ctrl
-        grp["Group<br/>cah-nyc3-admins"]:::ctrl
-        ra["Resource<br/>cah-nyc3-connector-a-ssh<br/>connector a private IP, TCP 22 only"]:::ctrl
-        rb["Resource<br/>cah-nyc3-connector-b-ssh<br/>connector b private IP, TCP 22 only"]:::ctrl
+        site["Remote network (site)<br/>access-tor1"]:::ctrl
+        grp["Group<br/>cah-tor1-admins"]:::ctrl
+        ra["Resource<br/>cah-tor1-connector-a-ssh<br/>connector a private IP, TCP 22 only"]:::ctrl
+        rb["Resource<br/>cah-tor1-connector-b-ssh<br/>connector b private IP, TCP 22 only"]:::ctrl
         tka["Connector + tokens a"]:::secret
         tkb["Connector + tokens b"]:::secret
     end
     subgraph doside["DigitalOcean"]
-        da["droplet access-nyc3-connector-a<br/>reboots 04:00 ET, updates Sun 04:30"]:::cloud
-        db["droplet access-nyc3-connector-b<br/>reboots 05:00 ET, updates Sun 05:30"]:::cloud
-        fw["connector firewall<br/>tag cah-connector-nyc3"]:::cloud
+        da["droplet access-tor1-connector-a<br/>reboots 04:00 ET, updates Sun 04:30"]:::cloud
+        db["droplet access-tor1-connector-b<br/>reboots 05:00 ET, updates Sun 05:30"]:::cloud
+        fw["connector firewall<br/>tag cah-connector-tor1"]:::cloud
     end
     site --- tka --> da
     site --- tkb --> db
@@ -100,6 +100,6 @@ Replace `module.connector_a.twingate_connector_tokens.this` (or `_b`) through a 
 
 ## Verify it yourself
 
-1. Both connectors show online in the Twingate admin console under `access-nyc3`.
+1. Both connectors show online in the Twingate admin console under `access-tor1`.
 2. From the Twingate client: `ssh cah-admin@<private IP>` works for each connector.
 3. From anywhere outside Twingate: `nmap -Pn -p 22,80,443 <public IP>` reports every port filtered. Scanning your own droplet is fine; scanning other people's is not.

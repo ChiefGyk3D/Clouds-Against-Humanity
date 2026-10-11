@@ -8,10 +8,10 @@ mock_provider "digitalocean" {
 mock_provider "twingate" {}
 
 variables {
-  region               = "nyc3"
+  region               = "tor1"
   vpc_id               = "vpc-test"
   project_id           = "project-test"
-  baseline_tag         = "cah-baseline-nyc3"
+  baseline_tag         = "cah-baseline-tor1"
   twingate_network     = "acme"
   admin_ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAItest"
   admin_ssh_key_name   = "existing-key-name"
@@ -37,7 +37,7 @@ run "connector_size_comes_from_the_cost_manifest" {
 run "two_connectors_with_distinct_names" {
   command = plan
   assert {
-    condition     = module.connector_a.droplet_name == "access-nyc3-connector-a" && module.connector_b.droplet_name == "access-nyc3-connector-b"
+    condition     = module.connector_a.droplet_name == "access-tor1-connector-a" && module.connector_b.droplet_name == "access-tor1-connector-b"
     error_message = "The droplets must be named access-<region>-connector-a and -b."
   }
   assert {
@@ -95,7 +95,7 @@ run "project_lists_both_droplets" {
 run "site_is_created_once_and_shared" {
   command = plan
   assert {
-    condition     = twingate_remote_network.this.name == "access-nyc3" && twingate_remote_network.this.location == "OTHER"
+    condition     = twingate_remote_network.this.name == "access-tor1" && twingate_remote_network.this.location == "OTHER"
     error_message = "The stack creates one remote network named access-<region>."
   }
   assert {
@@ -135,7 +135,7 @@ run "an_empty_ssh_key_name_is_rejected" {
 run "connector_has_its_own_tag_and_a_peer_ssh_only_firewall" {
   command = plan
   assert {
-    condition     = digitalocean_tag.connector.name == "cah-connector-nyc3"
+    condition     = digitalocean_tag.connector.name == "cah-connector-tor1"
     error_message = "Connector tag must be cah-connector-<region>."
   }
   assert {
@@ -143,7 +143,7 @@ run "connector_has_its_own_tag_and_a_peer_ssh_only_firewall" {
     error_message = "The connector firewall must have exactly one inbound rule (tcp 22 from the connector tag)."
   }
   assert {
-    condition     = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(["tcp/22/cah-connector-nyc3"])
+    condition     = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(["tcp/22/cah-connector-tor1"])
     error_message = "The only inbound rule must be tcp 22 sourced from the connector tag, never an address."
   }
   assert {
@@ -163,7 +163,7 @@ run "connector_has_its_own_tag_and_a_peer_ssh_only_firewall" {
     error_message = "Connector firewall outbound must be exactly the five defaults plus tcp 30000-31000 and udp 1-65535 (Twingate peer-to-peer needs outbound UDP to any port), each to 0.0.0.0/0 and ::/0."
   }
   assert {
-    condition     = jsonencode(module.connector_firewall.outbound_tag_rules) == jsonencode(["tcp/22/cah-connector-nyc3"])
+    condition     = jsonencode(module.connector_firewall.outbound_tag_rules) == jsonencode(["tcp/22/cah-connector-tor1"])
     error_message = "The only tag-scoped outbound rule must be tcp 22 destined to the connector tag, so a connector can open SSH to its peer and nothing else."
   }
 }
@@ -171,7 +171,7 @@ run "connector_has_its_own_tag_and_a_peer_ssh_only_firewall" {
 run "connector_a_ssh_is_reachable_only_as_a_restricted_twingate_resource" {
   command = plan
   assert {
-    condition     = twingate_resource.connector_a_ssh.name == "cah-nyc3-connector-a-ssh"
+    condition     = twingate_resource.connector_a_ssh.name == "cah-tor1-connector-a-ssh"
     error_message = "SSH access must be a named, per-host Twingate resource."
   }
   assert {
@@ -199,7 +199,7 @@ run "connector_a_ssh_is_reachable_only_as_a_restricted_twingate_resource" {
     error_message = "Access must be granted to the admins group only."
   }
   assert {
-    condition     = twingate_group.admins.name == "cah-nyc3-admins"
+    condition     = twingate_group.admins.name == "cah-tor1-admins"
     error_message = "Access is granted to one named group."
   }
 }
@@ -207,7 +207,7 @@ run "connector_a_ssh_is_reachable_only_as_a_restricted_twingate_resource" {
 run "connector_b_ssh_is_reachable_only_as_a_restricted_twingate_resource" {
   command = plan
   assert {
-    condition     = twingate_resource.connector_b_ssh.name == "cah-nyc3-connector-b-ssh"
+    condition     = twingate_resource.connector_b_ssh.name == "cah-tor1-connector-b-ssh"
     error_message = "SSH access must be a named, per-host Twingate resource."
   }
   assert {
@@ -235,7 +235,7 @@ run "connector_b_ssh_is_reachable_only_as_a_restricted_twingate_resource" {
     error_message = "Access must be granted to the admins group only."
   }
   assert {
-    condition     = twingate_group.admins.name == "cah-nyc3-admins"
+    condition     = twingate_group.admins.name == "cah-tor1-admins"
     error_message = "Access is granted to one named group."
   }
 }

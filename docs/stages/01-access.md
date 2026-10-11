@@ -2,10 +2,10 @@
 
 ## 1. What this stage builds
 
-- One Twingate remote network (site), created by OpenTofu and named `access-nyc3`, and an existing DigitalOcean SSH key that the stack looks up by name (it does not register one). Both connectors share them.
-- Two `s-1vcpu-1gb` droplets, `access-nyc3-connector-a` and `access-nyc3-connector-b`, each running a Twingate connector inside the VPC. Twingate recommends at least two active connectors, so one can be down without losing access. Each is created with `ubuntu-24-04-x64`, monitoring on, backups off and IPv6 off.
+- One Twingate remote network (site), created by OpenTofu and named `access-tor1`, and an existing DigitalOcean SSH key that the stack looks up by name (it does not register one). Both connectors share them.
+- Two `s-1vcpu-1gb` droplets, `access-tor1-connector-a` and `access-tor1-connector-b`, each running a Twingate connector inside the VPC. Twingate recommends at least two active connectors, so one can be down without losing access. Each is created with `ubuntu-24-04-x64`, monitoring on, backups off and IPv6 off.
 - A connector firewall, attached by the connector tag, with one inbound rule (TCP 22, only from droplets that carry the connector tag) and seven outbound rules: the firewall module's five defaults (tcp 443, 80 and 53; udp 53 and 123) plus tcp 30000-31000 and outbound UDP on every port (1-65535). Twingate's [outbound allowlist article](https://help.twingate.com/articles/1198271128-allowlist-for-outbound-connections-to-twingate-infrastructure) requires outbound UDP to any port for peer-to-peer connections. Nothing outside the connector tag can reach the droplet inbound. The baseline firewall also applies to the droplet through its own tag.
-- A Twingate admin group, `cah-nyc3-admins`.
+- A Twingate admin group, `cah-tor1-admins`.
 - Two per-host Twingate resources, one for each connector's private address, each limited to TCP port 22.
 
 Cost: $12.00/month, approved total $12.00 (see [cost](../cost.md)).
@@ -124,7 +124,7 @@ Known follow-up: the provider emits a deprecation warning when `access_group` is
    | `region` | `TF_VAR_region` |
 
 3. Add to Doppler: `DIGITALOCEAN_TOKEN`, `TWINGATE_API_TOKEN`, `TWINGATE_NETWORK`, `ADMIN_SSH_PUBLIC_KEY`, `ADMIN_SSH_KEY_NAME` and `ADMIN_USER_IDS`. Doppler only allows uppercase names, so the hook (`.spacelift/config.yml`) maps them to the lowercase environment variables OpenTofu reads: `TF_VAR_twingate_network` (from `TWINGATE_NETWORK`), `TF_VAR_admin_ssh_public_key`, `TF_VAR_admin_ssh_key_name` and `TF_VAR_admin_user_ids`. `ADMIN_USER_IDS` is required (the stack has no default and rejects an empty list, so a missing value cannot create an unreachable host); it is a JSON list of Twingate user ids, for example `["<user id>"]`. Strip the comment field from the SSH public key before storing it (keep only `<type> <key>`): comments often hold a user and machine name, and the key goes into the droplet's cloud-init and into state. `ADMIN_SSH_KEY_NAME` is the name of that same key as it is already registered on the DigitalOcean account. The key must already be there: the stack looks it up by name and does not register it, because DigitalOcean refuses a second registration of the same key with a 422 "SSH Key is already in use". If the name is wrong, the plan fails at the lookup. The two network values are the bare subdomain.
-4. Check that no Twingate site named `access-<region>` (for example `access-nyc3`) exists in the admin console. OpenTofu now creates the site itself; a hand-made site with that name makes the apply fail or leaves a duplicate, so rename or delete the hand-made one first.
+4. Check that no Twingate site named `access-<region>` (for example `access-tor1`) exists in the admin console. OpenTofu now creates the site itself; a hand-made site with that name makes the apply fail or leaves a duplicate, so rename or delete the hand-made one first.
 5. Trigger a tracked run on `main`; it stops after the plan because autodeploy is off. Proposed runs get no credentials by design. Read the plan, then confirm.
 
 ## 6. Verify
@@ -136,7 +136,7 @@ Known follow-up: the provider emits a deprecation warning when `access_group` is
 
 ## 6a. If a connector shows offline
 
-SSH to a connector goes through Twingate, so it is impossible while that connector is the only path in. Try the other connector first: if `access-nyc3-connector-b` is online, SSH to connector a's private IP through it as `cah-admin`, then:
+SSH to a connector goes through Twingate, so it is impossible while that connector is the only path in. Try the other connector first: if `access-tor1-connector-b` is online, SSH to connector a's private IP through it as `cah-admin`, then:
 
 - `sudo systemctl status twingate-connector` shows whether the service exists and runs. "Unit not found" means the installer never finished.
 - `sudo cat /var/log/cah-connector-install.log` holds the service state, the last 50 journal lines and the cloud-init output tail, written at the end of first boot. `sudo tail -n 100 /var/log/cloud-init-output.log` shows the full install attempts (`cah: connector install attempt N of 10 failed`).

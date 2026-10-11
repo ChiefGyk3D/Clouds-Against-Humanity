@@ -12,7 +12,7 @@ It is a cloud extension of a homelab and a teaching repository at the same time:
 flowchart LR
     you["You<br/>Twingate client"]:::you
     tg["Twingate<br/>controller + relays"]:::ctrl
-    subgraph do["DigitalOcean VPC (nyc3)"]
+    subgraph do["DigitalOcean VPC (tor1)"]
         ca["connector a"]:::cloud
         cb["connector b"]:::cloud
     end
