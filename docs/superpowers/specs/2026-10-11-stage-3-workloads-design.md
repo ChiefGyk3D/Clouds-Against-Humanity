@@ -1,6 +1,6 @@
 # Clouds Against Humanity: Stage 3 Workloads
 
-Status: DRAFT for review. Date: 2026-10-11.
+Status: DRAFT for review. Date: 2026-10-11. Revised 2026-10-11 (later): the Discord bridge is `mautrix-discord` (Go), self-hosted on the workload droplet by decision of the operator; etke.cc's hosted bridge is the alternative (section 5.4a). Open: how the etke.cc homeserver reaches the bridge (section 5.4).
 Tooling: OpenTofu throughout; where this document or a conversation says "Terraform", read OpenTofu.
 Scope: stage 3 only. It depends on stages 0 and 1 (built) and on parts of stage 2 (planned) that are called out below. Nothing in this document is approved to cost money yet; the numbers are here so the approval can be made on purpose.
 
@@ -15,7 +15,7 @@ Success looks like:
 - The five daemons running from their published images, taking their secrets from Doppler, with their state in an S3-compatible bucket rather than on the droplet, so the droplet is disposable (section 7).
 - The one-shot jobs among them offered a path to DigitalOcean Functions, the Lambda equivalent, where the fit is real (section 3a).
 - A "cloud-optimized install" for each daemon: the small set of changes that turns software written for Docker on a Raspberry Pi into something that can lose its host and not care (section 6a).
-- The Discord-to-Matrix bridge running wherever the homeserver can reach it (section 5.4 explains why that may not be this droplet).
+- The Discord-to-Matrix bridge, `mautrix-discord` (Go, actively maintained), self-hosted as a container with its own Postgres database, backed up to the bucket (sections 5.4 and 7). etke.cc's hosted bridge (section 5.4a) is the alternative if self-hosting hits a wall.
 - A written cost, approved before the first apply, and a cost gate that knows about the new droplet and the bucket.
 
 Non-goals: Kubernetes (section 8), a managed database, block storage volumes, load balancers, running an LLM in the cloud, and anything that needs a public listener.
@@ -31,11 +31,11 @@ All six are the author's own projects except the bridge. Facts below were read f
 | [Boon-Tube-Daemon](https://github.com/ChiefGyk3D/Boon-Tube-Daemon) | Posts new YouTube uploads to Discord, Matrix, Bluesky and Mastodon | Python 3.8+, `ghcr.io/chiefgyk3d/boon-tube-daemon` (652 MB image) | YouTube Data API, the four social APIs, Gemini or Ollama | None. Health endpoint on 127.0.0.1 | `youtube_state.json`, Matrix session; `./config` mounted at `/app/config` | No compose limit set; est. 100M to 200M |
 | [Stream-Daemon](https://github.com/ChiefGyk3D/Stream-Daemon) | Go-live and stream-ended posts for Twitch, YouTube Live and Kick | Python 3.10+, `ghcr.io/chiefgyk3d/stream-daemon` | Twitch, YouTube, Kick, the four social APIs, Gemini or Ollama | None. Health endpoint on 127.0.0.1 | In memory only (README: a restart mid-stream re-posts the go-live) | README: 50M to 100M; example compose limit 512M |
 | [Star-Daemon](https://github.com/ChiefGyk3D/Star-Daemon) | Posts GitHub starred-repo updates to Mastodon, Bluesky, Discord, Matrix and Threads | Python 3.11+, built from `docker/Dockerfile` | GitHub API (fine-grained PAT, starring read), the social APIs, Ollama or Gemini | None | `~/.star-daemon-state.json` in named volume `star-daemon-state` | Compose limit 512M, reservation 256M |
-| [matrix-appservice-discord](https://github.com/matrix-org/matrix-appservice-discord) | Bridges Discord channels to Matrix rooms as a homeserver application service | Node.js 18 to 20 only; Yarn classic; image `halfshot/matrix-appservice-discord` | Discord gateway and API as a bot; the Matrix homeserver's client API | **Yes: the homeserver pushes transactions to the bridge on TCP 9005** | `discord.db`, user and room stores (files), `config.yaml`, the registration file | Not stated; est. 150M to 300M |
+| [mautrix-discord](https://github.com/mautrix/discord) | Bridges Discord guilds to Matrix as a homeserver application service. Bot-token login; relay login for Matrix users who have not logged in | Go bridge, image `dock.mau.dev/mautrix/discord:<version tag>` (amd64 and arm64); needs a PostgreSQL server per the general setup page | Discord gateway and API as a bot; the Matrix homeserver's client API | **Yes: the homeserver pushes transactions to the bridge's appservice port** | PostgreSQL database, `config.yaml`, `registration.yaml`, a data directory | Not stated; est. 100M to 200M for the bridge plus 50M to 100M for Postgres |
 
 Three things in that table shape the design:
 
-1. **Only the bridge needs an inbound path**, and only from the homeserver. Everything else is a poller. The bridge is also the only one whose state really matters (room and user mappings); the daemons' state is a de-duplication window that rebuilds itself (Star-Daemon re-enumerates stars daily; Stream-Daemon keeps nothing).
+1. **Only the bridge needs an inbound path**, and only from the homeserver (section 5.4). Everything else is a poller. The bridge is also the only one whose state really matters (room and user mappings); the daemons' state is a de-duplication window that rebuilds itself (Star-Daemon re-enumerates stars daily; Stream-Daemon keeps nothing).
 2. **Four of the five daemons share one posting library**, hypeman-social, and all of them default to a **local Ollama server** for their optional AI text, with Gemini as the cloud alternative. Ollama lives in the homelab. A cloud daemon can only reach it over the cloud-to-home link that stage 2 designs. Until then the cloud daemons run with the LLM off or on Gemini.
 3. **Every daemon already reads its secrets from Doppler** (`DOPPLER_TOKEN`), which is this project's rule anyway. The bridge does not; it wants a `config.yaml` and a registration file. Section 6 handles that.
 
@@ -74,7 +74,7 @@ A function is a good fit when the job already runs to completion on a timer, hol
 | Boon-Tube-Daemon | Loop, checks every 15 minutes, keeps `youtube_state.json` and a Matrix session | **Later** | Fits a 15-minute cron once it has a `--once` mode and bucket state. The Matrix session token must persist between runs, so it goes in the bucket too. |
 | Star-Daemon | Loop with a daily full resync, JSON state | **Later** | Same shape as Boon-Tube: `--once` mode plus bucket state and it becomes a cron function. |
 | Stream-Daemon | Loop, polls every minute or so, updates a live Discord embed, state in memory | **Not first** | Minute-level cron is fine for cost, but the live-embed message ids and "currently live" flag live in memory today; they have to move to the bucket before a function can do this without re-posting on every run. |
-| matrix-appservice-discord | Persistent listener and gateway connection | **No** | Same reason as the bot. |
+| mautrix-discord | Persistent listener and gateway connection | **No** | Same reason as the bot. |
 
 So the realistic split: the bot, the bridge and (at first) the three polling daemons on the droplet; the penguin-overlord runners and solarstorm_scout as scheduled Functions; Boon-Tube and Star-Daemon moving to Functions once section 6a lands. Each function's code lives in its own repository with its `project.yml`, and a GYST workflow deploys it with a scoped token from Doppler. Nothing in this repository changes except the cost record.
 
@@ -141,7 +141,7 @@ Inbound, all sourced from the **connector tag**, never an address:
 |---|---|
 | TCP 22 | SSH over Twingate, as the stage 1 guide's section 7 predicted |
 | TCP 9443 | Portainer's HTTPS UI |
-| TCP 9005 | The bridge's appservice listener, only if the bridge runs here (section 5.4) |
+| bridge appservice port | Not from the connector tag. See section 5.4: the sender is the etke.cc homeserver, which cannot be a Twingate client, so this is the one rule that needs an explicit decision. The port number is the one in the generated config; read it at build time, do not copy it from this document |
 
 Outbound: the firewall module's five defaults (tcp 443, 80, 53; udp 53, 123). Every API in section 2 is HTTPS on 443. The connector firewall's `tcp 30000-31000` and `udp 1-65535` rules are **not** copied to the workload tag; the wiki already promises that.
 
@@ -153,9 +153,9 @@ Each is one private address and one port, granted to one group:
 
 | Resource | Port | Group |
 |---|---|---|
-| `workload-nyc3-host-ssh` | TCP 22 | `cah-nyc3-admins` |
-| `workload-nyc3-portainer` | TCP 9443 | `cah-nyc3-admins` |
-| `workload-nyc3-bridge` | TCP 9005 | a new group for the homeserver's service account, only if 5.4 lands here |
+| `workload-tor1-host-ssh` | TCP 22 | `cah-tor1-admins` |
+| `workload-tor1-portainer` | TCP 9443 | `cah-tor1-admins` |
+| (none for the bridge) | n/a | The homeserver is a managed service and cannot run a Twingate client, so the bridge is not a Twingate resource. Its inbound path is section 5.4's decision |
 
 No resource for the Docker API, ever. Portainer talks to Docker over the local socket.
 
@@ -171,19 +171,56 @@ A new module, `modules/docker-host`, built from the connector module's cloud-ini
 
 Unattended upgrades will restart the Docker daemon when it is updated; with `live-restore` the containers keep running through it. Portainer CE updates itself only when its stack is redeployed, so pin its image tag and bump it in a pull request.
 
-### 5.4 Where the bridge runs
+### 5.4a Update: the homeserver is hosted by etke.cc
 
-An application service is a two-way contract with the homeserver. The bridge calls the homeserver's client API (outbound from the bridge, port 443 or 8448 on the homeserver), and the homeserver pushes every event to the bridge's `url` from the registration file (inbound to the bridge, TCP 9005). So the bridge and the homeserver must reach each other, in both directions, and this environment allows neither direction from the public internet.
+The homeserver is a managed Matrix server at etke.cc, not something this environment runs. etke.cc offers a bridge of its own, which is the alternative to section 5.4's self-hosted one.
 
-The homeserver's location is not recorded in this repository and is the first thing to settle:
+What was read on 2026-10-11 from etke.cc's own pages (https://etke.cc/bridges/ and https://etke.cc/help/bridges/mautrix-discord/):
 
-| Homeserver is | Then the bridge | Because |
+- They install and support a Discord bridge on the customer's server, **powered by mautrix-discord**, available pre-installed or added to an existing server. They do not list matrix-appservice-discord. A price is not stated; the services page says everything beyond the base service is an optional add-on, so the order form decides.
+- Their guide uses a **bot token** (`login-token bot <token>`) and bridges a guild with `guilds bridge GUILD_ID --entire`. It warns that QR-code login is a self-bot, which Discord forbids. This corrects the first draft of section 9, which said `mautrix/discord` works only by signing in as a user account.
+- Messages from Matrix users who have not logged in to the bridge go out through a **relay** login (`bridge.relay.enabled` in the bridge config, then `set-relay` per room; `admin_only` defaults to true). Per the mautrix general relay documentation, relayed users' messages get a display-name prefix and their reactions are not bridged. Whether etke.cc enables or lets the customer configure relay mode was not found and has to be asked.
+
+It is therefore two-way, but not the same behaviour as `matrix-appservice-discord`:
+
+| Aspect | matrix-appservice-discord (the old bridge) | mautrix-discord from etke.cc |
 |---|---|---|
-| In the homelab | belongs next to the homeserver, costed at $0 here, **or** on this droplet only after stage 2 exists | Home to cloud (homeserver pushes to 9005) works with a Twingate headless client on the homeserver host today. Cloud to home (bridge calls the client API) is exactly the path stage 2 designs. Both are needed. |
-| Hosted elsewhere on the internet | belongs next to the homeserver, or on a host that can run a Twingate client | The homeserver must reach 9005. Opening it from the homeserver's public address would be this environment's first public inbound rule, and the answer to that is no. |
-| Also being moved to the cloud | goes on this droplet, and the homeserver gets its own sizing and cost line | A Synapse or Conduit homeserver is a bigger workload than everything else here combined and is not in this stage. |
+| Runs | where we host it | on the etke.cc server, managed |
+| Discord login | a bot, with guild-owner consent | a bot token (recommended); user-token and QR login exist but are self-bot territory |
+| Matrix to Discord | per-user webhooks | relay login with a name prefix, unless the user logs in |
+| Existing room plumbing | supported | different model (portal rooms); mappings do not carry over |
+| Reactions from relayed Matrix users | bridged | not bridged |
+| Maintenance | stale since 2023 | active |
 
-Recommendation: plan the bridge as a stage 3 **workload definition** (compose file, Doppler layout, Twingate group) but make its placement a decision that follows the homeserver, and do not count on it landing on this droplet.
+The existing bridge's room mappings live in its own database, so moving to the hosted bridge means re-bridging each channel. History already on the Matrix side stays where it is.
+
+**Test whichever bridge is chosen before moving anything.** Bridge one spare channel and one spare room and check: Discord messages arrive with the right sender; a Matrix message appears on Discord with a readable name; replies, edits and attachments work; reactions behave as needed.
+
+Choosing etke.cc's bridge removes the need for any of section 5.4: no inbound rule, no bridge database to back up, no image to build. Choosing the self-hosted bridge means doing all of it, and gives control of relay mode and the update schedule. The operator's stated lean (2026-10-11) is to self-host, to keep a cheap host in use, to avoid dependence on a managed add-on, and to share the module and the lessons with others.
+
+### 5.4 The self-hosted bridge: mautrix-discord
+
+Facts below are from docs.mau.fi (the general Go-bridge pages and the mautrix-discord pages), read 2026-10-11. The docs are written for people hosting the bridge themselves.
+
+**Software.** `mautrix-discord` is a Go program, so there is no Node runtime and no npm dependency tree in the container. It is actively maintained, which the old Node bridge was not. Source builds need Go 1.25 or newer (`./build.sh`; `-tags goolm` replaces libolm with a pure-Go implementation, `-tags nocrypto` removes encryption). The image is published at `dock.mau.dev/mautrix/discord`; `:latest` points at the latest commit, not the latest release, so the compose file pins a version tag, and the digest once chosen. The image mounts its working directory at `/data` and changes ownership of it to UID 1337.
+
+**Setup order, from the docs.** Run the container once and it writes a config file; edit the config (inside Docker, use container names, not `localhost`); run it again to generate the registration file; register that file with the homeserver; start the bridge; log in. The Discord bridge still uses the legacy config layout, so its example config is copied to `config.yaml` by hand.
+
+**Database.** The general setup page says a PostgreSQL server, version 16 or newer, and warns never to share a database between unrelated programs. The initial-config page says SQLite is fine for small instances. The two pages do not agree, so the design uses Postgres in its own container with its own volume, the documented path, and the first build checks the bridge's example config before settling it.
+
+**Settings to fix before the first login**, because the docs say they cannot be changed properly afterwards: backfill (`bridge.backfill`), and end-to-bridge encryption (set it up before logging in; existing rooms cannot be switched to encrypted properly). Double puppeting (`double_puppet.secrets`) is strongly recommended. Relay mode (`bridge.relay.enabled`, then `set-relay` per room; `admin_only` defaults to true) is what lets Matrix users who have not logged in send to Discord; relayed messages carry a display-name prefix and relayed reactions are not bridged.
+
+**Login.** A bot token only: create a Discord application, enable the privileged intents, send `login-token bot <token>` to the bridge bot, add the bot to the guild with the `bot` OAuth2 scope, then `guilds bridge GUILD_ID --entire`. QR and user-token login are self-bot territory and are not used.
+
+**The inbound problem.** Registration files are consumed only by the homeserver. The homeserver pushes every event to the bridge's `appservice.address` over HTTP, and the bridge calls the homeserver's client API in return. With the homeserver at etke.cc, this environment cannot require Twingate on that path, because a managed Synapse cannot run a Twingate client. Two ways through, to be decided with etke.cc:
+
+1. **One narrowly scoped public rule.** The workload firewall admits one TCP port from etke.cc's homeserver address only, with TLS in front of the bridge. It is this environment's first public inbound rule, so it needs the threat model, the wiki and the cost gate's expectations updated in the same pull request, and an address that etke.cc commits to keeping (to ask).
+2. **A private path from etke.cc**, if they offer one (to ask). Nothing was found in their public pages.
+
+A second thing to ask etke.cc: registering an external application service means adding the registration file to Synapse's `app_service_config_files` and restarting Synapse, which on a managed server only they can do. Their site mentions custom development and bridge installation, not external appservices. If they will not do it, the alternative is their own bridge (section 5.4a).
+
+**What this changes elsewhere.** The workload firewall, the Twingate section, the threat model and the roadmap all gain the bridge; the cost does not change (it shares the droplet), though Postgres adds roughly 50 to 100 MB of memory, which section 4's range already absorbs.
+
 
 ### 5.5 Reaching Ollama
 
@@ -195,7 +232,7 @@ Rule from stage 0: every secret lives in Doppler and nothing in this repository 
 
 - **The droplet** gets the same inputs as a connector (admin key, reboot window) from the stack. It gets **no** application secret in its user-data. User-data is readable from the metadata endpoint and ends up in state (threat model T5 and T6); the connector tokens are an accepted risk there, and this stage should not widen it with five more tokens.
 - **Each daemon** keeps its own Doppler project and config, as today, with one read-only service token per daemon. The compose file carries only `DOPPLER_TOKEN` as a variable, and that value is entered once in Portainer's stack environment over Twingate. Portainer stores it in its own database on the droplet, which is the same trust level as the daemon's own memory.
-- **The bridge** has no Doppler client. Its `config.yaml` holds the Discord bot token and the homeserver URL, and the registration file holds the appservice tokens. The bot token can come from the environment (`APPSERVICE_DISCORD_AUTH_BOT_TOKEN`); the rest is rendered from Doppler by a small systemd oneshot on the host (`doppler run --mount`, or a template step) before the stack starts, so the files never live in this repository or in Portainer.
+- **The bridge** has no Doppler client. Its `config.yaml` holds the Discord bot token, the database password and the homeserver URL, and `registration.yaml` holds the appservice tokens (`as_token` and `hs_token`, which the homeserver needs and the bridge does not read at runtime). Both files are rendered from Doppler by a small systemd oneshot on the host before the stack starts, and the registration file's secret copy lives in Doppler, so neither is ever in this repository, Portainer or the bucket. Regenerating the registration changes the tokens and means asking etke.cc to reload it, so it is stored, not re-derived.
 - **Portainer's own admin password** is set on first visit over Twingate and stored in the password manager. Portainer's UI is a second factor away from the internet already (Twingate sign-in through the identity provider), and the admin account should still be strong and unique.
 
 What goes into `.spacelift/config.yml` for the new stack: `DIGITALOCEAN_TOKEN`, `TWINGATE_API_TOKEN`, `TWINGATE_NETWORK`, the admin SSH values, and nothing from the daemons. Spaces access keys are created by the stack (`digitalocean_spaces_key`, one per daemon, scoped to its prefix) and land in state, which is the same accepted risk as the connector tokens; or they are created by hand and stored in Doppler, keeping state clean at the cost of a manual step. The guide should pick the second until Spacelift state access is restricted.
@@ -223,7 +260,7 @@ Per daemon:
 | Boon-Tube-Daemon | Health endpoint; Doppler; Matrix token rotation | `--once`; S3 state for `youtube_state.json` and the Matrix session; slimmer image; memory limit in compose |
 | Stream-Daemon | Health endpoint; Doppler; small footprint | Persist the live-stream flag and Discord message ids (the README already lists Redis or SQLite as planned; the bucket is the cheaper answer); then `--once` |
 | Star-Daemon | Doppler; named volume for state; compose limits | S3 state for the star list; `--once` |
-| matrix-appservice-discord | Nothing of the above; third-party | Stays a container with a local SQLite file; its backup is a nightly `sqlite3 .backup` copied to the bucket (section 7). No upstream change is expected from a project with no commits since 2023. |
+| mautrix-discord | Nothing of the above; third-party Go program with its own config | Stays a container with its own Postgres container; its backup is a nightly `pg_dump` copied to the bucket (section 7). Pin the image to a version tag and update by pull request, not by `:latest`. |
 
 None of this is required to run the daemons on the droplet on day one; they run as they do on the Pi, with state in named volumes. It is required before the host can be treated as disposable and before anything moves to Functions, and it is the work that makes the $29 option honest.
 
@@ -234,7 +271,7 @@ The user's rule is "several backups", and the data is almost all small text. The
 | Layer | What | Cost | Protects against |
 |---|---|---|---|
 | 0: git and Doppler | Compose files, cloud-init, function code, every secret | $0 | Losing the droplet, Portainer or a laptop. Everything is rebuilt from these two. |
-| 1: the bucket itself | Each daemon reads and writes its state in Spaces; the bridge database is copied there nightly | in the $5 | Losing the droplet. A new droplet pulls state on first start. |
+| 1: the bucket itself | Each daemon reads and writes its state in Spaces; the bridge database is dumped there nightly with `pg_dump` | in the $5 | Losing the droplet. A new droplet pulls state on first start. |
 | 2: versioning on the bucket | S3 versioning on, noncurrent versions expire after 90 days by lifecycle rule | in the $5 | A daemon writing bad state, an accidental delete, a bug that truncates a file. Restore is "copy the previous version back". |
 | 3: a copy off the account | Nightly `rclone sync` of the bucket to the homelab over Twingate (stage 2), or to a free-tier bucket at a second provider | $0 | The DigitalOcean account itself (token theft that deletes, billing lockout, region loss). This is the one layer the account cannot provide for itself. |
 | 4: droplet backups | DigitalOcean weekly image backups | 20 percent of the droplet | Not needed once layers 1 to 3 exist: the droplet holds nothing that is not in git, Doppler or the bucket. Off. |
@@ -245,11 +282,12 @@ What each thing loses, and how it comes back:
 |---|---|---|
 | Daemon state (JSON dedup windows, star list, YouTube state, Matrix session) | The bucket (layer 1), versioned (layer 2), copied off (layer 3) | Restored from a previous version or the off-account copy. Worst case without any of them: a burst of duplicate posts for one cycle; Star-Daemon resyncs within a day. |
 | Stream-Daemon state | Memory today; the bucket after section 6a | Already lost on every restart by design, until it is moved. |
-| Bridge database and stores | Named volume on the droplet; nightly `sqlite3 ... ".backup"` to the bucket | Up to a day of room and ghost-user mappings; older than that, the bridge is re-plumbed into every room. The one piece whose backup is a copy, not its home. |
+| Bridge database (Postgres) | Named volume on the droplet; nightly `pg_dump` to the bucket (an inference, not a documented procedure: docs.mau.fi has no backup page) | Up to a day of room mappings, ghost users, logins and, if encryption is on, the bridge's encryption state. The docs say nothing about restoring that state, so treat encrypted rooms as at risk beyond the last dump; older than the dump means re-bridging each channel and logging in again. A restore test belongs in the operator guide. |
+| Bridge `config.yaml` and `registration.yaml` | Doppler (secret copies), rendered to the host at start | Re-rendered from Doppler. The registration file is stored, not regenerated: new tokens would mean etke.cc reloading it. |
 | Portainer database | Named volume | Re-enter five tokens and redeploy six stacks from the compose files in git. Twenty minutes, and Portainer's own backup export can go to the bucket too. |
 | The droplet | Spacelift | Replace through a run, as the connectors are. Cloud-init rebuilds it, Portainer redeploys the stacks, the daemons pull their state from the bucket. |
 
-Until stage 2 exists, layer 3 is the free-tier bucket at a second provider or nothing. If the bridge runs on this droplet before then, its database has a copy in the bucket (layer 1 and 2) but no copy off the account, and that is a risk to accept in writing or a reason to wait.
+Until stage 2 exists, layer 3 is the free-tier bucket at a second provider or nothing. The bridge database has a copy in the bucket (layers 1 and 2) but no copy off the account until layer 3 exists, and that is a risk to accept in writing or a reason to wait. Take a restore test of the `pg_dump` before the bridge is relied on.
 
 ## 8. Kubernetes: not yet, and what would change that
 
@@ -270,13 +308,13 @@ Triggers to revisit: the ceiling is raised past $40, a workload needs more than 
 
 Facts checked 2026-10-11 and decisions this document asks for.
 
-1. **matrix-appservice-discord is stale.** Its last release is 4.0.0 from 2023-09-15 and the `develop` branch has no commit since that date. It supports Node 18 to 20 only, and both of those lines have reached end of life. The `halfshot/matrix-appservice-discord` tag on Docker Hub was last pushed about six years ago, so the image must be built from the tagged source. It still works and it is the right class of bridge for the job: a proper Discord **bot** with guild-owner consent, which is how a community server is bridged. The alternative, [mautrix/discord](https://github.com/mautrix/discord) (Go, actively developed), is a *puppeting* bridge that signs in as a Discord user account; that is automation of a user account, which Discord's terms forbid, and it is aimed at bridging one person's DMs and servers, not a server for its members. Decision: keep matrix-appservice-discord, build its image ourselves from the pinned tag on a supported Node 20 base, record the staleness as an accepted risk, and check for an active fork before the stage is built.
-2. **Where is the homeserver** (section 5.4)? Decides whether the bridge is on this droplet at all.
+1. **matrix-appservice-discord is stale and is not used.** Its last release is 4.0.0 from 2023-09-15 and its Node 18 to 20 runtimes are past end of life. The self-hosted bridge is `mautrix-discord` (Go, maintained, bot-token login), chosen on 2026-10-11 partly to avoid Node. Differences from the old bridge are in section 5.4a; existing room mappings do not carry over, so each channel is re-bridged.
+2. **How does the etke.cc homeserver reach the bridge** (section 5.4)? Open, with two questions for etke.cc: can they reload an external appservice registration, and do they offer a private path or a fixed source address. Fallback: etke.cc's own bridge (section 5.4a).
 3. **A plus the Spaces bucket at $29, B alone at $30, or a raised ceiling** (section 4). The draft recommends A plus the bucket, which depends on the cloud-optimized install work in section 6a being done for at least the state backend.
 3a. **Spaces at $5 or a free-tier bucket at a second provider** (section 3b). Spaces keeps everything in one account and inside the cost gate; B2 or R2 is free at this size but is a second account and outside this repository.
 3b. **Which jobs become Functions first** (section 3a). The draft says the penguin-overlord runners and solarstorm_scout, with Boon-Tube and Star-Daemon following once they have a `--once` mode and bucket state. Functions are deployed by `doctl`, not OpenTofu, so they live in each daemon's own repository and outside the cost gate.
 4. **Portainer's Docker socket is root.** Anyone who can sign in to Portainer can run a privileged container on the host. Mitigation: Portainer only over Twingate to the admins group, a strong local admin, and no public inbound. Accept and record in the threat model.
-5. **Bridge database backup before stage 2** (section 7). Accept or wait.
+5. **Bridge database backup before stage 2** (section 7): a nightly `pg_dump` to the bucket with a tested restore, and no off-account copy until layer 3 exists. Accept or wait.
 6. **Portainer CE git stacks.** CE can deploy a stack from a git repository; automatic polling for updates is a Business feature as far as the public docs say. Verify, then decide whether compose files live in this repository (public, no secrets in them) or in Portainer alone.
 7. **Price table.** Mark `backups_fraction_verified` true (20 percent weekly confirmed on DigitalOcean's pricing page), keep bandwidth overage and block storage as unverified.
 
@@ -290,13 +328,13 @@ Everything in this stage is defined in a file that is reviewed in a pull request
 | Docker Engine and Portainer CE on the host | the module's cloud-init template (OpenTofu renders it) | Spacelift, via the droplet's first boot | Yes (part of the droplet) | |
 | Spaces bucket, versioning, lifecycle rule | `stacks/30-workloads` (OpenTofu) | Spacelift | Yes, as a flat `spaces` entry | |
 | Spaces access keys, one per daemon | `stacks/30-workloads` (OpenTofu) or by hand into Doppler | Spacelift, or the operator | Free either way | Choice: keys in state (same accepted risk as connector tokens) or a manual step and clean state. The draft leans manual until Spacelift state access is restricted. |
-| Twingate group and resources (SSH, Portainer, bridge port) | `stacks/30-workloads` (OpenTofu) | Spacelift | Free | |
+| Twingate group and resources (SSH and Portainer) | `stacks/30-workloads` (OpenTofu) | Spacelift | Free | |
 | The daemon compose stacks inside Portainer | compose files in git, no secrets in them | Portainer, pulling from git (CE git stacks, to verify) or deployed once by hand over Twingate | No; nothing in them costs money | Spacelift cannot reach Portainer's API or the Docker socket, because both are reachable only through Twingate by design. A Portainer or Docker provider would need an inbound path that this environment refuses. |
 | Per-daemon `DOPPLER_TOKEN` values in Portainer | Doppler | Operator, once, over Twingate | No | A secret, so it must not pass through OpenTofu state or user-data. |
 | DigitalOcean Functions and their cron triggers | `project.yml` in each daemon's repository | `doctl serverless deploy` from a GYST workflow, token from Doppler | **No**; recorded in `docs/cost.md` as a watched usage line | The DigitalOcean provider has no resource for standalone Functions or triggers; App Platform function components have no scheduled triggers. Lambda later closes this gap (section 3a). |
 | The daemons' code changes (state backend, run-once mode, slimmer images) | each daemon's repository | its own CI and image publish | No | Application code, not infrastructure. |
-| The bridge's `config.yaml` and registration file | rendered from Doppler on the host by a systemd oneshot | the host, before the stack starts | No | Contains secrets; never in a repository or in Portainer. |
-| Backups: nightly `rclone sync` of the bucket off the account, nightly SQLite copy of the bridge | the module's cloud-init (systemd timer units) | Spacelift, via the droplet | Free, apart from any second provider's bill | |
+| The bridge's `config.yaml` and `registration.yaml` | rendered from Doppler on the host by a systemd oneshot | the host, before the stack starts | No | Contain secrets; never in a repository, in Portainer or in the bucket. |
+| Backups: nightly `rclone sync` of the bucket off the account, nightly `pg_dump` of the bridge database | the module's cloud-init (systemd timer units) | Spacelift, via the droplet | Free, apart from any second provider's bill | |
 
 ## 10. Changes this stage makes to the repository
 

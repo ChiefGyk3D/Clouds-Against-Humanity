@@ -7,7 +7,7 @@ flowchart LR
     s0["Stage 0<br/>Foundation<br/>$0<br/>BUILT"]:::done
     s1["Stage 1<br/>Access: 2 Twingate connectors<br/>$12<br/>BUILT"]:::done
     s2["Stage 2<br/>Logs to the on-prem SIEM,<br/>cloud-to-home access<br/>PLANNED"]:::plan
-    s3["Stage 3<br/>Workload host: Portainer,<br/>five daemons, Matrix bridge,<br/>Spaces bucket, Functions<br/>est. $17<br/>PLANNED"]:::plan
+    s3["Stage 3<br/>Workload host: Portainer,<br/>five daemons,<br/>Discord bridge, Spaces bucket, Functions<br/>est. $17<br/>PLANNED"]:::plan
     s4["Stage 4<br/>Grafana, runs on-prem<br/>PLANNED"]:::plan
     s0 --> s1 --> s2 --> s3 --> s4
 
@@ -48,7 +48,7 @@ One workload droplet in the VPC running Docker Engine and Portainer CE, hardened
 - [Boon-Tube-Daemon](https://github.com/ChiefGyk3D/Boon-Tube-Daemon), YouTube upload announcements.
 - [Stream-Daemon](https://github.com/ChiefGyk3D/Stream-Daemon), go-live announcements.
 - [Star-Daemon](https://github.com/ChiefGyk3D/Star-Daemon), GitHub star announcements.
-- [matrix-appservice-discord](https://github.com/matrix-org/matrix-appservice-discord), bridging the Discord server to Matrix. The bridge must be reachable by the homeserver, so where it runs follows where the homeserver is; the design draft explains.
+- The Discord-to-Matrix bridge: [mautrix-discord](https://github.com/mautrix/discord), a Go bridge, self-hosted next to the daemons with its own Postgres database and a nightly dump to the bucket. etke.cc, which hosts the Matrix homeserver, offers a bridge of its own as the alternative. How the homeserver reaches the bridge is an open decision; the design draft explains.
 
 All of them are outbound-only pollers that read their secrets from Doppler, which is why they are a good first set. They were written for one Docker container on a Raspberry Pi, so the stage includes a "cloud-optimized install" for each: state moves from the container's disk into an S3-compatible bucket (DigitalOcean Spaces, $5 flat, versioning on), each gets a run-once mode, and the jobs that already run on a timer (the penguin-overlord runners, solarstorm_scout) move to DigitalOcean Functions, the Lambda equivalent, inside its free allowance. With state off the host the droplet is disposable and the thin size is enough.
 
