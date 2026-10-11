@@ -30,7 +30,7 @@ flowchart TB
     subgraph dataplane["Data plane: reaching a host"]
         tgc["Twingate controller<br/>auth + signed ACLs"]:::ctrl
         relay["Twingate relays<br/>(fallback path only)"]:::ctrl
-        subgraph vpc["DigitalOcean VPC 10.77.0.0/24 (tor1)"]
+        subgraph vpc["DigitalOcean VPC 10.78.0.0/24 (tor1)"]
             ca["access-tor1-connector-a"]:::cloud
             cb["access-tor1-connector-b"]:::cloud
         end
@@ -112,7 +112,7 @@ sequenceDiagram
     participant B as connector b (target)
     C->>K: Sign in through the identity provider
     K-->>C: Signed ACL: cah-tor1-admins may reach connector-b-ssh, TCP 22
-    Note over C: ssh cah-admin@10.77.0.x<br/>client intercepts, address is in the ACL
+    Note over C: ssh cah-admin@10.78.0.x<br/>client intercepts, address is in the ACL
     C->>A: Certificate-pinned TLS tunnel (peer-to-peer, or through R)
     A->>A: Verify client signature and ACL claim
     A->>B: TCP 22 inside the VPC (tag-scoped firewall rule)
