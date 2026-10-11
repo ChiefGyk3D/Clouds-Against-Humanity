@@ -9,6 +9,7 @@
 - [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md)
 - [Droplet hardening](Droplet-Hardening.md)
 - [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
+- [Terraform reference](Terraform-Reference.md)
 - [Spacelift](Spacelift.md)
 - [Doppler and secrets](Doppler-and-Secrets.md)
 - [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md)
