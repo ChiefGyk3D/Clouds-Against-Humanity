@@ -74,3 +74,17 @@ Things that broke during the build (and a few traps the guides warn about), what
 ## 8. "Masked in logs" needs to be proven, not assumed
 
 Spacelift documents `::add-mask` for redacting values, but not whether the mask command line itself is hidden. So the first tracked run comes with a check: search the log for the Doppler token prefix and confirm it never appears. Trust, then verify, then write down that you verified.
+
+## 9. A rebuilt account: nothing you assumed is still true
+
+The DigitalOcean account was rebuilt and everything was redeployed. Four things that worked the first time did not, and each one was only visible on the real API.
+
+**Token scopes are proven by a run, not by a table.** The first plan failed with `403 You are not authorized to perform this operation` while reading SSH keys. The documented scope list said `ssh_key: read`, but the new token had been made without it, and DigitalOcean tokens cannot be edited after creation, only replaced. Read the error, not the symptom: it said 403 (a scope), not "key not found".
+
+**The cheap droplet size is not offered everywhere.** `422 Size is not available in this region`. The plain `s-1vcpu-1gb` ($6) was missing from nyc3 on the new account. Ask the API before you design around a size: `GET /v2/sizes` lists the regions each size is offered in, and `GET /v2/regions` lists the sizes each region offers. On this account the newer US sites (Atlanta, Richmond, Kansas City, Memphis) started at about $18 for 1 GB, so the answer was Toronto at $6, not a closer region.
+
+**A default VPC cannot be deleted, and VPC ranges cannot overlap anywhere in the account.** Changing the region replaces the VPC, which fails with `403 Can not delete default VPCs` because the first VPC in a region becomes its default. The plan had shown `default = true`; that field is the warning. The fix was `tofu state rm` for that VPC (forget it, do not delete it) and a new range, because creating the Toronto VPC at the same range failed with `422 This range/size overlaps with another VPC network in your account`, even across regions. The orphaned VPC is empty and free.
+
+**A stack dependency starts its own run.** When foundation finished, Spacelift started a run on the access stack by itself. Triggering another one by hand queued a duplicate behind it. Check the stack's runs before you trigger.
+
+**Lesson.** On a new account, plan for the first apply to find the account's real limits, and make each failure cheap: keep stages small, have nothing billing until the last stage.
