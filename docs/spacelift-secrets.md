@@ -73,7 +73,7 @@ Create both tokens under DigitalOcean console, API, Tokens, Generate New Token, 
 
 **Token B** (read only; interactive tooling and the `do-droplets` MCP server): `read` on the same groups, nothing else. It cannot change anything, so a leak costs you visibility, not infrastructure.
 
-Derived from the resources in `modules/` and the stack roots (`data "digitalocean_ssh_key"`, `digitalocean_droplet`, `digitalocean_firewall`, `digitalocean_project`, `digitalocean_project_resources`, `digitalocean_tag`, `digitalocean_vpc`). It has not been proven by a run with a minimal token. If a plan fails with `401` or `403`, the error names the missing scope: add that one and update this table.
+Derived from the resources in `modules/` and the stack roots (`data "digitalocean_ssh_key"`, `digitalocean_droplet`, `digitalocean_firewall`, `digitalocean_project`, `digitalocean_project_resources`, `digitalocean_tag`, `digitalocean_vpc`). Proven by the 2026-10-11 redeploy, which ran with exactly this token: `ssh_key: read` is enough for the lookup (without it the plan fails with `403`). If a plan fails with `401` or `403`, the error names the missing scope: add that one and update this table.
 
 ## 5. Rotation
 
