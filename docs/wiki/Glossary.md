@@ -11,6 +11,7 @@
 | **Cost gate** | `scripts/cost_check.py`, which fails CI if planned spend exceeds the approved total. |
 | **Doppler** | Hosted secrets manager. Every real secret in this project lives there. |
 | **Droplet** | A DigitalOcean virtual machine. |
+| **Functions (DigitalOcean)** | DigitalOcean's serverless product, the equivalent of AWS Lambda: a piece of code that runs on a schedule or a request and is billed by the GiB-second, with a free monthly allowance. Deployed with `doctl`, not OpenTofu. |
 | **GYST** | git-your-ship-together, the author's library of reusable, hardened GitHub Actions workflows. |
 | **IdP** | Identity provider, the service that actually checks who you are (and enforces MFA). |
 | **Lateral movement** | An attacker moving from the first compromised system to others on the same network. |
@@ -25,6 +26,7 @@
 | **Resource** | In Twingate, one destination (address plus allowed ports) that a group can be granted. |
 | **SASE / SSE** | Secure Access Service Edge / Security Service Edge. Vendor categories that bundle ZTNA with other network security services. |
 | **Spacelift** | Hosted runner for infrastructure as code: plans, applies, holds state, waits for approval. |
+| **Spaces** | DigitalOcean's S3-compatible object storage. A bucket of files reached over HTTPS, with optional versioning that keeps earlier copies of every object. |
 | **Stack** | A unit of infrastructure applied on its own with its own state. One Spacelift stack per `stacks/` directory. |
 | **State** | OpenTofu's record of what it created. Can contain secrets, so where it lives matters. |
 | **Tag (DigitalOcean)** | A label on a resource. Firewalls attach to tags, so a droplet is protected the moment it has one. |

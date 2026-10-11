@@ -7,7 +7,7 @@ flowchart LR
     s0["Stage 0<br/>Foundation<br/>$0<br/>BUILT"]:::done
     s1["Stage 1<br/>Access: 2 Twingate connectors<br/>$12<br/>BUILT"]:::done
     s2["Stage 2<br/>Logs to the on-prem SIEM,<br/>cloud-to-home access<br/>PLANNED"]:::plan
-    s3["Stage 3<br/>Workload host: Portainer,<br/>five daemons, Matrix bridge<br/>est. $18<br/>PLANNED"]:::plan
+    s3["Stage 3<br/>Workload host: Portainer,<br/>five daemons, Matrix bridge,<br/>Spaces bucket, Functions<br/>est. $17<br/>PLANNED"]:::plan
     s4["Stage 4<br/>Grafana, runs on-prem<br/>PLANNED"]:::plan
     s0 --> s1 --> s2 --> s3 --> s4
 
@@ -50,9 +50,11 @@ One workload droplet in the VPC running Docker Engine and Portainer CE, hardened
 - [Star-Daemon](https://github.com/ChiefGyk3D/Star-Daemon), GitHub star announcements.
 - [matrix-appservice-discord](https://github.com/matrix-org/matrix-appservice-discord), bridging the Discord server to Matrix. The bridge must be reachable by the homeserver, so where it runs follows where the homeserver is; the design draft explains.
 
-All of them are outbound-only pollers that read their secrets from Doppler, which is why they are a good first set. Estimated cost: $18 per month for an `s-2vcpu-2gb` droplet, which brings the running total to exactly the $30 ceiling with backups off. A $12 and a $24 option are priced in the draft. Backups and block storage stay off until they are priced and verified.
+All of them are outbound-only pollers that read their secrets from Doppler, which is why they are a good first set. They were written for one Docker container on a Raspberry Pi, so the stage includes a "cloud-optimized install" for each: state moves from the container's disk into an S3-compatible bucket (DigitalOcean Spaces, $5 flat, versioning on), each gets a run-once mode, and the jobs that already run on a timer (the penguin-overlord runners, solarstorm_scout) move to DigitalOcean Functions, the Lambda equivalent, inside its free allowance. With state off the host the droplet is disposable and the thin size is enough.
 
-Depends on stage 2 for two things: the daemons reaching the on-prem Ollama server (until then the AI text is off or on Gemini), and the nightly copy of the bridge database going home.
+Estimated cost: $12 for an `s-1vcpu-2gb` droplet plus $5 for the bucket, $17 in all, which brings the running total to $29 under the $30 ceiling with droplet backups off. Backups come from the versioned bucket and a nightly copy off the account instead. Larger droplets, a free-tier bucket at another provider and the costs of each are in the draft.
+
+Depends on stage 2 for two things: the daemons reaching the on-prem Ollama server (until then the AI text is off or on Gemini), and the nightly copy of the bucket going home.
 
 ## Stage 4: Grafana (planned)
 
@@ -62,4 +64,4 @@ Dashboards for the cloud side, running on-prem next to the SIEM rather than as a
 
 Kubernetes, multi-region, load balancers, managed databases. Each would blow the budget or the complexity budget for what this environment needs. The layout does not block any of them; the cost gate will refuse them until someone prices and approves one on purpose.
 
-Kubernetes in particular is a cost decision, not a refusal. DigitalOcean's control plane is free, but the smallest sensible node is the $24 droplet and a second node doubles it, for the same six containers that fit on one $18 host. Stage 3 is shaped so the move is cheap when it comes: one image per service, configuration from the environment and Doppler only, state only in named volumes, and nothing that depends on a Portainer-only feature. It gets revisited when the ceiling moves past $40, a workload needs more than one host, or a second operator wants declarative rollouts more than a web UI.
+Kubernetes in particular is a cost decision, not a refusal. DigitalOcean's control plane is free, but the smallest sensible node is the $24 droplet and a second node doubles it, for the same six containers that fit on one $12 host. Stage 3 is shaped so the move is cheap when it comes: one image per service, configuration from the environment and Doppler only, state in a bucket rather than on the host, timer jobs already running as Functions, and nothing that depends on a Portainer-only feature. It gets revisited when the ceiling moves past $40, a workload needs more than one host, or a second operator wants declarative rollouts more than a web UI.

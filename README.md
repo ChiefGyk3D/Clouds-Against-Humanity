@@ -60,7 +60,7 @@ That is not "VPNs are always wrong". WireGuard is a very different animal from a
 | 0 | Foundation: project, VPC, baseline firewall with zero inbound rules | $0 | Built |
 | 1 | Access: two Twingate connectors, connector firewall, per-host SSH resources | $12 | Built |
 | 2 | Logs to the on-prem SIEM, cloud-to-home access | | Planned |
-| 3 | Workload host: Portainer, five daemons, Discord-to-Matrix bridge | est. $18 | Planned |
+| 3 | Workload host: Portainer, five daemons, Discord-to-Matrix bridge, Spaces bucket, Functions | est. $17 | Planned |
 | 4 | Grafana, on-prem | | Planned |
 
 Working ceiling: $30 per month across stages 0 to 4. A cost gate in CI fails any change that raises the planned total above the approved total. See the [roadmap](docs/wiki/Roadmap.md).
