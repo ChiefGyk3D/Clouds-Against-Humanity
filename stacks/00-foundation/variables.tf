@@ -1,6 +1,6 @@
 variable "region" {
   type        = string
-  default     = "nyc3"
+  default     = "tor1"
   description = "DigitalOcean region slug."
 }
 

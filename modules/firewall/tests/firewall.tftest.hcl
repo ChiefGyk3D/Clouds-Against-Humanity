@@ -2,9 +2,9 @@ mock_provider "digitalocean" {}
 
 variables {
   layer   = "foundation"
-  region  = "nyc3"
+  region  = "tor1"
   purpose = "baseline"
-  tag     = "cah-baseline-nyc3"
+  tag     = "cah-baseline-tor1"
 }
 
 run "denies_all_inbound" {
@@ -22,11 +22,11 @@ run "denies_all_inbound" {
 run "applies_by_tag_with_convention_name" {
   command = plan
   assert {
-    condition     = digitalocean_firewall.this.name == "foundation-nyc3-baseline"
+    condition     = digitalocean_firewall.this.name == "foundation-tor1-baseline"
     error_message = "Name must be <layer>-<region>-<purpose>."
   }
   assert {
-    condition     = contains(digitalocean_firewall.this.tags, "cah-baseline-nyc3")
+    condition     = contains(digitalocean_firewall.this.tags, "cah-baseline-tor1")
     error_message = "Firewall must attach by the given tag."
   }
 }
@@ -95,13 +95,13 @@ run "inbound_from_tag_renders_only_tag_sourced_rules" {
     error_message = "Exactly the listed inbound rules must render."
   }
   assert {
-    condition     = jsonencode(output.inbound_rules) == jsonencode(sort(["tcp/22/cah-baseline-nyc3", "udp/9999/cah-baseline-nyc3"]))
+    condition     = jsonencode(output.inbound_rules) == jsonencode(sort(["tcp/22/cah-baseline-tor1", "udp/9999/cah-baseline-tor1"]))
     error_message = "Each inbound rule must be sourced from this firewall's own tag and nothing else."
   }
   assert {
     condition = alltrue([
       for r in digitalocean_firewall.this.inbound_rule :
-      length(coalesce(r.source_addresses, [])) == 0 && length(coalesce(r.source_droplet_ids, [])) == 0 && length(coalesce(r.source_load_balancer_uids, [])) == 0 && toset(r.source_tags) == toset(["cah-baseline-nyc3"])
+      length(coalesce(r.source_addresses, [])) == 0 && length(coalesce(r.source_droplet_ids, [])) == 0 && length(coalesce(r.source_load_balancer_uids, [])) == 0 && toset(r.source_tags) == toset(["cah-baseline-tor1"])
     ])
     error_message = "Inbound rules must carry source_tags equal to the module tag and no source addresses."
   }
@@ -155,13 +155,13 @@ run "outbound_to_tag_renders_only_tag_destined_rules" {
     error_message = "The five defaults plus exactly the two listed tag rules must render."
   }
   assert {
-    condition     = jsonencode(output.outbound_tag_rules) == jsonencode(sort(["tcp/22/cah-baseline-nyc3", "udp/9999/cah-baseline-nyc3"]))
+    condition     = jsonencode(output.outbound_tag_rules) == jsonencode(sort(["tcp/22/cah-baseline-tor1", "udp/9999/cah-baseline-tor1"]))
     error_message = "Each tag-scoped outbound rule must be destined to this firewall's own tag and nothing else."
   }
   assert {
     condition = alltrue([
       for r in digitalocean_firewall.this.outbound_rule :
-      length(coalesce(r.destination_tags, [])) == 0 ? true : (length(coalesce(r.destination_addresses, [])) == 0 && length(coalesce(r.destination_droplet_ids, [])) == 0 && length(coalesce(r.destination_load_balancer_uids, [])) == 0 && toset(r.destination_tags) == toset(["cah-baseline-nyc3"]))
+      length(coalesce(r.destination_tags, [])) == 0 ? true : (length(coalesce(r.destination_addresses, [])) == 0 && length(coalesce(r.destination_droplet_ids, [])) == 0 && length(coalesce(r.destination_load_balancer_uids, [])) == 0 && toset(r.destination_tags) == toset(["cah-baseline-tor1"]))
     ])
     error_message = "Tag-scoped outbound rules must carry destination_tags equal to the module tag and no destination addresses."
   }

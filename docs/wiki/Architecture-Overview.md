@@ -30,9 +30,9 @@ flowchart TB
     subgraph dataplane["Data plane: reaching a host"]
         tgc["Twingate controller<br/>auth + signed ACLs"]:::ctrl
         relay["Twingate relays<br/>(fallback path only)"]:::ctrl
-        subgraph vpc["DigitalOcean VPC 10.77.0.0/24 (nyc3)"]
-            ca["access-nyc3-connector-a"]:::cloud
-            cb["access-nyc3-connector-b"]:::cloud
+        subgraph vpc["DigitalOcean VPC 10.77.0.0/24 (tor1)"]
+            ca["access-tor1-connector-a"]:::cloud
+            cb["access-tor1-connector-b"]:::cloud
         end
     end
 
@@ -111,7 +111,7 @@ sequenceDiagram
     participant A as connector a
     participant B as connector b (target)
     C->>K: Sign in through the identity provider
-    K-->>C: Signed ACL: cah-nyc3-admins may reach connector-b-ssh, TCP 22
+    K-->>C: Signed ACL: cah-tor1-admins may reach connector-b-ssh, TCP 22
     Note over C: ssh cah-admin@10.77.0.x<br/>client intercepts, address is in the ACL
     C->>A: Certificate-pinned TLS tunnel (peer-to-peer, or through R)
     A->>A: Verify client signature and ACL claim
@@ -143,7 +143,7 @@ Full detail on [Doppler and secrets](Doppler-and-Secrets.md).
 
 ## Naming
 
-Everything follows `<layer>-<region>-<role>`, for example `access-nyc3-connector-a` or `foundation-nyc3-baseline`. Region is a variable everywhere, so a second region is the same modules instantiated again with a different slug, not a copy-paste of the code.
+Everything follows `<layer>-<region>-<role>`, for example `access-tor1-connector-a` or `foundation-tor1-baseline`. Region is a variable everywhere, so a second region is the same modules instantiated again with a different slug, not a copy-paste of the code.
 
 ## Repository layout
 

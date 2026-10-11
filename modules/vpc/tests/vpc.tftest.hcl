@@ -2,18 +2,18 @@ mock_provider "digitalocean" {}
 
 variables {
   layer    = "foundation"
-  region   = "nyc3"
+  region   = "tor1"
   ip_range = "10.77.0.0/24"
 }
 
 run "name_follows_layer_region_role" {
   command = plan
   assert {
-    condition     = digitalocean_vpc.this.name == "foundation-nyc3-vpc"
+    condition     = digitalocean_vpc.this.name == "foundation-tor1-vpc"
     error_message = "VPC name must be <layer>-<region>-vpc."
   }
   assert {
-    condition     = digitalocean_vpc.this.region == "nyc3"
+    condition     = digitalocean_vpc.this.region == "tor1"
     error_message = "VPC must be created in the requested region."
   }
 }

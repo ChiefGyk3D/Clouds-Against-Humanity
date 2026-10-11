@@ -7,6 +7,8 @@ Working ceiling: $30 per month for stages 0 to 4. Each stage must be costed and 
 | 0 | Hardening, repo, CI, Spacelift/Doppler wiring | $0 | $0 |
 | 1 | Two Twingate connector droplets (`s-1vcpu-1gb`, list price $6 each) | $12 | $12 |
 
+The region is `tor1` (Toronto), chosen on 2026-10-11 after a new account got `422 Size is not available in this region` for the $6 `s-1vcpu-1gb` in nyc3. Check `GET /v2/sizes` and `GET /v2/regions` for your own account before picking a region: availability of the cheap legacy sizes differs by region and by account, and the newer US sites (Atlanta, Richmond, Kansas City, Memphis) start at about $18 for 1 GB.
+
 Source of prices: `docs/cost-prices.json`, retrieved 2026-10-10 from the DigitalOcean sizes API.
 
 ## Stage 3 estimate (not approved)

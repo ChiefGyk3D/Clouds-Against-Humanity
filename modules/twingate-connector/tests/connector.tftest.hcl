@@ -3,9 +3,9 @@ mock_provider "twingate" {}
 
 variables {
   layer               = "access"
-  region              = "nyc3"
+  region              = "tor1"
   vpc_id              = "vpc-test"
-  tags                = ["cah-baseline-nyc3", "cah-connector-nyc3"]
+  tags                = ["cah-baseline-tor1", "cah-connector-tor1"]
   size                = "s-1vcpu-1gb"
   remote_network_id   = "remote-network-test"
   ssh_key_fingerprint = "aa:bb:cc:dd"
@@ -19,7 +19,7 @@ variables {
 run "droplet_is_tagged_at_creation_inside_the_vpc" {
   command = plan
   assert {
-    condition     = contains(digitalocean_droplet.connector.tags, "cah-baseline-nyc3")
+    condition     = contains(digitalocean_droplet.connector.tags, "cah-baseline-tor1")
     error_message = "The baseline tag must be on the droplet at creation."
   }
   assert {
@@ -27,7 +27,7 @@ run "droplet_is_tagged_at_creation_inside_the_vpc" {
     error_message = "The connector must live in the given VPC."
   }
   assert {
-    condition     = digitalocean_droplet.connector.name == "access-nyc3-connector-a"
+    condition     = digitalocean_droplet.connector.name == "access-tor1-connector-a"
     error_message = "Name must be <layer>-<region>-connector-<instance>."
   }
 }
@@ -38,7 +38,7 @@ run "connector_and_droplet_names_carry_the_instance" {
     instance = "b"
   }
   assert {
-    condition     = twingate_connector.this.name == "access-nyc3-connector-b" && digitalocean_droplet.connector.name == "access-nyc3-connector-b"
+    condition     = twingate_connector.this.name == "access-tor1-connector-b" && digitalocean_droplet.connector.name == "access-tor1-connector-b"
     error_message = "Both the Twingate connector and the droplet must be named with the instance letter."
   }
 }

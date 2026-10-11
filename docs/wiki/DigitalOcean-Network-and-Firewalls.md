@@ -7,10 +7,10 @@ Every DigitalOcean droplet gets a public IP address, and you cannot remove it. S
 | Piece | Built by | Purpose |
 |---|---|---|
 | Project `clouds-against-humanity` | stage 0 | Groups the resources in the console and for billing |
-| VPC `10.77.0.0/24` in `nyc3` | stage 0, `modules/vpc` | Private network for the droplets; one per region |
-| Tag `cah-baseline-nyc3` | stage 0 | Anything carrying it gets the baseline firewall |
+| VPC `10.77.0.0/24` in `tor1` | stage 0, `modules/vpc` | Private network for the droplets; one per region |
+| Tag `cah-baseline-tor1` | stage 0 | Anything carrying it gets the baseline firewall |
 | Baseline firewall | stage 0, `modules/firewall` | Zero inbound rules, five narrow outbound rules |
-| Tag `cah-connector-nyc3` | stage 1 | Marks the connector droplets |
+| Tag `cah-connector-tor1` | stage 1 | Marks the connector droplets |
 | Connector firewall | stage 1, `modules/firewall` | Adds the connector's outbound ports and connector-to-connector SSH |
 
 ## Two firewalls, layered by tag
@@ -18,7 +18,7 @@ Every DigitalOcean droplet gets a public IP address, and you cannot remove it. S
 ```mermaid
 flowchart TB
     internet["Public internet"]:::ext
-    subgraph droplet["Connector droplet<br/>tags: cah-baseline-nyc3, cah-connector-nyc3"]
+    subgraph droplet["Connector droplet<br/>tags: cah-baseline-tor1, cah-connector-tor1"]
         host["Ubuntu 24.04<br/>sshd allows only cah-admin, keys only"]:::cloud
     end
     subgraph base["Baseline firewall (stage 0)"]
@@ -26,8 +26,8 @@ flowchart TB
         bout["Outbound: tcp 443, 80, 53<br/>udp 53, 123"]:::cloud
     end
     subgraph conn["Connector firewall (stage 1)"]
-        cin["Inbound: tcp 22<br/>only from tag cah-connector-nyc3"]:::warn
-        cout["Outbound: tcp 30000-31000, udp any,<br/>tcp 22 only to tag cah-connector-nyc3,<br/>plus the same five defaults"]:::cloud
+        cin["Inbound: tcp 22<br/>only from tag cah-connector-tor1"]:::warn
+        cout["Outbound: tcp 30000-31000, udp any,<br/>tcp 22 only to tag cah-connector-tor1,<br/>plus the same five defaults"]:::cloud
     end
     internet -. "dropped" .-x bin
     base --- droplet

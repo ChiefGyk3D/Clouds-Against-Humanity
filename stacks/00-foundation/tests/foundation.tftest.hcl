@@ -3,7 +3,7 @@ mock_provider "digitalocean" {}
 run "defaults_are_a_single_region_deny_all_foundation" {
   command = plan
   assert {
-    condition     = digitalocean_tag.baseline.name == "cah-baseline-nyc3"
+    condition     = digitalocean_tag.baseline.name == "cah-baseline-tor1"
     error_message = "Baseline tag must be cah-baseline-<region>."
   }
   assert {
@@ -11,7 +11,7 @@ run "defaults_are_a_single_region_deny_all_foundation" {
     error_message = "Foundation must ship a firewall with zero inbound rules."
   }
   assert {
-    condition     = output.baseline_tag == "cah-baseline-nyc3"
+    condition     = output.baseline_tag == "cah-baseline-tor1"
     error_message = "The baseline tag must be exported for the access stack."
   }
 }
