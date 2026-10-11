@@ -1,6 +1,7 @@
 # Clouds Against Humanity: Stage 3 Workloads
 
 Status: DRAFT for review. Date: 2026-10-11.
+Tooling: OpenTofu throughout; where this document or a conversation says "Terraform", read OpenTofu.
 Scope: stage 3 only. It depends on stages 0 and 1 (built) and on parts of stage 2 (planned) that are called out below. Nothing in this document is approved to cost money yet; the numbers are here so the approval can be made on purpose.
 
 ## 1. Purpose
@@ -78,6 +79,8 @@ A function is a good fit when the job already runs to completion on a timer, hol
 So the realistic split: the bot, the bridge and (at first) the three polling daemons on the droplet; the penguin-overlord runners and solarstorm_scout as scheduled Functions; Boon-Tube and Star-Daemon moving to Functions once section 6a lands. Each function's code lives in its own repository with its `project.yml`, and a GYST workflow deploys it with a scoped token from Doppler. Nothing in this repository changes except the cost record.
 
 Two honest limits. Functions are outside OpenTofu and outside the cost gate's allowlist, so their spend is a line that a human checks against the usage page, and the threat model's T11 residual grows by that much. And a function's secrets are environment variables set at deploy time, so each function gets its own narrow Doppler service token or has its secrets injected by the deploy workflow; neither path puts a secret in a repository.
+
+**Later: AWS Lambda.** DigitalOcean Functions is the interim answer because the account already exists. An AWS tenant is planned but not yet established (hardening a fresh one is its own project), and once it is, the scheduled jobs are candidates to move to Lambda with EventBridge schedules, which the AWS provider manages fully in OpenTofu and which the cost gate could then see. The design keeps that move cheap: each job is a plain handler that reads its config from the environment and its state from an S3-compatible bucket, so the rework is a new deploy target and a bucket endpoint, not a rewrite. Until then nothing here depends on AWS.
 
 ### 3b. Object storage: Spaces, or an S3 bucket elsewhere
 
@@ -276,6 +279,24 @@ Facts checked 2026-10-11 and decisions this document asks for.
 5. **Bridge database backup before stage 2** (section 7). Accept or wait.
 6. **Portainer CE git stacks.** CE can deploy a stack from a git repository; automatic polling for updates is a Business feature as far as the public docs say. Verify, then decide whether compose files live in this repository (public, no secrets in them) or in Portainer alone.
 7. **Price table.** Mark `backups_fraction_verified` true (20 percent weekly confirmed on DigitalOcean's pricing page), keep bandwidth overage and block storage as unverified.
+
+## 9a. What is code, and where it lives
+
+Everything in this stage is defined in a file that is reviewed in a pull request. Not all of it can be applied by OpenTofu through Spacelift, and the table says which is which rather than implying it.
+
+| Piece | Defined in | Applied by | Seen by the cost gate | Why not OpenTofu, if not |
+|---|---|---|---|---|
+| Workload droplet, tag, firewall, cloud-init | `modules/docker-host`, `stacks/30-workloads` (OpenTofu) | Spacelift, human confirms | Yes | |
+| Docker Engine and Portainer CE on the host | the module's cloud-init template (OpenTofu renders it) | Spacelift, via the droplet's first boot | Yes (part of the droplet) | |
+| Spaces bucket, versioning, lifecycle rule | `stacks/30-workloads` (OpenTofu) | Spacelift | Yes, as a flat `spaces` entry | |
+| Spaces access keys, one per daemon | `stacks/30-workloads` (OpenTofu) or by hand into Doppler | Spacelift, or the operator | Free either way | Choice: keys in state (same accepted risk as connector tokens) or a manual step and clean state. The draft leans manual until Spacelift state access is restricted. |
+| Twingate group and resources (SSH, Portainer, bridge port) | `stacks/30-workloads` (OpenTofu) | Spacelift | Free | |
+| The daemon compose stacks inside Portainer | compose files in git, no secrets in them | Portainer, pulling from git (CE git stacks, to verify) or deployed once by hand over Twingate | No; nothing in them costs money | Spacelift cannot reach Portainer's API or the Docker socket, because both are reachable only through Twingate by design. A Portainer or Docker provider would need an inbound path that this environment refuses. |
+| Per-daemon `DOPPLER_TOKEN` values in Portainer | Doppler | Operator, once, over Twingate | No | A secret, so it must not pass through OpenTofu state or user-data. |
+| DigitalOcean Functions and their cron triggers | `project.yml` in each daemon's repository | `doctl serverless deploy` from a GYST workflow, token from Doppler | **No**; recorded in `docs/cost.md` as a watched usage line | The DigitalOcean provider has no resource for standalone Functions or triggers; App Platform function components have no scheduled triggers. Lambda later closes this gap (section 3a). |
+| The daemons' code changes (state backend, run-once mode, slimmer images) | each daemon's repository | its own CI and image publish | No | Application code, not infrastructure. |
+| The bridge's `config.yaml` and registration file | rendered from Doppler on the host by a systemd oneshot | the host, before the stack starts | No | Contains secrets; never in a repository or in Portainer. |
+| Backups: nightly `rclone sync` of the bucket off the account, nightly SQLite copy of the bridge | the module's cloud-init (systemd timer units) | Spacelift, via the droplet | Free, apart from any second provider's bill | |
 
 ## 10. Changes this stage makes to the repository
 
