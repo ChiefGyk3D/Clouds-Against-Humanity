@@ -3,6 +3,8 @@
 | Term | Meaning |
 |---|---|
 | **ACL** | Access control list. In Twingate, a signed list of the resources a client (or connector) is allowed to reach. |
+| **Application service (appservice)** | A Matrix component the homeserver trusts to act for many users. The homeserver pushes events to it over HTTP, so it must be reachable from the homeserver. Bridges are application services. |
+| **Bridge** | Software that relays messages between two chat networks, here Discord and Matrix. |
 | **cloud-init** | The tool that configures a Linux cloud instance on first boot from its user-data. |
 | **Connector** | Twingate's component inside your network. Makes outbound connections only and forwards authorized traffic to resources. |
 | **Controller** | Twingate's hosted coordinator: configuration, sign-in, signed ACLs. Never carries traffic. |
@@ -16,6 +18,7 @@
 | **Module** | A reusable OpenTofu building block. Never applied on its own here. |
 | **OIDC** | OpenID Connect. Here: short-lived identity tokens that let one service authenticate to another without a stored secret. |
 | **OpenTofu** | Open-source, MPL-licensed fork of Terraform. |
+| **Portainer** | A web UI for a Docker host: stacks, containers, logs. Community Edition is free. It talks to Docker over the local socket, which is root on the host, so its UI is reached only through Twingate here. |
 | **Proposed run** | A Spacelift plan for a pull request. Gets no credentials in this repo. |
 | **Relay** | Twingate component that joins a client and connector when a direct path is impossible, without terminating the encryption. |
 | **Remote network (site)** | Twingate's name for a network that connectors serve, here `access-nyc3`. |
