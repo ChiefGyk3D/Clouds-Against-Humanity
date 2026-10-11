@@ -1,0 +1,1 @@
+Source for these pages lives in [`docs/wiki/`](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/tree/main/docs/wiki) and is published by `scripts/publish-wiki.sh`. Corrections are welcome as pull requests; edits made in the wiki editor are overwritten on the next publish. MIT licensed, see LICENSE in the repository.
