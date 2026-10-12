@@ -61,8 +61,38 @@ Stage 1 gave an operator laptop a way into the cloud (laptop client, cloud conne
 
 Both need pieces that do not exist yet:
 
-- **A home remote network** with its own connector, on a VLAN that reaches only the SIEM manager. The Pis' connectors are an option only if their VLAN can already reach the SIEM; a dedicated connector is cleaner and is the roadmap's wording.
-- **Headless clients** (Twingate service accounts with keys) on the SIEM Prometheus host and on each cloud droplet. Each service account belongs to a group that sees only its own resources.
+- **One home remote network per VLAN to be reached**, each with its own connector in that VLAN. A Twingate resource belongs to exactly one remote network, and its traffic leaves from a connector there, so this is also how the homelab's segmentation is carried to the cloud. The apps are segmented in the cloud the way they are at home.
+- **Headless clients** (Twingate service accounts with keys) on the SIEM Prometheus host and on each cloud host. Each service account belongs to groups that see only the resources it needs.
+
+### 4.0 Where each kind of segmentation is enforced
+
+Everything between the cloud and home travels over Twingate; there is no other path. pfSense therefore sees only the home connector's IP as the source. A droplet, the workload host and the bridge all look identical to it, so pfSense cannot tell cloud hosts apart.
+
+| Layer | Question it answers | Enforced by |
+|---|---|---|
+| Twingate groups and resource ACLs | *Who* (which cloud identity) may reach *which* host and port | Service account, group, resource. This is the identity-level RBAC. |
+| pfSense on the connector's VLAN | *What can this connector reach at all*, if Twingate is misconfigured or the connector is compromised | Rules on the connector's source IP allowing only the listed host:ports, default deny |
+
+Per-host separation inside a VLAN is Twingate's job alone. pfSense is a coarse backstop that caps the damage at one VLAN's allowed targets, which is the only reason for one connector per VLAN.
+
+### 4.0a Home remote networks
+
+| Remote network | Connector sits in | pfSense allows the connector to reach | Resources |
+|---|---|---|---|
+| `home-logging` | the logging/SIEM VLAN | SIEM manager 1514 and 1515 (and syslog 514 if the fallback in section 6.1 is used) | one resource per port |
+| `home-ai` | the AI VLAN | the Ollama host on its API port (stage 3 uses it; default 11434) | one resource |
+
+Two connectors per remote network if redundancy is wanted, with identical reachability. The VLAN IDs, the Ollama host and port and the SIEM addresses are the operator's to fill in (section 9, item 6); this repository does not record them.
+
+### 4.0b Cloud service accounts
+
+| Service account | Group | Resources | Used by |
+|---|---|---|---|
+| `cah-logging` | `cloud-logging` | SIEM 1514 and 1515 | the Wazuh agent on every cloud host |
+| `cah-ai` | `cloud-ai` | Ollama API | the stage 3 workload host only |
+| `prometheus-scrape` | `prometheus-scrape` | cloud connector metrics ports | the SIEM Prometheus host |
+
+A headless client sees the union of its service account's groups, so a host that needs both logging and AI gets both groups and a compromise of that host reaches both. The connector droplets get `cah-logging` only; nothing in the access plane gets AI access. A future segment is a new remote network, group and service account, not a change to these.
 
 ### 4.1 Why pull for metrics and push for logs
 
@@ -74,7 +104,7 @@ Both need pieces that do not exist yet:
 
 A droplet carrying a Twingate client as well as a connector is two Twingate roles on one host. The risk is one of blast radius: if the connector droplet is compromised, the attacker holds the client service key and can reach the SIEM's 1514 and 1515 and nothing else. That is equivalent to the Pis today (they also hold a path to 1514). Mitigations:
 
-- The service account's group is bound to exactly two resources (ports 1514 and 1515 on the manager) and nothing else.
+- The service account's group is bound to exactly two resources (ports 1514 and 1515 on the manager) and nothing else, enforced by Twingate; the home-logging connector's pfSense rules repeat the same two ports as a second layer.
 - The key is shown once by Twingate, is held in Doppler and is rotated on the same cadence as the connector tokens.
 - Wazuh agent keys are per host, so one agent being compromised does not expose another's enrollment.
 - When stage 3's workload host exists, section 7 moves the client off the connectors onto one collector, so the access plane carries no client at all.
@@ -167,7 +197,7 @@ Each of these changes the build, so each is a checked item rather than a guess.
 3. **Wazuh agent journald support** in the version the manager runs. If it is absent, use the `ForwardToSyslog` fallback.
 4. **Twingate plan limits** on service accounts, resources and remote networks. The free plan has limits; confirm before designing around several service accounts.
 5. **Where the headless client key and the Wazuh enrollment secret live at boot.** Passing them in user-data is the accepted-risk path stage 1 already took for connector tokens (Terraform state and the DigitalOcean metadata endpoint both hold them). Better: cloud-init fetches them from Doppler at boot using a narrowly scoped, read-only service token. That needs the metadata-endpoint restriction on the roadmap, so it is an option rather than a requirement.
-6. **Home side:** the VLAN for the new home connector and the pfSense rules that let it reach the SIEM manager on 1514 and 1515 and nothing else. That is the operator's change, not this repository's.
+6. **Home side:** a connector per VLAN (logging now, AI for stage 3), the pfSense rules that let each reach only its listed host:ports, and the VLAN IDs, Ollama host and port. That is the operator's change, not this repository's.
 7. **Rule shape:** collect real journald lines for a few days before writing rules.
 
 ## 10. Build order
@@ -175,7 +205,7 @@ Each of these changes the build, so each is a checked item rather than a guess.
 Each step is its own pull request and is reversible. The first two are in this repository; the SIEM-side steps are in `siem-docker-stack` and are specified here, not built here.
 
 1. **Docs only:** this design merged. (This PR.)
-2. **Metrics on the cloud side:** cloud-init gains `TWINGATE_METRICS_PORT` and `prometheus-node-exporter` bound to the private IP, and the Twingate metrics resources and group are added to stack 10. Measure memory on connector a first; replace connector b only after a is healthy. Test: `tofu test` with mocked providers asserting the config lines, the resources, the group, and that no firewall inbound rule appears.
+2. **Metrics on the cloud side:** cloud-init gains `TWINGATE_METRICS_PORT` and `prometheus-node-exporter` bound to the private IP, and the Twingate metrics resources and group are added in stack 20. Measure memory on connector a first; replace connector b only after a is healthy. Test: `tofu test` with mocked providers asserting the config lines, the resources, the group, and that no firewall inbound rule appears.
 3. **Home side (operator):** home remote network, connector, VLAN and rules; Prometheus host headless client; the `file_sd` target file. Verify the four targets are up in Prometheus.
 4. **Logs on the cloud side:** the Wazuh agent and `auditd` fragment, the headless client and its service account with the two-port resource. Test as in step 2. Verify an agent shows as active on the manager.
 5. **Rules and dashboards in `siem-docker-stack`:** journald rules from captured lines, `site` variable and three panels, the absence alert.
@@ -192,8 +222,8 @@ Estimated effort at the operator's pace: about a week, in two weekend-sized piec
 | Metrics endpoint is unauthenticated | Private IP bind where possible, no public inbound, reached only through a narrow Twingate resource for one service account |
 | Rules written without real log lines | Capture first, write second; keep the Docker rules untouched |
 | Twingate plan limits | Verified before step 2; the fallback is one service account for logs and one for metrics, which is already the minimum |
-| Home connector is new attack surface at home | Dedicated VLAN that reaches only 1514 and 1515 on the manager; the operator owns the pfSense change |
+| Home connectors are new attack surface at home | One connector per VLAN, each reaching only its listed host:ports; Twingate groups carry the identity-level rules and pfSense keys on the connector as a backstop; the operator owns the pfSense change |
 
 ## 12. Changes this stage makes to the repository
 
-New: `docs/stages/02-logging.md`, a reusable cloud-init fragment for the agent and exporter, Twingate resources and groups in stack 10 (or a new stack 20 if the operator prefers the access stack to stay small; open question), tests, wiki updates (Twingate, Architecture-Overview, Droplet-Hardening, Roadmap, Terraform-Reference), and a Lessons-Learned entry. Unchanged: `approved.json`, the cost gate, and the firewall inbound rules.
+New: `docs/stages/02-logging.md`, a reusable cloud-init fragment for the agent and exporter, the cross-site Twingate objects (home remote networks, resources, groups, service accounts) in a new stack 20, so the access stack stays small (recommended; the operator confirms), tests, wiki updates (Twingate, Architecture-Overview, Droplet-Hardening, Roadmap, Terraform-Reference), and a Lessons-Learned entry. Unchanged: `approved.json`, the cost gate, and the firewall inbound rules.
