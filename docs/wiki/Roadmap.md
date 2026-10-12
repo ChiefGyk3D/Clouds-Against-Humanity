@@ -62,6 +62,22 @@ Depends on stage 2 for two things: the daemons reaching the on-prem Ollama serve
 
 Dashboards for the cloud side, running on-prem next to the SIEM rather than as another paid cloud service.
 
+## Public edge (DMZ) and hardening (planned, number set by its design doc)
+
+Handoff: [2026-10-12 edge DMZ handoff](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/plans/2026-10-12-edge-dmz-handoff.md). Design first, no implementation until the design and the cost decision are approved.
+
+- A separate VPC (`rns-dmz`, no peering to core) with one immutable droplet and a reserved IP, no SSH and no connector. It would run Reticulum transport with an LXMF propagation node, i2pd, a private Meshtastic MQTT broker over TLS and an authenticated iperf3 server, behind a tag-based Cloud Firewall and host nftables.
+- iperf3 measured over two paths to the same endpoint, direct and through Twingate, cheap probes often and throughput tests rarely.
+- Stage 1 hardening first: nftables default-drop on core droplets, a plan policy denying inbound rules on core tags, an IPv6 check, an external zero-open-ports check and the metadata-endpoint restriction.
+- Stage 3 amendments: a cloud Uptime Kuma, the LLM contract through a LiteLLM proxy, the Discord bridge decision order, and webhook receivers on DigitalOcean Functions writing to the bucket so the workload host keeps zero inbound.
+- Cost: this lands past the $30 ceiling (stage 3 is already at $29). The design must lay out raising it, deferring something or moving pieces; the ceiling is not raised by default.
+- Honeypot: a design doc only, on a separate account or provider, never in this project's apply path.
+- PeerTube is a DMZ-class workload and needs its own costed stage. Not designed yet.
+
+## Private droplets: later, not never
+
+Rejected for now: a VPC NAT gateway is about $40 a month, which exceeds the whole ceiling, and it removes the Droplet Console. Revisit when the ceiling passes roughly $75 to $80, a static egress IP is needed, or a compliance reason appears. A page, "Why Not Private Droplets (Yet)", comes with the edge wiki PR.
+
 ## Explicitly not planned (yet)
 
 Kubernetes, multi-region, load balancers, managed databases. Each would blow the budget or the complexity budget for what this environment needs. The layout does not block any of them; the cost gate will refuse them until someone prices and approves one on purpose.
