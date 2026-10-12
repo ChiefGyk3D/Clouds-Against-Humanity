@@ -54,7 +54,7 @@ Stage 1 gave an operator laptop a way into the cloud (laptop client, cloud conne
    (cloud remote network's connectors)
 
  LOGS     (cloud pushes home)
-   cloud droplet                                home connector (new, on a locked-down VLAN)
+   cloud droplet                                home-logging connector (one per VLAN, section 4.0a)
    headless client, one service           ---->  resource: SIEM manager :1514 and :1515
    account per host (or per role)
 ```
