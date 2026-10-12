@@ -1,5 +1,7 @@
 # Architecture overview
 
+> New to cloud, networking or infrastructure as code? Read [Start here if you are new](Start-Here-If-You-Are-New.md) first; this page assumes the vocabulary those pages teach.
+
 There are two planes here, and keeping them separate in your head makes everything else easier.
 
 - **The data plane** is how a person (or later, a service) reaches a host. It runs through Twingate.

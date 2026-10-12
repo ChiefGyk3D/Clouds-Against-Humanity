@@ -1,5 +1,7 @@
 # Spacelift
 
+> Before this page: [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) explains plan, apply and state, and [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) explains the pull request and CI steps that come before a Spacelift run.
+
 Spacelift is where `tofu plan` and `tofu apply` actually run. It holds the state, waits for a human to approve every apply, and is the reason nothing ever applies from a laptop or from GitHub Actions.
 
 ## The run lifecycle

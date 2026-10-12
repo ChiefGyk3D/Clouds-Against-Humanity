@@ -1,5 +1,7 @@
 # Threat model
 
+> New to threat modelling? [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) covers the vocabulary (tokens, least privilege, lateral movement), and [Enterprise engineering habits](Enterprise-Engineering-Habits.md) explains why a hobby lab writes one of these at all.
+
 Security controls only make sense against named threats. This page lists what is worth protecting, who might go after it, where the trust boundaries are, what stops each threat, and what is left over and accepted on purpose.
 
 It is a lab with a $30 budget and one operator, and the threat model is sized to that. Nation-state targeting of a hobby cloud account is out of scope; the internet's background noise, credential theft and supply-chain mistakes are very much in scope.
