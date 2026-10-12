@@ -1,6 +1,17 @@
 **[Home](Home.md)**
 
-**Start here**
+**Start from zero**
+- [Start here if you are new](Start-Here-If-You-Are-New.md)
+- [1. What is the cloud](What-Is-the-Cloud.md)
+- [2. Networking basics](Networking-Basics-for-This-Project.md)
+- [3. Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
+- [4. Infrastructure as code](What-Is-Infrastructure-as-Code.md)
+- [5. Git and pull requests](Git-GitHub-and-Pull-Requests.md)
+- [6. Containers and Docker](Containers-and-Docker-Basics.md)
+- [7. How money works](How-Money-Works-in-the-Cloud.md)
+- [8. Enterprise habits](Enterprise-Engineering-Habits.md)
+
+**Start here (if the words above are familiar)**
 - [Architecture overview](Architecture-Overview.md)
 - [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md)
 

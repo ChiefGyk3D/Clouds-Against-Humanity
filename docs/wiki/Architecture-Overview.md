@@ -1,5 +1,7 @@
 # Architecture overview
 
+> New to cloud, networking or infrastructure as code? Read [Start here if you are new](Start-Here-If-You-Are-New.md) first; this page assumes the vocabulary those pages teach.
+
 There are two planes here, and keeping them separate in your head makes everything else easier.
 
 - **The data plane** is how a person (or later, a service) reaches a host. It runs through Twingate.
@@ -40,7 +42,7 @@ flowchart TB
 
     dev -- "push branch, open PR" --> gh
     gh -- "every PR and push" --> ci
-    gh -- "PR: proposed run, no secrets<br/>main: tracked run" --> sl
+    gh -- "PR: no run (push policy)<br/>main: tracked run if the<br/>change touches that stack" --> sl
     sl -- "read-only service token" --> dp
     dp -- "named secrets, masked" --> sl
     sl -- "plan, then apply after<br/>a human confirms" --> doapi
@@ -82,7 +84,7 @@ Color key: green is you, purple is a hosted control service, blue is DigitalOcea
 ```mermaid
 flowchart LR
     pr["Pull request"]:::you --> ci["CI green?<br/>tests, cost gate, scanners"]:::ctrl
-    pr --> prop["Spacelift proposed run<br/>no credentials"]:::ctrl
+    pr --> prop["Spacelift: no run<br/>(push policy never proposes)"]:::ctrl
     ci -- "yes" --> merge["Merge to main"]:::you
     merge --> tracked["Spacelift tracked run"]:::ctrl
     tracked --> hook["Hook fetches secrets<br/>from Doppler"]:::secret

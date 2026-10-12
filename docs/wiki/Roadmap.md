@@ -28,7 +28,7 @@ Open follow-ups from this stage:
 - Restrict the droplet metadata endpoint to root.
 - Audit logging on the droplets.
 - Replace the deprecated `access_group` setting on Twingate resources.
-- A Spacelift push policy that ignores pull requests from forks, before anyone else can trigger runs.
+- Attach the Spacelift push policy. It is written and tested (`.spacelift/policies/push.rego`): it never proposes a run, so pull requests from forks or from this repository never run in Spacelift, and docs-only merges no longer start tracked runs. It takes effect only once created in Spacelift, and push policies need a paid Spacelift plan. On the free plan, narrow each stack's project root and globs instead. Both routes are in the secrets runbook, section 9.
 - First-run checks: log masking and the runner image.
 
 ## Stage 2: logging and the link home (planned)

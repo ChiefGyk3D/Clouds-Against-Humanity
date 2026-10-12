@@ -1,5 +1,7 @@
 # Why ZTNA and not a VPN
 
+> If "port", "firewall", "inbound" or "MFA" are new words, read [Networking basics](Networking-Basics-for-This-Project.md) and [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) first. This page is the argument; those pages are the vocabulary.
+
 The obvious way to reach a few cloud droplets from home is a VPN: stand up WireGuard or OpenVPN, open one UDP port, done in an afternoon. This project does not do that, on purpose. This page explains why, where that reasoning holds, and where it does not, because "VPNs bad, zero trust good" is a slogan, and slogans are how people end up buying a zero trust sticker for their old VPN appliance.
 
 ## TL;DR

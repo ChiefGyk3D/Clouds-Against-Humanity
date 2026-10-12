@@ -1,5 +1,7 @@
 # Spacelift
 
+> Before this page: [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) explains plan, apply and state, and [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) explains the pull request and CI steps that come before a Spacelift run.
+
 Spacelift is where `tofu plan` and `tofu apply` actually run. It holds the state, waits for a human to approve every apply, and is the reason nothing ever applies from a laptop or from GitHub Actions.
 
 ## The run lifecycle
@@ -7,11 +9,12 @@ Spacelift is where `tofu plan` and `tofu apply` actually run. It holds the state
 ```mermaid
 flowchart TD
     pr["Pull request opened"]:::you
-    prop["Proposed run<br/>hook skips: no credentials"]:::ctrl
-    fails["Plan fails at the provider<br/>(expected, by design)"]:::ext
+    prop["Push policy: no Spacelift run<br/>for a pull request"]:::ctrl
     ci["GitHub Actions<br/>tofu test with mocked providers,<br/>cost gate, scanners"]:::ctrl
     green{"CI green?"}:::warn
     merge["Merge to main"]:::you
+    affected{"Push policy: did the merge change<br/>this stack, modules/, the hook<br/>or .spacelift/?"}:::warn
+    skip["No run<br/>(docs-only change)"]:::ext
     tracked["Tracked run on main"]:::ctrl
     init["before_init hook<br/>fetch named secrets from Doppler"]:::secret
     plan["tofu plan"]:::ctrl
@@ -20,9 +23,11 @@ flowchart TD
     apply["tofu apply"]:::cloud
     discard["Discard: nothing changes"]:::ext
 
-    pr --> prop --> fails
+    pr --> prop
     pr --> ci --> green
-    green -- "yes" --> merge --> tracked --> init --> plan --> wait
+    green -- "yes" --> merge --> affected
+    affected -- "no" --> skip
+    affected -- "yes" --> tracked --> init --> plan --> wait
     green -- "no" --> pr
     wait -- "confirm" --> again --> apply
     wait -- "discard" --> discard
@@ -53,6 +58,17 @@ This repository is public. A Spacelift proposed run (the plan for a pull request
 
 So the Doppler hook refuses to fetch anything unless the run is a **tracked or destroy run on `main`**. The cost: a pull request plan cannot talk to DigitalOcean and fails at the provider. That is covered by `tofu test` with mocked providers in CI, and the real plan is read on `main` before anyone confirms it.
 
+### Why a pull request gets no Spacelift run at all
+
+A proposed run that can only fail is noise: it posts a red check on every pull request, and people learn to ignore red checks, which is worse than having none. It is also code from the pull request running in Spacelift with the Doppler context attached, which is the risk in the next section. So a **push policy** (`.spacelift/policies/push.rego`) decides which Git events start runs:
+
+- a push or merge to `main` that changes the stack's own directory, `modules/`, the secrets hook or `.spacelift/` starts a tracked run;
+- everything else starts nothing: pull requests, docs-only merges, tags, other branches, forks.
+
+The policy is written in Rego, the language of [Open Policy Agent](https://www.openpolicyagent.org/), and has its own tests (`push_test.rego`) that CI runs on every pull request. Spacelift does not read it from the repository: it is created once in Spacelift with the file as its body, and updated by hand after a change merges.
+
+**One catch: push policies are a paid Spacelift feature.** On the free plan the same effect is only half available. Spacelift's built-in behaviour already ignores changes outside a stack's project root and project globs, so setting those narrowly (the stack's own directory plus `modules/**`, `scripts/spacelift/**` and `.spacelift/**`) stops docs-only pull requests and merges from starting anything. A pull request that changes a stack still gets a proposed run that fails without credentials. That is a real limit of the free plan, written down rather than hidden. The steps are in [section 9 of the secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#9-the-push-policy). [Lessons learned](Lessons-Learned.md) item 10 is the story of the red check that prompted it.
+
 ### Why autodeploy is off
 
 Every apply needs a human to read the plan and press confirm. For infrastructure that costs money and controls access, the plan is the review. A plan that shows "1 to destroy" on a connector when you expected an in-place change is exactly the thing you want a person to catch.
@@ -71,7 +87,7 @@ The hook script's checks only protect against honest mistakes. The script and `.
 
 - one writer on the repository;
 - branch protection on `main` (pull request plus `CI green` required);
-- a push policy that ignores pull requests from forks and from branches outside this repository (needed before anyone else gets to open pull requests that trigger runs);
+- the push policy above, which never proposes a run, so no pull request's code runs next to the context (it must be attached in Spacelift to count; see the runbook);
 - the Doppler token being read-only and scoped to one config, so a leak reaches only these secrets.
 
 This is written down because "the script checks the run type" sounds like a security control and is not one on its own. See [Threat model](Threat-Model.md).
@@ -82,7 +98,7 @@ The ideal is that Spacelift holds no long-lived secret at all: it would present 
 
 ## Adding a stack
 
-1. Create it in Spacelift with the label `cah`, so the Doppler context attaches itself.
+1. Create it in Spacelift with the label `cah`, so the Doppler context and the push policy attach themselves.
 2. Add its entry to `.spacelift/config.yml`, keyed by the stack id, listing only the secrets it needs.
 3. Add stack dependencies for any outputs it consumes.
 4. Pull request, CI green, merge.

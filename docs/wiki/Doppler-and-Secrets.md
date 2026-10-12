@@ -1,5 +1,7 @@
 # Doppler and secrets
 
+> Before this page: [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) explains what a secret is, how secrets leak, and what a secrets manager is for.
+
 The rule is simple: **nothing in this repository is a credential**, and nothing that identifies the operator's account is in a file either. Every real value lives in Doppler. This page explains where each one lives, how it reaches a run, and how to rotate it.
 
 ## Who holds what

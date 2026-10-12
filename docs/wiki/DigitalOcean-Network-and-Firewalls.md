@@ -1,5 +1,7 @@
 # DigitalOcean network and firewalls
 
+> Before this page: [Networking basics](Networking-Basics-for-This-Project.md) covers addresses, CIDR, ports, inbound versus outbound and what a stateful firewall is. Everything below builds on those.
+
 Every DigitalOcean droplet gets a public IP address, and you cannot remove it. So the question is not "how do we keep it off the internet" but "how do we make sure nothing on that address answers". The answer is a cloud firewall that is attached by tag and in force from the first boot.
 
 ## The pieces

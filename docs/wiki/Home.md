@@ -4,6 +4,23 @@ A small, cheap, locked-down DigitalOcean environment built with OpenTofu, applie
 
 If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md). It is the reason the whole thing is shaped the way it is.
 
+## New to cloud, Terraform or zero trust? Start from zero
+
+If words like "VPC", "Terraform", "CI" or "secrets manager" are new to you, the pages below assume too much. **[Start here if you are new](Start-Here-If-You-Are-New.md)** maps homelab ideas to cloud ideas and then walks through eight short primers, each ending with where that idea lives in this repository:
+
+| # | Page | One idea, explained from zero |
+|---|---|---|
+| 1 | [What is the cloud](What-Is-the-Cloud.md) | What you are renting, why it has a public address, who is responsible for what |
+| 2 | [Networking basics for this project](Networking-Basics-for-This-Project.md) | Addresses, ports, firewalls, and why "no inbound" still works |
+| 3 | [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) | Passwords, tokens, keys, MFA, least privilege, and what zero trust means |
+| 4 | [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) | Terraform and OpenTofu, plan and apply, state, drift, and how to read the code here |
+| 5 | [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) | How a change is proposed, checked by robots, reviewed and merged |
+| 6 | [Containers and Docker basics](Containers-and-Docker-Basics.md) | Containers versus VMs, state, and what makes a Pi app cloud-shaped |
+| 7 | [How money works in the cloud](How-Money-Works-in-the-Cloud.md) | What costs, how bills get out of hand, and how the cost gate works |
+| 8 | [Enterprise engineering habits](Enterprise-Engineering-Habits.md) | Why a tiny lab does things the hard way, and which habits to take home |
+
+After those, come back here and follow the reading order below.
+
 ## What you get out of this wiki
 
 - How each component works, what it is responsible for, and why it was picked over the obvious alternative.
@@ -71,4 +88,4 @@ Working ceiling: $30 per month across stages 0 to 4. The [cost gate](CI-Tests-an
 
 ## Where this wiki comes from
 
-These pages live in the main repository under `docs/wiki/` and are copied to the GitHub wiki by `scripts/publish-wiki.sh`. That is deliberate: edits go through a pull request, so the same secret scanning and review that guard the code also guard the documentation. Edits made directly in the GitHub wiki editor are overwritten on the next publish, so send a pull request instead.
+These pages live in the main repository under `docs/wiki/` and are published to the GitHub wiki by the Wiki workflow (`.github/workflows/wiki.yml`, which calls git-your-ship-together's `wiki-publish.yml`) on every merge to `main`. That is deliberate: edits go through a pull request, so the same secret scanning and review that guard the code also guard the documentation. Edits made directly in the GitHub wiki editor are overwritten on the next publish, so send a pull request instead.
