@@ -11,7 +11,7 @@ Three shapes of thing, from most to least like a computer at home:
 | Shape | What you get | Homelab equivalent | In this project |
 |---|---|---|---|
 | **Virtual machine** (DigitalOcean: **droplet**; AWS: EC2 instance) | A slice of a physical server that behaves like a whole Linux computer: its own CPU share, memory, disk, operating system, and network address. You log in and run whatever you want. | A Raspberry Pi or a Proxmox VM | The two connector droplets (stage 1), the workload droplet (stage 3) |
-| **Object storage** (DigitalOcean: **Spaces**; AWS: S3) | A place to put files, reached over HTTPS with an access key. No operating system, no disk to manage, pay per gigabyte stored. | A NAS share, roughly | The state bucket planned for stage 3 |
+| **Object storage** (DigitalOcean: **Spaces**; AWS: S3) | A place to put files, reached over HTTPS with an access key. No operating system, no disk to manage. AWS S3 bills per gigabyte stored and transferred; DigitalOcean Spaces has a $5 monthly minimum that includes a generous allowance, so even one small file costs $5. | A NAS share, roughly | The state bucket planned for stage 3 |
 | **Serverless functions** (DigitalOcean: **Functions**; AWS: Lambda) | You hand over a small program and a schedule or a web address. The provider runs it when triggered and bills the seconds it ran. No machine to maintain at all. | A cron job, with no computer | The timer jobs planned for stage 3 |
 
 Everything else a provider sells (managed databases, Kubernetes, load balancers, CDNs) is a packaged combination of those three with staff on call. This project uses none of them, on purpose; the [Roadmap](Roadmap.md) explains why each is "not yet".

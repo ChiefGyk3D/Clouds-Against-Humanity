@@ -162,11 +162,24 @@ What it decides:
 | A tag, or a push to any other branch | Nothing. |
 | A pull request from a fork | Nothing. Spacelift runs a fork's pull request only when a push policy defines `allow_fork`, and this one never does. |
 
+**Plan check first.** Spacelift's documentation (read 2026-10-12) says the Git push policy type is available only to paid Spacelift accounts, and that policies live under **Enforce Guardrails > Policies**, visible to Spacelift admins. On the free plan there is no Policies entry to find. The free-plan route is below; the policy file stays in the repository, tested, for the day the plan changes.
+
 Why it exists: on 2026-10-12 a pull request that changed only `docs/wiki/` and the README got a red `spacelift/cah-10-access` check. The proposed run had no credentials by design, so it could only fail. Pull requests are already covered by `tofu test` with mocked providers in GitHub Actions, so a proposed run adds a failure and nothing else. Never proposing also closes the gap described in section 8: no pull request's code ever runs in Spacelift next to the Doppler context.
 
-### Attach it (once)
+### Free plan: narrow each stack's project root and globs
 
-1. In Spacelift, open **Policies**, choose **Create policy**, name it `cah-push`, and pick the type **Git push**.
+Without a push policy, Spacelift's built-in behaviour starts a stack's runs only when a push or pull request changes a file inside the stack's **project root** or matching one of its **project globs**. A docs-only pull request reaching `cah-10-access` means that stack's root or globs cover more than the stack. For each stack, open it, then **Settings**, and set:
+
+| Stack | Project root | Project globs |
+|---|---|---|
+| `cah-00-foundation` | `stacks/00-foundation` | `modules/**`, `scripts/spacelift/**`, `.spacelift/**` |
+| `cah-10-access` | `stacks/10-access` | `modules/**`, `scripts/spacelift/**`, `.spacelift/**` |
+
+Remove any other glob, such as `**`, `*` or one that covers `docs/`. Then a docs-only pull request or merge starts nothing. What this cannot do is the other half of the policy: a pull request that does change a stack still gets a proposed run, which still fails at the provider without credentials. On the free plan that red check is expected on those pull requests only; branch protection requires only `CI green`, so it does not block a merge, and `tofu test` in CI is the real test. The exposure in section 8 also remains: that proposed run executes the pull request's code with the Doppler context attached, so keep this repository single-writer.
+
+### Paid plan: attach the policy (once)
+
+1. In Spacelift, open **Enforce Guardrails > Policies**, choose **Create policy**, name it `cah-push`, and pick the type **Git push**.
 2. Paste the contents of `.spacelift/policies/push.rego` as the body. Do not paste `push_test.rego`; it is only for CI.
 3. Add the label `autoattach:cah`, so it attaches to every stack labelled `cah`, the same way the Doppler context does. Or attach it by hand to `cah-00-foundation` and `cah-10-access`.
 4. Detach any other Git push policy from those stacks. With more than one attached, the outcome is a combination of both and is no longer what the tests describe.

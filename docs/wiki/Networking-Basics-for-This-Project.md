@@ -22,7 +22,7 @@ You will see `10.78.0.0/24` throughout the repo. That is a **CIDR** block: a ran
 
 An address gets a packet to a machine. A **port** gets it to the right program on that machine. A port is a number from 1 to 65535. Some are conventional: 22 for SSH, 80 for plain web traffic, 443 for HTTPS, 53 for DNS.
 
-A program that wants to receive connections **listens** on a port. SSH listens on 22. A web server listens on 80 and 443. Nothing listens on a port unless a program asks to, and a port nobody is listening on just drops whatever arrives.
+A program that wants to receive connections **listens** on a port. SSH listens on 22. A web server listens on 80 and 443. Nothing listens on a port unless a program asks to. A port nobody is listening on is **closed**: the machine answers a TCP connection attempt with a refusal (a reset), and may answer UDP with an "unreachable" message. A firewall is different: it drops the packet silently and the sender hears nothing. That difference is how a scanner tells "closed" from "filtered", which comes up at the end of this page.
 
 This is the single most important idea on this page: **an attacker can only talk to a program that is listening.** A machine with no listening programs reachable from the internet has nothing to attack from the internet. This project's connectors have exactly that property, and the rest of the page explains how they still do useful work.
 

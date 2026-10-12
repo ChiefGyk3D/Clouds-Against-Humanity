@@ -85,7 +85,7 @@ State is where beginners get hurt:
 
 - **Lose the state and the tool forgets what it built.** The resources still exist and still bill you, but the tool will try to create them again. The provider then refuses or you get duplicates.
 - **State contains everything about the resources, including secrets** that were passed in. A token written into a machine's configuration is in the state file in plain text. So where the state lives, and who can read it, is a security question. This project keeps state in Spacelift and lists "connector tokens are in state" as an accepted risk in the [Threat model](Threat-Model.md).
-- **Two people applying at once corrupts state.** Which is one reason to run the tool in one shared place rather than on laptops.
+- **Two applies at once can corrupt state** when nothing locks it, for example two laptops each holding a copy. Shared backends lock the state while an apply runs, and a runner such as Spacelift queues runs one at a time per stack. That is one reason to run the tool in one shared place rather than on laptops.
 
 ## Declarative, not a script
 

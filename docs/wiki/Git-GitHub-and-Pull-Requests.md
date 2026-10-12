@@ -29,9 +29,12 @@ flowchart LR
     review["A human reads the diff"]:::you
     merge["Merge to main"]:::you
     sl["Spacelift plans the change,<br/>a human confirms, it applies"]:::cloud
+    none["No Spacelift run<br/>(docs, README, another stack)"]:::ctrl
     idea --> pr --> ci --> green
     green -- "no" --> idea
-    green -- "yes" --> review --> merge --> sl
+    green -- "yes" --> review --> merge
+    merge -- "changed a stack,<br/>a module or the Spacelift setup" --> sl
+    merge -- "anything else" --> none
 
     classDef you fill:#132a1f,stroke:#4ade80,color:#dcfce7
     classDef ctrl fill:#1e1b3a,stroke:#a78bfa,color:#ede9fe

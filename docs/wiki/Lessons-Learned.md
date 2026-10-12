@@ -97,8 +97,11 @@ The DigitalOcean account was rebuilt and everything was redeployed. Four things 
 
 **Fix.** A Spacelift push policy, `.spacelift/policies/push.rego`, that never proposes a run and starts a tracked run only when a merge to `main` changes the stack, a shared module, the secrets hook or the Spacelift configuration. Pull requests are covered by `tofu test` with mocked providers in GitHub Actions, which needs no credential. The policy has its own tests, and the job that runs them went into git-your-ship-together's `tofu-ci.yml` rather than into this repository, alongside the `tofu test` loop this repository used to carry by hand. Spacelift reads policies from its own store, not from the repository, so the policy takes effect only once it is created there (runbook section 9).
 
+**Then a second surprise.** The Policies menu was not where the guide said, and Spacelift's documentation explained why: push policies are a paid feature. On the free plan, the control that is left is each stack's project root and project globs, which Spacelift's built-in behaviour already uses to decide what a change touches. Narrowing those stops docs-only pull requests from reaching a stack; it cannot stop a pull request that changes a stack from getting a proposed run.
+
 **Lessons.**
 
 - A check that can only fail is worse than no check. People learn to ignore red, and the next red that matters gets ignored too. If a check cannot pass by design, stop it from running rather than explaining it every time.
+- Check that a feature exists on your plan before building on it. This is lesson 7 again, about OIDC, learned a second time.
 - Prove the mitigation, not just the policy. The tests include a docs-only pull request (must start nothing) and a merge that arrives with its pull request attached (must still deploy), because getting the second one wrong would have silently stopped every deployment.
 - When a fix is a job every similar repository would need, put it in the shared library first. A copy in one repository is a copy that drifts.

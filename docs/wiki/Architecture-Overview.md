@@ -42,7 +42,7 @@ flowchart TB
 
     dev -- "push branch, open PR" --> gh
     gh -- "every PR and push" --> ci
-    gh -- "PR: no run (push policy)<br/>main: tracked run" --> sl
+    gh -- "PR: no run (push policy)<br/>main: tracked run if the<br/>change touches that stack" --> sl
     sl -- "read-only service token" --> dp
     dp -- "named secrets, masked" --> sl
     sl -- "plan, then apply after<br/>a human confirms" --> doapi

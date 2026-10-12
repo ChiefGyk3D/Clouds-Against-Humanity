@@ -65,7 +65,9 @@ A proposed run that can only fail is noise: it posts a red check on every pull r
 - a push or merge to `main` that changes the stack's own directory, `modules/`, the secrets hook or `.spacelift/` starts a tracked run;
 - everything else starts nothing: pull requests, docs-only merges, tags, other branches, forks.
 
-The policy is written in Rego, the language of [Open Policy Agent](https://www.openpolicyagent.org/), and has its own tests (`push_test.rego`) that CI runs on every pull request. Spacelift does not read it from the repository: it is created once in Spacelift with the file as its body, and updated by hand after a change merges. The steps are in [section 9 of the secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#9-the-push-policy). [Lessons learned](Lessons-Learned.md) item 10 is the story of the red check that prompted it.
+The policy is written in Rego, the language of [Open Policy Agent](https://www.openpolicyagent.org/), and has its own tests (`push_test.rego`) that CI runs on every pull request. Spacelift does not read it from the repository: it is created once in Spacelift with the file as its body, and updated by hand after a change merges.
+
+**One catch: push policies are a paid Spacelift feature.** On the free plan the same effect is only half available. Spacelift's built-in behaviour already ignores changes outside a stack's project root and project globs, so setting those narrowly (the stack's own directory plus `modules/**`, `scripts/spacelift/**` and `.spacelift/**`) stops docs-only pull requests and merges from starting anything. A pull request that changes a stack still gets a proposed run that fails without credentials. That is a real limit of the free plan, written down rather than hidden. The steps are in [section 9 of the secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#9-the-push-policy). [Lessons learned](Lessons-Learned.md) item 10 is the story of the red check that prompted it.
 
 ### Why autodeploy is off
 

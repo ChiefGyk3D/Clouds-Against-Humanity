@@ -27,9 +27,9 @@ A token is just as good as a password and often better for an attacker: it does 
 
 ## How keys work, without the math
 
-A key pair is two numbers with a special relationship. Anything locked with one can only be unlocked with the other. You keep one (the **private key**) and publish the other (the **public key**).
+A key pair is two numbers with a special relationship. You keep one (the **private key**) and publish the other (the **public key**). With the private key you can make a **signature** over any piece of data; with the public key, anyone can check that signature, but nobody can make a new one.
 
-When you SSH to a machine that has your public key, the machine sends a random challenge locked with that public key. Only your private key can unlock it. You send back the answer; the machine knows it is you. Your private key never left your laptop, nothing reusable went over the wire, and there is nothing on the server worth stealing (a public key is public).
+When you SSH to a machine that has your public key, your client signs a piece of data that is unique to this one connection (it is tied to the session the two sides just set up, so it is useless anywhere else). The server checks the signature against your public key. If it checks out, only the holder of the private key could have made it, so the server knows it is you. Your private key never left your laptop, nothing reusable went over the wire, and there is nothing on the server worth stealing (a public key is public). Some older explanations describe this as the server encrypting a challenge for you to decrypt; modern SSH keys such as ed25519 sign rather than decrypt.
 
 Compare that to a password, which goes over the wire every time, can be guessed, can be reused from another site's breach, and is only as strong as the person who chose it. This is why the droplets here accept keys only: there is no password to guess, so the endless password-guessing traffic that hits every internet-facing SSH server has nothing to work with.
 
