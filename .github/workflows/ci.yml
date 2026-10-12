@@ -9,7 +9,7 @@ permissions: {}
 
 jobs:
   tofu:
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/tofu-ci.yml@9fd0907b20781556920e787822dfb1a1c7890151 # pre-release head of git-your-ship-together PR 151; re-pinned to its release tag before this merges
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/tofu-ci.yml@8fdb8d106b11aae0f37e893bb57e9bd8e8b0e7b7 # git-your-ship-together main at PR 151 (untagged; next release)
     permissions:
       contents: read
       id-token: write
@@ -22,7 +22,7 @@ jobs:
       policy-directories: .spacelift/policies
 
   python:
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/python-ci.yml@9fd0907b20781556920e787822dfb1a1c7890151 # pre-release head of git-your-ship-together PR 151; re-pinned to its release tag before this merges
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/python-ci.yml@8fdb8d106b11aae0f37e893bb57e9bd8e8b0e7b7 # git-your-ship-together main at PR 151 (untagged; next release)
     permissions:
       contents: read
       id-token: write
@@ -38,7 +38,7 @@ jobs:
       docker-build: false
 
   security:
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/security.yml@9fd0907b20781556920e787822dfb1a1c7890151 # pre-release head of git-your-ship-together PR 151; re-pinned to its release tag before this merges
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/security.yml@8fdb8d106b11aae0f37e893bb57e9bd8e8b0e7b7 # git-your-ship-together main at PR 151 (untagged; next release)
     permissions:
       contents: read
       security-events: write
