@@ -88,4 +88,4 @@ Working ceiling: $30 per month across stages 0 to 4. The [cost gate](CI-Tests-an
 
 ## Where this wiki comes from
 
-These pages live in the main repository under `docs/wiki/` and are copied to the GitHub wiki by `scripts/publish-wiki.sh`. That is deliberate: edits go through a pull request, so the same secret scanning and review that guard the code also guard the documentation. Edits made directly in the GitHub wiki editor are overwritten on the next publish, so send a pull request instead.
+These pages live in the main repository under `docs/wiki/` and are published to the GitHub wiki by the Wiki workflow (`.github/workflows/wiki.yml`, which calls git-your-ship-together's `wiki-publish.yml`) on every merge to `main`. That is deliberate: edits go through a pull request, so the same secret scanning and review that guard the code also guard the documentation. Edits made directly in the GitHub wiki editor are overwritten on the next publish, so send a pull request instead.

@@ -39,7 +39,7 @@ Record the real expiry dates in your password manager, not in this repository. A
 
 `scripts/spacelift/doppler-env.sh` is the only code that sees the token. It fails closed and does this:
 
-- **Only tracked and destroy runs, only on `main`.** A pull request produces a proposed run, and planning executes code from the pull request. This repository is public, so a proposed run never gets a credential. The cost is that a pull request plan cannot talk to DigitalOcean; CI covers it with `tofu test` and mocked providers, and the real plan happens on `main` before you confirm.
+- **Only tracked and destroy runs, only on `main`.** A pull request produces a proposed run, and planning executes code from the pull request. This repository is public, so a proposed run never gets a credential. The cost is that a pull request plan cannot talk to DigitalOcean; CI covers it with `tofu test` and mocked providers, and the real plan happens on `main` before you confirm. Once the push policy in section 9 is attached, Spacelift does not start a proposed run at all, so this rule becomes the second line of defence rather than the only one.
 - **Task runs get nothing.** A task runs an arbitrary command. If you need a task to hold a credential, add that deliberately and write it down here.
 - **Named secrets only.** Each stack lists the exact names it needs in `.spacelift/config.yml`. A name must be a plain identifier.
 - **Verified download.** The Doppler CLI is fetched from the official release over HTTPS and checked against the SHA-256 pinned in the script. A mismatch deletes the file and stops the run.
@@ -108,7 +108,7 @@ Replace the value in Doppler. The next tracked run picks it up. Rotating the con
 
 ### Add a stack
 
-1. Create the stack in Spacelift with the label `cah`, so the context attaches.
+1. Create the stack in Spacelift with the label `cah`, so the context attaches, and so does the push policy if it carries `autoattach:cah` (section 9).
 2. Add its entry to `.spacelift/config.yml`, keyed by the stack id.
 3. Open a pull request.
 
@@ -131,7 +131,7 @@ The script tests run it under plain `sh` with stubbed `doppler` and `curl`, and 
 
 | What you see in the run log | What it means | Fix |
 |---|---|---|
-| `run type 'PROPOSED' does not get secrets; skipping` | A pull request plan. Expected. | Nothing. The plan then fails at the provider, by design. |
+| `run type 'PROPOSED' does not get secrets; skipping` | A pull request plan. Expected without the push policy. | Attach the push policy (section 9) and proposed runs stop happening. Without it, the plan fails at the provider, by design. |
 | `DOPPLER_TOKEN is not set; is the cah-doppler context attached?` | The context did not attach. | Check the stack has the label `cah` and the context has `autoattach:cah`. |
 | `could not read NAME from Doppler` | The service token is expired or revoked, or `NAME` is missing in `prd`. | Rotate the service token (section 5) or add the secret. |
 | `NAME is empty in Doppler` | The secret exists but has no value. | Set the value. |
@@ -142,8 +142,48 @@ The script tests run it under plain `sh` with stubbed `doppler` and `curl`, and 
 
 - **No OIDC on this plan.** Spacelift's run identity token is not issued to this account (checked with a task: the variable was absent). If the plan changes, the token fetch can switch to Doppler OIDC, so no long-lived token sits in Spacelift. Only the login step in `doppler-env.sh` would change.
 - **The real trust boundary is Spacelift, not the script.** The script and `.spacelift/config.yml` are read from the branch being run, and the `cah-doppler` context is attached to every run type. Anyone who can push a branch or open a pull request can change either file to read `$DOPPLER_TOKEN` directly, so the script's run-type and branch checks only guard honest code. Today the repository owner is the only writer, which keeps the risk low. Keep it that way by doing all of the following:
-  - **A push policy** on these stacks that ignores pull request events from forks, and ignores pull requests that do not come from a branch of this repository. Until it exists, do not let anyone else open pull requests that trigger runs.
+  - **The push policy** in section 9, attached to every stack. It never proposes a run, so no pull request's code runs in Spacelift next to the context, from a fork or from a branch of this repository. Until it is attached, do not let anyone else open pull requests.
   - **Branch protection** on `main` stays on (a pull request and `CI green` are required). Add a required review before giving anyone else write access.
   - **Keep the Doppler token read-only** and scoped to this one config, so a leak reaches only these secrets.
 - **Masking must be confirmed on the first tracked run.** The script masks each value with Spacelift's documented `echo "::add-mask <value>"` command, which the runner is meant to consume without showing it. The documentation does not say the mask line itself is hidden from the log. After the first tracked run, search that run's log for the token prefix (`dop_v1_`) and confirm it never appears. If it does, revoke the token at once, then remove the `echo "::add-mask"` line and replace it with a different masking approach.
 - **Unverified until the first tracked run:** that hooks run with `/mnt/workspace/source/` as the checkout path, and that the Alpine runner image has `curl`, `tar` and `sha256sum`. If either is wrong the run fails closed with a clear message; fix the path or the install step.
+
+## 9. The push policy
+
+`.spacelift/policies/push.rego` decides which Git events start a Spacelift run. Spacelift does not read it from the repository; it is a policy object in Spacelift with this file as its body. The tests next to it (`push_test.rego`) run on every pull request through the `policy (OPA)` job of git-your-ship-together's `tofu-ci.yml`.
+
+What it decides:
+
+| Event | Outcome |
+|---|---|
+| Push or merge to `main` that changes the stack's project root, `modules/`, `scripts/spacelift/` or `.spacelift/` | Tracked run. It stops after the plan for you to confirm, as before. |
+| Push or merge to `main` that changes only other files (docs, the wiki, the README, another stack) | Nothing. |
+| Any pull request, whatever it changes | Nothing. No proposed run, so no red check from a plan that could only fail without credentials. |
+| A tag, or a push to any other branch | Nothing. |
+| A pull request from a fork | Nothing. Spacelift runs a fork's pull request only when a push policy defines `allow_fork`, and this one never does. |
+
+Why it exists: on 2026-10-12 a pull request that changed only `docs/wiki/` and the README got a red `spacelift/cah-10-access` check. The proposed run had no credentials by design, so it could only fail. Pull requests are already covered by `tofu test` with mocked providers in GitHub Actions, so a proposed run adds a failure and nothing else. Never proposing also closes the gap described in section 8: no pull request's code ever runs in Spacelift next to the Doppler context.
+
+### Attach it (once)
+
+1. In Spacelift, open **Policies**, choose **Create policy**, name it `cah-push`, and pick the type **Git push**.
+2. Paste the contents of `.spacelift/policies/push.rego` as the body. Do not paste `push_test.rego`; it is only for CI.
+3. Add the label `autoattach:cah`, so it attaches to every stack labelled `cah`, the same way the Doppler context does. Or attach it by hand to `cah-00-foundation` and `cah-10-access`.
+4. Detach any other Git push policy from those stacks. With more than one attached, the outcome is a combination of both and is no longer what the tests describe.
+5. When the policy changes in a pull request, paste the new body into the same policy after the merge. The file in the repository is the reviewed copy, not the live one; a check on the next tracked run is the only proof they match.
+
+### Verify it
+
+- Open a pull request that changes only a Markdown file. No `spacelift/...` check should appear on it.
+- Merge a change under `stacks/10-access/`. `cah-10-access` should start a tracked run that stops for confirmation.
+- The policy sets `sample := true`, so Spacelift keeps recent inputs in the policy workbench. Open one and confirm that `input.push.branch`, `input.push.affected_files` and `input.stack.project_root` look the way the policy assumes. The input shape was taken from Spacelift's published example policies, not from a real event on this account, so check it once.
+
+### Run the tests locally
+
+```bash
+opa test .spacelift/policies -v
+opa check --strict .spacelift/policies
+opa fmt --list --fail .spacelift/policies
+```
+
+Use OPA 1.21.0, the version CI pins (`opa_linux_amd64_static`, SHA-256 `5eef70644868bb04d0556bcc795ee42f2ab379e73f51d1bfa30f83e1305bc9b9`).

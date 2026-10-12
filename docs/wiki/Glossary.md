@@ -52,7 +52,9 @@ Every term the wiki uses, in plain language, with a pointer to the page that exp
 | **Plan** (basics) | The OpenTofu step that compares the code with reality and lists what would be created, changed or destroyed, without doing it. The thing a human reads before confirming. |
 | **Port** (basics) | A number from 1 to 65535 that directs a packet to the right program on a machine. 22 is SSH, 443 is HTTPS. |
 | **Portainer** | A web UI for a Docker host: stacks, containers, logs. Community Edition is free. It talks to Docker over the local socket, which is root on the host, so its UI is reached only through Twingate here. |
-| **Proposed run** | A Spacelift plan for a pull request. Gets no credentials in this repo. |
+| **OPA / Rego** | Open Policy Agent, a general-purpose policy engine, and Rego, the language its policies are written in. Spacelift policies are Rego; this repo tests its push policy with `opa test` in CI. |
+| **Proposed run** | A Spacelift plan for a pull request. Gets no credentials in this repo, and the push policy stops Spacelift starting one at all. |
+| **Push policy (Spacelift)** | A Rego policy that decides which Git events start a Spacelift run, and whether as a tracked or proposed run. Here: `.spacelift/policies/push.rego`, which tracks merges that change a stack and never proposes. [Spacelift](Spacelift.md) |
 | **Provider** (basics) | An OpenTofu plugin that knows how to talk to one service's API: DigitalOcean, Twingate. |
 | **Public key / private key** (basics) | The two halves of a key pair. You publish one and keep the other; anything locked with one opens only with the other. SSH login here uses them instead of passwords. |
 | **Pull request** (basics) | A proposal to merge a branch into `main`, showing the exact diff, with automated checks and human review. Every change here goes through one. [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) |

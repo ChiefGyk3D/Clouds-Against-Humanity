@@ -76,10 +76,12 @@ Clouds-Against-Humanity/
   modules/twingate-connector/              connector, its tokens, its droplet and cloud-init
   scripts/cost_check.py                    cost gate
   scripts/spacelift/doppler-env.sh         hook that loads Doppler secrets into a run
-  scripts/publish-wiki.sh                  copies docs/wiki to the GitHub wiki
-  tests/                                   pytest for the cost gate and the hook
+  scripts/gen-wiki.sh                      writes the wiki pages from docs/wiki (the Wiki workflow publishes them)
+  tests/                                   pytest for the cost gate, the hook and the wiki generator
   .spacelift/config.yml                    which secrets each stack loads
-  .github/workflows/ci.yml                 GYST callers + tofu-test + CI green
+  .github/workflows/ci.yml                 GYST callers only (tofu, python, security) + CI green
+  .github/workflows/wiki.yml               publishes docs/wiki through GYST's wiki-publish.yml
+  .spacelift/policies/                     Spacelift push policy and its OPA tests
   docs/wiki/                               the wiki pages (source of truth)
   docs/stages/                             operator guides: decisions, verify, rollback, per stage
   docs/cost.md, docs/cost-prices.json      cost gate explained, price table
@@ -90,21 +92,24 @@ Modules are reusable building blocks. Stacks are the things you actually apply, 
 
 ## Run the checks
 
-Install OpenTofu 1.8 or newer and Python 3, then:
+Install OpenTofu 1.8 or newer, Python 3 and, for the policy tests, OPA 1.21.0, then:
 
 ```bash
 # cost gate: totals the planned resources and compares with docs/stages/approved.json
 python3 -I scripts/cost_check.py --root .
 
-# tests for the cost gate and the Doppler hook (needs a virtualenv with pytest installed)
+# tests for the cost gate, the Doppler hook and the wiki generator (needs a virtualenv with pytest installed)
 python3 -I -m pytest tests -q
+
+# tests for the Spacelift push policy
+opa test .spacelift/policies -v
 
 # tests for one module or stack (no cloud account needed, providers are mocked)
 tofu -chdir=modules/firewall init -backend=false
 tofu -chdir=modules/firewall test
 ```
 
-Run the second pair for each of `modules/vpc`, `modules/firewall`, `modules/twingate-connector`, `stacks/00-foundation` and `stacks/10-access`. CI does the same and also runs the cost gate.
+Run the last pair for each of `modules/vpc`, `modules/firewall`, `modules/twingate-connector`, `stacks/00-foundation` and `stacks/10-access`. CI runs all of it through git-your-ship-together's shared workflows; this repository has no CI job of its own.
 
 ## Documentation
 
@@ -117,7 +122,7 @@ Run the second pair for each of `modules/vpc`, `modules/firewall`, `modules/twin
 | The money | [Cost](docs/cost.md) |
 | What could go wrong | [Threat model](docs/wiki/Threat-Model.md), [Lessons learned](docs/wiki/Lessons-Learned.md) |
 
-The wiki is generated from `docs/wiki/`, so corrections go in as pull requests and get the same review and secret scanning as the code. `scripts/publish-wiki.sh` copies them over.
+The wiki is generated from `docs/wiki/`, so corrections go in as pull requests and get the same review and secret scanning as the code. The Wiki workflow publishes them on every merge to `main`.
 
 ## Public by design
 

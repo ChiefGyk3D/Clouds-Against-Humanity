@@ -88,3 +88,17 @@ The DigitalOcean account was rebuilt and everything was redeployed. Four things 
 **A stack dependency starts its own run.** When foundation finished, Spacelift started a run on the access stack by itself. Triggering another one by hand queued a duplicate behind it. Check the stack's runs before you trigger.
 
 **Lesson.** On a new account, plan for the first apply to find the account's real limits, and make each failure cheap: keep stages small, have nothing billing until the last stage.
+
+## 10. A red check from a run that could never pass
+
+**Symptom.** A pull request that changed only the wiki and the README got a red `spacelift/cah-10-access` check. Every GitHub Actions job was green, including the `CI green` gate that branch protection requires, so the pull request could still merge. It just looked broken.
+
+**What was going on.** Spacelift started a proposed run for the pull request and posted its result back to GitHub. In this repository a proposed run gets no credentials by design (the secrets hook skips it), so its plan fails at the provider every time. The run was not testing anything; it could only fail. Earlier pull requests had no such check, so something on the Spacelift side changed which pull requests it proposed runs for. That part was not visible from the repository.
+
+**Fix.** A Spacelift push policy, `.spacelift/policies/push.rego`, that never proposes a run and starts a tracked run only when a merge to `main` changes the stack, a shared module, the secrets hook or the Spacelift configuration. Pull requests are covered by `tofu test` with mocked providers in GitHub Actions, which needs no credential. The policy has its own tests, and the job that runs them went into git-your-ship-together's `tofu-ci.yml` rather than into this repository, alongside the `tofu test` loop this repository used to carry by hand. Spacelift reads policies from its own store, not from the repository, so the policy takes effect only once it is created there (runbook section 9).
+
+**Lessons.**
+
+- A check that can only fail is worse than no check. People learn to ignore red, and the next red that matters gets ignored too. If a check cannot pass by design, stop it from running rather than explaining it every time.
+- Prove the mitigation, not just the policy. The tests include a docs-only pull request (must start nothing) and a merge that arrives with its pull request attached (must still deploy), because getting the second one wrong would have silently stopped every deployment.
+- When a fix is a job every similar repository would need, put it in the shared library first. A copy in one repository is a copy that drifts.

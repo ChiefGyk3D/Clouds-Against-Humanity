@@ -14,7 +14,7 @@ A **repository** (repo) is the folder plus its whole history. The one you are re
 
 ## GitHub: the shared copy, plus the tooling around it
 
-**GitHub** hosts a copy of the repository that everyone works against, and adds the things git itself does not have: a web view, issues, pull requests, automated checks, and a wiki. The pages you are reading are published from the `docs/wiki/` folder of the repo to the GitHub wiki by a script, so the wiki and the code have the same history and the same review.
+**GitHub** hosts a copy of the repository that everyone works against, and adds the things git itself does not have: a web view, issues, pull requests, automated checks, and a wiki. The pages you are reading are published from the `docs/wiki/` folder of the repo to the GitHub wiki by a workflow on every merge, so the wiki and the code have the same history and the same review.
 
 ## The pull request: how a change is proposed
 
@@ -94,10 +94,10 @@ Two rules from the project's own guidelines: never include anything that identif
 
 | Idea | Where |
 |---|---|
-| The CI workflow | `.github/workflows/ci.yml`, which mostly calls shared workflows from the author's [git-your-ship-together](https://github.com/ChiefGyk3D/git-your-ship-together) repository |
+| The CI workflow | `.github/workflows/ci.yml`, which only calls shared workflows from the author's [git-your-ship-together](https://github.com/ChiefGyk3D/git-your-ship-together) repository |
 | Actions pinned by commit hash | Every `uses:` line in that file ends in a 40-character hash with `# vX.Y.Z` as a comment |
 | The single gate job | The `CI green` job at the bottom of the workflow |
-| The wiki publish script | `scripts/publish-wiki.sh` |
+| The wiki publish workflow | `.github/workflows/wiki.yml` (calls GYST's `wiki-publish.yml`; `scripts/gen-wiki.sh` writes the pages) |
 | How a merge becomes infrastructure | [Spacelift](Spacelift.md) |
 
 ## Try it yourself

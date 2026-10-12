@@ -10,20 +10,14 @@ Every pull request runs the same set of checks, and the merge button stays disab
 flowchart LR
     pr["Push or pull request"]:::you
     subgraph gyst["Shared workflows from git-your-ship-together (pinned by commit)"]
-        tofu["tofu-ci<br/>fmt -check, validate"]:::ctrl
-        py["python-ci<br/>pytest on 3.12 and 3.13, ruff"]:::ctrl
+        tofu["tofu-ci<br/>fmt -check, validate, tflint, Trivy,<br/>tofu test (mocked providers),<br/>opa test (Spacelift push policy)"]:::ctrl
+        py["python-ci<br/>cost gate, then pytest<br/>on 3.12 and 3.13, ruff"]:::warn
         sec["security<br/>code scanning, dependency review,<br/>Gitleaks secret scanning"]:::ctrl
-    end
-    subgraph local["Repo-specific job"]
-        cost["Cost gate<br/>scripts/cost_check.py"]:::warn
-        tt["tofu test<br/>every module and stack,<br/>mocked providers"]:::ctrl
     end
     green{"CI green<br/>every job must be success"}:::you
     pr --> tofu --> green
     pr --> py --> green
     pr --> sec --> green
-    pr --> cost --> green
-    pr --> tt --> green
 
     classDef you fill:#132a1f,stroke:#4ade80,color:#dcfce7
     classDef ctrl fill:#1e1b3a,stroke:#a78bfa,color:#ede9fe
@@ -34,7 +28,9 @@ flowchart LR
 
 ### Call shared workflows, do not copy them
 
-The heavy lifting comes from [git-your-ship-together](https://github.com/ChiefGyk3D/git-your-ship-together) (GYST), the author's library of hardened reusable GitHub Actions workflows. This repo only calls them. Anything reusable gets added to GYST first and then called from here, so a fix to a scanner configuration lands in every repository at once instead of drifting across copies. `tofu test` is the one repo-specific job, because GYST has no test leg for OpenTofu yet (adding one to GYST has been proposed).
+The heavy lifting comes from [git-your-ship-together](https://github.com/ChiefGyk3D/git-your-ship-together) (GYST), the author's library of hardened reusable GitHub Actions workflows. This repo only calls them, and has no CI job of its own. Anything reusable gets added to GYST first and then called from here, so a fix to a scanner configuration lands in every repository at once instead of drifting across copies.
+
+That rule was tested on 2026-10-12. This repository used to carry its own job that looped `tofu test` over the modules and stacks, because GYST had none, and it needed somewhere to test a Spacelift push policy written in Rego. Both are the same job in any repository with OpenTofu tests or policies, so both went into GYST's `tofu-ci.yml` as opt-in legs (`test: true` and `policy-directories`), with their own fixture and contract tests there, and this repository now just switches them on. The one thing that stayed here is the cost gate script itself, because its rules are this repository's; it runs as the first step of the `python-ci` test command, so it needs no job of its own either.
 
 ### Pin every action by commit SHA
 
@@ -104,6 +100,15 @@ for d in modules/vpc modules/firewall modules/twingate-connector stacks/00-found
   tofu -chdir="$d" init -backend=false -input=false
   tofu -chdir="$d" test
 done
+
+# the Spacelift push policy (OPA 1.21.0, as CI pins)
+opa fmt --list --fail .spacelift/policies
+opa check --strict .spacelift/policies
+opa test .spacelift/policies -v
 ```
 
 `-I` runs Python in isolated mode, so a stray file in the current directory cannot shadow a standard library module.
+
+## The wiki is published by a workflow too
+
+`.github/workflows/wiki.yml` calls GYST's `wiki-publish.yml`. On a pull request that touches `docs/wiki/` it runs `scripts/gen-wiki.sh`, which copies the pages and rewrites their links for the flat wiki, so a broken page fails review. On `main` it also publishes: a separate job with `contents: write`, which runs none of this repository's code, replaces every page in the GitHub wiki with the generated set. Nothing is published from a laptop and no personal token is involved. A page that exists only in the wiki editor is removed on the next publish, which is the point: `docs/wiki/` is the only place a page is written.

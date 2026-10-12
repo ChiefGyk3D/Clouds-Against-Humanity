@@ -1,0 +1,40 @@
+# Publishes docs/wiki/ to this repository's GitHub wiki. A caller of
+# git-your-ship-together's wiki-publish.yml, which every repository that
+# mirrors its docs into a wiki calls the same way.
+#
+# On a pull request that touches the pages it only generates them, so a
+# broken page or link rewrite fails the review; on main it also publishes.
+# The generate job runs scripts/gen-wiki.sh with contents: read; the publish
+# job holds contents: write, runs none of this repository's code, and replaces
+# every page in the wiki with the generated set. A page that exists only in
+# the wiki editor is removed: docs/wiki/ is the one place pages are written.
+#
+# GitHub creates a wiki's git repository only when its first page is saved in
+# the UI. If the publish job says so, open the Wiki tab, save any page once,
+# and re-run.
+name: Wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/wiki/**"
+      - "scripts/gen-wiki.sh"
+      - ".github/workflows/wiki.yml"
+  pull_request:
+    paths:
+      - "docs/wiki/**"
+      - "scripts/gen-wiki.sh"
+      - ".github/workflows/wiki.yml"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  wiki:
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/wiki-publish.yml@9fd0907b20781556920e787822dfb1a1c7890151 # pre-release head of git-your-ship-together PR 151; re-pinned to its release tag before this merges
+    permissions:
+      contents: write  # the publish job only, on main; the generate job holds contents: read
+    with:
+      generate-command: bash scripts/gen-wiki.sh "$OUT_DIR"
+      out-dir: wiki-out
