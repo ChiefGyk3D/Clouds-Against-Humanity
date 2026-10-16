@@ -1,6 +1,6 @@
 # Clouds Against Humanity: Other Clouds (AWS, Azure, GCP)
 
-Status: DRAFT for review. Date: 2026-10-16, revised the same day after an adversarial review (Codex) that found the cost-gate, contract, credential and Azure points now reflected below. Issue: #22.
+Status: DRAFT for review. Date: 2026-10-16, revised the same day after an adversarial review (Codex) that found the cost-gate, contract, credential and Azure points now reflected below. Issue: #22. Phase 0 (vendor fact check) is done: see [the findings](2026-10-16-multicloud-phase0-findings.md); where they differ from this document, the findings win.
 Tooling: OpenTofu throughout.
 Scope: how to teach and, where it is worth it, build this environment on AWS, Azure and GCP. This is a design, not an approval. Nothing here costs money, changes a stack, or moves a file until the operator approves a phase.
 
@@ -76,7 +76,7 @@ This table is the design's centre and is also the outline of the lesson. Everyth
 | Network | VPC per region | VPC per region, with subnets per availability zone, route tables and an internet gateway you create | Virtual network with subnets, per region | VPC is global; subnets are regional |
 | Packet filtering | Cloud firewall attached **by tag** | Security group attached to the instance's network interface; a rule's source or destination can be **another security group** (resolved to private addresses, with topology limits) | Network security group attached to a subnet or interface; **application security groups** separately group interfaces for use in rules | VPC firewall rules on the network; a rule's **target** is chosen by network tag or service account, and its ingress **source** by address range, tag or service account, with restrictions on mixing them |
 | Statefulness and defaults | Stateful; explicit outbound rules in this repo | Stateful; new groups allow all outbound by default | Stateful; default rules allow outbound | Stateful; implied allow egress, implied deny ingress |
-| How a "no inbound" VM still reaches the internet | Public IP on the droplet, inbound filtered | Public IPv4 on the instance **or** a NAT gateway | Per Microsoft, API versions released after 2026-03-31 create new virtual networks with default outbound access **off**, so a new deployment has no internet unless the code chooses a method (public IP, NAT gateway, or load-balancer outbound rule); older networks keep the old behaviour. Found in review, to be re-verified in phase 0 | A public IP **or** Cloud NAT |
+| How a "no inbound" VM still reaches the internet | Public IP on the droplet, inbound filtered | Public IPv4 on the instance **or** a NAT gateway | Only subnets in virtual networks created with the API version released after 2026-03-31 default to private; older API versions (including a pinned Terraform provider) and all existing networks keep default outbound access, so **set it explicitly** and choose a method (public IP, NAT gateway or load-balancer outbound rule); verified in phase 0 (2026-10-16) | A public IP **or** Cloud NAT; Cloud NAT is the cheaper pattern on GCP only at low traffic (below roughly 36 GiB a month processed) |
 | Machine identity | None needed here | Instance profile (an IAM role) | Managed identity | Service account |
 | How Spacelift authenticates to the cloud | One API token from Doppler | Spacelift's native AWS integration (an assumable role, short-lived credentials), or access keys | Native Azure integration, or a service principal | Native GCP integration, or a service account key |
 | Smallest sensible instance | `s-1vcpu-1gb` | a small burstable instance type | a small burstable VM size | a small shared-core machine type |
@@ -139,7 +139,7 @@ Each phase ends at a review point and a pull request the operator merges. None s
 
 | Phase | Deliverable | Cost | Who must be involved |
 |---|---|---|---|
-| 0. Verify | Re-check every row of the section 4 table against current vendor documentation and date it. Settle the AWS egress choice with measured prices. | None | Author |
+| 0. Verify | **Done 2026-10-16**, see [the findings](2026-10-16-multicloud-phase0-findings.md). Re-checked the section 4 table against vendor documentation and price lists, and settled the AWS egress choice with measured prices. The Spacelift plan gate is still open. | None | Author |
 | 1. Lessons: AWS | Account preparation, "same four pieces", cost lesson, status line | None | Author reviews, since AWS is their strength |
 | 2. Contract, shared bootstrap, gate | Extract the shared Twingate and cloud-init module; the semantic contract and its two tests; recursive manifest discovery; plan-JSON costing; per-provider price tables; the identifier check; per-cloud secret separation. The DigitalOcean stacks must produce an unchanged plan. | None (CI only) | Author; adversarial review |
 | 3. AWS code | `modules/aws/*`, `stacks/aws/*`, mocked tests, cost manifest, a stage doc. Not applied. | None until applied | Author reviews; adversarial review before any apply |
@@ -178,4 +178,4 @@ Consequences for the phases in section 8: phase 0 gains a gate (confirm the Spac
 
 ## 11. What this design does not claim
 
-It does not claim the section 4 vendor facts are current (one row was already wrong on first draft), that a two-connector AWS stack fits the approved figure, that the budget is a hard cap, or that the module contract survives contact with Azure's network model unchanged. Phase 0 exists to find out, and the design changes if the answers do.
+As of phase 0 (2026-10-16) the section 4 vendor facts were checked against vendor documentation and price lists; rows still marked UNVERIFIED in the [evidence files](2026-10-16-multicloud-phase0-evidence-aws.md) are not claimed, and vendor facts go stale, so each carries its retrieval date. The design does not claim that the budget is a hard cap, that the AWS stack has ever been applied in a real account (the measured fixed cost is an estimate from list prices), that the Spacelift AWS integration is available on the maintainer's plan (still the open gate), or that the module contract survives contact with Azure's network model unchanged. The design changes if any of those answers do.
