@@ -10,6 +10,7 @@
 - [6. Containers and Docker](Containers-and-Docker-Basics.md)
 - [7. How money works](How-Money-Works-in-the-Cloud.md)
 - [8. Enterprise habits](Enterprise-Engineering-Habits.md)
+- [9. Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md)
 
 **Start here (if the words above are familiar)**
 - [Architecture overview](Architecture-Overview.md)
