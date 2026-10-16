@@ -34,7 +34,7 @@ Two things this page relies on are plan features, and plan features change, so c
 - **Branch protection on a private repository** (the setting that stops a direct push to `main` and requires `CI green`) has been a paid-plan feature for private repositories. On a free personal account you may not be able to turn it on.
 - **A wiki on a private repository** has had the same restriction.
 
-If your plan lacks them, the private copy still works, but you have lost a gate, and you should say so in writing rather than pretend otherwise. What still stands between a bad commit and a running droplet is that you are the only writer and that Spacelift waits for your confirmation on every apply. That is a weaker position than a protected branch, and it is a good example of a trade-off worth writing down in your own threat model. Paying for the plan, or hosting the repository where the feature is free, are both reasonable answers.
+If your plan lacks them, the private copy still works, but you have lost a gate, and you should say so in writing rather than pretend otherwise. What still stands between a bad commit and a running droplet is that you are the only writer and that Spacelift waits for your confirmation on every apply. That is a weaker position than a protected branch, and it is a good example of a trade-off worth writing down in your own threat model. Paying for the plan, or hosting the repository where the feature is free, are both reasonable answers. Having a free plan is not a reason to skip the private repository; it is a reason to know which gate you are missing.
 
 ## Step 1: make your own private copy
 
@@ -64,6 +64,8 @@ git remote add upstream https://github.com/ChiefGyk3D/Clouds-Against-Humanity.gi
 
 What each part is for:
 
+- The private repository must already exist and be empty before you push. `git push --mirror` does not create it; it fills it. That is why the page asks for no README or license: a starting file would give the two histories nothing in common and the push would be refused.
+- A **bare** clone has the history and no working files. `--mirror` pushes every branch and tag in it. Together they make an exact copy of the repository's contents, which an ordinary clone and push would not.
 - `--bare` and `--mirror` copy the whole history, not just the latest files, so you can see how the project got here. That history is part of the lesson.
 - The `upstream` remote is how you pull in later improvements: `git fetch upstream`, then merge or rebase what you want. It is also the reason to keep your changes **small and in clearly separate commits**. A copy that has been edited everywhere cannot take upstream changes without a fight.
 
