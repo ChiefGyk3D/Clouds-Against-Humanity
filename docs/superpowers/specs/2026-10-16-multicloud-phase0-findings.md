@@ -45,7 +45,7 @@ Arithmetic is in the evidence files. Excludes data transfer, logging and any fre
 | Cloud and sizing | About per month | Notes |
 |---|---|---|
 | AWS, 2 x t4g.nano + 2 public IPv4 + 2 x 8 GiB gp3 | $14.71 | 0.5 GiB of memory, at the floor of Twingate's smallest documented size. Not recommended. |
-| **AWS, 2 x t4g.micro + 2 public IPv4 + 2 x 8 GiB gp3** | **$20.84** | Recommended starting point. Arm; see section 7. |
+| **AWS, 2 x t4g.micro + 2 public IPv4 + 2 x 8 GiB gp3** | **$20.84** | Cheapest candidate that clears Twingate's smallest documented floor. **It is below Twingate's general guidance of 1 CPU and 2 GB of memory** (the 512 MB figure is for a container deployment), so treat it as an experiment to test; a 2 GiB arm instance costs more and was not priced in phase 0. Arm; see section 7. |
 | AWS, 2 x t3.micro (x86) | $23.76 | Fallback if arm turns out not to work. |
 | Azure, 2 x B2ats_v2 + 2 public IPs + 2 x 32 GiB Standard SSD | about $25.82 | Default disk type unverified. B2pts_v2 (Arm) about $24.36. Lessons only, so not decided. |
 | GCP, 2 x e2-small + 2 external IPs + disks | about $34 to $36 | **VM prices unverified.** Twingate suggests e2-small on GCP; e2-micro is below its guidance. Lessons only. |
@@ -85,4 +85,4 @@ If it is gated, decision 6 applies: come back to the maintainer before using a s
 
 1. Run the Spacelift check in section 6 and report what the settings page does.
 2. Per-cloud ceiling, or one shared $30 with the clouds never applied together? (Section 8, item 1.)
-3. Arm (t4g.micro, $20.84) or x86 (t3.micro, $23.76) for the first AWS stack? The recommendation is arm, with x86 as the fallback.
+3. ~~Arm or x86 for the first AWS stack?~~ **Answered 2026-10-16: arm** (t4g.micro as an experiment, x86 as the fallback). Open point: the 1 GiB of memory is below Twingate's general guidance, so the first real apply should confirm the connector runs well on it, and a 2 GiB arm instance should be priced if it does not.
