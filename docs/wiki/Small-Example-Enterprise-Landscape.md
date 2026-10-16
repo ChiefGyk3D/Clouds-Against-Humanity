@@ -24,6 +24,7 @@ Two honest limits first:
 | Prove it is you | MFA on each account | Duo and other MFA and phishing-resistant authentication, enforced by the identity provider |
 | Who can use the admin accounts? | One person holds the root-level keys | Privileged access management such as Delinea: vaulted credentials, checkout, session recording |
 | Where do secrets live? | Doppler | Bitwarden Secrets Manager, Infisical, HashiCorp Vault, a cloud's own secrets service, and others |
+| How do you know something went wrong? | Planned: a Wazuh agent on each host reporting to a home SIEM ([Detection](Detection-and-Monitoring-Wazuh-and-the-Landscape.md)) | EDR and XDR (CrowdStrike, SentinelOne, Bitdefender GravityZone), cloud posture tools (Wiz), observability platforms (Datadog), a SIEM, often watched by a SOC or an MDR service |
 | How does change reach production? | A pull request, CI, Spacelift with a human confirm | The same shape, with change tickets, approvers, separate environments and often a platform team |
 
 ## Getting traffic from here to there
