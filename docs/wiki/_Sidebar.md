@@ -32,6 +32,12 @@
 - [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md)
 - [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md)
 
+**Other clouds (unverified drafts)**
+- [Why the clouds differ](Why-the-Clouds-Differ.md)
+- [AWS: account preparation](Provider-AWS-Account-Preparation.md)
+- [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md)
+- [AWS: where the money goes](Provider-AWS-Cost-Lesson.md)
+
 **Reference**
 - [Terraform reference](Terraform-Reference.md)
 - [Lessons learned](Lessons-Learned.md)

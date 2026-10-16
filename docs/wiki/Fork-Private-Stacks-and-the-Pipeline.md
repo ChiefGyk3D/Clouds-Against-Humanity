@@ -161,4 +161,4 @@ Writing your own answers into your private repository, next to the code, is the 
 - In a Spacelift account you own, create a stack whose ID is not in `.spacelift/config.yml` (a stack called `test-access`, say) and run a plan. Predict first what will be different about the run, then check. The hooks never ran, so the failure shows up later and further from its cause. Failures that are far from their cause are the ones to learn to look for.
 - Write down, in your private repository, three settings from the table that you changed and one sentence each on why. A year from now that file is the answer to "why is it like this?".
 
-This page is the first of a series on taking the project further. Next up is moving it to other clouds; the plan for that is tracked in [issue #22](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues/22).
+Next: how this looks on other clouds. [Why the clouds differ](Why-the-Clouds-Differ.md) starts the AWS lessons (unverified drafts); the plan is tracked in [issue #22](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues/22).
