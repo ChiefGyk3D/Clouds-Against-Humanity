@@ -52,7 +52,7 @@ Open **AWS Budgets** and create a monthly cost budget at your lower number, with
 
 Root is for rare account tasks. Day to day, you use an administrative identity that can be restricted, audited and given MFA of its own.
 
-- AWS recommends **IAM Identity Center** for people: sign-in through a central directory with temporary credentials. For a single throwaway account with no directory, AWS's guidance is to create an administrative identity and use roles, and to avoid IAM users with long-lived keys.
+- AWS recommends **IAM Identity Center** for people: sign-in through a central directory with temporary credentials. Granting access to AWS accounts needs an *organization* instance of it, and using AWS Organizations upgrades a free-plan account to paid (Step 1). So for a standalone throwaway account on the free plan, the console-only path is an **IAM user with a console password and MFA, used for the console only, with no access keys created**. Choose Identity Center only if you accept the upgrade.
 - Whichever you choose: MFA on it, and use it from a browser or a command-line session that obtains temporary credentials, not from a downloaded permanent key.
 
 *Checkpoint: you can sign in as your admin identity with MFA and see the billing page. Return to root only for the few tasks that need it.*

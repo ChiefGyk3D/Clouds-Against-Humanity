@@ -45,7 +45,7 @@ A firewall rule answers three questions: which machines does this set of rules a
 | DigitalOcean | The firewall applies to droplets with a tag | A tag (so "only droplets with this tag") or an address range |
 | AWS | A security group is attached to a machine's network interface | A range, **or another security group**. Works through private addresses, within the same VPC or a peered one (and, for inbound rules only, across a transit gateway) |
 | Azure | A network security group attached to a subnet or a network interface | A range, a service tag, or an *application security group* (a named set of interfaces) |
-| GCP | Firewall rules on the VPC network, aimed by network tag or by service account | A range, a tag, or a service account. Tags and service accounts cannot be mixed in one rule |
+| GCP | Firewall rules on the VPC network, aimed by network tag or by service account | Ingress sources can be a range, a tag, or a service account (tags and service accounts cannot be mixed in one rule). Egress destinations are address ranges only, so this project's tag-scoped outbound rules do not translate directly |
 
 Why it matters: the module in this repository takes a single `tag`. That is a DigitalOcean shortcut. A module that speaks to AWS has to say "attach this group to these machines" and "allow traffic from that group" as two separate things. Any design that hides this behind one friendly word loses the most useful thing a learner can see.
 
