@@ -43,7 +43,7 @@ A firewall rule answers three questions: which machines does this set of rules a
 | | Target | Source or destination |
 |---|---|---|
 | DigitalOcean | The firewall applies to droplets with a tag | A tag (so "only droplets with this tag") or an address range |
-| AWS | A security group is attached to a machine's network interface | A range, **or another security group**. Works through private addresses only, and only within the same VPC (or a peered one) |
+| AWS | A security group is attached to a machine's network interface | A range, **or another security group**. Works through private addresses, within the same VPC or a peered one (and, for inbound rules only, across a transit gateway) |
 | Azure | A network security group attached to a subnet or a network interface | A range, a service tag, or an *application security group* (a named set of interfaces) |
 | GCP | Firewall rules on the VPC network, aimed by network tag or by service account | A range, a tag, or a service account. Tags and service accounts cannot be mixed in one rule |
 
@@ -68,7 +68,7 @@ The usual cloud incident is not a clever attack on the network. It is a leaked k
 
 ## Try it yourself
 
-- **Predict, then check.** Without looking above, write down which of the four clouds you think is cheapest for this project's "no inbound" design, and why. Then check the NAT table. If you were wrong, which assumption failed?
+- **Predict, then check.** Without looking above, write down, for each cloud, whether you expect a NAT service or a public address per machine to be the cheaper way to give two machines outbound access. Then check the egress table. Which cloud surprised you? (The table cannot say which *cloud* is cheapest overall: it leaves out the machines, disks and traffic.)
 - Pick a cloud you use. Fill in the four-question tables for it, from its documentation, with the date you read it.
 - Read [Provider-AWS-The-Same-Four-Pieces](Provider-AWS-The-Same-Four-Pieces.md). For each of the four questions, find the resource that answers it.
 

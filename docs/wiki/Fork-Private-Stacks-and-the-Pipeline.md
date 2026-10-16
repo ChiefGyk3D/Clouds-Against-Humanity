@@ -1,6 +1,6 @@
 # Fork, private stacks, and where the pipeline starts
 
-Start-from-zero capstone, after the eight primers. Previous: [Enterprise engineering habits](Enterprise-Engineering-Habits.md). Next: go to [Home](Home.md) and follow its reading order.
+Start-from-zero capstone, after the eight primers. Previous: [Enterprise engineering habits](Enterprise-Engineering-Habits.md). Next: go to [Home](Home.md) and follow its reading order, or continue to [Why the clouds differ](Why-the-Clouds-Differ.md).
 
 > Before this page: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) explains what a pull request and a CI check are. This page assumes you have read it, and that you have skimmed [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md).
 

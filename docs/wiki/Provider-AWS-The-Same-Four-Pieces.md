@@ -18,13 +18,13 @@ The method is the exercise: for each piece, **read the DigitalOcean file, predic
 - an **association** that connects the route table to the subnet;
 - a public address on the machine, either assigned automatically by the subnet or attached directly.
 
-AWS's documentation is explicit that a VPC you create yourself has none of this by default: no gateway, no route and no automatic public address. A subnet whose route table has no route to a gateway is a *private* subnet. A machine in it cannot reach the internet, even with a public address, until you add a NAT service (expensive, see [the cost lesson](Provider-AWS-Cost-Lesson.md)).
+AWS's documentation is explicit that a VPC you create yourself has none of the internet path by default: no gateway, no route to one, and no automatic public address. (It does get a main route table with a local route so its own subnets can talk to each other; what it lacks is a route to an internet gateway.) A subnet whose route table has no route to a gateway is a *private* subnet. A machine in it cannot reach the internet, even with a public address, until you add a NAT service (expensive, see [the cost lesson](Provider-AWS-Cost-Lesson.md)).
 
 **Why it matters.** This is the first place the DigitalOcean module's smallness hides a lesson. One resource on DigitalOcean is five on AWS, and each is something that can be missing. Most "the machine can't reach the internet" problems on AWS are a missing route or a subnet in the wrong table.
 
 **Predict, then check.** Without looking below, list the AWS resource types you would need to replace `modules/vpc`. Include the one that makes the network public.
 
-*Reference (one reasonable answer): a VPC, a subnet, an internet gateway, a route table, a route to the gateway, and a route table association.*
+*Reference (one reasonable answer): a VPC, a subnet, an internet gateway, and a route to it. You can add that route to the VPC's main route table, or create an explicit route table and associate it with the subnet, which is clearer in code and is what this project's style would prefer.*
 
 ## Piece 2: the firewall
 
@@ -32,8 +32,8 @@ AWS's documentation is explicit that a VPC you create yourself has none of this 
 
 **On AWS.** The filter is a **security group**, and it is attached to a machine's **network interface**, not to a tag. The differences that matter:
 
-- **Defaults.** A new security group has no inbound rules, so nothing gets in, and one rule that allows all outbound traffic. You can remove the outbound rule; with no outbound rules, nothing gets out. So "default deny inbound" is the starting state rather than something you build.
-- **The source of a rule can be another security group.** "Only the connectors may reach SSH on each other" is written as "allow SSH from the connector group." This is the AWS equivalent of this project's tag-sourced rules, but it works through private addresses, only inside one VPC (or a peered one), and not for traffic that passes through a middlebox.
+- **Defaults.** A newly created security group has no inbound rules, so nothing gets in, and one rule that allows all outbound traffic. (The group AWS creates for every VPC, the *default* security group, is different: it allows traffic from members of itself. Create your own group and do not use the default.) You can remove the outbound rule; with no outbound rules, nothing gets out. So "default deny inbound" is the starting state rather than something you build.
+- **The source of a rule can be another security group.** "Only the connectors may reach SSH on each other" is written as "allow SSH from the connector group." This is the AWS equivalent of this project's tag-sourced rules, but it works through private addresses and not for traffic that passes through a middlebox. For this build the scope is one VPC: AWS also allows references across a peered VPC and, for inbound rules only, across a transit gateway, which a two-machine project does not need.
 - **Statefulness.** Replies to allowed traffic are allowed whatever the rules say, as with the DigitalOcean firewall.
 - **What it does not filter.** Amazon's DNS resolver, address assignment, the instance metadata service and the time service sit outside the group's control. This is worth knowing for the threat model: the metadata service (where the connector token sits in the boot data on this project's droplets) is not something a security group can lock down.
 - **Cost.** Security groups are free.
@@ -42,7 +42,7 @@ AWS's documentation is explicit that a VPC you create yourself has none of this 
 
 **Predict, then check.** Your connectors must be able to SSH to each other and nothing else may reach them. In one sentence, what is the source of that rule on AWS? Then: why can the source not be the same rule on a *different* VPC without extra setup?
 
-*Reference: the source is the connectors' own security group, resolved through private addresses; it does not cross to an unrelated VPC unless the two are peered.*
+*Reference: the source is the connectors' own security group, resolved through private addresses. It does not reach an unrelated VPC unless the two are connected, for example by peering.*
 
 ## Piece 3: the machine
 
@@ -50,11 +50,11 @@ AWS's documentation is explicit that a VPC you create yourself has none of this 
 
 **On AWS.** An **instance** launched from an Ubuntu image, with the same cloud-init data. What changes:
 
-- **Size and architecture.** The cheapest sensible choice for this workload was priced on 2026-10-16: a small burstable arm instance (`t4g.micro`, 2 vCPUs, 1 GiB of memory) at about $0.0084 an hour, with an x86 equivalent (`t3.micro`) as the fallback. Twingate publishes the connector for arm64 in its package repository, so the arm choice is open; running it on a real instance is untested here.
+- **Size and architecture.** The cheapest candidate was priced on 2026-10-16: a small burstable arm instance (`t4g.micro`, 2 vCPUs, 1 GiB of memory) at about $0.0084 an hour, with an x86 equivalent (`t3.micro`) as the fallback. **That 1 GiB is below Twingate's general guidance of 1 CPU and 2 GB of memory** (its smaller figure comes from a container deployment), so treat the micro as an experiment to test, not a recommendation. The next size up has 2 GiB and costs more; its price was not checked. Twingate publishes the connector for arm64 in its package repository, so the arm choice is open; running it on a real instance is untested here.
 - **The root disk is a separate billed object** (EBS), with a default size that this wiki has not verified from an official source.
 - **The public address** is an attribute of the instance (or a separate elastic address resource) and is billed by the hour, whether or not you notice it.
 - **SSH key.** DigitalOcean registers a key at the account level and the droplet refers to its fingerprint. AWS has *key pairs*, and also lets you launch with no key at all and rely on Twingate for SSH. The project's rule is that SSH is only ever reached through Twingate, which makes the question "do you want a key at all?" a real one.
-- **Boot data and the metadata service.** The same cloud-init data is readable from the machine. This project accepts that risk on DigitalOcean (threat T5). AWS has a stricter mode of its metadata service that requires a session token, aimed at defeating attacks that trick a web application into fetching it. Predict whether it would help against a *local* process on the instance, then read AWS's documentation to find out.
+- **Boot data and the metadata service.** The same cloud-init data is readable from the machine. This project accepts that risk on DigitalOcean (threat T5). AWS has a stricter mode of its metadata service that requires a session token, aimed at defeating attacks that trick a web application into fetching it. Predict whether it would help against a *local* process on the instance, then read AWS's documentation to check. (The answer: not much. The stricter mode needs a session token fetched with a separate request, which defeats attacks that trick a web application into making one simple request on the attacker's behalf. A program already running on the instance can make both requests, so it can still read the boot data. It is worth turning on as defence in depth; it does not make the connector token safe from local code.)
 
 **Predict, then check.** List the AWS resources for the two connectors, including the one that is not a separate resource on DigitalOcean but costs money every hour.
 

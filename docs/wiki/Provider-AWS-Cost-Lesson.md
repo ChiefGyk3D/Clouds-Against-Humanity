@@ -10,12 +10,12 @@ All figures: US East (N. Virginia), on-demand list prices, 730 hours in a month,
 
 | Item | Rate | Two of them, per month |
 |---|---|---|
-| Small arm instance (`t4g.micro`) | $0.0084 per hour | $12.26 |
+| Small arm instance (`t4g.micro`, 1 GiB: below Twingate's 2 GB guidance, so an experiment) | $0.0084 per hour | $12.26 |
 | Public IPv4 address | $0.005 per hour | $7.30 |
 | Root disk, 8 GiB general-purpose SSD (size unverified) | $0.08 per GiB-month | $1.28 |
 | **Total, fixed** | | **about $20.84** |
 
-Variants priced the same way: a half-gigabyte arm instance (`t4g.nano`) comes to about $14.71 but sits at the smallest memory Twingate documents; an x86 instance (`t3.micro`) comes to about $23.76. DigitalOcean's version of this project is $12.
+Variants priced the same way: a half-gigabyte arm instance (`t4g.nano`) comes to about $14.71 but is well below Twingate's guidance; an x86 instance (`t3.micro`) comes to about $23.76. DigitalOcean's version of this project is $12.
 
 Now read the middle row again. **The addresses cost more than half of what DigitalOcean charges for the whole thing.** An address is not a cost most people think of as a cost, and it is charged for every public address in use, including the ones AWS assigns automatically when a machine starts. The old "free hours of public IPv4" allowance belonged to the previous twelve-month free offer; the current price page lists none, so do not plan around it.
 
@@ -46,17 +46,17 @@ That does not make AWS impossible; it changes how you use it:
 
 | Not in the $20.84 | Why it matters |
 |---|---|
-| Data transfer out | Internet-bound traffic from AWS is metered. A connector relaying heavy traffic can add up. |
+| Data transfer out | Internet-bound traffic from AWS is metered after any monthly allowance that applies. A connector relaying heavy traffic can add up. |
 | Logging and monitoring | Metrics, logs and any managed security service bill by volume. |
 | Snapshots, extra disks, forgotten resources | Billed until deleted. |
 | Anything created outside the code | Not in the repository, so not in the cost gate. |
 | Taxes and currency conversion | Real invoices. |
 
-And a point that is worth saying plainly: **no AWS budget stops spending.** A budget notifies. A budget *action* can attach a restrictive policy or stop selected instances, but it works on billing data that updates only a few times a day, so a cost can pass the line before anything happens, and it cannot reach every kind of charge. Azure and GCP have the same limitation. A budget is an alarm, not a brake.
+And a point that is worth saying plainly: **no AWS budget is a hard cap on your spending.** A budget notifies. A budget *action* can attach a restrictive policy or stop selected instances, but it works on billing data that updates only a few times a day, so a cost can pass the line before anything happens, and it cannot reach every kind of charge. Azure and GCP have the same limitation. A budget is an alarm, not a brake.
 
 ## The free offer, again
 
-New accounts get credits rather than a year of free service, and the free plan ends after six months or when the credits run out, then the account closes (content kept for 90 days). Credits can soften a learning bill. They also create a cliff, and they are no reason to skip the billing alert.
+New AWS customers get credits rather than a year of free service, and the free plan ends after six months or when the credits run out, then the account closes (content kept for 90 days). Credits can soften a learning bill. They also create a cliff, and they are no reason to skip the billing alert.
 
 ## Prove it is zero
 
@@ -72,7 +72,7 @@ The same discipline as the DigitalOcean teardown, with the AWS names:
 
 - **Predict, then check.** Before you read the table, estimate the monthly cost of two small instances with public addresses. Then compute it from the rates. Which line was the biggest surprise?
 - Open the AWS pricing calculator and build the stack above. Compare its answer with the table, and write down what it includes that the table does not.
-- Replace the public addresses with one NAT gateway. What is the new fixed cost? What does that tell you about the break-even between "an address per machine" and "one gateway for many"? (AWS's own documentation gives a formula for this. At two machines, which side wins?)
+- Replace the public addresses with one NAT gateway. What is the new fixed cost? (Reference: about $50 a month for the stack, which is the two instances and disks, about $13.54, plus about $36.50 for the gateway and its address, before any data.) What does that tell you about the break-even between "an address per machine" and "one gateway for many"? AWS's own documentation gives a formula for this. At two machines, which side wins?
 - Look at the [cost gate](CI-Tests-and-Cost-Gate.md). Which of the charges on this page would it catch today, and which would pass silently?
 
 Back to [Why the clouds differ](Why-the-Clouds-Differ.md), or to [Home](Home.md).

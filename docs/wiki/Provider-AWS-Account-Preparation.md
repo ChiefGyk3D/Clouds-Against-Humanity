@@ -15,12 +15,14 @@ Use a **new, throwaway account** for learning, not one that holds anything you c
 
 ## Step 1: understand what the "free" plan is today
 
-As of 2026-10-16, AWS describes the free offer for new accounts as **credit based**, not as twelve free months: $100 on signup and up to $100 more for completing certain activities. The free plan ends after six months or when the credits run out, whichever is first. Then the account closes, its content is kept for 90 days, and you can upgrade to a paid plan inside that window to keep it. If you join the account to AWS Organizations (and some related services), it upgrades to a paid plan automatically.
+As of 2026-10-16, AWS describes the free offer for **new AWS customers** as **credit based**, not as twelve free months: $100 on signup and up to $100 more for completing certain activities. The free plan ends after six months or when the credits run out, whichever is first. Then the account closes, its content is kept for 90 days, and you can upgrade to a paid plan inside that window to keep it. If you join the account to AWS Organizations (and some related services), it upgrades to a paid plan automatically, and AWS says the remaining credits then expire immediately.
+
+One trap with the advice to use a fresh account: the offer is for new customers. If you or your employer already have, or ever had, an AWS account, a new one may not get the free plan or the credits at all. Check the eligibility rules before you assume a free ride.
 
 What this means for a learner:
 
 - A short, planned apply fits comfortably. A forgotten environment does not: credits draw down, and then the account closes.
-- **Do not join the account to an organization casually.** It can end the free plan.
+- **Do not join the account to an organization casually.** It can end the free plan and the credits with it.
 - The old "750 free hours of public IPv4 a month" belonged to the older twelve-month model. The current pricing page lists no such allowance, so do not assume it. See the cost lesson.
 
 Check the live free-plan page before you sign up. This section is the most likely to be out of date.
@@ -53,7 +55,7 @@ Root is for rare account tasks. Day to day, you use an administrative identity t
 - AWS recommends **IAM Identity Center** for people: sign-in through a central directory with temporary credentials. For a single throwaway account with no directory, AWS's guidance is to create an administrative identity and use roles, and to avoid IAM users with long-lived keys.
 - Whichever you choose: MFA on it, and use it from a browser or a command-line session that obtains temporary credentials, not from a downloaded permanent key.
 
-*Checkpoint: you can sign in as your admin identity with MFA and see the billing page. You do not need root again.*
+*Checkpoint: you can sign in as your admin identity with MFA and see the billing page. Return to root only for the few tasks that need it.*
 
 ## Step 5: choose a region, and stay in it
 
@@ -68,8 +70,8 @@ Resources live in a region. Costs differ a little by region (Canada's `ca-centra
 ## Try it yourself
 
 - **Predict, then check.** Before you open the free-plan page, write down what you think happens to an account at the end of the free plan. Then read the page. What did you get wrong?
-- Open your billing page and find the thing you would look at on the morning after an experiment to prove you are back to zero. Write down its name and where it is. You will need it in the cost lesson.
-- Find the setting that controls whether your admin identity can see billing. Explain why it is off by default.
+- Open your billing page and find the thing you would look at the morning after an experiment to check you are back to zero. Write down its name and where it is. Billing data lags, so one look is not proof; the cost lesson says how to look twice.
+- Find the setting that controls whether your admin identity can see billing, and say what you can and cannot see with it on and off. What risk do you take by leaving it on for an identity you share?
 - List three ways someone could end up with your root credentials. Which step above closes each?
 
 Next: [the same four pieces on AWS](Provider-AWS-The-Same-Four-Pieces.md).
