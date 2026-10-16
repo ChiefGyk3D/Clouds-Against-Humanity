@@ -98,7 +98,7 @@ The connector's access and refresh tokens end up in two places: OpenTofu state (
 
 ## Rotating a connector token
 
-Replace `module.connector_a.twingate_connector_tokens.this` (or `_b`) through a Spacelift run with the replace option, one connector at a time. Because the token is in user-data, the droplet is rebuilt and probably gets a new private IP; its SSH resource follows the new address automatically. The other connector keeps access up meanwhile.
+Replace `module.connector_a.module.bootstrap.twingate_connector_tokens.this` (or `connector_b`; the tokens moved into the shared bootstrap module, and the old address no longer exists once a run has applied that change) through a Spacelift run with the replace option, one connector at a time. Because the token is in user-data, the droplet is rebuilt and probably gets a new private IP; its SSH resource follows the new address automatically. The other connector keeps access up meanwhile.
 
 ## Verify it yourself
 
