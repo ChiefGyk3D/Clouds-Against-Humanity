@@ -104,6 +104,18 @@ run "outputs_never_carry_connector_secrets" {
     error_message = "outputs.tf declares an output this test does not inspect. Add it here only after proving it carries no connector secret."
   }
 
+  # Each output must be exactly its intended non-secret source. Searching for
+  # the fake tokens alone would miss an output that re-encodes the boot data.
+  assert {
+    condition = (
+      output.droplet_name == digitalocean_droplet.connector.name &&
+      output.droplet_urn == digitalocean_droplet.connector.urn &&
+      output.private_ip == digitalocean_droplet.connector.ipv4_address_private &&
+      output.size == digitalocean_droplet.connector.size
+    )
+    error_message = "Every output must be exactly its droplet attribute, never derived from the boot data."
+  }
+
   assert {
     condition = !anytrue([
       for v in [output.droplet_name, output.droplet_urn, output.private_ip, output.size] :
@@ -143,8 +155,18 @@ run "this_module_holds_no_private_copy_of_the_bootstrap" {
 
 run "the_moved_blocks_keep_the_state_addresses" {
   command = plan
+  # The exact legacy address and the exact new address, as pairs. Checking only
+  # the destination would pass with a wrong "from" and replace live state.
   assert {
-    condition     = length(regexall("(?m)^moved \\{", file("${path.module}/main.tf"))) == 2 && strcontains(file("${path.module}/main.tf"), "to   = module.bootstrap.twingate_connector_tokens.this") && strcontains(file("${path.module}/main.tf"), "to   = module.bootstrap.twingate_connector.this")
-    error_message = "Without both moved blocks the live plan would replace the connector and its tokens."
+    condition     = strcontains(file("${path.module}/main.tf"), "moved {\n  from = twingate_connector.this\n  to   = module.bootstrap.twingate_connector.this\n}")
+    error_message = "twingate_connector.this must move to module.bootstrap.twingate_connector.this, or the live plan replaces the connector."
+  }
+  assert {
+    condition     = strcontains(file("${path.module}/main.tf"), "moved {\n  from = twingate_connector_tokens.this\n  to   = module.bootstrap.twingate_connector_tokens.this\n}")
+    error_message = "twingate_connector_tokens.this must move to module.bootstrap.twingate_connector_tokens.this, or the live plan replaces the tokens."
+  }
+  assert {
+    condition     = length(regexall("(?m)^moved \\{", file("${path.module}/main.tf"))) == 2
+    error_message = "Exactly the two moved blocks are expected."
   }
 }
