@@ -1,0 +1,148 @@
+# Build it: from zero accounts to stage 1
+
+> This is the replication path. It does not repeat the stage guides; it puts them in order, names the accounts you need before you need them, gives every step a "what you should see" check, and ends with how to take it all down and prove the bill is back to zero. Read [Start here if you are new](Start-Here-If-You-Are-New.md) first if the words are unfamiliar.
+
+The stage guides ([stage 0](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/00-foundation.md), [stage 1](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md)) and the [secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md) are the author's operating records. They are accurate for the author's setup and they contain items that are specific to it. This page tells you which, and in what order to use them.
+
+**Cost, so you can decide before you start.** Stage 0 creates a project, a private network and a firewall, none of which cost money on DigitalOcean at the time of writing. Stage 1 adds two small droplets: about $12 a month, and it is the only part that bills. Free tiers for the other services change, so check each vendor's pricing page on the day instead of trusting this one. The track is built so you can stop after any step with a working, understood environment.
+
+**What this is not.** It is not the only way to build this, and it is not a production recipe. Read [the demo-values table](Fork-Private-Stacks-and-the-Pipeline.md#step-2-which-values-are-demo-values) for what to change before it holds anything you care about.
+
+## Step 0: make a mistake impossible to be expensive
+
+Before you create anything, do the two things that bound your downside.
+
+1. **A password manager, and two-factor authentication on every account you are about to create.** Store recovery codes in the password manager, not in a note.
+2. **A billing alert at the provider, set below what you have decided you will spend.** The author set alerts at $10 and $25 under a $30 ceiling. You choose your own numbers. See [How money works in the cloud](How-Money-Works-in-the-Cloud.md) for why the alert is the first step, not the last.
+
+**You should see:** the alert listed in the provider's billing settings. Take a screenshot you do not publish. An unverified alert is not an alert.
+
+*Checkpoint: if you cannot point at the billing alert, stop. Everything after this step can cost money.*
+
+## Step 1: run the free labs first
+
+Before any account, spend an hour proving to yourself you understand what the code checks. [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) needs only a clone of the repository.
+
+**You should see:** `Success! 12 passed, 0 failed.` from `modules/firewall`, and `cost-check: planned $12.00/mo, approved $12.00, ceiling $30.00` from `scripts/cost_check.py`.
+
+*Checkpoint: if you could not predict a lab's result, reread its page before you give anything real access to your cloud.*
+
+## Step 2: the accounts you need, in order
+
+You need accounts at five services for stage 0 and 1. Create each one only when its step arrives, and turn on two-factor authentication the moment you do.
+
+| Order | Service | Needed for | Reached at |
+|---|---|---|---|
+| 1 | GitHub | Holding your private copy of the code | Step 3 |
+| 2 | DigitalOcean | The cloud account | Step 4 |
+| 3 | Doppler | The secret store | Step 5 |
+| 4 | Spacelift | Running OpenTofu, holding state | Step 6 |
+| 5 | Twingate **and an identity provider it can sign people in with** | Access to the droplets | Step 9 |
+
+The identity provider is the one nobody mentions: Twingate decides *who* you are by trusting a sign-in service, such as a Google or Microsoft account, a GitHub login, or a company directory. Pick one and confirm it works with Twingate before step 9, because it is the first thing that would otherwise block you with money already spent. The [identity primer](Identity-Secrets-and-Zero-Trust-Basics.md) explains the idea.
+
+## Step 3: your private copy
+
+Follow [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipeline.md): the mirror steps, the demo-values table, and what a mirror does not copy. Choose your region and VPC range now. Stage 0's guide explains why a VPC range that overlaps another one in the account is rejected.
+
+**You should see:** your private repository with the full history, and `git remote -v` listing `origin` (yours) and `upstream` (this project).
+
+*Checkpoint: CI runs on a pull request in your own repository, and you can say what it checks.*
+
+## Step 4: DigitalOcean
+
+1. Create the account, enable two-factor authentication, and set the billing alert from step 0.
+2. Create the API tokens described in the secrets runbook's [token scope table](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#4a-digitalocean-token-scopes): one write token for Spacelift to use, and optionally a read-only one for your own tooling. Give them a 90-day expiry and write the rotation date in your password manager.
+3. Register your SSH public key on the account and note its **name**. Stage 1 looks the key up by name and does not create it. See [Lessons learned, "The SSH key that already existed"](Lessons-Learned.md#3-the-ssh-key-that-already-existed).
+
+Skip the stage 0 guide's checklist item about "the token behind the `do-droplets` MCP server". That is the author's own tooling and has nothing to do with yours.
+
+**You should see:** the token listed with its scopes and expiry, and the SSH key listed under the account's security settings.
+
+*Checkpoint: the token's scopes match the table, not "full access".*
+
+## Step 5: Doppler
+
+Create a Doppler project with a `prd` config and add `DIGITALOCEAN_TOKEN`. Create a **read-only service token** for that config. This is the one secret Spacelift will hold. Why only one: [Doppler and secrets](Doppler-and-Secrets.md).
+
+**You should see:** the secret in the `prd` config, and a service token whose access is read-only.
+
+*Checkpoint: the token you are about to put in Spacelift cannot change anything in Doppler.*
+
+## Step 6: Spacelift, and the stage 0 stack
+
+1. Create the account and connect your GitHub account to **your private repository**.
+2. Create a context holding the Doppler service token as a write-only variable, and attach it to stacks with the `cah` label. The runbook's section 4 is the step-by-step.
+3. Create the stack `cah-00-foundation` with project root `stacks/00-foundation`, OpenTofu as the workflow tool, **autodeploy off**, and deletion protection on. The names must match `.spacelift/config.yml` exactly or the secrets hook silently loads nothing for the stack.
+
+Be aware of two plan limits. Push policies, which stop a pull request's code running in Spacelift, need a paid plan, and a free plan has no run-level identity token (which is why Doppler is in the picture). The runbook's section 9 gives the free-plan route and says what it cannot cover. Until you have read it, do not let anyone else open a pull request against your repository.
+
+**You should see:** the stack in the Spacelift list with no runs yet.
+
+*Checkpoint: autodeploy is off. Check it twice.*
+
+## Step 7: apply stage 0
+
+Trigger a **tracked run** on `main`. It stops after the plan and waits for you.
+
+**You should see in the plan:** exactly **4 resources to add**: a project, a tag, a VPC and a firewall. Nothing else. The run log should show the hook line `doppler-env: loaded DIGITALOCEAN_TOKEN as DIGITALOCEAN_TOKEN` and the token's value should appear nowhere in it. If it does, revoke the token immediately.
+
+Read the plan. Then confirm it. See [Terraform reference, reading the plan before you confirm](Terraform-Reference.md#reading-the-plan-before-you-confirm).
+
+**You should see after the apply:** the project in the DigitalOcean console, a firewall with **zero inbound rules**, and no droplets.
+
+*Checkpoint: you can explain each of the four resources. Billing is still $0.*
+
+## Step 8 (optional stop): you have stage 0
+
+You now have a private network and a default-deny firewall, for free, and you understand every line. This is a good place to stop for a week.
+
+## Step 9: Twingate, then stage 1
+
+1. Create the Twingate account and connect your identity provider. **Sign in as a normal user once** to confirm it works.
+2. Create a Twingate API key and add the stage 1 secrets to Doppler as listed in the stage 1 guide, section 5: `TWINGATE_API_TOKEN`, `TWINGATE_NETWORK`, `ADMIN_SSH_PUBLIC_KEY`, `ADMIN_SSH_KEY_NAME`, `ADMIN_USER_IDS`.
+3. Check that no Twingate site named `access-<region>` already exists. The code creates it, and a hand-made one with the same name collides. See [Lessons learned](Lessons-Learned.md#4-a-hand-made-twingate-site-collides-with-the-code).
+4. Create the stack `cah-10-access` rooted at `stacks/10-access`, with a dependency on `cah-00-foundation` and the output mapping in the stage 1 guide.
+5. **Before you apply, run the cost gate** and expect `$12.00` of planned cost. This is the first step that bills.
+
+**You should see in the plan:** **13 resources to add**: a tag, a site, two connectors, two token sets, two droplets, a firewall, a project attachment, a group and two SSH resources. Read it, then confirm.
+
+## Step 10: verify, as a visitor would
+
+Do all three. The third is the one that proves the design.
+
+1. Both connectors show **online** in the Twingate admin console, under one site.
+2. From a machine running the Twingate client, `ssh <user>@<connector private IP>` works for each connector.
+3. From a machine **not** running the client: `nmap -Pn -p 22,80,443 <connector public IP>` shows the ports **filtered** on both droplets. Scanning your own droplet is authorised; do not scan anyone else's.
+
+*Checkpoint: you can reach the machines from inside and you cannot from outside, and you know why.* If a connector shows offline, the stage 1 guide's section 6a is the troubleshooting path.
+
+## Step 11: tear it down, and prove the bill is zero
+
+Billing stops when the droplets are gone, not when you stop looking at them.
+
+1. In Spacelift, **destroy `cah-10-access` first**. Stage 0's VPC, project and tag are in use by stage 1, so the order matters. Connector tokens die with the connectors, and the Twingate site goes with the stack.
+2. Destroy `cah-00-foundation`.
+3. Revoke or let expire the tokens you made. Delete the Doppler secrets you no longer need.
+4. **Know what survives**, and look for it: the SSH key on your DigitalOcean account (the stack never created it), the account's default VPC (a default VPC cannot be deleted), the Doppler project, the Spacelift stacks themselves (deletion protection is on by design), and the Twingate account.
+5. **Prove it.** In the DigitalOcean billing page, check that no droplet or reserved resource is listed, and look again the next day. A resource you forgot is a charge you will meet on the invoice.
+
+*Checkpoint: the console lists no droplets, and tomorrow's billing page shows no new usage.*
+
+## When it breaks
+
+The stage guides and [Lessons learned](Lessons-Learned.md) are written as symptom, cause, fix. A few of the first-timer failures, with where to look:
+
+| What you see | Look at |
+|---|---|
+| The run fails and the log mentions Doppler or an empty variable | [Lessons learned 6](Lessons-Learned.md#6-doppler-names-are-uppercase-opentofu-variables-are-not) and the runbook's troubleshooting section |
+| A 422 about an IP range overlapping | The stage 0 guide, "Choices to confirm before apply" |
+| A connector offline, ports look fine | The stage 1 guide, section 6a, and [Lessons learned 1](Lessons-Learned.md#1-curl--bash-reported-success-and-installed-nothing-useful) |
+| A red check from Spacelift on a pull request | [Lessons learned 10](Lessons-Learned.md#10-a-red-check-from-a-run-that-could-never-pass) |
+| Your account is not like the author's | [Lessons learned 9](Lessons-Learned.md#9-a-rebuilt-account-nothing-you-assumed-is-still-true) |
+
+## What you built, and what to do next
+
+You built, by hand and understanding each step, a small environment where no machine has an open port, secrets live in one place, every change is reviewed, and a human confirms every apply. Next: read the [Threat model](Threat-Model.md) with the labs fresh in your mind, then [what an enterprise does differently](Small-Example-Enterprise-Landscape.md), then decide what you would change before this held anything real.
+
+Back to [Home](Home.md).
