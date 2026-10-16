@@ -1,6 +1,6 @@
 # Enterprise engineering habits
 
-Start-from-zero page 8 of 8. Previous: [How money works in the cloud](How-Money-Works-in-the-Cloud.md). Next: go to [Home](Home.md) and follow its reading order.
+Start-from-zero page 8 of 8. Previous: [How money works in the cloud](How-Money-Works-in-the-Cloud.md). Then the capstone: [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipeline.md).
 
 Reading this repository for the first time, a reasonable reaction is "this is a lot of ceremony for two $6 machines". Pull requests for a one-person project. A threat model for a hobby. A cost gate for a bill smaller than a streaming subscription. A document about every failure.
 
