@@ -22,6 +22,8 @@ If words like "VPC", "Terraform", "CI" or "secrets manager" are new to you, the 
 
 After those, come back here and follow the reading order below.
 
+> **This is a small example.** Two machines, one person, one cloud account. A company answers the same questions with different and often several products (other ZTNA and SSE platforms, tunnels, next-generation firewalls, identity providers, privileged access management, other secrets managers). [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md) maps this project's choices to what you may meet at work.
+
 ## What you get out of this wiki
 
 - How each component works, what it is responsible for, and why it was picked over the obvious alternative.

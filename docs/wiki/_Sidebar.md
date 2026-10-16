@@ -27,6 +27,8 @@
 - [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md)
 
 **Big picture**
+- [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md)
+- [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md)
 - [Threat model](Threat-Model.md)
 - [Lessons learned](Lessons-Learned.md)
 - [Roadmap](Roadmap.md)
