@@ -143,7 +143,7 @@ Each phase ends at a review point and a pull request the operator merges. None s
 | 1. Lessons: AWS | Account preparation, "same four pieces", cost lesson, status line | None | Author reviews, since AWS is their strength |
 | 2. Contract, shared bootstrap, gate | Extract the shared Twingate and cloud-init module; the semantic contract and its two tests; recursive manifest discovery; plan-JSON costing; per-provider price tables; the identifier check; per-cloud secret separation. The DigitalOcean stacks must produce an unchanged plan. | None (CI only) | Author; adversarial review |
 | 3. AWS code | `modules/aws/*`, `stacks/aws/*`, mocked tests, cost manifest, a stage doc. Not applied. | None until applied | Author reviews; adversarial review before any apply |
-| 4. AWS apply (optional) | Applied by the operator through Spacelift, torn down after | Real, small, time-boxed | Operator |
+| 4. AWS apply (in scope, throwaway account) | Applied by the operator through Spacelift, torn down after | Real, small, time-boxed | Operator |
 | 5. Lessons: Azure and GCP | Same shape as phase 1, labelled Unverified draft | None | A reviewer who runs the cloud, sought openly |
 | 6. Azure and GCP code | Only when a reviewer has signed off the lessons | None until applied | Reviewer plus author |
 
@@ -161,14 +161,20 @@ Phases 0 to 3 touch no running infrastructure and cost nothing. Phase 2 does edi
 | The public repository leaks an account id, tenant or subscription | Cloud identifiers are hard to scrub from history, and a secret scanner does not flag them: they are mostly not secrets. | Identifiers live in the secret store, never in files. Add an identifier check built on structural patterns (ARNs, subscription UUID fields, project ids) that runs in pull-request CI with no secret values. Searching for the author's *real* identifiers would need them as CI secrets, and pull-request workflows run branch-controlled code that can print environment values, so that variant runs only in a trusted post-merge or protected environment, never on pull requests. Lessons use obviously synthetic placeholders that the check allow-lists by name, and avoid realistic-looking twelve-digit account numbers. Verification: seed a fixture with each real form and see CI reject it. |
 | Scope runs into the edge DMZ and stage 1 hardening work | Both change the same modules. | Phases 0, 1 and 3 are additive. Phase 2 edits the connector module and is sequenced after that work, with a no-change plan on the live stacks as its gate. |
 
-## 10. Open questions for the operator
+## 10. Decisions
 
-1. **Option B with D first**, as recommended, or do you want separate repositories per cloud as the issue's wording suggests?
-2. **AWS code before Azure and GCP lessons**, or all three sets of lessons before any code?
-3. **Is a real AWS apply in scope** (phase 4), and under which account? A learner-grade throwaway account is safer than anything near a work account.
-4. **Do you want to ask the community for Azure and GCP reviewers** in the issue now, so reviewers exist by the time phase 5 starts?
-5. **Cost ceiling for an AWS stage**: the same $30 of approved fixed infrastructure, or a separate approved figure per provider? And is it acceptable that variable spend is outside that figure, or do you want a real cap with the extra machinery that needs?
-6. **Credentials**: should the first AWS work wait for a Spacelift native AWS integration to be confirmed on the current plan, or is a separate Doppler config with a narrowly scoped key acceptable meanwhile?
+Answered by the maintainer on 2026-10-16. The original questions and the options considered are in the history of this file.
+
+| # | Question | Decision |
+|---|---|---|
+| 1 | Repository layout | **One repository with provider directories.** The DigitalOcean tree stays where it is. A cloud can move to its own repository later if a maintainer shows up to own it. |
+| 2 | Sequencing | **AWS lessons, then AWS code, then Azure and GCP lessons.** Azure and GCP pages are labelled Unverified draft until a reviewer who runs the cloud has read them. |
+| 3 | A real AWS apply | **In scope, in a throwaway personal AWS account**: time-boxed, torn down afterwards, with a billing alert set first and nothing else in the account. |
+| 4 | Reviewers for Azure and GCP | **Ask now**, in the issue. |
+| 5 | AWS cost limit | **A separate approved figure per cloud**, for fixed declared infrastructure only, under the shared ceiling. The documents say plainly this is not a hard cap: metered use is outside the guarantee and billing alerts only notify. |
+| 6 | Credentials | **Wait until Spacelift's native AWS integration is confirmed on the current plan** (phase 0), so no long-lived AWS key is needed. If it is not available, return to the maintainer before falling back to a static key in a separate Doppler config. |
+
+Consequences for the phases in section 8: phase 0 gains a gate (confirm the Spacelift AWS integration on the current plan before any AWS stack is created), phase 4 is in scope but waits for phase 2's gate and per-cloud secret separation, and `docs/stages/approved.json` will need a per-cloud structure in phase 2.
 
 ## 11. What this design does not claim
 
