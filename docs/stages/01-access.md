@@ -24,7 +24,7 @@ DigitalOcean droplets always have a public address. You cannot remove it. So the
 
 ## 2a. Droplet hardening
 
-Each connector's cloud-init (`modules/twingate-connector/cloud-init.yaml.tftpl`) sets up:
+Each connector's cloud-init (`modules/twingate-bootstrap/cloud-init.yaml.tftpl`) sets up:
 
 - One login user, `cah-admin`, with the admin public key and passwordless sudo. No password exists (`lock_passwd`), root is disabled (`disable_root`) and the default `ubuntu` user is not created.
 - An sshd drop-in, `/etc/ssh/sshd_config.d/99-cah-hardening.conf`: no root login, no passwords, no keyboard-interactive, public keys only, no X11 forwarding, `AllowUsers cah-admin`, `MaxAuthTries 3`, `LoginGraceTime 20`.
@@ -82,7 +82,7 @@ Access from outside is unchanged: there is still no public inbound, and SSH is r
 
 The connector token appears in OpenTofu state and in the droplet's cloud-init user-data. It is marked sensitive, and the token is revocable and belongs to a single connector, so each of the two connectors has its own. Two things for you to do and check: keep the state in Spacelift, and in Spacelift restrict who can read the stack's state and outputs to the people who need it.
 
-To rotate the token, replace `module.connector_a.twingate_connector_tokens.this` (or `module.connector_b...` for the other one). Rotate one connector at a time so the other keeps serving. Because the state lives in Spacelift, this is not a local `tofu apply` from a laptop. Do it as a Spacelift run with the replace option for that address (or taint the resource through Spacelift's run options), then read the plan before confirming.
+To rotate the token, replace `module.connector_a.module.bootstrap.twingate_connector_tokens.this` (or `module.connector_b.module.bootstrap...` for the other one; the tokens moved into the shared bootstrap module, and the old address no longer exists once a run has applied that change). Rotate one connector at a time so the other keeps serving. Because the state lives in Spacelift, this is not a local `tofu apply` from a laptop. Do it as a Spacelift run with the replace option for that address (or taint the resource through Spacelift's run options), then read the plan before confirming.
 
 To rotate the admin SSH key: put the new public key in `ADMIN_SSH_PUBLIC_KEY`, register it on the DigitalOcean account, and set `ADMIN_SSH_KEY_NAME` to its name. The key is in `user_data`, so this rebuilds both droplets; do it with the same one-at-a-time care (target one module per run). To change the reboot windows, edit `reboot_time` in the stack; that also rebuilds the droplet.
 

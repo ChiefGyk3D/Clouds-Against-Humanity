@@ -1,23 +1,33 @@
-resource "twingate_connector" "this" {
-  remote_network_id = var.remote_network_id
-  name              = "${var.layer}-${var.region}-connector-${var.instance}"
+# The cloud-neutral part (Twingate connector, tokens, cloud-init) lives in the
+# bootstrap module so every provider shares one copy of the hardening.
+module "bootstrap" {
+  source = "../twingate-bootstrap"
+
+  layer                = var.layer
+  region               = var.region
+  instance             = var.instance
+  remote_network_id    = var.remote_network_id
+  twingate_network     = var.twingate_network
+  admin_ssh_public_key = var.admin_ssh_public_key
+  reboot_time          = var.reboot_time
 }
 
-resource "twingate_connector_tokens" "this" {
-  connector_id = twingate_connector.this.id
+# These resources used to live directly in this module. Moving them into the
+# bootstrap module changes their addresses, and without these blocks the next
+# plan would destroy and recreate the connector tokens. With them, state is
+# renamed in place and the plan shows no change.
+moved {
+  from = twingate_connector.this
+  to   = module.bootstrap.twingate_connector.this
 }
 
-locals {
-  # The weekly connector update runs half an hour after the nightly reboot
-  # window opens, so each connector updates only while its sibling is idle.
-  reboot_hour   = tonumber(substr(var.reboot_time, 0, 2))
-  reboot_minute = tonumber(substr(var.reboot_time, 3, 2))
-  update_minute = (local.reboot_minute + 30) % 60
-  update_hour   = (local.reboot_hour + floor((local.reboot_minute + 30) / 60)) % 24
+moved {
+  from = twingate_connector_tokens.this
+  to   = module.bootstrap.twingate_connector_tokens.this
 }
 
 resource "digitalocean_droplet" "connector" {
-  name       = "${var.layer}-${var.region}-connector-${var.instance}"
+  name       = module.bootstrap.name
   region     = var.region
   size       = var.size
   image      = "ubuntu-24-04-x64"
@@ -28,14 +38,5 @@ resource "digitalocean_droplet" "connector" {
   backups    = false
   monitoring = true
 
-  user_data = templatefile("${path.module}/cloud-init.yaml.tftpl", {
-    access_token  = twingate_connector_tokens.this.access_token
-    refresh_token = twingate_connector_tokens.this.refresh_token
-    network       = var.twingate_network
-
-    admin_ssh_public_key = var.admin_ssh_public_key
-    reboot_time          = var.reboot_time
-    update_hour          = local.update_hour
-    update_minute        = local.update_minute
-  })
+  user_data = module.bootstrap.user_data
 }

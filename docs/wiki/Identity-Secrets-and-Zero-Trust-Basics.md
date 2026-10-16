@@ -103,7 +103,7 @@ One honest note: zero trust shifts trust, it does not remove it. This project tr
 
 | Idea | Where |
 |---|---|
-| Keys only, no passwords, one user, root disabled | `modules/twingate-connector/cloud-init.yaml.tftpl`, explained on [Droplet hardening](Droplet-Hardening.md) |
+| Keys only, no passwords, one user, root disabled | `modules/twingate-bootstrap/cloud-init.yaml.tftpl`, explained on [Droplet hardening](Droplet-Hardening.md) |
 | Secrets fetched by name only on real runs, masked | `scripts/spacelift/doppler-env.sh` and `.spacelift/config.yml`, explained on [Doppler and secrets](Doppler-and-Secrets.md) |
 | Which stack receives which secret | `.spacelift/config.yml` |
 | Per-host, per-port access | The `twingate_resource` blocks in `stacks/10-access/main.tf`: one address, TCP port 22, nothing else |

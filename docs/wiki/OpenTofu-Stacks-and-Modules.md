@@ -19,7 +19,8 @@ flowchart LR
     subgraph modules["modules/ (reusable building blocks, never applied alone)"]
         mvpc["vpc"]:::ctrl
         mfw["firewall"]:::ctrl
-        mtc["twingate-connector<br/>connector + tokens + droplet + cloud-init"]:::ctrl
+        mtc["twingate-connector<br/>the droplet"]:::ctrl
+        mtb["twingate-bootstrap<br/>connector + tokens + cloud-init"]:::ctrl
     end
     subgraph stacks["stacks/ (what Spacelift actually applies)"]
         s00["00-foundation<br/>project, baseline tag,<br/>VPC, baseline firewall"]:::cloud
@@ -78,7 +79,7 @@ tofu -chdir=modules/firewall init -backend=false
 tofu -chdir=modules/firewall test
 ```
 
-Repeat for `modules/vpc`, `modules/twingate-connector`, `stacks/00-foundation` and `stacks/10-access`. CI runs all of them on every pull request.
+Repeat for `modules/vpc`, `modules/twingate-bootstrap`, `modules/twingate-connector`, `stacks/00-foundation` and `stacks/10-access`. CI runs all of them on every pull request.
 
 ## Known follow-up
 

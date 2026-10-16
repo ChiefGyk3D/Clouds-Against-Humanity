@@ -141,7 +141,7 @@ Each phase ends at a review point and a pull request the operator merges. None s
 |---|---|---|---|
 | 0. Verify | **Done 2026-10-16**, see [the findings](2026-10-16-multicloud-phase0-findings.md). Re-checked the section 4 table against vendor documentation and price lists, and settled the AWS egress choice with measured prices. The Spacelift plan gate is still open. | None | Author |
 | 1. Lessons: AWS | Account preparation, "same four pieces", cost lesson, status line | None | Author reviews, since AWS is their strength |
-| 2. Contract, shared bootstrap, gate | Extract the shared Twingate and cloud-init module; the semantic contract and its two tests; recursive manifest discovery; plan-JSON costing; per-provider price tables; the identifier check; per-cloud secret separation. The DigitalOcean stacks must produce an unchanged plan. | None (CI only) | Author; adversarial review |
+| 2. Contract, shared bootstrap, gate (**split: 2a shared bootstrap, 2b contract outputs and tests, 2c cost gate and identifier check**) | Extract the shared Twingate and cloud-init module; the semantic contract and its two tests; recursive manifest discovery; plan-JSON costing; per-provider price tables; the identifier check; per-cloud secret separation. The DigitalOcean stacks must produce an unchanged plan. | None (CI only) | Author; adversarial review |
 | 3. AWS code | `modules/aws/*`, `stacks/aws/*`, mocked tests, cost manifest, a stage doc. Not applied. | None until applied | Author reviews; adversarial review before any apply |
 | 4. AWS apply (in scope, throwaway account) | Applied by the operator through Spacelift, torn down after | Real, small, time-boxed | Operator |
 | 5. Lessons: Azure and GCP | Same shape as phase 1, labelled Unverified draft | None | A reviewer who runs the cloud, sought openly |
@@ -179,3 +179,14 @@ Consequences for the phases in section 8: phase 0 gains a gate (confirm the Spac
 ## 11. What this design does not claim
 
 As of phase 0 (2026-10-16) the section 4 vendor facts were checked against vendor documentation and price lists; rows still marked UNVERIFIED in the [evidence files](2026-10-16-multicloud-phase0-evidence-aws.md) are not claimed, and vendor facts go stale, so each carries its retrieval date. The design does not claim that the budget is a hard cap, that the AWS stack has ever been applied in a real account (the measured fixed cost is an estimate from list prices), that the Spacelift AWS integration is available on the maintainer's plan (still the open gate), or that the module contract survives contact with Azure's network model unchanged. The design changes if any of those answers do.
+
+## 12. Phase 2a: what was built and how it was checked
+
+`modules/twingate-bootstrap` now holds the Twingate connector, its tokens and the cloud-init template; `modules/twingate-connector` (DigitalOcean) calls it, with two `moved` blocks. The template is byte-identical, so the droplet's `user_data` does not change. The 27 hardening and token tests moved to the bootstrap module and run against its `user_data` output; the DigitalOcean module keeps tests that its droplet uses that output and carries no private copy.
+
+Evidence, not assertion:
+- Changing one hardening line in the shared template fails the bootstrap tests **and** the DigitalOcean module's test, so a fix or a regression reaches every provider path.
+- Dropping either `moved` block fails the DigitalOcean module's test.
+- A rehearsal of the state move: a hand-written state with the connector and tokens at their old addresses, planned with the new code and `-refresh=false`, shows both as "moved" and nothing destroyed or replaced. The same state planned with the old code shows the identical remaining in-place note on the tokens, so that note comes from the hand-written state, not from the move.
+- **Not yet done, and the real gate:** a plan on the two live stacks in Spacelift showing no changes. A hand-written state cannot prove that. It needs a proposed run on this branch, which only the maintainer can read.
+
