@@ -73,7 +73,7 @@ Create a Doppler project with a `prd` config and add `DIGITALOCEAN_TOKEN`. Creat
 2. Create a context holding the Doppler service token as a write-only variable, and attach it to stacks with the `cah` label. The runbook's section 4 is the step-by-step.
 3. Create the stack `cah-00-foundation` with project root `stacks/00-foundation`, OpenTofu as the workflow tool, **autodeploy off**, and deletion protection on. The names must match `.spacelift/config.yml` exactly or the secrets hook silently loads nothing for the stack.
 
-Be aware of two plan limits. Push policies, which stop a pull request's code running in Spacelift, need a paid plan, and a free plan has no run-level identity token (which is why Doppler is in the picture). The runbook's section 9 gives the free-plan route and says what it cannot cover. Until you have read it, do not let anyone else open a pull request against your repository.
+Be aware of two plan limits. Push policies, which stop a pull request's code running in Spacelift, need a paid plan, and a free plan has no run-level identity token (which is why Doppler is in the picture). [Push policies: paid plan versus free plan](Spacelift.md#push-policies-paid-plan-versus-free-plan) states the limit once, and the runbook's section 9 gives the free-plan route and says what it cannot cover. Until you have read it, do not let anyone else open a pull request against your repository.
 
 **You should see:** the stack in the Spacelift list with no runs yet.
 

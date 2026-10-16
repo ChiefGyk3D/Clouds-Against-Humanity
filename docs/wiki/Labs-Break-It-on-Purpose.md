@@ -199,7 +199,7 @@ The third is the interesting one. You added a rule about pull requests and a tes
 **What to take away.**
 
 - The tests state the policy in plain language. If a future change makes one fail, the name of the test says what behaviour was lost.
-- The policy's own header explains why leaving `propose` out is the protection: with it, a pull request's code would run in Spacelift beside the secrets context. Read [the Spacelift page](Spacelift.md) and the runbook's section 9 for what happens on a plan without push policies, and whether this lab's protection even applies to you.
+- The policy's own header explains why leaving `propose` out is the protection: with it, a pull request's code would run in Spacelift beside the secrets context. Read [Push policies: paid plan versus free plan](Spacelift.md#push-policies-paid-plan-versus-free-plan) and the runbook's section 9 for what happens on a plan without push policies, and whether this lab's protection even applies to you.
 
 **Restore:** `git restore .spacelift/policies/push.rego`.
 

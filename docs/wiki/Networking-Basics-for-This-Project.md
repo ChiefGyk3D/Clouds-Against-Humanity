@@ -40,7 +40,7 @@ From a machine's point of view, every connection is either **inbound** (someone 
 
 The web works because of outbound connections. Your laptop opens a connection to a website; the reply comes back on that same connection. Your laptop never had to accept an inbound connection to browse the web. Your home router relies on this: it allows anything outbound and blocks everything inbound, and you never notice because almost nothing you do needs inbound.
 
-A **stateful** firewall is one that remembers the connections that were allowed out, so it can let the replies back in without an explicit inbound rule. DigitalOcean's cloud firewalls are stateful for replies. The catch, which cost this project an evening, is that a stateful firewall still needs an explicit **outbound** rule before a machine can start a new connection. Replies are free; new connections in either direction need a rule. [Lessons learned](Lessons-Learned.md) item 2 is the story.
+A **stateful** firewall is one that remembers the connections that were allowed out, so it can let the replies back in without an explicit inbound rule. DigitalOcean's cloud firewalls are stateful for replies. The catch, which cost this project an evening, is that a stateful firewall still needs an explicit **outbound** rule before a machine can start a new connection. Replies are free; new connections in either direction need a rule. [Lessons learned, "Connector-to-connector SSH timed out, twice"](Lessons-Learned.md#2-connector-to-connector-ssh-timed-out-twice) is the story.
 
 ## What a firewall does
 

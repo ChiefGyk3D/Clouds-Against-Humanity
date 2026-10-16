@@ -42,7 +42,7 @@ flowchart TB
 
     dev -- "push branch, open PR" --> gh
     gh -- "every PR and push" --> ci
-    gh -- "PR: no run (push policy)<br/>main: tracked run if the<br/>change touches that stack" --> sl
+    gh -- "PR: no run with the push policy (paid plan)<br/>main: tracked run if the<br/>change touches that stack" --> sl
     sl -- "read-only service token" --> dp
     dp -- "named secrets, masked" --> sl
     sl -- "plan, then apply after<br/>a human confirms" --> doapi
@@ -84,7 +84,7 @@ Color key: green is you, purple is a hosted control service, blue is DigitalOcea
 ```mermaid
 flowchart LR
     pr["Pull request"]:::you --> ci["CI green?<br/>tests, cost gate, scanners"]:::ctrl
-    pr --> prop["Spacelift: no run<br/>(push policy never proposes)"]:::ctrl
+    pr --> prop["Spacelift: no run with the push policy<br/>(paid plan; free-plan limit in Spacelift page)"]:::ctrl
     ci -- "yes" --> merge["Merge to main"]:::you
     merge --> tracked["Spacelift tracked run"]:::ctrl
     tracked --> hook["Hook fetches secrets<br/>from Doppler"]:::secret
