@@ -14,7 +14,7 @@ jobs:
       contents: read
       id-token: write
     with:
-      directories: "stacks/00-foundation stacks/10-access modules/vpc modules/firewall modules/twingate-connector"
+      directories: "stacks/00-foundation stacks/10-access modules/vpc modules/firewall modules/twingate-bootstrap modules/twingate-connector"
       # tofu test in each directory; every test file mocks its providers, so
       # the job needs no credential, which is all a pull request may have.
       test: true

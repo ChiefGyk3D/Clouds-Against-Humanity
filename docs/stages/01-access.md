@@ -24,7 +24,7 @@ DigitalOcean droplets always have a public address. You cannot remove it. So the
 
 ## 2a. Droplet hardening
 
-Each connector's cloud-init (`modules/twingate-connector/cloud-init.yaml.tftpl`) sets up:
+Each connector's cloud-init (`modules/twingate-bootstrap/cloud-init.yaml.tftpl`) sets up:
 
 - One login user, `cah-admin`, with the admin public key and passwordless sudo. No password exists (`lock_passwd`), root is disabled (`disable_root`) and the default `ubuntu` user is not created.
 - An sshd drop-in, `/etc/ssh/sshd_config.d/99-cah-hardening.conf`: no root login, no passwords, no keyboard-interactive, public keys only, no X11 forwarding, `AllowUsers cah-admin`, `MaxAuthTries 3`, `LoginGraceTime 20`.

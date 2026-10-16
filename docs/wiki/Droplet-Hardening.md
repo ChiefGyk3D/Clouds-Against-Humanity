@@ -2,7 +2,7 @@
 
 > Before this page: the cloud-init and SSH key ideas are introduced in [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) and [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md).
 
-The firewall is the outer wall. This page is about the house: what `modules/twingate-connector/cloud-init.yaml.tftpl` does to a connector droplet on its first boot, before any human could log in.
+The firewall is the outer wall. This page is about the house: what `modules/twingate-bootstrap/cloud-init.yaml.tftpl` does to a connector droplet on its first boot, before any human could log in.
 
 The guiding idea is that the firewall should never be the only control. If a firewall rule is ever wrong, the host itself should still refuse anything it was not built to accept.
 

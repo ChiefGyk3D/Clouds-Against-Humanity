@@ -15,14 +15,14 @@ OpenTofu is the open-source fork of Terraform. The language (HCL) is identical, 
 | `variable` | An input. Set by the caller, by an environment variable named `TF_VAR_<name>`, or by its default. | Every `variables.tf` |
 | `validation` | A rule inside a variable. A bad value stops the plan before any API is called. | Most variables |
 | `sensitive = true` | Hides the value in plan output and logs. It is still stored in state. | `twingate_network` |
-| `locals` | Named intermediate values, computed once and reused. Not inputs, not outputs. | `firewall`, `twingate-connector`, `10-access` |
+| `locals` | Named intermediate values, computed once and reused. Not inputs, not outputs. | `firewall`, `twingate-bootstrap`, `10-access` |
 | `resource` | Something OpenTofu creates and tracks in state. | Every `main.tf` |
 | `data` | Something that already exists, looked up and not managed. | `digitalocean_ssh_key.admin` |
 | `module` | A call to a reusable folder of the above, with arguments. | `stacks/*/main.tf` |
 | `output` | A value a module or stack hands back to its caller. | Every `outputs.tf` |
 | `dynamic` block | Repeats a nested block once per item in a list. | `modules/firewall/main.tf` |
 | `depends_on` | An explicit ordering when no reference implies one. | Both connector modules |
-| `templatefile()` | Fills a text template with values. | `modules/twingate-connector/main.tf` |
+| `templatefile()` | Fills a text template with values. | `modules/twingate-bootstrap/outputs.tf` |
 
 ### The standard file layout
 
@@ -150,9 +150,13 @@ None of these outputs carry a secret. They are descriptions, built with `for` ex
 
 ---
 
+## modules/twingate-bootstrap
+
+The part of a connector that is the same on every cloud: its identity in Twingate, its tokens, and the cloud-init that hardens the machine and installs the connector. It creates no cloud resource. Each provider's connector module calls it, so a hardening fix reaches every cloud at once. Its inputs are the name parts (`layer`, `region`, `instance`), `remote_network_id`, `twingate_network`, `admin_ssh_public_key` and `reboot_time`, with the validations described below. Its outputs are `name` and `user_data`; `user_data` is **sensitive** because it contains the connector tokens.
+
 ## modules/twingate-connector
 
-One Twingate connector: its identity in Twingate, plus the droplet that runs it.
+One DigitalOcean connector: the droplet that runs it. The Twingate connector, its tokens and the cloud-init come from the bootstrap module, and two `moved` blocks keep the old state addresses so that extracting them changed nothing in the live plan.
 
 ### Variables
 
@@ -164,7 +168,7 @@ One Twingate connector: its identity in Twingate, plus the droplet that runs it.
 | `size` | string | required | Droplet size slug. The stack reads it from `cost.json` so the price and the plan can never disagree. |
 | `remote_network_id` | string | required | The Twingate site both connectors belong to. |
 | `ssh_key_fingerprint` | string | required | Fingerprint of the admin SSH key already on the DigitalOcean account. |
-| `instance` | string | required | One letter or digit (`a`, `b`) that tells siblings apart. **Validation:** exactly one lowercase letter or digit. |
+| `instance` | string | required | One letter or digit (`a`, `b`) that tells siblings apart. **Validation (in the bootstrap module):** exactly one lowercase letter or digit. |
 | `twingate_network` | string, **sensitive** | required | The bare network subdomain (`acme` for `acme.twingate.com`). Sensitive because the tenant name identifies the tenant. **Validation:** lowercase letters, digits and hyphens only, so a pasted URL or a quoted value is rejected. |
 | `admin_ssh_public_key` | string | required | The public key written for the `cah-admin` user. **Validation:** `ssh-ed25519` or `ssh-rsa` plus the key, no comment field. |
 | `reboot_time` | string | required | `HH:MM` Eastern, when security updates may reboot the droplet. **Validation:** 24-hour time. Each connector gets a different time so they never reboot together. |
@@ -173,13 +177,13 @@ One Twingate connector: its identity in Twingate, plus the droplet that runs it.
 
 | Resource | Why |
 |---|---|
-| `twingate_connector.this` | Registers the connector in Twingate under the site `remote_network_id`. Named like the droplet. |
-| `twingate_connector_tokens.this` | Mints the connector's access and refresh tokens. Terraform mints them so no human ever handles them. They are written only into the droplet's cloud-init. |
-| `digitalocean_droplet.connector` | The VM. Ubuntu 24.04, no IPv6, no backups, DigitalOcean monitoring on. SSH key is the admin key; `user_data` is the rendered cloud-init. |
+| `module.bootstrap.twingate_connector.this` | Registers the connector in Twingate under the site `remote_network_id`. Named like the droplet. |
+| `module.bootstrap.twingate_connector_tokens.this` | Mints the connector's access and refresh tokens. Terraform mints them so no human ever handles them. They are written only into the droplet's cloud-init. |
+| `digitalocean_droplet.connector` | The VM. Ubuntu 24.04, no IPv6, no backups, DigitalOcean monitoring on. SSH key is the admin key; `user_data` is the bootstrap module's rendered cloud-init. |
 
 ### Locals
 
-The weekly connector update must happen *after* the nightly reboot window opens, so the two never overlap on one machine. Three small calculations do that:
+These live in `modules/twingate-bootstrap`. The weekly connector update must happen *after* the nightly reboot window opens, so the two never overlap on one machine. Three small calculations do that:
 
 | Local | Meaning |
 |---|---|
@@ -189,7 +193,7 @@ The weekly connector update must happen *after* the nightly reboot window opens,
 
 ### The template
 
-`templatefile()` reads `cloud-init.yaml.tftpl` and replaces `${...}` placeholders. These are passed in: `access_token`, `refresh_token`, `network`, `admin_ssh_public_key`, `reboot_time`, `update_hour`, `update_minute`. A literal `${` meant for the *droplet's* shell, not for OpenTofu, is escaped as `$${` (this is how the unattended-upgrades origins are written). The file is described step by step in [Droplet hardening](Droplet-Hardening.md). Because the template is the droplet's `user_data`, **changing it forces the droplet to be rebuilt.**
+In `modules/twingate-bootstrap/outputs.tf`, `templatefile()` reads `cloud-init.yaml.tftpl` and replaces `${...}` placeholders. These are passed in: `access_token`, `refresh_token`, `network`, `admin_ssh_public_key`, `reboot_time`, `update_hour`, `update_minute`. A literal `${` meant for the *droplet's* shell, not for OpenTofu, is escaped as `$${` (this is how the unattended-upgrades origins are written). The file is described step by step in [Droplet hardening](Droplet-Hardening.md). Because the template is the droplet's `user_data`, **changing it forces the droplet to be rebuilt.**
 
 ### Outputs
 
@@ -293,7 +297,7 @@ Both are empty blocks. Credentials come from `DIGITALOCEAN_TOKEN`, `TWINGATE_API
 
 ## The cloud-init template, field by field
 
-`modules/twingate-connector/cloud-init.yaml.tftpl` is the droplet's first-boot configuration. It is YAML with `${}` holes that OpenTofu fills. Each top-level key:
+`modules/twingate-bootstrap/cloud-init.yaml.tftpl` is the droplet's first-boot configuration. It is YAML with `${}` holes that OpenTofu fills. Each top-level key:
 
 | Key | What it does |
 |---|---|

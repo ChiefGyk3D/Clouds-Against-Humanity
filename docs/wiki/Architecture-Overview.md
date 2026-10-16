@@ -155,7 +155,8 @@ stacks/10-access/          site, connectors, connector firewall,       (Spacelif
                            admin group, SSH resources
 modules/vpc/               one VPC per region
 modules/firewall/          tag-attached, deny-inbound firewall
-modules/twingate-connector/  connector + droplet + cloud-init
+modules/twingate-bootstrap/  connector tokens + cloud-init (same on every cloud)
+modules/twingate-connector/  the DigitalOcean droplet; calls the bootstrap
 scripts/cost_check.py      the cost gate
 scripts/spacelift/         Doppler hook for Spacelift runs
 docs/stages/               one guide per stage: decisions, verify, rollback
