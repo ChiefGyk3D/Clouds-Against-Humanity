@@ -1,35 +1,39 @@
 **[Home](Home.md)**
 
-**Start from zero**
+**Pick a path**
 - [Start here if you are new](Start-Here-If-You-Are-New.md)
+- [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md)
+- [Labs: break it on purpose](Labs-Break-It-on-Purpose.md)
+
+**Start from zero**
 - [1. What is the cloud](What-Is-the-Cloud.md)
 - [2. Networking basics](Networking-Basics-for-This-Project.md)
 - [3. Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
 - [4. Infrastructure as code](What-Is-Infrastructure-as-Code.md)
 - [5. Git and pull requests](Git-GitHub-and-Pull-Requests.md)
-- [6. Containers and Docker](Containers-and-Docker-Basics.md)
+- [6. Containers and Docker (optional, for stage 3)](Containers-and-Docker-Basics.md)
 - [7. How money works](How-Money-Works-in-the-Cloud.md)
 - [8. Enterprise habits](Enterprise-Engineering-Habits.md)
-- [9. Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md)
+- [Capstone: fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md)
 
-**Start here (if the words above are familiar)**
+**How it works (engineers start here)**
 - [Architecture overview](Architecture-Overview.md)
-- [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md)
-
-**Components**
+- [Threat model](Threat-Model.md)
 - [Twingate](Twingate.md)
-- [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md)
-- [Droplet hardening](Droplet-Hardening.md)
-- [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
-- [Terraform reference](Terraform-Reference.md)
 - [Spacelift](Spacelift.md)
 - [Doppler and secrets](Doppler-and-Secrets.md)
 - [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md)
+- [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
+- [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md)
+- [Droplet hardening](Droplet-Hardening.md)
 
-**Big picture**
+**The argument and the wider world**
+- [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md)
 - [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md)
 - [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md)
-- [Threat model](Threat-Model.md)
+
+**Reference**
+- [Terraform reference](Terraform-Reference.md)
 - [Lessons learned](Lessons-Learned.md)
 - [Roadmap](Roadmap.md)
 - [Glossary](Glossary.md)

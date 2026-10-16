@@ -2,7 +2,16 @@
 
 A small, cheap, locked-down DigitalOcean environment built with OpenTofu, applied by Spacelift, fed secrets by Doppler, and reached only through Twingate. Nothing in it listens on the public internet. It is a real extension of a homelab and, just as much, a teaching repository: every decision is written down along with the reason for it, including the ones that turned out wrong the first time.
 
-If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md). It is the reason the whole thing is shaped the way it is.
+## Pick a path
+
+| You are... | Start with | Then |
+|---|---|---|
+| New to cloud, Terraform or zero trust | [Start here if you are new](Start-Here-If-You-Are-New.md) and the eight primers below | [Labs: break it on purpose](Labs-Break-It-on-Purpose.md), then the capstone |
+| An engineer who knows Terraform and wants the design | [Architecture overview](Architecture-Overview.md) | [Threat model](Threat-Model.md), [Spacelift](Spacelift.md), [Doppler](Doppler-and-Secrets.md), [CI and the cost gate](CI-Tests-and-Cost-Gate.md), then [Why ZTNA](Why-ZTNA-Not-a-VPN.md) for the argument |
+| Building your own copy | [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) | [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipeline.md) |
+| Wondering how a company would do this | [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md) | [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) |
+
+If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md): it is the reason the whole thing is shaped the way it is. It is long and opinionated, so newcomers are better off after the primers.
 
 ## New to cloud, Terraform or zero trust? Start from zero
 
@@ -48,6 +57,8 @@ After those, come back here and follow the reading order below.
 | 10 | [Threat model](Threat-Model.md) | Assets, adversaries, trust boundaries, accepted risk |
 | 11 | [Lessons learned](Lessons-Learned.md) | What broke and why |
 | 12 | [Roadmap](Roadmap.md) | Stages 0 through 4 |
+| | [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) | Break each safety property on your own computer and watch the check object |
+| | [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) | The replication path, with checkpoints and teardown |
 | | [Glossary](Glossary.md) | Every acronym on these pages |
 
 ## The short version

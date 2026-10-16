@@ -21,7 +21,7 @@ Do these by hand in the DigitalOcean console and the password manager before the
   Verified on:
 - [ ] Token B: custom read-only scopes from the same table, 90-day expiry, for interactive tooling.
   Verified on:
-- [ ] The token currently behind the `do-droplets` MCP server is identified; if it is write-scoped, it is replaced with Token B.
+- [ ] *(Author-specific; skip if you have no such tool.)* The token currently behind the `do-droplets` MCP server is identified; if it is write-scoped, it is replaced with Token B.
   Verified on:
 - [ ] Rotation date for both tokens recorded in the password manager (not in this repo).
   Verified on:
