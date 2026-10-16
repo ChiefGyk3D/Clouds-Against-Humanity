@@ -53,7 +53,7 @@ def test_at_least_one_provider_uses_the_bootstrap():
 
 def test_a_bootstrap_caller_passes_the_shared_boot_data_straight_to_the_machine():
     for rel, main in bootstrap_callers():
-        name = re.search(r'module\s+"([^"]+)"\s*\{[^}]*?source\s*=\s*"\.\./' + BOOTSTRAP, main, re.S).group(1)
+        name = re.search(r'module\s+"([^"]+)"\s*\{[^}]*?source\s*=\s*"\.\./' + BOOTSTRAP, main, re.DOTALL).group(1)
         assert re.search(r"(?m)^\s*(user_data|custom_data|metadata_startup_script)\s*=\s*module\." + name + r"\.user_data\s*$", main), \
             f"{rel}: the machine's boot data must be module.{name}.user_data, unmodified"
         assert "templatefile" not in main, f"{rel}: a provider module must not render its own cloud-init"
