@@ -1,6 +1,6 @@
 # Labs: break it on purpose
 
-> Needs no cloud account and costs nothing. You need a clone of the repository, OpenTofu 1.8 or newer for the first two labs, Python 3.12 or newer for the last two, and about 15 minutes per lab. Read [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) first if `tofu test` is new to you.
+> Needs no cloud account and costs nothing. You need Git, a clone of the repository, an internet connection (OpenTofu downloads provider plugins when you initialise, and lab 4 downloads a tool), OpenTofu 1.8 or newer for the first two labs, `curl` and `sha256sum` for lab 4, Python 3.12 or newer with `pytest` installed for the last, and about 15 minutes per lab. Read [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) first if `tofu test` is new to you.
 
 Reading that a control exists is not the same as knowing it works. The way to find out is to break the thing it protects and watch the control object. Each lab here removes or weakens one safety property of this project, on your own computer, and asks you to **predict which check will notice** before you run anything.
 
@@ -144,6 +144,8 @@ cost-check: resource type not on the free list or outside its allowed file: stac
 cost-check: planned $12.00/mo, approved $12.00, ceiling $30.00
 exit 1
 ```
+
+(The two lines are written to different output streams, so they may appear in the other order on your terminal.)
 
 The total is still `$12.00`, because the gate has no price for the load balancer, yet it fails. That is the point: the gate does not subtract what it does not understand from the bill. An unknown resource type is a failure, not a zero.
 

@@ -4,24 +4,22 @@
 
 The stage guides ([stage 0](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/00-foundation.md), [stage 1](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md)) and the [secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md) are the author's operating records. They are accurate for the author's setup and they contain items that are specific to it. This page tells you which, and in what order to use them.
 
-**Cost, so you can decide before you start.** Stage 0 creates a project, a private network and a firewall, none of which cost money on DigitalOcean at the time of writing. Stage 1 adds two small droplets: about $12 a month, and it is the only part that bills. Free tiers for the other services change, so check each vendor's pricing page on the day instead of trusting this one. The track is built so you can stop after any step with a working, understood environment.
+**Cost, so you can decide before you start.** Stage 0 creates a project, a private network and a firewall, none of which cost money on DigitalOcean at the time of writing. Stage 1 adds two small droplets: about $12 a month at the prices the repository recorded on 2026-10-10, and it is the only part that bills. Free tiers for the other services change, so check each vendor's pricing page on the day instead of trusting this one. The track is built so you can stop after any step with a working, understood environment.
 
 **What this is not.** It is not the only way to build this, and it is not a production recipe. Read [the demo-values table](Fork-Private-Stacks-and-the-Pipeline.md#step-2-which-values-are-demo-values) for what to change before it holds anything you care about.
 
 ## Step 0: make a mistake impossible to be expensive
 
-Before you create anything, do the two things that bound your downside.
+Before you create any cloud account, do what you can to bound your downside.
 
 1. **A password manager, and two-factor authentication on every account you are about to create.** Store recovery codes in the password manager, not in a note.
-2. **A billing alert at the provider, set below what you have decided you will spend.** The author set alerts at $10 and $25 under a $30 ceiling. You choose your own numbers. See [How money works in the cloud](How-Money-Works-in-the-Cloud.md) for why the alert is the first step, not the last.
+2. **Decide your numbers.** Choose the most you are willing to spend in a month and two alert levels below it (the author used $10 and $25 under a $30 ceiling). You cannot set the alert yet, because the provider account does not exist; you will set it as the first thing you do after creating that account, in step 4, **before you create a token or any resource**. See [How money works in the cloud](How-Money-Works-in-the-Cloud.md) for why the alert comes first, not last.
 
-**You should see:** the alert listed in the provider's billing settings. Take a screenshot you do not publish. An unverified alert is not an alert.
-
-*Checkpoint: if you cannot point at the billing alert, stop. Everything after this step can cost money.*
+*Checkpoint: you have a password manager with MFA, and your budget numbers are written down.*
 
 ## Step 1: run the free labs first
 
-Before any account, spend an hour proving to yourself you understand what the code checks. [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) needs only a clone of the repository.
+Before any cloud account, spend an hour proving to yourself you understand what the code checks. [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) needs a clone of the repository and an internet connection (to download providers and tools), but no cloud account.
 
 **You should see:** `Success! 12 passed, 0 failed.` from `modules/firewall`, and `cost-check: planned $12.00/mo, approved $12.00, ceiling $30.00` from `scripts/cost_check.py`.
 
@@ -51,15 +49,15 @@ Follow [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipel
 
 ## Step 4: DigitalOcean
 
-1. Create the account, enable two-factor authentication, and set the billing alert from step 0.
+1. Create the account, enable two-factor authentication, and **set the billing alerts you decided on in step 0 before you do anything else**. The exact place in the console changes, so look for the billing or alerts settings in the live console. Take a screenshot you do not publish; an alert you cannot point at is not an alert.
 2. Create the API tokens described in the secrets runbook's [token scope table](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#4a-digitalocean-token-scopes): one write token for Spacelift to use, and optionally a read-only one for your own tooling. Give them a 90-day expiry and write the rotation date in your password manager.
 3. Register your SSH public key on the account and note its **name**. Stage 1 looks the key up by name and does not create it. See [Lessons learned, "The SSH key that already existed"](Lessons-Learned.md#3-the-ssh-key-that-already-existed).
 
 Skip the stage 0 guide's checklist item about "the token behind the `do-droplets` MCP server". That is the author's own tooling and has nothing to do with yours.
 
-**You should see:** the token listed with its scopes and expiry, and the SSH key listed under the account's security settings.
+**You should see:** the billing alert listed, the token listed with its scopes and expiry, and the SSH key listed under the account's security settings.
 
-*Checkpoint: the token's scopes match the table, not "full access".*
+*Checkpoint: you can point at the billing alert, and the token's scopes match the table, not "full access".*
 
 ## Step 5: Doppler
 
@@ -102,8 +100,8 @@ You now have a private network and a default-deny firewall, for free, and you un
 1. Create the Twingate account and connect your identity provider. **Sign in as a normal user once** to confirm it works.
 2. Create a Twingate API key and add the stage 1 secrets to Doppler as listed in the stage 1 guide, section 5: `TWINGATE_API_TOKEN`, `TWINGATE_NETWORK`, `ADMIN_SSH_PUBLIC_KEY`, `ADMIN_SSH_KEY_NAME`, `ADMIN_USER_IDS`.
 3. Check that no Twingate site named `access-<region>` already exists. The code creates it, and a hand-made one with the same name collides. See [Lessons learned](Lessons-Learned.md#4-a-hand-made-twingate-site-collides-with-the-code).
-4. Create the stack `cah-10-access` rooted at `stacks/10-access`, with a dependency on `cah-00-foundation` and the output mapping in the stage 1 guide.
-5. **Before you apply, run the cost gate** and expect `$12.00` of planned cost. This is the first step that bills.
+4. Create the stack `cah-10-access` rooted at `stacks/10-access`, with a dependency on `cah-00-foundation` and the output mapping in the stage 1 guide. **Give it the same settings as stage 0:** the `cah` label (the Doppler context attaches to stacks carrying it, and without it the run has no Doppler token and fails), **autodeploy off** (this is what makes a human confirm every paid apply), and deletion protection on.
+5. **Before you apply, check the price yourself.** The cost gate proves your code is consistent with the repository's approved model: run it and expect `$12.00`. It does not prove your invoice, because it reads a price table fixed on 2026-10-10. Look up the current price and availability of the droplet size in your region in the DigitalOcean console or its sizes API, and confirm it matches. This is the first step that bills.
 
 **You should see in the plan:** **13 resources to add**: a tag, a site, two connectors, two token sets, two droplets, a firewall, a project attachment, a group and two SSH resources. Read it, then confirm.
 
@@ -112,8 +110,8 @@ You now have a private network and a default-deny firewall, for free, and you un
 Do all three. The third is the one that proves the design.
 
 1. Both connectors show **online** in the Twingate admin console, under one site.
-2. From a machine running the Twingate client, `ssh <user>@<connector private IP>` works for each connector.
-3. From a machine **not** running the client: `nmap -Pn -p 22,80,443 <connector public IP>` shows the ports **filtered** on both droplets. Scanning your own droplet is authorised; do not scan anyone else's.
+2. From a machine running the Twingate client, `ssh cah-admin@<connector private IP>` works for each connector. The user is `cah-admin` (the stage 1 guide explains why not root), and the private addresses are the `connector_private_ips` output of the `cah-10-access` stack.
+3. From a machine **not** running the client: `nmap -Pn -p 22,80,443 <connector public IP>` shows the ports **filtered** on both droplets. The stack does not output public addresses; read each droplet's public IP from the DigitalOcean console. Scanning your own droplet is authorised; do not scan anyone else's.
 
 *Checkpoint: you can reach the machines from inside and you cannot from outside, and you know why.* If a connector shows offline, the stage 1 guide's section 6a is the troubleshooting path.
 
@@ -124,8 +122,9 @@ Billing stops when the droplets are gone, not when you stop looking at them.
 1. In Spacelift, **destroy `cah-10-access` first**. Stage 0's VPC, project and tag are in use by stage 1, so the order matters. Connector tokens die with the connectors, and the Twingate site goes with the stack.
 2. Destroy `cah-00-foundation`.
 3. Revoke or let expire the tokens you made. Delete the Doppler secrets you no longer need.
-4. **Know what survives**, and look for it: the SSH key on your DigitalOcean account (the stack never created it), the account's default VPC (a default VPC cannot be deleted), the Doppler project, the Spacelift stacks themselves (deletion protection is on by design), and the Twingate account.
-5. **Prove it.** In the DigitalOcean billing page, check that no droplet or reserved resource is listed, and look again the next day. A resource you forgot is a charge you will meet on the invoice.
+4. **Check the VPC.** Destroying `cah-00-foundation` can fail with `403 Can not delete default VPCs` if the VPC the stack created became the region's default (this happened to the author; see [Lessons learned 9](Lessons-Learned.md#9-a-rebuilt-account-nothing-you-assumed-is-still-true)). DigitalOcean can delete a default VPC only after another VPC is made the default for that region. So: in the console, see whether this VPC is the default. If it is, either make another VPC the default first and destroy again, or remove the VPC from the stack's state and accept that it remains on the account (empty VPCs cost nothing) and say so in your notes. Re-run the destroy and confirm the stack reports nothing left.
+5. **Know what survives**, and look for it: the SSH key on your DigitalOcean account (the stack never created it), a VPC you chose to leave, the Doppler project, the Spacelift stacks themselves (deletion protection is on by design), and the Twingate account.
+6. **Prove it.** In the DigitalOcean billing page, check that no droplet or reserved resource is listed, and look again the next day. A resource you forgot is a charge you will meet on the invoice.
 
 *Checkpoint: the console lists no droplets, and tomorrow's billing page shows no new usage.*
 
