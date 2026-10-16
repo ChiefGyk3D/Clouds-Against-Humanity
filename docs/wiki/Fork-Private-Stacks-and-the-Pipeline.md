@@ -88,7 +88,7 @@ Open each file below and find the value. The table says what to do with it and, 
 | Secret store | Doppler project and config | one project, one `prd` config | Keep the idea (one store, read-only token per consumer). You may split into `dev` and `prd` configs once you have something you are afraid to break. |
 | Every account value | Doppler | tokens, tenant name, user ids, SSH key name | **Never in any repository**, public or private. A private repository is still a repository: it gets cloned to laptops, forked by collaborators, and leaked by mistake. |
 
-**Predict, then check.** Predict what the cost gate says about a pull request that adds a third connector. Then run `python -I scripts/cost_check.py --root .` before and after, in a throwaway branch, in two steps: first copy only the `connector_b` module block in `stacks/10-access/main.tf`, then also add a third entry to that stack's `cost.json`. The two runs fail for different reasons, and neither one is "the ceiling". Which rule did each trip, and what would you have to change, in what order, to make a third connector legitimate? Reading `scripts/cost_check.py` after you have a prediction is the fastest way to find out whether your model of the gate was right.
+**Predict, then check.** Predict what the cost gate says about a pull request that adds a third connector. Then run `python -I scripts/cost_check.py --root .` before and after, in a throwaway branch, in two steps: first copy the `connector_b` module block in `stacks/10-access/main.tf` and rename the copy `connector_c` (two modules cannot share a name), then also add a third entry to that stack's `cost.json`. The two runs fail for different reasons, and neither one is "the ceiling". Which rule did each trip, and what would you have to change, in what order, to make a third connector legitimate? Reading `scripts/cost_check.py` after you have a prediction is the fastest way to find out whether your model of the gate was right.
 
 ## Step 3: what has to be re-pointed in your copy
 
@@ -111,7 +111,7 @@ flowchart LR
     pr["2. Pull request<br/>description + diff"]:::you
     ci["3. CI checks<br/>tests, cost gate,<br/>scanners. No credentials"]:::ctrl
     review["4. Review and merge<br/>CI green required"]:::you
-    plan["5. Spacelift plan<br/>from main only"]:::ctrl
+    plan["5. Spacelift tracked plan<br/>from main, with credentials"]:::ctrl
     confirm["6. Human confirms<br/>the plan"]:::you
     apply["7. Apply<br/>real infrastructure"]:::cloud
 
@@ -127,7 +127,7 @@ Read it left to right and ask of each box: *what mistake does this one catch tha
 - **Commit and pull request** are where a change gets a name and a reason. This is where you decide what you are doing, in a unit small enough for someone else to understand. DevSecOps starts here: "shift left" means finding problems at boxes 1 to 3, where a fix costs a minute, instead of at box 7, where it costs an outage.
 - **CI** catches what a machine can check: the code is formatted, the tests pass, no secret is in the diff, the cost has not crossed the ceiling. It holds no cloud credentials, so a compromised check can block you but cannot destroy anything.
 - **Review** catches what a machine cannot: whether the change is a good idea. Even when you are the only person, the pull request description and the pause before merging are a review of yourself.
-- **Spacelift plan** shows exactly what will change in the real world. It runs from `main` only, so nothing unreviewed is ever planned with credentials.
+- **Spacelift plan** shows exactly what will change in the real world. The tracked plan, the one that can be applied, runs from `main` only and is the only one that gets credentials, so nothing unreviewed is ever planned with them. One caveat: without the paid push policy, a pull request that changes a stack still gets a *proposed* run. It has no credentials, but it does run that pull request's code in Spacelift. The [Spacelift](Spacelift.md) page and the runbook's section 9 explain why that matters and what narrows it.
 - **The human confirm** is the last gate and the only one that cannot be skipped by a bug in a script. See [Enterprise engineering habits](Enterprise-Engineering-Habits.md#separation-of-duties-the-thing-that-checks-is-not-the-thing-that-changes).
 
 The reason the order matters: moving a check to the right makes it more expensive, and moving it out of the chain makes it optional. A check that lives only in a person's memory will be forgotten on the day it matters.
