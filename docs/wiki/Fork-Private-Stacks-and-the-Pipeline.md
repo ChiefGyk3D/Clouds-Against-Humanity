@@ -64,7 +64,7 @@ git remote add upstream https://github.com/ChiefGyk3D/Clouds-Against-Humanity.gi
 
 What each part is for:
 
-- The private repository must already exist and be empty before you push. `git push --mirror` does not create it; it fills it. That is why the page asks for no README or license: a starting file would give the two histories nothing in common and the push would be refused.
+- The private repository must already exist and be empty before you push. `git push --mirror` does not create it; it fills it. That is why the page asks for no README or license: a mirror push overwrites the target's branches and tags to match the source, so anything already there is discarded, and it is better to start with nothing to lose.
 - A **bare** clone has the history and no working files. `--mirror` pushes every branch and tag in it. Together they make an exact copy of the repository's contents, which an ordinary clone and push would not.
 - `--bare` and `--mirror` copy the whole history, not just the latest files, so you can see how the project got here. That history is part of the lesson.
 - The `upstream` remote is how you pull in later improvements: `git fetch upstream`, then merge or rebase what you want. It is also the reason to keep your changes **small and in clearly separate commits**. A copy that has been edited everywhere cannot take upstream changes without a fight.
