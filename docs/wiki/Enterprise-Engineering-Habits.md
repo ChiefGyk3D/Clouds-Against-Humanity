@@ -50,7 +50,7 @@ That reaction is correct, and the ceremony is the point. These are the habits th
 
 **The habit.** The environment grows in numbered stages. Each has a design, a cost, an approval and an operator guide before it exists. Stage 1 did not start until stage 0 was built and verified.
 
-**What it is for.** Small changes are easy to review, easy to test and cheap to undo. A failure on a new cloud account (and there were several; see [Lessons learned](Lessons-Learned.md) item 9) is found at stage 0, where nothing bills, instead of at stage 3 with six services running.
+**What it is for.** Small changes are easy to review, easy to test and cheap to undo. A failure on a new cloud account (and there were several; see [Lessons learned, "A rebuilt account"](Lessons-Learned.md#9-a-rebuilt-account-nothing-you-assumed-is-still-true)) is found at stage 0, where nothing bills, instead of at stage 3 with six services running.
 
 **At home.** Change one thing, check it works, then change the next. Everyone knows this and nobody does it at 11pm.
 
