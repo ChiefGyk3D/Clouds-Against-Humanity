@@ -98,7 +98,7 @@ variables {
   # first, so b keeps its config while a changes.
   connector_telemetry_previous = {}
 
-  # Lock the droplet metadata endpoint (169.254.169.254, which serves each
+  # Lock the droplet metadata endpoint (the link-local cloud address, which serves each
   # connector's user-data and so its Twingate tokens) to root and to the do-agent
   # user that DigitalOcean's monitoring agent runs as. Default false changes
   # nothing. true REPLACES the droplet of every connector in
