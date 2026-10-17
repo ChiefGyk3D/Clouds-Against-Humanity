@@ -369,10 +369,10 @@ def test_coverage_bites_when_a_validation_is_added_or_dropped(tree):
 
 def test_coverage_bites_when_a_planned_entry_becomes_real(tree):
     with (tree / "stacks" / "00-foundation" / "variables.tf").open("a") as f:
-        f.write('\nvariable "site_name" {\n  type    = string\n  default = ""\n}\n')
+        f.write('\nvariable "provider_name" {\n  type    = string\n  default = "digitalocean"\n}\n')
     problems = coverage_problems(tree, load())
     assert any(
-        "site_name exists in code but the manifest says planned" in p for p in problems
+        "provider_name exists in code but the manifest says planned" in p for p in problems
     ), problems
 
 
@@ -709,3 +709,67 @@ def test_an_example_value_file_can_be_added_to_git(tmp_path):
     )
     assert "terraform.tfvars.example" in add.stdout
     assert "'terraform.tfvars'" not in add.stdout
+
+
+# --- literal values: lists, objects, assignments --------------------------------
+
+
+def test_the_reader_reads_list_and_object_defaults():
+    text = """
+variable "m" {
+  type = map(string)
+  default = {
+    a = "04:00" # a comment after a value
+    "b" = "05:00",
+  }
+}
+variable "l" {
+  type    = list(string)
+  default = ["x", "y", ]
+}
+variable "n" {
+  type    = list(object({ k = number }))
+  default = [{ k = 1 }, { k = 2.5 }]
+}
+"""
+    found = {v.name: v.default for v in hcl_variables.parse_variables(text)}
+    assert found == {
+        "m": {"a": "04:00", "b": "05:00"},
+        "l": ["x", "y"],
+        "n": [{"k": 1}, {"k": 2.5}],
+    }
+
+
+@pytest.mark.parametrize(
+    "default",
+    [
+        '{ a = "x", a = "y" }',  # repeated key
+        '{ a = "x" b = "y" }',  # no separator on one line
+        '["x" "y"]',  # no comma
+        "{ a = var.x }",  # not a literal
+        "[1, foo]",
+        "10.78.0.0",  # an unquoted address is not a number
+        "truely",
+        "[[[[[[[[[[1]]]]]]]]]]",  # nested too deeply
+        '{ a = "x"',  # unbalanced
+    ],
+)
+def test_the_reader_refuses_a_default_it_does_not_understand(default):
+    text = f'variable "a" {{\n  type    = string\n  default = {default}\n}}\n'
+    with pytest.raises(hcl_variables.HclError):
+        hcl_variables.parse_variables(text)
+
+
+def test_parse_assignments_reads_a_value_file():
+    text = (
+        '# c\nregion = "tor1" # why\nlist = ["a",\n  "b"]\n'
+        'map = { a = "1", b = "2" }\nflag = true\nnum = 3\nnone = null\n'
+    )
+    assert hcl_variables.parse_assignments(text) == {
+        "region": "tor1",
+        "list": ["a", "b"],
+        "map": {"a": "1", "b": "2"},
+        "flag": True,
+        "num": 3,
+        "none": None,
+    }

@@ -5,7 +5,7 @@
 
 resource "twingate_connector" "this" {
   remote_network_id = var.remote_network_id
-  name              = "${var.layer}-${var.region}-connector-${var.instance}"
+  name              = "${var.layer}-${local.name_key}-connector-${var.instance}"
 }
 
 resource "twingate_connector_tokens" "this" {
@@ -13,6 +13,15 @@ resource "twingate_connector_tokens" "this" {
 }
 
 locals {
+  # Names use resource_key when it is set and region otherwise.
+  name_key = var.resource_key != "" ? var.resource_key : var.region
+
+  # What the cloud-init gets for the admin key: "<algorithm> <key>" only. A
+  # trailing comment is accepted by the variable's validation and dropped here,
+  # so user_data is the same whether or not the key carries one.
+  admin_key_parts = split(" ", var.admin_ssh_public_key)
+  admin_key       = "${local.admin_key_parts[0]} ${local.admin_key_parts[1]}"
+
   # The weekly connector update runs half an hour after the nightly reboot
   # window opens, so each connector updates only while its sibling is idle.
   reboot_hour   = tonumber(substr(var.reboot_time, 0, 2))

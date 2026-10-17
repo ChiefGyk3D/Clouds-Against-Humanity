@@ -1,0 +1,130 @@
+{
+  "stack": "stacks/10-access",
+  "note": "Every resource address the stack has today, with the default settings (the values the live stack uses), and the attributes that force a replacement or hold identity. scripts/plan_noop_check.py fails a plan that changes any of them. '@unchanged' means only before == after (ids and sensitive values such as user_data). A pull request that adds a resource updates this file on purpose.",
+  "addresses": {
+    "digitalocean_project_resources.access": {
+      "type": "digitalocean_project_resources",
+      "force_new": {
+        "project": "@unchanged",
+        "resources": "@unchanged"
+      }
+    },
+    "digitalocean_tag.connector": {
+      "type": "digitalocean_tag",
+      "force_new": {
+        "name": "cah-connector-tor1"
+      }
+    },
+    "module.connector_a.digitalocean_droplet.connector": {
+      "type": "digitalocean_droplet",
+      "force_new": {
+        "name": "access-tor1-connector-a",
+        "region": "tor1",
+        "size": "s-1vcpu-1gb",
+        "image": "ubuntu-24-04-x64",
+        "vpc_uuid": "@unchanged",
+        "tags": [
+          "cah-baseline-tor1",
+          "cah-connector-tor1"
+        ],
+        "ssh_keys": "@unchanged",
+        "user_data": "@unchanged",
+        "ipv6": false,
+        "backups": false,
+        "monitoring": true
+      }
+    },
+    "module.connector_a.module.bootstrap.twingate_connector.this": {
+      "type": "twingate_connector",
+      "force_new": {
+        "name": "access-tor1-connector-a",
+        "remote_network_id": "@unchanged"
+      }
+    },
+    "module.connector_a.module.bootstrap.twingate_connector_tokens.this": {
+      "type": "twingate_connector_tokens",
+      "force_new": {
+        "connector_id": "@unchanged"
+      }
+    },
+    "module.connector_b.digitalocean_droplet.connector": {
+      "type": "digitalocean_droplet",
+      "force_new": {
+        "name": "access-tor1-connector-b",
+        "region": "tor1",
+        "size": "s-1vcpu-1gb",
+        "image": "ubuntu-24-04-x64",
+        "vpc_uuid": "@unchanged",
+        "tags": [
+          "cah-baseline-tor1",
+          "cah-connector-tor1"
+        ],
+        "ssh_keys": "@unchanged",
+        "user_data": "@unchanged",
+        "ipv6": false,
+        "backups": false,
+        "monitoring": true
+      }
+    },
+    "module.connector_b.module.bootstrap.twingate_connector.this": {
+      "type": "twingate_connector",
+      "force_new": {
+        "name": "access-tor1-connector-b",
+        "remote_network_id": "@unchanged"
+      }
+    },
+    "module.connector_b.module.bootstrap.twingate_connector_tokens.this": {
+      "type": "twingate_connector_tokens",
+      "force_new": {
+        "connector_id": "@unchanged"
+      }
+    },
+    "module.connector_firewall.digitalocean_firewall.this": {
+      "type": "digitalocean_firewall",
+      "force_new": {
+        "name": "access-tor1-connector",
+        "tags": [
+          "cah-connector-tor1"
+        ]
+      }
+    },
+    "twingate_group.admins": {
+      "type": "twingate_group",
+      "force_new": {
+        "name": "cah-tor1-admins"
+      }
+    },
+    "twingate_remote_network.this": {
+      "type": "twingate_remote_network",
+      "force_new": {
+        "name": "access-tor1",
+        "location": "OTHER"
+      }
+    },
+    "twingate_resource.connector_a_ssh": {
+      "type": "twingate_resource",
+      "force_new": {
+        "name": "cah-tor1-connector-a-ssh",
+        "address": "@unchanged",
+        "remote_network_id": "@unchanged"
+      }
+    },
+    "twingate_resource.connector_b_ssh": {
+      "type": "twingate_resource",
+      "force_new": {
+        "name": "cah-tor1-connector-b-ssh",
+        "address": "@unchanged",
+        "remote_network_id": "@unchanged"
+      }
+    }
+  },
+  "data": [
+    "data.digitalocean_ssh_key.admin"
+  ],
+  "moves": {
+    "module.connector_a.twingate_connector.this": "module.connector_a.module.bootstrap.twingate_connector.this",
+    "module.connector_a.twingate_connector_tokens.this": "module.connector_a.module.bootstrap.twingate_connector_tokens.this",
+    "module.connector_b.twingate_connector.this": "module.connector_b.module.bootstrap.twingate_connector.this",
+    "module.connector_b.twingate_connector_tokens.this": "module.connector_b.module.bootstrap.twingate_connector_tokens.this"
+  }
+}

@@ -221,3 +221,37 @@ run "contract_members_are_empty_without_member_rules" {
     error_message = "A firewall with only address-based rules has no members."
   }
 }
+
+run "resource_key_changes_the_name_not_the_tag" {
+  command = plan
+  variables {
+    resource_key = "tor1-b"
+  }
+  assert {
+    condition     = digitalocean_firewall.this.name == "foundation-tor1-b-baseline"
+    error_message = "A resource_key must replace the region in the firewall name."
+  }
+  assert {
+    condition     = contains(digitalocean_firewall.this.tags, "cah-baseline-tor1")
+    error_message = "The tag is the caller's; resource_key must not touch it."
+  }
+}
+
+run "an_empty_resource_key_means_the_region_in_the_firewall_name" {
+  command = plan
+  variables {
+    resource_key = ""
+  }
+  assert {
+    condition     = digitalocean_firewall.this.name == "foundation-tor1-baseline"
+    error_message = "An empty resource_key must leave the name as before."
+  }
+}
+
+run "rejects_a_bad_resource_key" {
+  command = plan
+  variables {
+    resource_key = "x"
+  }
+  expect_failures = [var.resource_key]
+}

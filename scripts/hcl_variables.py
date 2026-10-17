@@ -11,6 +11,10 @@ Understood:
 - Strings with backslash escapes, `#`, `//` and `/* */` comments, and
   multi-line expressions in brackets, braces or parentheses.
 
+- Literal values: strings, numbers, true/false/null, and lists and objects
+  built from them (for defaults, and for the assignments of a tfvars file read
+  by `parse_assignments`). A comment may follow any value.
+
 Refused (HclError): heredocs, `${` or `%{` template sequences inside a string,
 unbalanced brackets, an unknown attribute or block inside a variable, a
 repeated attribute, a duplicate variable name in one directory, a variable
@@ -152,25 +156,115 @@ def _read_expression(text: str, i: int) -> int:
     return i
 
 
+NUMBER_RE = re.compile(r"-?[0-9]+(\.[0-9]+)?")
+KEY_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_-]*")
+MAX_DEPTH = 8
+
+
+def _parse_value(text: str, i: int, depth: int = 0):
+    """Parse one literal at text[i]; return (value, index after it)."""
+    if depth > MAX_DEPTH:
+        raise HclError("literal is nested too deeply")
+    i = _skip_ws_comments(text, i)
+    if i >= len(text):
+        raise HclError("expected a value")
+    c = text[i]
+    if c == '"':
+        end = _skip_string(text, i)
+        return json.loads(text[i:end]), end
+    if c == "[":
+        out: list = []
+        i += 1
+        while True:
+            i = _skip_ws_comments(text, i)
+            if text.startswith("]", i):
+                return out, i + 1
+            value, i = _parse_value(text, i, depth + 1)
+            out.append(value)
+            i = _skip_ws_comments(text, i)
+            if text.startswith(",", i):
+                i += 1
+            elif not text.startswith("]", i):
+                raise HclError("list items must be separated by commas")
+    if c == "{":
+        obj: dict = {}
+        i += 1
+        while True:
+            i = _skip_ws_comments(text, i)
+            if text.startswith("}", i):
+                return obj, i + 1
+            if text.startswith('"', i):
+                end = _skip_string(text, i)
+                key = json.loads(text[i:end])
+                i = end
+            else:
+                m = KEY_RE.match(text, i)
+                if not m:
+                    raise HclError("object key is not understood")
+                key, i = m.group(0), m.end()
+            i = _skip_ws_comments(text, i, newlines=False)
+            if not (text.startswith("=", i) or text.startswith(":", i)):
+                raise HclError(f"object key {key!r} has no value")
+            if key in obj:
+                raise HclError(f"object key {key!r} is repeated")
+            obj[key], i = _parse_value(text, i + 1, depth + 1)
+            i = _skip_ws_comments(text, i, newlines=False)
+            if text.startswith(",", i):
+                i += 1
+            elif i < len(text) and text[i] == "}":
+                continue
+            elif i < len(text) and text[i] != "\n":
+                raise HclError("object entries are separated by a comma or a new line")
+    for word, value in (("true", True), ("false", False), ("null", None)):
+        if text.startswith(word, i) and not re.match(
+            r"[A-Za-z0-9_.-]", text[i + len(word) : i + len(word) + 1]
+        ):
+            return value, i + len(word)
+    m = NUMBER_RE.match(text, i)
+    if m and not re.match(r"[A-Za-z0-9_.-]", text[m.end() : m.end() + 1]):
+        s = m.group(0)
+        return (float(s) if "." in s else int(s)), m.end()
+    raise HclError(f"not a simple literal: {text[i : i + 30]!r}")
+
+
 def _literal(expr: str):
-    """Evaluate a literal: string, number, bool, null, [] or {}. Else HclError."""
-    expr = expr.strip()
-    if expr.startswith('"'):
-        end = _skip_string(expr, 0)
-        if expr[end:].strip():
-            raise HclError(f"trailing text after string: {expr!r}")
-        return json.loads(expr)
-    if expr in ("true", "false"):
-        return expr == "true"
-    if expr == "null":
-        return None
-    if re.fullmatch(r"-?[0-9]+(\.[0-9]+)?", expr):
-        return float(expr) if "." in expr else int(expr)
-    if re.fullmatch(r"\[\s*\]", expr):
-        return []
-    if re.fullmatch(r"\{\s*\}", expr):
-        return {}
-    raise HclError(f"default is not a simple literal: {expr!r}")
+    """Evaluate a literal expression. Anything else is an HclError."""
+    value, end = _parse_value(expr, 0)
+    if _skip_ws_comments(expr, end) != len(expr):
+        raise HclError(f"trailing text after a value: {expr[end:].strip()[:30]!r}")
+    return value
+
+
+def parse_assignments(text: str, source: str = "<text>") -> dict:
+    """The top-level `name = literal` lines of a tfvars-style file.
+
+    Fails closed: a block, a heredoc, a repeated name, a value that is not a
+    simple literal, or anything else on a top-level line is an HclError.
+    """
+    out: dict = {}
+    i = 0
+    while True:
+        i = _skip_ws_comments(text, i)
+        if i >= len(text):
+            return out
+        m = NAME_RE.match(text, i)
+        if not m:
+            raise HclError(f"{source}: unexpected text at top level")
+        name = m.group(0)
+        i = _skip_ws_comments(text, m.end(), newlines=False)
+        if not text.startswith("=", i) or text.startswith("==", i):
+            raise HclError(f"{source}: {name}: expected '=' (blocks are not understood)")
+        if name in out:
+            raise HclError(f"{source}: {name} is assigned twice")
+        start = _skip_ws_comments(text, i + 1, newlines=False)
+        end = _read_expression(text, start)
+        if not text[start:end].strip():
+            raise HclError(f"{source}: {name}: empty value")
+        try:
+            out[name] = _literal(text[start:end])
+        except HclError as exc:
+            raise HclError(f"{source}: {name}: {exc}") from exc
+        i = end
 
 
 def _normalize_type(expr: str) -> str:

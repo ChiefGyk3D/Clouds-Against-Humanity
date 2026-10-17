@@ -60,6 +60,7 @@ Pick the row that sounds like you. Every path is a numbered list: read in that o
 | 2 | [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) | 15 min | Each of the five labs: you predicted the check that would object, and it did. |
 | 3 | [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) | 15 min | Stage 0 applied, stage 1 connected, then torn down and the bill proved zero. |
 | 4 | [Settings reference](Settings-Reference.md) | lookup | You can find where any value lives (variable, tfvars, Doppler or cost.json). |
+| 5 | [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) | 20 min | You can say, for any value, whether it belongs in a variable, a tfvars file, Spacelift, Doppler or cost.json, and why `resource_key` never changes on a live stack. |
 
 The settings reference is a lookup page: it is generated from one manifest and meant to be searched, not read through. Doing, not just reading: Labs adds about 75 minutes (five labs at about 15 minutes each, as the page says).
 

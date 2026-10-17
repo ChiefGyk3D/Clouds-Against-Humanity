@@ -52,3 +52,14 @@ variable "outbound_to_tag_rules" {
     error_message = "Each outbound-to-tag rule needs protocol tcp or udp and a non-empty port_range."
   }
 }
+
+variable "resource_key" {
+  type        = string
+  default     = ""
+  description = "Key used in resource NAMES in place of region. Empty means region, so every name is the same as before this setting existed. Immutable on a live stack: changing it changes names, causes widespread plan changes and may replace resources, including through tags or user_data. Never derived from site_name."
+
+  validation {
+    condition     = var.resource_key == "" || can(regex("^[a-z][a-z0-9-]{1,23}$", var.resource_key))
+    error_message = "resource_key must be empty (meaning region) or 2 to 24 characters: a lowercase letter, then lowercase letters, digits or hyphens."
+  }
+}

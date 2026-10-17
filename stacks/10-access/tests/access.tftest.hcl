@@ -287,8 +287,8 @@ run "an_empty_admin_list_is_rejected" {
 run "the_two_connectors_reboot_at_different_times" {
   command = plan
   assert {
-    condition     = length(regexall("reboot_time\\s*=\\s*\"04:00\"", file("${path.module}/main.tf"))) == 1 && length(regexall("reboot_time\\s*=\\s*\"05:00\"", file("${path.module}/main.tf"))) == 1
-    error_message = "Connector a must reboot at 04:00 and connector b at 05:00 Eastern, so they never reboot together."
+    condition     = length(regexall("reboot_time\\s*=\\s*var.reboot_times\\[\"a\"\\]", file("${path.module}/main.tf"))) == 1 && length(regexall("reboot_time\\s*=\\s*var.reboot_times\\[\"b\"\\]", file("${path.module}/main.tf"))) == 1
+    error_message = "Connector a must take reboot_times[\"a\"] and connector b reboot_times[\"b\"]."
   }
   assert {
     condition     = length(regexall("reboot_time\\s*=", file("${path.module}/main.tf"))) == 2
@@ -298,4 +298,448 @@ run "the_two_connectors_reboot_at_different_times" {
     condition     = length(regexall("admin_ssh_public_key\\s*=\\s*var.admin_ssh_public_key", file("${path.module}/main.tf"))) == 2
     error_message = "Both connectors must receive the admin public key."
   }
+  assert {
+    condition     = var.reboot_times["a"] == "04:00" && var.reboot_times["b"] == "05:00" && var.reboot_times["a"] != var.reboot_times["b"]
+    error_message = "The defaults must be the times the live connectors use today: 04:00 and 05:00 Eastern."
+  }
+}
+
+# --- golden names ------------------------------------------------------------
+# The names the live stack has today, with the default settings.
+
+run "golden_names_with_defaults" {
+  command = plan
+  assert {
+    condition     = twingate_remote_network.this.name == "access-tor1"
+    error_message = "The Twingate remote network name changed."
+  }
+  assert {
+    condition     = digitalocean_tag.connector.name == "cah-connector-tor1"
+    error_message = "The connector tag name changed."
+  }
+  assert {
+    condition     = twingate_group.admins.name == "cah-tor1-admins"
+    error_message = "The admin group name changed."
+  }
+  assert {
+    condition     = twingate_resource.connector_a_ssh.name == "cah-tor1-connector-a-ssh" && twingate_resource.connector_b_ssh.name == "cah-tor1-connector-b-ssh"
+    error_message = "A Twingate SSH resource name changed."
+  }
+  assert {
+    condition     = module.connector_a.droplet_name == "access-tor1-connector-a" && module.connector_b.droplet_name == "access-tor1-connector-b"
+    error_message = "A droplet name changed."
+  }
+  assert {
+    condition     = module.connector_firewall.name == "access-tor1-connector"
+    error_message = "The connector firewall name changed."
+  }
+  assert {
+    condition     = output.connector_tag == "cah-connector-tor1"
+    error_message = "The connector_tag output changed."
+  }
+}
+
+run "an_empty_resource_key_means_the_region" {
+  command = plan
+  variables {
+    resource_key = ""
+  }
+  assert {
+    condition = alltrue([
+      twingate_remote_network.this.name == "access-tor1",
+      digitalocean_tag.connector.name == "cah-connector-tor1",
+      twingate_group.admins.name == "cah-tor1-admins",
+      twingate_resource.connector_a_ssh.name == "cah-tor1-connector-a-ssh",
+      twingate_resource.connector_b_ssh.name == "cah-tor1-connector-b-ssh",
+      module.connector_a.droplet_name == "access-tor1-connector-a",
+      module.connector_b.droplet_name == "access-tor1-connector-b",
+      module.connector_firewall.name == "access-tor1-connector",
+    ])
+    error_message = "An empty resource_key must leave every name as it is today."
+  }
+}
+
+run "resource_key_names_every_object_and_the_region_stays_the_region" {
+  command = plan
+  variables {
+    resource_key = "tor1-b"
+  }
+  assert {
+    condition = alltrue([
+      twingate_remote_network.this.name == "access-tor1-b",
+      digitalocean_tag.connector.name == "cah-connector-tor1-b",
+      twingate_group.admins.name == "cah-tor1-b-admins",
+      twingate_resource.connector_a_ssh.name == "cah-tor1-b-connector-a-ssh",
+      twingate_resource.connector_b_ssh.name == "cah-tor1-b-connector-b-ssh",
+      module.connector_a.droplet_name == "access-tor1-b-connector-a",
+      module.connector_b.droplet_name == "access-tor1-b-connector-b",
+      module.connector_firewall.name == "access-tor1-b-connector",
+    ])
+    error_message = "A resource_key must replace the region in every name."
+  }
+  assert {
+    condition     = length(regexall("region\\s*=\\s*var.region", file("${path.module}/main.tf"))) == 3
+    error_message = "The two connector modules and the firewall module must still receive the real region."
+  }
+  assert {
+    condition     = length(regexall("(?m)resource_key\\s*=\\s*var.resource_key$", file("${path.module}/main.tf"))) == 3
+    error_message = "The two connector modules and the firewall module must receive the resource_key."
+  }
+  assert {
+    condition     = !strcontains(file("${path.module}/main.tf"), "-$${var.region}")
+    error_message = "No name may be built from var.region directly; use local.resource_key."
+  }
+}
+
+run "site_name_changes_no_name" {
+  command = plan
+  variables {
+    site_name = "site-tor1"
+  }
+  assert {
+    condition = alltrue([
+      twingate_remote_network.this.name == "access-tor1",
+      digitalocean_tag.connector.name == "cah-connector-tor1",
+      twingate_group.admins.name == "cah-tor1-admins",
+      module.connector_a.droplet_name == "access-tor1-connector-a",
+      module.connector_firewall.name == "access-tor1-connector",
+    ])
+    error_message = "site_name is a telemetry label and must change no name."
+  }
+}
+
+run "no_source_file_uses_site_name" {
+  command = plan
+  assert {
+    condition     = !strcontains(file("${path.module}/main.tf"), "site_name") && !strcontains(file("${path.module}/outputs.tf"), "site_name")
+    error_message = "site_name must not appear in main.tf or outputs.tf: it is for telemetry labels only."
+  }
+}
+
+run "resource_key_rejects_uppercase" {
+  command = plan
+  variables {
+    resource_key = "Tor1"
+  }
+  expect_failures = [var.resource_key]
+}
+
+run "resource_key_rejects_a_leading_digit" {
+  command = plan
+  variables {
+    resource_key = "1tor"
+  }
+  expect_failures = [var.resource_key]
+}
+
+run "resource_key_rejects_one_character" {
+  command = plan
+  variables {
+    resource_key = "a"
+  }
+  expect_failures = [var.resource_key]
+}
+
+run "resource_key_rejects_25_characters" {
+  command = plan
+  variables {
+    resource_key = "abcdefghijklmnopqrstuvwxy"
+  }
+  expect_failures = [var.resource_key]
+}
+
+run "resource_key_rejects_a_space" {
+  command = plan
+  variables {
+    resource_key = "tor 1"
+  }
+  expect_failures = [var.resource_key]
+}
+
+run "site_name_rejects_uppercase" {
+  command = plan
+  variables {
+    site_name = "Site-Tor1"
+  }
+  expect_failures = [var.site_name]
+}
+
+run "site_name_rejects_a_leading_hyphen" {
+  command = plan
+  variables {
+    site_name = "-site"
+  }
+  expect_failures = [var.site_name]
+}
+
+# --- region ------------------------------------------------------------------
+
+run "region_rejects_uppercase" {
+  command = plan
+  variables {
+    region = "Tor1"
+  }
+  expect_failures = [var.region]
+}
+
+run "region_rejects_a_city_name" {
+  command = plan
+  variables {
+    region = "toronto"
+  }
+  expect_failures = [var.region]
+}
+
+run "region_rejects_empty" {
+  command = plan
+  variables {
+    region = ""
+  }
+  expect_failures = [var.region]
+}
+
+# --- reboot_times ------------------------------------------------------------
+
+run "reboot_times_default_to_the_live_values" {
+  command = plan
+  assert {
+    condition     = jsonencode(var.reboot_times) == jsonencode({ a = "04:00", b = "05:00" })
+    error_message = "The default reboot_times must be a = 04:00 and b = 05:00."
+  }
+}
+
+run "reboot_times_accepts_other_distinct_times" {
+  command = plan
+  variables {
+    reboot_times = { a = "03:15", b = "23:59" }
+  }
+  assert {
+    condition     = var.reboot_times["b"] == "23:59"
+    error_message = "Two distinct valid times must be accepted."
+  }
+}
+
+run "reboot_times_exactly_60_minutes_apart_pass" {
+  command = plan
+  variables {
+    reboot_times = { a = "04:00", b = "05:00" }
+  }
+  assert {
+    condition     = var.reboot_times["b"] == "05:00"
+    error_message = "Exactly 60 minutes apart must be accepted."
+  }
+}
+
+run "reboot_times_60_apart_across_midnight_pass" {
+  command = plan
+  variables {
+    reboot_times = { a = "23:30", b = "00:30" }
+  }
+  assert {
+    condition     = var.reboot_times["a"] == "23:30"
+    error_message = "60 minutes apart across midnight must be accepted."
+  }
+}
+
+run "reboot_times_60_apart_across_midnight_pass_reversed" {
+  command = plan
+  variables {
+    reboot_times = { a = "00:30", b = "23:30" }
+  }
+  assert {
+    condition     = var.reboot_times["b"] == "23:30"
+    error_message = "60 minutes apart across midnight must be accepted either way round."
+  }
+}
+
+run "reboot_times_accepts_the_times_swapped" {
+  command = plan
+  variables {
+    reboot_times = { a = "05:00", b = "04:00" }
+  }
+  assert {
+    condition     = var.reboot_times["a"] == "05:00"
+    error_message = "Swapped times are still distinct."
+  }
+}
+
+run "reboot_times_rejects_identical_times" {
+  command = plan
+  variables {
+    reboot_times = { a = "04:00", b = "04:00" }
+  }
+  expect_failures = [var.reboot_times]
+}
+
+run "reboot_times_rejects_a_bad_hour" {
+  command = plan
+  variables {
+    reboot_times = { a = "24:00", b = "05:00" }
+  }
+  expect_failures = [var.reboot_times]
+}
+
+run "reboot_times_rejects_a_bad_minute" {
+  command = plan
+  variables {
+    reboot_times = { a = "04:00", b = "05:60" }
+  }
+  expect_failures = [var.reboot_times]
+}
+
+run "reboot_times_rejects_no_zero_pad" {
+  command = plan
+  variables {
+    reboot_times = { a = "4:00", b = "05:00" }
+  }
+  expect_failures = [var.reboot_times]
+}
+
+run "reboot_times_rejects_seconds" {
+  command = plan
+  variables {
+    reboot_times = { a = "04:00:00", b = "05:00" }
+  }
+  expect_failures = [var.reboot_times]
+}
+
+run "reboot_times_rejects_a_missing_key" {
+  command = plan
+  variables {
+    reboot_times = { a = "04:00" }
+  }
+  expect_failures = [var.reboot_times]
+}
+
+run "reboot_times_rejects_an_extra_key" {
+  command = plan
+  variables {
+    reboot_times = { a = "04:00", b = "05:00", c = "06:00" }
+  }
+  expect_failures = [var.reboot_times]
+}
+
+run "reboot_times_rejects_wrong_keys" {
+  command = plan
+  variables {
+    reboot_times = { a = "04:00", c = "05:00" }
+  }
+  expect_failures = [var.reboot_times]
+}
+
+run "reboot_times_rejects_an_empty_map" {
+  command = plan
+  variables {
+    reboot_times = {}
+  }
+  expect_failures = [var.reboot_times]
+}
+
+run "reboot_times_reject_one_minute_apart" {
+  command = plan
+  variables {
+    reboot_times = { a = "04:00", b = "04:01" }
+  }
+  expect_failures = [var.reboot_times]
+}
+
+run "reboot_times_reject_59_minutes_apart" {
+  command = plan
+  variables {
+    reboot_times = { a = "04:00", b = "04:59" }
+  }
+  expect_failures = [var.reboot_times]
+}
+
+run "reboot_times_reject_across_midnight_one_minute_apart" {
+  command = plan
+  variables {
+    reboot_times = { a = "23:59", b = "00:00" }
+  }
+  expect_failures = [var.reboot_times]
+}
+
+run "reboot_times_reject_across_midnight_59_apart" {
+  command = plan
+  variables {
+    reboot_times = { a = "23:31", b = "00:30" }
+  }
+  expect_failures = [var.reboot_times]
+}
+
+run "reboot_times_reject_across_midnight_59_apart_reversed" {
+  command = plan
+  variables {
+    reboot_times = { a = "00:30", b = "23:31" }
+  }
+  expect_failures = [var.reboot_times]
+}
+
+# --- admin_ssh_public_key ----------------------------------------------------
+
+run "admin_key_accepts_a_comment_at_the_stack" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAItest laptop-2026"
+  }
+  assert {
+    condition     = module.connector_a.droplet_name == "access-tor1-connector-a"
+    error_message = "A key with a trailing comment must plan at the stack."
+  }
+}
+
+run "admin_key_rejects_a_two_word_comment" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AAAA two words"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_a_newline" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AAAA\n  - evil"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_a_trailing_newline" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AAAA\n"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_unsafe_comment_characters" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AAAA user;id"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_an_unknown_algorithm" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-dss AAAA"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_an_empty_key" {
+  command = plan
+  variables {
+    admin_ssh_public_key = ""
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_an_option_prefix" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "command=\"id\" ssh-ed25519 AAAA"
+  }
+  expect_failures = [var.admin_ssh_public_key]
 }

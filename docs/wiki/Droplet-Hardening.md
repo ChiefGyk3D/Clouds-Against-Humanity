@@ -45,7 +45,7 @@ flowchart TD
 | `disable_root: true` and `PermitRootLogin no` | Root is reached through `sudo`, which is logged. |
 | Passwordless sudo for `cah-admin` | There is no password to type. The gate is the SSH key plus Twingate access. |
 
-The SSH key comment is stripped before it is stored in Doppler (keep only `<type> <key>`), because comments usually hold a username and machine name, and the key ends up in cloud-init and in state.
+The SSH key comment is stripped before it is stored in Doppler (keep only `<type> <key>`), because comments usually hold a username and machine name, and the key ends up in cloud-init and in state. If a key does arrive with one comment word, the module accepts it and drops the comment before rendering cloud-init, but the value in Doppler and the plan still holds it, so stripping it first stays the advice.
 
 ### sshd drop-in (`/etc/ssh/sshd_config.d/99-cah-hardening.conf`)
 
