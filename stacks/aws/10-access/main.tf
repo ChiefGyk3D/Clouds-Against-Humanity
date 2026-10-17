@@ -61,6 +61,9 @@ module "connector_a" {
 
   metadata_lock = var.metadata_lock && contains(var.metadata_lock_instances, "a")
 
+  host_firewall             = var.host_firewall && contains(var.host_firewall_instances, "a")
+  host_firewall_ssh_sources = var.host_firewall_ssh_sources
+
   # The outbound rules must exist before the instance boots and starts to install.
   depends_on = [module.connector_firewall]
 }
@@ -83,6 +86,9 @@ module "connector_b" {
   connector_telemetry = contains(var.connector_telemetry_instances, "b") ? var.connector_telemetry : var.connector_telemetry_previous
 
   metadata_lock = var.metadata_lock && contains(var.metadata_lock_instances, "b")
+
+  host_firewall             = var.host_firewall && contains(var.host_firewall_instances, "b")
+  host_firewall_ssh_sources = var.host_firewall_ssh_sources
 
   depends_on = [module.connector_firewall]
 }

@@ -206,5 +206,10 @@ def test_generated_ruleset_passes_nft_syntax_check(tmp_path):
 
 def test_template_gates_the_lock_on_metadata_lock():
     text = TEMPLATE.read_text(encoding="utf-8")
-    assert len(re.findall(r"%\{ if metadata_lock ~\}", text)) == 3
-    assert len(re.findall(r"%\{ endif ~\}", text)) == 3
+    # The nftables package entry is shared with host_firewall (issue #90), so it
+    # is gated on "metadata_lock || host_firewall"; the script/unit block and the
+    # runcmd block are gated on metadata_lock alone.
+    assert len(re.findall(r"%\{ if metadata_lock ~\}", text)) == 2
+    assert len(re.findall(r"%\{ if metadata_lock \|\| host_firewall ~\}", text)) == 1
+    # Two more endifs close the host_firewall blocks (script/unit and runcmd).
+    assert len(re.findall(r"%\{ endif ~\}", text)) == 5

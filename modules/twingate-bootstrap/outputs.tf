@@ -21,5 +21,9 @@ output "user_data" {
     update_minute        = local.update_minute
     telemetry_conf       = local.telemetry_conf
     metadata_lock        = var.metadata_lock
+
+    host_firewall              = var.host_firewall
+    host_firewall_ssh_sources  = join(", ", var.host_firewall_ssh_sources)
+    host_firewall_metrics_port = var.connector_telemetry.metrics_port == null ? "" : tostring(var.connector_telemetry.metrics_port)
   })
 }

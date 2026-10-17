@@ -266,3 +266,34 @@ run "metadata_lock_reaches_the_droplet_user_data" {
     error_message = "metadata_lock must flow through the module into the droplet's user_data."
   }
 }
+
+run "host_firewall_default_adds_nothing_to_the_droplet_user_data" {
+  command = plan
+  assert {
+    condition     = !strcontains(digitalocean_droplet.connector.user_data, "cah-host-firewall") && !strcontains(digitalocean_droplet.connector.user_data, "nftables")
+    error_message = "With host_firewall unset nothing about it may reach the droplet."
+  }
+}
+
+run "host_firewall_reaches_the_droplet_user_data" {
+  command = plan
+  variables {
+    host_firewall = true
+  }
+  assert {
+    condition     = strcontains(digitalocean_droplet.connector.user_data, "/usr/local/sbin/cah-host-firewall") && strcontains(digitalocean_droplet.connector.user_data, "--no-block") && strcontains(digitalocean_droplet.connector.user_data, "policy drop")
+    error_message = "host_firewall must flow through the module into the droplet's user_data."
+  }
+}
+
+run "host_firewall_sources_reach_the_droplet_user_data" {
+  command = plan
+  variables {
+    host_firewall             = true
+    host_firewall_ssh_sources = ["10.20.0.0/16"]
+  }
+  assert {
+    condition     = strcontains(digitalocean_droplet.connector.user_data, "ssh_sources=\"10.20.0.0/16\"")
+    error_message = "host_firewall_ssh_sources must flow through the module into the droplet's user_data."
+  }
+}

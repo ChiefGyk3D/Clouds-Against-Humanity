@@ -968,3 +968,100 @@ run "metadata_lock_instances_rejects_a_repeat" {
   }
   expect_failures = [var.metadata_lock_instances]
 }
+
+run "host_firewall_defaults_to_off_and_is_wired_to_both_connectors" {
+  command = plan
+  assert {
+    condition     = length(regexall("host_firewall\\s*=\\s*var\\.host_firewall && contains\\(var\\.host_firewall_instances", file("${path.module}/main.tf"))) == 2
+    error_message = "Both connectors must receive var.host_firewall gated on host_firewall_instances."
+  }
+  assert {
+    condition     = length(regexall("contains\\(var\\.host_firewall_instances, \"a\"\\)", file("${path.module}/main.tf"))) == 1 && length(regexall("contains\\(var\\.host_firewall_instances, \"b\"\\)", file("${path.module}/main.tf"))) == 1
+    error_message = "Connector a must be gated on \"a\" and connector b on \"b\" in host_firewall_instances."
+  }
+  assert {
+    condition     = length(regexall("host_firewall_ssh_sources\\s*=\\s*var\\.host_firewall_ssh_sources", file("${path.module}/main.tf"))) == 2
+    error_message = "Both connectors must receive var.host_firewall_ssh_sources."
+  }
+  assert {
+    condition     = var.host_firewall == false && jsonencode(var.host_firewall_instances) == jsonencode(["a", "b"]) && jsonencode(var.host_firewall_ssh_sources) == jsonencode(["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"])
+    error_message = "host_firewall must default to false, both instances, the three private blocks."
+  }
+}
+
+run "host_firewall_on_plans" {
+  command = plan
+  variables {
+    host_firewall = true
+  }
+  assert {
+    condition     = module.connector_a.size != "" && module.connector_b.size != ""
+    error_message = "Enabling the firewall for both connectors must plan."
+  }
+}
+
+run "host_firewall_instances_a_plans" {
+  command = plan
+  variables {
+    host_firewall           = true
+    host_firewall_instances = ["a"]
+  }
+  assert {
+    condition     = module.connector_a.size != "" && module.connector_b.size != ""
+    error_message = "Rolling the firewall out to one connector must plan."
+  }
+}
+
+run "host_firewall_with_metrics_port_metadata_lock_and_custom_sources_plans" {
+  command = plan
+  variables {
+    host_firewall             = true
+    metadata_lock             = true
+    host_firewall_ssh_sources = ["10.20.0.0/16"]
+    connector_telemetry       = { metrics_port = 9999 }
+  }
+  assert {
+    condition     = module.connector_a.size != "" && module.connector_b.size != ""
+    error_message = "The firewall together with the metadata lock, a metrics port and custom sources must plan."
+  }
+}
+
+run "host_firewall_ssh_sources_rejects_a_non_cidr" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["10.0.0.1"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_ssh_sources_rejects_an_empty_list" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = []
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_instances_rejects_an_empty_list" {
+  command = plan
+  variables {
+    host_firewall_instances = []
+  }
+  expect_failures = [var.host_firewall_instances]
+}
+
+run "host_firewall_instances_rejects_c" {
+  command = plan
+  variables {
+    host_firewall_instances = ["c"]
+  }
+  expect_failures = [var.host_firewall_instances]
+}
+
+run "host_firewall_instances_rejects_a_repeat" {
+  command = plan
+  variables {
+    host_firewall_instances = ["a", "a"]
+  }
+  expect_failures = [var.host_firewall_instances]
+}

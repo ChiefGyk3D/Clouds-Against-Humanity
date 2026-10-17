@@ -66,6 +66,38 @@ Rollback: set `metadata_lock = false` (this replaces the droplet again), or on o
 ssh -t cah-admin@host 'sudo nft delete table inet cah_metadata'
 ```
 
+### Host firewall (built, off by default)
+
+The DigitalOcean cloud firewall is the only inbound layer today. If a tag is ever set wrong, nothing else stands in the way. The `host_firewall` setting (default `false`) adds a second layer on each connector: an nftables table of its own (`inet cah_host`, input chain only, policy drop; the `inet cah_metadata` table and the output and forward chains are never touched, and the ruleset is never flushed). It lets in only loopback, replies to traffic the machine started, the few ICMP types and ICMPv6 neighbour discovery the network card needs, DHCPv4 replies so leases renew, TCP 22 from `host_firewall_ssh_sources` (default the three private blocks `10.0.0.0/8`, `172.16.0.0/12` and `192.168.0.0/16`; the cloud firewall already limits SSH to the connector tag, so this only narrows it to private space, because the module does not know the VPC range) and, when `connector_telemetry.metrics_port` is set, that one port from the same sources. The same template serves DigitalOcean and AWS. A systemd unit (`cah-host-firewall.service`, after `cloud-final.service`, enabled with `--no-block` so it cannot deadlock cloud-init) runs `/usr/local/sbin/cah-host-firewall` at every boot.
+
+The script is built not to lock you out: it checks the ruleset first (`nft -c`, and refuses to apply one that does not parse), applies it, then verifies that sshd is still listening on port 22 and that the ssh accept is in the loaded table, and deletes the table if either check fails. There is no timer that removes the firewall later, because that would be a hole.
+
+It has **not been tested on a real droplet yet**. A wrong ruleset can lock you out of SSH, and turning it on changes `user_data`, so the plan shows the droplet of every connector in `host_firewall_instances` REPLACED. Stage it, one connector at a time:
+
+1. Set `host_firewall = true` and `host_firewall_instances = ["a"]`. Plan, apply.
+2. Check SSH through Twingate to the new connector a (below) **before** touching b.
+3. Only then set `host_firewall_instances = ["a", "b"]`. Plan, apply, verify connector b.
+
+Verify, as `cah-admin` over Twingate (replace `HOST` with the connector's private address):
+
+```
+ssh -t cah-admin@HOST 'sudo nft list table inet cah_host'
+ssh -t cah-admin@HOST 'systemctl is-active cah-host-firewall.service twingate-connector'
+ssh -t cah-admin@HOST 'sudo journalctl -u cah-host-firewall.service --no-pager -n 20'
+```
+
+The first line must print the table with `policy drop` and a `tcp dport 22` rule, and both units in the second must be `active`.
+
+If you lose SSH: use the Droplet Console in the DigitalOcean panel (out of band, it does not go through the firewall), then run the rollback below. If even that fails, replace the droplet through OpenTofu (set `host_firewall = false` and apply), which is the fallback.
+
+Rollback: set `host_firewall = false` (this replaces the droplet again), or on one box, without waiting for a rebuild (this lasts until the next boot, so also set the setting to false):
+
+```
+ssh -t cah-admin@HOST 'sudo nft delete table inet cah_host'
+```
+
+Not covered yet: when the node exporter is installed on the connectors (stage 2), its port needs its own rule; today nothing on the connectors listens on it.
+
 Follow-ups, not done yet:
 
 

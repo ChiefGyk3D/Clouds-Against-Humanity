@@ -110,6 +110,22 @@ variables {
   # Which connectors get metadata_lock (a, b or both). Default both.
   metadata_lock_instances = ["a", "b"]
 
+  # A default-drop host firewall (nftables) on each connector, a second layer
+  # behind the cloud firewall. Only SSH from host_firewall_ssh_sources (and the
+  # connector metrics port when connector_telemetry sets one) is let in. Default
+  # false changes nothing. true REPLACES the droplet of every connector in
+  # host_firewall_instances (user_data changes). A wrong ruleset can lock you
+  # out of SSH: roll out one at a time, host_firewall = true with ["a"], apply,
+  # check SSH through Twingate, then ["a", "b"]. Not yet tested on a real droplet.
+  host_firewall = false
+
+  # Which connectors get host_firewall (a, b or both). Default both.
+  host_firewall_instances = ["a", "b"]
+
+  # IPv4 CIDRs allowed to reach SSH through the host firewall. Default the three
+  # private blocks; narrow to your VPC range if you know it.
+  host_firewall_ssh_sources = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+
   # A label for telemetry only (empty means "site-<region>"). It appears in no
   # resource name, tag or output, and changing it replaces nothing.
   site_name = "site-tor1"
