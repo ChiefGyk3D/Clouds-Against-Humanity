@@ -59,6 +59,46 @@ python3 -I scripts/cost_check.py --root . --plan plan.json --stack stacks/aws/10
 
 For an `aws_instance` it also fails on an `unpriced attribute`: a `tenancy` other than `default`, `unlimited` CPU credits, `instance_market_options`, a placement group or host, detailed `monitoring`, extra `network_interface` blocks, a `launch_template` or a `license_specification`. The list is the constant `AWS_INSTANCE_UNPRICED_ATTRS` in the script. The same attributes (plus `tenancy` and `credit_specification`, nested values included) also fail when the plan cannot value them: the gate reads the plan's `configuration` block, where a resource's `expressions` list only the attributes the configuration sets, and refuses an attribute that is unknown in the plan and set there (for example from a `terraform_data` output). An unknown attribute the configuration does not set is a provider default computed at apply, which every normal plan shows, so it passes; and if the plan carries no `configuration` for the instance the gate cannot tell the two apart and fails. What is not caught: another provider default that is priced differently, and anything set outside the configuration. (CPU credits left unset on a T-family type are caught: see "AWS in approved.json" below.) It prices each planned instance (hourly price times 730, plus a public address unless `associate_public_ip_address` is explicitly `false`, plus the root disk, which must be set explicitly because the image default is not priced), each elastic address and each volume, then requires the result to equal the stack's `cost.json`. Anything it cannot price, such as a load balancer or an unknown instance type, is a failure rather than a zero, and a NAT gateway is rejected outright at this ceiling. The required CI check does not run it today: CI has no AWS plan to give it, and there is no AWS stack yet. It belongs in the trusted run that produces the real plan, which is part of the AWS code phase. Where the plan comes from matters: a plan file checked into a pull request can be edited to say anything, so the check is only a guarantee on a plan produced by the trusted run; on a pull request it is an early warning.
 
+## Stack instances: more than one site of the same code
+
+A second site runs the same stack code (one Spacelift project root) with different settings, so the source holds one manifest and the gate would count it once. A **stack instance manifest** makes the second deployment visible. It is data only:
+
+```
+stacks/sites/<resource_key>/<stack path>/cost.json      e.g. stacks/sites/tor2/10-access/cost.json
+{ "instance_of": "stacks/10-access", "resources": [ ...that site's machines... ] }
+```
+
+The gate prices an instance like any manifest. The provider is the one of the stack named in `instance_of`, not the path. It fails if:
+
+- `instance_of` is missing, is not a plain normalized stack path, points into `stacks/sites`, or names a stack directory that has no `cost.json` of its own; or the manifest is not at `stacks/sites/<resource_key>/` plus the `instance_of` path without its `stacks/` prefix; or `instance_of` is set on a manifest outside `stacks/sites/`;
+- the `resource_key` directory is not lowercase letters, digits and dashes;
+- any `.tf` or `.tofu` file exists under `stacks/sites/` (instances carry no code);
+- the number of machine entries in the instance manifest differs from the number of `twingate-connector` module blocks in the stack named by `instance_of` (the same reconciliation as a base stack, against that stack's code);
+- two manifests answer to one stack id (below).
+
+### Stack ids and `.spacelift/config.yml`
+
+Each manifest answers to one Spacelift stack id:
+
+| Manifest directory | Stack id |
+|---|---|
+| `stacks/10-access` | `cah-10-access` |
+| `stacks/aws/10-access` | `cah-aws-10-access` |
+| `stacks/sites/tor2/10-access` (`instance_of: stacks/10-access`) | `cah-10-access-tor2` |
+
+The rule is `cah-` plus the stack path after `stacks/` joined with dashes, plus `-<resource_key>` for an instance. `tests/test_cost_check_instances.py` requires every stack id in `.spacelift/config.yml` to have exactly one manifest: an entry with no manifest fails, and the gate itself fails when two manifests share an id. A stack with no entry in `config.yml` never loads its secrets and cannot apply, and an entry cannot be added without a manifest, so a second site cannot reach an apply without being costed. The gate cannot see a Spacelift stack that is created and never listed.
+
+### Approving sites
+
+By default the provider's `approved_monthly_total` covers everything of that provider, instances included. A provider entry may also carry an optional `sites` map:
+
+```json
+"digitalocean": { "approved_monthly_total": 24.0, "active": true,
+  "sites": { "tor2": { "approved_monthly_total": 12.0 } } }
+```
+
+With a map present: every instance's `resource_key` must be in it; each site's planned total must be within its own figure; the sites' figures must add up to no more than the provider figure; and the base stacks (everything not under `stacks/sites`) must fit in the provider figure minus the sites' figures. So the provider figure is the base stack plus its sites. The shared-ceiling check still sums the provider figures of the `active` providers, never the sites (they are already inside it). With no map, behaviour is unchanged.
+
 ## Not yet verified
 
 These are not priced, or not confirmed against the vendor's current page. Check them before relying on them:
