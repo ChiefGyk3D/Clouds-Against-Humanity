@@ -330,6 +330,151 @@
         "status": "planned"
       }
     ],
+    "stacks/aws/00-foundation": [
+      {
+        "name": "region",
+        "type": "string",
+        "description": "AWS region name. The price table was recorded for us-east-1; another region needs its own check.",
+        "required": false,
+        "default": "us-east-1",
+        "validation": "^[a-z]{2}(-[a-z]+)+-[0-9]$ (for example us-east-1)",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "us-east-1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "vpc_ip_range",
+        "type": "string",
+        "description": "Private CIDR. Must not overlap any homelab range (confirmed in the stage guide before apply).",
+        "required": false,
+        "default": "10.78.0.0/24",
+        "validation": "none in the stack; modules/aws/vpc checks it is a private IPv4 network address, /16 to /28",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "10.99.0.0/24",
+        "sensitivity": "private",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
+      },
+      {
+        "name": "availability_zone",
+        "type": "string",
+        "description": "Availability zone of the one subnet. Null lets AWS choose.",
+        "required": false,
+        "default": null,
+        "validation": "none",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "us-east-1a",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "project_name",
+        "type": "string",
+        "description": "Value of the Project tag that every AWS resource of the stack receives.",
+        "required": false,
+        "default": "clouds-against-humanity",
+        "validation": "none",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "clouds-against-humanity",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      }
+    ],
+    "stacks/aws/10-access": [
+      {
+        "name": "region",
+        "type": "string",
+        "description": "AWS region name, the same value as stack 00.",
+        "required": true,
+        "validation": "^[a-z]{2}(-[a-z]+)+-[0-9]$ (for example us-east-1)",
+        "set_where": "Spacelift stack dependency, mapped to a TF_VAR_* environment variable (output of stack 00)",
+        "example": "us-east-1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "vpc_id",
+        "type": "string",
+        "description": "ID of the VPC created by stack 00.",
+        "required": true,
+        "validation": "^vpc-[0-9a-f]+$",
+        "set_where": "Spacelift stack dependency, mapped to a TF_VAR_* environment variable (output of stack 00)",
+        "example": "vpc-00000000000000000",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "subnet_id",
+        "type": "string",
+        "description": "ID of the public subnet created by stack 00.",
+        "required": true,
+        "validation": "^subnet-[0-9a-f]+$",
+        "set_where": "Spacelift stack dependency, mapped to a TF_VAR_* environment variable (output of stack 00)",
+        "example": "subnet-00000000000000000",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "project_name",
+        "type": "string",
+        "description": "Value of the Project tag that every AWS resource of the stack receives. Same as stack 00.",
+        "required": false,
+        "default": "clouds-against-humanity",
+        "validation": "none",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "clouds-against-humanity",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "twingate_network",
+        "type": "string",
+        "description": "Bare Twingate network subdomain (the tenant name).",
+        "required": true,
+        "validation": "^[a-z0-9-]+$ (no URL, no quotes)",
+        "set_where": "Doppler (config prd), exported as TF_VAR_* by the Spacelift hook (TWINGATE_NETWORK)",
+        "example": "example-tenant",
+        "sensitivity": "private",
+        "sensitive_in_code": true,
+        "status": "exists",
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
+      },
+      {
+        "name": "admin_ssh_public_key",
+        "type": "string",
+        "description": "Public SSH key for the cah-admin user on the connectors (modules/twingate-bootstrap requires type and key with no comment). No AWS key pair is created.",
+        "required": true,
+        "validation": "none in the stack (the bootstrap module requires '<ssh-ed25519|ssh-rsa> <key>' with no comment)",
+        "set_where": "Doppler (config prd), exported as TF_VAR_* by the Spacelift hook (ADMIN_SSH_PUBLIC_KEY)",
+        "example": "ssh-ed25519 AAAAEXAMPLEONLYNOTAREALKEY",
+        "sensitivity": "private",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
+      },
+      {
+        "name": "admin_user_ids",
+        "type": "list(string)",
+        "description": "Twingate user ids placed in the admin group.",
+        "required": true,
+        "validation": "at least one entry",
+        "set_where": "Doppler (config prd), exported as TF_VAR_* by the Spacelift hook (ADMIN_USER_IDS, a JSON list)",
+        "example": "[\"example-user-id\"]",
+        "sensitivity": "private",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
+      }
+    ],
     "stacks/20-telemetry (not built yet)": [
       {
         "name": "logging_servers",
@@ -1241,6 +1386,42 @@
       "validation": "dollars per month for a size; a size absent from the table fails the gate",
       "set_where": "cost-prices.json (retrieved from the provider API)",
       "example": "6",
+      "sensitivity": "public",
+      "status": "exists"
+    },
+    {
+      "name": "AWS connector-a instance type",
+      "file": "stacks/aws/10-access/cost.json",
+      "pointer": "/resources/0/type",
+      "current": "t4g.micro",
+      "stack": "stacks/aws/10-access",
+      "validation": "price must exist in docs/cost-prices/aws.json; read by the stack as local.connector_a.type; both connectors are kept equal by a test",
+      "set_where": "cost.json (edit together with docs/stages/approved.json)",
+      "example": "t4g.micro",
+      "sensitivity": "public",
+      "status": "exists"
+    },
+    {
+      "name": "AWS connector-b instance type",
+      "file": "stacks/aws/10-access/cost.json",
+      "pointer": "/resources/1/type",
+      "current": "t4g.micro",
+      "stack": "stacks/aws/10-access",
+      "validation": "price must exist in docs/cost-prices/aws.json; read by the stack as local.connector_b.type; both connectors are kept equal by a test",
+      "set_where": "cost.json (edit together with docs/stages/approved.json)",
+      "example": "t4g.micro",
+      "sensitivity": "public",
+      "status": "exists"
+    },
+    {
+      "name": "approved monthly total (AWS)",
+      "file": "docs/stages/approved.json",
+      "pointer": "/providers/aws/approved_monthly_total",
+      "current": 21.0,
+      "stack": "all stacks",
+      "validation": "the computed AWS total may not exceed it; counted against the ceiling only while the AWS entry is active",
+      "set_where": "approved.json",
+      "example": "21.0",
       "sensitivity": "public",
       "status": "exists"
     }

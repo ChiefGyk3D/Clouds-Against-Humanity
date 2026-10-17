@@ -62,6 +62,27 @@ Stack variables are the settings you set per site. Module variables are filled i
 | `wazuh_agent_group`<br>Wazuh agent group for the cloud hosts. | `string` | `"cloud"` | ^[a-zA-Z0-9_.-]+\$ | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `cloud-site-tor1` | public | planned |
 | `labels`<br>Telemetry labels. | `map(string)` | `{}` | keys limited to env, role, owner_team; values at most 32 characters | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `{env = "lab"}` | public | planned |
 
+### stacks/aws/00-foundation
+
+| Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
+|---|---|---|---|---|---|---|---|
+| `region`<br>AWS region name. The price table was recorded for us-east-1; another region needs its own check. | `string` | `"us-east-1"` | ^[a-z]{2}(-[a-z]+)+-[0-9]\$ (for example us-east-1) | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `us-east-1` | public | exists |
+| `vpc_ip_range`<br>Private CIDR. Must not overlap any homelab range (confirmed in the stage guide before apply). | `string` | `"10.78.0.0/24"` | none in the stack; modules/aws/vpc checks it is a private IPv4 network address, /16 to /28 | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `10.99.0.0/24` | private (not a credential, but identifies the owner) | exists |
+| `availability_zone`<br>Availability zone of the one subnet. Null lets AWS choose. | `string` | `null` | none | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `us-east-1a` | public | exists |
+| `project_name`<br>Value of the Project tag that every AWS resource of the stack receives. | `string` | `"clouds-against-humanity"` | none | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `clouds-against-humanity` | public | exists |
+
+### stacks/aws/10-access
+
+| Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
+|---|---|---|---|---|---|---|---|
+| `region`<br>AWS region name, the same value as stack 00. | `string` | required | ^[a-z]{2}(-[a-z]+)+-[0-9]\$ (for example us-east-1) | Spacelift stack dependency, mapped to a TF_VAR_* environment variable (output of stack 00) | `us-east-1` | public | exists |
+| `vpc_id`<br>ID of the VPC created by stack 00. | `string` | required | ^vpc-[0-9a-f]+\$ | Spacelift stack dependency, mapped to a TF_VAR_* environment variable (output of stack 00) | `vpc-00000000000000000` | public | exists |
+| `subnet_id`<br>ID of the public subnet created by stack 00. | `string` | required | ^subnet-[0-9a-f]+\$ | Spacelift stack dependency, mapped to a TF_VAR_* environment variable (output of stack 00) | `subnet-00000000000000000` | public | exists |
+| `project_name`<br>Value of the Project tag that every AWS resource of the stack receives. Same as stack 00. | `string` | `"clouds-against-humanity"` | none | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `clouds-against-humanity` | public | exists |
+| `twingate_network`<br>Bare Twingate network subdomain (the tenant name). | `string` | required | ^[a-z0-9-]+\$ (no URL, no quotes) | Doppler (config prd), exported as TF_VAR_* by the Spacelift hook (TWINGATE_NETWORK) | `example-tenant` | private (not a credential, but identifies the owner) | exists |
+| `admin_ssh_public_key`<br>Public SSH key for the cah-admin user on the connectors (modules/twingate-bootstrap requires type and key with no comment). No AWS key pair is created. | `string` | required | none in the stack (the bootstrap module requires '&lt;ssh-ed25519\|ssh-rsa&gt; &lt;key&gt;' with no comment) | Doppler (config prd), exported as TF_VAR_* by the Spacelift hook (ADMIN_SSH_PUBLIC_KEY) | `ssh-ed25519 AAAAEXAMPLEONLYNOTAREALKEY` | private (not a credential, but identifies the owner) | exists |
+| `admin_user_ids`<br>Twingate user ids placed in the admin group. | `list(string)` | required | at least one entry | Doppler (config prd), exported as TF_VAR_* by the Spacelift hook (ADMIN_USER_IDS, a JSON list) | `["example-user-id"]` | private (not a credential, but identifies the owner) | exists |
+
 ### stacks/20-telemetry (not built yet)
 
 | Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
@@ -185,6 +206,9 @@ These are not OpenTofu variables. The cost gate (`scripts/cost_check.py`) reads 
 | approved monthly total (DigitalOcean) | `docs/stages/approved.json` | `/providers/digitalocean/approved_monthly_total` | `12.0` | the computed total may not exceed it; the sum across providers may not exceed the ceiling | `12.0` | exists |
 | monthly ceiling | `docs/stages/approved.json` | `/ceiling` | `30.0` | number of dollars | `30.0` | exists |
 | droplet price table entry | `docs/cost-prices.json` | `/droplets/s-1vcpu-1gb` | `6` | dollars per month for a size; a size absent from the table fails the gate | `6` | exists |
+| AWS connector-a instance type | `stacks/aws/10-access/cost.json` | `/resources/0/type` | `"t4g.micro"` | price must exist in docs/cost-prices/aws.json; read by the stack as local.connector_a.type; both connectors are kept equal by a test | `t4g.micro` | exists |
+| AWS connector-b instance type | `stacks/aws/10-access/cost.json` | `/resources/1/type` | `"t4g.micro"` | price must exist in docs/cost-prices/aws.json; read by the stack as local.connector_b.type; both connectors are kept equal by a test | `t4g.micro` | exists |
+| approved monthly total (AWS) | `docs/stages/approved.json` | `/providers/aws/approved_monthly_total` | `21.0` | the computed AWS total may not exceed it; counted against the ceiling only while the AWS entry is active | `21.0` | exists |
 
 ## Settings that are hard-coded today
 
