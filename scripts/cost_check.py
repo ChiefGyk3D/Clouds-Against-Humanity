@@ -14,12 +14,19 @@ provider's price table and docs/stages/approved.json. It fails when:
   a NAT gateway appears;
 - the number of twingate-connector module blocks in a stack differs from the
   machines in that stack's manifest (or a block uses count/for_each);
-- a module source is not local, or a *.tf.json file exists;
+- a connector module's size is not a plain `local.<name>.size` reference (its
+  instance_type likewise), a costed resource uses count or for_each, a resource
+  type's provider prefix is neither a known cloud nor in SAFE_PREFIXES, or a
+  label holds a backslash;
+- a module source is not local or goes through a dot-directory, a stack
+  directory is misnamed, a dot-directory exists under stacks/ or modules/, or a
+  *.tf.json / *.tofu.json file exists (*.tf and *.tofu are both read);
 - with --plan, the cost of the planned values in an OpenTofu plan (JSON) differs
   from the manifest, or the plan holds a type the gate cannot price.
 
-HCL is parsed with regexes and never executed, so the source scan is a
-guardrail, not a proof. The plan check is the stronger one for attributes
+HCL is scanned (comments, strings and heredocs understood) and never executed,
+so the source scan is a guardrail, not a proof; the plan check below is the
+guarantee. The plan check is the stronger one for attributes
 (a public address, a disk size, count/for_each) that source cannot show, and it
 is only as trustworthy as where the plan came from: a plan produced by the
 trusted run, not a file anyone can edit in a pull request.
@@ -30,6 +37,8 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
+import posixpath
 import re
 import sys
 from pathlib import Path
@@ -93,12 +102,48 @@ REJECTED_TYPES = {
 }
 
 MACHINE_KINDS = frozenset({"droplet", "instance"})
-SKIP_DIRS = frozenset({".terraform", ".venv", ".git", ".claude"})
+# Skipped at the repository top level only: tool state and agent worktrees.
+TOP_SKIP_DIRS = frozenset({".git", ".venv", ".claude"})
+# Directories whose contents the gate must be able to read in full.
+GUARDED_TOP = frozenset({"stacks", "modules"})
+HCL_SUFFIXES = (".tf", ".tofu")
+JSON_SUFFIXES = (".tf.json", ".tofu.json")
+STACK_NAME_RE = re.compile(r"^[0-9]+-[A-Za-z0-9][A-Za-z0-9_-]*$")
 CONNECTOR_SOURCE_SUFFIX = "twingate-connector"
-RESOURCE_RE = re.compile(r'^\s*resource\s+"(?P<type>[A-Za-z0-9_]+)"', re.MULTILINE)
-MODULE_RE = re.compile(r'^\s*module\s+"(?P<name>[^"]+)"\s*\{', re.MULTILINE)
-SOURCE_RE = re.compile(r'^\s*source\s*=\s*"(?P<src>[^"]*)"', re.MULTILINE)
-META_RE = re.compile(r"^\s*(?P<key>count|for_each)\s*=", re.MULTILINE)
+# Connector size attribute -> the manifest key its local must read.
+CONNECTOR_SIZE_ATTRS = {"size": "size", "instance_type": "type"}
+# Providers that create nothing billable. Any other prefix that is not a known
+# cloud fails the gate until it is added here deliberately.
+SAFE_PREFIXES = (
+    "twingate_",
+    "terraform_",
+    "null_",
+    "random_",
+    "time_",
+    "tls_",
+    "local_",
+)
+
+# aws_instance plan attributes that change the bill and that the gate does not
+# model. Setting any of them to a non-empty value is a problem, not a zero;
+# tenancy and credit_specification have their own rule in unpriced_instance_attrs.
+# A value unknown in the plan is refused when the configuration sets the attribute
+# (see unknown_unpriced_attrs); an unset computed default is not.
+AWS_INSTANCE_UNPRICED_ATTRS = (
+    "instance_market_options",
+    "placement_group",
+    "host_id",
+    "host_resource_group_arn",
+    "license_specification",
+    "network_interface",
+    "launch_template",
+    "monitoring",
+)
+# Every attribute the unknown-value rule looks at.
+AWS_INSTANCE_CHECKED_ATTRS = AWS_INSTANCE_UNPRICED_ATTRS + (
+    "tenancy",
+    "credit_specification",
+)
 
 
 def load_json(path):
@@ -208,11 +253,13 @@ def resource_cost(res, prices, provider="digitalocean"):
 
 def stack_manifests(root):
     """Yield (stack dir relative path, manifest path) for every cost.json under stacks/."""
-    for path in sorted(Path(root, "stacks").rglob("cost.json")):
-        parts = path.relative_to(root).parts
-        if SKIP_DIRS.intersection(parts):
-            continue
-        yield path.parent.relative_to(root).as_posix(), path
+    for rel in walk_repo(root)[0]:
+        if (
+            rel.startswith("stacks/")
+            and rel.endswith("/cost.json")
+            and not is_hidden(rel)
+        ):
+            yield str(Path(rel).parent.as_posix()), Path(root, rel)
 
 
 def provider_totals(root):
@@ -268,7 +315,9 @@ def plan_cost(plan, prices):
             continue
         try:
             if rtype == "aws_instance":
-                total += plan_instance_cost(addr, after, unknown, prices)
+                total += plan_instance_cost(
+                    addr, after, unknown, prices, config_expressions(plan, rc)
+                )
             elif rtype == "aws_eip":
                 total += (
                     num(prices["public_ipv4_hourly"], "public_ipv4_hourly")
@@ -311,7 +360,94 @@ def plan_volume_gb(addr, block, unknown, key):
     return num(block[key], f"{addr}: {key}")
 
 
-def plan_instance_cost(addr, after, unknown, prices):
+def mask_has_unknown(mask):
+    """True when an after_unknown mask marks anything, at any depth, unknown."""
+    if isinstance(mask, dict):
+        return any(mask_has_unknown(v) for v in mask.values())
+    if isinstance(mask, list):
+        return any(mask_has_unknown(v) for v in mask)
+    return mask is True
+
+
+def config_expressions(plan, rc):
+    """The configuration's `expressions` for a resource change, or None when the
+    plan does not carry that configuration (shape unknown, so callers fail closed).
+
+    In `tofu show -json`, configuration.root_module.resources[].expressions lists
+    only the attributes the configuration sets; an unset computed attribute is
+    absent there while still being unknown in after_unknown. Resources in modules
+    sit under module_calls.<name>.module.resources.
+    """
+    node = (plan.get("configuration") or {}).get("root_module")
+    address = rc.get("address", "")
+    module_address = rc.get("module_address")
+    if module_address is None:
+        lead = re.match(r"^((?:module\.[^.\[]+(?:\[[^\]]*\])?\.)*)", address)
+        module_address = lead.group(1)
+    for name in re.findall(r"module\.([^.\[]+)", module_address or ""):
+        if not isinstance(node, dict):
+            return None
+        node = ((node.get("module_calls") or {}).get(name) or {}).get("module")
+    if not isinstance(node, dict):
+        return None
+    name = rc.get("name") or re.sub(r"\[.*$", "", address.rsplit(".", 1)[-1])
+    for res in node.get("resources") or []:
+        if (
+            res.get("mode", "managed") == "managed"
+            and res.get("type") == rc.get("type")
+            and res.get("name") == name
+        ):
+            expr = res.get("expressions")
+            return expr if isinstance(expr, dict) else {}
+    return None
+
+
+def unknown_unpriced_attrs(unknown, expressions):
+    """Attributes the plan cannot value and that the configuration sets (or that
+    cannot be told apart from set, when the configuration is missing).
+
+    Not flagged: an unknown attribute the configuration does not set. That is a
+    provider default computed at apply (tenancy, placement_group, ...), which a
+    normal plan shows as unknown. Not caught either way: a default that is itself
+    priced differently, such as CPU credits left unset on a T-family type.
+    """
+    found = []
+    for attr in AWS_INSTANCE_CHECKED_ATTRS:
+        if mask_has_unknown(unknown.get(attr)):
+            if expressions is None:
+                found.append(
+                    f"{attr} (unknown in the plan and the plan carries no configuration to show it unset)"
+                )
+            elif attr in expressions:
+                found.append(
+                    f"{attr} (set by the configuration but unknown in the plan)"
+                )
+    return found
+
+
+def unpriced_instance_attrs(after):
+    """Names (with values) of aws_instance attributes the gate does not price."""
+    found = []
+    if after.get("tenancy") not in (None, "default"):
+        found.append(f"tenancy={after['tenancy']!r}")
+    for spec in after.get("credit_specification") or []:
+        if str((spec or {}).get("cpu_credits", "")).lower() == "unlimited":
+            found.append("credit_specification.cpu_credits='unlimited'")
+    for attr in AWS_INSTANCE_UNPRICED_ATTRS:
+        if after.get(attr) not in (None, "", False, [], {}):
+            found.append(f"{attr}={after[attr]!r}")
+    return found
+
+
+def plan_instance_cost(addr, after, unknown, prices, expressions=None):
+    extras = unpriced_instance_attrs(after) + unknown_unpriced_attrs(
+        unknown, expressions
+    )
+    if extras:
+        raise ValueError(
+            f"{addr}: unpriced attribute {'; '.join(extras)}; the gate prices the "
+            "instance type, root disk and public address only"
+        )
     if unknown.get("instance_type") or not after.get("instance_type"):
         raise ValueError(f"{addr}: instance_type is not known in the plan")
     roots = after.get("root_block_device") or []
@@ -354,45 +490,326 @@ def plan_problems(plan_path, stack, root):
 
 
 # ---- source scan ------------------------------------------------------------
+#
+# The source scan reads HCL with a small tokenizer-aware scanner. It understands
+# comments, quoted strings (with ${...} interpolation) and heredocs, so that a
+# `/*`, a brace or the word `resource` inside a string or heredoc is text and
+# not code. It is still a guardrail, not a parser: see the module docstring.
+
+
+class HclError(ValueError):
+    """The file has a shape this scanner will not guess at (fail closed)."""
+
+
+HEREDOC_OPEN_RE = re.compile(
+    r"<<(?P<dash>-?)(?P<ident>[A-Za-z_][A-Za-z0-9_-]*)[ \t]*\r?\n"
+)
+# A bare label is an identifier: "=", ":" and braces are not label characters, so
+# `module = { ... }` inside an object is an attribute, not a block header.
+LABEL = r'"(?:[^"\\\n]|\\.)*"|[^\W\d][\w-]*'
+LABEL_RE = re.compile(LABEL)
+HEADER_RE = re.compile(
+    rf"^[ \t]*(?P<kind>resource|module)(?P<labels>(?:[ \t]+(?:{LABEL}))*)[ \t]*\{{",
+    re.MULTILINE,
+)
+ATTR_RE = re.compile(
+    r"\s*(?P<name>[A-Za-z_][A-Za-z0-9_-]*)\s*=(?!=)\s*(?P<value>.*?)\s*$", re.DOTALL
+)
+STRING_LITERAL_RE = re.compile(r'"(?P<text>[^"\\$%\n]*)"')
+# `size = local.<name>.size`: nothing else ties a droplet to cost.json.
+LOCAL_REF_RE = r"local\.[A-Za-z_][A-Za-z0-9_-]*\.{key}"
+
+
+def blank(text):
+    """Spaces for every character but newlines, so line numbers survive."""
+    return re.sub(r"[^\n]", " ", text)
+
+
+def skip_interpolation(text, j):
+    """j is just after `${` or `%{`; return the index after the matching `}`."""
+    depth, n = 1, len(text)
+    while j < n:
+        c = text[j]
+        if c == '"':
+            j = skip_string(text, j)
+            continue
+        if c == "#" or text.startswith("//", j):
+            nl = text.find("\n", j)
+            j = n if nl == -1 else nl
+            continue
+        if text.startswith("/*", j):
+            end = text.find("*/", j + 2)
+            if end == -1:
+                raise HclError("unterminated /* comment in an interpolation")
+            j = end + 2
+            continue
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth == 0:
+                return j + 1
+        j += 1
+    raise HclError("unterminated ${...} interpolation")
+
+
+def skip_string(text, i):
+    """i is at an opening quote; return the index after the closing quote.
+
+    A raw newline ends nothing: HCL quoted strings are single-line, so one that
+    runs past the line is refused rather than guessed at.
+    """
+    j, n = i + 1, len(text)
+    while j < n:
+        c = text[j]
+        if c == '"':
+            return j + 1
+        if c == "\n":
+            break
+        if c == "\\":
+            j += 2
+        elif text.startswith(("$${", "%%{"), j):
+            j += 3
+        elif text.startswith(("${", "%{"), j):
+            j = skip_interpolation(text, j + 2)
+        else:
+            j += 1
+    raise HclError("unterminated string")
 
 
 def strip_comments(text):
-    """Remove #, // and /* */ comments, leaving string contents alone.
+    """Remove comments and heredoc bodies; leave quoted strings alone.
 
-    Without this a commented-out `source = "./x"` before the real, remote
-    source is read as the module's source, and a brace inside a comment ends a
-    block early.
+    #, // and /* */ comments become nothing (newlines are kept, so line numbers
+    stay true). A heredoc, `<<ID` or `<<-ID` at the end of a line, is string
+    content through the line whose stripped text equals ID: its body is blanked,
+    so a `/*`, a brace or a `resource` word inside it is never read as code.
+    Without this a commented-out `source = "./x"` before the real, remote source
+    is read as the module's source, and a brace inside a comment or heredoc ends
+    a block early.
     """
     out, i, n = [], 0, len(text)
     while i < n:
         c = text[i]
         if c == '"':
-            j = i + 1
-            while j < n and text[j] != '"':
-                j += 2 if text[j] == "\\" else 1
-            out.append(text[i : j + 1])
-            i = j + 1
+            j = skip_string(text, i)
+            out.append(text[i:j])
+            i = j
         elif c == "#" or text.startswith("//", i):
             while i < n and text[i] != "\n":
                 i += 1
         elif text.startswith("/*", i):
             end = text.find("*/", i + 2)
-            i = n if end == -1 else end + 2
-            out.append(" ")
+            if end == -1:
+                raise HclError("unterminated /* comment")
+            out.append(blank(text[i : end + 2]))
+            i = end + 2
+        elif text.startswith("<<", i):
+            match = HEREDOC_OPEN_RE.match(text, i)
+            if not match:
+                raise HclError("a << that is not a heredoc opener this scanner reads")
+            out.append(match.group(0))
+            ident, pos = match.group("ident"), match.end()
+            while True:
+                if pos >= n:
+                    raise HclError(f"unterminated heredoc <<{ident}")
+                eol = text.find("\n", pos)
+                eol = n if eol == -1 else eol
+                if text[pos:eol].strip() == ident:
+                    out.append(blank(text[match.end() : eol]))
+                    i = eol
+                    break
+                pos = eol + 1
         else:
             out.append(c)
             i += 1
     return "".join(out)
 
 
-def iter_files(root, pattern):
-    """Yield (relative posix path, Path) for files under root, skipping tool caches."""
-    root = Path(root)
-    for path in sorted(root.rglob(pattern)):
-        parts = path.relative_to(root).parts
-        if SKIP_DIRS.intersection(parts):
+def block_end(text, i):
+    """i is just after a `{`; return the index of its matching `}`."""
+    depth, n = 1, len(text)
+    while i < n:
+        c = text[i]
+        if c == '"':
+            i = skip_string(text, i)
             continue
-        yield path.relative_to(root).as_posix(), path
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+            if depth == 0:
+                return i
+        i += 1
+    raise HclError("unbalanced braces")
+
+
+class Block:
+    """A `resource` or `module` block header and body from comment-free text."""
+
+    def __init__(self, kind, raw_labels, line, body):
+        self.kind, self.raw_labels, self.line, self.body = kind, raw_labels, line, body
+        self.labels = [
+            lab[1:-1] if lab.startswith('"') and lab.endswith('"') else lab
+            for lab in raw_labels
+        ]
+        self.problem = None
+        if any("\\" in lab for lab in raw_labels):
+            self.problem = (
+                f"backslash in a {kind} label {' '.join(raw_labels)}; "
+                "the gate does not decode escapes in labels"
+            )
+        elif len(raw_labels) != (2 if kind == "resource" else 1):
+            self.problem = (
+                f"{kind} header with labels {' '.join(raw_labels)!r} is not understood"
+            )
+
+    def attrs(self):
+        return top_level_attrs(self.body)
+
+
+def find_blocks(text):
+    """Every resource/module block in already-stripped text (nested ones too)."""
+    blocks = []
+    for match in HEADER_RE.finditer(text):
+        line = text.count("\n", 0, match.start("kind")) + 1
+        try:
+            end = block_end(text, match.end())
+        except HclError as err:
+            raise HclError(f"line {line}: {err}") from None
+        blocks.append(
+            Block(
+                match.group("kind"),
+                LABEL_RE.findall(match.group("labels")),
+                line,
+                text[match.end() : end],
+            )
+        )
+    return blocks
+
+
+def top_level_attrs(body):
+    """[(name, value)] for the attributes written directly in a block body.
+
+    Anything inside a nested {...}, [...] or (...) is not an attribute of the
+    block, so a `source = ...` in a tags object cannot stand in for the real one.
+    """
+    attrs, depth, start, i, n = [], 0, 0, 0, len(body)
+
+    def flush(segment):
+        match = ATTR_RE.fullmatch(segment)
+        if match:
+            attrs.append((match.group("name"), match.group("value")))
+
+    while i < n:
+        c = body[i]
+        if c == '"':
+            i = skip_string(body, i)
+            continue
+        if c in "{[(":
+            depth += 1
+        elif c in "}])":
+            depth = max(depth - 1, 0)
+        elif c == "\n" and depth == 0:
+            flush(body[start:i])
+            start = i + 1
+        i += 1
+    flush(body[start:])
+    return attrs
+
+
+def walk_repo(root):
+    """Return (sorted relative file paths, layout problems).
+
+    Skipped: .git, .venv and .claude at the repository top level (tool and
+    worktree directories) and a .terraform cache anywhere. Nothing else is
+    hidden from the scan. Under stacks/ and modules/ any other directory whose
+    name starts with a dot is a failure, a symlinked directory is a failure,
+    and a stack directory must be named NN-name or be a provider directory.
+    """
+    root = Path(root)
+    files, problems = [], []
+    for dirpath, dirnames, filenames in os.walk(root):
+        rel_dir = Path(dirpath).relative_to(root)
+        keep = []
+        for name in sorted(dirnames):
+            if name == ".terraform" or (not rel_dir.parts and name in TOP_SKIP_DIRS):
+                continue
+            child = rel_dir / name
+            where = child.as_posix()
+            guarded = child.parts[0] in GUARDED_TOP
+            if Path(dirpath, name).is_symlink():
+                problems.append(
+                    f"{where}: symlinked directory is refused; the gate does not follow it, OpenTofu does"
+                )
+                continue
+            if guarded and name.startswith("."):
+                problems.append(
+                    f"{where}: hidden directory under {child.parts[0]}/ is refused; "
+                    "the gate does not scan it, so nothing may live there"
+                )
+            elif child.parts[0] == "stacks" and not stack_name_ok(child.parts):
+                problems.append(
+                    f"{where}: stack directory name must be NN-name (digits, a dash, then a name) "
+                    f"or one of {', '.join(sorted(STACK_PROVIDER_DIRS))} exactly, lowercase"
+                )
+            keep.append(name)
+        dirnames[:] = keep
+        for f in sorted(filenames):
+            if f.endswith(HCL_SUFFIXES) and Path(dirpath, f).is_symlink():
+                problems.append(
+                    f"{(rel_dir / f).as_posix()}: symlinked OpenTofu file is refused"
+                )
+                continue
+            files.append((rel_dir / f).as_posix())
+    return sorted(files), problems
+
+
+def stack_name_ok(parts):
+    """Naming rule for stacks/<x> and stacks/<provider>/<x>."""
+    if len(parts) == 2:
+        return parts[1] in STACK_PROVIDER_DIRS or bool(STACK_NAME_RE.match(parts[1]))
+    if len(parts) == 3 and parts[1] in STACK_PROVIDER_DIRS:
+        return bool(STACK_NAME_RE.match(parts[2]))
+    return True
+
+
+def is_hidden(rel):
+    return any(part.startswith(".") for part in Path(rel).parts)
+
+
+def hcl_files(root):
+    """Yield (rel, stripped text, error) for every *.tf and *.tofu file."""
+    for rel in walk_repo(root)[0]:
+        if not rel.endswith(HCL_SUFFIXES):
+            continue
+        try:
+            yield (
+                rel,
+                strip_comments(Path(root, rel).read_text(encoding="utf-8-sig")),
+                None,
+            )
+        except (HclError, UnicodeDecodeError) as err:
+            yield rel, None, str(err)
+
+
+def file_blocks(root):
+    """Yield (rel, Block) for every readable block; unreadable files are skipped
+    here and reported once by block_problems."""
+    for rel, text, error in hcl_files(root):
+        if error:
+            continue
+        try:
+            blocks = find_blocks(text)
+        except HclError:
+            continue
+        for block in blocks:
+            yield rel, block
+
+
+def provider_prefix(rtype):
+    head, sep, _ = rtype.partition("_")
+    return head + sep
 
 
 def uncosted_sources(root, allowed, approved_providers=None):
@@ -401,94 +818,172 @@ def uncosted_sources(root, allowed, approved_providers=None):
     `allowed` maps a costed type to the files that may contain it. A type with a
     provider prefix that is neither free, nor costed-and-in-its-file fails; a
     rejected type fails whatever `allowed` says. A provider that is not
-    approved at all fails every non-free type it uses.
+    approved at all fails every non-free type it uses. A prefix that is neither
+    a known cloud nor in SAFE_PREFIXES fails: an unknown cloud is not "free".
     """
     found = []
-    for rel, tf in iter_files(root, "*.tf"):
-        for match in RESOURCE_RE.finditer(strip_comments(tf.read_text())):
-            kind = match.group("type")
-            provider = provider_of_type(kind)
-            if provider is None:
-                continue
-            if kind in REJECTED_TYPES:
-                found.append(f"{rel}: {kind} is rejected: {REJECTED_TYPES[kind]}")
-                continue
-            if kind in FREE_TYPES[provider]:
-                continue
-            if approved_providers is not None and provider not in approved_providers:
+    for rel, block in file_blocks(root):
+        if block.kind != "resource" or block.problem:
+            continue
+        kind = block.labels[0]
+        provider = provider_of_type(kind)
+        if provider is None:
+            if not kind.startswith(SAFE_PREFIXES):
                 found.append(
-                    f"{rel}: {kind} (provider {provider} is not in approved.json)"
+                    f"{rel}:{block.line}: {kind} (provider prefix {provider_prefix(kind)!r} "
+                    "is not known to the gate; add it deliberately)"
                 )
-            elif kind not in COSTED_TYPES[provider]:
-                # approved.json can place a priced type in a file, but cannot
-                # approve a type the gate has no price model for.
-                found.append(f"{rel}: {kind} (the gate has no price model for it)")
-            elif rel not in allowed.get(kind, []):
-                found.append(f"{rel}: {kind}")
+            continue
+        if kind in REJECTED_TYPES:
+            found.append(f"{rel}: {kind} is rejected: {REJECTED_TYPES[kind]}")
+            continue
+        if kind in FREE_TYPES[provider]:
+            continue
+        if approved_providers is not None and provider not in approved_providers:
+            found.append(f"{rel}: {kind} (provider {provider} is not in approved.json)")
+        elif kind not in COSTED_TYPES[provider]:
+            # approved.json can place a priced type in a file, but cannot
+            # approve a type the gate has no price model for.
+            found.append(f"{rel}: {kind} (the gate has no price model for it)")
+        elif rel not in allowed.get(kind, []):
+            found.append(f"{rel}: {kind}")
     return found
 
 
 def module_blocks(text):
-    """Return (name, body) for each top-level-looking module block.
+    """Return (name, body) for each module block in the text."""
+    return [
+        (block.labels[0], block.body)
+        for block in find_blocks(strip_comments(text))
+        if block.kind == "module" and not block.problem
+    ]
 
-    Comments are removed first and braces inside quoted strings are not
-    counted. Heredocs are not understood.
-    """
-    text = strip_comments(text)
-    blocks = []
-    for match in MODULE_RE.finditer(text):
-        depth, i = 1, match.end()
-        while i < len(text) and depth:
-            if text[i] == '"':
-                i += 1
-                while i < len(text) and text[i] != '"':
-                    i += 2 if text[i] == "\\" else 1
-            else:
-                depth += {"{": 1, "}": -1}.get(text[i], 0)
-            i += 1
-        blocks.append((match.group("name"), text[match.end() : i]))
-    return blocks
+
+def module_source_problem(root, rel, block):
+    """(source or None, problem or None) for one module block."""
+    sources = [v for k, v in block.attrs() if k == "source"]
+    if len(sources) > 1:
+        return (
+            None,
+            f"{rel}:{block.line}: module {block.labels[0]!r} has more than one source",
+        )
+    match = STRING_LITERAL_RE.fullmatch(sources[0]) if sources else None
+    source = match.group("text") if match else ""
+    if not source.startswith(("./", "../")):
+        return (
+            None,
+            f"{rel}: module {block.labels[0]!r} has a non-local source {source!r}",
+        )
+    if any(seg.startswith(".") and seg not in (".", "..") for seg in source.split("/")):
+        return None, (
+            f"{rel}:{block.line}: module {block.labels[0]!r} source {source!r} goes through a hidden "
+            "directory (a dot-directory is never scanned, so no module may live there)"
+        )
+    target = posixpath.normpath(posixpath.join(posixpath.dirname(rel), source))
+    if target == ".." or target.startswith("../"):
+        return None, (
+            f"{rel}:{block.line}: module {block.labels[0]!r} source {source!r} is outside the repository"
+        )
+    resolved = Path(root, posixpath.dirname(rel), source).resolve()
+    if not resolved.is_relative_to(Path(root).resolve()):
+        return None, (
+            f"{rel}:{block.line}: module {block.labels[0]!r} source {source!r} is outside the repository "
+            "once symlinks are resolved"
+        )
+    return source, None
 
 
 def module_problems(root):
     """Check module blocks. Returns (problems, {stack dir: connector module count})."""
     problems, connectors = [], {}
-    for rel, tf in iter_files(root, "*.tf"):
-        for name, body in module_blocks(tf.read_text()):
-            src = SOURCE_RE.search(body)
-            source = src.group("src") if src else ""
-            if not source.startswith(("./", "../")):
-                problems.append(
-                    f"{rel}: module {name!r} has a non-local source {source!r}"
-                )
-                continue
-            if source.rstrip("/").endswith(CONNECTOR_SOURCE_SUFFIX):
-                stack = str(Path(rel).parent.as_posix())
+    manifests = dict(stack_manifests(root))
+    for rel, block in file_blocks(root):
+        if block.kind != "module" or block.problem:
+            continue
+        name = block.labels[0]
+        source, problem = module_source_problem(root, rel, block)
+        if problem:
+            problems.append(problem)
+            continue
+        if source.rstrip("/").endswith(CONNECTOR_SOURCE_SUFFIX):
+            stack = str(Path(rel).parent.as_posix())
+            # Only a stack's own connector blocks reconcile with its manifest; a
+            # module directory may compose one without being a stack.
+            if stack in manifests or stack.startswith("stacks/"):
                 connectors[stack] = connectors.get(stack, 0) + 1
-                meta = META_RE.search(body)
-                if meta:
+            attrs = block.attrs()
+            for key, _ in attrs:
+                if key in ("count", "for_each"):
                     problems.append(
-                        f"{rel}: module {name!r} uses {meta.group('key')}; the connector is costed as a single instance"
+                        f"{rel}: module {name!r} uses {key}; the connector is costed as a single instance"
                     )
+                    break
+            sizes = [(k, v) for k, v in attrs if k in CONNECTOR_SIZE_ATTRS]
+            ok = bool(sizes) and all(
+                re.fullmatch(LOCAL_REF_RE.format(key=CONNECTOR_SIZE_ATTRS[k]), v)
+                for k, v in sizes
+            )
+            if not ok:
+                problems.append(
+                    f"{rel}:{block.line}: connector module {name!r} must set size (or instance_type) "
+                    "to a plain reference such as local.connector_a.size, read from cost.json; "
+                    "a literal or other expression is not tied to the priced manifest (see docs/cost.md)"
+                )
     return problems, connectors
+
+
+def block_problems(root):
+    """Everything wrong with how the files themselves read: unreadable HCL,
+    escapes in labels, headers the scanner does not understand, and count or
+    for_each on a costed resource (the manifest cannot be reconciled with it
+    without a plan)."""
+    problems = []
+    costed = set().union(*COSTED_TYPES.values())
+    for rel, text, error in hcl_files(root):
+        if error:
+            problems.append(f"{rel}: unreadable HCL, refused: {error}")
+            continue
+        try:
+            blocks = find_blocks(text)
+        except HclError as err:
+            problems.append(f"{rel}: unreadable HCL, refused: {err}")
+            continue
+        for block in blocks:
+            if block.problem:
+                problems.append(f"{rel}:{block.line}: {block.problem}")
+            elif block.kind == "resource" and block.labels[0] in costed:
+                for key, _ in block.attrs():
+                    if key in ("count", "for_each"):
+                        problems.append(
+                            f"{rel}:{block.line}: {block.labels[0]} {block.labels[1]!r} uses {key}; "
+                            "the manifest cannot be reconciled without a plan, so a costed resource "
+                            "may not use it"
+                        )
+    return problems
 
 
 def stack_dirs(root):
     """Every directory under stacks/ that holds OpenTofu files."""
     dirs = set()
-    for rel, _ in iter_files(Path(root, "stacks"), "*.tf"):
-        dirs.add(str(Path("stacks", rel).parent.as_posix()))
+    for rel in walk_repo(root)[0]:
+        if (
+            rel.startswith("stacks/")
+            and rel.endswith(HCL_SUFFIXES)
+            and not is_hidden(rel)
+        ):
+            dirs.add(str(Path(rel).parent.as_posix()))
     return sorted(dirs)
 
 
 def structure_problems(root):
     """Everything the cost total cannot see: manifests, modules, unreadable HCL.
 
-    Limits: HCL is read with regexes and never executed. This is a guardrail,
+    Limits: HCL is read with a scanner and never executed. This is a guardrail,
     not a proof. Dynamic module sources, string-built resource types and
-    files outside *.tf are not understood; *.tf.json is refused outright.
+    `dynamic` blocks are not understood; *.tf.json and *.tofu.json are refused
+    outright. *.tf and *.tofu (override files included) are read.
     """
-    problems = []
+    files, problems = walk_repo(root)
     manifests = dict(stack_manifests(root))
     if not manifests:
         problems.append(
@@ -499,8 +994,13 @@ def structure_problems(root):
             problems.append(
                 f"{stack}: has OpenTofu files but no cost.json; every stack needs a manifest"
             )
-    for rel, _ in iter_files(root, "*.tf.json"):
-        problems.append(f"{rel}: *.tf.json cannot be read by this gate and is refused")
+    for rel in files:
+        for suffix in JSON_SUFFIXES:
+            if rel.endswith(suffix):
+                problems.append(
+                    f"{rel}: *{suffix} cannot be read by this gate and is refused"
+                )
+    problems += block_problems(root)
     mod_problems, connectors = module_problems(root)
     problems += mod_problems
     for stack in sorted(set(connectors) | set(manifests)):

@@ -15,7 +15,8 @@ PRICES = {
 
 
 CONNECTOR_MODULE = (
-    'module "connector" {\n  source = "../../modules/twingate-connector"\n}\n'
+    'module "connector" {\n  source = "../../modules/twingate-connector"\n'
+    "  size   = local.connector.size\n}\n"
 )
 
 
@@ -261,7 +262,7 @@ def test_connector_module_with_count_or_for_each_fails(tmp_path, capsys, meta):
         [droplet()],
         tf_files={
             **OK_DROPLET,
-            "stacks/10-access/modules.tf": f'module "connector" {{\n  source = "../../modules/twingate-connector"\n  {meta}\n}}\n',
+            "stacks/10-access/modules.tf": f'module "connector" {{\n  source = "../../modules/twingate-connector"\n  size = local.c.size\n  {meta}\n}}\n',
         },
     )
     code, err = run_main(root, capsys)

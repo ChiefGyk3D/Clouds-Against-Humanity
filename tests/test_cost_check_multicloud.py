@@ -18,9 +18,13 @@ AWS_PRICES = json.loads(
     (Path(__file__).resolve().parents[1] / "docs/cost-prices/aws.json").read_text()
 )
 CONNECTOR = (
-    'module "c{i}" {{\n  source = "../../../modules/aws/twingate-connector"\n}}\n'
+    'module "c{i}" {{\n  source = "../../../modules/aws/twingate-connector"\n'
+    "  instance_type = local.c.type\n}}\n"
 )
-DO_CONNECTOR = 'module "c{i}" {{\n  source = "../../modules/twingate-connector"\n}}\n'
+DO_CONNECTOR = (
+    'module "c{i}" {{\n  source = "../../modules/twingate-connector"\n'
+    "  size = local.c.size\n}}\n"
+)
 
 
 def instance(name="connector-a", itype="t4g.micro", root_gb=8, public_ip=True):
@@ -384,7 +388,7 @@ def test_a_brace_in_a_string_or_comment_does_not_end_a_connector_block(
 ):
     root = build(tmp_path, aws=TWO)
     (root / "stacks/aws/10-access/m.tf").write_text(
-        'module "c" {\n  source = "../../../modules/aws/twingate-connector"\n  note   = "}"\n  # }\n  count  = 100\n}\n'
+        'module "c" {\n  source = "../../../modules/aws/twingate-connector"\n  instance_type = local.c.type\n  note   = "}"\n  # }\n  count  = 100\n}\n'
         + CONNECTOR.format(i=7)
     )
     code, out = run(root, capsys)
@@ -516,3 +520,771 @@ def test_standalone_and_extra_volumes_are_shape_checked():
     assert cost_check.plan_cost(plan(vol), AWS_PRICES)[1]
     extra = inst(ebs_block_device=[{"volume_size": 10, "volume_type": "st1"}])
     assert cost_check.plan_cost(plan(extra), AWS_PRICES)[1]
+
+
+# ---- adversarial review: parser-differential bypasses ------------------------
+#
+# Each of these exited 0 before the fix. The baseline `build(aws=TWO)` repo
+# passes, so any failure below comes from the one file the test adds.
+
+AWS_STACK = "stacks/aws/10-access"
+NAT = 'resource "aws_nat_gateway" "n" {}\n'
+
+
+def add(root, rel, text):
+    path = root / rel
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text)
+    return path
+
+
+def fails(root, capsys, *needles):
+    code, out = run(root, capsys)
+    assert code == 1, out.err
+    for needle in needles:
+        assert needle in out.err, out.err
+
+
+def test_baseline_repo_for_the_review_tests_passes(tmp_path, capsys):
+    assert run(build(tmp_path, aws=TWO), capsys)[0] == 0
+
+
+# 1. labels --------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        'resource aws_nat_gateway "n" {}\n',
+        'resource "aws_nat_gateway" n {}\n',
+        "resource aws_nat_gateway n {}\n",
+        'resource\t"aws_nat_gateway"\t"n"\t{}\n',
+    ],
+)
+def test_bare_resource_labels_are_read(tmp_path, capsys, text):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/x.tf", text)
+    fails(root, capsys, "aws_nat_gateway")
+
+
+def test_bare_module_label_with_a_remote_source_fails(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(
+        root,
+        f"{AWS_STACK}/x.tf",
+        'module r {\n  source = "git::https://example.invalid/x.git"\n}\n',
+    )
+    fails(root, capsys, "non-local source")
+
+
+def test_a_bare_labelled_local_module_still_passes(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/x.tf", 'module r {\n  source = "./x"\n}\n')
+    assert run(root, capsys)[0] == 0
+
+
+@pytest.mark.parametrize(
+    "text,line",
+    [
+        ('resource "aws_nat\\u005fgateway" "n" {}\n', 1),
+        ('\n\nresource "aws_nat_gateway" "n\\u0041" {}\n', 3),
+        ('resource "aws_nat\\x" "n" {}\n', 1),
+        ('\nmodule "r\\u0041" {\n  source = "./x"\n}\n', 2),
+    ],
+)
+def test_a_backslash_in_a_label_fails_naming_file_and_line(
+    tmp_path, capsys, text, line
+):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/x.tf", text)
+    fails(root, capsys, f"{AWS_STACK}/x.tf:{line}", "backslash")
+
+
+# 2. OpenTofu file kinds -------------------------------------------------------
+
+
+def test_tofu_files_are_scanned_for_resources(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/x.tofu", NAT)
+    fails(root, capsys, "aws_nat_gateway", "x.tofu")
+
+
+def test_tofu_files_are_scanned_for_modules(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/extra.tofu", CONNECTOR.format(i=9))
+    fails(root, capsys, f"{AWS_STACK}: 3 twingate-connector")
+
+
+@pytest.mark.parametrize("name", ["x.tofu.json", "x.tf.json"])
+def test_json_configuration_is_refused(tmp_path, capsys, name):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/{name}", "{}")
+    fails(root, capsys, name)
+
+
+def test_a_stack_of_only_tofu_files_needs_a_manifest(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(root, "stacks/aws/20-new/main.tofu", 'resource "twingate_group" "g" {}\n')
+    fails(root, capsys, "stacks/aws/20-new: has OpenTofu files but no cost.json")
+
+
+@pytest.mark.parametrize("name", ["override.tf", "main_override.tf", "override.tofu"])
+def test_override_files_are_scanned(tmp_path, capsys, name):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/{name}", NAT)
+    fails(root, capsys, "aws_nat_gateway", name)
+
+
+# 3. hidden directories and stack names ---------------------------------------
+
+
+@pytest.mark.parametrize("hidden", [".claude", ".hidden", ".git", ".venv"])
+def test_a_hidden_directory_under_stacks_is_a_failure(tmp_path, capsys, hidden):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"stacks/10-access/{hidden}/z/main.tf", NAT)
+    fails(root, capsys, "hidden directory", f"stacks/10-access/{hidden}")
+
+
+def test_a_hidden_directory_under_modules_is_a_failure(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(root, "modules/.claude/m/main.tf", NAT)
+    fails(root, capsys, "hidden directory")
+
+
+@pytest.mark.parametrize(
+    "source", ["./.claude/m", "../../.claude/m", "./a/.hidden/b", "../.git/x"]
+)
+def test_a_module_source_through_a_dot_directory_fails(tmp_path, capsys, source):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/x.tf", f'module "m" {{\n  source = "{source}"\n}}\n')
+    fails(root, capsys, "hidden directory", f"{AWS_STACK}/x.tf:1")
+
+
+def test_a_module_source_that_leaves_the_repository_fails(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(root, "stacks/10-access/x.tf", 'module "m" {\n  source = "../../../x"\n}\n')
+    fails(root, capsys, "outside the repository")
+
+
+def test_terraform_cache_and_root_tool_directories_are_still_ignored(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/.terraform/modules/x/main.tf", NAT)
+    add(root, ".claude/worktrees/w/stacks/10-access/main.tf", NAT)
+    add(root, ".git/x.tf", NAT)
+    add(root, ".venv/lib/x.tf", NAT)
+    assert run(root, capsys)[0] == 0
+
+
+@pytest.mark.parametrize(
+    "rel",
+    [
+        "stacks/AWS/10-access/main.tf",
+        "stacks/aws-foo/10-access/main.tf",
+        "stacks/Azure/10-access/main.tf",
+        "stacks/foo/main.tf",
+        "stacks/aws/foo/main.tf",
+        "stacks/10/main.tf",
+        "stacks/-x/main.tf",
+    ],
+)
+def test_stack_directory_names_are_exact(tmp_path, capsys, rel):
+    root = build(tmp_path, aws=TWO)
+    add(root, rel, 'resource "twingate_group" "g" {}\n')
+    fails(root, capsys, "stack directory name")
+
+
+@pytest.mark.parametrize("rel", ["stacks/gcp/05-x/main.tf", "stacks/azure/99-a-b/m.tf"])
+def test_known_provider_and_numbered_names_are_accepted(tmp_path, capsys, rel):
+    root = build(tmp_path, aws=TWO)
+    add(root, rel, 'resource "twingate_group" "g" {}\n')
+    out = run(root, capsys)[1]
+    assert "stack directory name" not in out.err
+
+
+# 4. heredocs ------------------------------------------------------------------
+
+OPEN_C = "locals {\n  a = <<EOT\n/*\nEOT\n}\n"
+CLOSE_C = "locals {\n  b = <<EOT\n*/\nEOT\n}\n"
+
+
+def test_a_comment_opener_inside_a_heredoc_does_not_hide_a_resource(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/x.tf", OPEN_C + NAT + CLOSE_C)
+    fails(root, capsys, "aws_nat_gateway")
+
+
+def test_the_same_trick_with_an_indented_heredoc(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    text = OPEN_C.replace("<<EOT", "<<-EOT") + NAT + CLOSE_C.replace("<<EOT", "<<-EOT")
+    add(root, f"{AWS_STACK}/x.tf", text.replace("\nEOT\n", "\n  EOT\n"))
+    fails(root, capsys, "aws_nat_gateway")
+
+
+def test_a_comment_opener_inside_a_heredoc_does_not_hide_a_connector(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/x.tf", OPEN_C + CONNECTOR.format(i=9) + CLOSE_C)
+    fails(root, capsys, f"{AWS_STACK}: 3 twingate-connector")
+
+
+def test_a_lone_brace_in_a_heredoc_does_not_end_a_connector_block(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(
+        root,
+        f"{AWS_STACK}/m.tf",
+        'module "c" {\n  source = "../../../modules/aws/twingate-connector"\n'
+        "  instance_type = local.c.type\n  user_data = <<EOT\n}\nEOT\n  count = 3\n}\n"
+        + CONNECTOR.format(i=7),
+    )
+    fails(root, capsys, "uses count")
+
+
+def test_a_resource_or_module_keyword_inside_a_heredoc_is_text(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(
+        root,
+        f"{AWS_STACK}/x.tf",
+        "locals {\n  doc = <<EOT\n"
+        + NAT
+        + 'module "m" {\n  source = "git::x"\n}\nEOT\n}\n',
+    )
+    assert run(root, capsys)[0] == 0
+
+
+def test_an_unterminated_heredoc_fails_closed(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/x.tf", "locals {\n  a = <<EOT\nnever closed\n")
+    fails(root, capsys, "unterminated heredoc", f"{AWS_STACK}/x.tf")
+
+
+# 5. top-level attributes only -------------------------------------------------
+
+
+def test_a_nested_source_does_not_stand_in_for_the_real_one(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(
+        root,
+        f"{AWS_STACK}/x.tf",
+        'module "r" {\n  tags = { source = "./fake" }\n'
+        '  source = "git::https://example.invalid/x.git"\n}\n',
+    )
+    fails(root, capsys, "non-local source")
+
+
+def test_a_nested_source_alone_is_not_a_source(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(
+        root,
+        f"{AWS_STACK}/x.tf",
+        'module "r" {\n  tags = {\n    source = "./fake"\n  }\n}\n',
+    )
+    fails(root, capsys, "non-local source")
+
+
+def test_a_nested_count_on_a_connector_is_not_a_top_level_count(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    (root / f"{AWS_STACK}/m.tf").write_text(
+        'module "c0" {\n  source = "../../../modules/aws/twingate-connector"\n'
+        "  instance_type = local.c.type\n  tags = { count = 1 }\n}\n"
+        + CONNECTOR.format(i=1)
+    )
+    assert run(root, capsys)[0] == 0
+
+
+def test_duplicate_top_level_sources_fail(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(
+        root,
+        f"{AWS_STACK}/x.tf",
+        'module "r" {\n  source = "./a"\n  source = "git::x"\n}\n',
+    )
+    fails(root, capsys, "more than one source")
+
+
+# 6. the machine size must come from the manifest -----------------------------
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        'size = "s-32vcpu-192gb"',
+        "size = var.size",
+        "size = local.connector_a.size == null ? local.x.size : local.y.size",
+        "size = local.connector_a.cost.size",
+        "size = local.connector_a.size_big",
+        'size = "${local.connector_a.size}"',
+    ],
+)
+def test_a_do_connector_size_must_be_a_manifest_reference(tmp_path, capsys, line):
+    root = build(tmp_path, aws=TWO)
+    (root / "stacks/10-access/m.tf").write_text(
+        f'module "c0" {{\n  source = "../../modules/twingate-connector"\n  {line}\n}}\n'
+    )
+    fails(root, capsys, "stacks/10-access/m.tf:1", "docs/cost.md")
+
+
+def test_a_connector_with_no_size_at_all_fails(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    (root / "stacks/10-access/m.tf").write_text(
+        'module "c0" {\n  source = "../../modules/twingate-connector"\n}\n'
+    )
+    fails(root, capsys, "docs/cost.md")
+
+
+def test_an_aws_connector_literal_instance_type_fails(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    (root / f"{AWS_STACK}/m.tf").write_text(
+        'module "c0" {\n  source = "../../../modules/aws/twingate-connector"\n'
+        '  instance_type = "m7g.16xlarge"\n}\n' + CONNECTOR.format(i=1)
+    )
+    fails(root, capsys, "docs/cost.md")
+
+
+def test_a_size_in_a_nested_object_does_not_satisfy_the_rule(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    (root / "stacks/10-access/m.tf").write_text(
+        'module "c0" {\n  source = "../../modules/twingate-connector"\n'
+        "  other = { size = local.c.size }\n}\n"
+    )
+    fails(root, capsys, "docs/cost.md")
+
+
+def test_the_repo_connectors_pass_the_size_rule():
+    root = Path(__file__).resolve().parents[1]
+    problems, _ = cost_check.module_problems(root)
+    assert problems == []
+
+
+# 7. unknown provider prefixes ------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "rtype",
+    [
+        "linode_instance",
+        "hcloud_server",
+        "vultr_instance",
+        "oci_core_instance",
+        "kubernetes_namespace",
+        "scaleway_instance_server",
+        "foo",
+    ],
+)
+def test_an_unknown_provider_prefix_fails(tmp_path, capsys, rtype):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/x.tf", f'resource "{rtype}" "x" {{}}\n')
+    fails(root, capsys, rtype, "is not known to the gate", f"{AWS_STACK}/x.tf")
+
+
+@pytest.mark.parametrize(
+    "rtype",
+    [
+        "twingate_group",
+        "terraform_data",
+        "null_resource",
+        "random_id",
+        "time_sleep",
+        "tls_private_key",
+        "local_file",
+    ],
+)
+def test_safe_non_cloud_prefixes_pass(tmp_path, capsys, rtype):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/x.tf", f'resource "{rtype}" "x" {{}}\n')
+    assert run(root, capsys)[0] == 0
+
+
+def test_the_repository_itself_uses_only_known_prefixes():
+    root = Path(__file__).resolve().parents[1]
+    approved = json.loads((root / "docs/stages/approved.json").read_text())
+    found = cost_check.uncosted_sources(
+        root, cost_check.allowed_sources(approved), set(approved["providers"])
+    )
+    assert found == []
+
+
+# 8. count / for_each on a costed resource ------------------------------------
+
+
+@pytest.mark.parametrize(
+    "rel,rtype,meta",
+    [
+        ("modules/aws/twingate-connector/main.tf", "aws_instance", "count = 50"),
+        ("modules/aws/twingate-connector/main.tf", "aws_instance", "for_each = var.x"),
+        ("modules/twingate-connector/main.tf", "digitalocean_droplet", "count = 9"),
+        ("modules/twingate-connector/main.tf", "digitalocean_droplet", "for_each = {}"),
+    ],
+)
+def test_a_costed_resource_with_count_or_for_each_fails(
+    tmp_path, capsys, rel, rtype, meta
+):
+    root = build(tmp_path, aws=TWO)
+    add(root, rel, f'resource "{rtype}" "a" {{\n  ami = "x"\n  {meta}\n}}\n')
+    fails(root, capsys, f"{rel}:1", "without a plan")
+
+
+def test_costed_resource_in_a_bare_labelled_block_with_count_fails(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(
+        root,
+        "modules/aws/twingate-connector/main.tf",
+        "resource aws_instance a {\n  count = 50\n}\n",
+    )
+    fails(root, capsys, "without a plan")
+
+
+def test_nested_count_or_a_free_resource_with_count_is_fine(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(
+        root,
+        "modules/aws/twingate-connector/main.tf",
+        'resource "aws_instance" "a" {\n  tags = { count = 5 }\n}\n',
+    )
+    add(root, f"{AWS_STACK}/x.tf", 'resource "aws_subnet" "s" {\n  count = 3\n}\n')
+    assert run(root, capsys)[0] == 0
+
+
+def test_count_behind_a_heredoc_brace_in_a_costed_resource_fails(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(
+        root,
+        "modules/aws/twingate-connector/main.tf",
+        'resource "aws_instance" "a" {\n  user_data = <<EOT\n}\nEOT\n  count = 50\n}\n',
+    )
+    fails(root, capsys, "without a plan")
+
+
+# 9. plan: attributes the gate does not price ---------------------------------
+
+
+@pytest.mark.parametrize(
+    "extra",
+    [
+        {"tenancy": "dedicated"},
+        {"tenancy": "host"},
+        {"credit_specification": [{"cpu_credits": "unlimited"}]},
+        {"instance_market_options": [{"market_type": "spot"}]},
+        {"placement_group": "pg-1"},
+        {"host_id": "h-123"},
+        {"monitoring": True},
+        {"network_interface": [{"device_index": 0}]},
+        {"launch_template": [{"id": "lt-1"}]},
+        {"license_specification": [{"license_configuration_arn": "arn:x"}]},
+        {"host_resource_group_arn": "arn:x"},
+    ],
+)
+def test_an_unpriced_instance_attribute_is_a_problem(extra):
+    problems = cost_check.plan_cost(plan(inst("a", **extra)), AWS_PRICES)[1]
+    assert any("unpriced attribute" in p for p in problems), problems
+
+
+@pytest.mark.parametrize(
+    "extra",
+    [
+        {"tenancy": "default"},
+        {"tenancy": None},
+        {"credit_specification": []},
+        {"credit_specification": [{"cpu_credits": "standard"}]},
+        {"instance_market_options": []},
+        {"placement_group": ""},
+        {"monitoring": False},
+    ],
+)
+def test_priced_shapes_of_those_attributes_pass(extra):
+    problems = cost_check.plan_cost(plan(inst("a", **extra)), AWS_PRICES)[1]
+    assert problems == []
+
+
+def test_main_fails_a_plan_with_a_dedicated_instance(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    p = tmp_path / "plan.json"
+    p.write_text(json.dumps(plan(inst("a", tenancy="dedicated"), inst("b"))))
+    code, out = run(root, capsys, "--plan", str(p), "--stack", AWS_STACK)
+    assert code == 1 and "unpriced attribute" in out.err
+
+
+# ---- second review round -----------------------------------------------------
+
+
+def test_a_utf8_bom_does_not_hide_the_first_block(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    (root / f"{AWS_STACK}/bom.tf").write_bytes(b"\xef\xbb\xbf" + NAT.encode())
+    fails(root, capsys, "aws_nat_gateway")
+
+
+def test_a_bom_before_a_module_is_read(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    (root / f"{AWS_STACK}/bom.tf").write_bytes(
+        b'\xef\xbb\xbfmodule "r" {\n  source = "git::x"\n}\n'
+    )
+    fails(root, capsys, "non-local source")
+
+
+def test_crlf_files_are_read(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    text = (
+        (
+            'module "c" {\r\n  source = "../../../modules/aws/twingate-connector"\r\n'
+            "  instance_type = local.c.type\r\n  count = 4\r\n}\r\n" + NAT
+        )
+        .replace("\n", "\r\n")
+        .replace("\r\r", "\r")
+    )
+    (root / f"{AWS_STACK}/crlf.tf").write_bytes(text.encode())
+    fails(root, capsys, "uses count", "aws_nat_gateway")
+
+
+def test_a_crlf_connector_size_reference_passes(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    (root / f"{AWS_STACK}/m.tf").write_bytes(
+        b'module "c0" {\r\n  source = "../../../modules/aws/twingate-connector"\r\n'
+        b"  instance_type = local.c.type\r\n}\r\n" + CONNECTOR.format(i=1).encode()
+    )
+    assert run(root, capsys)[0] == 0
+
+
+def test_a_root_level_directory_symlink_is_refused(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    outside = tmp_path.parent / (tmp_path.name + "-ext")
+    (outside / "twingate-connector").mkdir(parents=True)
+    (outside / "twingate-connector/main.tf").write_text(
+        'resource "digitalocean_kubernetes_cluster" "x" {}\n'
+    )
+    (root / "vendor").symlink_to(outside)
+    add(
+        root,
+        f"{AWS_STACK}/x.tf",
+        'module "v" {\n  source = "../../../vendor/twingate-connector"\n  size = local.c.size\n}\n',
+    )
+    fails(root, capsys, "vendor: symlinked directory is refused")
+
+
+def test_a_symlinked_module_target_escaping_the_root_is_refused(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    outside = tmp_path.parent / (tmp_path.name + "-ext2")
+    outside.mkdir()
+    link = root / "stacks/10-access/ln"
+    link.symlink_to(outside)
+    add(
+        root,
+        f"{AWS_STACK}/x.tf",
+        'module "v" {\n  source = "../../../stacks/10-access/ln"\n}\n',
+    )
+    fails(root, capsys, "outside the repository")
+
+
+def test_a_symlinked_tf_file_is_refused(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    target = tmp_path.parent / (tmp_path.name + "-f.tf")
+    target.write_text(NAT)
+    (root / f"{AWS_STACK}/link.tf").symlink_to(target)
+    fails(root, capsys, "symlink")
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        'locals {\n  x = "${1 /* } " <<FAKE */ + 2}"\n}\n',
+        'locals {\n  x = "${(1 # } " <<FAKE\n    + 2)}"\n}\n',
+        'locals {\n  x = "${(1 // } " <<FAKE\n    + 2)}"\n}\n',
+    ],
+)
+def test_comments_inside_interpolation_are_comments(tmp_path, capsys, text):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/x.tf", text)
+    assert run(root, capsys)[0] == 0
+
+
+def test_a_connector_in_an_ordinary_module_directory_is_not_a_stack(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(
+        root,
+        "modules/wrapper/main.tf",
+        'locals {\n  c = { size = "s-1vcpu-1gb" }\n}\n\n'
+        'module "inner" {\n  source = "../twingate-connector"\n  size = local.c.size\n}\n',
+    )
+    assert run(root, capsys)[0] == 0
+
+
+def test_a_connector_in_a_module_directory_still_has_its_source_and_size_checked(
+    tmp_path, capsys
+):
+    root = build(tmp_path, aws=TWO)
+    add(
+        root,
+        "modules/wrapper/main.tf",
+        'module "inner" {\n  source = "../twingate-connector"\n  size = "s-32vcpu-192gb"\n}\n',
+    )
+    fails(root, capsys, "docs/cost.md")
+
+
+# ---- third review round -------------------------------------------------------
+
+
+@pytest.mark.parametrize("target", ["outside", ".claude/payload"])
+def test_any_root_level_directory_symlink_is_refused(tmp_path, capsys, target):
+    root = build(tmp_path, aws=TWO)
+    if target == "outside":
+        dest = tmp_path.parent / (tmp_path.name + "-shared")
+    else:
+        dest = root / target
+    (dest / "twingate-connector").mkdir(parents=True)
+    (dest / "twingate-connector/main.tf").write_text(NAT)
+    (root / "shared").symlink_to(dest)
+    add(
+        root,
+        f"{AWS_STACK}/x.tf",
+        'module "v" {\n  source = "../../../shared/twingate-connector"\n  size = local.c.size\n}\n',
+    )
+    fails(root, capsys, "shared: symlinked directory is refused")
+
+
+def test_a_symlink_nested_deep_in_the_tree_is_refused(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    (root / "docs/deep").mkdir()
+    (root / "docs/deep/ln").symlink_to(root / "modules")
+    fails(root, capsys, "docs/deep/ln: symlinked directory is refused")
+
+
+# ordinary object attributes named like block keywords
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "locals {\n  module = { enabled = true }\n}\n",
+        "locals {\n  resource = { enabled = true }\n}\n",
+        "locals {\n  cfg = {\n    module = {\n      a = 1\n    }\n    resource = {\n      b = 2\n    }\n    data = {}\n  }\n}\n",
+        'variable "x" {\n  default = {\n    module   = { on = true }\n    resource = { on = false }\n  }\n}\n',
+        "locals {\n  module   =   {\n    on = true\n  }\n}\n",
+    ],
+)
+def test_object_attributes_named_module_or_resource_are_not_blocks(
+    tmp_path, capsys, text
+):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/x.tf", text)
+    code, out = run(root, capsys)
+    assert code == 0, out.err
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "resource = aws_nat_gateway n {}\n",
+        "resource aws_nat_gateway = {}\n",
+        "module r = {\n}\n",
+    ],
+)
+def test_a_label_cannot_contain_an_equals_sign(text):
+    assert cost_check.find_blocks(text) == []
+
+
+# unknown plan values
+
+
+def with_config(pl, expressions):
+    """Attach a `configuration` block shaped like `tofu show -json`: a resource's
+    config lists only the attributes the configuration sets."""
+    pl["configuration"] = {
+        "root_module": {
+            "resources": [
+                {
+                    "address": address,
+                    "mode": "managed",
+                    "type": "aws_instance",
+                    "name": address.split(".")[-1],
+                    "expressions": exprs,
+                }
+                for address, exprs in expressions.items()
+            ]
+        }
+    }
+    return pl
+
+
+def inst_unknown(unknown, **after_extra):
+    change_ = inst("a", **after_extra)
+    change_["change"]["after_unknown"] = unknown
+    return change_
+
+
+UNKNOWN_CASES = [
+    ("monitoring", {"monitoring": True}, {"monitoring": None}),
+    ("tenancy", {"tenancy": True}, {}),
+    (
+        "credit_specification",
+        {"credit_specification": [{"cpu_credits": True}]},
+        {"credit_specification": []},
+    ),
+    ("instance_market_options", {"instance_market_options": True}, {}),
+    ("placement_group", {"placement_group": True}, {}),
+    ("host_id", {"host_id": True}, {}),
+    ("host_resource_group_arn", {"host_resource_group_arn": True}, {}),
+    ("license_specification", {"license_specification": True}, {}),
+    ("network_interface", {"network_interface": True}, {}),
+    ("launch_template", {"launch_template": [{"id": True}]}, {}),
+]
+
+
+@pytest.mark.parametrize("attr,unknown,after", UNKNOWN_CASES)
+def test_an_unknown_value_the_config_sets_is_a_problem(attr, unknown, after):
+    pl = plan(inst_unknown(unknown, **after))
+    with_config(
+        pl, {"aws_instance.a": {attr: {"references": ["terraform_data.x.output"]}}}
+    )
+    problems = cost_check.plan_cost(pl, AWS_PRICES)[1]
+    assert any("unpriced attribute" in p and attr in p for p in problems), problems
+
+
+@pytest.mark.parametrize("attr,unknown,after", UNKNOWN_CASES)
+def test_an_unknown_computed_default_the_config_does_not_set_passes(
+    attr, unknown, after
+):
+    pl = plan(inst_unknown(unknown, **after))
+    with_config(
+        pl, {"aws_instance.a": {"instance_type": {"constant_value": "t4g.micro"}}}
+    )
+    assert cost_check.plan_cost(pl, AWS_PRICES)[1] == []
+
+
+@pytest.mark.parametrize("attr,unknown,after", UNKNOWN_CASES)
+def test_an_unknown_value_with_no_configuration_fails_closed(attr, unknown, after):
+    pl = plan(inst_unknown(unknown, **after))
+    problems = cost_check.plan_cost(pl, AWS_PRICES)[1]
+    assert any("unpriced attribute" in p and attr in p for p in problems), problems
+
+
+def module_plan(expressions):
+    change_ = inst_unknown({"tenancy": True})
+    change_["address"] = "module.m.aws_instance.a[0]"
+    change_["module_address"] = "module.m"
+    pl = plan(change_)
+    pl["configuration"] = {
+        "root_module": {
+            "module_calls": {
+                "m": {
+                    "module": {
+                        "resources": [
+                            {
+                                "mode": "managed",
+                                "type": "aws_instance",
+                                "name": "a",
+                                "expressions": expressions,
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+    return pl
+
+
+def test_an_unknown_value_in_a_module_instance_is_found_through_module_calls():
+    pl = module_plan({"tenancy": {"references": ["var.t"]}})
+    problems = cost_check.plan_cost(pl, AWS_PRICES)[1]
+    assert any("unpriced attribute" in p and "tenancy" in p for p in problems)
+
+
+def test_a_module_instance_whose_config_does_not_set_it_passes():
+    assert cost_check.plan_cost(module_plan({}), AWS_PRICES)[1] == []
