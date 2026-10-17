@@ -329,6 +329,7 @@ def site_totals(root):
         if provider not in cache:
             cache[provider] = load_prices(root, provider)
         bucket = totals.setdefault(provider, {})
+        bucket.setdefault(key or "", 0.0)
         for res in data["resources"]:
             bucket[key or ""] = bucket.get(key or "", 0.0) + resource_cost(
                 res, cache[provider], provider
@@ -583,13 +584,15 @@ def plan_instance_cost(addr, after, unknown, prices, expressions=None):
 
 def plan_problems(plan_path, stack, root):
     """Compare the cost of a plan with the same stack's manifest."""
-    provider = provider_of_stack(stack)
-    if provider != "aws":
-        return [f"--plan costing is implemented for aws only, not {provider}"]
-    prices = load_prices(root, "aws")
     manifest = Path(root, stack, "cost.json")
     if not manifest.exists():
         return [f"{stack}: no cost.json to reconcile the plan against"]
+    # An instance (stacks/sites/...) takes its provider from instance_of and is
+    # compared with its own manifest, not the base stack's.
+    provider = manifest_provider(stack, load_json(manifest))
+    if provider != "aws":
+        return [f"--plan costing is implemented for aws only, not {provider}"]
+    prices = load_prices(root, "aws")
     declared = round(
         sum(resource_cost(r, prices, "aws") for r in load_json(manifest)["resources"]),
         2,
@@ -1150,13 +1153,66 @@ def structure_problems(root):
                 f"{stack}: {have} twingate-connector module block(s) but {machines} machine entr(ies) in its cost.json; they must match"
             )
     problems += instance_problems(manifests, bases, connectors)
+    problems += config_problems(root)
     return problems
+
+
+def config_problems(root):
+    """Every stack id in .spacelift/config.yml answers to exactly one manifest.
+
+    No config file (a fixture) is not a problem; one that cannot be read is."""
+    config = Path(root, ".spacelift/config.yml")
+    if not config.exists():
+        return []
+    try:
+        import yaml
+    except ImportError:
+        return [".spacelift/config.yml exists but PyYAML is not installed to read it"]
+    try:
+        loaded = yaml.safe_load(config.read_text(encoding="utf-8"))
+        stacks = loaded["stacks"]
+        if not isinstance(stacks, dict):
+            raise TypeError("stacks is not a map")
+    except (yaml.YAMLError, OSError, KeyError, TypeError) as err:
+        return [f".spacelift/config.yml is unreadable or has no stacks map: {err!r}"]
+    ids = manifest_ids(root)
+    return [
+        f".spacelift/config.yml stack id {sid} has {len(ids.get(sid, []))} manifest(s), expected exactly 1"
+        for sid in stacks
+        if len(ids.get(sid, [])) != 1
+    ]
 
 
 def machine_count(manifest):
     return sum(
         1 for r in load_json(manifest)["resources"] if r.get("kind") in MACHINE_KINDS
     )
+
+
+def shared_code_problems(rel, data, base_manifest, target):
+    """An instance deploys the base stack's code, which reads its resources from
+    the base stack's own cost.json and creates ALL of them again. Until a stack
+    can select the instance manifest, the instance's resource list (machines,
+    volumes, addresses, every costed entry) must equal the base manifest's,
+    entry by entry, matched by name."""
+    mine = {r.get("name"): r for r in data["resources"]}
+    base = {r.get("name"): r for r in load_json(base_manifest)["resources"]}
+    if set(mine) != set(base) or len(mine) != len(data["resources"]):
+        return [
+            (
+                f"{rel}: resource names must equal the base stack's ({target}); "
+                "the shared code deploys every resource of the base manifest"
+            )
+        ]
+    return [
+        (
+            f"{rel}: resource {name!r} is {res!r} but must equal the base stack's entry "
+            f"{base[name]!r} in {target}/cost.json (the shared code reads the base manifest; "
+            "a site-specific size needs the stack to read the instance manifest)"
+        )
+        for name, res in sorted(mine.items(), key=lambda kv: str(kv[0]))
+        if res != base[name]
+    ]
 
 
 def instance_problems(manifests, bases, connectors):
@@ -1199,6 +1255,7 @@ def instance_problems(manifests, bases, connectors):
             )
             continue
         owners.setdefault(stack_id(rel, target), []).append(rel)
+        problems += shared_code_problems(rel, data, bases[target], target)
         machines = machine_count(manifest)
         have = connectors.get(target, 0)
         if have != machines:
@@ -1249,6 +1306,9 @@ def sites_problems(provider, entry, cap, parts):
         site_cap = num(site["approved_monthly_total"], f"{provider} site {key}")
         approved_sum += site_cap
         planned = parts.get(key)
+        if planned is not None:
+            planned = round(planned, 2)
+        site_cap = round(site_cap, 2)
         if planned is not None and planned > site_cap:
             problems.append(
                 f"{provider}: site {key} planned ${planned:.2f} is above its approved ${site_cap:.2f}"
@@ -1257,12 +1317,14 @@ def sites_problems(provider, entry, cap, parts):
         problems.append(
             f"{provider}: site {key} has a manifest but is not in the approved sites map"
         )
+    approved_sum = round(approved_sum, 2)
+    cap = round(cap, 2)
     if approved_sum > cap:
         problems.append(
             f"{provider}: approved sites add up to ${approved_sum:.2f}, above the provider approved ${cap:.2f}"
         )
-    base = parts.get("", 0.0)
-    if base > cap - approved_sum:
+    base = round(parts.get("", 0.0), 2)
+    if base > round(cap - approved_sum, 2):
         problems.append(
             f"{provider}: base stacks planned ${base:.2f} are above approved ${cap:.2f} minus sites ${approved_sum:.2f}"
         )

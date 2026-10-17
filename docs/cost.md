@@ -73,6 +73,7 @@ The gate prices an instance like any manifest. The provider is the one of the st
 - `instance_of` is missing, is not a plain normalized stack path, points into `stacks/sites`, or names a stack directory that has no `cost.json` of its own; or the manifest is not at `stacks/sites/<resource_key>/` plus the `instance_of` path without its `stacks/` prefix; or `instance_of` is set on a manifest outside `stacks/sites/`;
 - the `resource_key` directory is not lowercase letters, digits and dashes;
 - any `.tf` or `.tofu` file exists under `stacks/sites/` (instances carry no code);
+- the instance's resource list differs from the base stack's manifest: the shared code reads sizes from the base stack's own `cost.json` and creates every resource in it again, so the names and every entry (machines, volumes, addresses, sizes, backups) must be equal. A site-specific size needs the stack to read the instance manifest, which is a later change;
 - the number of machine entries in the instance manifest differs from the number of `twingate-connector` module blocks in the stack named by `instance_of` (the same reconciliation as a base stack, against that stack's code);
 - two manifests answer to one stack id (below).
 
@@ -86,7 +87,7 @@ Each manifest answers to one Spacelift stack id:
 | `stacks/aws/10-access` | `cah-aws-10-access` |
 | `stacks/sites/tor2/10-access` (`instance_of: stacks/10-access`) | `cah-10-access-tor2` |
 
-The rule is `cah-` plus the stack path after `stacks/` joined with dashes, plus `-<resource_key>` for an instance. `tests/test_cost_check_instances.py` requires every stack id in `.spacelift/config.yml` to have exactly one manifest: an entry with no manifest fails, and the gate itself fails when two manifests share an id. A stack with no entry in `config.yml` never loads its secrets and cannot apply, and an entry cannot be added without a manifest, so a second site cannot reach an apply without being costed. The gate cannot see a Spacelift stack that is created and never listed.
+The rule is `cah-` plus the stack path after `stacks/` joined with dashes, plus `-<resource_key>` for an instance. The gate itself requires every stack id in `.spacelift/config.yml` (read with PyYAML, installed in CI before the gate; a missing file is skipped, an unreadable one fails) to have exactly one manifest: an entry with no manifest fails, and it fails when two manifests share an id (`tests/test_cost_check_instances.py` covers both). A stack with no entry in `config.yml` never loads its secrets and cannot apply, and an entry cannot be added without a manifest, so a second site cannot reach an apply without being costed. The gate cannot see a Spacelift stack that is created and never listed.
 
 ### Approving sites
 
@@ -97,7 +98,9 @@ By default the provider's `approved_monthly_total` covers everything of that pro
   "sites": { "tor2": { "approved_monthly_total": 12.0 } } }
 ```
 
-With a map present: every instance's `resource_key` must be in it; each site's planned total must be within its own figure; the sites' figures must add up to no more than the provider figure; and the base stacks (everything not under `stacks/sites`) must fit in the provider figure minus the sites' figures. So the provider figure is the base stack plus its sites. The shared-ceiling check still sums the provider figures of the `active` providers, never the sites (they are already inside it). With no map, behaviour is unchanged.
+With a map present: every instance's `resource_key` must be in it; each site's planned total must be within its own figure; the sites' figures must add up to no more than the provider figure; and the base stacks (everything not under `stacks/sites`) must fit in the provider figure minus the sites' figures. So the provider figure is the base stack plus its sites. The shared-ceiling check still sums the provider figures of the `active` providers, never the sites (they are already inside it). Site, base and sum comparisons are made at cent precision (full precision is kept while adding up), as the provider total already is. With no map, behaviour is unchanged.
+
+`--plan` accepts an instance path (`--stack stacks/sites/east/aws/10-access`): the provider comes from `instance_of` and the plan is compared with that instance's manifest.
 
 ## Not yet verified
 

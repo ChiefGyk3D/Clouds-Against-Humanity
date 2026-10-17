@@ -331,15 +331,8 @@ def test_two_manifests_for_one_stack_id_fail(tmp_path, capsys):
 
 
 def config_problems(root):
-    """The design's test: every config.yml stack id has exactly one manifest."""
-    config = yaml.safe_load((root / ".spacelift/config.yml").read_text())
-    ids = cost_check.manifest_ids(root)
-    problems = []
-    for sid in config["stacks"]:
-        have = ids.get(sid, [])
-        if len(have) != 1:
-            problems.append(f"{sid}: {len(have)} manifest(s), expected exactly 1")
-    return problems
+    """The design's test, now also part of the gate itself."""
+    return cost_check.config_problems(root)
 
 
 def write_config(root, *ids):
@@ -367,7 +360,7 @@ def test_config_entry_with_no_manifest_fails(tmp_path):
     root = build(tmp_path, do_cap=24.0)
     write_config(root, "cah-10-access", "cah-10-access-tor2")
     assert config_problems(root) == [
-        "cah-10-access-tor2: 0 manifest(s), expected exactly 1"
+        ".spacelift/config.yml stack id cah-10-access-tor2 has 0 manifest(s), expected exactly 1"
     ]
 
 
@@ -377,7 +370,7 @@ def test_config_entry_with_two_manifests_fails(tmp_path):
     write_json(root / "stacks/10-access-tor2/cost.json", {"resources": []})
     write_config(root, "cah-10-access-tor2")
     assert config_problems(root) == [
-        "cah-10-access-tor2: 2 manifest(s), expected exactly 1"
+        ".spacelift/config.yml stack id cah-10-access-tor2 has 2 manifest(s), expected exactly 1"
     ]
 
 
