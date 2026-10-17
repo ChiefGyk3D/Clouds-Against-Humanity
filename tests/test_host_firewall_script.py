@@ -362,5 +362,5 @@ def test_template_gates_the_firewall_on_host_firewall():
     assert len(re.findall(r"%\{ if host_firewall ~\}", text)) == 2
     assert len(re.findall(r"%\{ if metadata_lock \|\| host_firewall ~\}", text)) == 1
     # nftables is listed exactly once, whichever feature asks for it.
-    assert len(re.findall(r"^  - nftables$", text, flags=re.M)) == 1
+    assert len(re.findall(r"^  - nftables$", text, flags=re.MULTILINE)) == 1
     assert "--no-block" in text
