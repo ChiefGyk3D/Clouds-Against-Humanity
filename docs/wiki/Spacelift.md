@@ -100,6 +100,10 @@ This is written down because "the script checks the run type" sounds like a secu
 
 The ideal is that Spacelift holds no long-lived secret at all: it would present a short-lived OIDC identity token and Doppler would trust it. Spacelift's run identity token was not issued on this account's plan (checked with a task run: the variable was absent), so a read-only Doppler service token with a 90-day expiry is the compromise. If OIDC becomes available, only the login step in `doppler-env.sh` changes.
 
+## More than one cloud
+
+When AWS, Azure or GCP stacks are added, each cloud gets its own Doppler config and its own Spacelift context with its own read-only token, attached only to that cloud's stacks. The reason is blast radius: a Doppler token can read its whole config, so keys for several clouds in one config would turn one compromised run into several compromised accounts. A test checks that no stack's `.spacelift/config.yml` entry asks for another cloud's secrets. Naming, the native-integration route and what the test cannot prove are in [docs/spacelift-secrets.md](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#8a-more-than-one-cloud).
+
 ## Adding a stack
 
 1. Create it in Spacelift with the label `cah`, so the Doppler context and the push policy attach themselves.
