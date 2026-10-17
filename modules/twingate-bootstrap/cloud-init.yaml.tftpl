@@ -36,7 +36,7 @@ write_files:
       TWINGATE_URL=https://${network}.twingate.com
       TWINGATE_ACCESS_TOKEN=${access_token}
       TWINGATE_REFRESH_TOKEN=${refresh_token}
-  - path: /etc/apt/apt.conf.d/99cah-lock-wait
+${telemetry_conf}  - path: /etc/apt/apt.conf.d/99cah-lock-wait
     permissions: "0644"
     content: |
       DPkg::Lock::Timeout "300";

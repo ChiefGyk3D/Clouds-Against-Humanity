@@ -73,3 +73,46 @@ variable "timezone" {
     error_message = "timezone must be a name in modules/twingate-bootstrap/timezones.txt (the IANA zones, for example America/New_York or UTC): no spaces or line breaks, and the zone must exist."
   }
 }
+
+variable "connector_telemetry" {
+  type = object({
+    status_updates_enabled = optional(bool)
+    log_level              = optional(number)
+    connection_logs        = optional(bool, false)
+    metrics_port           = optional(number)
+    labels                 = optional(map(string), {})
+  })
+  default     = {}
+  nullable    = false
+  description = "Connector telemetry. The default ({}) is the live state: it adds no line to the connector config, so user_data is byte-identical and nothing is replaced. status_updates_enabled is a Twingate provider setting; unset (the default) it is not sent at all, so the connector keeps what it has today (Twingate's default, true), and set to true or false it is sent. It never touches user_data. The other four add lines to /etc/twingate/connector.conf and therefore change user_data, which REPLACES the machine: log_level (TWINGATE_LOG_LEVEL, 3 4 5 or 7; unset leaves Twingate's default of 3), connection_logs (true adds TWINGATE_LOG_ANALYTICS=v3, real-time connection logs to the journal), metrics_port (TWINGATE_METRICS_PORT, Prometheus metrics on that port, 1024 to 65535 and not 9100) and labels (a map; KEY=value becomes TWINGATE_LABEL_KEY=value, shown in the Twingate Admin Console, so never put a secret in a label). No firewall port is opened here: that is a separate change."
+
+  validation {
+    condition     = var.connector_telemetry.log_level == null ? true : contains([3, 4, 5, 7], var.connector_telemetry.log_level)
+    error_message = "connector_telemetry.log_level must be 3, 4, 5 or 7 (Twingate's documented levels), or unset."
+  }
+
+  validation {
+    condition = var.connector_telemetry.metrics_port == null ? true : (
+      var.connector_telemetry.metrics_port == floor(var.connector_telemetry.metrics_port) &&
+      var.connector_telemetry.metrics_port >= 1024 &&
+      var.connector_telemetry.metrics_port <= 65535 &&
+      var.connector_telemetry.metrics_port != 9100
+    )
+    error_message = "connector_telemetry.metrics_port must be a whole number from 1024 to 65535, and not 9100 (kept for the node exporter), or unset."
+  }
+
+  validation {
+    condition     = alltrue([for k, v in var.connector_telemetry.labels : can(regex("^[A-Z][A-Z0-9_]{0,31}$", k))])
+    error_message = "Each connector_telemetry.labels key must be 1 to 32 characters: an uppercase letter, then uppercase letters, digits or underscores (it becomes TWINGATE_LABEL_<KEY>)."
+  }
+
+  validation {
+    condition     = alltrue([for k, v in var.connector_telemetry.labels : can(regex("^[A-Za-z0-9._-]{1,64}$", v))])
+    error_message = "Each connector_telemetry.labels value must be 1 to 64 characters of letters, digits, dot, underscore or hyphen (no spaces, quotes or line breaks, because it is written into the connector config)."
+  }
+
+  validation {
+    condition     = length(var.connector_telemetry.labels) <= 10
+    error_message = "connector_telemetry.labels may hold at most 10 entries."
+  }
+}

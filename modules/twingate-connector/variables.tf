@@ -72,3 +72,16 @@ variable "timezone" {
     error_message = "timezone must be UTC or an IANA name such as America/New_York (Area/Location, letters, digits and _ + - only, no spaces or line breaks)."
   }
 }
+
+variable "connector_telemetry" {
+  type = object({
+    status_updates_enabled = optional(bool)
+    log_level              = optional(number)
+    connection_logs        = optional(bool, false)
+    metrics_port           = optional(number)
+    labels                 = optional(map(string), {})
+  })
+  default     = {}
+  nullable    = false
+  description = "Connector telemetry, passed to the bootstrap module, which validates it and explains each field. The default ({}) changes nothing. Any of log_level, connection_logs, metrics_port or labels changes user_data and replaces the droplet; status_updates_enabled does not."
+}

@@ -57,6 +57,8 @@ module "connector_a" {
   reboot_time = "04:00"
   timezone    = var.timezone
 
+  connector_telemetry = contains(var.connector_telemetry_instances, "a") ? var.connector_telemetry : var.connector_telemetry_previous
+
   # The outbound rules must exist before the instance boots and starts to install.
   depends_on = [module.connector_firewall]
 }
@@ -75,6 +77,8 @@ module "connector_b" {
   admin_ssh_public_key = var.admin_ssh_public_key
   reboot_time          = "05:00"
   timezone             = var.timezone
+
+  connector_telemetry = contains(var.connector_telemetry_instances, "b") ? var.connector_telemetry : var.connector_telemetry_previous
 
   depends_on = [module.connector_firewall]
 }

@@ -228,3 +228,22 @@ run "timezone_default_is_eastern" {
     error_message = "Without a timezone the machine must stay on America/New_York."
   }
 }
+
+run "telemetry_default_adds_nothing_to_the_droplet_user_data" {
+  command = plan
+  assert {
+    condition     = !strcontains(digitalocean_droplet.connector.user_data, "TWINGATE_LOG_") && !strcontains(digitalocean_droplet.connector.user_data, "TWINGATE_METRICS_") && !strcontains(digitalocean_droplet.connector.user_data, "TWINGATE_LABEL_")
+    error_message = "With connector_telemetry unset no telemetry line may reach the droplet."
+  }
+}
+
+run "telemetry_reaches_the_droplet_user_data" {
+  command = plan
+  variables {
+    connector_telemetry = { metrics_port = 9999, connection_logs = true }
+  }
+  assert {
+    condition     = strcontains(digitalocean_droplet.connector.user_data, "      TWINGATE_LOG_ANALYTICS=v3\n      TWINGATE_METRICS_PORT=9999\n")
+    error_message = "connector_telemetry must flow through the module into the droplet's user_data."
+  }
+}

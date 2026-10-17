@@ -275,6 +275,136 @@ run "timezone_defaults_to_the_live_zone_and_reaches_both_connectors" {
   }
 }
 
+run "connector_telemetry_defaults_to_off_and_plans" {
+  command = plan
+  assert {
+    condition     = length(regexall("connector_telemetry\\s*=\\s*contains\\(var\\.connector_telemetry_instances", file("${path.module}/main.tf"))) == 2
+    error_message = "Both connectors must receive var.connector_telemetry."
+  }
+  assert {
+    condition     = length(regexall("contains\\(var\\.connector_telemetry_instances, \"a\"\\)", file("${path.module}/main.tf"))) == 1 && length(regexall("contains\\(var\\.connector_telemetry_instances, \"b\"\\)", file("${path.module}/main.tf"))) == 1
+    error_message = "Connector a must be gated on \"a\" and connector b on \"b\" in connector_telemetry_instances."
+  }
+}
+
+run "connector_telemetry_enabled_plans" {
+  command = plan
+  variables {
+    connector_telemetry = { log_level = 5, connection_logs = true, metrics_port = 9999, labels = { SITE = "us-east-1" } }
+  }
+  assert {
+    condition     = module.connector_a.instance_name == "access-us-east-1-connector-a"
+    error_message = "Enabling telemetry must not change names."
+  }
+}
+
+run "telemetry_instances_a_only_plans" {
+  command = plan
+  variables {
+    connector_telemetry           = { metrics_port = 9999 }
+    connector_telemetry_instances = ["a"]
+  }
+  assert {
+    condition     = module.connector_a.instance_name == "access-us-east-1-connector-a"
+    error_message = "Rolling telemetry out to one connector must plan."
+  }
+}
+
+run "staged_update_keeps_the_unlisted_connectors_previous_telemetry" {
+  command = plan
+  variables {
+    connector_telemetry           = { log_level = 7 }
+    connector_telemetry_previous  = { log_level = 5 }
+    connector_telemetry_instances = ["a"]
+  }
+  assert {
+    condition     = module.connector_a.instance_name == "access-us-east-1-connector-a"
+    error_message = "A staged update must plan."
+  }
+  assert {
+    condition     = length(regexall(": var\\.connector_telemetry_previous", file("${path.module}/main.tf"))) == 2 && !strcontains(file("${path.module}/main.tf"), "telemetry_off")
+    error_message = "A connector not listed must receive connector_telemetry_previous, not an empty config."
+  }
+}
+
+run "telemetry_empty_object_and_explicit_nulls_plan" {
+  command = plan
+  variables {
+    connector_telemetry = { metrics_port = null, log_level = null, status_updates_enabled = null }
+  }
+  assert {
+    condition     = module.connector_a.instance_name == "access-us-east-1-connector-a"
+    error_message = "Explicit nulls must plan as unset."
+  }
+}
+
+run "telemetry_null_object_plans_as_off" {
+  command = plan
+  variables {
+    connector_telemetry = null
+  }
+  assert {
+    condition     = module.connector_a.instance_name == "access-us-east-1-connector-a"
+    error_message = "A null connector_telemetry must plan as {} (nullable = false)."
+  }
+}
+
+run "telemetry_instances_rejects_an_empty_list" {
+  command = plan
+  variables {
+    connector_telemetry_instances = []
+  }
+  expect_failures = [var.connector_telemetry_instances]
+}
+
+run "telemetry_instances_rejects_c" {
+  command = plan
+  variables {
+    connector_telemetry_instances = ["c"]
+  }
+  expect_failures = [var.connector_telemetry_instances]
+}
+
+run "telemetry_instances_rejects_a_repeat" {
+  command = plan
+  variables {
+    connector_telemetry_instances = ["a", "a"]
+  }
+  expect_failures = [var.connector_telemetry_instances]
+}
+
+run "connector_telemetry_rejects_log_level_6" {
+  command = plan
+  variables {
+    connector_telemetry = { log_level = 6 }
+  }
+  expect_failures = [var.connector_telemetry]
+}
+
+run "connector_telemetry_rejects_a_low_metrics_port" {
+  command = plan
+  variables {
+    connector_telemetry = { metrics_port = 1023 }
+  }
+  expect_failures = [var.connector_telemetry]
+}
+
+run "connector_telemetry_rejects_the_node_exporter_port" {
+  command = plan
+  variables {
+    connector_telemetry = { metrics_port = 9100 }
+  }
+  expect_failures = [var.connector_telemetry]
+}
+
+run "connector_telemetry_rejects_a_label_with_a_line_break" {
+  command = plan
+  variables {
+    connector_telemetry = { labels = { SITE = "a\nb" } }
+  }
+  expect_failures = [var.connector_telemetry]
+}
+
 run "timezone_rejects_injection" {
   command = plan
   variables {

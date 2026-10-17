@@ -851,3 +851,343 @@ run "timezone_rejects_an_out_of_range_etc_zone" {
   }
   expect_failures = [var.timezone]
 }
+
+# ---- connector telemetry (default off) ----
+
+run "explicit_default_telemetry_renders_the_golden_user_data_a" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time         = "04:00"
+    connector_telemetry = {}
+  }
+  assert {
+    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    error_message = "An empty connector_telemetry must render the golden user_data of connector a."
+  }
+}
+
+run "explicit_default_telemetry_renders_the_golden_user_data_b" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    instance    = "b"
+    reboot_time = "05:00"
+    connector_telemetry = {
+      status_updates_enabled = true
+      connection_logs        = false
+      labels                 = {}
+    }
+  }
+  assert {
+    condition     = sha256(output.user_data) == "de2de6286f955100f199779f2b8a4d0a194b72f28619965c80f858061742790b"
+    error_message = "The spelled-out defaults must render the golden user_data of connector b."
+  }
+}
+
+run "status_updates_is_provider_side_and_never_changes_user_data" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time         = "04:00"
+    connector_telemetry = { status_updates_enabled = false }
+  }
+  assert {
+    condition     = twingate_connector.this.status_updates_enabled == false
+    error_message = "status_updates_enabled must reach the Twingate connector."
+  }
+  assert {
+    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    error_message = "status_updates_enabled must not touch user_data."
+  }
+}
+
+run "status_updates_is_not_sent_unless_set" {
+  command = plan
+  assert {
+    condition     = strcontains(file("${path.module}/variables.tf"), "status_updates_enabled = optional(bool)\n") && strcontains(file("${path.module}/main.tf"), "status_updates_enabled = var.connector_telemetry.status_updates_enabled")
+    error_message = "status_updates_enabled must be optional(bool) with no default (null when unset) and passed straight to the resource, so the default resource config is what it was before this setting existed."
+  }
+}
+
+run "status_updates_true_is_sent_when_set" {
+  command = plan
+  variables {
+    connector_telemetry = { status_updates_enabled = true }
+  }
+  assert {
+    condition     = twingate_connector.this.status_updates_enabled == true
+    error_message = "An explicit true must reach the Twingate connector."
+  }
+}
+
+run "an_empty_telemetry_object_plans_and_renders_the_golden_user_data" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time         = "04:00"
+    connector_telemetry = {}
+  }
+  assert {
+    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    error_message = "{} must render the golden user_data."
+  }
+}
+
+run "explicit_null_fields_plan_and_render_the_golden_user_data" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time = "04:00"
+    connector_telemetry = {
+      status_updates_enabled = null
+      log_level              = null
+      metrics_port           = null
+    }
+  }
+  assert {
+    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    error_message = "Explicit nulls must behave as unset."
+  }
+}
+
+# nullable = false: OpenTofu replaces a null with the default {} instead of
+# letting the attribute accesses crash, so null means "off".
+run "a_null_telemetry_object_means_off_not_a_crash" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time         = "04:00"
+    connector_telemetry = null
+  }
+  assert {
+    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    error_message = "A null connector_telemetry must behave as {} and render the golden user_data."
+  }
+}
+
+run "the_telemetry_variable_is_declared_non_nullable" {
+  command = plan
+  assert {
+    condition     = strcontains(file("${path.module}/variables.tf"), "nullable    = false")
+    error_message = "connector_telemetry must declare nullable = false."
+  }
+}
+
+run "every_telemetry_setting_renders_exactly_its_lines_in_connector_conf" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time = "04:00"
+    connector_telemetry = {
+      log_level       = 5
+      connection_logs = true
+      metrics_port    = 9999
+      labels          = { SITE = "tor1", DEPLOYED_BY = "opentofu" }
+    }
+  }
+  assert {
+    condition = split("\n", one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/etc/twingate/connector.conf"])) == tolist([
+      "TWINGATE_URL=https://acme.twingate.com",
+      "TWINGATE_ACCESS_TOKEN=fixed-access-token",
+      "TWINGATE_REFRESH_TOKEN=fixed-refresh-token",
+      "TWINGATE_LOG_LEVEL=5",
+      "TWINGATE_LOG_ANALYTICS=v3",
+      "TWINGATE_METRICS_PORT=9999",
+      "TWINGATE_LABEL_DEPLOYED_BY=opentofu",
+      "TWINGATE_LABEL_SITE=tor1",
+      "",
+    ])
+    error_message = "connector.conf must hold the three original lines and then exactly the enabled telemetry lines, labels sorted."
+  }
+  assert {
+    condition     = one([for f in yamldecode(output.user_data).write_files : f.permissions if f.path == "/etc/twingate/connector.conf"]) == "0600"
+    error_message = "connector.conf must stay 0600."
+  }
+  # Nothing else changed: take the five lines out and the golden hash comes back.
+  assert {
+    condition     = sha256(replace(output.user_data, "      TWINGATE_LOG_LEVEL=5\n      TWINGATE_LOG_ANALYTICS=v3\n      TWINGATE_METRICS_PORT=9999\n      TWINGATE_LABEL_DEPLOYED_BY=opentofu\n      TWINGATE_LABEL_SITE=tor1\n", "")) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    error_message = "Telemetry may add lines to connector.conf and nothing else to user_data."
+  }
+  assert {
+    condition     = length(regexall("fixed-access-token", output.user_data)) == 1 && length(regexall("fixed-refresh-token", output.user_data)) == 1
+    error_message = "Each token must still appear exactly once, in connector.conf."
+  }
+}
+
+run "only_the_enabled_settings_render" {
+  command = plan
+  variables {
+    connector_telemetry = { metrics_port = 9999 }
+  }
+  assert {
+    condition     = strcontains(output.user_data, "      TWINGATE_METRICS_PORT=9999\n") && !strcontains(output.user_data, "TWINGATE_LOG_") && !strcontains(output.user_data, "TWINGATE_LABEL_")
+    error_message = "Only metrics_port was set, so only TWINGATE_METRICS_PORT may be added."
+  }
+}
+
+run "log_level_3_is_rendered_when_set_explicitly" {
+  command = plan
+  variables {
+    connector_telemetry = { log_level = 3 }
+  }
+  assert {
+    condition     = strcontains(output.user_data, "      TWINGATE_LOG_LEVEL=3\n")
+    error_message = "An explicit level is written, even Twingate's default."
+  }
+}
+
+run "telemetry_user_data_is_still_valid_yaml_with_the_other_files_intact" {
+  command = plan
+  variables {
+    connector_telemetry = {
+      log_level = 7
+      labels    = { A = "b" }
+    }
+  }
+  assert {
+    condition     = length(yamldecode(output.user_data).write_files) == 7
+    error_message = "The extra lines must stay inside connector.conf and not start another file."
+  }
+}
+
+run "log_level_rejects_a_value_twingate_does_not_document" {
+  command = plan
+  variables {
+    connector_telemetry = { log_level = 6 }
+  }
+  expect_failures = [var.connector_telemetry]
+}
+
+run "metrics_port_rejects_a_privileged_port" {
+  command = plan
+  variables {
+    connector_telemetry = { metrics_port = 1023 }
+  }
+  expect_failures = [var.connector_telemetry]
+}
+
+run "metrics_port_rejects_65536" {
+  command = plan
+  variables {
+    connector_telemetry = { metrics_port = 65536 }
+  }
+  expect_failures = [var.connector_telemetry]
+}
+
+run "metrics_port_rejects_a_fraction" {
+  command = plan
+  variables {
+    connector_telemetry = { metrics_port = 9999.5 }
+  }
+  expect_failures = [var.connector_telemetry]
+}
+
+run "metrics_port_rejects_the_node_exporter_port" {
+  command = plan
+  variables {
+    connector_telemetry = { metrics_port = 9100 }
+  }
+  expect_failures = [var.connector_telemetry]
+}
+
+run "metrics_port_accepts_the_edges" {
+  command = plan
+  variables {
+    connector_telemetry = { metrics_port = 1024 }
+  }
+  assert {
+    condition     = strcontains(output.user_data, "TWINGATE_METRICS_PORT=1024\n")
+    error_message = "1024 is allowed."
+  }
+}
+
+run "labels_reject_a_newline_in_a_value" {
+  command = plan
+  variables {
+    connector_telemetry = { labels = { SITE = "a\nTWINGATE_URL=https://evil.example" } }
+  }
+  expect_failures = [var.connector_telemetry]
+}
+
+run "labels_reject_a_lowercase_key" {
+  command = plan
+  variables {
+    connector_telemetry = { labels = { site = "tor1" } }
+  }
+  expect_failures = [var.connector_telemetry]
+}
+
+run "labels_reject_a_key_that_breaks_the_line" {
+  command = plan
+  variables {
+    connector_telemetry = { labels = { "A=B" = "x" } }
+  }
+  expect_failures = [var.connector_telemetry]
+}
+
+run "labels_reject_a_space_or_quote_in_a_value" {
+  command = plan
+  variables {
+    connector_telemetry = { labels = { SITE = "a b" } }
+  }
+  expect_failures = [var.connector_telemetry]
+}
+
+run "labels_reject_an_empty_value" {
+  command = plan
+  variables {
+    connector_telemetry = { labels = { SITE = "" } }
+  }
+  expect_failures = [var.connector_telemetry]
+}
+
+run "labels_reject_eleven_entries" {
+  command = plan
+  variables {
+    connector_telemetry = { labels = { A = "x", B = "x", C = "x", D = "x", E = "x", F = "x", G = "x", H = "x", I = "x", J = "x", K = "x" } }
+  }
+  expect_failures = [var.connector_telemetry]
+}

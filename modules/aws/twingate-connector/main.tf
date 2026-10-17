@@ -18,6 +18,7 @@ module "bootstrap" {
   admin_ssh_public_key = var.admin_ssh_public_key
   reboot_time          = var.reboot_time
   timezone             = var.timezone
+  connector_telemetry  = var.connector_telemetry
 }
 
 # Ubuntu 24.04 LTS, from the parameter Canonical publishes in every region's

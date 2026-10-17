@@ -67,6 +67,9 @@ NEED_NOT_SAY_EXAMPLE = {
     "vpc_ip_range",
     "project_name",
     "baseline_tag",
+    "connector_telemetry",
+    "connector_telemetry_instances",
+    "connector_telemetry_previous",
     "reboot_times",
     "reserved_ranges",
     "resource_key",
@@ -101,6 +104,18 @@ def type_ok(type_text: str, value) -> bool:
         return isinstance(value, dict) and all(isinstance(v, str) for v in value.values())
     if type_text.startswith("list(object("):
         return isinstance(value, list) and all(isinstance(v, dict) for v in value)
+    if type_text.startswith("object({status_updates_enabled=optional(bool),log_level="):
+        # connector_telemetry: an object whose every field is optional.
+        allowed = {
+            "status_updates_enabled": bool,
+            "log_level": (int, float),
+            "connection_logs": bool,
+            "metrics_port": (int, float),
+            "labels": dict,
+        }
+        return isinstance(value, dict) and all(
+            k in allowed and isinstance(v, allowed[k]) for k, v in value.items()
+        )
     raise AssertionError(f"the example check does not know the type {type_text}")
 
 
