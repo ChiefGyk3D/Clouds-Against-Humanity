@@ -262,3 +262,6 @@ Nothing here is checked by a machine except that a pointer file exists. Each has
 | DigitalOcean account (sizes available to the account, SSH key registration) | maintainer | DigitalOcean console and API | docs/cost.md | exists |
 | Home Prometheus scrape interval | home monitoring repository | that repository's target file | specified in the stage 2 design, not built here | planned |
 | Home firewall rules for the logging connector | maintainer | the home firewall | specified in the stage 2 design, not built here | planned |
+
+
+Next: [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md), step 5 of the build track on the [Reading order](Reading-Order.md) page, which says which of these places a value belongs in and why.

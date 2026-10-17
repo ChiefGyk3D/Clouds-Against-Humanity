@@ -17,7 +17,7 @@ The full tables, with page order, time estimates and checkpoints, are on **[Read
 | Curious how AWS, Azure and GCP differ (unverified drafts) | [Why the clouds differ](Why-the-Clouds-Differ.md) | [Other clouds](Reading-Order.md#other-clouds-unverified-drafts): AWS, then Azure, then GCP |
 | Looking something up | [Glossary](Glossary.md), [Troubleshooting index](Troubleshooting-Index.md) | [Settings reference](Settings-Reference.md), [Terraform reference](Terraform-Reference.md) |
 
-If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md): it is the reason the whole thing is shaped the way it is. It is long and opinionated, so newcomers are better off after the primers.
+If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md): it is the reason the whole thing is shaped the way it is. It is step 11 of the [core path](Reading-Order.md#the-core-path), long and opinionated, so newcomers are better off after the primers and the [Architecture overview](Architecture-Overview.md), which come first there.
 
 ## New to cloud, Terraform or zero trust? Start from zero
 
@@ -63,7 +63,7 @@ Read these in this order. Each page ends with a **Next** line that names the fol
 | 18 | [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) | What runs on every pull request and why the bill cannot surprise anyone |
 | 19 | [Threat model](Threat-Model.md) | Assets, adversaries, trust boundaries, accepted risk |
 | 20 | [Lessons learned](Lessons-Learned.md) | What broke and why |
-| 21 | [Roadmap](Roadmap.md) | Stages 0 through 4 |
+| 21 | [Roadmap](Roadmap.md) | Stages 0 through 4, the public edge (DMZ) and what is deliberately not planned |
 
 Then pick a track on [Reading order](Reading-Order.md): [build it yourself](Reading-Order.md#build-it-yourself) (fork, labs, build, settings), [understand the design](Reading-Order.md#understand-the-design) ([Terraform reference](Terraform-Reference.md), [trace one change](Trace-One-Change-End-to-End.md)), [security and threat modelling](Reading-Order.md#security-and-threat-modelling), [detection and monitoring](Reading-Order.md#detection-and-monitoring), or [other clouds](Reading-Order.md#other-clouds-unverified-drafts) (unverified drafts). For lookups: [Glossary](Glossary.md), [Troubleshooting index](Troubleshooting-Index.md), [Settings reference](Settings-Reference.md).
 
@@ -100,11 +100,13 @@ The droplets dial out. You dial out. Twingate introduces the two of you, checks 
 |---|---|---|
 | 0: foundation (project, VPC, baseline firewall) | Built | $0 |
 | 1: access (two Twingate connectors) | Built | $12 |
-| 2: logging back to the on-prem SIEM | Planned | not yet approved |
+| 2: logging back to the on-prem SIEM | Planned (the settings layer and the cost gate's stack instances that prepare it are merged; no telemetry stack exists yet) | $0 for the reference environment, not yet approved |
 | 3: workload host (Portainer, five daemons, Discord-to-Matrix bridge), Spaces bucket, Functions | Planned | est. $17, not yet approved |
-| 4: Grafana (runs on-prem) | Planned | not yet approved |
+| 4: Grafana (home Grafana in the reference environment) | Planned | $0 in the reference environment; a cloud copy is a learner option, see [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) |
+| Public edge (DMZ) and hardening | Planned, design first, no number yet | lands past the ceiling, so it needs a decision before any approval |
+| AWS twin of stages 0 and 1 | Written and tested with mocked providers, never applied; Azure and GCP have no code | $0 and $20.84, marked inactive in the cost gate because the ceiling cannot hold both clouds |
 
-Working ceiling: $30 per month across stages 0 to 4. The [cost gate](CI-Tests-and-Cost-Gate.md) fails any pull request that would push the planned bill above what was approved.
+Working ceiling: $30 per month across stages 0 to 4 (the [Roadmap](Roadmap.md) says why the edge does not fit). The [cost gate](CI-Tests-and-Cost-Gate.md) fails any pull request that would push the planned bill above what was approved.
 
 ## Where this wiki comes from
 

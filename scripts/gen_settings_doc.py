@@ -246,6 +246,11 @@ def render_external(entries: list[dict]) -> list[str]:
     return out
 
 
+FOOTER = """\
+Next: [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md), step 5 of the build track on the [Reading order](Reading-Order.md) page, which says which of these places a value belongs in and why.
+"""
+
+
 def render(manifest: dict) -> str:
     lines = [HEADER.rstrip("\n"), ""]
     lines += render_variables(manifest["variables"])
@@ -253,6 +258,7 @@ def render(manifest: dict) -> str:
     lines += render_hardcoded(manifest["hardcoded"])
     lines += render_secrets(manifest["secrets"])
     lines += render_external(manifest["external"])
+    lines += ["", FOOTER.rstrip("\n")]
     return "\n".join(lines).rstrip("\n") + "\n"
 
 

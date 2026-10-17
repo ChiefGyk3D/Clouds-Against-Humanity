@@ -59,11 +59,13 @@ That is not "VPNs are always wrong". WireGuard is a very different animal from a
 |---|---|---|---|
 | 0 | Foundation: project, VPC, baseline firewall with zero inbound rules | $0 | Built |
 | 1 | Access: two Twingate connectors, connector firewall, per-host SSH resources | $12 | Built |
-| 2 | Logs to the on-prem SIEM, cloud-to-home access | | Planned |
+| 2 | Logs to the on-prem SIEM, cloud-to-home access | $0 in the cloud | Planned (the settings layer and the cost gate's stack instances that prepare it are merged) |
 | 3 | Workload host: Portainer, five daemons, Discord-to-Matrix bridge, Spaces bucket, Functions | est. $17 | Planned |
-| 4 | Grafana, on-prem | | Planned |
+| 4 | Grafana, on-prem | $0 in the cloud | Planned (a cloud Grafana is a learner option, see [Build your own mini SOC](docs/wiki/Build-Your-Own-Mini-SOC.md)) |
+| Edge | Public edge (DMZ) and hardening | past the ceiling | Planned, design first |
+| AWS | The AWS twin of stages 0 and 1: `modules/aws/*`, `stacks/aws/*` | $0 and $20.84 | Written and tested with mocked providers, never applied. Azure and GCP have no code |
 
-Working ceiling: $30 per month across stages 0 to 4. A cost gate in CI fails any change that raises the planned total above the approved total. See the [roadmap](docs/wiki/Roadmap.md).
+Working ceiling: $30 per month across stages 0 to 4, shared by every cloud. A cost gate in CI fails any change that raises a cloud's planned total above its approved total in `docs/stages/approved.json`, or the active clouds' approved totals above the ceiling (the AWS twin is marked inactive, because it does not fit beside stage 1). See the [roadmap](docs/wiki/Roadmap.md).
 
 ## Layout
 
@@ -71,21 +73,34 @@ Working ceiling: $30 per month across stages 0 to 4. A cost gate in CI fails any
 Clouds-Against-Humanity/
   stacks/00-foundation/                    project, tag, VPC, baseline firewall
   stacks/10-access/                        site, SSH key lookup, two connectors, connector firewall, group, SSH resources
+  stacks/aws/                              00-foundation and 10-access for AWS (mocked tests only, never applied)
   modules/vpc/                             per-region VPC
   modules/firewall/                        tag-based deny-inbound firewall
+  modules/twingate-bootstrap/              shared connector boot script and tokens, called by every provider's connector
   modules/twingate-connector/              connector, its tokens, its droplet and cloud-init
+  modules/aws/                             vpc, firewall and twingate-connector for AWS
   scripts/cost_check.py                    cost gate
   scripts/identifier_check.py              fails on cloud account ids in tracked files (never prints them)
+  scripts/gen_settings_doc.py              writes docs/wiki/Settings-Reference.md from docs/settings.json (--check fails when stale)
+  scripts/gen_example_tests.py             writes each live stack's example.tftest.hcl from its terraform.tfvars.example
+  scripts/gen_timezones.py                 regenerates modules/twingate-bootstrap/timezones.txt from the local tz database
+  scripts/hcl_variables.py                 helper module: a fail-closed reader of `variable` blocks (used by tests and the generators)
+  scripts/plan_noop_check.py               fails unless a saved plan is a no-op over the golden addresses (run by hand, not in CI)
   scripts/spacelift/doppler-env.sh         hook that loads Doppler secrets into a run
   scripts/gen-wiki.sh                      writes the wiki pages from docs/wiki (the Wiki workflow publishes them)
-  tests/                                   pytest for the cost gate, the hook and the wiki generator
+  tests/                                   pytest for the cost gate, settings, module policy, secret separation, the hook, the wiki and more
   .spacelift/config.yml                    which secrets each stack loads
   .github/workflows/ci.yml                 GYST callers only (tofu, python, security) + CI green
   .github/workflows/wiki.yml               publishes docs/wiki through GYST's wiki-publish.yml
   .spacelift/policies/                     Spacelift push policy and its OPA tests
   docs/wiki/                               the wiki pages (source of truth)
   docs/stages/                             operator guides: decisions, verify, rollback, per stage
-  docs/cost.md, docs/cost-prices.json      cost gate explained, price table
+  docs/cost.md                             cost gate explained
+  docs/cost-prices.json, docs/cost-prices/ price tables (DigitalOcean, and one file per other cloud)
+  docs/settings.json                       the settings manifest the Settings reference is generated from
+  docs/threat-model/                       the OWASP Threat Dragon model
+  docs/golden-addresses/                   resource addresses the plan no-op check compares against
+  docs/superpowers/                        dated design records (specs and plans), not maintained as guides
   docs/spacelift-secrets.md                how secrets reach a run, rotation, upgrades
 ```
 
@@ -99,8 +114,14 @@ Install OpenTofu 1.8 or newer, Python 3 and, for the policy tests, OPA 1.21.0, t
 # cost gate: totals the planned resources and compares with docs/stages/approved.json
 python3 -I scripts/cost_check.py --root .
 
-# tests for the cost gate, the Doppler hook and the wiki generator (needs a virtualenv with pytest installed)
+# the settings page must match docs/settings.json
+python3 -I scripts/gen_settings_doc.py --check
+
+# the repository tests (needs a virtualenv with pytest and pyyaml installed)
 python3 -I -m pytest tests -q
+
+# no cloud account ids in tracked files
+python3 -I scripts/identifier_check.py --root .
 
 # tests for the Spacelift push policy
 opa test .spacelift/policies -v
@@ -110,7 +131,7 @@ tofu -chdir=modules/firewall init -backend=false
 tofu -chdir=modules/firewall test
 ```
 
-Run the last pair for each of `modules/vpc`, `modules/firewall`, `modules/twingate-connector`, `stacks/00-foundation` and `stacks/10-access`. CI runs all of it through git-your-ship-together's shared workflows; this repository has no CI job of its own.
+Run the last pair for each directory in the `directories` list of the tofu job in `.github/workflows/ci.yml`: `modules/vpc`, `modules/firewall`, `modules/twingate-bootstrap`, `modules/twingate-connector`, `modules/aws/vpc`, `modules/aws/firewall`, `modules/aws/twingate-connector`, `stacks/00-foundation`, `stacks/10-access`, `stacks/aws/00-foundation` and `stacks/aws/10-access`. CI runs all of it through git-your-ship-together's shared workflows; the only job this repository defines itself is the `CI green` gate.
 
 ## Documentation
 

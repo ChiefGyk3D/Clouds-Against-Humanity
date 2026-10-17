@@ -8,7 +8,7 @@
 - A Twingate admin group, `cah-tor1-admins`.
 - Two per-host Twingate resources, one for each connector's private address, each limited to TCP port 22.
 
-Cost: $12.00/month, approved total $12.00 (see [cost](../cost.md)).
+Cost: $12.00/month, approved DigitalOcean total $12.00 in `docs/stages/approved.json` (see [cost](../cost.md)).
 
 What the tests prove (`tofu test`, no cloud account needed):
 
@@ -132,7 +132,7 @@ Known follow-up: the provider emits a deprecation warning when `access_group` is
 1. Both connectors show online in the Twingate admin console, under the one site `access-<region>`.
 2. From a Twingate client: `ssh <user>@<connector private IP>` works for each connector's private IP (`connector_private_ips` output, keys `a` and `b`).
 3. From outside Twingate: `nmap -Pn -p 22,80,443 <connector public IP>` shows the ports filtered on both droplets. Scanning your own droplet is authorized.
-4. `python3 -I scripts/cost_check.py --root .` still reports `$12.00`.
+4. `python3 -I scripts/cost_check.py --root .` still reports `digitalocean: planned $12.00/mo, approved $12.00`.
 
 ## 6a. If a connector shows offline
 

@@ -25,7 +25,7 @@ tofu init -backend=false
 tofu test
 ```
 
-You should see `Success! 12 passed, 0 failed.` That is your baseline.
+You should see `Success! 34 passed, 0 failed.` That is your baseline.
 
 **Predict.** Open `main.tf`. Above the `dynamic "inbound_rule"` block, add one inbound rule for SSH from the whole internet:
 
@@ -37,7 +37,7 @@ inbound_rule {
 }
 ```
 
-Before you run the tests: which test will fail, which assertion in it, and will the other eleven tests still run?
+Before you run the tests: which test will fail, which assertion in it, and will the other thirty-three tests still run?
 
 **Run it** (`tofu test`) and compare.
 
@@ -49,10 +49,10 @@ Before you run the tests: which test will fail, which assertion in it, and will 
 │   on outputs.tf line 28, in output "inbound_rules":
 │   28:     "${r.protocol}/${r.port_range}/${join(",", sort(tolist(r.source_tags)))}"
 │     │ r.source_tags is null
-Failure! 0 passed, 1 failed, 11 skipped.
+Failure! 0 passed, 1 failed, 33 skipped.
 ```
 
-The tests never reached the assertion that says "zero inbound rules". The module's own output code assumes every inbound rule names a source tag, and an address-based rule breaks it. Eleven tests are skipped, because a failing test stops the rest of the file. So the control did stop you, by accident of how the output is written, and the message points at the wrong thing.
+The tests never reached the assertion that says "zero inbound rules". The module's own output code assumes every inbound rule names a source tag, and an address-based rule breaks it. Thirty-three tests are skipped, because a failing test stops the rest of the file. So the control did stop you, by accident of how the output is written, and the message points at the wrong thing.
 
 **Now make it fail the way the author intended.** Replace the rule with one that *does* use a tag:
 
@@ -106,7 +106,7 @@ Two independent assertions catch it, and the message is the one the author wrote
 │ The checkable object, var.ip_range, was expected to report an error but did
 │ not.
   run "rejects_malformed_range"... skip
-Failure! 1 passed, 1 failed, 1 skipped.
+Failure! 1 passed, 1 failed, 4 skipped.
 ```
 
 Notice the wording. Nothing failed in the module; a test that *expects* a failure didn't get one. That is the shape of a test for a guard: it succeeds when the bad thing is refused.

@@ -4,7 +4,7 @@
 
 This is the page before any infrastructure. You will finish it with an Azure subscription that is protected, empty and watched, and with no OpenTofu, no Spacelift and no resources. That is the point. [Why the clouds differ](Why-the-Clouds-Differ.md) explains why the account is where Azure differs most from DigitalOcean, and [the AWS version of this page](Provider-AWS-Account-Preparation.md) is the same exercise on another cloud.
 
-**What this costs:** nothing, if you stop here. **What it does not do:** build anything. The build comes later and is not yet written (see [issue #22](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues/22)).
+**What this costs:** nothing, if you stop here. **What it does not do:** build anything. No Azure code exists in this repository yet: there is no Azure module or stack, and the build is not yet written (see [issue #22](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues/22)). Only AWS has code, and that is mocked-tested and never applied.
 
 ## Step 0: decide what this subscription is for
 
