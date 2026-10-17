@@ -107,6 +107,7 @@ Clouds-Against-Humanity/
   docs/golden-addresses/                   resource addresses the plan no-op check compares against
   docs/superpowers/                        dated design records (specs and plans), not maintained as guides
   docs/spacelift-secrets.md                how secrets reach a run, rotation, upgrades
+  media/                                   icons and images for the README's Support section
 ```
 
 Modules are reusable building blocks. Stacks are the things you actually apply, one Spacelift stack each. Each module and stack has its tests in `<module or stack>/tests/*.tftest.hcl`.
@@ -158,3 +159,56 @@ This repository is public from its first commit, so the GitHub code-scanning and
 ## Secrets
 
 Secrets live in Doppler; nothing in this repository is a credential. Spacelift holds one read-only Doppler token and fetches the rest at run time; see [Spacelift and Doppler secrets](docs/spacelift-secrets.md) for how that works and how to rotate it.
+
+---
+
+## 💝 Support This Project
+
+If you find Clouds Against Humanity useful, consider supporting continued development.
+Everything is also collected at **[support.chiefgyk3d.com](https://support.chiefgyk3d.com)**.
+
+### Recurring Support
+
+<div align="center">
+<table>
+  <tr>
+    <td align="center" width="150">
+      <a href="https://patreon.com/chiefgyk3d" title="Patreon">
+        <img src="media/icons/patreon.svg" width="36" height="36" alt="Patreon"><br>
+        <sub><b>Patreon</b></sub>
+      </a>
+    </td>
+    <td align="center" width="150">
+      <a href="https://streamelements.com/chiefgyk3d/tip" title="StreamElements">
+        <img src="media/streamelements.png" width="36" height="36" alt="StreamElements"><br>
+        <sub><b>StreamElements</b></sub>
+      </a>
+    </td>
+    <td align="center" width="150">
+      <a href="https://shop.chiefgyk3d.com/" title="Merch Store">
+        <img src="media/icons/merch.svg" width="36" height="36" alt="Merch"><br>
+        <sub><b>Merch Store</b></sub>
+      </a>
+    </td>
+  </tr>
+</table>
+</div>
+
+### Cryptocurrency Tips
+
+<div align="center">
+<table>
+  <tr>
+    <td><img src="media/icons/bitcoin.svg" width="28" height="28" alt="Bitcoin">&nbsp;<b>Bitcoin</b><br><code>bc1qztdzcy2wyavj2tsuandu4p0tcklzttvdnzalla</code></td>
+  </tr>
+  <tr>
+    <td><img src="media/icons/monero.svg" width="28" height="28" alt="Monero">&nbsp;<b>Monero</b><br><code>84Y34QubRwQYK2HNviezeH9r6aRcPvgWmKtDkN3EwiuVbp6sNLhm9ffRgs6BA9X1n9jY7wEN16ZEpiEngZbecXseUrW8SeQ</code></td>
+  </tr>
+  <tr>
+    <td><img src="media/icons/ethereum.svg" width="28" height="28" alt="Ethereum">&nbsp;<b>Ethereum</b><br><code>0x554f18cfB684889c3A60219BDBE7b050C39335ED</code></td>
+  </tr>
+  <tr>
+    <td><img src="media/icons/solana.svg" width="28" height="28" alt="Solana">&nbsp;<b>Solana</b><br><code>5T8h3HbyvHgLxwXgchRYbHSqRjZyAr8J7uwjLN9Fh8Jh</code></td>
+  </tr>
+</table>
+</div>
