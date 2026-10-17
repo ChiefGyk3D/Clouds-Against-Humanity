@@ -1,6 +1,6 @@
 # Reading order
 
-Pick the row that sounds like you. Every path is a numbered list: read in that order, and each page ends with a **Next** line that agrees with it. The first path, the core path, is the one to take if you are unsure; the other paths branch off it.
+Pick the row that sounds like you. Every path is a numbered list: read in that order. The tables on this page are the authority. A page's **Next** line follows the core path if the page is on it, and otherwise follows the track that page belongs to (build, security, detection or other clouds); when you are on a different track from a page's Next line, follow the table instead. The first path, the core path, is the one to take if you are unsure; the other paths branch off it.
 
 > **Status honesty.** The pages for DigitalOcean, stages 0 and 1, the labs, the threat model and the settings reference describe things that are built and tested. The pages for AWS, Azure and GCP are **unverified drafts**: written from the vendors' own documentation, not applied in a real account, and labelled that way in their first lines and in the title column below. Stages 2 to 4 are planned, not built.
 
