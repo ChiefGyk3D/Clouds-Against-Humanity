@@ -44,7 +44,7 @@ variable "admin_ssh_public_key" {
 
 variable "reboot_time" {
   type        = string
-  description = "HH:MM (America/New_York, the droplet's local time) when unattended-upgrades may reboot this droplet. Give each connector a different time so they never reboot together."
+  description = "HH:MM (in `timezone`, the droplet's local time; America/New_York by default) when unattended-upgrades may reboot this droplet. Give each connector a different time so they never reboot together."
 
   validation {
     condition     = can(regex("^([01][0-9]|2[0-3]):[0-5][0-9]$", var.reboot_time))
@@ -60,5 +60,16 @@ variable "resource_key" {
   validation {
     condition     = var.resource_key == "" || can(regex("^[a-z][a-z0-9-]{1,23}$", var.resource_key))
     error_message = "resource_key must be empty (meaning region) or 2 to 24 characters: a lowercase letter, then lowercase letters, digits or hyphens."
+  }
+}
+
+variable "timezone" {
+  type        = string
+  default     = "America/New_York"
+  description = "IANA time zone name of the machine (UTC or Area/Location, for example America/New_York), also the zone reboot_time and the weekly update are read in. Default America/New_York. Rendered into cloud-init, so changing it changes user_data and replaces the droplet."
+
+  validation {
+    condition     = can(regex("^(UTC|[A-Za-z_]+(/[A-Za-z0-9_+-]+){1,2})$", var.timezone)) && contains(split("\n", file(join("/", [path.module, "timezones.txt"]))), var.timezone)
+    error_message = "timezone must be a name in modules/twingate-bootstrap/timezones.txt (the IANA zones, for example America/New_York or UTC): no spaces or line breaks, and the zone must exist."
   }
 }

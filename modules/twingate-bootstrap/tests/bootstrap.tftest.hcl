@@ -679,3 +679,175 @@ run "resource_key_rejects_an_underscore_and_a_space" {
   }
   expect_failures = [var.resource_key]
 }
+
+# --- timezone ----------------------------------------------------------------
+# The zone is an input now. The default must render exactly what the literal
+# did (the golden hashes above); a different zone may change only that line.
+
+run "default_timezone_renders_the_golden_user_data" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time = "04:00"
+    timezone    = "America/New_York"
+  }
+  assert {
+    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    error_message = "Passing the default timezone explicitly must render the golden user_data."
+  }
+}
+
+run "another_timezone_changes_only_the_timezone_line" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time = "04:00"
+    timezone    = "Europe/Paris"
+  }
+  assert {
+    condition     = yamldecode(output.user_data).timezone == "Europe/Paris"
+    error_message = "The machine timezone must be the one given."
+  }
+  assert {
+    condition     = sha256(replace(output.user_data, "\ntimezone: Europe/Paris\n", "\ntimezone: America/New_York\n")) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    error_message = "Changing the timezone must change nothing but the timezone line."
+  }
+}
+
+run "utc_is_accepted" {
+  command = plan
+  variables {
+    timezone = "UTC"
+  }
+  assert {
+    condition     = yamldecode(output.user_data).timezone == "UTC"
+    error_message = "UTC must be accepted."
+  }
+}
+
+run "three_part_timezone_is_accepted" {
+  command = plan
+  variables {
+    timezone = "America/Argentina/Buenos_Aires"
+  }
+  assert {
+    condition     = yamldecode(output.user_data).timezone == "America/Argentina/Buenos_Aires"
+    error_message = "A three-part IANA name must be accepted."
+  }
+}
+
+run "timezone_rejects_newline_injection" {
+  command = plan
+  variables {
+    timezone = "America/New_York\nruncmd: [\"id\"]"
+  }
+  expect_failures = [var.timezone]
+}
+
+run "timezone_rejects_trailing_newline" {
+  command = plan
+  variables {
+    timezone = "America/New_York\n"
+  }
+  expect_failures = [var.timezone]
+}
+
+run "timezone_rejects_yaml_special" {
+  command = plan
+  variables {
+    timezone = "America/New_York: {a: b}"
+  }
+  expect_failures = [var.timezone]
+}
+
+run "timezone_rejects_comment_marker" {
+  command = plan
+  variables {
+    timezone = "America/New_York # x"
+  }
+  expect_failures = [var.timezone]
+}
+
+run "timezone_rejects_space" {
+  command = plan
+  variables {
+    timezone = "America/New York"
+  }
+  expect_failures = [var.timezone]
+}
+
+run "timezone_rejects_no_slash" {
+  command = plan
+  variables {
+    timezone = "Eastern"
+  }
+  expect_failures = [var.timezone]
+}
+
+run "timezone_rejects_lowercase_utc" {
+  command = plan
+  variables {
+    timezone = "utc"
+  }
+  expect_failures = [var.timezone]
+}
+
+run "timezone_rejects_empty" {
+  command = plan
+  variables {
+    timezone = ""
+  }
+  expect_failures = [var.timezone]
+}
+
+run "timezone_rejects_four_parts" {
+  command = plan
+  variables {
+    timezone = "A/b/c/d"
+  }
+  expect_failures = [var.timezone]
+}
+
+run "timezone_rejects_template_marker" {
+  command = plan
+  variables {
+    timezone = "America/$${x}"
+  }
+  expect_failures = [var.timezone]
+}
+
+run "timezone_rejects_a_made_up_zone" {
+  command = plan
+  variables {
+    timezone = "Foo/Bar"
+  }
+  expect_failures = [var.timezone]
+}
+
+run "timezone_rejects_a_plausible_but_missing_zone" {
+  command = plan
+  variables {
+    timezone = "America/Definitely_Not_A_Zone"
+  }
+  expect_failures = [var.timezone]
+}
+
+run "timezone_rejects_an_out_of_range_etc_zone" {
+  command = plan
+  variables {
+    timezone = "Etc/GMT+99"
+  }
+  expect_failures = [var.timezone]
+}

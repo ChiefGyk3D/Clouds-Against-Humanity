@@ -71,6 +71,7 @@ NEED_NOT_SAY_EXAMPLE = {
     "reserved_ranges",
     "resource_key",
     "site_name",
+    "timezone",
 }
 
 

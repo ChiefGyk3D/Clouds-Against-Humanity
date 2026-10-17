@@ -261,3 +261,24 @@ run "nothing_in_the_stack_names_an_account_profile_or_key" {
     error_message = "No AWS key pair and no instance profile."
   }
 }
+
+# --- timezone ----------------------------------------------------------------
+run "timezone_defaults_to_the_live_zone_and_reaches_both_connectors" {
+  command = plan
+  assert {
+    condition     = var.timezone == "America/New_York"
+    error_message = "The default timezone must be the zone the live connectors use."
+  }
+  assert {
+    condition     = length(regexall("timezone\\s*=\\s*var\\.timezone", file("${path.module}/main.tf"))) == 2
+    error_message = "Both connectors must receive var.timezone."
+  }
+}
+
+run "timezone_rejects_injection" {
+  command = plan
+  variables {
+    timezone = "UTC\nruncmd: [x]"
+  }
+  expect_failures = [var.timezone]
+}

@@ -28,13 +28,13 @@ Each connector's cloud-init (`modules/twingate-bootstrap/cloud-init.yaml.tftpl`)
 
 - One login user, `cah-admin`, with the admin public key and passwordless sudo. No password exists (`lock_passwd`), root is disabled (`disable_root`) and the default `ubuntu` user is not created.
 - An sshd drop-in, `/etc/ssh/sshd_config.d/99-cah-hardening.conf`: no root login, no passwords, no keyboard-interactive, public keys only, no X11 forwarding, `AllowUsers cah-admin`, `MaxAuthTries 3`, `LoginGraceTime 20`.
-- The droplet clock is `America/New_York`, so every time below is Eastern.
+- The droplet clock is the `timezone` setting (default `America/New_York`), so every time below is Eastern unless you change it.
 - `unattended-upgrades` for security updates, with automatic reboot (also when someone is logged in) at `reboot_time` and removal of unused dependencies. Updates and the install of the connector wait for the dpkg lock for up to 300 seconds (`/etc/apt/apt.conf.d/99cah-lock-wait`), so first boot does not fail while Ubuntu's own apt jobs run.
 - `chrony` for time sync (UDP 123 outbound is already allowed).
 - A sysctl drop-in: loose reverse-path filtering, no ICMP redirects, no source routing, SYN cookies, martian logging. It does not touch `ip_forward`.
 - A weekly connector update, half an hour after each connector's reboot time on Sundays (see the install route below), so the sibling is idle while one restarts.
 
-Update schedule (Eastern time):
+Update schedule (droplet local time, Eastern by default):
 
 - Security updates install daily.
 - A droplet reboots only when an update requires it, at 04:00 (connector a) or 05:00 (connector b).

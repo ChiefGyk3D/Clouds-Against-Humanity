@@ -11,6 +11,7 @@ module "bootstrap" {
   twingate_network     = var.twingate_network
   admin_ssh_public_key = var.admin_ssh_public_key
   reboot_time          = var.reboot_time
+  timezone             = var.timezone
 }
 
 # These resources used to live directly in this module. Moving them into the

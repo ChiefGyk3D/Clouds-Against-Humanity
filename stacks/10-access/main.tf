@@ -39,9 +39,10 @@ module "connector_a" {
   twingate_network    = var.twingate_network
 
   admin_ssh_public_key = var.admin_ssh_public_key
-  # Eastern time, staggered so the two connectors never reboot together
+  # In var.timezone (Eastern by default), staggered so the two connectors never reboot together
   # (reboot_times is validated to hold two different times).
   reboot_time = var.reboot_times["a"]
+  timezone    = var.timezone
 
   # The outbound rules must exist before the droplet boots and starts to install.
   depends_on = [module.connector_firewall]
@@ -62,6 +63,7 @@ module "connector_b" {
 
   admin_ssh_public_key = var.admin_ssh_public_key
   reboot_time          = var.reboot_times["b"]
+  timezone             = var.timezone
 
   depends_on = [module.connector_firewall]
 }
