@@ -59,6 +59,8 @@ module "connector_a" {
 
   connector_telemetry = contains(var.connector_telemetry_instances, "a") ? var.connector_telemetry : var.connector_telemetry_previous
 
+  metadata_lock = var.metadata_lock && contains(var.metadata_lock_instances, "a")
+
   # The outbound rules must exist before the instance boots and starts to install.
   depends_on = [module.connector_firewall]
 }
@@ -79,6 +81,8 @@ module "connector_b" {
   timezone             = var.timezone
 
   connector_telemetry = contains(var.connector_telemetry_instances, "b") ? var.connector_telemetry : var.connector_telemetry_previous
+
+  metadata_lock = var.metadata_lock && contains(var.metadata_lock_instances, "b")
 
   depends_on = [module.connector_firewall]
 }

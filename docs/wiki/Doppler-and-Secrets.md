@@ -73,7 +73,7 @@ Being honest about this matters more than the diagram:
 
 | Value | Also ends up in | Mitigation |
 |---|---|---|
-| Twingate connector access and refresh tokens | OpenTofu state in Spacelift, and droplet user-data | Marked sensitive; one token per connector; revocable; restrict who can read stack state in Spacelift; metadata lockdown is a follow-up |
+| Twingate connector access and refresh tokens | OpenTofu state in Spacelift, and droplet user-data | Marked sensitive; one token per connector; revocable; restrict who can read stack state in Spacelift; a metadata lock is built but off by default until rolled out |
 | Admin SSH public key | Droplet user-data and state | It is a public key; the comment is stripped so it carries no user or machine name |
 
 ## Rotation, in short

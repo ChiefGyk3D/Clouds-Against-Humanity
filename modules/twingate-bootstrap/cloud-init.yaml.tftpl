@@ -12,6 +12,9 @@ package_upgrade: true
 packages:
   - unattended-upgrades
   - chrony
+%{ if metadata_lock ~}
+  - nftables
+%{ endif ~}
 
 users:
   - name: cah-admin
@@ -36,7 +39,51 @@ write_files:
       TWINGATE_URL=https://${network}.twingate.com
       TWINGATE_ACCESS_TOKEN=${access_token}
       TWINGATE_REFRESH_TOKEN=${refresh_token}
-${telemetry_conf}  - path: /etc/apt/apt.conf.d/99cah-lock-wait
+${telemetry_conf}%{ if metadata_lock ~}
+  # Lock the droplet metadata endpoint (it serves this very user-data, tokens
+  # included) to root and to the DigitalOcean monitoring agent's user. The rule
+  # lives in its own nftables table, so it never touches any other rule.
+  - path: /usr/local/sbin/cah-metadata-lock
+    permissions: "0750"
+    owner: root:root
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+      # uid 0 always; the do-agent user too when it exists (DigitalOcean's
+      # monitoring agent reads the metadata address as that user). AWS has none.
+      allowed="0"
+      if agent_uid="$(id -u do-agent 2>/dev/null)"; then
+        allowed="0, $agent_uid"
+      fi
+      nft -f - <<EOF
+      table inet cah_metadata
+      delete table inet cah_metadata
+      table inet cah_metadata {
+        chain output {
+          type filter hook output priority 0; policy accept;
+          ip daddr 169.254.169.254 meta skuid != { $allowed } reject with icmp type admin-prohibited
+        }
+      }
+      EOF
+      echo "cah-metadata-lock: metadata endpoint allowed for uids: $allowed"
+  # After cloud-final so the do-agent user already exists on first boot.
+  - path: /etc/systemd/system/cah-metadata-lock.service
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Restrict the droplet metadata endpoint to root and do-agent
+      After=cloud-final.service network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      ExecStart=/usr/local/sbin/cah-metadata-lock
+
+      [Install]
+      WantedBy=multi-user.target
+%{ endif ~}
+  - path: /etc/apt/apt.conf.d/99cah-lock-wait
     permissions: "0644"
     content: |
       DPkg::Lock::Timeout "300";
@@ -99,6 +146,12 @@ runcmd:
   - [sysctl, --system]
   - [bash, -c, "sshd -t && systemctl restart ssh"]
   - [systemctl, enable, --now, chrony]
+%{ if metadata_lock ~}
+  # --no-block is required: the unit waits for cloud-final, which is what runs
+  # this very command, so waiting here would deadlock.
+  - [systemctl, daemon-reload]
+  - [systemctl, enable, --now, --no-block, cah-metadata-lock.service]
+%{ endif ~}
   # Install the connector from Twingate's signed apt repository and start it,
   # the way their Terraform guide does, instead of running their setup.sh (an
   # installer that is piped into bash can have its script swallowed by apt's

@@ -19,6 +19,7 @@ module "bootstrap" {
   reboot_time          = var.reboot_time
   timezone             = var.timezone
   connector_telemetry  = var.connector_telemetry
+  metadata_lock        = var.metadata_lock
 }
 
 # Ubuntu 24.04 LTS, from the parameter Canonical publishes in every region's

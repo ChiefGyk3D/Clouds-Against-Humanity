@@ -40,9 +40,35 @@ Update schedule (droplet local time, Eastern by default):
 - A droplet reboots only when an update requires it, at 04:00 (connector a) or 05:00 (connector b).
 - The connector package updates on Sundays at 04:30 (a) and 05:30 (b).
 
+### Metadata endpoint lock (built, off by default)
+
+Any process on a connector droplet can read the cloud-init user-data from `169.254.169.254`, and that includes the connector tokens. The `metadata_lock` setting (default `false`) closes that: a small nftables table (`inet cah_metadata`, its own table, so no other rule is touched) rejects outbound traffic to `169.254.169.254` unless the process runs as root (uid 0) or as the `do-agent` user. DigitalOcean's monitoring agent runs as `do-agent` and uses that address as its metric proxy, and the droplet module sets `monitoring = true`, so without that exemption droplet monitoring would silently stop. On AWS there is no `do-agent` user and the script allows root only. A systemd unit (`cah-metadata-lock.service`, ordered after `cloud-final.service` so the `do-agent` user already exists on first boot) applies the table at every boot.
+
+It has **not been tested on a real droplet yet**. Turning it on changes `user_data`, so the plan shows the droplet of every connector in `metadata_lock_instances` REPLACED. Stage it, one connector at a time:
+
+1. Set `metadata_lock = true` and `metadata_lock_instances = ["a"]`. Plan, apply.
+2. Verify connector a (below). Check SSH through Twingate to it.
+3. Set `metadata_lock_instances = ["a", "b"]`. Plan, apply, verify connector b.
+
+Verify, as `cah-admin` over Twingate (replace `host` with the connector's private address):
+
+```
+ssh -t cah-admin@host 'curl -s -m 3 http://169.254.169.254/metadata/v1/id; echo "exit=$?"'
+ssh -t cah-admin@host 'sudo curl -s -m 3 http://169.254.169.254/metadata/v1/id; echo "exit=$?"'
+ssh -t cah-admin@host 'systemctl is-active do-agent cah-metadata-lock.service'
+```
+
+The first line must fail (the request is rejected), the second must print the droplet id, and `do-agent` must stay `active`.
+
+Rollback: set `metadata_lock = false` (this replaces the droplet again), or on one box, without waiting for a rebuild (this lasts until the next boot, so also set the setting to false):
+
+```
+ssh -t cah-admin@host 'sudo nft delete table inet cah_metadata'
+```
+
 Follow-ups, not done yet:
 
-- Lock the droplet metadata endpoint (169.254.169.254) to root. Today any process on the droplet can read the cloud-init user-data from it, and that includes the connector tokens. This needs a real droplet to test, so it waits.
+
 - Audit logging (auditd, or shipping auth logs off the droplet).
 - Moving the Twingate install to a pinned package source once Twingate documents one (below).
 

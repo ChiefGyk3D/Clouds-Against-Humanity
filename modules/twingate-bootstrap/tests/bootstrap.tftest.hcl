@@ -1191,3 +1191,84 @@ run "labels_reject_eleven_entries" {
   }
   expect_failures = [var.connector_telemetry]
 }
+
+# metadata_lock (issue #87): off by default, and off adds nothing at all. The
+# golden-hash runs above already prove the default user_data is byte-identical;
+# this run names the absent pieces so a failure says what leaked.
+run "metadata_lock_default_adds_nothing_to_user_data" {
+  command = plan
+  assert {
+    condition     = !strcontains(output.user_data, "cah-metadata-lock") && !strcontains(output.user_data, "cah_metadata") && !strcontains(output.user_data, "nftables") && !strcontains(output.user_data, "169.254.169.254")
+    error_message = "With metadata_lock unset no metadata-lock script, unit, rule or nftables package may appear in user_data."
+  }
+}
+
+run "metadata_lock_false_is_the_golden_user_data" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time   = "04:00"
+    metadata_lock = false
+  }
+  assert {
+    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    error_message = "metadata_lock = false must render the same user_data as before the setting existed."
+  }
+}
+
+run "metadata_lock_on_installs_script_unit_and_package" {
+  command = plan
+  variables {
+    metadata_lock = true
+  }
+  assert {
+    condition     = contains(yamldecode(output.user_data).packages, "nftables") && contains(yamldecode(output.user_data).packages, "chrony")
+    error_message = "nftables must be installed next to the existing packages."
+  }
+  assert {
+    condition     = one([for f in yamldecode(output.user_data).write_files : f.permissions if f.path == "/usr/local/sbin/cah-metadata-lock"]) == "0750" && one([for f in yamldecode(output.user_data).write_files : f.owner if f.path == "/usr/local/sbin/cah-metadata-lock"]) == "root:root"
+    error_message = "The lock script must be root-owned and 0750."
+  }
+  assert {
+    condition = alltrue([
+      for s in ["169.254.169.254", "meta skuid != {", "id -u do-agent", "table inet cah_metadata", "delete table inet cah_metadata", "reject with icmp type admin-prohibited", "set -euo pipefail"] :
+      strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/usr/local/sbin/cah-metadata-lock"]), s)
+    ])
+    error_message = "The lock script must exempt root and do-agent, use its own idempotent table and reject others."
+  }
+  assert {
+    condition = alltrue([
+      for s in ["Type=oneshot", "RemainAfterExit=yes", "After=cloud-final.service network-online.target", "ExecStart=/usr/local/sbin/cah-metadata-lock", "WantedBy=multi-user.target"] :
+      strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/etc/systemd/system/cah-metadata-lock.service"]), s)
+    ])
+    error_message = "The unit must be a oneshot ordered after cloud-final."
+  }
+}
+
+run "metadata_lock_on_enables_the_unit_without_blocking" {
+  command = plan
+  variables {
+    metadata_lock = true
+  }
+  assert {
+    condition     = contains(yamldecode(output.user_data).runcmd, ["systemctl", "daemon-reload"]) && contains(yamldecode(output.user_data).runcmd, ["systemctl", "enable", "--now", "--no-block", "cah-metadata-lock.service"])
+    error_message = "runcmd must daemon-reload and enable the unit with --no-block (cloud-final runs runcmd; blocking would deadlock)."
+  }
+}
+
+run "metadata_lock_on_keeps_the_rest_of_the_cloud_init" {
+  command = plan
+  variables {
+    metadata_lock = true
+  }
+  assert {
+    condition     = length(yamldecode(output.user_data).users) == 1 && strcontains(output.user_data, "TWINGATE_URL=https://acme.twingate.com") && strcontains(output.user_data, "99-cah-hardening")
+    error_message = "The lock must be additive."
+  }
+}

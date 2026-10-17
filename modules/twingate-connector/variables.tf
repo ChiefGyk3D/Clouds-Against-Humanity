@@ -85,3 +85,10 @@ variable "connector_telemetry" {
   nullable    = false
   description = "Connector telemetry, passed to the bootstrap module, which validates it and explains each field. The default ({}) changes nothing. Any of log_level, connection_logs, metrics_port or labels changes user_data and replaces the droplet; status_updates_enabled does not."
 }
+
+variable "metadata_lock" {
+  type        = bool
+  default     = false
+  nullable    = false
+  description = "Lock the metadata endpoint (169.254.169.254) to root and the do-agent user, passed to the bootstrap module, which explains it. The default (false) changes nothing. true changes user_data and replaces the droplet."
+}

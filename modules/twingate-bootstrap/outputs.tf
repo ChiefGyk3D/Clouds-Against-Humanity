@@ -20,5 +20,6 @@ output "user_data" {
     update_hour          = local.update_hour
     update_minute        = local.update_minute
     telemetry_conf       = local.telemetry_conf
+    metadata_lock        = var.metadata_lock
   })
 }

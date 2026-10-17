@@ -52,7 +52,7 @@ Two Twingate connectors, the connector firewall, an admin group and per-host SSH
 
 Open follow-ups from this stage:
 
-- Restrict the droplet metadata endpoint to root.
+- Roll out the droplet metadata endpoint lock (`metadata_lock`, built and off by default, not yet tested on a real droplet).
 - Audit logging on the droplets.
 - Replace the deprecated `access_group` setting on Twingate resources.
 - Attach the Spacelift push policy. It is written and tested (`.spacelift/policies/push.rego`): it never proposes a run, so pull requests from forks or from this repository never run in Spacelift, and docs-only merges no longer start tracked runs. It takes effect only once created in Spacelift, and push policies need a paid Spacelift plan. On the free plan, narrow each stack's project root and globs instead. Both routes are in the secrets runbook, section 9.

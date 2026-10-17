@@ -83,6 +83,18 @@ connector_telemetry_instances = ["a", "b"]
 # first, so b keeps its config while a changes.
 connector_telemetry_previous = {}
 
+# Lock the droplet metadata endpoint (the link-local cloud address, which serves each
+# connector's user-data and so its Twingate tokens) to root and to the do-agent
+# user that DigitalOcean's monitoring agent runs as. Default false changes
+# nothing. true REPLACES the droplet of every connector in
+# metadata_lock_instances (user_data changes). Roll out one at a time:
+# metadata_lock = true with ["a"], apply, check SSH through Twingate, then
+# ["a", "b"]. Not yet tested on a real droplet.
+metadata_lock = false
+
+# Which connectors get metadata_lock (a, b or both). Default both.
+metadata_lock_instances = ["a", "b"]
+
 # A label for telemetry only (empty means "site-<region>"). It appears in no
 # resource name, tag or output, and changing it replaces nothing.
 site_name = "site-tor1"

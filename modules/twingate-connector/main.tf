@@ -13,6 +13,7 @@ module "bootstrap" {
   reboot_time          = var.reboot_time
   timezone             = var.timezone
   connector_telemetry  = var.connector_telemetry
+  metadata_lock        = var.metadata_lock
 }
 
 # These resources used to live directly in this module. Moving them into the
