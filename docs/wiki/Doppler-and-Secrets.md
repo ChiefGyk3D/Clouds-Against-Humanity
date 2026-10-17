@@ -6,6 +6,11 @@ The rule is simple: **nothing in this repository is a credential**, and nothing 
 
 ## Who holds what
 
+![Diagram, Who holds what: Doppler: clouds-against-humanity / prd; DIGITALOCEAN_TOKEN custom write scopes, 90 days; TWINGATE_API_TOKEN 90 days; TWINGATE_NETWORK tenant name, not a credential; ADMIN_SSH_PUBLIC_KEY ADMIN_SSH](images/doppler-and-secrets-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
     subgraph doppler["Doppler: clouds-against-humanity / prd"]
@@ -32,6 +37,8 @@ flowchart LR
     classDef warn fill:#2a2410,stroke:#facc15,color:#fef9c3
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
 ```
+
+</details>
 
 The "gets" lines are the names each stack **asks Doppler for**, which is least privilege for honest code, not isolation. `DOPPLER_TOKEN` itself is present in every run through the attached context, so code that someone can get into a run could read it directly and fetch every secret in the config, including the ones stack 00 never asked for. What actually keeps that code out of a run is the push policy and who can push, covered in [section 8 of the secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#8-known-limits-and-open-checks) and on the [Spacelift](Spacelift.md) page.
 

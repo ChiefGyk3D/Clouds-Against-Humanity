@@ -45,6 +45,11 @@ Every `versions.tf` says `required_version = ">= 1.8"`. That means "OpenTofu 1.8
 
 ## How a value travels
 
+![Diagram, How a value travels: Doppler secrets and settings; Spacelift hook exports as env vars; TF_VAR_name or provider env var; variable block (validated); resource / module; output; Spacelift stack dependency output to](images/terraform-reference-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
     dop["Doppler<br/>secrets and settings"]:::sec
@@ -62,6 +67,8 @@ flowchart LR
     classDef ctrl fill:#1e1b3a,stroke:#a78bfa,color:#ede9fe
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
 ```
+
+</details>
 
 Two kinds of environment variable matter:
 

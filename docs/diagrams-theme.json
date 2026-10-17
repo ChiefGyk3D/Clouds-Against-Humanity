@@ -1,0 +1,12 @@
+{
+  "theme": "dark",
+  "themeVariables": {
+    "background": "#0d1117",
+    "edgeLabelBackground": "#161b22",
+    "lineColor": "#8b949e",
+    "clusterBkg": "#161b22",
+    "clusterBorder": "#30363d",
+    "fontFamily": "DejaVu Sans, sans-serif"
+  },
+  "flowchart": {"htmlLabels": true, "useMaxWidth": false}
+}

@@ -17,6 +17,11 @@ Every DigitalOcean droplet gets a public IP address, and you cannot remove it. S
 
 ## Two firewalls, layered by tag
 
+![Diagram, Two firewalls, layered by tag: Public internet; Connector droplet tags: cah-baseline-tor1, cah-connector-tor1; Ubuntu 24.04 sshd allows only cah-admin, keys only; Baseline firewall (stage 0); Inbound: none; Outb](images/digitalocean-network-and-firewalls-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart TB
     internet["Public internet"]:::ext
@@ -39,6 +44,8 @@ flowchart TB
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
     classDef warn fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
+
+</details>
 
 DigitalOcean evaluates all firewalls attached to a droplet together: traffic is allowed if any attached firewall allows it, and denied otherwise. That is why the two can be layered: the baseline guarantees "nothing in", the connector firewall adds only what connectors need.
 

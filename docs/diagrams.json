@@ -1,0 +1,89 @@
+{
+  "docs/images/readme-diagram-1.png": {
+    "sha256": "137ec36f8fd0bda4eb647ae214353be078277147a51685dbda1483098961a526"
+  },
+  "docs/wiki/images/architecture-overview-diagram-1.png": {
+    "sha256": "9f256ddb1fdf7a26682a5e5e7aefd26cec4afac601c389654e7f4475c63f8c4a"
+  },
+  "docs/wiki/images/architecture-overview-diagram-2.png": {
+    "sha256": "61c6358d98bb43bfa1eb014054e0d74c462abead6754eedb75fc0548f7eb032c"
+  },
+  "docs/wiki/images/architecture-overview-diagram-3.png": {
+    "sha256": "10ae249abfc7287da18f54a2883fa690b617ff12a43b1805a9198a58603e775c"
+  },
+  "docs/wiki/images/architecture-overview-diagram-4.png": {
+    "sha256": "e3311302f8cca095ab63360c2de33d7fb8dacd01d039562808996c991f8fa80a"
+  },
+  "docs/wiki/images/ci-tests-and-cost-gate-diagram-1.png": {
+    "sha256": "ad44896c9bd9cf6d870396ee888b0fcba158f93f3dcad06f580a7b92e70bde23"
+  },
+  "docs/wiki/images/ci-tests-and-cost-gate-diagram-2.png": {
+    "sha256": "0abfae9a550e9d479144b3ef546e6aa5a41b06ae9db2fcfc33b3d9fe8e173722"
+  },
+  "docs/wiki/images/containers-and-docker-basics-diagram-1.png": {
+    "sha256": "ea2dc53f819ff0450c14ec57cd89fdd7c92a0d69aa2ddcb0153d30c6018d6c5f"
+  },
+  "docs/wiki/images/digitalocean-network-and-firewalls-diagram-1.png": {
+    "sha256": "a2f67631aa20079a931ed0c1479ffbd86f9d732a10686fba76dc0705700122f8"
+  },
+  "docs/wiki/images/doppler-and-secrets-diagram-1.png": {
+    "sha256": "3eaae25dd1055b1db027ee9662c4322542447dcbcda0c78e93acc9987349e587"
+  },
+  "docs/wiki/images/droplet-hardening-diagram-1.png": {
+    "sha256": "f0165943c5a24c1e3276be75779b6f202d2dcbbafe6236dea2e269e3c7ecb073"
+  },
+  "docs/wiki/images/fork-private-stacks-and-the-pipeline-diagram-1.png": {
+    "sha256": "d6290ae409d567181ef427a314e1a50b43d6c8dbe76770b3a49f181078b109dd"
+  },
+  "docs/wiki/images/git-github-and-pull-requests-diagram-1.png": {
+    "sha256": "70d3bb49dacda55881fcbb0a3b6431a197bfd27d60f703b209626df76cb00310"
+  },
+  "docs/wiki/images/home-diagram-1.png": {
+    "sha256": "64a67622aa75222a3e25fb53f47c4013c6a7f53f9a342da59a447ed32f531897"
+  },
+  "docs/wiki/images/networking-basics-for-this-project-diagram-1.png": {
+    "sha256": "41f611664d536c18b4324141934a1021df658785ea996e8e080c354434f60f8e"
+  },
+  "docs/wiki/images/opentofu-stacks-and-modules-diagram-1.png": {
+    "sha256": "eac3a9eceeca15af7d24459ca10d06fb43a6892641a92ed485f4504473911b5e"
+  },
+  "docs/wiki/images/roadmap-diagram-1.png": {
+    "sha256": "0d5ca59a85fe3430236e362ace3c3767c57cc0d1710aa49d29a0e2388fb6f4ce"
+  },
+  "docs/wiki/images/spacelift-diagram-1.png": {
+    "sha256": "8c750ab350c2a14e2132f0fd1877d513dca6585e69e50a04df5eca56014a31ae"
+  },
+  "docs/wiki/images/telemetry-crosses-the-trust-boundary-diagram-1.png": {
+    "sha256": "24fed3e9d7a1872ea2e54ca3206b541060745f2a9b3db22eb1f86acc8c912183"
+  },
+  "docs/wiki/images/terraform-reference-diagram-1.png": {
+    "sha256": "8d76d16ffea6d2409e793288aa26cbbb6a2cf3172718cb64f9f28d759f8e0f30"
+  },
+  "docs/wiki/images/threat-model-diagram-1.png": {
+    "sha256": "46f0d51a36ef29ce2f660d4aef6602b03fab603bf4c7644aad4a2cca41d948c9"
+  },
+  "docs/wiki/images/threat-model-exercise-diagram-1.png": {
+    "sha256": "454609d11ee176b9061e25d845219f5ac822a6147cb4a47970780533b7f7963e"
+  },
+  "docs/wiki/images/trace-one-change-end-to-end-diagram-1.png": {
+    "sha256": "ff28cab639dbeed1bfe0151277a5add4076863c1ef3ef39cf6ae2b2ea52f2707"
+  },
+  "docs/wiki/images/twingate-diagram-1.png": {
+    "sha256": "897606c875b07769119f5ac11f12aa13d0debb225cf6283e9ff653a788c07385"
+  },
+  "docs/wiki/images/what-is-infrastructure-as-code-diagram-1.png": {
+    "sha256": "be9827ee42d541af85df9d5d50395e21e42807a58528c16a46f2d8b4951169ce"
+  },
+  "docs/wiki/images/what-is-the-cloud-diagram-1.png": {
+    "sha256": "0c2b4feea5a58abde69b9f84e7b1d48aa19608c2b63beb12918f27a2c87ed99a"
+  },
+  "docs/wiki/images/why-ztna-not-a-vpn-diagram-1.png": {
+    "sha256": "a0fefebdda967c905c1be9f0b0caef3f23e7f749e5dd4a1ea7a8e6dac641c02c"
+  },
+  "docs/wiki/images/why-ztna-not-a-vpn-diagram-2.png": {
+    "sha256": "7c19dc59dab21b4b0097b95abfb453a75a1c8e59a97cba63d71b38dcc1e7caef"
+  },
+  "docs/wiki/images/why-ztna-not-a-vpn-diagram-3.png": {
+    "sha256": "fe1c83111e2e1275c77fd6574d616ec9bb45ef8ed371dc39daa7375a7a118d3e"
+  }
+}

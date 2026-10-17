@@ -71,6 +71,11 @@ Then pick a track on [Reading order](Reading-Order.md): [build it yourself](Read
 
 ## The short version
 
+![Diagram, The short version: You, with the Twingate client; Public internet; Twingate control plane + relays; DigitalOcean VPC; connector a; connector b; private hosts (stage 3)](images/home-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
     you["You, with the<br/>Twingate client"]:::you
@@ -93,6 +98,8 @@ flowchart LR
     classDef ctrl fill:#1e1b3a,stroke:#a78bfa,color:#ede9fe
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
 ```
+
+</details>
 
 The droplets dial out. You dial out. Twingate introduces the two of you, checks that you are allowed to reach that exact host and port, and the encrypted session runs end to end between your client and the connector. There is nothing for a scanner to find.
 

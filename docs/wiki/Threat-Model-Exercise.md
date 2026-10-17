@@ -41,6 +41,11 @@ A **trust boundary** is a line where the party on one side has different rights,
 
 **Check.** One drawing, with attacker positions marked `A1` to `A4`. A **position** is where an attacker stands, not who they are.
 
+![Diagram, Step 2: draw the trust boundaries: Untrusted; The internet A1: scanner, no account; Fork or outside pull request A2: can propose code; Third-party control planes (trusted, not controlled); GitHub + Actions CI: n](images/threat-model-exercise-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart TB
     subgraph untrusted["Untrusted"]
@@ -77,6 +82,8 @@ flowchart TB
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
     classDef secret fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
+
+</details>
 
 Compare with the diagram in [Threat model](Threat-Model.md#trust-boundaries). That one has four numbered boundaries and a supply-chain box (pinned actions, the pinned Doppler CLI, the Twingate apt key, Ubuntu mirrors). This one has eight boundaries and no supply-chain box. Neither is more correct; they answer different questions. Add the supply-chain box to yours and see what new arrows it needs.
 

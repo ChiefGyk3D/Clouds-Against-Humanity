@@ -20,6 +20,11 @@ A **repository** (repo) is the folder plus its whole history. The one you are re
 
 A **pull request** (PR) says "I have changes on this branch; please review them and merge them into main". It shows the exact difference (the **diff**: lines removed in red, lines added in green), lets people comment on specific lines, and runs the automated checks.
 
+![Diagram, The pull request: how a change is proposed: Change a file on a branch; Open a pull request; Robots run checks (CI); A human reads the diff; Merge to main; Spacelift plans the change, a human confirms, it applies](images/git-github-and-pull-requests-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
     idea["Change a file<br/>on a branch"]:::you
@@ -41,6 +46,8 @@ flowchart LR
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
     classDef warn fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
+
+</details>
 
 In this project **every** change goes through a pull request, including the author's own and including documentation. That is not bureaucracy for its own sake. It is the one point where the automated checks run, where the diff is read, and where "why" gets written down in the description. Months later, the PR is the answer to "why is this rule here".
 

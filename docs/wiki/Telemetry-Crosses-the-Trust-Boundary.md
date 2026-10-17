@@ -8,6 +8,11 @@ The repository's central promise is that nothing on the cloud side listens to th
 
 ## The picture
 
+![Diagram, The picture: Cloud site (no public inbound); Connector droplets a and b metrics exporter log agent; Twingate connectors cloud remote network; Twingate identity and policy one resource, one port; Home site; Home-](images/telemetry-crosses-the-trust-boundary-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
     subgraph cloud["Cloud site (no public inbound)"]
@@ -31,6 +36,8 @@ flowchart LR
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
     classDef secret fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
+
+</details>
 
 "Pull" and "push" here are *policy* directions: who asks for the data. Twingate's tunnels are outbound from both ends, which is why neither side opens a port.
 

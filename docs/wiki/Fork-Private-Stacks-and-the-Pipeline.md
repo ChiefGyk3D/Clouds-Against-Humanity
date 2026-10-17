@@ -105,6 +105,11 @@ A mirror copies files, not connections. Four things still point at the author's 
 
 DevOps is often drawn as a loop of tools. The more useful way to see it is as a chain of **gates**, where the first gate is in git and everything after it is automation that only runs because the earlier gates passed.
 
+![Diagram, Where the pipeline actually starts: 1. Commit on a branch; 2. Pull request description + diff; 3. CI checks tests, cost gate, scanners. No credentials; 4. Review and merge CI green required; 5. Spacelift tracked](images/fork-private-stacks-and-the-pipeline-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
     commit["1. Commit<br/>on a branch"]:::you
@@ -121,6 +126,8 @@ flowchart LR
     classDef ctrl fill:#1e1b3a,stroke:#a78bfa,color:#ede9fe
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
 ```
+
+</details>
 
 Read it left to right and ask of each box: *what mistake does this one catch that the others cannot?*
 

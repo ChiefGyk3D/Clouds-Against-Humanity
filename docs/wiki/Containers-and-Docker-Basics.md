@@ -8,6 +8,11 @@ If you run Docker on a Pi you already know the commands. This page is about the 
 
 A **virtual machine** has its own whole operating system, booted by a hypervisor. A **container** does not. It is an ordinary process on the host's Linux kernel, wrapped so that it sees its own filesystem, its own network address, its own process list, and nothing else. There is no second kernel and no boot; a container starts in milliseconds and costs almost nothing beyond the program inside it.
 
+![Diagram, A container is not a small virtual machine: One droplet (a virtual machine); One Linux kernel, one OS; Docker Engine; Containers: isolated processes sharing that kernel; penguin-overlord; star-daemon; portainer;](images/containers-and-docker-basics-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart TB
     subgraph vm["One droplet (a virtual machine)"]
@@ -26,6 +31,8 @@ flowchart TB
     classDef ctrl fill:#1e1b3a,stroke:#a78bfa,color:#ede9fe
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
 ```
+
+</details>
 
 Consequences:
 

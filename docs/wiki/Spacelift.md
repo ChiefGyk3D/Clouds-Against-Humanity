@@ -6,6 +6,11 @@ Spacelift is where `tofu plan` and `tofu apply` actually run. It holds the state
 
 ## The run lifecycle
 
+![Diagram, The run lifecycle: Pull request opened; Push policy: no Spacelift run for a pull request; GitHub Actions tofu test with mocked providers, cost gate, scanners; Merge to main; No run (docs-only change); Tracked ru](images/spacelift-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart TD
     pr["Pull request opened"]:::you
@@ -39,6 +44,8 @@ flowchart TD
     classDef secret fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
     classDef warn fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
+
+</details>
 
 > **Screenshot to take yourself:** the run view of a stack in the Spacelift console, once for a proposed run and once for a tracked run.
 > Capture: the stack's run page for a tracked run that is waiting at the confirm step (the plan finished, the Confirm button visible), then a proposed run's page if your plan has one, with the run type and the plan summary in frame.
