@@ -60,13 +60,13 @@ The SSH key comment is stripped before it is stored in Doppler (keep only `<type
 
 ### Updates
 
-| What | When (Eastern) |
+| What | When (droplet local time, Eastern by default) |
 |---|---|
 | Security updates (`unattended-upgrades`, security origins only) | Daily |
 | Reboot, only if an update requires it | 04:00 (a), 05:00 (b) |
 | Connector package update (cron, from Twingate's update guide) | Sundays 04:30 (a), 05:30 (b) |
 
-The droplet clock is set to `America/New_York` so these times mean what they say. A `cron.d` entry is used instead of `cron.weekly` because `cron.weekly` would fire on both connectors at the same moment, and the whole point of two connectors is that they never restart together.
+The droplet clock is set to the `timezone` setting (default `America/New_York`), and `reboot_times` and the weekly update are read in that zone, so the times above are Eastern unless you change it. `timezone` must be a zone listed in `modules/twingate-bootstrap/timezones.txt` (generated from the tz database with `python -I scripts/gen_timezones.py`; regenerate it when zones change), so a misspelt zone fails the plan instead of leaving the clock on UTC at boot. Changing `timezone` changes the rendered cloud-init and replaces the droplets. A `cron.d` entry is used instead of `cron.weekly` because `cron.weekly` would fire on both connectors at the same moment, and the whole point of two connectors is that they never restart together.
 
 First boot races Ubuntu's own apt timers for the dpkg lock. `DPkg::Lock::Timeout "300"` makes the install wait instead of failing.
 

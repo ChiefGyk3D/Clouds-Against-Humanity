@@ -345,3 +345,22 @@ run "the_trigger_follows_the_architecture_input" {
     error_message = "The trigger must follow var.architecture."
   }
 }
+
+run "timezone_reaches_the_machine" {
+  command = plan
+  variables {
+    timezone = "Europe/Paris"
+  }
+  assert {
+    condition     = strcontains(aws_instance.connector.user_data, "\ntimezone: Europe/Paris\n")
+    error_message = "The timezone input must reach the machine's cloud-init."
+  }
+}
+
+run "timezone_default_is_eastern" {
+  command = plan
+  assert {
+    condition     = strcontains(aws_instance.connector.user_data, "\ntimezone: America/New_York\n")
+    error_message = "Without a timezone the machine must stay on America/New_York."
+  }
+}

@@ -76,5 +76,16 @@ variable "admin_ssh_public_key" {
 
 variable "reboot_time" {
   type        = string
-  description = "HH:MM (America/New_York, the instance's local time) when unattended-upgrades may reboot this instance. Give each connector a different time so they never reboot together."
+  description = "HH:MM (in `timezone`, the instance's local time; America/New_York by default) when unattended-upgrades may reboot this instance. Give each connector a different time so they never reboot together."
+}
+
+variable "timezone" {
+  type        = string
+  default     = "America/New_York"
+  description = "IANA time zone name of the machine (UTC or Area/Location, for example America/New_York), also the zone reboot_time and the weekly update are read in. Default America/New_York. Passed to the bootstrap module; changing it replaces the instance."
+
+  validation {
+    condition     = can(regex("^(UTC|[A-Za-z_]+(/[A-Za-z0-9_+-]+){1,2})$", var.timezone))
+    error_message = "timezone must be UTC or an IANA name such as America/New_York (Area/Location, letters, digits and _ + - only, no spaces or line breaks)."
+  }
 }

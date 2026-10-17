@@ -97,6 +97,17 @@ variable "reboot_times" {
   }
 }
 
+variable "timezone" {
+  type        = string
+  default     = "America/New_York"
+  description = "IANA time zone name of the machine (UTC or Area/Location, for example America/New_York), also the zone reboot_time and the weekly update are read in. Default America/New_York, the zone the live connectors use. Changing it changes the rendered cloud-init and replaces both droplets."
+
+  validation {
+    condition     = can(regex("^(UTC|[A-Za-z_]+(/[A-Za-z0-9_+-]+){1,2})$", var.timezone))
+    error_message = "timezone must be UTC or an IANA name such as America/New_York (Area/Location, letters, digits and _ + - only, no spaces or line breaks)."
+  }
+}
+
 variable "resource_key" {
   type        = string
   default     = ""

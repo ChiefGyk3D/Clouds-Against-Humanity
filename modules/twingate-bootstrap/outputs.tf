@@ -16,6 +16,7 @@ output "user_data" {
 
     admin_ssh_public_key = local.admin_key
     reboot_time          = var.reboot_time
+    timezone             = var.timezone
     update_hour          = local.update_hour
     update_minute        = local.update_minute
   })

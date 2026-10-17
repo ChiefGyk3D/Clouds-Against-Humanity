@@ -53,8 +53,9 @@ module "connector_a" {
   instance             = "a"
   twingate_network     = var.twingate_network
   admin_ssh_public_key = var.admin_ssh_public_key
-  # Eastern time, staggered so the two connectors never reboot together.
+  # In var.timezone (Eastern by default), staggered so the two connectors never reboot together.
   reboot_time = "04:00"
+  timezone    = var.timezone
 
   # The outbound rules must exist before the instance boots and starts to install.
   depends_on = [module.connector_firewall]
@@ -73,6 +74,7 @@ module "connector_b" {
   twingate_network     = var.twingate_network
   admin_ssh_public_key = var.admin_ssh_public_key
   reboot_time          = "05:00"
+  timezone             = var.timezone
 
   depends_on = [module.connector_firewall]
 }

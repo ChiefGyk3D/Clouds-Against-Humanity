@@ -57,3 +57,14 @@ variable "admin_user_ids" {
     error_message = "admin_user_ids must list at least one Twingate user. A missing Doppler value would otherwise create a host nobody can reach."
   }
 }
+
+variable "timezone" {
+  type        = string
+  default     = "America/New_York"
+  description = "IANA time zone name of the machine (UTC or Area/Location, for example America/New_York), also the zone reboot_time and the weekly update are read in. Default America/New_York. Changing it changes the rendered cloud-init and replaces both instances."
+
+  validation {
+    condition     = can(regex("^(UTC|[A-Za-z_]+(/[A-Za-z0-9_+-]+){1,2})$", var.timezone))
+    error_message = "timezone must be UTC or an IANA name such as America/New_York (Area/Location, letters, digits and _ + - only, no spaces or line breaks)."
+  }
+}

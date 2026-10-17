@@ -60,6 +60,12 @@ variables {
   # These are the times the live connectors use.
   reboot_times = { a = "04:00", b = "05:00" }
 
+  # IANA time zone of the droplets (UTC or Area/Location). reboot_times above and
+  # the weekly connector update are read in this zone. The default is the zone the
+  # live connectors use. Changing it changes the rendered cloud-init (user_data),
+  # which is force-new: both droplets are REPLACED, so read the plan first.
+  timezone = "America/New_York"
+
   # Used in the NAMES and TAGS of cloud and Twingate objects (access-<key>,
   # cah-connector-<key>, droplet names). Empty means region, so every name is the
   # same as before this setting existed. IMMUTABLE for the life of a stack:

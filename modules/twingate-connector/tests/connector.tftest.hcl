@@ -209,3 +209,22 @@ run "a_commented_admin_key_is_accepted_through_the_connector_module" {
     error_message = "A key with a comment must plan."
   }
 }
+
+run "timezone_reaches_the_machine" {
+  command = plan
+  variables {
+    timezone = "Europe/Paris"
+  }
+  assert {
+    condition     = strcontains(digitalocean_droplet.connector.user_data, "\ntimezone: Europe/Paris\n")
+    error_message = "The timezone input must reach the machine's cloud-init."
+  }
+}
+
+run "timezone_default_is_eastern" {
+  command = plan
+  assert {
+    condition     = strcontains(digitalocean_droplet.connector.user_data, "\ntimezone: America/New_York\n")
+    error_message = "Without a timezone the machine must stay on America/New_York."
+  }
+}
