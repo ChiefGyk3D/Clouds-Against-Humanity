@@ -196,3 +196,28 @@ run "an_outbound_tag_rule_with_an_empty_port_range_is_rejected" {
   }
   expect_failures = [var.outbound_to_tag_rules]
 }
+
+run "contract_roles_are_the_tag_on_digitalocean" {
+  command = plan
+  variables {
+    purpose                = "connector"
+    inbound_from_tag_rules = [{ protocol = "tcp", port_range = "22" }]
+    outbound_to_tag_rules  = [{ protocol = "tcp", port_range = "22" }]
+  }
+  assert {
+    condition     = jsonencode(output.rule_targets) == jsonencode(["cah-baseline-tor1"])
+    error_message = "rule_targets must be the tag the firewall attaches to."
+  }
+  assert {
+    condition     = jsonencode(output.source_members) == jsonencode(["cah-baseline-tor1"]) && jsonencode(output.destination_members) == jsonencode(["cah-baseline-tor1"])
+    error_message = "With member rules, source_members and destination_members must name the tag; address rules must not appear in them."
+  }
+}
+
+run "contract_members_are_empty_without_member_rules" {
+  command = plan
+  assert {
+    condition     = length(output.source_members) == 0 && length(output.destination_members) == 0
+    error_message = "A firewall with only address-based rules has no members."
+  }
+}

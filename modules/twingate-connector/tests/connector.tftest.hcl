@@ -95,12 +95,12 @@ run "outputs_never_carry_connector_secrets" {
   # The test can only name outputs it knows, so pin the output set: adding any
   # output (whatever its name) must be a deliberate edit of this list.
   assert {
-    condition     = length(regexall("output \"", file("${path.module}/outputs.tf"))) == 4
-    error_message = "outputs.tf must declare exactly 4 outputs. Add one only after proving it carries no connector secret and extending this test."
+    condition     = length(regexall("output \"", file("${path.module}/outputs.tf"))) == 6
+    error_message = "outputs.tf must declare exactly 6 outputs. Add one only after proving it carries no connector secret and extending this test."
   }
 
   assert {
-    condition     = jsonencode(sort(flatten(regexall("output \"([A-Za-z0-9_-]+)\"", file("${path.module}/outputs.tf"))))) == jsonencode(["droplet_name", "droplet_urn", "private_ip", "size"])
+    condition     = jsonencode(sort(flatten(regexall("output \"([A-Za-z0-9_-]+)\"", file("${path.module}/outputs.tf"))))) == jsonencode(["droplet_name", "droplet_urn", "instance_id", "instance_name", "private_ip", "size"])
     error_message = "outputs.tf declares an output this test does not inspect. Add it here only after proving it carries no connector secret."
   }
 
@@ -111,14 +111,16 @@ run "outputs_never_carry_connector_secrets" {
       output.droplet_name == digitalocean_droplet.connector.name &&
       output.droplet_urn == digitalocean_droplet.connector.urn &&
       output.private_ip == digitalocean_droplet.connector.ipv4_address_private &&
-      output.size == digitalocean_droplet.connector.size
+      output.size == digitalocean_droplet.connector.size &&
+      output.instance_id == digitalocean_droplet.connector.id &&
+      output.instance_name == digitalocean_droplet.connector.name
     )
     error_message = "Every output must be exactly its droplet attribute, never derived from the boot data."
   }
 
   assert {
     condition = !anytrue([
-      for v in [output.droplet_name, output.droplet_urn, output.private_ip, output.size] :
+      for v in [output.droplet_name, output.droplet_urn, output.instance_id, output.instance_name, output.private_ip, output.size] :
       strcontains(tostring(v), "FAKE-ACCESS-TOKEN-1") || strcontains(tostring(v), "FAKE-REFRESH-TOKEN-1")
     ])
     error_message = "A module output carries a connector access or refresh token."

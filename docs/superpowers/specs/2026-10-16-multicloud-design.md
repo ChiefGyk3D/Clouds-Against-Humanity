@@ -190,3 +190,15 @@ Evidence, not assertion:
 - A rehearsal of the state move: a hand-written state with the connector and tokens at their old addresses, planned with the new code and `-refresh=false`, shows both as "moved" and nothing destroyed or replaced. The same state planned with the old code shows the identical remaining in-place note on the tokens, so that note comes from the hand-written state, not from the move.
 - **Not yet done, and the real gate:** a plan on the two live stacks in Spacelift showing no changes. A hand-written state cannot prove that. It needs a proposed run on this branch, which only the maintainer can read.
 
+## 13. Phase 2b: the contract as built
+
+The contract is enforced in two places. Per provider, mocked-provider `tofu test` runs pin each output to its source. Across providers, `tests/test_module_contract.py` finds every `modules/vpc`, `modules/firewall` and `modules/twingate-connector` directory under the repository (so `aws/modules/...` too) and requires the contract outputs, a README with a role table, and a "Provider extensions" section.
+
+| Role | Contract outputs |
+|---|---|
+| network | `id`, `ip_range`, `name` |
+| firewall | `id`, `name`, `rule_targets`, `source_members`, `destination_members` |
+| connector | `instance_id`, `instance_name`, `private_ip`, `size` |
+
+What this cannot tell you: that the semantics match. A module can export `source_members` and fill it with something that does not mean "who may reach the targets". That is what review and the READMEs' role tables are for.
+

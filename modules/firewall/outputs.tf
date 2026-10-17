@@ -38,3 +38,26 @@ output "outbound_tag_rules" {
     if length(coalesce(r.destination_tags, [])) > 0
   ])
 }
+
+# The module contract (docs/superpowers/specs/2026-10-16-multicloud-design.md,
+# section 5). These names are the same on every provider; see README.md for the
+# role table.
+output "id" {
+  description = "Identifier a stack can depend on."
+  value       = digitalocean_firewall.this.id
+}
+
+# What the rules attach to. On DigitalOcean this is the tag the firewall applies to.
+output "rule_targets" {
+  value = sort(tolist(digitalocean_firewall.this.tags))
+}
+
+# Who may reach the targets by membership rather than by address. Here: the source tags.
+output "source_members" {
+  value = sort(distinct(flatten([for r in digitalocean_firewall.this.inbound_rule : tolist(r.source_tags)])))
+}
+
+# What the targets may reach by membership rather than by address. Here: the destination tags.
+output "destination_members" {
+  value = sort(distinct(flatten([for r in digitalocean_firewall.this.outbound_rule : tolist(coalesce(r.destination_tags, []))])))
+}
