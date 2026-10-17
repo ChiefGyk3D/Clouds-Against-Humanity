@@ -12,7 +12,7 @@ It is a cloud extension of a homelab and a teaching repository at the same time:
 flowchart LR
     you["You<br/>Twingate client"]:::you
     tg["Twingate<br/>controller + relays"]:::ctrl
-    subgraph do["DigitalOcean VPC (tor1)"]
+    subgraph vpc["DigitalOcean VPC (tor1)"]
         ca["connector a"]:::cloud
         cb["connector b"]:::cloud
     end
@@ -26,10 +26,10 @@ flowchart LR
     ca -- "outbound only" --> tg
     cb -- "outbound only" --> tg
     you == "end-to-end encrypted" ==> ca
-    net -. "no inbound rule exists" .-x do
+    net -. "no inbound rule exists" .-> vpc
     gh --> sl
     dp -- "read-only token" --> sl
-    sl -- "OpenTofu" --> do
+    sl -- "OpenTofu" --> vpc
 
     classDef you fill:#132a1f,stroke:#4ade80,color:#dcfce7
     classDef ext fill:#3b1d1d,stroke:#f87171,color:#fde2e2
