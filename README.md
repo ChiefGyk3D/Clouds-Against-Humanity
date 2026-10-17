@@ -215,7 +215,7 @@ Everything is also collected at **[support.chiefgyk3d.com](https://support.chief
 
 ---
 
-# 👤 Author & Socials
+## 👤 Author & Socials
 
 <div align="center">
 <table>
