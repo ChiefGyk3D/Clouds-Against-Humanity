@@ -133,7 +133,13 @@ test_firewall_update_is_checked_too if {
 test_firewall_replacement_is_checked_too if {
 	bad := with_source({"source_tags": [], "source_addresses": ["198.51.100.0/24"]})
 	replace := change(fw, "digitalocean_firewall", ["delete", "create"], {"inbound_rule": [bad]})
-	count(denied([replace])) == 1
+	count(denied_destroy_allowed([replace])) == 1
+}
+
+# The inbound checks in isolation: the firewall's destroy is allowlisted, so
+# only the inbound rules can deny. The destroy guard has its own tests below.
+denied_destroy_allowed(changes) := reasons if {
+	reasons := spacelift.deny with input as plan(changes) with data.spacelift.destroy_allowlist as {fw}
 }
 
 # Empty and null fields do not crash and do not deny.
@@ -147,13 +153,13 @@ test_missing_and_null_inbound_rule_do_not_crash if {
 
 test_delete_with_null_after_is_ignored if {
 	gone := change(fw, "digitalocean_firewall", ["delete"], null)
-	count(denied([gone])) == 0
+	count(denied_destroy_allowed([gone])) == 0
 }
 
 test_deleting_an_open_rule_is_ignored if {
 	bad := with_source({"source_tags": [], "source_addresses": ["0.0.0.0/0"]})
 	gone := change(fw, "digitalocean_firewall", ["delete"], {"inbound_rule": [bad]})
-	count(denied([gone])) == 0
+	count(denied_destroy_allowed([gone])) == 0
 }
 
 test_no_op_is_ignored if {
@@ -338,4 +344,125 @@ test_aws_instance_with_zero_ipv6_passes if {
 # Findings accumulate: two problems in one plan are two reasons.
 test_two_problems_are_two_reasons if {
 	count(denied([sg_cidr, droplet(true)])) == 2
+}
+
+# Destroy guard. A deleting change carries its old values in `before`.
+
+removal(address, type, actions, before) := {
+	"address": address,
+	"type": type,
+	"change": {"actions": actions, "before": before, "after": null},
+}
+
+delete_of(address, type, before) := removal(address, type, ["delete"], before)
+
+vpc_addr := "module.vpc.digitalocean_vpc.this"
+
+test_replace_of_firewall_is_denied if {
+	rc := removal(fw, "digitalocean_firewall", ["delete", "create"], {"name": "core"})
+	reasons := denied([rc])
+	count(reasons) == 1
+	some msg in reasons
+	contains(msg, fw)
+	contains(msg, "destroy_allowlist")
+}
+
+test_create_before_destroy_replace_of_firewall_is_denied if {
+	rc := removal(fw, "digitalocean_firewall", ["create", "delete"], {"name": "core"})
+	count(denied([rc])) == 1
+}
+
+test_delete_of_vpc_is_denied if {
+	count(denied([delete_of(vpc_addr, "digitalocean_vpc", {"name": "core"})])) == 1
+}
+
+test_delete_of_each_protected_type_is_denied if {
+	types := {
+		"digitalocean_vpc",
+		"digitalocean_project",
+		"digitalocean_firewall",
+		"twingate_remote_network",
+		"aws_vpc",
+		"aws_security_group",
+	}
+	every type in types {
+		count(denied([delete_of(sprintf("module.m.%s.this", [type]), type, {"name": "x"})])) == 1
+	}
+}
+
+test_delete_of_droplet_is_allowed if {
+	rc := delete_of("module.c.digitalocean_droplet.this", "digitalocean_droplet", {"tags": ["cah-access"]})
+	count(denied([rc])) == 0
+}
+
+test_replace_of_droplet_is_allowed if {
+	rc := removal("module.c.digitalocean_droplet.this", "digitalocean_droplet", ["delete", "create"], {"tags": ["cah-access"]})
+	count(denied([rc])) == 0
+}
+
+test_delete_of_tag_protected_resource_is_denied if {
+	rc := delete_of("module.s.digitalocean_volume.state", "digitalocean_volume", {"tags": ["env", "protected"]})
+	count(denied([rc])) == 1
+}
+
+test_delete_of_aws_resource_with_protected_tag_key_is_denied if {
+	rc := delete_of("module.s.aws_s3_bucket.state", "aws_s3_bucket", {"tags": {"protected": "true"}})
+	count(denied([rc])) == 1
+}
+
+test_delete_of_untagged_other_resource_is_allowed if {
+	rc := delete_of("module.s.digitalocean_volume.scratch", "digitalocean_volume", {"tags": ["env"]})
+	count(denied([rc])) == 0
+}
+
+test_create_update_and_noop_never_trigger_destroy_guard if {
+	every actions in [["create"], ["update"], ["no-op"], ["read"]] {
+		rc := removal(vpc_addr, "digitalocean_vpc", actions, {"name": "core", "tags": ["protected"]})
+		count(denied([rc])) == 0
+	}
+}
+
+test_missing_and_null_fields_do_not_crash_destroy_guard if {
+	count(denied([{"address": "a.b", "type": "digitalocean_volume", "change": {"actions": ["delete"]}}])) == 0
+	count(denied([removal("a.b", "digitalocean_volume", ["delete"], null)])) == 0
+	count(denied([removal("a.b", "digitalocean_volume", ["delete"], {"tags": null})])) == 0
+	count(denied([{"address": "a.b", "type": "digitalocean_vpc", "change": {"actions": null}}])) == 0
+	count(denied([{"address": "a.b", "type": "digitalocean_vpc", "change": null}])) == 0
+}
+
+test_allowlisted_address_is_allowed_while_another_is_denied if {
+	other := "module.other.digitalocean_vpc.this"
+	changes := [
+		delete_of(vpc_addr, "digitalocean_vpc", {"name": "a"}),
+		delete_of(other, "digitalocean_vpc", {"name": "b"}),
+	]
+	reasons := spacelift.deny with input as plan(changes) with data.spacelift.destroy_allowlist as {vpc_addr}
+	count(reasons) == 1
+	some msg in reasons
+	contains(msg, other)
+}
+
+# Autodeploy guard. The plan input carries input.spacelift.stack.autodeploy.
+
+with_stack(autodeploy) := object.union(plan([]), {"spacelift": {"stack": {"id": "cah-10-access", "autodeploy": autodeploy}}})
+
+denied_input(inp) := reasons if {
+	reasons := spacelift.deny with input as inp
+}
+
+test_autodeploy_on_is_denied if {
+	reasons := denied_input(with_stack(true))
+	count(reasons) == 1
+	some msg in reasons
+	contains(msg, "autodeploy")
+}
+
+test_autodeploy_off_passes if {
+	count(denied_input(with_stack(false))) == 0
+}
+
+test_missing_or_null_stack_does_not_crash_autodeploy_guard if {
+	count(denied_input(plan([]))) == 0
+	count(denied_input({"spacelift": {"stack": null}, "terraform": {"resource_changes": []}})) == 0
+	count(denied_input({"spacelift": {"stack": {"autodeploy": null}}})) == 0
 }

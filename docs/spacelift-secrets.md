@@ -258,7 +258,14 @@ It denies a created or updated resource that is:
 | `digitalocean_droplet` | `ipv6 = true`. |
 | `aws_vpc`, `aws_subnet`, `aws_instance` | The plan turns on an IPv6 range or address. |
 
-Deletes and no-ops are ignored. The destroy and autodeploy guard is a separate policy (issue #92) and is not part of this one.
+For those rules, deletes and no-ops are ignored: removing a rule never opens anything. Two more rules, the destroy guard and the autodeploy guard (issue #92), turn "locked and manual" from a convention into a rule:
+
+| Guard | Denied when |
+|---|---|
+| Destroy | The plan deletes, or replaces (the delete half counts, in either order), a `digitalocean_vpc`, `digitalocean_project`, `digitalocean_firewall`, `twingate_remote_network`, `aws_vpc` or `aws_security_group`, or any resource whose tags contain `protected` (a DigitalOcean tag list, or an AWS tag map with that key; the tags are read from the values being destroyed). Droplets are deliberately not protected: a connector replace is a normal, reviewed event. Creates, updates and no-ops never trigger it. |
+| Autodeploy | The stack has autodeploy on. Spacelift's plan policy input documents `input.spacelift.stack.autodeploy` (a required field), so this is a real check on the stack the plan belongs to. It blocks the apply; it cannot stop someone creating a stack with autodeploy on, so the setting is also enforced where stacks are made (the stack factory, issue #96). |
+
+Each message names the resource address (or the stack) and says what a human must do. I have not seen a real plan input in Spacelift yet: the field paths follow the published policy contract, and the fixtures in `plan_test.rego` follow it too. Keep a real plan in the policy workbench (the `sample` rule) and compare the first time the policy is attached.
 
 **Plan check first.** Spacelift's documentation lists policies under **Enforce Guardrails > Policies**, and the push policy type is paid-plan only (section 9). I have not confirmed whether the plan policy type is available on the maintainer's plan; if **Create policy** offers no **Plan** type, the policy stays in the repository, tested, until the plan changes. Until it is attached, the firewall module's own tests in CI are the only check on inbound rules, and they run on the pull request, not on the plan Spacelift applies.
 
@@ -272,6 +279,8 @@ Deletes and no-ops are ignored. The destroy and autodeploy guard is a separate p
 ### A deliberate exception
 
 A deliberate inbound rule is allowed only by a reviewed code change. Add the exact resource address, as the plan shows it (for example `module.fw.digitalocean_firewall.this`), to `inbound_allowlist` in `plan.rego`, in a pull request. Every entry needs a threat-model note (`docs/wiki/Threat-Model.md`) naming the port, the source and the reason, and a review. After the merge, paste the new body into Spacelift. There is no stack label, environment variable or plan field that grants an exception, on purpose: a branch must not be able to grant its own. The list is empty today. The IPv6 checks have no exception.
+
+A deliberate destroy works the same way, with its own list: add the exact resource address of the protected resource to `destroy_allowlist` in `plan.rego`, in a pull request that names the address and the reason, and paste the new body into Spacelift after the merge. The denial message says the same. Remove the entry once the change has applied, so the next plan is guarded again. Other addresses stay denied while one is allowlisted. The autodeploy guard has no exception: turn autodeploy off on the stack.
 
 ### Reading a denial
 
