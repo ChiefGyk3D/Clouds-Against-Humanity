@@ -1,0 +1,37 @@
+{
+  "stack": "stacks/00-foundation",
+  "note": "Every resource address the stack has today, with the default settings (the values the live stack uses), and the attributes that force a replacement or hold identity. scripts/plan_noop_check.py fails a plan that changes any of them. '@unchanged' means only before == after (ids and sensitive values such as user_data). A pull request that adds a resource updates this file on purpose.",
+  "addresses": {
+    "digitalocean_project.this": {
+      "type": "digitalocean_project",
+      "force_new": {
+        "name": "clouds-against-humanity"
+      }
+    },
+    "digitalocean_tag.baseline": {
+      "type": "digitalocean_tag",
+      "force_new": {
+        "name": "cah-baseline-tor1"
+      }
+    },
+    "module.vpc.digitalocean_vpc.this": {
+      "type": "digitalocean_vpc",
+      "force_new": {
+        "name": "foundation-tor1-vpc",
+        "region": "tor1",
+        "ip_range": "10.78.0.0/24"
+      }
+    },
+    "module.baseline_firewall.digitalocean_firewall.this": {
+      "type": "digitalocean_firewall",
+      "force_new": {
+        "name": "foundation-tor1-baseline",
+        "tags": [
+          "cah-baseline-tor1"
+        ]
+      }
+    }
+  },
+  "data": [],
+  "moves": {}
+}

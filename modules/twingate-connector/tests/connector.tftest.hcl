@@ -172,3 +172,40 @@ run "the_moved_blocks_keep_the_state_addresses" {
     error_message = "Exactly the two moved blocks are expected."
   }
 }
+
+run "resource_key_names_the_droplet_and_the_connector_but_not_the_region" {
+  command = plan
+  variables {
+    resource_key = "tor1-b"
+  }
+  assert {
+    condition     = digitalocean_droplet.connector.name == "access-tor1-b-connector-a" && module.bootstrap.name == "access-tor1-b-connector-a"
+    error_message = "A resource_key must replace the region in the droplet and Twingate connector names."
+  }
+  assert {
+    condition     = digitalocean_droplet.connector.region == "tor1"
+    error_message = "The droplet must still be created in the real region."
+  }
+}
+
+run "an_empty_resource_key_keeps_the_live_name" {
+  command = plan
+  variables {
+    resource_key = ""
+  }
+  assert {
+    condition     = digitalocean_droplet.connector.name == "access-tor1-connector-a"
+    error_message = "An empty resource_key must leave the live droplet name."
+  }
+}
+
+run "a_commented_admin_key_is_accepted_through_the_connector_module" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAItest user@host"
+  }
+  assert {
+    condition     = digitalocean_droplet.connector.name == "access-tor1-connector-a"
+    error_message = "A key with a comment must plan."
+  }
+}

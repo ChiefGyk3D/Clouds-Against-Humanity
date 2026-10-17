@@ -230,10 +230,230 @@ run "reboot_time_rejects_a_missing_zero_pad" {
   expect_failures = [var.reboot_time]
 }
 
-run "admin_key_rejects_a_comment_and_a_newline" {
+# A normal OpenSSH public key carries a trailing comment. It is accepted, and it
+# is dropped before the key reaches cloud-init, so user_data is the same with or
+# without it.
+run "admin_key_accepts_a_comment_and_renders_without_it" {
   command = plan
   variables {
-    admin_ssh_public_key = "ssh-ed25519 AAAA user@host"
+    admin_ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAItest user@host.example"
+  }
+  assert {
+    condition     = yamldecode(output.user_data).users[0].ssh_authorized_keys == ["ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAItest"]
+    error_message = "The rendered key must be '<algorithm> <key>' with the comment removed."
+  }
+  assert {
+    condition     = !strcontains(output.user_data, "user@host.example")
+    error_message = "The comment must not appear anywhere in user_data."
+  }
+}
+
+# Golden: the rendered cloud-init for the live connectors, with fixed tokens,
+# measured on origin/main before resource_key and the comment-tolerant key
+# existed. A change here rebuilds the droplets (user_data is force-new), so it
+# must be a deliberate step, never a side effect.
+run "user_data_is_byte_identical_to_the_live_connector_a" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time = "04:00"
+  }
+  assert {
+    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    error_message = "user_data for connector a changed. The golden hash was taken on origin/main; a different value means droplets would be replaced."
+  }
+}
+
+run "user_data_is_byte_identical_to_the_live_connector_b" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    instance    = "b"
+    reboot_time = "05:00"
+  }
+  assert {
+    condition     = sha256(output.user_data) == "de2de6286f955100f199779f2b8a4d0a194b72f28619965c80f858061742790b"
+    error_message = "user_data for connector b changed. The golden hash was taken on origin/main; a different value means droplets would be replaced."
+  }
+}
+
+run "user_data_with_a_comment_matches_the_golden_hash" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time          = "04:00"
+    admin_ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAItest laptop-2026"
+  }
+  assert {
+    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    error_message = "A key with a comment must render the same user_data as the key without one."
+  }
+}
+
+run "admin_key_accepts_rsa_with_padding_and_ecdsa" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAAtest== me"
+  }
+  assert {
+    condition     = yamldecode(output.user_data).users[0].ssh_authorized_keys == ["ssh-rsa AAAAB3NzaC1yc2EAAAAtest=="]
+    error_message = "An rsa key with padding must be accepted and rendered without its comment."
+  }
+}
+
+run "admin_key_accepts_ecdsa" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ecdsa-sha2-nistp256 AAAAE2VjZHNhtest"
+  }
+  assert {
+    condition     = yamldecode(output.user_data).users[0].ssh_authorized_keys == ["ecdsa-sha2-nistp256 AAAAE2VjZHNhtest"]
+    error_message = "An ecdsa key must be accepted."
+  }
+}
+
+run "admin_key_rejects_a_two_word_comment" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AAAA two words"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_a_newline_after_the_comment" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AAAA user@host\n  - evil"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_a_trailing_newline" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AAAA\n"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_a_tab" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519\tAAAA"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_a_trailing_space" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AAAA "
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_unsafe_comment_characters" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AAAA user;id"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_a_quote_in_the_comment" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AAAA us\"er"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_a_hash_in_the_comment" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AAAA #x"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_a_dollar_brace_in_the_comment" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AAAA $${x}"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_a_comment_over_64_characters" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AAAA ${join("", [for i in range(65) : "a"])}"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_an_unknown_algorithm" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-dss AAAA"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_an_option_prefix" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "command=\"id\" ssh-ed25519 AAAA"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_an_empty_key" {
+  command = plan
+  variables {
+    admin_ssh_public_key = ""
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_a_key_with_no_body" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_a_non_base64_body" {
+  command = plan
+  variables {
+    admin_ssh_public_key = "ssh-ed25519 AA!A"
+  }
+  expect_failures = [var.admin_ssh_public_key]
+}
+
+run "admin_key_rejects_a_leading_space" {
+  command = plan
+  variables {
+    admin_ssh_public_key = " ssh-ed25519 AAAA"
   }
   expect_failures = [var.admin_ssh_public_key]
 }
@@ -386,4 +606,76 @@ run "connector_joins_the_callers_remote_network_and_is_named_by_instance" {
     condition     = twingate_connector.this.remote_network_id == "remote-network-test" && twingate_connector.this.name == "access-tor1-connector-b" && output.name == "access-tor1-connector-b"
     error_message = "The connector must join the caller's remote network and be named <layer>-<region>-connector-<instance>."
   }
+}
+
+# resource_key: the key in NAMES. Empty means region, so the live names stay.
+
+run "resource_key_defaults_to_the_region_in_the_name" {
+  command = plan
+  assert {
+    condition     = output.name == "access-tor1-connector-a"
+    error_message = "With no resource_key the connector is named <layer>-<region>-connector-<instance>."
+  }
+}
+
+run "resource_key_replaces_region_in_the_name_only" {
+  command = plan
+  variables {
+    resource_key = "tor1-b"
+  }
+  assert {
+    condition     = output.name == "access-tor1-b-connector-a"
+    error_message = "A resource_key must replace the region in the name."
+  }
+}
+
+run "resource_key_rejects_uppercase" {
+  command = plan
+  variables {
+    resource_key = "Tor1"
+  }
+  expect_failures = [var.resource_key]
+}
+
+run "resource_key_rejects_a_leading_digit" {
+  command = plan
+  variables {
+    resource_key = "1tor"
+  }
+  expect_failures = [var.resource_key]
+}
+
+run "resource_key_rejects_one_character" {
+  command = plan
+  variables {
+    resource_key = "a"
+  }
+  expect_failures = [var.resource_key]
+}
+
+run "resource_key_rejects_25_characters" {
+  command = plan
+  variables {
+    resource_key = "abcdefghijklmnopqrstuvwxy"
+  }
+  expect_failures = [var.resource_key]
+}
+
+run "resource_key_accepts_24_characters" {
+  command = plan
+  variables {
+    resource_key = "abcdefghijklmnopqrstuvwx"
+  }
+  assert {
+    condition     = output.name == "access-abcdefghijklmnopqrstuvwx-connector-a"
+    error_message = "A 24 character key is the longest allowed."
+  }
+}
+
+run "resource_key_rejects_an_underscore_and_a_space" {
+  command = plan
+  variables {
+    resource_key = "tor_1"
+  }
+  expect_failures = [var.resource_key]
 }

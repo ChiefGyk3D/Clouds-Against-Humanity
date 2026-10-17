@@ -1,5 +1,5 @@
 output "name" {
-  description = "Name shared by the Twingate connector and the machine: <layer>-<region>-connector-<instance>."
+  description = "Name shared by the Twingate connector and the machine: <layer>-<resource_key or region>-connector-<instance>."
   value       = twingate_connector.this.name
 }
 
@@ -14,7 +14,7 @@ output "user_data" {
     refresh_token = twingate_connector_tokens.this.refresh_token
     network       = var.twingate_network
 
-    admin_ssh_public_key = var.admin_ssh_public_key
+    admin_ssh_public_key = local.admin_key
     reboot_time          = var.reboot_time
     update_hour          = local.update_hour
     update_minute        = local.update_minute

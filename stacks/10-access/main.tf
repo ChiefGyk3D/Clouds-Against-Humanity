@@ -1,17 +1,21 @@
 locals {
+  # Names and tags use resource_key when it is set and region otherwise. The
+  # region argument of the droplets and modules stays var.region.
+  resource_key = var.resource_key != "" ? var.resource_key : var.region
+
   cost        = jsondecode(file("${path.module}/cost.json"))
   connector_a = one([for r in local.cost.resources : r if r.name == "connector-a"])
   connector_b = one([for r in local.cost.resources : r if r.name == "connector-b"])
 }
 
 resource "digitalocean_tag" "connector" {
-  name = "cah-connector-${var.region}"
+  name = "cah-connector-${local.resource_key}"
 }
 
 # One site and one SSH key for every connector, so the connectors are redundant
 # members of the same Twingate remote network.
 resource "twingate_remote_network" "this" {
-  name     = "access-${var.region}"
+  name     = "access-${local.resource_key}"
   location = "OTHER"
 }
 
@@ -25,6 +29,7 @@ module "connector_a" {
   source              = "../../modules/twingate-connector"
   layer               = "access"
   region              = var.region
+  resource_key        = var.resource_key
   vpc_id              = var.vpc_id
   tags                = [var.baseline_tag, digitalocean_tag.connector.name]
   size                = local.connector_a.size
@@ -34,8 +39,9 @@ module "connector_a" {
   twingate_network    = var.twingate_network
 
   admin_ssh_public_key = var.admin_ssh_public_key
-  # Eastern time, staggered so the two connectors never reboot together.
-  reboot_time = "04:00"
+  # Eastern time, staggered so the two connectors never reboot together
+  # (reboot_times is validated to hold two different times).
+  reboot_time = var.reboot_times["a"]
 
   # The outbound rules must exist before the droplet boots and starts to install.
   depends_on = [module.connector_firewall]
@@ -45,6 +51,7 @@ module "connector_b" {
   source              = "../../modules/twingate-connector"
   layer               = "access"
   region              = var.region
+  resource_key        = var.resource_key
   vpc_id              = var.vpc_id
   tags                = [var.baseline_tag, digitalocean_tag.connector.name]
   size                = local.connector_b.size
@@ -54,8 +61,7 @@ module "connector_b" {
   twingate_network    = var.twingate_network
 
   admin_ssh_public_key = var.admin_ssh_public_key
-  # Eastern time, staggered so the two connectors never reboot together.
-  reboot_time = "05:00"
+  reboot_time          = var.reboot_times["b"]
 
   depends_on = [module.connector_firewall]
 }
@@ -75,11 +81,12 @@ module "connector_b" {
 # requires outbound UDP to any port for peer-to-peer connections, so UDP is
 # open outbound only; inbound stays deny-all. Record the check date in the stage guide.
 module "connector_firewall" {
-  source  = "../../modules/firewall"
-  layer   = "access"
-  region  = var.region
-  purpose = "connector"
-  tag     = digitalocean_tag.connector.name
+  source       = "../../modules/firewall"
+  layer        = "access"
+  region       = var.region
+  resource_key = var.resource_key
+  purpose      = "connector"
+  tag          = digitalocean_tag.connector.name
   inbound_from_tag_rules = [
     { protocol = "tcp", port_range = "22" },
   ]
@@ -98,12 +105,12 @@ resource "digitalocean_project_resources" "access" {
 }
 
 resource "twingate_group" "admins" {
-  name     = "cah-${var.region}-admins"
+  name     = "cah-${local.resource_key}-admins"
   user_ids = var.admin_user_ids
 }
 
 resource "twingate_resource" "connector_a_ssh" {
-  name              = "cah-${var.region}-connector-a-ssh"
+  name              = "cah-${local.resource_key}-connector-a-ssh"
   address           = module.connector_a.private_ip
   remote_network_id = twingate_remote_network.this.id
 
@@ -124,7 +131,7 @@ resource "twingate_resource" "connector_a_ssh" {
 }
 
 resource "twingate_resource" "connector_b_ssh" {
-  name              = "cah-${var.region}-connector-b-ssh"
+  name              = "cah-${local.resource_key}-connector-b-ssh"
   address           = module.connector_b.private_ip
   remote_network_id = twingate_remote_network.this.id
 

@@ -7,6 +7,9 @@ locals {
     { protocol = "udp", port_range = "123" },
   ]
   outbound = concat(local.default_outbound, var.extra_outbound_rules)
+
+  # Names use resource_key when it is set and region otherwise.
+  name_key = var.resource_key != "" ? var.resource_key : var.region
 }
 
 # Inbound is deny-all: DigitalOcean denies all inbound traffic that no rule
@@ -27,7 +30,7 @@ locals {
 # addresses, so there is no address list to pin.
 #trivy:ignore:AVD-DIG-0003
 resource "digitalocean_firewall" "this" {
-  name = "${var.layer}-${var.region}-${var.purpose}"
+  name = "${var.layer}-${local.name_key}-${var.purpose}"
   tags = [var.tag]
 
   dynamic "inbound_rule" {

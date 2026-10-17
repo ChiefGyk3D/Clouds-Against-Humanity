@@ -6,31 +6,29 @@
       {
         "name": "region",
         "type": "string",
-        "description": "DigitalOcean region slug.",
+        "description": "DigitalOcean region slug. Names are built from resource_key, which defaults to this. Check the sizes your account may use in the region (GET /v2/sizes) before changing it.",
         "required": false,
         "default": "tor1",
-        "validation": "none today (planned: pattern check)",
+        "validation": "^[a-z]{3}[0-9]$ (three lowercase letters and a digit); the pattern cannot know which sizes the account may use",
         "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
         "example": "tor1",
         "sensitivity": "public",
         "sensitive_in_code": false,
-        "status": "exists",
-        "planned_change": "Regex validation for the region slug; the description should say to check the account's available sizes first."
+        "status": "exists"
       },
       {
         "name": "vpc_ip_range",
         "type": "string",
-        "description": "Private CIDR. Must not overlap any homelab range (confirmed in the stage 0 guide before apply).",
+        "description": "Private CIDR for the VPC. Must be the network address and must not overlap any range in reserved_ranges.",
         "required": false,
         "default": "10.78.0.0/24",
-        "validation": "none in the stack; modules/vpc checks it is a private IPv4 CIDR (10/8, 172.16/12, 192.168/16)",
+        "validation": "private IPv4 CIDR (10/8, 172.16/12, 192.168/16, also checked in modules/vpc); the network address (10.78.0.0/24, not 10.78.0.5/24); prefix length between /16 and /28; no overlap with reserved_ranges (a precondition on the project, because OpenTofu 1.8 cannot compare two variables in a validation)",
         "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
         "example": "10.99.0.0/24",
         "sensitivity": "private",
         "sensitive_in_code": false,
         "status": "exists",
-        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2",
-        "planned_change": "Prefix length between /16 and /28, and no overlap with reserved_ranges."
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
       },
       {
         "name": "project_name",
@@ -48,21 +46,21 @@
       {
         "name": "reserved_ranges",
         "type": "list(string)",
-        "description": "Ranges you connect to (home networks); vpc_ip_range must not overlap them.",
+        "description": "Private CIDRs the VPC range must not overlap (your homelab, other VPCs). Optional; they identify your network, so they are never committed. Prompts the human check, does not replace it.",
         "required": false,
         "default": [],
-        "validation": "each entry a valid CIDR; vpc_ip_range must not overlap any entry",
-        "set_where": "Doppler or private tfvars (identifies the owner's network)",
+        "validation": "each entry an IPv4 CIDR; vpc_ip_range must not overlap any entry (compared by first and last address)",
+        "set_where": "Spacelift stack environment (TF_VAR_reserved_ranges, a JSON list) or a private tfvars today; Doppler only once a hook line in .spacelift/config.yml requests it (the foundation hooks request only DIGITALOCEAN_TOKEN)",
         "example": "[\"10.50.0.0/16\", \"10.60.0.0/16\"]",
         "sensitivity": "private",
         "sensitive_in_code": true,
-        "status": "planned",
+        "status": "exists",
         "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
       },
       {
         "name": "resource_key",
         "type": "string",
-        "description": "Key used in resource names instead of region; empty means region.",
+        "description": "Key used in the names and tags of cloud and Twingate objects instead of region; empty means region, so every name is identical to a stack that never set it. IMMUTABLE for the life of a stack: changing it changes names, causes widespread plan changes and may replace resources, including through tags or user_data. Never derived from site_name.",
         "required": false,
         "default": "",
         "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$; immutable on a live stack",
@@ -70,20 +68,20 @@
         "example": "tor1",
         "sensitivity": "public",
         "sensitive_in_code": false,
-        "status": "planned"
+        "status": "exists"
       },
       {
         "name": "site_name",
         "type": "string",
-        "description": "Telemetry label for the site; empty means site-<region>. In no resource name or tag.",
+        "description": "Telemetry label for the site (metrics and log labels in a later stage); empty means site-<region>. In no resource name, tag or output; changing it replaces nothing.",
         "required": false,
         "default": "",
-        "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$; unique across sites",
+        "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$; unique across sites (a rule for the person, one stack cannot test it)",
         "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
         "example": "site-tor1",
         "sensitivity": "public",
         "sensitive_in_code": false,
-        "status": "planned"
+        "status": "exists"
       },
       {
         "name": "provider_name",
@@ -103,9 +101,9 @@
       {
         "name": "region",
         "type": "string",
-        "description": "DigitalOcean region slug, the same value as stack 00 (the code has no description for it).",
+        "description": "DigitalOcean region slug, from the foundation stack's region output. Names are built from resource_key, which defaults to this.",
         "required": true,
-        "validation": "none today",
+        "validation": "^[a-z]{3}[0-9]$ (three lowercase letters and a digit)",
         "set_where": "Spacelift stack dependency, mapped to a TF_VAR_* environment variable (output of stack 00)",
         "example": "tor1",
         "sensitivity": "public",
@@ -164,9 +162,9 @@
       {
         "name": "admin_ssh_public_key",
         "type": "string",
-        "description": "Public SSH key for the cah-admin user on the connectors (the stack has no description; modules/twingate-bootstrap requires type and key with no comment).",
+        "description": "Public SSH key for the cah-admin user on the connectors: '<algorithm> <key>' with an optional trailing comment of one word. The comment is dropped before cloud-init, so user_data does not depend on it.",
         "required": true,
-        "validation": "none in the stack (the bootstrap module requires '<ssh-ed25519|ssh-rsa> <key>' with no comment); planned: accept a trailing comment",
+        "validation": "^(ssh-ed25519|ssh-rsa|ecdsa-sha2-nistp(256|384|521)) [A-Za-z0-9+/]+=*( [A-Za-z0-9@._+:=/-]{1,64})?$ (one optional comment word of safe characters; no line break or other whitespace); the same check in modules/twingate-bootstrap",
         "set_where": "Doppler (config prd), exported as TF_VAR_* by the Spacelift hook (ADMIN_SSH_PUBLIC_KEY)",
         "example": "ssh-ed25519 AAAAEXAMPLEONLYNOTAREALKEY",
         "sensitivity": "private",
@@ -203,7 +201,7 @@
       {
         "name": "resource_key",
         "type": "string",
-        "description": "Key used in resource names instead of region; empty means region.",
+        "description": "Key used in the names and tags of cloud and Twingate objects instead of region; empty means region, so every name is identical to a stack that never set it. IMMUTABLE for the life of a stack: changing it changes names, causes widespread plan changes and may replace resources, including through tags or user_data. Never derived from site_name.",
         "required": false,
         "default": "",
         "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$; immutable on a live stack",
@@ -211,12 +209,12 @@
         "example": "tor1",
         "sensitivity": "public",
         "sensitive_in_code": false,
-        "status": "planned"
+        "status": "exists"
       },
       {
         "name": "site_name",
         "type": "string",
-        "description": "Telemetry label for the site; empty means site-<region>.",
+        "description": "Telemetry label for the site (metrics and log labels in a later stage); empty means site-<region>. In no resource name, tag or output; changing it replaces nothing.",
         "required": false,
         "default": "",
         "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$",
@@ -224,7 +222,7 @@
         "example": "site-tor1",
         "sensitivity": "public",
         "sensitive_in_code": false,
-        "status": "planned"
+        "status": "exists"
       },
       {
         "name": "provider_name",
@@ -242,15 +240,18 @@
       {
         "name": "reboot_times",
         "type": "map(string)",
-        "description": "Reboot time per connector (HH:MM, droplet local time). Replaces two literals in main.tf.",
+        "description": "Reboot time per connector (HH:MM, America/New_York, the droplet's local time). Keys a and b. The defaults are the times the live connectors use.",
         "required": false,
-        "default": "{a = \"04:00\", b = \"05:00\"}",
-        "validation": "HH:MM 24-hour; the two differ by at least 30 minutes",
+        "default": {
+          "a": "04:00",
+          "b": "05:00"
+        },
+        "validation": "exactly the keys a and b; each HH:MM in 24-hour time; the two reboot times at least 60 minutes apart, measured around the clock across midnight, which also keeps each connector's weekly update (reboot + 30 minutes) at least 30 minutes from the other's reboot",
         "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
-        "example": "{a = \"04:00\", b = \"05:00\"}",
+        "example": "{ a = \"04:00\", b = \"05:00\" }",
         "sensitivity": "public",
         "sensitive_in_code": false,
-        "status": "planned"
+        "status": "exists"
       },
       {
         "name": "timezone",
@@ -685,6 +686,19 @@
         "sensitive_in_code": false,
         "status": "exists",
         "readers": "same as the calling stack's variable of the same name"
+      },
+      {
+        "name": "resource_key",
+        "type": "string",
+        "description": "Key used in resource names in place of region; empty means region. Set by the calling stack from its resource_key.",
+        "required": false,
+        "default": "",
+        "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
       }
     ],
     "modules/firewall": [
@@ -774,6 +788,19 @@
         "sensitivity": "public",
         "sensitive_in_code": false,
         "status": "exists"
+      },
+      {
+        "name": "resource_key",
+        "type": "string",
+        "description": "Key used in resource names in place of region; empty means region. Set by the calling stack from its resource_key.",
+        "required": false,
+        "default": "",
+        "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
       }
     ],
     "modules/twingate-bootstrap": [
@@ -841,9 +868,9 @@
       {
         "name": "admin_ssh_public_key",
         "type": "string",
-        "description": "Public key (type and key, no comment) for the cah-admin user.",
+        "description": "Public key for the cah-admin user; an optional trailing comment is dropped before cloud-init.",
         "required": true,
-        "validation": "^ssh-(ed25519|rsa) [A-Za-z0-9+/=]+$ (no comment field)",
+        "validation": "^(ssh-ed25519|ssh-rsa|ecdsa-sha2-nistp(256|384|521)) [A-Za-z0-9+/]+=*( [A-Za-z0-9@._+:=/-]{1,64})?$",
         "set_where": "set by the calling stack (not a user setting)",
         "example": "ssh-ed25519 AAAAEXAMPLEONLYNOTAREALKEY",
         "sensitivity": "private",
@@ -859,6 +886,19 @@
         "validation": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
         "set_where": "set by the calling stack (not a user setting)",
         "example": "04:00",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "resource_key",
+        "type": "string",
+        "description": "Key used in resource names in place of region; empty means region. Set by the calling stack from its resource_key.",
+        "required": false,
+        "default": "",
+        "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "tor1",
         "sensitivity": "public",
         "sensitive_in_code": false,
         "status": "exists"
@@ -995,6 +1035,19 @@
         "validation": "none in this module (the bootstrap module checks it)",
         "set_where": "set by the calling stack (not a user setting)",
         "example": "04:00",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "resource_key",
+        "type": "string",
+        "description": "Key used in resource names in place of region; empty means region. Set by the calling stack from its resource_key.",
+        "required": false,
+        "default": "",
+        "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "tor1",
         "sensitivity": "public",
         "sensitive_in_code": false,
         "status": "exists"
@@ -1586,32 +1639,6 @@
     }
   ],
   "hardcoded": [
-    {
-      "name": "reboot time, connector a",
-      "file": "stacks/10-access/main.tf",
-      "literal": "reboot_time = \"04:00\"",
-      "current": "04:00",
-      "stack": "stacks/10-access",
-      "validation": "the bootstrap module checks HH:MM",
-      "set_where": "hard-coded in stacks/10-access/main.tf",
-      "example": "04:00",
-      "sensitivity": "public",
-      "converted_by": "reboot_times (step 2)",
-      "status": "exists"
-    },
-    {
-      "name": "reboot time, connector b",
-      "file": "stacks/10-access/main.tf",
-      "literal": "reboot_time = \"05:00\"",
-      "current": "05:00",
-      "stack": "stacks/10-access",
-      "validation": "the bootstrap module checks HH:MM",
-      "set_where": "hard-coded in stacks/10-access/main.tf",
-      "example": "05:00",
-      "sensitivity": "public",
-      "converted_by": "reboot_times (step 2)",
-      "status": "exists"
-    },
     {
       "name": "droplet timezone",
       "file": "modules/twingate-bootstrap/cloud-init.yaml.tftpl",

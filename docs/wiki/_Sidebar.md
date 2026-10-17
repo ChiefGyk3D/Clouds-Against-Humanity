@@ -34,6 +34,7 @@
 - [Labs: break it on purpose](Labs-Break-It-on-Purpose.md)
 - [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md)
 - [Settings reference](Settings-Reference.md)
+- [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md)
 
 </details>
 

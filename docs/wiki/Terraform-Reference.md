@@ -174,7 +174,7 @@ One DigitalOcean connector: the droplet that runs it. The Twingate connector, it
 | `ssh_key_fingerprint` | string | required | Fingerprint of the admin SSH key already on the DigitalOcean account. |
 | `instance` | string | required | One letter or digit (`a`, `b`) that tells siblings apart. **Validation (in the bootstrap module):** exactly one lowercase letter or digit. |
 | `twingate_network` | string, **sensitive** | required | The bare network subdomain (`acme` for `acme.twingate.com`). Sensitive because the tenant name identifies the tenant. **Validation:** lowercase letters, digits and hyphens only, so a pasted URL or a quoted value is rejected. |
-| `admin_ssh_public_key` | string | required | The public key written for the `cah-admin` user. **Validation:** `ssh-ed25519` or `ssh-rsa` plus the key, no comment field. |
+| `admin_ssh_public_key` | string | required | The public key written for the `cah-admin` user. **Validation:** `ssh-ed25519`, `ssh-rsa` or `ecdsa-sha2-nistp256/384/521`, then the key, then at most one comment word of safe characters. The comment is dropped before the key reaches cloud-init. |
 | `reboot_time` | string | required | `HH:MM` Eastern, when security updates may reboot the droplet. **Validation:** 24-hour time. Each connector gets a different time so they never reboot together. |
 
 ### Resources
@@ -334,7 +334,7 @@ Both are empty blocks. Credentials come from `DIGITALOCEAN_TOKEN`, `TWINGATE_API
 | `digitalocean_tag.connector` | Tag `cah-connector-<region>`. The connector firewall attaches to this one; it is how connectors are allowed to talk to each other. |
 | `twingate_remote_network.this` | The Twingate site `access-<region>`. Both connectors are redundant members of it. `location = "OTHER"` is a required field that only labels where the network is. |
 | `data.digitalocean_ssh_key.admin` | **Looks up** the admin key by name instead of creating it. DigitalOcean refuses to register the same key twice (HTTP 422), and the key already exists, so the stack reads its fingerprint. |
-| `module.connector_a`, `module.connector_b` | Two calls of the same module with different `instance` and `reboot_time` (04:00 and 05:00 Eastern). Written out twice rather than with `for_each` on purpose: a learner can read each connector without a loop. `depends_on = [module.connector_firewall]` makes the firewall exist *before* the droplet boots, because the install needs those outbound rules. |
+| `module.connector_a`, `module.connector_b` | Two calls of the same module with different `instance` and `reboot_time` (`reboot_times["a"]` and `reboot_times["b"]`, defaulting to 04:00 and 05:00 Eastern; the two must differ). Written out twice rather than with `for_each` on purpose: a learner can read each connector without a loop. `depends_on = [module.connector_firewall]` makes the firewall exist *before* the droplet boots, because the install needs those outbound rules. |
 | `module.connector_firewall` | Calls `modules/firewall` with purpose `connector`. Inbound: TCP 22 from the connector tag. Outbound to tag: TCP 22. Extra outbound: TCP `30000-31000` and all UDP, which Twingate needs for its relay and peer-to-peer paths. Inbound from the internet stays zero. |
 | `digitalocean_project_resources.access` | Puts both droplets in the project (`resources` takes their URNs). |
 | `twingate_group.admins` | The group `cah-<region>-admins`, filled from `admin_user_ids`. Access is granted to a group, never to a single person. |

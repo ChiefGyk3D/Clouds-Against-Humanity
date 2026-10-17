@@ -5,6 +5,7 @@ module "bootstrap" {
 
   layer                = var.layer
   region               = var.region
+  resource_key         = var.resource_key
   instance             = var.instance
   remote_network_id    = var.remote_network_id
   twingate_network     = var.twingate_network
