@@ -489,63 +489,23 @@
         "status": "exists"
       }
     ],
-    "stacks/20-telemetry (not built yet)": [
+    "stacks/20-telemetry": [
       {
-        "name": "logging_servers",
-        "type": "list(object({name=string,address=string,port=number,protocol=string,purpose=string}))",
-        "description": "Home logging endpoints reached only through Twingate; one Twingate resource per element.",
-        "required": false,
-        "default": [],
-        "validation": "name unique and ^[a-z][a-z0-9-]*$; address an RFC 1918 or RFC 5737 IPv4 literal or a hostname with no scheme; port 1-65535; protocol tcp or udp; purpose one of wazuh-agent, wazuh-enroll, syslog, metrics-remote-write",
-        "set_where": "Per-site Doppler config as JSON (private, non-secret)",
-        "example": "[{name=\"siem-home-agent\", address=\"192.0.2.10\", port=1514, protocol=\"tcp\", purpose=\"wazuh-agent\"}]",
-        "sensitivity": "private",
-        "sensitive_in_code": true,
-        "status": "planned",
-        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
-      },
-      {
-        "name": "logging_enabled",
-        "type": "bool",
-        "description": "Gate: nothing from stage 2 exists until true.",
-        "required": false,
-        "default": false,
-        "validation": "none",
-        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
-        "example": "true",
-        "sensitivity": "public",
-        "sensitive_in_code": false,
-        "status": "planned"
-      },
-      {
-        "name": "metrics_enabled",
-        "type": "bool",
-        "description": "Create the metrics resources.",
-        "required": false,
-        "default": false,
-        "validation": "none",
-        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
-        "example": "true",
-        "sensitivity": "public",
-        "sensitive_in_code": false,
-        "status": "planned"
-      },
-      {
-        "name": "scrape_allowlist",
-        "type": "list(object({name=string,host_role=string,port=number}))",
-        "description": "Which cloud endpoints become Twingate resources for scraping.",
+        "name": "region",
+        "type": "string",
+        "description": "DigitalOcean region slug of the site this stack serves, from the foundation stack's region output. Names are built from resource_key, which defaults to this.",
         "required": true,
-        "validation": "each name unique; ports from the metrics port settings",
-        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
-        "example": "[{name=\"node\", host_role=\"connector\", port=9100}]",
+        "validation": "^[a-z]{3}[0-9]$ (three lowercase letters and a digit)",
+        "set_where": "Spacelift stack environment (foundation output mapped to TF_VAR_region) or tfvars",
+        "example": "tor1",
         "sensitivity": "public",
         "sensitive_in_code": false,
-        "status": "planned"
+        "status": "exists"
       },
       {
         "name": "resource_key",
         "type": "string",
-        "description": "Key used in resource names instead of region; empty means region.",
+        "description": "Key used in the names of the Twingate objects this stack creates (telemetry-<key>-logging); empty means region. IMMUTABLE for the life of a stack: changing it renames, and so replaces, every object. Never derived from site_name.",
         "required": false,
         "default": "",
         "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$; immutable on a live stack",
@@ -553,25 +513,146 @@
         "example": "tor1",
         "sensitivity": "public",
         "sensitive_in_code": false,
-        "status": "planned"
+        "status": "exists"
       },
       {
         "name": "site_name",
         "type": "string",
-        "description": "Telemetry label for the site.",
+        "description": "Telemetry label only (the site field of scrape_targets and site_identity); empty means site-<region>. In no resource name or tag; changing it replaces nothing.",
         "required": false,
         "default": "",
-        "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$",
+        "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$; unique across sites (a rule for the person, one stack cannot test it)",
         "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
         "example": "site-tor1",
         "sensitivity": "public",
         "sensitive_in_code": false,
-        "status": "planned"
+        "status": "exists"
+      },
+      {
+        "name": "logging_enabled",
+        "type": "bool",
+        "description": "Create the logging Twingate service and one resource per logging_servers element. False creates nothing. Verify the Twingate plan allows the services first (UNVERIFIED).",
+        "required": false,
+        "default": false,
+        "validation": "none",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "true",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "metrics_enabled",
+        "type": "bool",
+        "description": "Create the scrape Twingate service and one resource per scrape_allowlist entry per connector. False creates nothing.",
+        "required": false,
+        "default": false,
+        "validation": "none",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "true",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "logging_servers",
+        "type": "list(object({name=string,address=string,port=number,protocol=string,purpose=string}))",
+        "description": "Home logging endpoints reached only through Twingate; one Twingate resource per element, named from name and resource_key, never from the address.",
+        "required": false,
+        "default": [],
+        "validation": "name unique and ^[a-z][a-z0-9-]{0,40}$ (so never an address); address an RFC 1918 or RFC 5737 IPv4 literal or a host name with no scheme (a public IPv4 literal is refused); port 1-65535; protocol tcp or udp; purpose one of wazuh-agent, wazuh-enroll, syslog, metrics-remote-write",
+        "set_where": "Per-site Doppler config as JSON (private, non-secret), exported as TF_VAR_logging_servers",
+        "example": "[{name=\"siem-home-agent\", address=\"192.0.2.10\", port=1514, protocol=\"tcp\", purpose=\"wazuh-agent\"}]",
+        "sensitivity": "private",
+        "sensitive_in_code": true,
+        "status": "exists",
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
+      },
+      {
+        "name": "home_remote_network_id",
+        "type": "string",
+        "description": "Id of the Twingate remote network that holds the home logging connector, where the logging resources are created. Required when logging_enabled (a precondition).",
+        "required": false,
+        "default": "",
+        "validation": "none (a precondition on the logging service checks it when logging_enabled)",
+        "set_where": "Per-site Doppler config or Spacelift stack environment (TF_VAR_home_remote_network_id)",
+        "example": "example-home-remote-network-id",
+        "sensitivity": "private",
+        "sensitive_in_code": true,
+        "status": "exists",
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
+      },
+      {
+        "name": "cloud_remote_network_id",
+        "type": "string",
+        "description": "Id of this site's cloud Twingate remote network (access-<resource_key>, made by stack 10), where the scrape resources are created. Required when metrics_enabled (a precondition). Stack 10 does not output it today.",
+        "required": false,
+        "default": "",
+        "validation": "none (a precondition on the scrape service checks it when metrics_enabled)",
+        "set_where": "Spacelift stack environment (TF_VAR_cloud_remote_network_id)",
+        "example": "example-cloud-remote-network-id",
+        "sensitivity": "private",
+        "sensitive_in_code": true,
+        "status": "exists",
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
+      },
+      {
+        "name": "node_exporter_port",
+        "type": "number",
+        "description": "TCP port the node exporter listens on, on each connector.",
+        "required": false,
+        "default": 9100,
+        "validation": "whole number from 1024 to 65535",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "9100",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "metrics_port_connector",
+        "type": "number",
+        "description": "TCP port of the Twingate connector's own metrics endpoint. No default: the bind port and address are UNVERIFIED. Required when metrics_enabled (a precondition).",
+        "required": false,
+        "default": null,
+        "validation": "unset, or a whole number from 1024 to 65535; when metrics_enabled it must be set and differ from node_exporter_port",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "9101 (illustrative)",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "scrape_allowlist",
+        "type": "list(object({name=string,host_role=string,port=number}))",
+        "description": "Which connector endpoints become Twingate resources for scraping, per connector. Required non-empty when metrics_enabled.",
+        "required": false,
+        "default": [],
+        "validation": "name unique and ^[a-z][a-z0-9-]{0,30}$; host_role connector; port 1024-65535; when metrics_enabled each port must be node_exporter_port or metrics_port_connector",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "[{name=\"node\", host_role=\"connector\", port=9100}]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "connector_private_ips",
+        "type": "map(string)",
+        "description": "Private addresses of the site's connectors, keyed a and b: the access stack's connector_private_ips output. Required when metrics_enabled. Used for the scrape resources and the sensitive scrape_targets output only.",
+        "required": false,
+        "default": {},
+        "validation": "keys only a and b; values private IPv4 addresses (10/8, 172.16/12, 192.168/16)",
+        "set_where": "Spacelift stack environment (TF_VAR_connector_private_ips, a JSON map) or by hand; a map through a stack dependency is UNVERIFIED",
+        "example": "{a=\"10.99.0.5\", b=\"10.99.0.6\"}",
+        "sensitivity": "private",
+        "sensitive_in_code": true,
+        "status": "exists",
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
       },
       {
         "name": "wazuh_agent_group",
         "type": "string",
-        "description": "Wazuh agent group for the cloud hosts.",
+        "description": "Wazuh agent group for this site's cloud hosts (telemetry label; read by the host bootstrap in a later step).",
         "required": false,
         "default": "cloud",
         "validation": "^[a-zA-Z0-9_.-]+$",
@@ -579,12 +660,12 @@
         "example": "cloud-site-tor1",
         "sensitivity": "public",
         "sensitive_in_code": false,
-        "status": "planned"
+        "status": "exists"
       },
       {
         "name": "labels",
         "type": "map(string)",
-        "description": "Telemetry labels.",
+        "description": "Extra telemetry labels, kept few to bound metric cardinality.",
         "required": false,
         "default": {},
         "validation": "keys limited to env, role, owner_team; values at most 32 characters",
@@ -592,7 +673,7 @@
         "example": "{env = \"lab\"}",
         "sensitivity": "public",
         "sensitive_in_code": false,
-        "status": "planned"
+        "status": "exists"
       }
     ],
     "planned/optional-noc-soc (not built yet)": [
@@ -1577,7 +1658,8 @@
       "class": "secret",
       "store": "Doppler config prd",
       "used_by": [
-        "stacks/10-access"
+        "stacks/10-access",
+        "stacks/20-telemetry"
       ],
       "delivered_as": "TWINGATE_API_TOKEN",
       "expiry": "90 days",
@@ -1590,7 +1672,8 @@
       "class": "private",
       "store": "Doppler config prd",
       "used_by": [
-        "stacks/10-access"
+        "stacks/10-access",
+        "stacks/20-telemetry"
       ],
       "delivered_as": "TWINGATE_NETWORK and TF_VAR_twingate_network",
       "expiry": "none",

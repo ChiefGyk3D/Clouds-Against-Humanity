@@ -182,3 +182,5 @@ The stages end, but the learning does not. Each of these is a project:
 - Write the three questions you would ask of your N1 Grafana on a quiet Sunday morning, and the panel that would answer each.
 
 Next: the [Roadmap](Roadmap.md), which says what is built and what is planned. Back to the [Reading order](Reading-Order.md).
+
+Build status: the first piece, the telemetry stack skeleton with every flag off, is described in the [stage 2 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/02-telemetry.md). Nothing in it is applied.

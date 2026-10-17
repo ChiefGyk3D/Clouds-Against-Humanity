@@ -11,6 +11,8 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+# The one file where the telemetry stack reads site_name (see the tests below).
+TELEMETRY_SITE_FILE = "stacks/20-telemetry/site.tf"
 
 
 def source_files():
@@ -18,6 +20,10 @@ def source_files():
     for top in ("stacks", "modules"):
         for path in sorted((ROOT / top).rglob("*.tf")):
             if ".terraform" in path.parts or path.name == "variables.tf":
+                continue
+            # stack 20 reads site_name in exactly one file; its own test below
+            # keeps that file honest, so the general rules skip it.
+            if path.relative_to(ROOT).as_posix() == TELEMETRY_SITE_FILE:
                 continue
             # resource_key is DigitalOcean-only for now: stacks/<NN-name> and
             # modules/<role>. The AWS code (stacks/aws/*, modules/aws/*) still
@@ -57,7 +63,11 @@ def test_site_name_is_only_declared_in_the_stacks():
         for p in (ROOT / "stacks").glob("*/variables.tf")
         if 'variable "site_name"' in p.read_text()
     ]
-    assert sorted(declared) == ["stacks/00-foundation", "stacks/10-access"]
+    assert sorted(declared) == [
+        "stacks/00-foundation",
+        "stacks/10-access",
+        "stacks/20-telemetry",
+    ]
     for path in (ROOT / "modules").glob("*/variables.tf"):
         assert 'variable "site_name"' not in path.read_text(), path
 
@@ -99,3 +109,22 @@ def test_resource_key_is_passed_down_next_to_every_region():
                 assert re.search(r"(?m)^\s*resource_key\s*=\s*var\.resource_key\s*$", block), (
                     f"{path.relative_to(ROOT)}: a module gets region but not resource_key"
                 )
+
+
+def test_telemetry_reads_site_name_in_one_file_and_only_for_labels():
+    # Stack 20 is the telemetry consumer of site_name. It may be read in site.tf
+    # (into local.site) and local.site may feed outputs.tf, nothing else.
+    stack = ROOT / "stacks" / "20-telemetry"
+    site = without_comments((ROOT / TELEMETRY_SITE_FILE).read_text())
+    assert "var.site_name" in site
+    for path in sorted(stack.glob("*.tf")):
+        if path.name in ("variables.tf", "site.tf"):
+            continue
+        text = without_comments(path.read_text())
+        assert "site_name" not in text, f"{path.name} reads site_name"
+        if path.name != "outputs.tf":
+            assert "local.site" not in text, f"{path.name} uses the site label"
+    # No name, tag or moved target is built from the label.
+    main = without_comments((stack / "main.tf").read_text())
+    assert not re.search(r"(?m)^\s*(name|tags?)\s*=.*(\bsite\b|site_name)", main)
+    assert "moved" not in main

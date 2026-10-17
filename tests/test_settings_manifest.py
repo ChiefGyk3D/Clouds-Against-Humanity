@@ -323,14 +323,14 @@ def test_coverage_bites_when_a_variable_is_removed(tree):
 
 
 def test_coverage_bites_on_a_new_stack_without_a_section(tree):
-    new = tree / "stacks" / "20-telemetry"
+    new = tree / "stacks" / "30-example"
     new.mkdir()
     (new / "variables.tf").write_text(
         'variable "logging_enabled" {\n  type = bool\n}\n'
     )
     problems = coverage_problems(tree, load())
     assert any(
-        "stacks/20-telemetry" in p and "no manifest section" in p for p in problems
+        "stacks/30-example" in p and "no manifest section" in p for p in problems
     ), problems
 
 
@@ -592,7 +592,7 @@ def test_the_example_check_bites():
 def test_the_planned_logging_example_uses_a_documentation_range():
     entry = next(
         e
-        for e in load()["variables"]["stacks/20-telemetry (not built yet)"]
+        for e in load()["variables"]["stacks/20-telemetry"]
         if e["name"] == "logging_servers"
     )
     ips = IPV4_RE.findall(entry["example"])

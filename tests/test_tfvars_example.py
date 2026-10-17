@@ -33,7 +33,7 @@ import gen_example_tests
 import hcl_variables
 import identifier_check
 
-STACKS = ("stacks/00-foundation", "stacks/10-access")
+STACKS = ("stacks/00-foundation", "stacks/10-access", "stacks/20-telemetry")
 EXAMPLE = "terraform.tfvars.example"
 
 DOC_NETS = [
@@ -72,6 +72,11 @@ NEED_NOT_SAY_EXAMPLE = {
     "resource_key",
     "site_name",
     "timezone",
+    # Stack 20: public configuration, or private values whose example is a
+    # documentation-range address (the address check above still applies).
+    "logging_servers",
+    "scrape_allowlist",
+    "wazuh_agent_group",
 }
 
 
@@ -94,6 +99,8 @@ def type_ok(type_text: str, value) -> bool:
         return isinstance(value, list) and all(isinstance(v, str) for v in value)
     if type_text == "map(string)":
         return isinstance(value, dict) and all(isinstance(v, str) for v in value.values())
+    if type_text.startswith("list(object("):
+        return isinstance(value, list) and all(isinstance(v, dict) for v in value)
     raise AssertionError(f"the example check does not know the type {type_text}")
 
 
