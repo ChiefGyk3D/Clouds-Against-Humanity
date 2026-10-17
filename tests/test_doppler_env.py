@@ -14,7 +14,9 @@ from pathlib import Path
 
 import pytest
 
-SCRIPT = Path(__file__).resolve().parent.parent / "scripts" / "spacelift" / "doppler-env.sh"
+SCRIPT = (
+    Path(__file__).resolve().parent.parent / "scripts" / "spacelift" / "doppler-env.sh"
+)
 TOOLS = ["uname", "sed", "mkdir", "rm", "sha256sum", "tar", "cat", "env", "printf"]
 SECRET = "dp_test_SECRET_VALUE_123"
 
@@ -105,19 +107,25 @@ def test_other_run_types_get_nothing(sandbox, run_type):
 
 
 def test_destroy_run_on_main_is_allowed(sandbox):
-    result = run(sandbox, "DIGITALOCEAN_TOKEN", {"TF_VAR_spacelift_run_type": "DESTROY"})
+    result = run(
+        sandbox, "DIGITALOCEAN_TOKEN", {"TF_VAR_spacelift_run_type": "DESTROY"}
+    )
     assert f"TOKEN={SECRET}" in result.stdout
 
 
 @pytest.mark.parametrize("branch", ["feature/x", "mainline", ""])
 def test_non_main_branch_gets_nothing(sandbox, branch):
-    result = run(sandbox, "DIGITALOCEAN_TOKEN", {"TF_VAR_spacelift_commit_branch": branch})
+    result = run(
+        sandbox, "DIGITALOCEAN_TOKEN", {"TF_VAR_spacelift_commit_branch": branch}
+    )
     assert "rc=0" in result.stdout
     assert "TOKEN=unset" in result.stdout
     assert SECRET not in result.stdout
 
 
-@pytest.mark.parametrize("missing", ["DOPPLER_TOKEN", "DOPPLER_PROJECT", "DOPPLER_CONFIG"])
+@pytest.mark.parametrize(
+    "missing", ["DOPPLER_TOKEN", "DOPPLER_PROJECT", "DOPPLER_CONFIG"]
+)
 def test_missing_doppler_setting_fails(sandbox, missing):
     result = run(sandbox, "DIGITALOCEAN_TOKEN", {missing: ""})
     assert "rc=1" in result.stdout
@@ -207,7 +215,9 @@ def test_bad_checksum_refuses_to_run_downloaded_cli(sandbox):
 def test_script_has_no_trace_or_unsafe_echo():
     text = SCRIPT.read_text()
     assert "set -x" not in text
-    assert not re.search(r"\|\s*(ba|da|a)?sh\b", text), "never pipe a download into a shell"
+    assert not re.search(r"\|\s*(ba|da|a)?sh\b", text), (
+        "never pipe a download into a shell"
+    )
 
 
 CONFIG = Path(__file__).resolve().parent.parent / ".spacelift" / "config.yml"

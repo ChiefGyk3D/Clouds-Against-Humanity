@@ -98,6 +98,8 @@ A private network for droplets. Smallest module in the repo, so a good first rea
 | `ip_range` | The CIDR actually applied. | Stack 00 re-exports it as `vpc_ip_range`. |
 | `name` | The generated name. | Tests. |
 
+These three names are the module contract for a network: every cloud's VPC module exposes them. Each module has a README with a role table and a "Provider extensions" section.
+
 ---
 
 ## modules/firewall
@@ -145,6 +147,8 @@ The comment `#trivy:ignore:AVD-DIG-0003` above the resource is a documented exce
 | `inbound_rules` | Sorted `protocol/port/source-tags` strings. | A test can pin the exact set of inbound rules, so a new one cannot slip in. |
 | `outbound_rules` | Sorted `protocol/port/destinations` strings for address-based rules. | Same, for outbound. |
 | `outbound_tag_rules` | Sorted strings for tag-scoped outbound rules. | Same. |
+| `id` | The firewall's identifier. | The module contract: a stack can depend on it. |
+| `rule_targets`, `source_members`, `destination_members` | The tag the rules attach to, the tags that may reach it, the tags it may reach. | The module contract's three roles, named the same on every cloud. |
 
 None of these outputs carry a secret. They are descriptions, built with `for` expressions and `sort()` so the order is stable.
 
@@ -203,6 +207,7 @@ In `modules/twingate-bootstrap/outputs.tf`, `templatefile()` reads `cloud-init.y
 | `droplet_urn` | DigitalOcean's unique resource name for the droplet. | Stack 10 attaches it to the project. |
 | `private_ip` | Address inside the VPC. | Stack 10 builds each SSH resource from it. It changes whenever a droplet is rebuilt. |
 | `size` | Size slug. | Tests, cost cross-check. |
+| `instance_id`, `instance_name` | The droplet's id and name. | The module contract: the same names on every cloud. |
 
 No token is an output, and a test checks that.
 
