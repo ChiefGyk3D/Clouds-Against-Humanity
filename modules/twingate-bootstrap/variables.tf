@@ -116,3 +116,10 @@ variable "connector_telemetry" {
     error_message = "connector_telemetry.labels may hold at most 10 entries."
   }
 }
+
+variable "metadata_lock" {
+  type        = bool
+  default     = false
+  nullable    = false
+  description = "Lock the droplet metadata endpoint (169.254.169.254, which serves this machine's user-data, connector tokens included) to root and to the do-agent user (DigitalOcean's monitoring agent reads it; the user is allowed only when it exists, so AWS needs no special case). Default false is the live state: user_data is byte-identical (golden hashes in the tests) and nothing is replaced. true adds an nftables table, a script, a systemd unit and the nftables package to user_data, which REPLACES the machine. Not tested on a real machine yet: roll out one connector at a time."
+}

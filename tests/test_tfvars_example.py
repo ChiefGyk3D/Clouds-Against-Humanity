@@ -70,6 +70,8 @@ NEED_NOT_SAY_EXAMPLE = {
     "connector_telemetry",
     "connector_telemetry_instances",
     "connector_telemetry_previous",
+    "metadata_lock",
+    "metadata_lock_instances",
     "reboot_times",
     "reserved_ranges",
     "resource_key",

@@ -79,7 +79,7 @@ Boundary numbers are shared with [Threat model exercise, step 2](Threat-Model-Ex
 | T2 | Stolen Twingate credentials | Sign-in delegated to the identity provider (enforce MFA there); access limited to one host and port per resource; SSH key still required on the host | An attacker with both the identity and the SSH key gets a shell on a connector |
 | T3 | Malicious pull request steals secrets from a plan | A Spacelift push policy that never proposes a run, so no pull request's code runs in Spacelift (tested in CI; needs a paid Spacelift plan and must be attached there); on the free plan, narrow project roots and globs so only pull requests that change a stack reach it; proposed runs get no credentials anyway; branch protection; one writer | Until the policy is attached, script checks only guard honest code. Either way, anyone who can push to `main` is trusted |
 | T4 | Leaked Doppler service token | Read-only, one config, 90-day expiry, write-only in Spacelift, masked in logs | Reads all `prd` secrets until revoked |
-| T5 | Connector token theft from the droplet | File is root-only 0600; one token per connector, revocable | **Accepted:** user-data is readable by any local process via the metadata endpoint; lockdown is a follow-up |
+| T5 | Connector token theft from the droplet | File is root-only 0600; one token per connector, revocable | **Accepted:** user-data is readable by any local process via the metadata endpoint; a root-and-do-agent-only lock (`metadata_lock`) is built but off by default until it is rolled out and tested on a real droplet |
 | T6 | Connector token theft from state | Marked sensitive; state lives only in Spacelift | **Accepted:** anyone who can read stack state sees it; restrict state access in Spacelift |
 | T7 | Compromised GitHub Action | Every action pinned by commit SHA; `permissions: {}` by default; CI holds no cloud credential | A compromised pinned commit is still trusted until the pin changes |
 | T8 | Tampered Doppler CLI download | Pinned version, pinned SHA-256 per architecture, fail closed | None beyond trusting the pinned release |
@@ -95,7 +95,7 @@ Boundary numbers are shared with [Threat model exercise, step 2](Threat-Model-Ex
 Accepting a risk is a decision, so each one is written down where a reviewer will see it:
 
 1. Connector tokens in state and in user-data (T5, T6).
-2. The metadata endpoint is not yet restricted to root (T5).
+2. The metadata endpoint is not yet restricted to root (T5): the lock exists but is off by default until it is rolled out.
 3. Hosted control planes are trusted (T10).
 4. No break-glass console path (T13).
 5. The Spacelift script's run-type checks are not a security boundary (T3). The push policy is the boundary for pull requests, and it lives in Spacelift, so the copy in the repository is only as current as the last time someone pasted it in.

@@ -136,3 +136,22 @@ variable "connector_telemetry" {
     error_message = "connector_telemetry.labels may hold at most 10 entries."
   }
 }
+
+variable "metadata_lock" {
+  type        = bool
+  default     = false
+  nullable    = false
+  description = "Lock the metadata endpoint (169.254.169.254, which serves each connector's user-data and so its Twingate tokens) to root and the do-agent user (DigitalOcean's monitoring agent). The default (false) is the live state and changes nothing: merging code with this unset plans no change. true adds an nftables table, a script and a systemd unit through user_data, which REPLACES the instance of every connector listed in metadata_lock_instances (both by default). Roll out one connector at a time: metadata_lock = true with metadata_lock_instances = [\"a\"], apply, check SSH through Twingate to the new connector, then [\"a\", \"b\"]. Not yet tested on a real machine."
+}
+
+variable "metadata_lock_instances" {
+  type        = list(string)
+  default     = ["a", "b"]
+  nullable    = false
+  description = "Which connectors get metadata_lock: a, b or both (default both, and only matters once metadata_lock is true). Set [\"a\"] first, apply, check SSH through Twingate to the new connector, then [\"a\", \"b\"] and apply again. A connector not listed runs without the lock, as it does today."
+
+  validation {
+    condition     = length(var.metadata_lock_instances) >= 1 && alltrue([for i in var.metadata_lock_instances : contains(["a", "b"], i)]) && length(distinct(var.metadata_lock_instances)) == length(var.metadata_lock_instances)
+    error_message = "metadata_lock_instances must hold a, b or both, each at most once (at least one entry)."
+  }
+}

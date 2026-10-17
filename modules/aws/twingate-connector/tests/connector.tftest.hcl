@@ -383,3 +383,22 @@ run "telemetry_reaches_the_instance_user_data" {
     error_message = "connector_telemetry must flow through the module into the instance's user_data."
   }
 }
+
+run "metadata_lock_default_adds_nothing_to_the_instance_user_data" {
+  command = plan
+  assert {
+    condition     = !strcontains(aws_instance.connector.user_data, "cah-metadata-lock") && !strcontains(aws_instance.connector.user_data, "nftables")
+    error_message = "With metadata_lock unset nothing about it may reach the instance."
+  }
+}
+
+run "metadata_lock_reaches_the_instance_user_data" {
+  command = plan
+  variables {
+    metadata_lock = true
+  }
+  assert {
+    condition     = strcontains(aws_instance.connector.user_data, "/usr/local/sbin/cah-metadata-lock") && strcontains(aws_instance.connector.user_data, "--no-block")
+    error_message = "metadata_lock must flow through the module into the instance's user_data."
+  }
+}

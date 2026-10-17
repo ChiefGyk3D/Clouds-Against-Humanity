@@ -247,3 +247,22 @@ run "telemetry_reaches_the_droplet_user_data" {
     error_message = "connector_telemetry must flow through the module into the droplet's user_data."
   }
 }
+
+run "metadata_lock_default_adds_nothing_to_the_droplet_user_data" {
+  command = plan
+  assert {
+    condition     = !strcontains(digitalocean_droplet.connector.user_data, "cah-metadata-lock") && !strcontains(digitalocean_droplet.connector.user_data, "nftables")
+    error_message = "With metadata_lock unset nothing about it may reach the droplet."
+  }
+}
+
+run "metadata_lock_reaches_the_droplet_user_data" {
+  command = plan
+  variables {
+    metadata_lock = true
+  }
+  assert {
+    condition     = strcontains(digitalocean_droplet.connector.user_data, "/usr/local/sbin/cah-metadata-lock") && strcontains(digitalocean_droplet.connector.user_data, "--no-block")
+    error_message = "metadata_lock must flow through the module into the droplet's user_data."
+  }
+}

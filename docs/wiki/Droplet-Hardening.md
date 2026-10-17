@@ -87,9 +87,14 @@ For two identical, stateless droplets, cloud-init means the hardening is part of
 
 The trade: any change to the template changes `user_data`, which **forces the droplet to be rebuilt**. With two stateless connectors that is fine, done one at a time.
 
+## Metadata endpoint lock (built, off by default)
+
+Any process on a droplet can read the cloud-init user-data from `169.254.169.254`, and the user-data holds the connector tokens. The `metadata_lock` setting (default `false`) adds a self-contained nftables table, `inet cah_metadata`, that rejects outbound traffic to that address unless the process runs as root or as the `do-agent` user. The exemption matters: DigitalOcean's monitoring agent runs as `do-agent` and uses that address as its metric proxy, so locking it out would silently break droplet monitoring. The script allows `do-agent` only when the user exists, so the same template works on AWS, where it does not. A systemd unit, ordered after `cloud-final.service`, applies the table at each boot.
+
+It changes `user_data`, so turning it on replaces the droplet, and it has **not been tested on a real droplet yet**. It is a rollout you stage: `metadata_lock = true` with `metadata_lock_instances = ["a"]`, apply, check SSH through Twingate, then `["a", "b"]`. The verify and rollback commands are in the [stage 1 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md).
+
 ## Not done yet
 
-- **Lock the metadata endpoint (`169.254.169.254`) to root.** Today any process on the droplet can read the cloud-init user-data, which includes the connector tokens. It needs testing on a real droplet before it goes in.
 - **Audit logging** (auditd, and shipping auth logs off the box). Planned for stage 2 alongside the SIEM link.
 - **A pinned package version source** for the connector, once Twingate documents one.
 

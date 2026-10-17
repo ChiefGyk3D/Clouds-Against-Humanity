@@ -412,3 +412,66 @@ run "timezone_rejects_injection" {
   }
   expect_failures = [var.timezone]
 }
+
+run "metadata_lock_defaults_to_off_and_is_wired_to_both_connectors" {
+  command = plan
+  assert {
+    condition     = length(regexall("metadata_lock\\s*=\\s*var\\.metadata_lock && contains\\(var\\.metadata_lock_instances", file("${path.module}/main.tf"))) == 2
+    error_message = "Both connectors must receive var.metadata_lock gated on metadata_lock_instances."
+  }
+  assert {
+    condition     = length(regexall("contains\\(var\\.metadata_lock_instances, \"a\"\\)", file("${path.module}/main.tf"))) == 1 && length(regexall("contains\\(var\\.metadata_lock_instances, \"b\"\\)", file("${path.module}/main.tf"))) == 1
+    error_message = "Connector a must be gated on \"a\" and connector b on \"b\" in metadata_lock_instances."
+  }
+  assert {
+    condition     = var.metadata_lock == false && jsonencode(var.metadata_lock_instances) == jsonencode(["a", "b"])
+    error_message = "metadata_lock must default to false with both instances listed."
+  }
+}
+
+run "metadata_lock_on_plans" {
+  command = plan
+  variables {
+    metadata_lock = true
+  }
+  assert {
+    condition     = module.connector_a.size != "" && module.connector_b.size != ""
+    error_message = "Enabling the lock for both connectors must plan."
+  }
+}
+
+run "metadata_lock_instances_a_plans" {
+  command = plan
+  variables {
+    metadata_lock           = true
+    metadata_lock_instances = ["a"]
+  }
+  assert {
+    condition     = module.connector_a.size != "" && module.connector_b.size != ""
+    error_message = "Rolling the lock out to one connector must plan."
+  }
+}
+
+run "metadata_lock_instances_rejects_an_empty_list" {
+  command = plan
+  variables {
+    metadata_lock_instances = []
+  }
+  expect_failures = [var.metadata_lock_instances]
+}
+
+run "metadata_lock_instances_rejects_c" {
+  command = plan
+  variables {
+    metadata_lock_instances = ["c"]
+  }
+  expect_failures = [var.metadata_lock_instances]
+}
+
+run "metadata_lock_instances_rejects_a_repeat" {
+  command = plan
+  variables {
+    metadata_lock_instances = ["a", "a"]
+  }
+  expect_failures = [var.metadata_lock_instances]
+}
