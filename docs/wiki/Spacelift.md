@@ -40,6 +40,11 @@ flowchart TD
     classDef warn fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
 
+> **Screenshot to take yourself:** the run view of a stack in the Spacelift console, once for a proposed run and once for a tracked run.
+> Capture: the stack's run page for a tracked run that is waiting at the confirm step (the plan finished, the Confirm button visible), then a proposed run's page if your plan has one, with the run type and the plan summary in frame.
+> Look for: the run labelled tracked or proposed, the plan summary (resources to add, change, destroy), and the Confirm and Discard buttons that exist only because autodeploy is off.
+> Redact: the account or organisation name in the address bar and header, the stack and space names if they are yours, commit authors, email addresses, and any resource id in the plan output.
+
 ## Decisions and why
 
 ### Why not just `tofu apply` from GitHub Actions?

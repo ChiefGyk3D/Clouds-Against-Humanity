@@ -91,7 +91,8 @@ Clouds-Against-Humanity/
   scripts/plan_noop_check.py               fails unless a saved plan is a no-op over the golden addresses (run by hand, not in CI)
   scripts/threat_dragon_layout.py          lays out the Threat Dragon models in docs/threat-model (nodes, boundary boxes, flow routes; --check fails when stale)
   scripts/spacelift/doppler-env.sh         hook that loads Doppler secrets into a run
-  scripts/gen-wiki.sh                      writes the wiki pages from docs/wiki (the Wiki workflow publishes them)
+  scripts/gen-wiki.sh                      writes the wiki pages and copies docs/wiki/images from docs/wiki (the Wiki workflow publishes them)
+  scripts/strip_png_metadata.py            removes text, EXIF and time chunks from wiki screenshots (--check fails when any remain)
   tests/                                   pytest for the cost gate, settings, module policy, secret separation, the hook, the wiki and more
   .spacelift/config.yml                    which secrets each stack loads
   .github/workflows/ci.yml                 GYST callers only (tofu, python, security) + CI green

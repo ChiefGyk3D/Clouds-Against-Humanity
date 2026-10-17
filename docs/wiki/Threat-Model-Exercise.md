@@ -86,6 +86,12 @@ Three things to take from the drawing:
 - **B4 is also a setting, not a file.** Branch protection is described in [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md#branch-protection-and-one-writer). If it is off, the pull request and `CI green` requirement is lost for everyone who already has write access: they can push straight to `main`. It does not turn A2 into A3. Someone who can only propose code still cannot push or merge; repository write permission is a separate boundary, and the model assumes one holder of it.
 - **A3 is the whole game.** Everything to the right of B4 trusts `main`. That is why the worked example says, in T3, "anyone who can push to `main` is trusted".
 
+**What it looks like in a tool.** The same boundaries drawn as a data flow diagram in Threat Dragon (the dashed boxes are B1 to B8; the [Threat Dragon exercise](Threat-Dragon-Exercise.md) walks through it). Do your own drawing first and look at this only to compare.
+
+![The pipeline data flow diagram in Threat Dragon with eight dashed trust boundary boxes B1 to B8 enclosing processes and data stores, and labelled arrows between actors, processes and stores](images/threat-dragon-stride-diagram.png)
+
+*Threat Dragon v2.6.2 hosted app, Local Session, captured 2026-10-16. The repository's own synthetic model, exported with the app's Export, PNG command.*
+
 ## Step 3: fill in the STRIDE table
 
 **STRIDE** is six prompts for finding threats, one per way a security property can fail: **S**poofing (pretending to be someone), **T**ampering (changing what should not change), **R**epudiation (no record of who did it), **I**nformation disclosure (a secret read), **D**enial of service (made unavailable or expensive), **E**levation of privilege (gaining rights you should not have).

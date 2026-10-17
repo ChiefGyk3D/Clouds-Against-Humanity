@@ -107,6 +107,7 @@ The [Threat model](Threat-Model.md) is core step 19.
 - [Troubleshooting index](Troubleshooting-Index.md)
 - [Settings reference](Settings-Reference.md)
 - [Terraform reference](Terraform-Reference.md)
+- [Screenshots policy](Screenshots-Policy.md)
 - [Stage 0 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/00-foundation.md)
 - [Stage 1 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md)
 - [Secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md)

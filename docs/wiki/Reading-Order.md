@@ -169,6 +169,7 @@ Not a path. Open these when you need them; every one is linked from the sidebar.
 | [Terraform reference](Terraform-Reference.md) | You want every variable, resource and output explained line by line. |
 | [Lessons learned](Lessons-Learned.md) | You want the things that broke during the build, and what fixed them. |
 | [Roadmap](Roadmap.md) | You want to know what is built and what is only planned. |
+| [Screenshots policy](Screenshots-Policy.md) | You are adding a picture to a page, or want to know why a console is described but not shown. |
 | [Home](Home.md) | You want the short version, the diagram and the current state. |
 
 Operator guides that live in the repository rather than the wiki: [stage 0](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/00-foundation.md), [stage 1](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md), the [secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md) and the [cost guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md).

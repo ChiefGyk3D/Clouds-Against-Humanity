@@ -47,11 +47,24 @@ One mistake to avoid: ATT&CK and ATLAS are not threat models. They are vocabular
 3. **Map the AI workflow to ATLAS.** The same repository is also worked on by AI tools. They read text that strangers can write, they run tools, and they can see secrets. STRIDE alone fits that badly, because the "process" is a model with no fixed behaviour. The ATLAS model is the result.
 4. **Colour your coverage.** A list of techniques is only useful if it ends in a picture of what you can and cannot see. The ATT&CK Navigator is the usual tool; see the springboard section.
 
+Here is that picture for this repository: every technique the models cite, coloured in the ATT&CK Navigator. Colour means only "this repository names the technique in a threat". It does not mean the technique is detected or mitigated.
+
+![The ATT&CK Navigator enterprise matrix with the techniques this repository cites coloured orange, spread across the Reconnaissance, Initial Access, Persistence, Credential Access and Impact tactic columns](images/attack-navigator-cited-techniques.png)
+
+![A close-up of the left of the Navigator matrix: Reconnaissance, Resource Development, Initial Access, Execution and Persistence columns, with the cited techniques such as Scanning IP Blocks, Exploit Public-Facing Application, Supply Chain Compromise and Cloud Accounts coloured orange](images/attack-navigator-cited-closeup.png)
+
+*MITRE ATT&CK Navigator v5.3.2 (hosted at `https://mitre-attack.github.io/attack-navigator/`), captured 2026-10-16, ATT&CK v20.0 data. The layer is `docs/threat-model/attack-navigator-layer.json`, the repository's own synthetic coverage layer. To reproduce: Open Existing Layer, Upload from local, pick that file.*
+
 STRIDE letters in the two new models are kept because Threat Dragon needs a native type to hold, and because the combination is the lesson: a threat has a category (what kind of flaw) and a technique (how someone would use it).
 
 ## The pipeline mapped to ATT&CK (T1 to T14)
 
 File: `docs/threat-model/clouds-against-humanity.attack.threat-dragon.json`. It has the same elements, flows and boundaries as the STRIDE model, 41 threats (the STRIDE model's other six are Repudiation or design-only threats with no adversary technique), and 29 distinct techniques. Matrix: Enterprise, with the IaaS platform in mind. Where a technique's platform list does not include IaaS (for example T1677 Poisoned Pipeline Execution is listed for SaaS) the CI service is the thing it applies to, and I say so rather than hiding it.
+
+![The Edit Threat dialog for threat 13 in the ATT&CK model: the title starts with technique T1555.006 Cloud Secrets Management Stores and the description names T1528 Steal Application Access Token](images/threat-dragon-attack-threat-edit.png)
+
+*What a threat reads like in the ATT&CK model: a STRIDE type (Elevation of privilege) plus the technique IDs in the title and description. Threat Dragon v2.6.2 hosted app, Local Session, captured 2026-10-16; the repository's own synthetic model.*
+
 
 | Threat | What it is | ATT&CK technique and its tactics (v20.0) |
 |---|---|---|
@@ -79,6 +92,10 @@ Things to argue with:
 ## The AI workflow mapped to ATLAS
 
 File: `docs/threat-model/clouds-against-humanity.atlas.threat-dragon.json`. It models how AI tools touch this public repository: a coding agent with tools, a hosted review assistant, a hosted model provider, a local model, the text strangers can put in pull requests, the plans and handoff prompts the agents read, and the secrets that should stay out of reach. It has 12 threats, 20 distinct ATLAS techniques, and five boundaries named AB1 to AB5 (the pipeline model's B1 to B8 are a different set).
+
+![The AI-assisted workflow data flow diagram in Threat Dragon: a coding agent session, a hosted AI reviewer, a hosted model provider, a local LLM, repository content and secrets, grouped into five dashed boundary boxes AB1 to AB5](images/threat-dragon-atlas-diagram.png)
+
+*The ATLAS model's diagram, exported from Threat Dragon v2.6.2 hosted app, Local Session, captured 2026-10-16. The repository's own synthetic model.*
 
 **What is true of this repository, and where it is written.** The tiering of AI tools (a local model first for drafts and summaries, a coding model for implementation, a second model for security review at stage gates, a larger model only with approval) is in `docs/superpowers/specs/2026-10-10-foundation-access-design.md`, section 8. The repository's plans and handoff prompts are instructions written for agents (`docs/superpowers/plans/`). The edge handoff states the rule "never run `tofu apply` or trigger a tracked Spacelift run; pull requests only". Commits made with an AI's help carry a `Co-Authored-By` trailer. The evidence files behind the provider pages say they were collected by a research agent from vendor documentation. Nothing in this repository configures an agent's tool permissions, and the model says so. That configuration lives on the machine that runs the agent, which is why it cannot be verified from here.
 
@@ -133,6 +150,8 @@ Three files live in `docs/threat-model/`:
 | `clouds-against-humanity.threat-dragon.json` | STRIDE | Learn the pipeline and its trust boundaries (the Threat Dragon exercise) |
 | `clouds-against-humanity.attack.threat-dragon.json` | STRIDE categories with ATT&CK techniques in each threat | See how threats read when they name techniques, and what detection each would need |
 | `clouds-against-humanity.atlas.threat-dragon.json` | STRIDE categories with ATLAS techniques in each threat | Think about AI tools as part of the system |
+
+A fourth file, `attack-navigator-layer.json`, is not a Threat Dragon model. It is an ATT&CK Navigator layer (layer format 4.5, checked against the format definition in the Navigator repository) that colours the cited techniques; open it in the [hosted Navigator](https://mitre-attack.github.io/attack-navigator/) with Open Existing Layer, then Upload from local. A test keeps its technique list equal to the cited list in `framework-reference.json`.
 
 **Hosted web app, no sign-in (verified 2026-10-16).** This is the quickest route. Browse to `https://www.threatdragon.com`, choose "Login to Local Session" (not "Login with GitHub"), then "Open an existing threat model". The page says "Open / Import a threat model via JSON" and offers a text area ("Drag and drop or Drop a threat model JSON file or paste its content here") with Open and Import buttons. Paste the file and press Import, or drop it on the text area. I imported both new models this way and the diagram drew. Open the model, choose the diagram, and click an element to see its threats.
 

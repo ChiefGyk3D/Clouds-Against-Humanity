@@ -93,6 +93,11 @@ Read the plan. Then confirm it. See [Terraform reference, reading the plan befor
 
 *Checkpoint: you can explain each of the four resources. Billing is still $0.*
 
+> **Screenshot to take yourself:** the Spacelift run for stage 0, at the confirm step and again after it applies.
+> Capture: the tracked run waiting for confirmation with the plan summary visible, then the same run finished with the resources created.
+> Look for: the run type tracked, the plan listing only what stage 0 should create, and the Confirm button you pressed yourself.
+> Redact: the account name, the stack path if it names your repository owner, resource ids, and anything printed from the plan that is an address or a token.
+
 ## Step 8 (optional stop): you have stage 0
 
 You now have a private network and a default-deny firewall, for free, and you understand every line. This is a good place to stop for a week.
@@ -116,6 +121,11 @@ Do all three. The third is the one that proves the design.
 3. From a machine **not** running the client: `nmap -Pn -p 22,80,443 <connector public IP>` shows the ports **filtered** on both droplets. The stack does not output public addresses; read each droplet's public IP from the DigitalOcean console. Scanning your own droplet is authorised; do not scan anyone else's.
 
 *Checkpoint: you can reach the machines from inside and you cannot from outside, and you know why.* If a connector shows offline, the stage 1 guide's section 6a is the troubleshooting path.
+
+> **Screenshot to take yourself:** the Twingate Connectors page and the DigitalOcean Droplets page once stage 1 is up.
+> Capture: both connectors with status Alive, and the Droplets list showing the connector droplets running.
+> Look for: Alive on both connectors, and the droplets present, so you know what step 11 will remove.
+> Redact: tenant and team names, droplet names and ids, public and private IP addresses, and the region if you do not want it known.
 
 ## Step 11: tear it down, and prove the bill is zero
 

@@ -48,6 +48,11 @@ Open **AWS Budgets** and create a monthly cost budget at your lower number, with
 
 *Checkpoint: a budget exists, its email address is one you read, and you have a screenshot you do not publish. An alert you cannot point at is not an alert.*
 
+> **Screenshot to take yourself:** the Budgets console while you create your first budget.
+> Capture: the final review step of a cost budget with a low monthly amount and an email alert at a percentage of it, before you press Create.
+> Look for: the monthly amount, the alert threshold (actual and forecasted), and that the alert goes to an address you read.
+> Redact: the 12-digit account id (header and any ARN), the account alias, and the notification email address. Crop the account menu out of the top right corner.
+
 ## Step 4: stop using root; create the identity you will use
 
 Root is for rare account tasks. Day to day, you use an administrative identity that can be restricted, audited and given MFA of its own.
