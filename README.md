@@ -8,11 +8,16 @@ It is a cloud extension of a homelab and a teaching repository at the same time:
 
 ## How it fits together
 
+![Architecture: Twingate connectors dial out, nothing listens inbound, Spacelift applies OpenTofu](docs/images/architecture.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
     you["You<br/>Twingate client"]:::you
     tg["Twingate<br/>controller + relays"]:::ctrl
-    subgraph do["DigitalOcean VPC (tor1)"]
+    subgraph vpc["DigitalOcean VPC (tor1)"]
         ca["connector a"]:::cloud
         cb["connector b"]:::cloud
     end
@@ -26,10 +31,10 @@ flowchart LR
     ca -- "outbound only" --> tg
     cb -- "outbound only" --> tg
     you == "end-to-end encrypted" ==> ca
-    net -. "no inbound rule exists" .-x do
+    net -. "no inbound rule exists" .-> vpc
     gh --> sl
     dp -- "read-only token" --> sl
-    sl -- "OpenTofu" --> do
+    sl -- "OpenTofu" --> vpc
 
     classDef you fill:#132a1f,stroke:#4ade80,color:#dcfce7
     classDef ext fill:#3b1d1d,stroke:#f87171,color:#fde2e2
@@ -37,6 +42,8 @@ flowchart LR
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
     classDef secret fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
+
+</details>
 
 | Piece | Job | Why this and not the obvious alternative |
 |---|---|---|
