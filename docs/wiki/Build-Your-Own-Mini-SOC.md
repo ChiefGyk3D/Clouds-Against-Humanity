@@ -48,6 +48,7 @@ The design's shape, none of it built:
 
 - One droplet in the VPC, tagged for its role. Grafana and Prometheus listen on the **private** address only.
 - Its firewall has **one** inbound rule: TCP on the Grafana port, with the connector **tag** as the source. No rule has an address source. Twingate does not bypass the destination's firewall; the connector opens an ordinary connection inside the VPC.
+- **Scraping the connectors takes rules on both sides**, and the SOC droplet does **not** get the connector tag (that would put it inside the connectors' trust group). Today the firewall module (`modules/firewall`) only admits and permits the firewall's own tag, and its default outbound rules are tcp 443, 80 and 53 and udp 53 and 123 (`default_outbound` in `modules/firewall/main.tf`), which do not include the exporter ports. So you need: (a) on the **connector** firewall, an inbound rule for the exporter ports whose source is the **SOC tag**; (b) on the **SOC** firewall, an outbound rule for the same ports, ideally with the connector tag as the destination. The design plans an additive `inbound_from_other_tags` input (and an `outbound_to_other_tags` one) for the module; as of this page's last check those inputs are being added in a separate pull request and are **not on the main branch**. The design lists the connector-side outbound input but is silent on the SOC-side egress, so (b) is this page's inference from the module's stateful-reply behaviour: a new outbound connection needs an outbound rule. Until the inputs exist, `extra_outbound_rules` can open the port but has no tag scope, so prefer waiting for the tag-scoped input.
 - A Twingate resource of one port, TCP only, UDP denied, ICMP off, granted to a SOC admin group, the same form as the SSH resources on the [Twingate page](Twingate.md).
 - Grafana's own accounts, anonymous access off, sign-up off, admin password from Doppler. HTTP inside the tunnel for the first build, which is a trade-off, not a recommendation.
 - Dashboards come from files in git, so the same JSON installs here and at home. Prefer rebuilding over restoring: a droplet is disposable.
@@ -57,6 +58,8 @@ The design's shape, none of it built:
 ### N2: push, don't open a path
 
 A cloud Grafana pointed at your home Prometheus would reach Prometheus's whole HTTP surface, because a one-port resource is not read-only. So home pushes. `remote_write` with filtering (`write_relabel_configs`) sends only the series you choose, and the cloud Prometheus's write receiver accepts it. The receiver is a write endpoint (enabled by a flag; UNVERIFIED), so its Twingate resource is granted only to your Prometheus's service.
+
+A Twingate resource does not bypass the firewall here either. N1 admitted only the Grafana port, so N2 needs one more rule pair: on the **SOC** firewall, an inbound rule for the receiver port with the **connector tag** as the source (the home Prometheus's traffic leaves a connector and enters the VPC as an ordinary connection), and on the **connector** firewall the matching outbound rule to the SOC tag on that port. Both are tag-scoped, which needs the same planned `other_tags` inputs, and the assertion from the design still holds: no inbound rule has an address source. Without them the push fails at the firewall while the Twingate resource looks correct.
 
 This stage moves data about your home **out** to the cloud. Decide what that data is before you send it. If a series name or label would tell a stranger something about your network, filter it.
 
@@ -168,7 +171,7 @@ The stages end, but the learning does not. Each of these is a project:
 2. No reference answer exists: the design gives no memory figure for Grafana, Prometheus or the Wazuh manager, only that they must be measured. The gap between your guess and the measurement is the lesson.
 3. The cloud hosts: normal, because the local Prometheus keeps scraping inside the VPC. Home series: they stop updating, and the panel shows the last data and then nothing, because `remote_write` is pushed from home and the push cannot arrive.
 4. Level 5: nothing arrives; it stays in the cloud manager's alerts. Level 9: it forwards as a syslog line. If the destination also copies syslog into its own Wazuh, the same event can alert twice, once there and once at the source, each with its own rule id.
-5. None. The firewall has one inbound rule, tag-sourced from the connectors, and Twingate reaches the droplet through them. Prove it as stage 1 did: scan the droplet's public address from outside and expect every port filtered.
+5. None. The firewall has one inbound rule at N1 (two at N2, when the receiver port is added), all tag-sourced from the connectors, and Twingate reaches the droplet through them. Prove it as stage 1 did: scan the droplet's public address from outside and expect every port filtered.
 
 </details>
 

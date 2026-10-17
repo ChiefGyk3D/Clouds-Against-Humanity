@@ -67,7 +67,7 @@ Here is what the design says adding `site-tor2` takes. Every step is data.
 
 1. **Values.** A new `region` or a new `resource_key` (for example `tor2`), a `vpc_ip_range` that overlaps nothing (the first site's range goes in `reserved_ranges`), a `site_name`, and its own list of logging servers. The shape of that file is the `terraform.tfvars.example` of each stack.
 2. **Stacks.** New Spacelift stacks pointing at the same code, with their own state, environment and Doppler config. A new stack starts from nothing, so its names can use the new key and nothing existing is renamed.
-3. **`.spacelift/config.yml` entries** for the new stack ids. A stack with no entry never loads its secrets and cannot apply (see [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipeline.md)).
+3. **`.spacelift/config.yml` entries** for the new stack ids. The entry tells the hook which Doppler secrets to fetch for that stack (see [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipeline.md)). It is not what attaches credentials: in `docs/spacelift-secrets.md` (sections 4 and 8, read for this page) the `cah-doppler` context attaches to any stack carrying the `cah` label and supplies `DOPPLER_TOKEN` to every run type, independently of `config.yml`. So a new stack's label, context attachments and run policies are Spacelift settings you must control by hand.
 4. **A cost approval.** A second site is a deliberate decision, not a side effect.
 5. **A scrape inventory** for the home Prometheus, generated from the new stack's outputs. This step belongs to the telemetry stack, which does not exist yet.
 
@@ -79,7 +79,7 @@ The gate (`scripts/cost_check.py`) finds `cost.json` manifests under `stacks/` o
 
 - prices the instance like any manifest, using the provider of the stack it names;
 - requires the instance's machines to equal the base stack's (instances carry no code);
-- requires every stack id in `.spacelift/config.yml` to have exactly one manifest, so a site cannot reach an apply without being costed. The id for the example is `cah-10-access-tor2`;
+- requires every stack id **declared** in `.spacelift/config.yml` to have exactly one manifest (`config_problems()` in `scripts/cost_check.py`), so a declared stack cannot be added without being costed. The id for the example is `cah-10-access-tor2`;
 - optionally reads a `sites` map in `approved.json`, so each site is named in the approval:
 
 ```json
@@ -87,7 +87,7 @@ The gate (`scripts/cost_check.py`) finds `cost.json` manifests under `stacks/` o
   "sites": { "tor2": { "approved_monthly_total": 12.0 } } }
 ```
 
-It cannot see a Spacelift stack that someone creates and never lists in `config.yml`; that stack has no secrets and nothing to apply.
+The gate checks **declared** stacks only. It cannot see a Spacelift stack that someone creates and never lists in `config.yml`, and such a stack is not harmless: if it carries the `cah` label, the context supplies `DOPPLER_TOKEN` to its runs whether or not `config.yml` mentions it (`docs/spacelift-secrets.md` sections 4 and 8). Stack creation, context attachment and the push and run policies have to be controlled in Spacelift; the cost gate does not do that.
 
 **The money.** A DigitalOcean site carries two connectors. At the list price of `s-1vcpu-1gb` in `docs/cost-prices.json` (retrieved 2026-10-10), that is $6 + $6 = $12 per site, so two sites are $24 before any telemetry component, against the $30 shared ceiling in `docs/stages/approved.json`. That leaves $6. The reference environment's planned stage 3 option A is $29 on one site (`docs/cost.md`), so a second site and stage 3 A together are $29 + $12 = $41, which does not fit.
 
@@ -98,7 +98,7 @@ It cannot see a Spacelift stack that someone creates and never lists in `config.
 3. You set `site_name = "site-tor1"` on the live stack. What does the plan show? You set `resource_key = "tor1-main"` instead. What does it show?
 4. Why is `site` a label and not a job name?
 5. Under the one-service-per-site-per-role rule, with a logging service and a scrape service per site, how many services and keys do one site and two sites need? Assume each cloud host holds one key for its site's logging service and the home Prometheus host holds one key per scrape service.
-6. You add a second site. Which three files change outside the new stacks' settings?
+6. You add a second site. What kinds of change are needed beyond the values themselves?
 
 <details>
 <summary>Reference answers</summary>
@@ -108,7 +108,7 @@ It cannot see a Spacelift stack that someone creates and never lists in `config.
 3. `site_name` alone: nothing. No resource, tag or output uses it, so the plan is a no-op. `resource_key`: the Twingate network, group, resources, tag, firewall and both droplets are renamed, and several force new machines. Discard the run.
 4. A job names a kind of target. A job per site means every panel and alert that selects the job is rewritten per site and "all sites" is a list to maintain. A label adds one filter and `by (site)` gives the per-site view.
 5. One site: 2 services (logging, scrape) and 3 keys (two cloud hosts for logging, one home key for scrape). Two sites: 4 services and 6 keys. This is this page's counting of the design, not a figure the design states. Whether the Twingate plan allows that many services is **not documented** on the page the design cites; verify before relying on it.
-6. A cost manifest for the instance (`stacks/sites/tor2/10-access/cost.json`), an entry in `.spacelift/config.yml` per new stack id, and the provider's `approved_monthly_total` (and the `sites` map if used) in `docs/stages/approved.json`.
+6. Three kinds of change, not three files. (a) **A cost manifest for every new stack id**, including zero-cost ones: `config_problems()` requires exactly one manifest per declared id, so the access instance (`stacks/sites/tor2/10-access/cost.json`) and, later, the foundation instance and the telemetry stack each need one. (b) **The site's settings**: its values, plus the provider's `approved_monthly_total` (and the `sites` map if used) in `docs/stages/approved.json`, and an entry in `.spacelift/config.yml` per new stack id. (c) **The Spacelift and Doppler objects**: the stacks themselves, their label and context attachments, their run policies, and the site's Doppler config and token.
 
 </details>
 
