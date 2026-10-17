@@ -34,7 +34,19 @@
 # is read, so a branch cannot grant its own exception. The IPv6 checks have no
 # escape hatch.
 #
-# The destroy and autodeploy guard is a separate policy (issue #92).
+# Two guards turn the "locked and manual" convention into a rule (issue #92):
+#
+#   - Destroy guard: a plan that deletes, or replaces, a digitalocean_vpc,
+#     digitalocean_project, digitalocean_firewall, twingate_remote_network,
+#     aws_vpc, aws_security_group, or anything tagged `protected`, is denied.
+#     Droplets are deliberately not protected: a connector replace is a normal,
+#     reviewed event. Escape hatch: destroy_allowlist, same rule as above.
+#   - Autodeploy guard: a stack with autodeploy on is denied. Spacelift's plan
+#     input does expose it (input.spacelift.stack.autodeploy; the contract
+#     lists it as required), so this is a real check, not a note. It has no
+#     allowlist. It runs inside a plan, so it cannot stop a stack from being
+#     created with autodeploy on; it blocks the apply it would have made. The
+#     setting itself is enforced where stacks are made (issue #96).
 #
 # Plan policies run on tracked runs here, before the apply. Proposed runs do
 # not exist in this repository (see push.rego), so this is the gate on the
@@ -51,6 +63,12 @@ import rego.v1
 # names the port, the source and the reason. Remove the entry when the rule
 # goes away.
 inbound_allowlist := set()
+
+# Exact resource addresses whose deletion (or replacement) is allowed even
+# though the resource is protected. Empty by default. Same rule as above: a
+# pull request that names the address and the reason, reviewed, then the new
+# body pasted into Spacelift. Remove the entry once the change has applied.
+destroy_allowlist := set()
 
 deny contains msg if {
 	some rc in changed_resources("digitalocean_firewall")
@@ -85,6 +103,29 @@ deny contains msg if {
 }
 
 deny contains msg if {
+	some rc in removed_resources
+	protected(rc)
+	not rc.address in destroy_allowlist
+	msg := sprintf(
+		"%s: this plan deletes (or replaces) a protected %s. A human must add the address to destroy_allowlist in .spacelift/policies/plan.rego, in a pull request, before it can be applied.",
+		[rc.address, rc.type],
+	)
+}
+
+# The stack settings are part of the plan input, so a stack with autodeploy on
+# is denied here. Stacks in this repository stay manual: a human reads every
+# plan and confirms. Turning autodeploy back off is the fix; there is no
+# allowlist. The setting itself belongs to the stack (the stack factory, issue
+# #96, should create stacks with autodeploy off).
+deny contains msg if {
+	input.spacelift.stack.autodeploy == true
+	msg := sprintf(
+		"stack %s has autodeploy enabled. Stacks here are manual: turn autodeploy off so a human confirms every apply.",
+		[object.get(input.spacelift.stack, "id", "(unknown)")],
+	)
+}
+
+deny contains msg if {
 	some rc in changed_resources("digitalocean_droplet")
 	rc.change.after.ipv6 == true
 	msg := sprintf("%s: ipv6 = true. IPv6 must stay closed on droplets.", [rc.address])
@@ -105,6 +146,43 @@ changed_resources(type) := {rc |
 }
 
 allowlisted(rc) if rc.address in inbound_allowlist
+
+# Resources this plan deletes, including the delete half of a replacement
+# (either order). Creates, updates, reads and no-ops are not removals.
+removed_resources contains rc if {
+	some rc in input.terraform.resource_changes
+	some action in object.get(object.get(rc, "change", {}), "actions", [])
+	action == "delete"
+}
+
+# Types whose loss breaks the network, the access path or the project. The
+# droplets (the connectors) are deliberately absent: replacing one is a normal,
+# reviewed event.
+protected_types := {
+	"digitalocean_vpc",
+	"digitalocean_project",
+	"digitalocean_firewall",
+	"twingate_remote_network",
+	"aws_vpc",
+	"aws_security_group",
+}
+
+protected(rc) if rc.type in protected_types
+
+# Anything tagged `protected` (a DigitalOcean tag list, or an AWS tag map with
+# that key), judged by the values being destroyed.
+protected(rc) if "protected" in values(before_of(rc), "tags")
+
+protected(rc) if {
+	tags := object.get(before_of(rc), "tags", null)
+	is_object(tags)
+	"protected" in object.keys(tags)
+}
+
+before_of(rc) := b if {
+	b := object.get(object.get(rc, "change", {}), "before", {})
+	is_object(b)
+} else := {}
 
 # A list-valued field, or [] when it is missing or null (a real plan uses
 # both for "nothing here").
