@@ -1,0 +1,96 @@
+# SPDX-License-Identifier: MIT
+# The project board for this repository, defined as code for Scrum Around and Find Out (SAFO).
+# A user-owned GitHub Project: no App can write one, so it is kept current from the maintainer's own
+# `gh` login with `safo --board board.yaml reconcile` (no token is stored in CI).
+# How the board is used: docs/wiki/How-This-Project-Is-Planned.md
+version: 1
+project:
+  owner: ChiefGyk3D
+  owner_type: user
+  number: 4
+  title: Clouds Against Humanity
+repositories:
+  - owner: ChiefGyk3D
+    name: Clouds-Against-Humanity
+    default_area: Learning and wiki
+    area_rules:
+      - {match: stage 2, area: "Stage 2 telemetry"}
+      - {match: telemetry, area: "Stage 2 telemetry"}
+      - {match: stage 3, area: "Stage 3 workloads"}
+      - {match: edge, area: "Edge and DMZ"}
+      - {match: aws, area: "Multi-cloud"}
+      - {match: azure, area: "Multi-cloud"}
+      - {match: gcp, area: "Multi-cloud"}
+      - {match: harden, area: "Stage 1 hardening"}
+      - {match: rotate, area: "Operations and gates"}
+fields:
+  - name: Status
+    type: single_select
+    options:
+      - {name: Backlog, color: GRAY, description: "Not scheduled"}
+      - {name: Next, color: BLUE, description: "Scheduled for a sprint"}
+      - {name: In progress, color: YELLOW, description: "Being worked, or a draft pull request"}
+      - {name: In review, color: PURPLE, description: "Pull request open, checks and reviews running"}
+      - {name: Blocked, color: RED, description: "Needs the maintainer or an outside answer"}
+      - {name: Done, color: GREEN, description: "Closed or merged"}
+  - name: Area
+    type: single_select
+    options:
+      - {name: Operations and gates, color: RED, description: "Maintainer-only steps, rotations, approvals"}
+      - {name: Stage 1 hardening, color: ORANGE, description: "Hardening the built access stage"}
+      - {name: Stage 2 telemetry, color: BLUE, description: "Logs and metrics back home"}
+      - {name: Stage 3 workloads, color: GREEN, description: "The workload host, bucket, Functions, bridge"}
+      - {name: Edge and DMZ, color: PINK, description: "Public edge, designed before built"}
+      - {name: Multi-cloud, color: PURPLE, description: "AWS, Azure, GCP"}
+      - {name: Learning and wiki, color: GRAY, description: "Lessons, labs, screenshots"}
+      - {name: Process, color: YELLOW, description: "How the project is run"}
+  - name: Size
+    type: single_select
+    options:
+      - {name: S, color: GRAY, description: "About 2 hours"}
+      - {name: M, color: BLUE, description: "About 5 hours"}
+      - {name: L, color: ORANGE, description: "About 12 hours"}
+      - {name: XL, color: RED, description: "About 30 hours: split before scheduling"}
+  - name: Priority
+    type: single_select
+    options:
+      - {name: P1 soon, color: ORANGE, description: ""}
+      - {name: P2 later, color: YELLOW, description: ""}
+      - {name: P3 someday, color: GRAY, description: ""}
+  - name: Agent
+    type: single_select
+    options:
+      - {name: Claude, color: ORANGE, description: "Claude lead or a Claude subagent"}
+      - {name: Codex, color: GREEN, description: "OpenAI Codex"}
+      - {name: Copilot, color: BLUE, description: "GitHub Copilot coding agent"}
+      - {name: You, color: PURPLE, description: "The maintainer"}
+  - {name: Sprint, type: iteration, start: 2026-10-20, duration_days: 14, count: 8, title_prefix: "S"}
+  - {name: Start date, type: date}
+  - {name: Target date, type: date}
+  - {name: Done on, type: date}
+views:
+  - {name: Sprint board, layout: board, filter: "-status:Done"}
+  - {name: Sprint plan, layout: table, filter: "-status:Done"}
+  - {name: Roadmap, layout: roadmap, filter: ""}
+  - {name: Backlog, layout: table, filter: "status:Backlog"}
+  - {name: Agents at work, layout: table, filter: 'status:"In progress","In review",Next'}
+rules:
+  status:
+    opened: Backlog
+    opened_pr: In review
+    draft_pr: In progress
+    reopened: Backlog
+    closed: Done
+    merged: Done
+  done_date_field: Done on
+  new_item_defaults:
+    Priority: P2 later
+agents:
+  field: Agent
+  working: [In progress, In review, Next]
+  waiting: [Blocked]
+ui_only:
+  - "Board view: Group by = Status; Sprint board: set Group by Status and Sort by Priority"
+  - "Roadmap view: Date fields = Start date and Target date, Group by = Area, zoom = Quarter"
+  - "Sprint plan view: Group by = Sprint; show Size, Agent, Area"
+  - "Project workflows: Item closed -> Done; Pull request merged -> Done; Auto-add is not needed (reconcile adds)"
