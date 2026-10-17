@@ -350,7 +350,7 @@ Both are empty blocks. Credentials come from `DIGITALOCEAN_TOKEN`, `TWINGATE_API
 | `module.connector_firewall` | Calls `modules/firewall` with purpose `connector`. Inbound: TCP 22 from the connector tag. Outbound to tag: TCP 22. Extra outbound: TCP `30000-31000` and all UDP, which Twingate needs for its relay and peer-to-peer paths. Inbound from the internet stays zero. |
 | `digitalocean_project_resources.access` | Puts both droplets in the project (`resources` takes their URNs). |
 | `twingate_group.admins` | The group `cah-<region>-admins`, filled from `admin_user_ids`. Access is granted to a group, never to a single person. |
-| `twingate_resource.connector_a_ssh`, `...connector_b_ssh` | One Twingate **resource** per connector: the address is the connector's private IP, reachable by the admin group, TCP port 22 only. `policy = "RESTRICTED"` plus `ports = ["22"]` means only that port; `udp` is `DENY_ALL`; `allow_icmp = false` turns ping off. The `access_group` block is deprecated by the provider and is tracked as a follow-up. |
+| `twingate_resource.connector_a_ssh`, `...connector_b_ssh` | One Twingate **resource** per connector: the address is the connector's private IP, reachable by the admin group, TCP port 22 only. `policy = "RESTRICTED"` plus `ports = ["22"]` means only that port; `udp` is `DENY_ALL`; `allow_icmp = false` turns ping off. The `access_group` block is current: the provider deprecates only two attributes nested inside it, which this repository does not set (the warnings `tofu test` prints come from reading the whole block in an assertion). |
 
 ### Outputs
 

@@ -90,6 +90,6 @@ Repeat for `modules/vpc`, `modules/twingate-bootstrap`, `modules/twingate-connec
 
 ## Known follow-up
 
-The Twingate provider warns that `access_group` on `twingate_resource` is deprecated. It still works; it needs replacing with the provider's current access setting before an upgrade removes it.
+You may see "deprecated source" warnings from `tofu test` about `access_group` on `twingate_resource`. The block itself is not deprecated; the provider deprecates two attributes nested inside it, which this repository does not set, and the warning appears where a test reads the whole block. Nothing needs replacing. The provider is pinned to 3.x; moving to a newer major version is an optional upgrade tracked in issue #93.
 
 Next: [Spacelift](Spacelift.md), step 16 of the core path on the [Reading order](Reading-Order.md) page. The [Terraform reference](Terraform-Reference.md) is the line-by-line lookup page; it is optional on the core path.
