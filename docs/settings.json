@@ -99,6 +99,52 @@
     ],
     "stacks/10-access": [
       {
+        "name": "host_firewall",
+        "type": "bool",
+        "description": "A default-drop host firewall (nftables table inet cah_host, input chain only) on each connector, a second layer behind the cloud firewall. Only loopback, established traffic, the ICMP and DHCP the network card needs, TCP 22 from host_firewall_ssh_sources and, when connector_telemetry.metrics_port is set, that port from the same sources are let in. Default false is the live state: merging code with this unset plans no change. true adds a script, a systemd unit and the nftables package through user_data, which REPLACES the droplet of every connector in host_firewall_instances (both by default). The script checks the ruleset, applies it, verifies sshd still listens and removes the table if not. Roll out one connector at a time: true with host_firewall_instances [\"a\"], apply, check SSH through Twingate, then [\"a\", \"b\"]. Not yet tested on a real machine.",
+        "required": false,
+        "default": false,
+        "validation": "none; non-nullable (null means false)",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "true",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "host_firewall_instances",
+        "type": "list(string)",
+        "description": "Which connectors get host_firewall: a, b or both. Only matters once host_firewall is true. Set [\"a\"] first, apply, check SSH through Twingate to the new connector, then [\"a\", \"b\"]. A connector not listed runs without the host firewall, as it does today.",
+        "required": false,
+        "default": [
+          "a",
+          "b"
+        ],
+        "validation": "at least one entry; each entry is a or b, no repeats",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "[\"a\"]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "host_firewall_ssh_sources",
+        "type": "list(string)",
+        "description": "IPv4 CIDRs allowed to reach TCP 22 (and the connector metrics port) through the host firewall. Default the three private RFC 1918 blocks: the cloud firewall already limits SSH to the connector tag and this only narrows it to private space, because the module does not know the VPC CIDR. Narrow it to your VPC range if you know it. A /0 is refused on purpose: it would defeat the narrowing, and the cloud firewall stays the outer layer. Only matters once host_firewall is true.",
+        "required": false,
+        "default": [
+          "10.0.0.0/8",
+          "172.16.0.0/12",
+          "192.168.0.0/16"
+        ],
+        "validation": "at least one IPv4 CIDR, no repeats; no leading zeros in octets or prefix; prefix 1 to 32 (/0 is refused on purpose); host bits and overlaps allowed",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "[\"10.0.0.0/8\"]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
         "name": "region",
         "type": "string",
         "description": "DigitalOcean region slug, from the foundation stack's region output. Names are built from resource_key, which defaults to this.",
@@ -458,6 +504,52 @@
       }
     ],
     "stacks/aws/10-access": [
+      {
+        "name": "host_firewall",
+        "type": "bool",
+        "description": "A default-drop host firewall (nftables table inet cah_host, input chain only) on each connector, a second layer behind the cloud firewall. Only loopback, established traffic, the ICMP and DHCP the network card needs, TCP 22 from host_firewall_ssh_sources and, when connector_telemetry.metrics_port is set, that port from the same sources are let in. Default false is the live state: merging code with this unset plans no change. true adds a script, a systemd unit and the nftables package through user_data, which REPLACES the instance of every connector in host_firewall_instances (both by default). The script checks the ruleset, applies it, verifies sshd still listens and removes the table if not. Roll out one connector at a time: true with host_firewall_instances [\"a\"], apply, check SSH through Twingate, then [\"a\", \"b\"]. Not yet tested on a real machine.",
+        "required": false,
+        "default": false,
+        "validation": "none; non-nullable (null means false)",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "true",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "host_firewall_instances",
+        "type": "list(string)",
+        "description": "Which connectors get host_firewall: a, b or both. Only matters once host_firewall is true. Set [\"a\"] first, apply, check SSH through Twingate to the new connector, then [\"a\", \"b\"]. A connector not listed runs without the host firewall, as it does today.",
+        "required": false,
+        "default": [
+          "a",
+          "b"
+        ],
+        "validation": "at least one entry; each entry is a or b, no repeats",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "[\"a\"]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "host_firewall_ssh_sources",
+        "type": "list(string)",
+        "description": "IPv4 CIDRs allowed to reach TCP 22 (and the connector metrics port) through the host firewall. Default the three private RFC 1918 blocks: the cloud firewall already limits SSH to the connector tag and this only narrows it to private space, because the module does not know the VPC CIDR. Narrow it to your VPC range if you know it. A /0 is refused on purpose: it would defeat the narrowing, and the cloud firewall stays the outer layer. Only matters once host_firewall is true.",
+        "required": false,
+        "default": [
+          "10.0.0.0/8",
+          "172.16.0.0/12",
+          "192.168.0.0/16"
+        ],
+        "validation": "at least one IPv4 CIDR, no repeats; no leading zeros in octets or prefix; prefix 1 to 32 (/0 is refused on purpose); host bits and overlaps allowed",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "[\"10.0.0.0/8\"]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
       {
         "name": "region",
         "type": "string",
@@ -1067,6 +1159,36 @@
     ],
     "modules/twingate-bootstrap": [
       {
+        "name": "host_firewall",
+        "type": "bool",
+        "description": "A default-drop host firewall (nftables, input only). Default false changes nothing: user_data is byte-identical (golden hashes in the tests). true adds a script, a systemd unit and the nftables package to user_data, which replaces the machine.",
+        "required": false,
+        "default": false,
+        "validation": "none; non-nullable (null means false)",
+        "set_where": "the calling module",
+        "example": "true",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "host_firewall_ssh_sources",
+        "type": "list(string)",
+        "description": "IPv4 CIDRs allowed to reach TCP 22 (and the metrics port) when host_firewall is true. Default the three private RFC 1918 blocks.",
+        "required": false,
+        "default": [
+          "10.0.0.0/8",
+          "172.16.0.0/12",
+          "192.168.0.0/16"
+        ],
+        "validation": "at least one IPv4 CIDR, no repeats; no leading zeros in octets or prefix; prefix 1 to 32 (/0 is refused on purpose); host bits and overlaps allowed",
+        "set_where": "the calling module",
+        "example": "[\"10.0.0.0/8\"]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
         "name": "layer",
         "type": "string",
         "description": "Stack layer, used in names (the module has no description for it).",
@@ -1206,6 +1328,36 @@
       }
     ],
     "modules/twingate-connector": [
+      {
+        "name": "host_firewall",
+        "type": "bool",
+        "description": "A default-drop host firewall (nftables, input only). Default false changes nothing: user_data is byte-identical (golden hashes in the tests). true adds a script, a systemd unit and the nftables package to user_data, which replaces the droplet.",
+        "required": false,
+        "default": false,
+        "validation": "none; non-nullable (null means false)",
+        "set_where": "the calling stack",
+        "example": "true",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "host_firewall_ssh_sources",
+        "type": "list(string)",
+        "description": "IPv4 CIDRs allowed to reach TCP 22 (and the metrics port) when host_firewall is true. Default the three private RFC 1918 blocks.",
+        "required": false,
+        "default": [
+          "10.0.0.0/8",
+          "172.16.0.0/12",
+          "192.168.0.0/16"
+        ],
+        "validation": "none here; the bootstrap module requires IPv4 CIDRs without leading zeros, prefix 1 to 32 (/0 refused), no repeats",
+        "set_where": "the calling stack",
+        "example": "[\"10.0.0.0/8\"]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
       {
         "name": "layer",
         "type": "string",
@@ -1535,6 +1687,36 @@
       }
     ],
     "modules/aws/twingate-connector": [
+      {
+        "name": "host_firewall",
+        "type": "bool",
+        "description": "A default-drop host firewall (nftables, input only). Default false changes nothing: user_data is byte-identical (golden hashes in the tests). true adds a script, a systemd unit and the nftables package to user_data, which replaces the instance.",
+        "required": false,
+        "default": false,
+        "validation": "none; non-nullable (null means false)",
+        "set_where": "the calling stack",
+        "example": "true",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "host_firewall_ssh_sources",
+        "type": "list(string)",
+        "description": "IPv4 CIDRs allowed to reach TCP 22 (and the metrics port) when host_firewall is true. Default the three private RFC 1918 blocks.",
+        "required": false,
+        "default": [
+          "10.0.0.0/8",
+          "172.16.0.0/12",
+          "192.168.0.0/16"
+        ],
+        "validation": "none here; the bootstrap module requires IPv4 CIDRs without leading zeros, prefix 1 to 32 (/0 refused), no repeats",
+        "set_where": "the calling stack",
+        "example": "[\"10.0.0.0/8\"]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
       {
         "name": "layer",
         "type": "string",

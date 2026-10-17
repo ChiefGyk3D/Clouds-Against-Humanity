@@ -12,7 +12,7 @@ package_upgrade: true
 packages:
   - unattended-upgrades
   - chrony
-%{ if metadata_lock ~}
+%{ if metadata_lock || host_firewall ~}
   - nftables
 %{ endif ~}
 
@@ -67,18 +67,118 @@ ${telemetry_conf}%{ if metadata_lock ~}
       EOF
       echo "cah-metadata-lock: metadata endpoint allowed for uids: $allowed"
   # After cloud-final so the do-agent user already exists on first boot.
+  # Ubuntu's nftables.service loads /etc/nftables.conf, which starts with
+  # "flush ruleset", on start, restart and reload, and its package upgrade
+  # try-restarts it: that would silently drop our table. So this unit is ordered
+  # After= it, is PartOf= it (a stop or restart of nftables.service restarts this
+  # unit, which re-runs the idempotent script) and takes its reloads too. All
+  # three are soft: no Requires=, Wants= or Requisite=, so when nftables.service
+  # is inactive (the first-boot state) this unit still starts and does not fail.
+  # PartOf= and ReloadPropagatedFrom= only forward jobs that nftables.service
+  # already has; they never start it. Untested on a real machine.
   - path: /etc/systemd/system/cah-metadata-lock.service
     permissions: "0644"
     content: |
       [Unit]
       Description=Restrict the droplet metadata endpoint to root and do-agent
       After=cloud-final.service network-online.target
+      After=nftables.service
+      PartOf=nftables.service
+      ReloadPropagatedFrom=nftables.service
       Wants=network-online.target
 
       [Service]
       Type=oneshot
       RemainAfterExit=yes
       ExecStart=/usr/local/sbin/cah-metadata-lock
+      ExecReload=/usr/local/sbin/cah-metadata-lock
+
+      [Install]
+      WantedBy=multi-user.target
+%{ endif ~}
+%{ if host_firewall ~}
+  # A default-drop host firewall, the second layer behind the cloud firewall. It
+  # lives in its own nftables table (inet cah_host), so it never flushes or
+  # touches any other rule, including the metadata lock's table. Only the input
+  # chain is filtered; output and forward are left alone.
+  - path: /usr/local/sbin/cah-host-firewall
+    permissions: "0750"
+    owner: root:root
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+      ssh_sources="${host_firewall_ssh_sources}"
+      # Empty unless connector_telemetry.metrics_port is set.
+      metrics_port="${host_firewall_metrics_port}"
+      metrics_rule=""
+      if [ -n "$metrics_port" ]; then
+        metrics_rule="tcp dport $metrics_port ip saddr { $ssh_sources } accept"
+      fi
+      # Why each accept exists:
+      #  - lo and established/related: local traffic and replies to what this
+      #    machine started (the connector, apt, DNS, NTP all work on replies).
+      #  - ICMPv4 echo, unreachable and time-exceeded: ping, and path MTU and
+      #    error reporting.
+      #  - ICMPv6 neighbour discovery and packet-too-big: the machines have no
+      #    public IPv6, but link-local neighbour discovery must keep working.
+      #  - DHCPv4 replies (server port 67 to client port 68): lease renewal.
+      #  - TCP 22 and the metrics port: only from the private sources.
+      # The same ruleset serves DigitalOcean and AWS.
+      read -r -d '' ruleset <<EOF || true
+      table inet cah_host
+      delete table inet cah_host
+      table inet cah_host {
+        chain input {
+          type filter hook input priority 0; policy drop;
+          iifname "lo" accept
+          ct state established,related accept
+          ct state invalid drop
+          icmp type { echo-request, destination-unreachable, time-exceeded } accept
+          icmpv6 type { destination-unreachable, packet-too-big, time-exceeded, echo-request, nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert } accept
+          udp sport 67 udp dport 68 accept
+          tcp dport 22 ip saddr { $ssh_sources } accept
+          $metrics_rule
+        }
+      }
+      EOF
+      # Refuse a ruleset that does not parse, before anything changes.
+      if ! printf '%s\n' "$ruleset" | nft -c -f -; then
+        echo "cah-host-firewall: refusing to apply: the ruleset does not parse" >&2
+        exit 1
+      fi
+      printf '%s\n' "$ruleset" | nft -f -
+      # Verify, and roll back (delete only our own table) if the machine could
+      # no longer be reached over SSH.
+      listening=""
+      listed=""
+      listening="$(ss -H -ltn)" || listening=""
+      listed="$(nft list table inet cah_host)" || listed=""
+      if [[ ! "$listening" =~ :22[[:space:]] ]] || [[ "$listed" != *"tcp dport 22"* ]]; then
+        echo "cah-host-firewall: verification failed (sshd not listening on 22, or the ssh accept is not loaded): removing the table" >&2
+        nft delete table inet cah_host || echo "cah-host-firewall: could not delete the table" >&2
+        exit 1
+      fi
+      echo "cah-host-firewall: loaded; ssh and metrics allowed from: $ssh_sources"
+  # Same reasoning as the metadata lock unit: nftables.service flushes the whole
+  # ruleset, so this unit is After=, PartOf= and ReloadPropagatedFrom= it (soft,
+  # nothing is pulled in, and it still starts when nftables.service is inactive).
+  # No ExecStop: a plain "stop nftables" still flushes our table, and the docs say so.
+  - path: /etc/systemd/system/cah-host-firewall.service
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Default-drop host firewall (inet cah_host)
+      After=cloud-final.service network-online.target
+      After=nftables.service
+      PartOf=nftables.service
+      ReloadPropagatedFrom=nftables.service
+      Wants=network-online.target
+
+      [Service]
+      Type=oneshot
+      RemainAfterExit=yes
+      ExecStart=/usr/local/sbin/cah-host-firewall
+      ExecReload=/usr/local/sbin/cah-host-firewall
 
       [Install]
       WantedBy=multi-user.target
@@ -151,6 +251,12 @@ runcmd:
   # this very command, so waiting here would deadlock.
   - [systemctl, daemon-reload]
   - [systemctl, enable, --now, --no-block, cah-metadata-lock.service]
+%{ endif ~}
+%{ if host_firewall ~}
+  # --no-block for the same reason. The firewall only filters inbound traffic and
+  # allows replies, so it can come up before the connector installs.
+  - [systemctl, daemon-reload]
+  - [systemctl, enable, --now, --no-block, cah-host-firewall.service]
 %{ endif ~}
   # Install the connector from Twingate's signed apt repository and start it,
   # the way their Terraform guide does, instead of running their setup.sh (an

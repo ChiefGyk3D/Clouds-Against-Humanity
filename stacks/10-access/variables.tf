@@ -219,3 +219,36 @@ variable "metadata_lock_instances" {
     error_message = "metadata_lock_instances must hold a, b or both, each at most once (at least one entry)."
   }
 }
+
+variable "host_firewall" {
+  type        = bool
+  default     = false
+  nullable    = false
+  description = "A default-drop host firewall (nftables table inet cah_host, input chain only) on each connector, a second layer behind the cloud firewall. Inbound is allowed only for loopback, established traffic, the ICMP and DHCP the network card needs, TCP 22 from host_firewall_ssh_sources and, when connector_telemetry.metrics_port is set, that port from the same sources. The default (false) is the live state and changes nothing: merging code with this unset plans no change. true adds a script, a systemd unit and the nftables package through user_data, which REPLACES the droplet of every connector listed in host_firewall_instances (both by default). The script checks the ruleset, applies it, verifies sshd still listens and removes the table if not. Roll out one connector at a time: host_firewall = true with host_firewall_instances = [\"a\"], apply, check SSH through Twingate to the new connector, then [\"a\", \"b\"]. Not yet tested on a real machine."
+}
+
+variable "host_firewall_instances" {
+  type        = list(string)
+  default     = ["a", "b"]
+  nullable    = false
+  description = "Which connectors get host_firewall: a, b or both (default both, and only matters once host_firewall is true). Set [\"a\"] first, apply, check SSH through Twingate to the new connector, then [\"a\", \"b\"] and apply again. A connector not listed runs without the host firewall, as it does today."
+
+  validation {
+    condition     = length(var.host_firewall_instances) >= 1 && alltrue([for i in var.host_firewall_instances : contains(["a", "b"], i)]) && length(distinct(var.host_firewall_instances)) == length(var.host_firewall_instances)
+    error_message = "host_firewall_instances must hold a, b or both, each at most once (at least one entry)."
+  }
+}
+
+variable "host_firewall_ssh_sources" {
+  type        = list(string)
+  default     = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+  nullable    = false
+  description = "IPv4 CIDRs allowed to reach TCP 22 (and the connector metrics port) through the host firewall. Default the three private RFC 1918 blocks: the cloud firewall already limits SSH to the connector tag and this only narrows it to private space, because the module does not know the VPC CIDR. Narrow it to your VPC range if you know it. No leading zeros in octets or prefix and a prefix of 1 to 32; a /0 is refused on purpose because it would defeat the narrowing (the cloud firewall is still the outer layer). Host bits and overlapping entries are allowed. Only matters once host_firewall is true."
+
+  validation {
+    condition = length(var.host_firewall_ssh_sources) >= 1 && length(distinct(var.host_firewall_ssh_sources)) == length(var.host_firewall_ssh_sources) && alltrue([
+      for c in var.host_firewall_ssh_sources : can(regex("^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])/([1-9]|[12][0-9]|3[0-2])$", c)) && can(cidrnetmask(c))
+    ])
+    error_message = "host_firewall_ssh_sources must hold at least one IPv4 CIDR (for example 10.0.0.0/8), each at most once, written without leading zeros (nft rejects 10.0.0.0/08) and with a prefix of 1 to 32. A /0 (0.0.0.0/0) is refused on purpose: it would defeat the narrowing to private space, and the cloud firewall stays the outer layer either way."
+  }
+}

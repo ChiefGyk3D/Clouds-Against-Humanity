@@ -20,6 +20,9 @@ module "bootstrap" {
   timezone             = var.timezone
   connector_telemetry  = var.connector_telemetry
   metadata_lock        = var.metadata_lock
+
+  host_firewall             = var.host_firewall
+  host_firewall_ssh_sources = var.host_firewall_ssh_sources
 }
 
 # Ubuntu 24.04 LTS, from the parameter Canonical publishes in every region's

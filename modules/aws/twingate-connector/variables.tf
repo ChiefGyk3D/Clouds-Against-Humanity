@@ -109,3 +109,17 @@ variable "metadata_lock" {
   nullable    = false
   description = "Lock the metadata endpoint (169.254.169.254) to root and the do-agent user, passed to the bootstrap module, which explains it. The default (false) changes nothing. true changes user_data and replaces the instance."
 }
+
+variable "host_firewall" {
+  type        = bool
+  default     = false
+  nullable    = false
+  description = "A default-drop host firewall (nftables, input only), passed to the bootstrap module, which explains it. The default (false) changes nothing. true changes user_data and replaces the instance."
+}
+
+variable "host_firewall_ssh_sources" {
+  type        = list(string)
+  default     = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+  nullable    = false
+  description = "IPv4 CIDRs allowed to reach SSH (and the metrics port) when host_firewall is true, passed to the bootstrap module, which validates it. Default the three private RFC 1918 blocks."
+}

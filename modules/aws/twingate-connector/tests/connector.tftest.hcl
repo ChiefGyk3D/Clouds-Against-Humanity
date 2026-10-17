@@ -402,3 +402,34 @@ run "metadata_lock_reaches_the_instance_user_data" {
     error_message = "metadata_lock must flow through the module into the instance's user_data."
   }
 }
+
+run "host_firewall_default_adds_nothing_to_the_instance_user_data" {
+  command = plan
+  assert {
+    condition     = !strcontains(aws_instance.connector.user_data, "cah-host-firewall") && !strcontains(aws_instance.connector.user_data, "nftables")
+    error_message = "With host_firewall unset nothing about it may reach the instance."
+  }
+}
+
+run "host_firewall_reaches_the_instance_user_data" {
+  command = plan
+  variables {
+    host_firewall = true
+  }
+  assert {
+    condition     = strcontains(aws_instance.connector.user_data, "/usr/local/sbin/cah-host-firewall") && strcontains(aws_instance.connector.user_data, "--no-block") && strcontains(aws_instance.connector.user_data, "policy drop")
+    error_message = "host_firewall must flow through the module into the instance's user_data."
+  }
+}
+
+run "host_firewall_sources_reach_the_instance_user_data" {
+  command = plan
+  variables {
+    host_firewall             = true
+    host_firewall_ssh_sources = ["10.20.0.0/16"]
+  }
+  assert {
+    condition     = strcontains(aws_instance.connector.user_data, "ssh_sources=\"10.20.0.0/16\"")
+    error_message = "host_firewall_ssh_sources must flow through the module into the instance's user_data."
+  }
+}

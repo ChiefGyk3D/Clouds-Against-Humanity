@@ -1272,3 +1272,294 @@ run "metadata_lock_on_keeps_the_rest_of_the_cloud_init" {
     error_message = "The lock must be additive."
   }
 }
+
+# host_firewall (issue #90): off by default, and off adds nothing at all. The
+# golden-hash runs above already prove the default user_data is byte-identical;
+# this run names the absent pieces so a failure says what leaked.
+run "host_firewall_default_adds_nothing_to_user_data" {
+  command = plan
+  assert {
+    condition     = !strcontains(output.user_data, "cah-host-firewall") && !strcontains(output.user_data, "cah_host") && !strcontains(output.user_data, "nftables") && !strcontains(output.user_data, "policy drop")
+    error_message = "With host_firewall unset no firewall script, unit, rule or nftables package may appear in user_data."
+  }
+}
+
+run "host_firewall_false_is_the_golden_user_data" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time   = "04:00"
+    host_firewall = false
+  }
+  assert {
+    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    error_message = "host_firewall = false must render the same user_data as before the setting existed."
+  }
+}
+
+run "host_firewall_on_installs_script_unit_and_package" {
+  command = plan
+  variables {
+    host_firewall = true
+  }
+  assert {
+    condition     = contains(yamldecode(output.user_data).packages, "nftables") && contains(yamldecode(output.user_data).packages, "chrony")
+    error_message = "nftables must be installed next to the existing packages."
+  }
+  assert {
+    condition     = length([for p in yamldecode(output.user_data).packages : p if p == "nftables"]) == 1
+    error_message = "nftables must appear exactly once."
+  }
+  assert {
+    condition     = one([for f in yamldecode(output.user_data).write_files : f.permissions if f.path == "/usr/local/sbin/cah-host-firewall"]) == "0750" && one([for f in yamldecode(output.user_data).write_files : f.owner if f.path == "/usr/local/sbin/cah-host-firewall"]) == "root:root"
+    error_message = "The firewall script must be root-owned and 0750."
+  }
+  assert {
+    condition = alltrue([
+      for s in ["table inet cah_host", "delete table inet cah_host", "policy drop", "ct state established,related accept", "ct state invalid drop", "udp sport 67 udp dport 68 accept", "tcp dport 22 ip saddr", "nft -c -f -", "nft delete table inet cah_host", "set -euo pipefail", "ssh_sources=\"10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16\"", "metrics_port=\"\""] :
+      strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/usr/local/sbin/cah-host-firewall"]), s)
+    ])
+    error_message = "The script must check, load an idempotent drop-by-default table with the default private ssh sources, and roll back."
+  }
+  assert {
+    condition     = !strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/usr/local/sbin/cah-host-firewall"]), "flush ruleset") && !strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/usr/local/sbin/cah-host-firewall"]), "cah_metadata")
+    error_message = "The firewall must never flush the ruleset or touch the metadata-lock table."
+  }
+  assert {
+    condition = alltrue([
+      for s in ["Type=oneshot", "RemainAfterExit=yes", "After=cloud-final.service network-online.target", "ExecStart=/usr/local/sbin/cah-host-firewall", "WantedBy=multi-user.target"] :
+      strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/etc/systemd/system/cah-host-firewall.service"]), s)
+    ])
+    error_message = "The unit must be a oneshot ordered after cloud-final."
+  }
+}
+
+run "host_firewall_on_enables_the_unit_without_blocking" {
+  command = plan
+  variables {
+    host_firewall = true
+  }
+  assert {
+    condition     = contains(yamldecode(output.user_data).runcmd, ["systemctl", "daemon-reload"]) && contains(yamldecode(output.user_data).runcmd, ["systemctl", "enable", "--now", "--no-block", "cah-host-firewall.service"])
+    error_message = "runcmd must daemon-reload and enable the unit with --no-block (cloud-final runs runcmd; blocking would deadlock)."
+  }
+}
+
+run "host_firewall_on_keeps_the_rest_of_the_cloud_init" {
+  command = plan
+  variables {
+    host_firewall = true
+  }
+  assert {
+    condition     = length(yamldecode(output.user_data).users) == 1 && strcontains(output.user_data, "TWINGATE_URL=https://acme.twingate.com") && strcontains(output.user_data, "99-cah-hardening")
+    error_message = "The firewall must be additive."
+  }
+}
+
+run "host_firewall_metrics_port_is_empty_without_telemetry" {
+  command = plan
+  variables {
+    host_firewall = true
+  }
+  assert {
+    condition     = strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/usr/local/sbin/cah-host-firewall"]), "metrics_port=\"\"")
+    error_message = "Without connector_telemetry.metrics_port no metrics rule may be configured."
+  }
+}
+
+run "host_firewall_metrics_port_follows_telemetry" {
+  command = plan
+  variables {
+    host_firewall       = true
+    connector_telemetry = { metrics_port = 9999 }
+  }
+  assert {
+    condition     = strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/usr/local/sbin/cah-host-firewall"]), "metrics_port=\"9999\"")
+    error_message = "connector_telemetry.metrics_port must reach the firewall script."
+  }
+}
+
+run "host_firewall_custom_sources_are_rendered" {
+  command = plan
+  variables {
+    host_firewall             = true
+    host_firewall_ssh_sources = ["10.20.0.0/16", "192.0.2.7/32"]
+  }
+  assert {
+    condition     = strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/usr/local/sbin/cah-host-firewall"]), "ssh_sources=\"10.20.0.0/16, 192.0.2.7/32\"")
+    error_message = "host_firewall_ssh_sources must be rendered into the script."
+  }
+}
+
+run "host_firewall_sources_reject_a_non_cidr" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["10.0.0.1"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_reject_injection" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["10.0.0.0/8 } accept; ip saddr { 0.0.0.0/0"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_reject_ipv6" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["fd00::/8"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_reject_an_empty_list" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = []
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_reject_a_repeat" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["10.0.0.0/8", "10.0.0.0/8"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_and_metadata_lock_render_nftables_once_and_both_tables" {
+  command = plan
+  variables {
+    host_firewall = true
+    metadata_lock = true
+  }
+  assert {
+    condition     = length([for p in yamldecode(output.user_data).packages : p if p == "nftables"]) == 1
+    error_message = "nftables must be listed once when both features are on."
+  }
+  assert {
+    condition     = strcontains(output.user_data, "table inet cah_metadata") && strcontains(output.user_data, "table inet cah_host")
+    error_message = "Both tables must be present when both features are on."
+  }
+  assert {
+    condition     = contains(yamldecode(output.user_data).runcmd, ["systemctl", "enable", "--now", "--no-block", "cah-host-firewall.service"]) && contains(yamldecode(output.user_data).runcmd, ["systemctl", "enable", "--now", "--no-block", "cah-metadata-lock.service"])
+    error_message = "Both units must be enabled."
+  }
+}
+
+run "metadata_lock_alone_still_renders_nftables_once" {
+  command = plan
+  variables {
+    metadata_lock = true
+  }
+  assert {
+    condition     = length([for p in yamldecode(output.user_data).packages : p if p == "nftables"]) == 1 && !strcontains(output.user_data, "cah_host")
+    error_message = "The metadata lock alone must keep one nftables entry and no firewall."
+  }
+}
+
+# Persistence (issue #90 review): Ubuntu's nftables.service starts with
+# `flush ruleset` and is try-restarted by package upgrades, which would drop our
+# tables silently. Both units must be ordered after it and be part of it so a
+# restart of nftables.service re-runs our script.
+run "host_firewall_unit_follows_nftables_service" {
+  command = plan
+  variables {
+    host_firewall = true
+  }
+  assert {
+    condition = alltrue([
+      for s in ["After=nftables.service", "PartOf=nftables.service", "ReloadPropagatedFrom=nftables.service", "ExecReload=/usr/local/sbin/cah-host-firewall", "After=cloud-final.service network-online.target"] :
+      strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/etc/systemd/system/cah-host-firewall.service"]), s)
+    ])
+    error_message = "cah-host-firewall.service must be After= and PartOf= nftables.service."
+  }
+}
+
+run "metadata_lock_unit_follows_nftables_service" {
+  command = plan
+  variables {
+    metadata_lock = true
+  }
+  assert {
+    condition = alltrue([
+      for s in ["After=nftables.service", "PartOf=nftables.service", "ReloadPropagatedFrom=nftables.service", "ExecReload=/usr/local/sbin/cah-metadata-lock", "After=cloud-final.service network-online.target"] :
+      strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/etc/systemd/system/cah-metadata-lock.service"]), s)
+    ])
+    error_message = "cah-metadata-lock.service must be After= and PartOf= nftables.service."
+  }
+}
+
+run "both_units_follow_nftables_service_when_both_features_are_on" {
+  command = plan
+  variables {
+    host_firewall = true
+    metadata_lock = true
+  }
+  assert {
+    condition = alltrue([
+      for p in ["/etc/systemd/system/cah-host-firewall.service", "/etc/systemd/system/cah-metadata-lock.service"] :
+      strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == p]), "PartOf=nftables.service") && strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == p]), "After=nftables.service")
+    ])
+    error_message = "Both units must follow nftables.service."
+  }
+}
+
+# Tightened host_firewall_ssh_sources validation: nft rejects leading zeros, and
+# a /0 would defeat the narrowing to private space.
+run "host_firewall_sources_reject_a_leading_zero_prefix" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["10.0.0.0/08"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_reject_a_leading_zero_octet" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["010.0.0.0/8"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_reject_slash_zero" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["0.0.0.0/0"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_reject_a_prefix_over_32" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["10.0.0.0/33"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_reject_an_octet_over_255" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["10.0.0.256/32"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_accept_host_bits_overlaps_and_the_extremes" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["10.0.0.1/8", "10.1.0.0/16", "192.0.2.7/32", "128.0.0.0/1"]
+  }
+}
