@@ -75,6 +75,7 @@ Clouds-Against-Humanity/
   modules/firewall/                        tag-based deny-inbound firewall
   modules/twingate-connector/              connector, its tokens, its droplet and cloud-init
   scripts/cost_check.py                    cost gate
+  scripts/identifier_check.py              fails on cloud account ids in tracked files (never prints them)
   scripts/spacelift/doppler-env.sh         hook that loads Doppler secrets into a run
   scripts/gen-wiki.sh                      writes the wiki pages from docs/wiki (the Wiki workflow publishes them)
   tests/                                   pytest for the cost gate, the hook and the wiki generator
