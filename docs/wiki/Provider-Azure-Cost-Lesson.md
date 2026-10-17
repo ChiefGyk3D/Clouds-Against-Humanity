@@ -112,4 +112,4 @@ The same discipline as the DigitalOcean teardown, with the Azure names:
 - Look at the [cost gate](CI-Tests-and-Cost-Gate.md). Which of the charges on this page would it catch today, and which would pass silently?
   *Reference: today, for Azure, it would catch none of the costs on this page by pricing them: plan costing and the named NAT rejection exist for AWS only (`aws_nat_gateway`), and the Azure price lists are empty. The source allowlist would refuse an unapproved `azurerm_` resource type, including a NAT gateway, but only because it is unapproved, not because it was priced. Everything else here (data transfer, logging, a forgotten disk, anything created outside the code) would pass silently on any cloud, since a fixed-cost gate prices only what the code declares. A future Azure build would need an Azure price table, costed types and plan checks.*
 
-Back to [Why the clouds differ](Why-the-Clouds-Differ.md), or to [Home](Home.md).
+Next: [GCP account preparation](Provider-GCP-Account-Preparation.md), the same three lessons for GCP (unverified drafts). Back to [Why the clouds differ](Why-the-Clouds-Differ.md) or the [Reading order](Reading-Order.md).

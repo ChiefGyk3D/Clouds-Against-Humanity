@@ -149,4 +149,4 @@ Do this before you need the table.
 
 If your prediction named the wrong rule or the wrong total, write one sentence on what you assumed. The [labs](Labs-Break-It-on-Purpose.md) do the same for the firewall, the VPC range, the push policy and the secrets hook.
 
-Back to [Lessons learned](Lessons-Learned.md) or the [Glossary](Glossary.md).
+Back to [Lessons learned](Lessons-Learned.md), the [Glossary](Glossary.md) or the [Reading order](Reading-Order.md).

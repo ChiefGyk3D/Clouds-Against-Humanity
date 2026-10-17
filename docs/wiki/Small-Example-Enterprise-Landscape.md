@@ -97,4 +97,4 @@ Be honest with yourself about what this project does not teach, because it is ea
 - Look at a job description for a cloud or security engineer. Highlight every product name. For each, find which row or rows of the table it answers, and which of its capabilities are separate products or licences. Many will not fit one row, which is the point: products are portfolios and the questions are what stay put.
 - If you work somewhere that uses several of these, ask the person who runs one how it ended up there. The history is usually more instructive than the feature list.
 
-Back to [Home](Home.md).
+Next: [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md), step 2 of the detection track. Back to the [Reading order](Reading-Order.md).

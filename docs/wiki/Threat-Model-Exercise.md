@@ -203,3 +203,5 @@ A threat model that does not say what it left out is selling comfort. This one, 
 - Add a threat **T15** to your own copy of the table that the worked example does not have. Give it a position, a control, a residual risk, and a file that proves the control. Open a pull request if you think it belongs upstream.
 - Pick one "Accepted" risk (T5, T6, T10 or T13) and write the cheapest control you would add, what it would cost in effort, and whether it moves the risk out of "accepted".
 - Re-do scenario 2 for `cah-00-foundation`. What changes about the answer to "what does the run hold", and what does not?
+
+Next: [Threat Dragon exercise: trust boundaries](Threat-Dragon-Exercise.md), which draws the same system as a diagram. Back to the [Reading order](Reading-Order.md).

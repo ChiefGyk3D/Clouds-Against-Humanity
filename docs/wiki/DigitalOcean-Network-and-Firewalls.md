@@ -85,3 +85,5 @@ Later workload droplets will need an inbound rule allowing their service ports *
 - The baseline firewall in the console lists no inbound rules.
 - `nmap -Pn -p 22,80,443 <droplet public IP>` from outside reports all filtered.
 - From connector a over Twingate SSH: `timeout 5 bash -c '</dev/tcp/<connector b private IP>/22' && echo open || echo blocked` prints `open`. Do the same from b to a.
+
+Next: [Droplet hardening](Droplet-Hardening.md), step 14 of the core path on the [Reading order](Reading-Order.md) page.

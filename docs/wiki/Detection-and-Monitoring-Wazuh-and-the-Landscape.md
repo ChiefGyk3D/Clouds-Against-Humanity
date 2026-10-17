@@ -96,4 +96,4 @@ The useful distinction is **agent versus agentless, and host versus cloud contro
 - **Agent or agentless?** For each of: a public storage bucket, a process on a droplet launching `/bin/sh`, an IAM role with admin rights, a modified `sshd_config`. Say which kind of tool could see it and why the other kind could not.
 - **Break it on purpose, later.** When stage 2 exists in your own copy, change a monitored file on a throwaway host and find the alert. Then stop the agent and find out how long it takes anything to tell you it has gone quiet. That second number is usually the one nobody has.
 
-Back to [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md), or on to [Home](Home.md).
+Next: the stage 2 section of the [Roadmap](Roadmap.md#stage-2-logging-and-the-link-home-planned), which is where this becomes a build. Back to [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md) or the [Reading order](Reading-Order.md).

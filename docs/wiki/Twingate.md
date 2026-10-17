@@ -105,3 +105,5 @@ Replace `module.connector_a.module.bootstrap.twingate_connector_tokens.this` (or
 1. Both connectors show online in the Twingate admin console under `access-tor1`.
 2. From the Twingate client: `ssh cah-admin@<private IP>` works for each connector.
 3. From anywhere outside Twingate: `nmap -Pn -p 22,80,443 <public IP>` reports every port filtered. Scanning your own droplet is fine; scanning other people's is not.
+
+Next: [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md), step 13 of the core path on the [Reading order](Reading-Order.md) page.

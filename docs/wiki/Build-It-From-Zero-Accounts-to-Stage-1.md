@@ -1,5 +1,7 @@
 # Build it: from zero accounts to stage 1
 
+> Prerequisites: the build track so far ([Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipeline.md), then [Labs](Labs-Break-It-on-Purpose.md)) and [How money works in the cloud](How-Money-Works-in-the-Cloud.md), because you set a billing alert before anything else.
+
 > This is the replication path. It does not repeat the stage guides; it puts them in order, names the accounts you need before you need them, gives every step a "what you should see" check, and ends with how to take it all down and prove the bill is back to zero. Read [Start here if you are new](Start-Here-If-You-Are-New.md) first if the words are unfamiliar.
 
 The stage guides ([stage 0](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/00-foundation.md), [stage 1](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md)) and the [secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md) are the author's operating records. They are accurate for the author's setup and they contain items that are specific to it. This page tells you which, and in what order to use them.
@@ -142,6 +144,6 @@ The stage guides and [Lessons learned](Lessons-Learned.md) are written as sympto
 
 ## What you built, and what to do next
 
-You built, by hand and understanding each step, a small environment where no machine has an open port, secrets live in one place, every change is reviewed, and a human confirms every apply. Next: read the [Threat model](Threat-Model.md) with the labs fresh in your mind, then [what an enterprise does differently](Small-Example-Enterprise-Landscape.md), then decide what you would change before this held anything real.
+You built, by hand and understanding each step, a small environment where no machine has an open port, secrets live in one place, every change is reviewed, and a human confirms every apply. Next: the [Settings reference](Settings-Reference.md) lists every value you can change in your own copy. Then re-read the [Threat model](Threat-Model.md) with the labs fresh in your mind, try the security track, and decide what you would change before this held anything real. [What an enterprise does differently](Small-Example-Enterprise-Landscape.md) starts the detection track.
 
-Back to [Home](Home.md).
+Back to the [Reading order](Reading-Order.md).

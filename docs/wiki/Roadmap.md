@@ -1,5 +1,7 @@
 # Roadmap
 
+> Prerequisites: the [Architecture overview](Architecture-Overview.md) and the [How money works in the cloud](How-Money-Works-in-the-Cloud.md) primer, because every stage here is a cost decision.
+
 The environment grows one stage at a time. Each stage gets its own design, its own cost approval and its own guide before it costs anything. Working ceiling across stages 0 to 4: $30 per month.
 
 ```mermaid
@@ -85,3 +87,5 @@ Kubernetes, multi-region, load balancers, managed databases. Each would blow the
 Also later, not never: a second cloud account at AWS. Once that tenant exists and is hardened (a project of its own), the stage 3 timer jobs that run as DigitalOcean Functions are candidates to move to Lambda with scheduled triggers, which OpenTofu manages fully and the cost gate can then see. The stage 3 design keeps the jobs portable for that: plain handlers, config from the environment, state in an S3-compatible bucket.
 
 Kubernetes in particular is a cost decision, not a refusal. DigitalOcean's control plane is free, but the smallest sensible node is the $24 droplet and a second node doubles it, for the same six containers that fit on one $12 host. Stage 3 is shaped so the move is cheap when it comes: one image per service, configuration from the environment and Doppler only, state in a bucket rather than on the host, timer jobs already running as Functions, and nothing that depends on a Portainer-only feature. It gets revisited when the ceiling moves past $40, a workload needs more than one host, or a second operator wants declarative rollouts more than a web UI.
+
+The core path ends here. Pick a track on the [Reading order](Reading-Order.md) page: build it yourself, understand the design, security, detection, or other clouds.

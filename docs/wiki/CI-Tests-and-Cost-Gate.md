@@ -130,3 +130,5 @@ opa test .spacelift/policies -v
 ## The wiki is published by a workflow too
 
 `.github/workflows/wiki.yml` calls GYST's `wiki-publish.yml`. On a pull request that touches `docs/wiki/` it runs `scripts/gen-wiki.sh`, which copies the pages and rewrites their links for the flat wiki, so a broken page fails review. On `main` it also publishes: a separate job with `contents: write`, which runs none of this repository's code, replaces every page in the GitHub wiki with the generated set. Nothing is published from a laptop and no personal token is involved. A page that exists only in the wiki editor is removed on the next publish, which is the point: `docs/wiki/` is the only place a page is written.
+
+Next: [Threat model](Threat-Model.md), step 19 of the core path on the [Reading order](Reading-Order.md) page. To follow one real change through every gate, see [Trace one change end to end](Trace-One-Change-End-to-End.md).

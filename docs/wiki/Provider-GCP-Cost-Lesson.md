@@ -118,4 +118,4 @@ The same discipline as the DigitalOcean teardown, with the GCP names:
 - **Close the gap.** Use the pricing calculator to get the real `e2-micro` and `e2-small` hourly prices in `us-central1` and replace the two UNVERIFIED rows. How far off was the working figure?
 - Look at the [cost gate](CI-Tests-and-Cost-Gate.md). Which of the charges on this page would it catch today, and which would pass silently? (Reference, one honest answer: its free list is an allowlist of DigitalOcean resource types and it has no GCP prices, so a GCP stack would be refused by name rather than priced.)
 
-Back to [Why the clouds differ](Why-the-Clouds-Differ.md), or to [Home](Home.md).
+That is the last of the other-clouds pages. Back to [Why the clouds differ](Why-the-Clouds-Differ.md) or the [Reading order](Reading-Order.md).

@@ -43,7 +43,7 @@ Read these in order. Each one is short, explains one idea, and ends by pointing 
 | 7 | [How money works in the cloud](How-Money-Works-in-the-Cloud.md) | What costs, what is free, how a bill gets out of hand, and how this project makes the bill a reviewed number |
 | 8 | [Enterprise engineering habits](Enterprise-Engineering-Habits.md) | Why this lab does things that look like overkill, and which of those habits are worth copying at home |
 
-After step 8, go to [Home](Home.md) and follow its reading order. The [Architecture overview](Architecture-Overview.md) will make sense, and the [Glossary](Glossary.md) is there for any word that does not.
+After step 8, continue with the core path on the [Reading order](Reading-Order.md) page (step 10 is the [Architecture overview](Architecture-Overview.md), which will make sense by then), and the [Glossary](Glossary.md) is there for any word that does not.
 
 ## Following along
 
@@ -68,3 +68,5 @@ Whatever level you pick, read [How money works in the cloud](How-Money-Works-in-
 ## What this is not
 
 It is not a tutorial that ends with a working website. The environment is deliberately tiny: two machines, zero open ports, one way in. The value is in how it was built and why, and in the fact that every decision, including the wrong ones, is written down. If you want to learn cloud by building a thing, pick a thing and build it; then come back here to learn how to build it so that it does not get owned, does not surprise you on the bill, and can be rebuilt from scratch in an afternoon.
+
+Next: [What is the cloud](What-Is-the-Cloud.md), the first primer. Every path through the wiki is laid out on the [Reading order](Reading-Order.md) page.

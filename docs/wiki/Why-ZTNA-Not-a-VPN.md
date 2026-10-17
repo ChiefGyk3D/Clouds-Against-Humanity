@@ -196,3 +196,5 @@ flowchart TD
 - [Colonial Pipeline CEO testimony coverage](https://www.darkreading.com/cyberattacks-data-breaches/colonial-pipeline-ceo-ransomware-attack-started-via-pilfered-legacy-vpn-account), Dark Reading, June 2021
 - [CISA Emergency Directive 24-01 coverage](https://thehackernews.com/2024/01/cisa-issues-emergency-directive-to.html), The Hacker News, January 2024
 - [CISA Known Exploited Vulnerabilities catalog](https://www.cisa.gov/known-exploited-vulnerabilities-catalog): search for your own VPN vendor and see how long the list is
+
+Next: [Twingate](Twingate.md), step 12 of the core path on the [Reading order](Reading-Order.md) page.
