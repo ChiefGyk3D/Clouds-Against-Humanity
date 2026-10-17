@@ -127,8 +127,8 @@ SAFE_PREFIXES = (
 # aws_instance plan attributes that change the bill and that the gate does not
 # model. Setting any of them to a non-empty value is a problem, not a zero;
 # tenancy and credit_specification have their own rule in unpriced_instance_attrs.
-# A value that is only known after apply comes from another resource in the plan,
-# and that resource is itself an unpriced type the plan check refuses.
+# A value unknown in the plan is refused when the configuration sets the attribute
+# (see unknown_unpriced_attrs); an unset computed default is not.
 AWS_INSTANCE_UNPRICED_ATTRS = (
     "instance_market_options",
     "placement_group",
@@ -138,6 +138,11 @@ AWS_INSTANCE_UNPRICED_ATTRS = (
     "network_interface",
     "launch_template",
     "monitoring",
+)
+# Every attribute the unknown-value rule looks at.
+AWS_INSTANCE_CHECKED_ATTRS = AWS_INSTANCE_UNPRICED_ATTRS + (
+    "tenancy",
+    "credit_specification",
 )
 
 
@@ -310,7 +315,9 @@ def plan_cost(plan, prices):
             continue
         try:
             if rtype == "aws_instance":
-                total += plan_instance_cost(addr, after, unknown, prices)
+                total += plan_instance_cost(
+                    addr, after, unknown, prices, config_expressions(plan, rc)
+                )
             elif rtype == "aws_eip":
                 total += (
                     num(prices["public_ipv4_hourly"], "public_ipv4_hourly")
@@ -353,6 +360,71 @@ def plan_volume_gb(addr, block, unknown, key):
     return num(block[key], f"{addr}: {key}")
 
 
+def mask_has_unknown(mask):
+    """True when an after_unknown mask marks anything, at any depth, unknown."""
+    if isinstance(mask, dict):
+        return any(mask_has_unknown(v) for v in mask.values())
+    if isinstance(mask, list):
+        return any(mask_has_unknown(v) for v in mask)
+    return mask is True
+
+
+def config_expressions(plan, rc):
+    """The configuration's `expressions` for a resource change, or None when the
+    plan does not carry that configuration (shape unknown, so callers fail closed).
+
+    In `tofu show -json`, configuration.root_module.resources[].expressions lists
+    only the attributes the configuration sets; an unset computed attribute is
+    absent there while still being unknown in after_unknown. Resources in modules
+    sit under module_calls.<name>.module.resources.
+    """
+    node = (plan.get("configuration") or {}).get("root_module")
+    address = rc.get("address", "")
+    module_address = rc.get("module_address")
+    if module_address is None:
+        lead = re.match(r"^((?:module\.[^.\[]+(?:\[[^\]]*\])?\.)*)", address)
+        module_address = lead.group(1)
+    for name in re.findall(r"module\.([^.\[]+)", module_address or ""):
+        if not isinstance(node, dict):
+            return None
+        node = ((node.get("module_calls") or {}).get(name) or {}).get("module")
+    if not isinstance(node, dict):
+        return None
+    name = rc.get("name") or re.sub(r"\[.*$", "", address.rsplit(".", 1)[-1])
+    for res in node.get("resources") or []:
+        if (
+            res.get("mode", "managed") == "managed"
+            and res.get("type") == rc.get("type")
+            and res.get("name") == name
+        ):
+            expr = res.get("expressions")
+            return expr if isinstance(expr, dict) else {}
+    return None
+
+
+def unknown_unpriced_attrs(unknown, expressions):
+    """Attributes the plan cannot value and that the configuration sets (or that
+    cannot be told apart from set, when the configuration is missing).
+
+    Not flagged: an unknown attribute the configuration does not set. That is a
+    provider default computed at apply (tenancy, placement_group, ...), which a
+    normal plan shows as unknown. Not caught either way: a default that is itself
+    priced differently, such as CPU credits left unset on a T-family type.
+    """
+    found = []
+    for attr in AWS_INSTANCE_CHECKED_ATTRS:
+        if mask_has_unknown(unknown.get(attr)):
+            if expressions is None:
+                found.append(
+                    f"{attr} (unknown in the plan and the plan carries no configuration to show it unset)"
+                )
+            elif attr in expressions:
+                found.append(
+                    f"{attr} (set by the configuration but unknown in the plan)"
+                )
+    return found
+
+
 def unpriced_instance_attrs(after):
     """Names (with values) of aws_instance attributes the gate does not price."""
     found = []
@@ -367,8 +439,10 @@ def unpriced_instance_attrs(after):
     return found
 
 
-def plan_instance_cost(addr, after, unknown, prices):
-    extras = unpriced_instance_attrs(after)
+def plan_instance_cost(addr, after, unknown, prices, expressions=None):
+    extras = unpriced_instance_attrs(after) + unknown_unpriced_attrs(
+        unknown, expressions
+    )
     if extras:
         raise ValueError(
             f"{addr}: unpriced attribute {'; '.join(extras)}; the gate prices the "
@@ -430,7 +504,9 @@ class HclError(ValueError):
 HEREDOC_OPEN_RE = re.compile(
     r"<<(?P<dash>-?)(?P<ident>[A-Za-z_][A-Za-z0-9_-]*)[ \t]*\r?\n"
 )
-LABEL = r'"(?:[^"\\\n]|\\.)*"|[^\s"{}]+'
+# A bare label is an identifier: "=", ":" and braces are not label characters, so
+# `module = { ... }` inside an object is an attribute, not a block header.
+LABEL = r'"(?:[^"\\\n]|\\.)*"|[^\W\d][\w-]*'
 LABEL_RE = re.compile(LABEL)
 HEADER_RE = re.compile(
     rf"^[ \t]*(?P<kind>resource|module)(?P<labels>(?:[ \t]+(?:{LABEL}))*)[ \t]*\{{",

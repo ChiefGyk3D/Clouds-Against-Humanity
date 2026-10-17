@@ -1115,3 +1115,176 @@ def test_a_connector_in_a_module_directory_still_has_its_source_and_size_checked
         'module "inner" {\n  source = "../twingate-connector"\n  size = "s-32vcpu-192gb"\n}\n',
     )
     fails(root, capsys, "docs/cost.md")
+
+
+# ---- third review round -------------------------------------------------------
+
+
+@pytest.mark.parametrize("target", ["outside", ".claude/payload"])
+def test_any_root_level_directory_symlink_is_refused(tmp_path, capsys, target):
+    root = build(tmp_path, aws=TWO)
+    if target == "outside":
+        dest = tmp_path.parent / (tmp_path.name + "-shared")
+    else:
+        dest = root / target
+    (dest / "twingate-connector").mkdir(parents=True)
+    (dest / "twingate-connector/main.tf").write_text(NAT)
+    (root / "shared").symlink_to(dest)
+    add(
+        root,
+        f"{AWS_STACK}/x.tf",
+        'module "v" {\n  source = "../../../shared/twingate-connector"\n  size = local.c.size\n}\n',
+    )
+    fails(root, capsys, "shared: symlinked directory is refused")
+
+
+def test_a_symlink_nested_deep_in_the_tree_is_refused(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    (root / "docs/deep").mkdir()
+    (root / "docs/deep/ln").symlink_to(root / "modules")
+    fails(root, capsys, "docs/deep/ln: symlinked directory is refused")
+
+
+# ordinary object attributes named like block keywords
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "locals {\n  module = { enabled = true }\n}\n",
+        "locals {\n  resource = { enabled = true }\n}\n",
+        "locals {\n  cfg = {\n    module = {\n      a = 1\n    }\n    resource = {\n      b = 2\n    }\n    data = {}\n  }\n}\n",
+        'variable "x" {\n  default = {\n    module   = { on = true }\n    resource = { on = false }\n  }\n}\n',
+        "locals {\n  module   =   {\n    on = true\n  }\n}\n",
+    ],
+)
+def test_object_attributes_named_module_or_resource_are_not_blocks(
+    tmp_path, capsys, text
+):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/x.tf", text)
+    code, out = run(root, capsys)
+    assert code == 0, out.err
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "resource = aws_nat_gateway n {}\n",
+        "resource aws_nat_gateway = {}\n",
+        "module r = {\n}\n",
+    ],
+)
+def test_a_label_cannot_contain_an_equals_sign(text):
+    assert cost_check.find_blocks(text) == []
+
+
+# unknown plan values
+
+
+def with_config(pl, expressions):
+    """Attach a `configuration` block shaped like `tofu show -json`: a resource's
+    config lists only the attributes the configuration sets."""
+    pl["configuration"] = {
+        "root_module": {
+            "resources": [
+                {
+                    "address": address,
+                    "mode": "managed",
+                    "type": "aws_instance",
+                    "name": address.split(".")[-1],
+                    "expressions": exprs,
+                }
+                for address, exprs in expressions.items()
+            ]
+        }
+    }
+    return pl
+
+
+def inst_unknown(unknown, **after_extra):
+    change_ = inst("a", **after_extra)
+    change_["change"]["after_unknown"] = unknown
+    return change_
+
+
+UNKNOWN_CASES = [
+    ("monitoring", {"monitoring": True}, {"monitoring": None}),
+    ("tenancy", {"tenancy": True}, {}),
+    (
+        "credit_specification",
+        {"credit_specification": [{"cpu_credits": True}]},
+        {"credit_specification": []},
+    ),
+    ("instance_market_options", {"instance_market_options": True}, {}),
+    ("placement_group", {"placement_group": True}, {}),
+    ("host_id", {"host_id": True}, {}),
+    ("host_resource_group_arn", {"host_resource_group_arn": True}, {}),
+    ("license_specification", {"license_specification": True}, {}),
+    ("network_interface", {"network_interface": True}, {}),
+    ("launch_template", {"launch_template": [{"id": True}]}, {}),
+]
+
+
+@pytest.mark.parametrize("attr,unknown,after", UNKNOWN_CASES)
+def test_an_unknown_value_the_config_sets_is_a_problem(attr, unknown, after):
+    pl = plan(inst_unknown(unknown, **after))
+    with_config(
+        pl, {"aws_instance.a": {attr: {"references": ["terraform_data.x.output"]}}}
+    )
+    problems = cost_check.plan_cost(pl, AWS_PRICES)[1]
+    assert any("unpriced attribute" in p and attr in p for p in problems), problems
+
+
+@pytest.mark.parametrize("attr,unknown,after", UNKNOWN_CASES)
+def test_an_unknown_computed_default_the_config_does_not_set_passes(
+    attr, unknown, after
+):
+    pl = plan(inst_unknown(unknown, **after))
+    with_config(
+        pl, {"aws_instance.a": {"instance_type": {"constant_value": "t4g.micro"}}}
+    )
+    assert cost_check.plan_cost(pl, AWS_PRICES)[1] == []
+
+
+@pytest.mark.parametrize("attr,unknown,after", UNKNOWN_CASES)
+def test_an_unknown_value_with_no_configuration_fails_closed(attr, unknown, after):
+    pl = plan(inst_unknown(unknown, **after))
+    problems = cost_check.plan_cost(pl, AWS_PRICES)[1]
+    assert any("unpriced attribute" in p and attr in p for p in problems), problems
+
+
+def module_plan(expressions):
+    change_ = inst_unknown({"tenancy": True})
+    change_["address"] = "module.m.aws_instance.a[0]"
+    change_["module_address"] = "module.m"
+    pl = plan(change_)
+    pl["configuration"] = {
+        "root_module": {
+            "module_calls": {
+                "m": {
+                    "module": {
+                        "resources": [
+                            {
+                                "mode": "managed",
+                                "type": "aws_instance",
+                                "name": "a",
+                                "expressions": expressions,
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+    return pl
+
+
+def test_an_unknown_value_in_a_module_instance_is_found_through_module_calls():
+    pl = module_plan({"tenancy": {"references": ["var.t"]}})
+    problems = cost_check.plan_cost(pl, AWS_PRICES)[1]
+    assert any("unpriced attribute" in p and "tenancy" in p for p in problems)
+
+
+def test_a_module_instance_whose_config_does_not_set_it_passes():
+    assert cost_check.plan_cost(module_plan({}), AWS_PRICES)[1] == []
