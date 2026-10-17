@@ -34,9 +34,16 @@ def make_repo(
     (tmp_path / "docs/stages/approved.json").write_text(
         json.dumps(
             {
-                "approved_monthly_total": approved_total,
                 "ceiling": ceiling,
-                "allowed_sources": {"digitalocean_droplet": ["modules/ok/main.tf"]},
+                "providers": {
+                    "digitalocean": {
+                        "approved_monthly_total": approved_total,
+                        "active": True,
+                        "allowed_sources": {
+                            "digitalocean_droplet": ["modules/ok/main.tf"]
+                        },
+                    }
+                },
             }
         )
     )
@@ -127,7 +134,7 @@ def test_main_passes_at_approved_total(tmp_path, capsys):
         tf_files={"modules/ok/main.tf": 'resource "digitalocean_droplet" "a" {}\n'},
     )
     assert cost_check.main(["--root", str(root)]) == 0
-    assert "planned $6.00/mo" in capsys.readouterr().out
+    assert "digitalocean: planned $6.00/mo" in capsys.readouterr().out
 
 
 def test_main_fails_over_approved_total(tmp_path):

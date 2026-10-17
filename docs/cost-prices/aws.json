@@ -1,0 +1,16 @@
+{
+  "provider": "aws",
+  "region": "us-east-1",
+  "retrieved": "2026-10-16",
+  "source": "AWS Price List files and the Amazon VPC pricing page, as recorded in docs/superpowers/specs/2026-10-16-multicloud-phase0-evidence-aws.md",
+  "verified": true,
+  "hours_per_month": 730,
+  "instances": {
+    "t4g.nano": 0.0042,
+    "t4g.micro": 0.0084,
+    "t3.micro": 0.0104
+  },
+  "public_ipv4_hourly": 0.005,
+  "ebs_gp3_gb_month": 0.08,
+  "not_priced": "data transfer, logging, snapshots, anything created outside OpenTofu"
+}
