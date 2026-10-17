@@ -25,6 +25,11 @@ Most of this page is about the first kind.
 
 ## What a remote-access VPN actually does
 
+![Diagram, What a remote-access VPN actually does: Anyone on the internet; Your laptop; Network edge; VPN concentrator listening on a public port; Private network, now reachable as a whole; web host; database; admin panel](images/why-ztna-not-a-vpn-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
     attacker["Anyone on the internet"]:::ext
@@ -48,12 +53,19 @@ flowchart LR
     classDef warn fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
 
+</details>
+
 Two properties of that picture cause almost every problem below:
 
 1. **The front door is on the internet.** The concentrator has to accept packets from anyone so that legitimate users can reach it. Its authentication code runs before it knows who you are.
 2. **Authentication buys network reach, not resource reach.** After the tunnel is up, the device is "inside", and what it can touch is decided by routes and by whatever firewalling exists between internal hosts. In most networks that is less than people think.
 
 ## What ZTNA does instead
+
+![Diagram, What ZTNA does instead: Anyone on the internet; Your laptop Twingate client; Controller identity, MFA, signed ACLs; Private network; Connector dials out, listens on nothing public; web host; database; admin pane](images/why-ztna-not-a-vpn-diagram-2.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
 
 ```mermaid
 flowchart LR
@@ -77,6 +89,8 @@ flowchart LR
     classDef ctrl fill:#1e1b3a,stroke:#a78bfa,color:#ede9fe
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
 ```
+
+</details>
 
 In Twingate's design the controller hands the client a signed ACL, the client only captures traffic for addresses on that list, and the connector checks the client's signature and ACL claim again before forwarding. The tunnel between client and connector is certificate-pinned TLS; when a direct peer-to-peer path is not possible a relay carries it, but the relay never terminates the encrypted connection. ([How Twingate works](https://www.twingate.com/docs/how-twingate-works), [Understanding relays](https://twingate.com/docs/understanding-relays))
 
@@ -158,6 +172,11 @@ The free and paid tier limits of Twingate (and Spacelift and Doppler) are listed
 
 I used to run a VPN for everything. Here is where each of those uses went.
 
+![Diagram, Why I stopped using a VPN (except for geo-blocks): Reach my own services from outside; Be safe on hotel or coffee-shop Wi-Fi; Hide browsing from my ISP; Watch something that is only licensed in another country; ](images/why-ztna-not-a-vpn-diagram-3.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart TD
     q{"What are you<br/>actually trying to do?"}:::you
@@ -177,6 +196,8 @@ flowchart TD
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
     classDef warn fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
+
+</details>
 
 **Remote access to my own stuff** moved to ZTNA. The reasoning that applies to these droplets applies to a homelab: administrative access should not hang off a listening port that the whole internet can poke at. (Services that are meant to be public, like a Mastodon instance, are a different problem with their own hardening; ZTNA is for the things that should never be public.)
 

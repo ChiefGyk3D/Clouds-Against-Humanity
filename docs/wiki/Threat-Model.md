@@ -20,6 +20,11 @@ It is a lab with a $30 budget and one operator, and the threat model is sized to
 
 ## Trust boundaries
 
+![Diagram, Trust boundaries: Untrusted; The internet; Forks and outside pull requests; Trusted vendors (third-party control planes); GitHub + Actions; Spacelift; Doppler; Twingate controller and relays](images/threat-model-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart TB
     subgraph untrusted["Untrusted"]
@@ -61,6 +66,8 @@ flowchart TB
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
     classDef warn fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
+
+</details>
 
 Boundary numbers are shared with [Threat model exercise, step 2](Threat-Model-Exercise.md#step-2-draw-the-trust-boundaries), which draws all eight (B1 to B8). This diagram shows only the four that matter most for the threats below, so it skips B2, B4, B5 and B6.
 

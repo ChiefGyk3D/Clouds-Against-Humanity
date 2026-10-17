@@ -8,6 +8,11 @@ The guiding idea is that the firewall should never be the only control. If a fir
 
 ## First boot, in order
 
+![Diagram, First boot, in order: Droplet boots tags already applied, firewall already enforcing; Create cah-admin key only, no password, root disabled; Write config files sshd drop-in, sysctl, apt, unattended-upgrades, con](images/droplet-hardening-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart TD
     boot["Droplet boots<br/>tags already applied, firewall already enforcing"]:::cloud
@@ -33,6 +38,8 @@ flowchart TD
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
     classDef warn fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
+
+</details>
 
 ## What each setting is for
 

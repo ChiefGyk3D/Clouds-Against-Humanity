@@ -4,6 +4,11 @@
 
 The environment grows one stage at a time. Each stage gets its own design, its own cost approval and its own guide before it costs anything. Working ceiling in the current phase: $30 per month. Every phase carries its own ceiling in `docs/stages/approved.json`, with a reason and a decision date, and a later phase can raise it on purpose (see the [per-phase cost table](#cost-per-phase) below).
 
+![Diagram, Roadmap: Stage 0 Foundation $0 BUILT; Stage 1 Access: 2 Twingate connectors $12 BUILT; Stage 2 Logs to the on-prem SIEM, cloud-to-home access PLANNED; Stage 3 Workload host: Portainer, five daemons, Discord brid](images/roadmap-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
     s0["Stage 0<br/>Foundation<br/>$0<br/>BUILT"]:::done
@@ -16,6 +21,8 @@ flowchart LR
     classDef done fill:#132a1f,stroke:#4ade80,color:#dcfce7
     classDef plan fill:#1e1b3a,stroke:#a78bfa,color:#ede9fe
 ```
+
+</details>
 
 ## Cost per phase
 

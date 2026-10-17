@@ -16,6 +16,11 @@ gh pr checks 8 --repo ChiefGyk3D/Clouds-Against-Humanity
 
 ## The whole path on one page
 
+![Diagram, The whole path on one page: 1. Branch + commit connector-peer-ssh-outbound; 2. Pull request #8 why / change / testing / not verified; 3. CI tofu, python + cost gate, security, then CI green; 4. Review and merge ](images/trace-one-change-end-to-end-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
     br["1. Branch + commit<br/>connector-peer-ssh-outbound"]:::you
@@ -34,6 +39,8 @@ flowchart LR
     classDef warn fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
 ```
+
+</details>
 
 ## What the change was
 

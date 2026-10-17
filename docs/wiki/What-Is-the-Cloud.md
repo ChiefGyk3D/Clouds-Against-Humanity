@@ -20,6 +20,11 @@ Everything else a provider sells (managed databases, Kubernetes, load balancers,
 
 One physical server runs a program called a **hypervisor**. It carves the hardware into slices and runs a separate operating system in each. Each slice is a virtual machine. The VM does not know it is sharing; it sees "a computer" with, say, one CPU and one gigabyte of memory. That is why the cheapest droplet here is called `s-1vcpu-1gb`: one virtual CPU, one gigabyte of RAM.
 
+![Diagram, A virtual machine, a little more precisely: One physical server in a DigitalOcean datacenter; Hypervisor; Virtual machines, each with its own OS; someone's web server; access-tor1-connector-a (this project); som](images/what-is-the-cloud-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart TB
     subgraph phys["One physical server in a DigitalOcean datacenter"]
@@ -37,6 +42,8 @@ flowchart TB
     classDef ctrl fill:#1e1b3a,stroke:#a78bfa,color:#ede9fe
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
 ```
+
+</details>
 
 Your neighbours on the physical server are strangers. The hypervisor keeps you apart, and that separation is a large part of what you pay the provider to get right. It is also why "a droplet" is cheap: the machine is shared.
 

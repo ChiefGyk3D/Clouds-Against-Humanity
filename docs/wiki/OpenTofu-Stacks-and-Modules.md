@@ -14,6 +14,11 @@ For a line-by-line explanation of every variable, resource and output, read the 
 
 ## Modules versus stacks
 
+![Diagram, Modules versus stacks: modules/ (reusable building blocks, never applied alone); vpc; firewall; twingate-connector the droplet; twingate-bootstrap connector + tokens + cloud-init; stacks/ (what Spacelift actuall](images/opentofu-stacks-and-modules-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
     subgraph modules["modules/ (reusable building blocks, never applied alone)"]
@@ -35,6 +40,8 @@ flowchart LR
     classDef ctrl fill:#1e1b3a,stroke:#a78bfa,color:#ede9fe
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
 ```
+
+</details>
 
 - **Modules** describe one thing well and take inputs. The same `firewall` module builds both the baseline firewall and the connector firewall with different arguments.
 - **Stacks** wire modules together for one layer of the environment, and each stack is one Spacelift stack with its own state.

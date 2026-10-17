@@ -8,7 +8,7 @@ It is a cloud extension of a homelab and a teaching repository at the same time:
 
 ## How it fits together
 
-![Architecture: Twingate connectors dial out, nothing listens inbound, Spacelift applies OpenTofu](docs/images/architecture.png)
+![Architecture: Twingate connectors dial out, nothing listens inbound, Spacelift applies OpenTofu](docs/images/readme-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>
@@ -98,6 +98,7 @@ Clouds-Against-Humanity/
   scripts/plan_noop_check.py               fails unless a saved plan is a no-op over the golden addresses (run by hand, not in CI)
   scripts/threat_dragon_layout.py          lays out the Threat Dragon models in docs/threat-model (nodes, boundary boxes, flow routes; --check fails when stale)
   scripts/spacelift/doppler-env.sh         hook that loads Doppler secrets into a run
+  scripts/render_diagrams.py               renders every Mermaid diagram to a dark-mode PNG with its source kept underneath (--check fails when a picture is stale)
   scripts/gen-wiki.sh                      writes the wiki pages and copies docs/wiki/images from docs/wiki (the Wiki workflow publishes them)
   scripts/strip_png_metadata.py            removes text, EXIF and time chunks from wiki screenshots (--check fails when any remain)
   tests/                                   pytest for the cost gate, settings, module policy, secret separation, the hook, the wiki and more
@@ -109,6 +110,7 @@ Clouds-Against-Humanity/
   docs/stages/                             operator guides: decisions, verify, rollback, per stage  (00-foundation, 01-access, 02-telemetry, aws-access)
   docs/cost.md                             cost gate explained
   docs/cost-prices.json, docs/cost-prices/ price tables (DigitalOcean, and one file per other cloud)
+  docs/diagrams.json, docs/diagrams-theme.json  source hash of each diagram picture, and the dark theme it is rendered with
   docs/settings.json                       the settings manifest the Settings reference is generated from
   docs/threat-model/                       the OWASP Threat Dragon model
   docs/golden-addresses/                   resource addresses the plan no-op check compares against

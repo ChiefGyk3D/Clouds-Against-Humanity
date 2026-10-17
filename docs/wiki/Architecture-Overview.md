@@ -11,6 +11,11 @@ Neither plane needs a single inbound port open on a droplet.
 
 ## Everything on one page
 
+![Diagram, Everything on one page: Operator side; Laptop git + Twingate client; Control plane: changes to infrastructure; GitHub repo (public); GitHub Actions fmt, validate, tofu test, cost gate, scanners; Spacelift stacks](images/architecture-overview-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart TB
     subgraph operator["Operator side"]
@@ -63,6 +68,8 @@ flowchart TB
     classDef secret fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
 
+</details>
+
 Color key: green is you, purple is a hosted control service, blue is DigitalOcean, amber holds secrets, red is untrusted.
 
 ## Component by component
@@ -80,6 +87,11 @@ Color key: green is you, purple is a hosted control service, blue is DigitalOcea
 ## The three paths that matter
 
 ### Path 1: a change to infrastructure
+
+![Diagram, Path 1: a change to infrastructure: Pull request; CI green? tests, cost gate, scanners; Spacelift: no run with the push policy (paid plan; free-plan limit in Spacelift page); Merge to main; Spacelift tracked run](images/architecture-overview-diagram-2.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
 
 ```mermaid
 flowchart LR
@@ -100,9 +112,16 @@ flowchart LR
     classDef secret fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
 
+</details>
+
 Full detail on [Spacelift](Spacelift.md).
 
 ### Path 2: an SSH session to a droplet
+
+![Sequence diagram, Path 2: an SSH session to a droplet: Twingate client (laptop); Twingate controller; Relay (only if P2P fails); connector a; connector b (target)](images/architecture-overview-diagram-3.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
 
 ```mermaid
 sequenceDiagram
@@ -121,9 +140,16 @@ sequenceDiagram
     B-->>C: SSH banner, key auth as cah-admin
 ```
 
+</details>
+
 Twingate may hand the session to either connector, which is why connector a needs to reach connector b's port 22. That one detail cost a debugging session; the story is on [Lessons learned](Lessons-Learned.md).
 
 ### Path 3: a secret reaching a run
+
+![Diagram, Path 3: a secret reaching a run: Doppler prd every real secret; Spacelift context cah-doppler one read-only token, write-only variable; scripts/spacelift/doppler-env.sh tracked or destroy run on main only; Run e](images/architecture-overview-diagram-4.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
 
 ```mermaid
 flowchart TB
@@ -140,6 +166,8 @@ flowchart TB
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
     classDef secret fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
+
+</details>
 
 Full detail on [Doppler and secrets](Doppler-and-Secrets.md).
 

@@ -57,6 +57,11 @@ The [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) 
 
 ## How a machine with zero inbound rules still works
 
+![Diagram, How a machine with zero inbound rules still works: Scanners, bots, everyone on the internet; You; Twingate (a service on the internet); Droplet, zero inbound rules; connector program listens on nothing public](images/networking-basics-for-this-project-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
     inet["Scanners, bots,<br/>everyone on the internet"]:::ext
@@ -75,6 +80,8 @@ flowchart LR
     classDef ctrl fill:#1e1b3a,stroke:#a78bfa,color:#ede9fe
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
 ```
+
+</details>
 
 The connector program on the droplet opens an outbound connection to Twingate's service and keeps it open, the way a chat app on your phone stays connected to its server. Outbound is allowed. When you want to reach the droplet, your laptop also connects outbound to Twingate. Twingate introduces the two connections, checks that you are allowed to reach that specific machine on that specific port, and your SSH session rides the connection the droplet already opened. At no point did anything on the internet connect **in** to the droplet.
 

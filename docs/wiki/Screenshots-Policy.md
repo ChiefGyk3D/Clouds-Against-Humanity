@@ -30,7 +30,8 @@ Redact by not capturing, then by cropping, and only last by drawing over. If you
 
 - **Headless, fixed viewport.** Use a headless browser with a viewport of 1440 by 900 for a normal page. A larger viewport (up to 2400 pixels wide) is fine for a wide diagram or matrix; say so in the caption.
 - **Prefer the tool's own export** for a diagram (Threat Dragon's Export, PNG gives the whole diagram regardless of window size).
-- **Light mode** unless the lesson is about dark mode. Do not mix light and dark pictures on one page.
+- **Light mode** for pictures of another tool unless the lesson is about dark mode.
+- **Diagrams are always dark.** Every Mermaid diagram in the README and the wiki is rendered to a dark-mode PNG by `scripts/render_diagrams.py` (theme in `docs/diagrams-theme.json`), because GitHub's mobile app shows a Mermaid block as raw code. The source stays underneath the picture in a collapsed section; never edit the PNG, edit the source and run `scripts/render_diagrams.py --write`. A test fails when a picture is stale.
 - Do not run a graphical tool on a maintainer's own desktop just to take a picture. Headless only.
 
 ## Where files go and what they look like

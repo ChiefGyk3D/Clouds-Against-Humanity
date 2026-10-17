@@ -56,6 +56,11 @@ Read it as: "there should be a DigitalOcean VPC, which I will refer to as `this`
 
 The plan is the most important artifact in the whole workflow. It is where a human catches "wait, why does changing a comment destroy a droplet?" before it happens. In this project the plan is read on Spacelift by a human before every apply, and the [Terraform reference](Terraform-Reference.md) ends with a checklist of what to look for in one.
 
+![Diagram, Plan and apply: Your .tf files (what should exist); State file (what the tool made last time); Provider API (what actually exists); Plan + create ~ change - destroy; Apply](images/what-is-infrastructure-as-code-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
     files["Your .tf files<br/>(what should exist)"]:::you
@@ -76,6 +81,8 @@ flowchart LR
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
     classDef warn fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
+
+</details>
 
 ### State
 

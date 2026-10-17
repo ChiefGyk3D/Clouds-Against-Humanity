@@ -17,6 +17,11 @@ Source: [How Twingate works](https://www.twingate.com/docs/how-twingate-works).
 
 ## What `stacks/10-access` builds
 
+![Diagram, What `stacks/10-access` builds: Twingate (managed as code); Remote network (site) access-tor1; Group cah-tor1-admins; Resource cah-tor1-connector-a-ssh connector a private IP, TCP 22 only; Resource cah-tor1-conn](images/twingate-diagram-1.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart TB
     subgraph tg["Twingate (managed as code)"]
@@ -45,6 +50,8 @@ flowchart TB
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
     classDef secret fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
+
+</details>
 
 > **Screenshot to take yourself:** the Twingate admin console, the Connectors page and the Resources page.
 > Capture: the Remote Network with both connectors listed, then the Resources page with one resource per host and port.
