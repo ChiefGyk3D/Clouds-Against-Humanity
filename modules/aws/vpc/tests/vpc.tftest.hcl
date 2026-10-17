@@ -135,3 +135,11 @@ run "default_security_group_is_managed_with_no_rules" {
     error_message = "The default security group must declare no ingress or egress rule."
   }
 }
+
+run "subnet_id_waits_for_the_route_and_association" {
+  command = plan
+  assert {
+    condition     = can(regex("output \"subnet_id\" \\{[^}]*depends_on = \\[[^\\]]*aws_route\\.internet[^\\]]*aws_route_table_association\\.public", file("${path.module}/outputs.tf")))
+    error_message = "subnet_id must depend on the internet route and the route table association."
+  }
+}

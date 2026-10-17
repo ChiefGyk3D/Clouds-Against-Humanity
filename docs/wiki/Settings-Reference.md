@@ -133,6 +133,44 @@ Stack variables are the settings you set per site. Module variables are filled i
 | `admin_ssh_public_key`<br>Public key for the cah-admin user. | `string` | required | none in this module (the bootstrap module checks it) | set by the calling stack (not a user setting) | `ssh-ed25519 AAAAEXAMPLEONLYNOTAREALKEY` | private (not a credential, but identifies the owner) | exists |
 | `reboot_time`<br>HH:MM (America/New_York) when unattended-upgrades may reboot. | `string` | required | none in this module (the bootstrap module checks it) | set by the calling stack (not a user setting) | `04:00` | public | exists |
 
+### modules/aws/vpc
+
+| Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
+|---|---|---|---|---|---|---|---|
+| `layer`<br>Stack layer, used in names (for example foundation). | `string` | required | none | set by the calling stack (not a user setting) | `access` | public | exists |
+| `region`<br>AWS region name (for example us-east-1). Used in names; the stack's provider block decides where the VPC is really created. | `string` | required | none | set by the calling stack (not a user setting) | `us-east-1` | public | exists |
+| `ip_range`<br>Private IPv4 CIDR for the VPC. The one public subnet uses the whole range. | `string` | required | see the validation block in variables.tf | set by the calling stack (not a user setting) | `10.99.0.0/24` | private (not a credential, but identifies the owner) | exists |
+| `availability_zone`<br>Availability zone of the subnet (for example us-east-1a). Null lets AWS choose. AWS extension: a subnet lives in exactly one zone. | `string` | `null` | none | set by the calling stack (not a user setting) | `us-east-1a` | public | exists |
+
+### modules/aws/firewall
+
+| Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
+|---|---|---|---|---|---|---|---|
+| `layer`<br>Stack layer, used in names (for example access). | `string` | required | none | set by the calling stack (not a user setting) | `access` | public | exists |
+| `region`<br>AWS region name (for example us-east-1). Used in names. | `string` | required | none | set by the calling stack (not a user setting) | `us-east-1` | public | exists |
+| `purpose`<br>Role in the group name (for example connector). | `string` | required | none | set by the calling stack (not a user setting) | `connector` | public | exists |
+| `vpc_id`<br>VPC the security group belongs to. From the vpc module's id. | `string` | required | none | set by the calling stack (not a user setting) | `vpc-00000000000000000` | public | exists |
+| `extra_outbound_rules`<br>Outbound rules to any IPv4 address, appended to the five defaults. port_range is a port (443), a range (30000-31000) or "all" (ports 0-65535 of that one protocol). | `list(object({protocol=string,port_range=string}))` | `[]` | see the validation block in variables.tf | set by the calling stack (not a user setting) | `[{ protocol = "tcp", port_range = "30000-31000" }]` | public | exists |
+| `inbound_from_member_rules`<br>Inbound rules that admit only members of this security group itself (a rule whose source is the group). Empty means no inbound rule at all. | `list(object({protocol=string,port_range=string}))` | `[]` | see the validation block in variables.tf | set by the calling stack (not a user setting) | `[{ protocol = "tcp", port_range = "22" }]` | public | exists |
+| `outbound_to_member_rules`<br>Outbound rules that reach only members of this security group itself (a rule whose destination is the group, no address). Empty means none. | `list(object({protocol=string,port_range=string}))` | `[]` | see the validation block in variables.tf | set by the calling stack (not a user setting) | `[{ protocol = "tcp", port_range = "22" }]` | public | exists |
+
+### modules/aws/twingate-connector
+
+| Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
+|---|---|---|---|---|---|---|---|
+| `layer`<br>layer (the module has no description for it). | `string` | required | none | set by the calling stack (not a user setting) | `access` | public | exists |
+| `region`<br>region (the module has no description for it). | `string` | required | none | set by the calling stack (not a user setting) | `us-east-1` | public | exists |
+| `subnet_id`<br>Public subnet the instance launches into. From the vpc module's subnet_id. | `string` | required | none | set by the calling stack (not a user setting) | `subnet-00000000000000000` | public | exists |
+| `security_group_id`<br>The one security group attached to the instance's network interface at launch, so there is no unprotected moment. From the firewall module's id (its single rule target). A single string, not a list: security group rules are additive, so any second group a caller added could open inbound access to the public address. | `string` | required | see the validation block in variables.tf | set by the calling stack (not a user setting) | `sg-00000000000000000` | public | exists |
+| `instance_type`<br>EC2 instance type. The stack reads it from cost.json (local.&lt;x&gt;.type) so the price and the plan can never disagree. | `string` | required | see the validation block in variables.tf | set by the calling stack (not a user setting) | `t4g.micro` | public | exists |
+| `architecture`<br>CPU architecture of the Ubuntu image: arm64 (Graviton types such as t4g) or amd64 (types such as t3). Must match instance_type. | `string` | `"arm64"` | see the validation block in variables.tf | set by the calling stack (not a user setting) | `arm64` | public | exists |
+| `root_volume_size`<br>Root disk size in GiB (gp3). This number is an input to the cost gate: the AMI's own default is not priced, so the size is always set here. 8 GiB is the smallest the Ubuntu image accepts. | `number` | `8` | see the validation block in variables.tf | set by the calling stack (not a user setting) | `8` | public | exists |
+| `remote_network_id`<br>Twingate remote network (site) shared by every connector of the stack. | `string` | required | none | set by the calling stack (not a user setting) | `example-remote-network-id` | public | exists |
+| `instance`<br>One lowercase letter or digit that tells this connector from its siblings (a, b). | `string` | required | none in this module (the bootstrap module checks it) | set by the calling stack (not a user setting) | `a` | public | exists |
+| `twingate_network`<br>Bare Twingate network subdomain (acme for acme.twingate.com). Sensitive because the tenant slug identifies the tenant. | `string` | required | none in this module (the bootstrap module checks it) | set by the calling stack (not a user setting) | `example-tenant` | private (not a credential, but identifies the owner) | exists |
+| `admin_ssh_public_key`<br>Public key (type and key, no comment) for the cah-admin user. Installed by cloud-init; no AWS key pair is used. | `string` | required | none in this module (the bootstrap module checks it) | set by the calling stack (not a user setting) | `ssh-ed25519 AAAAEXAMPLEONLYNOTAREALKEY` | private (not a credential, but identifies the owner) | exists |
+| `reboot_time`<br>HH:MM (America/New_York, the instance's local time) when unattended-upgrades may reboot this instance. Give each connector a different time so they never reboot together. | `string` | required | none in this module (the bootstrap module checks it) | set by the calling stack (not a user setting) | `04:00` | public | exists |
+
 ## Values read from `cost.json`, `approved.json` and the price table
 
 These are not OpenTofu variables. The cost gate (`scripts/cost_check.py`) reads them, and stack 10 reads its droplet sizes from `cost.json`, so there is one source of truth for money. To change a size you edit `cost.json` and `docs/stages/approved.json` together; that is the lesson.

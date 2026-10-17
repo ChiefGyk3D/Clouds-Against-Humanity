@@ -231,6 +231,9 @@ def test_the_directories_found_are_the_ones_expected():
         "modules/firewall",
         "modules/twingate-bootstrap",
         "modules/twingate-connector",
+        "modules/aws/vpc",
+        "modules/aws/firewall",
+        "modules/aws/twingate-connector",
     } <= found
 
 

@@ -270,3 +270,16 @@ run "boundary_ports_and_single_port_ranges_are_accepted" {
     error_message = "Boundary values must be accepted."
   }
 }
+
+run "launch_facing_outputs_wait_for_every_rule" {
+  command = plan
+  # A consumer of id or rule_targets must not start before the separate rule
+  # resources exist. Source-level: a plan cannot show ordering.
+  assert {
+    condition = alltrue([
+      for name in ["id", "rule_targets"] :
+      can(regex("output \"${name}\" \\{[^}]*depends_on = \\[[^\\]]*aws_vpc_security_group_ingress_rule\\.member[^\\]]*aws_vpc_security_group_egress_rule\\.internet[^\\]]*aws_vpc_security_group_egress_rule\\.member", file("${path.module}/outputs.tf")))
+    ])
+    error_message = "id and rule_targets must depend on all three rule resources."
+  }
+}

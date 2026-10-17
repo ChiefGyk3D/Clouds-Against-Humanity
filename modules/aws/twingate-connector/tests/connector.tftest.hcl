@@ -321,3 +321,27 @@ run "an_oversized_root_volume_is_rejected" {
   }
   expect_failures = [var.root_volume_size]
 }
+
+run "an_architecture_change_replaces_the_instance_despite_ignored_ami" {
+  command = plan
+  assert {
+    condition     = terraform_data.architecture.input == "arm64"
+    error_message = "The trigger must carry the architecture input."
+  }
+  assert {
+    condition     = can(regex("ignore_changes\\s*=\\s*\\[ami\\]", file("${path.module}/main.tf"))) && can(regex("replace_triggered_by\\s*=\\s*\\[terraform_data\\.architecture\\]", file("${path.module}/main.tf")))
+    error_message = "Routine image updates stay ignored, but an architecture change must trigger replacement."
+  }
+}
+
+run "the_trigger_follows_the_architecture_input" {
+  command = plan
+  variables {
+    architecture  = "amd64"
+    instance_type = "t3.micro"
+  }
+  assert {
+    condition     = terraform_data.architecture.input == "amd64"
+    error_message = "The trigger must follow var.architecture."
+  }
+}

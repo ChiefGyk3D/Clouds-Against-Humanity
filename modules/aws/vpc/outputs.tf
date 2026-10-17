@@ -14,4 +14,11 @@ output "name" {
 # AWS extension: machines launch into a subnet, not into the VPC itself.
 output "subnet_id" {
   value = aws_subnet.public.id
+
+  # A subnet is only usable once its route table sends traffic to the gateway,
+  # so a consumer in the same apply waits for the route and the association.
+  depends_on = [
+    aws_route.internet,
+    aws_route_table_association.public,
+  ]
 }

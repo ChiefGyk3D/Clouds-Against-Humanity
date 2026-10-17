@@ -32,12 +32,30 @@ output "outbound_member_rules" {
 output "id" {
   description = "Identifier a stack can depend on."
   value       = aws_security_group.this.id
+
+  # Wait for every rule, not just the group: a machine that launches with this
+  # group must find its egress rules already in place, or cloud-init's package
+  # install races them. (UNVERIFIED ordering until an apply.)
+  depends_on = [
+    aws_vpc_security_group_ingress_rule.member,
+    aws_vpc_security_group_egress_rule.internet,
+    aws_vpc_security_group_egress_rule.member,
+  ]
 }
 
 # What the rules attach to. On AWS this is the security group a machine lists
 # in vpc_security_group_ids when it launches.
 output "rule_targets" {
   value = [aws_security_group.this.id]
+
+  # Wait for every rule, not just the group: a machine that launches with this
+  # group must find its egress rules already in place, or cloud-init's package
+  # install races them. (UNVERIFIED ordering until an apply.)
+  depends_on = [
+    aws_vpc_security_group_ingress_rule.member,
+    aws_vpc_security_group_egress_rule.internet,
+    aws_vpc_security_group_egress_rule.member,
+  ]
 }
 
 # Who may reach the targets by membership rather than by address. Here: the

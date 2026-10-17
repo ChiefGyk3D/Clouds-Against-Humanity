@@ -41,6 +41,16 @@ data "aws_ssm_parameter" "ubuntu" {
   }
 }
 
+# ignore_changes = [ami] below hides routine Canonical image updates, but it
+# would also hide a deliberate switch of architecture (arm64 to amd64) and keep
+# the old image on the new instance type. This value changes only when the
+# architecture input does, and replace_triggered_by turns that into a
+# replacement. (OpenTofu 1.8 supports both. The replacement itself is
+# UNVERIFIED until an apply: mocks show the wiring, not the action.)
+resource "terraform_data" "architecture" {
+  input = var.architecture
+}
+
 resource "aws_instance" "connector" {
   # An AMI id is public, so the non-sensitive attribute is used. Plain `value`
   # would mark the whole instance's ami as sensitive in every plan.
@@ -113,7 +123,8 @@ resource "aws_instance" "connector" {
   # its public address) on the next plan. The image is chosen at creation;
   # security updates arrive through unattended-upgrades, not through a new AMI.
   lifecycle {
-    ignore_changes = [ami]
+    ignore_changes       = [ami]
+    replace_triggered_by = [terraform_data.architecture]
   }
 
   tags = { Name = module.bootstrap.name }

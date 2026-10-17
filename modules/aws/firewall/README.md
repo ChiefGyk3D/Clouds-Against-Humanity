@@ -24,6 +24,10 @@ Contract outputs: `id`, `name`, `rule_targets`, `source_members`, `destination_m
 `inbound_from_member_rules` and `outbound_to_member_rules`; both name this group
 itself, never an address, so only machines wearing the group can use them.
 
+The `id` and `rule_targets` outputs declare `depends_on` for all the rule
+resources, so an instance in the same apply launches after its egress rules exist
+(ordering UNVERIFIED until an apply; the test checks the declaration only).
+
 Ports are validated as numbers from 0 to 65535 with the start not above the end.
 
 Inbound is deny-all: the group has no inbound rule unless a member rule asks for
