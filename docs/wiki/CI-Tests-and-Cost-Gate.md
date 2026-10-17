@@ -11,10 +11,10 @@ flowchart LR
     pr["Push or pull request"]:::you
     subgraph gyst["Shared workflows from git-your-ship-together (pinned by commit)"]
         tofu["tofu-ci<br/>fmt -check, validate, tflint, Trivy,<br/>tofu test (mocked providers),<br/>opa test (Spacelift push policy)"]:::ctrl
-        py["python-ci<br/>cost gate, then pytest<br/>on 3.12 and 3.13, ruff"]:::warn
+        py["python-ci<br/>cost gate, settings page check,<br/>pytest on 3.12 and 3.13,<br/>identifier check, ruff"]:::warn
         sec["security<br/>code scanning, dependency review,<br/>Gitleaks secret scanning"]:::ctrl
     end
-    green{"CI green<br/>every job must be success"}:::you
+    green{"CI green<br/>(the one job defined here)<br/>every needed job must be success"}:::you
     pr --> tofu --> green
     pr --> py --> green
     pr --> sec --> green
@@ -28,9 +28,9 @@ flowchart LR
 
 ### Call shared workflows, do not copy them
 
-The heavy lifting comes from [git-your-ship-together](https://github.com/ChiefGyk3D/git-your-ship-together) (GYST), the author's library of hardened reusable GitHub Actions workflows. This repo only calls them, and has no CI job of its own. Anything reusable gets added to GYST first and then called from here, so a fix to a scanner configuration lands in every repository at once instead of drifting across copies.
+The heavy lifting comes from [git-your-ship-together](https://github.com/ChiefGyk3D/git-your-ship-together) (GYST), the author's library of hardened reusable GitHub Actions workflows. This repo only calls them. The one job `.github/workflows/ci.yml` defines itself is the `CI green` gate below; every check is a GYST leg or a script this repository passes to one. Anything reusable gets added to GYST first and then called from here, so a fix to a scanner configuration lands in every repository at once instead of drifting across copies.
 
-That rule was tested on 2026-10-12. This repository used to carry its own job that looped `tofu test` over the modules and stacks, because GYST had none, and it needed somewhere to test a Spacelift push policy written in Rego. Both are the same job in any repository with OpenTofu tests or policies, so both went into GYST's `tofu-ci.yml` as opt-in legs (`test: true` and `policy-directories`), with their own fixture and contract tests there, and this repository now just switches them on. The one thing that stayed here is the cost gate script itself, because its rules are this repository's; it runs as the first step of the `python-ci` test command, so it needs no job of its own either.
+That rule was tested on 2026-10-12. This repository used to carry its own job that looped `tofu test` over the modules and stacks, because GYST had none, and it needed somewhere to test a Spacelift push policy written in Rego. Both are the same job in any repository with OpenTofu tests or policies, so both went into GYST's `tofu-ci.yml` as opt-in legs (`test: true` and `policy-directories`), with their own fixture and contract tests there, and this repository now just switches them on. The one thing that stayed here is the cost gate script itself, because its rules are this repository's; it runs as the first step of the `python-ci` test command, so it needs no job of its own either. The `python-ci` test command, in order, is: the cost gate, the settings page check (`scripts/gen_settings_doc.py --check`), `pytest tests`, then the identifier check.
 
 ### Pin every action by commit SHA
 
@@ -55,18 +55,21 @@ A $30 per month ceiling is easy to blow past by accident: one wrong droplet size
 ```mermaid
 flowchart TD
     start["scripts/cost_check.py"]:::ctrl
-    read["Read every stacks/*/cost.json<br/>(planned droplets, sizes, backups)"]:::ctrl
-    price["Look up each size in<br/>docs/cost-prices.json"]:::ctrl
-    scan["Scan every .tf file for<br/>digitalocean_* resource types"]:::ctrl
-    q1{"Total above approved total<br/>in approved.json?"}:::warn
-    q2{"Paid resource type not on<br/>the free list, or droplet<br/>outside its allowed file?"}:::warn
-    q3{"Connector module count differs<br/>from cost.json entries?"}:::warn
-    q4{"Remote module source,<br/>*.tf.json, or backups<br/>with unverified price?"}:::warn
+    read["Read every cost.json under stacks/<br/>(base stacks per cloud, and stack instances<br/>under stacks/sites/ via instance_of)"]:::ctrl
+    price["Price each machine from that cloud's table<br/>docs/cost-prices.json, docs/cost-prices/cloud.json"]:::ctrl
+    scan["Scan every .tf and .tofu file for<br/>resource types and module blocks"]:::ctrl
+    q1{"A cloud's total above its<br/>approved_monthly_total, or a site<br/>above its own figure in the sites map?"}:::warn
+    q1b{"Approved totals of the active clouds<br/>above the shared ceiling?"}:::warn
+    q2{"Resource type not on that cloud's<br/>free list, or a costed type outside<br/>its allowed file?"}:::warn
+    q3{"Connector module blocks differ<br/>from manifest machines, or<br/>a stack id has no single manifest?"}:::warn
+    q4{"Remote module source, *.tf.json,<br/>misnamed stack directory, or backups<br/>with unverified price?"}:::warn
     fail["Fail the build"]:::ext
     pass["Pass"]:::you
     start --> read --> price --> scan --> q1
     q1 -- "yes" --> fail
-    q1 -- "no" --> q2
+    q1 -- "no" --> q1b
+    q1b -- "yes" --> fail
+    q1b -- "no" --> q2
     q2 -- "yes" --> fail
     q2 -- "no" --> q3
     q3 -- "yes" --> fail
@@ -82,15 +85,27 @@ flowchart TD
 
 Key ideas:
 
-- **The free list is an allowlist.** `digitalocean_project`, `_project_resources`, `_tag`, `_vpc`, `_firewall` and `_ssh_key` are free. A droplet is allowed only inside the connector module. Anything else (a NAT gateway, Kubernetes node pool, container registry, CDN, app) is refused by name until someone deliberately prices and approves it.
+- **The free list is an allowlist, per cloud.** For DigitalOcean, `digitalocean_project`, `_project_resources`, `_tag`, `_vpc`, `_firewall` and `_ssh_key` are free, and a droplet is allowed only inside its connector module; AWS has its own list and its instance is allowed only in `modules/aws/twingate-connector`. Anything else (a NAT gateway, Kubernetes node pool, container registry, CDN, app) is refused by name until someone deliberately prices and approves it.
 - **Raising the budget is a visible change.** To add something paid, you edit a `cost.json`, raise that cloud's `approved_monthly_total` in `docs/stages/approved.json`, and that diff is reviewed like code.
-- **Each cloud has its own approved figure under one shared ceiling.** A cloud you are not using right now is marked inactive, so the active figures together must fit under the ceiling. This is how a second cloud shares one budget with the first.
+- **Each cloud has its own approved figure under one shared ceiling.** A cloud you are not using right now is marked inactive, so the active figures together must fit under the ceiling. This is how a second cloud shares one budget with the first. A provider entry may also list approved `sites`, so a second site of the same stack code (a stack instance under `stacks/sites/`) is costed on its own; see [Multiple sites and identity](Multiple-Sites-and-Identity.md).
+- **Prices are per cloud.** The DigitalOcean table is `docs/cost-prices.json`; other clouds have `docs/cost-prices/<cloud>.json`.
 - **Some costs are attributes, not resources.** On AWS a public address is a setting on an instance, so for AWS the gate can also price an OpenTofu plan in JSON and require it to match the stack's `cost.json`. See [the AWS cost lesson](Provider-AWS-Cost-Lesson.md).
-- **Prices come from the DigitalOcean sizes API**, recorded with the date they were retrieved. Backup pricing is marked unverified, so the gate refuses any backup-enabled droplet until someone checks it.
+- **Prices come from each vendor's own price source** (for DigitalOcean the sizes API), recorded with the date they were retrieved. Backup pricing is marked unverified, so the gate refuses any backup-enabled droplet until someone checks it.
 
 ### What the gate cannot do
 
 It reads HCL with regular expressions and never executes it. It will not see a resource type built dynamically, a paid resource created outside this repository, or bandwidth overage. It is a guardrail against honest mistakes, not a proof. The billing alerts set during stage 0 (at $10 and $25) are the backstop.
+
+## The other checks in `python-ci`
+
+Besides the cost gate and the identifier check, the `pytest tests` step covers these repository-wide rules, each of which a per-module `tofu test` cannot see on its own:
+
+- **Settings page and manifest.** `scripts/gen_settings_doc.py --check` fails when [Settings reference](Settings-Reference.md) is stale against `docs/settings.json`, and a test fails when a `variable` exists in a stack or module but not in the manifest (or the reverse).
+- **Module policy and contract.** Every provider connector module must reuse the shared `twingate-bootstrap`, CI must list every module and stack directory, and every provider supplies the same module roles with the same output names and a README.
+- **Secret separation.** Each stack may only ask for its own cloud's secret names in `.spacelift/config.yml`. This proves what the repository declares, not what a Doppler token can actually read.
+- **Examples and unused variables.** Each live stack's `terraform.tfvars.example` is complete and valid, and an unused variable must be on a short documented list.
+- **Wiki and threat model files.** Sidebar, reading order and `Next:` lines stay consistent; the Threat Dragon model parses; the telemetry lesson pages carry their draft banner and their cost tables are recomputed.
+- **The plan no-op check.** `scripts/plan_noop_check.py` is not run in CI (it needs a real plan). It is the acceptance test for editing a live stack: with default values the saved plan must change nothing, compared with the golden address lists in `docs/golden-addresses/`.
 
 ## The identifier check
 
@@ -111,10 +126,14 @@ To show an example in a lesson, use one of the synthetic placeholders the script
 
 ```bash
 python3 -I scripts/cost_check.py --root .
+python3 -I scripts/gen_settings_doc.py --check
 python3 -I -m pytest tests -q
 python3 -I scripts/identifier_check.py --root .
 
-for d in modules/vpc modules/firewall modules/twingate-connector stacks/00-foundation stacks/10-access; do
+# the directories in the tofu job's `directories` input in .github/workflows/ci.yml
+for d in stacks/00-foundation stacks/10-access stacks/aws/00-foundation stacks/aws/10-access \
+         modules/vpc modules/firewall modules/twingate-bootstrap modules/twingate-connector \
+         modules/aws/vpc modules/aws/firewall modules/aws/twingate-connector; do
   tofu -chdir="$d" init -backend=false -input=false
   tofu -chdir="$d" test
 done

@@ -13,7 +13,7 @@ Source of prices: `docs/cost-prices.json`, retrieved 2026-10-10 from the Digital
 
 ## Stage 3 estimate (not approved)
 
-Stage 3 adds one Docker host running Portainer CE, five small daemons, an S3-compatible bucket for their state and a self-hosted Discord-to-Matrix bridge on the same droplet (the Matrix homeserver itself is hosted by etke.cc). The jobs that already run on a timer move to DigitalOcean Functions. Stages 2 and 4 are planned to add $0 to the cloud bill (logs and Grafana run on-prem), so this is the only remaining paid stage. The design draft is [2026-10-11 stage 3 workloads](superpowers/specs/2026-10-11-stage-3-workloads-design.md); what it prices:
+Stage 3 adds one Docker host running Portainer CE, five small daemons, an S3-compatible bucket for their state and a self-hosted Discord-to-Matrix bridge on the same droplet (the Matrix homeserver itself is hosted by etke.cc). The jobs that already run on a timer move to DigitalOcean Functions. In the reference environment stages 2 and 4 are planned to add $0 to the cloud bill (logs and the Grafana run on-prem), so this is the only remaining paid stage there. A learner who builds their own cloud Grafana (option N1) or Wazuh manager (S1) pays $6 to $24 or more for one more droplet, which with stage 3 option A ($29) does not fit under $30; see the [settings and mini SOC design](superpowers/specs/2026-10-16-stage2-settings-and-mini-soc-design.md) section 1.3 and the wiki page [Build your own mini SOC](wiki/Build-Your-Own-Mini-SOC.md). The design draft is [2026-10-11 stage 3 workloads](superpowers/specs/2026-10-11-stage-3-workloads-design.md); what it prices:
 
 | Option | Droplet | Spaces bucket | Functions | Running | Fits $30? |
 |---|---|---|---|---|---|

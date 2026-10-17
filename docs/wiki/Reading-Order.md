@@ -9,7 +9,7 @@ Pick the row that sounds like you. Every path is a numbered list: read in that o
 | Path | Who it is for | Pages | Reading time |
 |---|---|---|---|
 | [The core path](#the-core-path) | Everyone, and anyone unsure where to start. | 21 | about 3 h 15 min of reading |
-| [Build it yourself](#build-it-yourself) | A learner replicating the build in their own accounts. | 4 | about 0 h 50 min of reading |
+| [Build it yourself](#build-it-yourself) | A learner replicating the build in their own accounts. | 5 | about 1 h 10 min of reading |
 | [Understand the design](#understand-the-design) | An engineer who wants the design without the primers. | 11 | about 1 h 30 min of reading |
 | [Security and threat modelling](#security-and-threat-modelling) | A security-minded reader. | 4 | about 0 h 50 min of reading |
 | [Detection and monitoring](#detection-and-monitoring) | Someone asking how it would be watched, and who wants to build a small version. | 8 | about 1 h 55 min of reading |

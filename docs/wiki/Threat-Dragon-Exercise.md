@@ -106,7 +106,7 @@ For each of these three flows, write down which STRIDE letters you expect and *w
 
 ## Step 4: add a second cloud
 
-A hypothetical change, not on the roadmap as a commitment: add an **AWS account**. [Why the clouds differ](Why-the-Clouds-Differ.md) and [AWS: account preparation](Provider-AWS-Account-Preparation.md) are unverified drafts, so treat their claims as inputs to the exercise, not as tested facts.
+A hypothetical change, not on the roadmap as a commitment: add an **AWS account**. (The AWS modules and stacks exist in the repository, tested with mocked providers and never applied, so this is still a hypothetical change to the live system.) [Why the clouds differ](Why-the-Clouds-Differ.md) and [AWS: account preparation](Provider-AWS-Account-Preparation.md) are unverified drafts, so treat their claims as inputs to the exercise, not as tested facts.
 
 **Do.** In a copy of the model (save it under a new name; never edit the committed file in place):
 

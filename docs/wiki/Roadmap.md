@@ -35,7 +35,7 @@ Open follow-ups from this stage:
 
 ## Stage 2: logging and the link home (planned)
 
-Design draft: [2026-10-11 stage 2 logging](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-11-stage-2-logging-design.md). Prometheus pulls the cloud connectors over a Twingate headless client; one home connector per VLAN (logging, AI), with Twingate groups carrying identity-level segmentation and pfSense as a connector-level backstop; Wazuh agents push logs home over a second service account; both paths are single-port resources. Cloud cost $0.
+Design draft: [2026-10-11 stage 2 logging](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-11-stage-2-logging-design.md). Prometheus pulls the cloud connectors over a Twingate headless client; one home connector per VLAN (logging, AI), with Twingate groups carrying identity-level segmentation and pfSense as a connector-level backstop; Wazuh agents push logs home over a second service account; both paths are single-port resources. Cloud cost $0 for the reference environment (home Grafana, nothing new in the cloud). The [2026-10-16 settings and mini SOC design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-stage2-settings-and-mini-soc-design.md) first adds a settings layer (variables, example values, `resource_key`, `site_name`, a timezone variable) and stack instances for a second site in the cost gate; those are merged, while no telemetry stack exists yet.
 
 Build status: the telemetry stack skeleton exists with everything off ([stage 2 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/02-telemetry.md)); nothing is applied.
 
@@ -64,7 +64,7 @@ Depends on stage 2 for two things: the daemons reaching the on-prem Ollama serve
 
 ## Stage 4: Grafana (planned)
 
-Dashboards for the cloud side, running on-prem next to the SIEM rather than as another paid cloud service.
+Dashboards for the cloud side, running on-prem next to the SIEM rather than as another paid cloud service. That is the reference environment, and it adds $0 to the cloud bill. A cloud Grafana (and, further on, a lab-scale Wazuh manager) is the learner's own build, not part of the reference: it adds $6 to $24 or more per month for one droplet and does not fit next to stage 3's $29 under the $30 ceiling. [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) has the options and the arithmetic (unverified draft).
 
 ## Public edge (DMZ) and hardening (planned, number set by its design doc)
 
@@ -86,7 +86,7 @@ Rejected for now: a VPC NAT gateway is about $40 a month, which exceeds the whol
 
 Kubernetes, multi-region, load balancers, managed databases. Each would blow the budget or the complexity budget for what this environment needs. The layout does not block any of them; the cost gate will refuse them until someone prices and approves one on purpose.
 
-Also later, not never: a second cloud account at AWS. Once that tenant exists and is hardened (a project of its own), the stage 3 timer jobs that run as DigitalOcean Functions are candidates to move to Lambda with scheduled triggers, which OpenTofu manages fully and the cost gate can then see. The stage 3 design keeps the jobs portable for that: plain handlers, config from the environment, state in an S3-compatible bucket.
+Also later, not never: running at AWS. The AWS modules and the two AWS stacks are written and tested with mocked providers, but never applied, and the cost gate keeps AWS marked inactive because the $30 ceiling cannot hold it beside the DigitalOcean connectors. Azure and GCP have no code. Once an AWS account exists and is hardened (a project of its own), the stage 3 timer jobs that run as DigitalOcean Functions are candidates to move to Lambda with scheduled triggers, which OpenTofu manages fully and the cost gate can then see. The stage 3 design keeps the jobs portable for that: plain handlers, config from the environment, state in an S3-compatible bucket.
 
 Kubernetes in particular is a cost decision, not a refusal. DigitalOcean's control plane is free, but the smallest sensible node is the $24 droplet and a second node doubles it, for the same six containers that fit on one $12 host. Stage 3 is shaped so the move is cheap when it comes: one image per service, configuration from the environment and Doppler only, state in a bucket rather than on the host, timer jobs already running as Functions, and nothing that depends on a Portainer-only feature. It gets revisited when the ceiling moves past $40, a workload needs more than one host, or a second operator wants declarative rollouts more than a web UI.
 

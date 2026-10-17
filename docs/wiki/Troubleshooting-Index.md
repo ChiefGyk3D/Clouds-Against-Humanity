@@ -43,7 +43,7 @@ Runbook links go to the files in the repository, outside the wiki: [Spacelift an
 
 | Symptom | Likely cause | Where to look |
 |---|---|---|
-| `Invalid function argument ... r.source_tags is null`, then `0 passed, 1 failed, 11 skipped` | An inbound rule written with an address instead of a source tag breaks the module's output code before the real assertion is reached. The test failed for the wrong reason but still protected you. | [Labs: Lab 1](Labs-Break-It-on-Purpose.md#lab-1-open-the-firewall) |
+| `Invalid function argument ... r.source_tags is null`, then `0 passed, 1 failed, 33 skipped` | An inbound rule written with an address instead of a source tag breaks the module's output code before the real assertion is reached. The test failed for the wrong reason but still protected you. | [Labs: Lab 1](Labs-Break-It-on-Purpose.md#lab-1-open-the-firewall) |
 | `Missing expected failure ... was expected to report an error but did not` | A guard was loosened. The test that expects a bad input to be refused did not get a refusal. | [Labs: Lab 2](Labs-Break-It-on-Purpose.md#lab-2-let-a-private-network-be-public) |
 | Tests marked `skip` after one failed | A failing test stops the rest of its file. Read `skip` as "not checked", never as "fine". | [Labs: Lab 1](Labs-Break-It-on-Purpose.md#lab-1-open-the-firewall) and [Lab 2, "What to take away"](Labs-Break-It-on-Purpose.md#lab-2-let-a-private-network-be-public) |
 | `tofu test` seems to need a cloud account or a token | It should not. Every test file mocks its providers, which return made-up IDs, so the tests need no credential and cost nothing. Run `init -backend=false` first. | [OpenTofu, stacks and modules, "Tests without a cloud account"](OpenTofu-Stacks-and-Modules.md#tests-without-a-cloud-account) |
