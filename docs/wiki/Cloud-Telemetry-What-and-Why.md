@@ -88,3 +88,5 @@ Write your answers before opening the reference.
 - **Find the cheapest signal.** For "is connector a up", name the cheapest signal that answers it, and then the one that would also tell you *why* it is down.
 
 Next: [Multiple sites and identity](Multiple-Sites-and-Identity.md). Back to the [Reading order](Reading-Order.md).
+
+Where this is built: the [stage 2 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/02-telemetry.md) describes the telemetry stack skeleton (everything off, nothing applied).

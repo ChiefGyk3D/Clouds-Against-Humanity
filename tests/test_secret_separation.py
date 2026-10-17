@@ -29,7 +29,7 @@ CALL_RE = re.compile(rf"cah_doppler_env( {NAME}(={NAME})?)+")
 
 # Every accepted stack name matches exactly one of these. Anything else fails.
 STACK_PATTERNS = {
-    "digitalocean": re.compile(r"cah-00-foundation|cah-10-access"),
+    "digitalocean": re.compile(r"cah-00-foundation|cah-10-access|cah-20-telemetry"),
     "aws": re.compile(r"cah-aws-[a-z0-9]+(-[a-z0-9]+)*"),
     "azure": re.compile(r"cah-azure-[a-z0-9]+(-[a-z0-9]+)*"),
     "gcp": re.compile(r"cah-gcp-[a-z0-9]+(-[a-z0-9]+)*"),
@@ -184,7 +184,11 @@ def test_real_config_passes_and_every_stack_was_validated():
     validated, problems = validate(CONFIG.read_text())
     assert problems == []
     raw = yaml.safe_load(CONFIG.read_text())["stacks"]
-    assert set(validated) == set(raw) == {"cah-00-foundation", "cah-10-access"}
+    assert set(validated) == set(raw) == {
+        "cah-00-foundation",
+        "cah-10-access",
+        "cah-20-telemetry",
+    }
 
 
 def test_stack_classification_is_explicit_and_fail_closed():
