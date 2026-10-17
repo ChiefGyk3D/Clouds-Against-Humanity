@@ -44,6 +44,8 @@ module "connector_a" {
   reboot_time = var.reboot_times["a"]
   timezone    = var.timezone
 
+  connector_telemetry = contains(var.connector_telemetry_instances, "a") ? var.connector_telemetry : var.connector_telemetry_previous
+
   # The outbound rules must exist before the droplet boots and starts to install.
   depends_on = [module.connector_firewall]
 }
@@ -64,6 +66,8 @@ module "connector_b" {
   admin_ssh_public_key = var.admin_ssh_public_key
   reboot_time          = var.reboot_times["b"]
   timezone             = var.timezone
+
+  connector_telemetry = contains(var.connector_telemetry_instances, "b") ? var.connector_telemetry : var.connector_telemetry_previous
 
   depends_on = [module.connector_firewall]
 }

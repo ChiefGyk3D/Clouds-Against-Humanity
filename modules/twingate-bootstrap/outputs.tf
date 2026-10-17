@@ -19,5 +19,6 @@ output "user_data" {
     timezone             = var.timezone
     update_hour          = local.update_hour
     update_minute        = local.update_minute
+    telemetry_conf       = local.telemetry_conf
   })
 }

@@ -58,6 +58,31 @@ timezone = "America/New_York"
 # Set it only on a NEW stack, and use the same value as the foundation stack.
 resource_key = ""
 
+# Twingate connector telemetry (both connectors). The default, {}, changes nothing.
+# Setting any of log_level, connection_logs, metrics_port or labels adds lines to
+# /etc/twingate/connector.conf, which changes user_data: the plan then shows BOTH
+# droplets REPLACED. Roll out one connector at a time with
+# connector_telemetry_instances (["a"] first, then ["a", "b"]) and an
+# SSH-through-Twingate check between (docs/wiki/Trace-One-Change-End-to-End.md,
+# variant C). It opens no firewall port. Uncomment to try it; the values are
+# placeholders.
+# connector_telemetry = {
+#   status_updates_enabled = true         # provider setting, not sent while unset, never replaces anything
+#   log_level              = 5            # 3, 4, 5 or 7 (Twingate's default is 3)
+#   connection_logs        = true         # TWINGATE_LOG_ANALYTICS=v3 (user emails and client IPs in the journal)
+#   metrics_port           = 9999         # TWINGATE_METRICS_PORT, 1024 to 65535, not 9100
+#   labels                 = { DEPLOYED_BY = "opentofu" }  # shown in the Admin Console: no secrets
+# }
+connector_telemetry = {}
+
+# Which connectors get connector_telemetry (a, b or both). Default both.
+connector_telemetry_instances = ["a", "b"]
+
+# What the connectors NOT listed above keep (their current telemetry). {} for the
+# first activation. For a later change, put the old value here and list ["a"]
+# first, so b keeps its config while a changes.
+connector_telemetry_previous = {}
+
 # A label for telemetry only (empty means "site-<region>"). It appears in no
 # resource name, tag or output, and changing it replaces nothing.
 site_name = "site-tor1"

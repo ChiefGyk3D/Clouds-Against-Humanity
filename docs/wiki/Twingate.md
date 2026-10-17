@@ -92,6 +92,22 @@ Twingate can route a session for connector b's address through connector a. Conn
 
 All outbound. Inbound from the internet: none.
 
+## Connector telemetry (off by default)
+
+The connector can write its own logs, expose Prometheus metrics and carry labels. All of it is configured on the connector, in `/etc/twingate/connector.conf`; none of it lives in the Admin Console or the Twingate provider. One variable, `connector_telemetry`, turns it on in both stacks. Default `{}` changes nothing. The research and sources are in the [findings note](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-17-twingate-connector-telemetry-findings.md) (read 2026-10-16).
+
+| Setting | Line in `connector.conf` | Verified from Twingate's docs |
+|---|---|---|
+| `log_level` | `TWINGATE_LOG_LEVEL=3, 4, 5 or 7` | Yes. 3 is the default, 7 is DEBUG and very verbose. There is no log format setting. |
+| `connection_logs` | `TWINGATE_LOG_ANALYTICS=v3` | Yes, for systemd. One JSON object per connection, on stdout, so in the journal (`journalctl -u twingate-connector`), prefixed `ANALYTICS `. Each line names the user's email, client IP and city. |
+| `metrics_port` | `TWINGATE_METRICS_PORT=<port>` | Yes. Needs connector v1.80.0 or later. Plain HTTP at `/metrics`, no authentication. Which interface it listens on is **not documented**. |
+| `labels` | `TWINGATE_LABEL_<KEY>=<value>` | The mechanism is documented; its use in the systemd config file is **not shown** on the pages read. Check the connector page after the first apply. |
+| `status_updates_enabled` | none (a provider attribute) | Yes, in the provider schema. The provider default is `true`, which is what the live connectors already have; this code does not send it unless you set it. |
+
+There is no health-check port. The check is a command on the host, `twingate-connectorctl health`, and it only says the service runs, not that the connector reached Twingate.
+
+Turning any of the first four on changes `user_data`, so the plan shows a **replace** of the droplet (or instance), not an in-place update. Use `connector_telemetry_instances` to do it one connector at a time: `["a"]`, apply, SSH through Twingate to the new connector, then `["a", "b"]` (for a later change to settings already on, put the old value in `connector_telemetry_previous` so the connector not yet changed keeps its config; [Trace one change end to end](Trace-One-Change-End-to-End.md), variant C). Merging with the variable unset is expected to plan no change, but a template hash cannot prove a live plan: confirm with the saved plan in Spacelift before applying. Labels are shown in the Twingate Admin Console, so never put a secret in one. No firewall port is opened by this. Reading the metrics from another host needs a separate change: a firewall rule from that host's tag (`inbound_from_other_tags`), a rule from the connector tag for the other connector, and a Twingate resource for the endpoint. Treat the port as reachable by anything the firewall lets through, because the bind address is not something you can set.
+
 ## Accepted risk: the connector tokens
 
 The connector's access and refresh tokens end up in two places: OpenTofu state (held by Spacelift) and the droplet's cloud-init user-data. They are marked sensitive, each token belongs to one connector and is revocable, and rotation is documented. The open follow-up is that any process on the droplet can currently read user-data from the metadata endpoint at `169.254.169.254`; locking that to root is on the list. See [Threat model](Threat-Model.md).
