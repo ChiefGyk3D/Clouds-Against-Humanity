@@ -23,7 +23,7 @@ Before you create any cloud account, do what you can to bound your downside.
 
 Before any cloud account, spend an hour proving to yourself you understand what the code checks. [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) needs a clone of the repository and an internet connection (to download providers and tools), but no cloud account.
 
-**You should see:** `Success! 34 passed, 0 failed.` from `modules/firewall`, and `cost-check: digitalocean: planned $12.00/mo, approved $12.00, active` followed by `cost-check: shared ceiling $30.00` from `scripts/cost_check.py`.
+**You should see:** `Success! 34 passed, 0 failed.` from `modules/firewall`, and `cost-check: digitalocean: planned $12.00/mo, approved $12.00, active` followed by `cost-check: phase stage-1 ceiling $30.00 (reason: ...)` from `scripts/cost_check.py`.
 
 *Checkpoint: if you could not predict a lab's result, reread its page before you give anything real access to your cloud.*
 

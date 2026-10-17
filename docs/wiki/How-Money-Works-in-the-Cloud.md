@@ -35,11 +35,11 @@ The other services in this project (Spacelift, Doppler, Twingate, GitHub) have f
 
 ### 1. A billing alert, before anything else
 
-Every provider lets you set an email alert at a dollar threshold. Set one before you create your first resource. This project set two in stage 0, at $10 and $25, against a $30 ceiling. An alert does not stop spending, but it turns a month of silence into a same-day email.
+Every provider lets you set an email alert at a dollar threshold. Set one before you create your first resource. This project set two in stage 0, at $10 and $25, against the $30 ceiling of the current phase. An alert does not stop spending, but it turns a month of silence into a same-day email.
 
 ### 2. A ceiling, written down
 
-Decide the most this is allowed to cost per month, and write the number where it will be seen. Here it is $30 across all five planned stages, and it appears on the Home page, the cost page, the roadmap and the README. A number nobody wrote down is a number nobody is held to.
+Decide the most this is allowed to cost per month, and write the number where it will be seen. Here it is $30 today, and it is written per phase in `docs/stages/approved.json`: every phase carries its own ceiling, why it is that number and when it was decided. A later phase can raise it, but only by editing that entry in a pull request someone reads, so the number rises on purpose and never by drift. The README, the Home page, the cost page and the roadmap quote it. A number nobody wrote down is a number nobody is held to.
 
 ### 3. Approve before it exists, not after
 
@@ -82,7 +82,8 @@ Two more kinds of cost that do not appear on an invoice:
 
 | Idea | Where |
 |---|---|
-| The ceiling and the approved total | `docs/stages/approved.json` |
+| The ceiling per phase and the approved totals | `docs/stages/approved.json` (`phases`, `current_phase`) |
+| Raising a phase's ceiling | `scripts/cost_raise.py` (dry run by default) |
 | What each stack will create and cost | `stacks/*/cost.json` |
 | The price table, with its retrieval date | `docs/cost-prices.json` |
 | The gate itself and its tests | `scripts/cost_check.py`, `tests/test_cost_check.py` |
@@ -91,7 +92,7 @@ Two more kinds of cost that do not appear on an invoice:
 
 ## Try it yourself
 
-- Run the gate: `python3 -I scripts/cost_check.py --root .` from a clone of this repo. It prints the planned total, the approved total and the ceiling. Then edit a `cost.json` to use a bigger size and run it again; it should refuse.
+- Run the gate: `python3 -I scripts/cost_check.py --root .` from a clone of this repo. It prints the planned total, the approved total and the current phase's ceiling. Then edit a `cost.json` to use a bigger size and run it again; it should refuse.
 - Before you create your first cloud resource anywhere, find the billing alert setting and set one. Then, and only then, create the resource.
 - If you already have a cloud account, open its billing page right now and name every line.
 

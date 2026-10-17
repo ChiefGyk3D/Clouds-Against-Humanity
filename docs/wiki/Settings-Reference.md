@@ -229,7 +229,7 @@ These are not OpenTofu variables. The cost gate (`scripts/cost_check.py`) reads 
 | connector-b backups | `stacks/10-access/cost.json` | `/resources/1/backups` | `false` | false or true | `false` | exists |
 | stage 0 resources | `stacks/00-foundation/cost.json` | `/resources` | `[]` | list of costed resources; empty because stage 0 costs nothing | `[]` | exists |
 | approved monthly total (DigitalOcean) | `docs/stages/approved.json` | `/providers/digitalocean/approved_monthly_total` | `12.0` | the computed total may not exceed it; the sum across providers may not exceed the ceiling | `12.0` | exists |
-| monthly ceiling | `docs/stages/approved.json` | `/ceiling` | `30.0` | number of dollars | `30.0` | exists |
+| monthly ceiling (current phase) | `docs/stages/approved.json` | `/phases/stage-1/ceiling` | `30.0` | dollars; one ceiling per phase in phases, the one named by current_phase is enforced; a later phase may raise it, lowering needs lowers: true, and hard_max (required, with hard_max_reason) caps every phase | `30.0` | exists |
 | droplet price table entry | `docs/cost-prices.json` | `/droplets/s-1vcpu-1gb` | `6` | dollars per month for a size; a size absent from the table fails the gate | `6` | exists |
 | AWS connector-a instance type | `stacks/aws/10-access/cost.json` | `/resources/0/type` | `"t4g.micro"` | price must exist in docs/cost-prices/aws.json; read by the stack as local.connector_a.type; both connectors are kept equal by a test | `t4g.micro` | exists |
 | AWS connector-b instance type | `stacks/aws/10-access/cost.json` | `/resources/1/type` | `"t4g.micro"` | price must exist in docs/cost-prices/aws.json; read by the stack as local.connector_b.type; both connectors are kept equal by a test | `t4g.micro` | exists |

@@ -65,7 +65,7 @@ That is not "VPNs are always wrong". WireGuard is a very different animal from a
 | Edge | Public edge (DMZ) and hardening | past the ceiling | Planned, design first |
 | AWS | The AWS twin of stages 0 and 1: `modules/aws/*`, `stacks/aws/*` | $0 and $20.84 | Written and tested with mocked providers, never applied. Azure and GCP have no code |
 
-Working ceiling: $30 per month across stages 0 to 4, shared by every cloud. A cost gate in CI fails any change that raises a cloud's planned total above its approved total in `docs/stages/approved.json`, or the active clouds' approved totals above the ceiling (the AWS twin is marked inactive, because it does not fit beside stage 1). See the [roadmap](docs/wiki/Roadmap.md).
+Working ceiling: $30 per month in the current phase (stage 1), shared by every cloud; each phase carries its own ceiling in `docs/stages/approved.json`, so a later phase can raise it on purpose. A cost gate in CI fails any change that raises a cloud's planned total above its approved total, or the active clouds' approved totals above the current phase's ceiling (the AWS twin is marked inactive, because it does not fit beside stage 1). See the [roadmap](docs/wiki/Roadmap.md).
 
 ## Layout
 
@@ -81,6 +81,8 @@ Clouds-Against-Humanity/
   modules/twingate-connector/              connector, its tokens, its droplet and cloud-init
   modules/aws/{vpc,firewall,twingate-connector}  the AWS versions of those modules
   scripts/cost_check.py                    cost gate
+  scripts/ci_cost_gate.sh                  the cost gate as CI runs it: compares approved.json with the base branch on pull requests
+  scripts/cost_raise.py                    proposes (dry run) or makes a per-phase ceiling change in approved.json
   scripts/identifier_check.py              fails on cloud account ids in tracked files (never prints them)
   scripts/gen_settings_doc.py              writes docs/wiki/Settings-Reference.md from docs/settings.json (--check fails when stale)
   scripts/gen_example_tests.py             writes each live stack's example.tftest.hcl from its terraform.tfvars.example

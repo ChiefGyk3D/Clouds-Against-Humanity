@@ -8,7 +8,7 @@
 - A Twingate admin group, `cah-tor1-admins`.
 - Two per-host Twingate resources, one for each connector's private address, each limited to TCP port 22.
 
-Cost: $12.00/month, approved DigitalOcean total $12.00 in `docs/stages/approved.json` (see [cost](../cost.md)).
+Cost: $12.00/month, approved DigitalOcean total $12.00 in `docs/stages/approved.json` (see [cost](../cost.md)). Phase id `stage-1`, the current phase, ceiling $30.
 
 What the tests prove (`tofu test`, no cloud account needed):
 

@@ -110,7 +110,8 @@ def test_only_documentation_or_private_example_addresses(name):
 # --- the cost tables -------------------------------------------------------
 
 PRICES = json.loads((ROOT / "docs" / "cost-prices.json").read_text())["droplets"]
-CEILING = json.loads((ROOT / "docs" / "stages" / "approved.json").read_text())["ceiling"]
+_APPROVED = json.loads((ROOT / "docs" / "stages" / "approved.json").read_text())
+CEILING = _APPROVED["phases"][_APPROVED["current_phase"]]["ceiling"]
 SITE_CONNECTORS = sum(
     PRICES[m["size"]]
     for m in json.loads((ROOT / "stacks" / "10-access" / "cost.json").read_text())["resources"]

@@ -36,7 +36,7 @@ What the tests prove (`tofu test`, mocked providers, no account needed): names a
 
 ## 3. Cost
 
-Planned $20.84 a month (two `t4g.micro` at $0.0084 an hour, two public IPv4 addresses at $0.005 an hour, two 8 GiB gp3 volumes at $0.08 per GiB-month), against an approved $21.00 for AWS. The shared ceiling is $30, and DigitalOcean stage 1 ($12) plus AWS ($21) would be $33, so **apply this only while the DigitalOcean access stage is torn down**. Data transfer and anything created outside OpenTofu are not priced; a billing alert only notifies. See [cost](../cost.md) and the [AWS cost lesson](../wiki/Provider-AWS-Cost-Lesson.md).
+Phase id `aws-twin`, planned, proposed ceiling $30. Planned $20.84 a month (two `t4g.micro` at $0.0084 an hour, two public IPv4 addresses at $0.005 an hour, two 8 GiB gp3 volumes at $0.08 per GiB-month), against an approved $21.00 for AWS. The current phase's ceiling (`stage-1`, $30) applies, and DigitalOcean stage 1 ($12) plus AWS ($21) would be $33, so **apply this only while the DigitalOcean access stage is torn down**. Data transfer and anything created outside OpenTofu are not priced; a billing alert only notifies. See [cost](../cost.md) and the [AWS cost lesson](../wiki/Provider-AWS-Cost-Lesson.md).
 
 **The cost switch is two flags, not one.** `providers.digitalocean.active` is `true` today and `providers.aws.active` is `false`. Turning only AWS on fails the gate. Order of operations:
 
@@ -50,7 +50,7 @@ The gate for each state, run on copies of the repository with only the flags cha
 |---|---|---|
 | true | false (today) | passes: aws inactive, digitalocean $12.00 active |
 | false | true (the AWS stage) | passes: aws $20.84 against $21.00 active, digitalocean inactive |
-| true | true | **fails**: `the approved figures of the active providers add up to $33.00, above the shared ceiling $30.00` |
+| true | true | **fails**: `the approved figures of the active providers add up to $33.00, above the shared ceiling $30.00` (the message keeps the wording "shared ceiling"; the ceiling is the current phase's) |
 | false | false | passes (nothing is attested as applied) |
 
 `python3 -I scripts/cost_check.py --root .` reports `aws: planned $20.84/mo, approved $21.00, inactive` today. Once a trusted run produces a real plan, run the gate with `--plan plan.json --stack stacks/aws/10-access` before the first apply; it prices what the plan resolves, which source code can hide.

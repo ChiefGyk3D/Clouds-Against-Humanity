@@ -11,7 +11,7 @@ Design: [2026-10-16 settings layer, multi-site telemetry and the mini cloud SOC]
 | `logging_enabled` | One Twingate service, `telemetry-<resource_key>-logging`, and one Twingate resource per `logging_servers` element, named `logging-<resource_key>-<name>`, each limited to its one port and protocol | Resources live in the home remote network (`home_remote_network_id`) |
 | `metrics_enabled` | One Twingate service, `telemetry-<resource_key>-scrape`, and one resource per `scrape_allowlist` entry per connector, named `scrape-<resource_key>-<entry>-<a or b>` | Resources live in the site's cloud remote network (`cloud_remote_network_id`) |
 
-Cost: $0.00. `cost.json` lists no resources, and the cost gate requires the file to exist anyway.
+Cost: $0.00. `cost.json` lists no resources, and the cost gate requires the file to exist anyway. Phase id `stage-2`, planned, proposed ceiling $30 (the reference environment adds $0; see [cost](../cost.md#ceilings-per-phase)).
 
 What it does **not** do yet: it creates no firewall rule, no droplet, no agent, no exporter and no service key. Service keys are issued out of band, one per host, so no key is ever in state (design section 2.8). Metrics need an exporter on the connectors (step 5 of the design) and logs need an agent (step 7), so enabling a flag today only creates the Twingate side.
 
