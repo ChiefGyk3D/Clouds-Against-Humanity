@@ -83,7 +83,9 @@ flowchart TD
 Key ideas:
 
 - **The free list is an allowlist.** `digitalocean_project`, `_project_resources`, `_tag`, `_vpc`, `_firewall` and `_ssh_key` are free. A droplet is allowed only inside the connector module. Anything else (a NAT gateway, Kubernetes node pool, container registry, CDN, app) is refused by name until someone deliberately prices and approves it.
-- **Raising the budget is a visible change.** To add something paid, you edit a `cost.json`, raise `approved_monthly_total` in `docs/stages/approved.json`, and that diff is reviewed like code.
+- **Raising the budget is a visible change.** To add something paid, you edit a `cost.json`, raise that cloud's `approved_monthly_total` in `docs/stages/approved.json`, and that diff is reviewed like code.
+- **Each cloud has its own approved figure under one shared ceiling.** A cloud you are not using right now is marked inactive, so the active figures together must fit under the ceiling. This is how a second cloud shares one budget with the first.
+- **Some costs are attributes, not resources.** On AWS a public address is a setting on an instance, so for AWS the gate can also price an OpenTofu plan in JSON and require it to match the stack's `cost.json`. See [the AWS cost lesson](Provider-AWS-Cost-Lesson.md).
 - **Prices come from the DigitalOcean sizes API**, recorded with the date they were retrieved. Backup pricing is marked unverified, so the gate refuses any backup-enabled droplet until someone checks it.
 
 ### What the gate cannot do

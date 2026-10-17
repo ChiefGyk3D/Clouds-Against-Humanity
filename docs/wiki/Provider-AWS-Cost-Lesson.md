@@ -30,7 +30,7 @@ So this project would not build the textbook design on AWS. It would use a publi
 Two more places charges appear:
 
 - **An address you forgot.** AWS charges for public addresses whether they are in use or idle. An elastic address left behind after the machine is gone is still billed.
-- **Anything that quietly adds a gateway.** A tutorial's "also create a NAT gateway for the private subnet" is a $32.85-a-month line item hidden in a copy-paste. This is exactly what this repository's cost gate exists to refuse. The gate does not yet price AWS; teaching it to is a planned piece of the design.
+- **Anything that quietly adds a gateway.** A tutorial's "also create a NAT gateway for the private subnet" is a $32.85-a-month line item hidden in a copy-paste. This is exactly what this repository's cost gate exists to refuse: it rejects a NAT gateway outright at this ceiling, whether it appears in the source or in a plan, and it prices the instances and addresses of an AWS stack from a manifest that must match the plan. There is no AWS stack in the repository yet, so this is tested against fixtures, not a live stack.
 
 ## The shared $30
 

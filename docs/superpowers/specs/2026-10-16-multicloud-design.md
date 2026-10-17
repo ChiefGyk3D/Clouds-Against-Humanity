@@ -202,3 +202,11 @@ The contract is enforced in two places. Per provider, mocked-provider `tofu test
 
 What this cannot tell you: that the semantics match. A module can export `source_members` and fill it with something that does not mean "who may reach the targets". That is what review and the READMEs' role tables are for.
 
+## 14. Phase 2c-i: the cost gate as built
+
+Built as designed, with three deliberate differences. The DigitalOcean price table stays at `docs/cost-prices.json` (the DigitalOcean tree is untouched, as in section 3); other clouds use `docs/cost-prices/<cloud>.json`. `approved.json` is now `{ceiling, providers: {<cloud>: {approved_monthly_total, active, allowed_sources}}}`: each cloud is capped on its own, and the active clouds' figures together must fit under the shared ceiling, which is how the maintainer's "shared $30 for now" decision is expressed (AWS inactive while DigitalOcean stage 1 runs). Plan costing is implemented for AWS only and is run by hand or by the trusted run; wiring it into a Spacelift plan policy is part of the AWS code phase, when a stack exists to attach it to.
+
+Verified by fixtures (no AWS stack exists): an AWS manifest over its approved figure fails; the two-connector stack costs exactly $20.84; a stack directory with no manifest fails; an unapproved provider's paid types fail; a NAT gateway is rejected in source and in a plan, even when listed in `allowed_sources`; an implicit public address, a 500 GiB root disk, an extra block device, an explicit elastic address and `for_each` are each priced; unknown types and a missing disk size fail rather than cost zero; connector counts are checked per stack, so one cloud's blocks cannot hide another's. Mutation checks: removing the explicit-false rule, the NAT rejection, the plan reconciliation or the shared-ceiling sum each turns a test red.
+
+Still open from section 6: the identifier check and per-cloud secret separation (phase 2c-ii and iii).
+

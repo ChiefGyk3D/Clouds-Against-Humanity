@@ -34,9 +34,16 @@ def make_repo(
     (tmp_path / "docs/stages/approved.json").write_text(
         json.dumps(
             {
-                "approved_monthly_total": approved_total,
                 "ceiling": ceiling,
-                "allowed_sources": {"digitalocean_droplet": ["modules/ok/main.tf"]},
+                "providers": {
+                    "digitalocean": {
+                        "approved_monthly_total": approved_total,
+                        "active": True,
+                        "allowed_sources": {
+                            "digitalocean_droplet": ["modules/ok/main.tf"]
+                        },
+                    }
+                },
             }
         )
     )
@@ -106,7 +113,9 @@ def test_costed_resource_outside_allowed_file_is_flagged(tmp_path):
     found = cost_check.uncosted_sources(
         root, {"digitalocean_droplet": ["modules/ok/main.tf"]}
     )
-    assert found == ["stacks/10-access/sneaky.tf: digitalocean_volume"]
+    assert found == [
+        "stacks/10-access/sneaky.tf: digitalocean_volume (the gate has no price model for it)"
+    ]
 
 
 def test_provider_cache_directories_are_ignored(tmp_path):
@@ -127,7 +136,7 @@ def test_main_passes_at_approved_total(tmp_path, capsys):
         tf_files={"modules/ok/main.tf": 'resource "digitalocean_droplet" "a" {}\n'},
     )
     assert cost_check.main(["--root", str(root)]) == 0
-    assert "planned $6.00/mo" in capsys.readouterr().out
+    assert "digitalocean: planned $6.00/mo" in capsys.readouterr().out
 
 
 def test_main_fails_over_approved_total(tmp_path):

@@ -28,19 +28,31 @@ None of this is in `approved.json` yet. Droplet backups are off in every row; th
 
 ## How the gate works
 
-`scripts/cost_check.py` reads each stack's `cost.json` (the planned droplets, their sizes and whether backups are on), looks each size up in the price table and adds them up. It fails if:
+`scripts/cost_check.py` reads each stack's `cost.json` (found anywhere under `stacks/`; the planned machines, their sizes and whether backups are on), looks each up in that cloud's price table and adds them up per cloud. The DigitalOcean table is `docs/cost-prices.json`; other clouds have `docs/cost-prices/<cloud>.json`. A stack under `stacks/aws/` belongs to AWS; any other stack belongs to DigitalOcean. It fails if:
 
-- the total is above the approved total in `docs/stages/approved.json` (currently stage 1, $12.00, ceiling $30.00);
+- a cloud's total is above that cloud's `approved_monthly_total` in `docs/stages/approved.json` (currently DigitalOcean $12.00 of a shared $30.00 ceiling);
+- the approved figures of the clouds marked `active` add up to more than the shared ceiling. A cloud that is not applied right now is marked inactive, which is how a second cloud fits under one budget: you apply it while the other is torn down;
+- a stack directory has OpenTofu files but no `cost.json`;
 - a size is missing from the price table;
 - backups are requested while the backup price is unverified (see below);
 - the approved total is itself above the ceiling;
 - a `digitalocean_*` resource type that is not on the free list appears in any `.tf` file. The gate is an allowlist: `digitalocean_project`, `digitalocean_project_resources`, `digitalocean_tag`, `digitalocean_vpc`, `digitalocean_firewall` and `digitalocean_ssh_key` are free, and the droplet is allowed only in the file listed under `allowed_sources` (the connector module). Anything else, such as a NAT gateway, app, container registry, Kubernetes node pool or CDN, is refused by name and file;
-- no `stacks/*/cost.json` manifest exists, or the number of `twingate-connector` module blocks differs from the number of `droplet` entries in the manifests, or a connector module block uses `count` or `for_each` (each connector is costed as its own instance, so the gate wants one module block per manifest entry);
+- no `stacks/**/cost.json` manifest exists, or, in any one stack, the number of `twingate-connector` module blocks differs from the number of machine entries (`droplet` or `instance`) in that stack's manifest, or a connector module block uses `count` or `for_each` (each connector is costed as its own instance, so the gate wants one module block per manifest entry);
 - a module source is not local (`./` or `../`), or a `*.tf.json` file exists, because the gate cannot read either.
 
 The gate parses HCL with regular expressions and does not execute it, so it is a guardrail, not a proof: it will not see a resource type built dynamically or a paid resource created outside this repo.
 
-To add a paid resource, add it to a `cost.json`, raise the approved total on purpose in `approved.json`, and have the new total approved before the change merges.
+To add a paid resource, add it to a `cost.json`, raise that cloud's approved total on purpose in `approved.json`, and have the new total approved before the change merges.
+
+### Costing a plan, not just the source
+
+Source code hides the expensive parts: on AWS a public address is an attribute of an instance, a disk size is a setting, and `count` or `for_each` multiply things the file shows once. So for AWS the gate can also read an OpenTofu plan as JSON (`tofu show -json plan`), where those values are resolved:
+
+```bash
+python3 -I scripts/cost_check.py --root . --plan plan.json --stack stacks/aws/10-access
+```
+
+It prices each planned instance (hourly price times 730, plus a public address unless `associate_public_ip_address` is explicitly `false`, plus the root disk, which must be set explicitly because the image default is not priced), each elastic address and each volume, then requires the result to equal the stack's `cost.json`. Anything it cannot price, such as a load balancer or an unknown instance type, is a failure rather than a zero, and a NAT gateway is rejected outright at this ceiling. The required CI check does not run it today: CI has no AWS plan to give it, and there is no AWS stack yet. It belongs in the trusted run that produces the real plan, which is part of the AWS code phase. Where the plan comes from matters: a plan file checked into a pull request can be edited to say anything, so the check is only a guarantee on a plan produced by the trusted run; on a pull request it is an early warning.
 
 ## Not yet verified
 
@@ -50,3 +62,11 @@ These are not priced, or not confirmed against the vendor's current page. Check 
 - Bandwidth overage.
 - Snapshots.
 - Free-tier limits of Spacelift, Doppler and Twingate.
+
+### What `active` means
+
+`active` in `approved.json` is the maintainer's statement that a cloud is applied right now. The gate adds up the active figures against the shared ceiling, but it cannot see what is actually running: a cloud marked inactive can still have a manifest in the repository (the code exists, it is just not applied), and nothing checks that its stacks are destroyed. Marking a cloud inactive is a promise to tear it down first, backed by the billing alert, not by the gate.
+
+### Other limits of the source scan
+
+Comments are removed and braces inside quoted strings are ignored, but heredocs, dynamic module sources and resource types built from strings are not understood. A type the gate has no price model for fails even when `approved.json` names a file for it: approval can place a priced type in a file, not invent a price.
