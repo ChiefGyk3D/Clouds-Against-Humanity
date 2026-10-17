@@ -72,4 +72,4 @@ The usual cloud incident is not a clever attack on the network. It is a leaked k
 - Pick a cloud you use. Fill in the four-question tables for it, from its documentation, with the date you read it.
 - Read [Provider-AWS-The-Same-Four-Pieces](Provider-AWS-The-Same-Four-Pieces.md). For each of the four questions, find the resource that answers it.
 
-Next: [AWS account preparation](Provider-AWS-Account-Preparation.md).
+Next: [AWS account preparation](Provider-AWS-Account-Preparation.md), then Azure, then GCP, in the order on the [Reading order](Reading-Order.md) page. Prerequisites: the core path through [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md).

@@ -1,41 +1,74 @@
-**[Home](Home.md)**
+**[Home](Home.md)** | **[Reading order](Reading-Order.md)**
 
-**Pick a path**
-- [Start here if you are new](Start-Here-If-You-Are-New.md)
-- [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md)
+<details open>
+<summary><b>Core path: read in this order</b></summary>
+
+1. [Start here if you are new](Start-Here-If-You-Are-New.md)
+2. [What is the cloud](What-Is-the-Cloud.md)
+3. [Networking basics](Networking-Basics-for-This-Project.md)
+4. [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
+5. [Infrastructure as code](What-Is-Infrastructure-as-Code.md)
+6. [Git and pull requests](Git-GitHub-and-Pull-Requests.md)
+7. [Containers and Docker (optional)](Containers-and-Docker-Basics.md)
+8. [How money works](How-Money-Works-in-the-Cloud.md)
+9. [Enterprise habits](Enterprise-Engineering-Habits.md)
+10. [Architecture overview](Architecture-Overview.md)
+11. [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md)
+12. [Twingate](Twingate.md)
+13. [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md)
+14. [Droplet hardening](Droplet-Hardening.md)
+15. [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
+16. [Spacelift](Spacelift.md)
+17. [Doppler and secrets](Doppler-and-Secrets.md)
+18. [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md)
+19. [Threat model](Threat-Model.md)
+20. [Lessons learned](Lessons-Learned.md)
+21. [Roadmap](Roadmap.md)
+
+</details>
+
+<details>
+<summary><b>Track: build it yourself</b></summary>
+
+- [Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md)
 - [Labs: break it on purpose](Labs-Break-It-on-Purpose.md)
+- [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md)
+- [Settings reference](Settings-Reference.md)
 
-**Start from zero**
-- [1. What is the cloud](What-Is-the-Cloud.md)
-- [2. Networking basics](Networking-Basics-for-This-Project.md)
-- [3. Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
-- [4. Infrastructure as code](What-Is-Infrastructure-as-Code.md)
-- [5. Git and pull requests](Git-GitHub-and-Pull-Requests.md)
-- [6. Containers and Docker (optional, for stage 3)](Containers-and-Docker-Basics.md)
-- [7. How money works](How-Money-Works-in-the-Cloud.md)
-- [8. Enterprise habits](Enterprise-Engineering-Habits.md)
-- [Capstone: fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md)
+</details>
 
-**How it works (engineers start here)**
-- [Architecture overview](Architecture-Overview.md)
-- [Threat model](Threat-Model.md)
-- [Threat model exercise: build your own](Threat-Model-Exercise.md)
-- [Threat Dragon exercise: trust boundaries](Threat-Dragon-Exercise.md)
+<details>
+<summary><b>Track: understand the design</b></summary>
+
+- [Terraform reference](Terraform-Reference.md)
 - [Trace one change end to end](Trace-One-Change-End-to-End.md)
-- [Twingate](Twingate.md)
-- [Spacelift](Spacelift.md)
-- [Doppler and secrets](Doppler-and-Secrets.md)
-- [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md)
-- [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
-- [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md)
-- [Droplet hardening](Droplet-Hardening.md)
 
-**The argument and the wider world**
-- [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md)
+The rest of this track is on the core path; see [Reading order](Reading-Order.md#understand-the-design).
+
+</details>
+
+<details>
+<summary><b>Track: security and threat modelling</b></summary>
+
+- [Threat model exercise](Threat-Model-Exercise.md)
+- [Threat Dragon exercise](Threat-Dragon-Exercise.md)
+- [Troubleshooting index](Troubleshooting-Index.md)
+
+The [Threat model](Threat-Model.md) is core step 19.
+
+</details>
+
+<details>
+<summary><b>Track: detection and monitoring</b></summary>
+
 - [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md)
 - [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md)
 
-**Other clouds (unverified drafts)**
+</details>
+
+<details>
+<summary><b>Track: other clouds (unverified drafts)</b></summary>
+
 - [Why the clouds differ](Why-the-Clouds-Differ.md)
 - [AWS: account preparation](Provider-AWS-Account-Preparation.md)
 - [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md)
@@ -47,16 +80,18 @@
 - [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md)
 - [GCP: where the money goes](Provider-GCP-Cost-Lesson.md)
 
-**Reference**
-- [Terraform reference](Terraform-Reference.md)
-- [Settings reference](Settings-Reference.md)
-- [Lessons learned](Lessons-Learned.md)
-- [Troubleshooting index](Troubleshooting-Index.md)
-- [Roadmap](Roadmap.md)
-- [Glossary](Glossary.md)
+</details>
 
-**Operator guides (in the repo)**
-- [Stage 0](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/00-foundation.md)
-- [Stage 1](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md)
+<details>
+<summary><b>Reference and operator guides</b></summary>
+
+- [Glossary](Glossary.md)
+- [Troubleshooting index](Troubleshooting-Index.md)
+- [Settings reference](Settings-Reference.md)
+- [Terraform reference](Terraform-Reference.md)
+- [Stage 0 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/00-foundation.md)
+- [Stage 1 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md)
 - [Secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md)
 - [Cost](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md)
+
+</details>

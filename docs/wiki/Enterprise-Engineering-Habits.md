@@ -1,6 +1,6 @@
 # Enterprise engineering habits
 
-Start-from-zero page 8 of 8. Previous: [How money works in the cloud](How-Money-Works-in-the-Cloud.md). Then the capstone: [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipeline.md).
+Start-from-zero page 8 of 8. Previous: [How money works in the cloud](How-Money-Works-in-the-Cloud.md). Next: [Architecture overview](Architecture-Overview.md), step 10 of the core path. The capstone, [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipeline.md), opens the build track and comes after the core path.
 
 Reading this repository for the first time, a reasonable reaction is "this is a lot of ceremony for two $6 machines". Pull requests for a one-person project. A threat model for a hobby. A cost gate for a bill smaller than a streaming subscription. A document about every failure.
 
@@ -98,4 +98,6 @@ Everything else on this page is those three, applied with more people and more m
 
 ## Where to go next
 
-You now have the vocabulary the rest of the wiki assumes. Go to [Home](Home.md) and read its reading order from the top. The [Architecture overview](Architecture-Overview.md) will read as a description of things you understand, and [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) will read as an argument you can evaluate rather than a position you are asked to accept. When a word does not land, the [Glossary](Glossary.md) is there. When you find a page that still assumes too much, that is a pull request waiting to happen, and [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) says how.
+You now have the vocabulary the rest of the wiki assumes. Continue with the core path on the [Reading order](Reading-Order.md) page. The [Architecture overview](Architecture-Overview.md) will read as a description of things you understand, and [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) will read as an argument you can evaluate rather than a position you are asked to accept. When a word does not land, the [Glossary](Glossary.md) is there. When you find a page that still assumes too much, that is a pull request waiting to happen, and [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) says how.
+
+Next: [Architecture overview](Architecture-Overview.md).

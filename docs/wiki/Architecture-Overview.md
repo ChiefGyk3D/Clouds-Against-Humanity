@@ -164,3 +164,5 @@ docs/wiki/                 these pages
 ```
 
 Modules are reusable building blocks; stacks are what actually gets applied. More on that split on [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md).
+
+Next: [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md), step 11 of the core path on the [Reading order](Reading-Order.md) page.

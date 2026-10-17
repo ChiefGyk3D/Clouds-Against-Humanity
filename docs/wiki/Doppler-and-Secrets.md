@@ -83,3 +83,5 @@ Two things can only be confirmed on a real tracked run, and are worth doing the 
 - Confirm the hook ran from `/mnt/workspace/source/` and that the runner had `curl`, `tar` and `sha256sum`. If not, the run fails closed with a clear message.
 
 The full operator guide, including adding secrets and upgrading the pinned CLI, is [docs/spacelift-secrets.md](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md).
+
+Next: [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md), step 18 of the core path on the [Reading order](Reading-Order.md) page.

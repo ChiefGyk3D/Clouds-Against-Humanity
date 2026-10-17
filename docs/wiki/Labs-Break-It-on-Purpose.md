@@ -241,4 +241,4 @@ The cases include `mainline`, a name that *starts with* `main`, which is exactly
 - Pick the lab where your prediction was most wrong. Write one sentence on what you misunderstood. That sentence is worth more than the passing tests.
 - Take any control in the [Threat model](Threat-Model.md) and design a lab like these for it: what would you break, which check should object, and what would you predict? If you cannot name the check, you have found a gap. Open an issue.
 
-Next: [Build it: from zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md).
+Next: [Build it: from zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md), step 3 of the build track. If you came for security rather than a build, the security track starts at the [Threat model exercise](Threat-Model-Exercise.md).

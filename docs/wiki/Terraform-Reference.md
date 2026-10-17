@@ -381,3 +381,5 @@ When Spacelift shows a plan, check these against this page:
 - [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) and [Twingate](Twingate.md): the services behind the resources.
 - [Doppler and secrets](Doppler-and-Secrets.md): where each environment variable comes from.
 - [Spacelift](Spacelift.md): how stacks, dependencies and the hook run these.
+
+Next: [Spacelift](Spacelift.md) if you have not read it, then [Trace one change end to end](Trace-One-Change-End-to-End.md). Back to the [Reading order](Reading-Order.md).

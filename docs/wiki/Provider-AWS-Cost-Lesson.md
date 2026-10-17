@@ -75,4 +75,4 @@ The same discipline as the DigitalOcean teardown, with the AWS names:
 - Replace the public addresses with one NAT gateway. What is the new fixed cost? (Reference: about $50 a month for the stack, which is the two instances and disks, about $13.54, plus about $36.50 for the gateway and its address, before any data.) What does that tell you about the break-even between "an address per machine" and "one gateway for many"? AWS's own documentation gives a formula for this. At two machines, which side wins?
 - Look at the [cost gate](CI-Tests-and-Cost-Gate.md). Which of the charges on this page would it catch today, and which would pass silently?
 
-Back to [Why the clouds differ](Why-the-Clouds-Differ.md), or to [Home](Home.md).
+Next: [Azure account preparation](Provider-Azure-Account-Preparation.md), the same three lessons for Azure (unverified drafts). Back to [Why the clouds differ](Why-the-Clouds-Differ.md) or the [Reading order](Reading-Order.md).

@@ -1,5 +1,7 @@
 # Lessons learned
 
+> Prerequisites: none strictly. The stories make more sense after [Spacelift](Spacelift.md) and [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md), which is where the core path puts this page.
+
 Things that broke during the build (and a few traps the guides warn about), what was really going on, and what fixed it. These are the parts most tutorials leave out, and the parts most likely to save you an evening.
 
 ## 1. `curl | bash` reported success and installed nothing useful
@@ -105,3 +107,5 @@ The DigitalOcean account was rebuilt and everything was redeployed. Four things 
 - Check that a feature exists on your plan before building on it. This is lesson 7 again, about OIDC, learned a second time.
 - Prove the mitigation, not just the policy. The tests include a docs-only pull request (must start nothing) and a merge that arrives with its pull request attached (must still deploy), because getting the second one wrong would have silently stopped every deployment.
 - When a fix is a job every similar repository would need, put it in the shared library first. A copy in one repository is a copy that drifts.
+
+Next: [Roadmap](Roadmap.md), step 21 of the core path on the [Reading order](Reading-Order.md) page.

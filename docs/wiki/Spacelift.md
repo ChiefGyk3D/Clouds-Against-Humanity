@@ -112,3 +112,5 @@ When AWS, Azure or GCP stacks are added, each cloud gets its own Doppler config 
 4. Pull request, CI green, merge.
 
 Full step-by-step for secrets is on [Doppler and secrets](Doppler-and-Secrets.md) and in [docs/spacelift-secrets.md](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md).
+
+Next: [Doppler and secrets](Doppler-and-Secrets.md), step 17 of the core path on the [Reading order](Reading-Order.md) page.
