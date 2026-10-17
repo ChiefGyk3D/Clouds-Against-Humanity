@@ -1,3 +1,10 @@
+locals {
+  # Graviton families put a "g" after the generation digit: t4g, m7g, c7gn.
+  graviton = can(regex("^[a-z]+[0-9]+g[a-z]*\\.", var.instance_type))
+  # CPU credits exist only on the T families, and EC2 rejects the block elsewhere.
+  burstable = can(regex("^t[0-9]", var.instance_type))
+}
+
 # The cloud-neutral part (Twingate connector, tokens, cloud-init) lives in the
 # bootstrap module so every provider shares one copy of the hardening.
 module "bootstrap" {
@@ -21,6 +28,17 @@ module "bootstrap" {
 # public path); the AMI lookup would instead need ec2:DescribeImages.
 data "aws_ssm_parameter" "ubuntu" {
   name = "/aws/service/canonical/ubuntu/server/24.04/stable/current/${var.architecture}/hvm/ebs-gp3/ami-id"
+
+  # A precondition rather than a cross-variable validation: it works on the
+  # OpenTofu 1.8 this repository requires, and it fails at plan time before any
+  # instance is planned. An arm image on an x86 type (or the reverse) would pass
+  # every other check and be refused by EC2 at launch.
+  lifecycle {
+    precondition {
+      condition     = local.graviton == (var.architecture == "arm64")
+      error_message = "architecture ${var.architecture} does not match instance_type ${var.instance_type}: Graviton types (t4g, m7g, ...) need arm64, everything else amd64."
+    }
+  }
 }
 
 resource "aws_instance" "connector" {
@@ -30,7 +48,7 @@ resource "aws_instance" "connector" {
   instance_type = var.instance_type
   subnet_id     = var.subnet_id
 
-  vpc_security_group_ids = var.security_group_ids
+  vpc_security_group_ids = [var.security_group_id]
 
   # The only public-facing setting. The address is what lets the connector
   # reach Twingate and the package mirrors without a NAT gateway (which alone
@@ -69,6 +87,17 @@ resource "aws_instance" "connector" {
     throughput            = 125
     encrypted             = true
     delete_on_termination = true
+  }
+
+  # T-family instances launch in "unlimited" CPU-credit mode when nothing is
+  # said, and surplus credits are billed on top of the hourly price, which would
+  # break the fixed figure. "standard" caps the instance at its earned credits.
+  # The cost gate refuses a T-family plan that does not state this.
+  dynamic "credit_specification" {
+    for_each = local.burstable ? [1] : []
+    content {
+      cpu_credits = "standard"
+    }
   }
 
   # Detailed monitoring is a per-instance charge the gate does not price.

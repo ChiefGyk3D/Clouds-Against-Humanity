@@ -55,3 +55,15 @@ resource "aws_route_table_association" "public" {
   subnet_id      = aws_subnet.public.id
   route_table_id = aws_route_table.public.id
 }
+
+# Every VPC comes with a default security group that allows all traffic between
+# its own members and all outbound. Declaring it with no rules empties it, so
+# nothing can rely on it by accident (the connector module never uses it).
+# The VPC's default network ACL is left as AWS made it (allow all, both ways):
+# a custom ACL is stateless and needs return-path ephemeral-port rules, and
+# the security group is this project's filter.
+resource "aws_default_security_group" "this" {
+  vpc_id = aws_vpc.this.id
+
+  tags = { Name = "${var.layer}-${var.region}-default-unused" }
+}

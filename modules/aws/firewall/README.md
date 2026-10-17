@@ -24,6 +24,8 @@ Contract outputs: `id`, `name`, `rule_targets`, `source_members`, `destination_m
 `inbound_from_member_rules` and `outbound_to_member_rules`; both name this group
 itself, never an address, so only machines wearing the group can use them.
 
+Ports are validated as numbers from 0 to 65535 with the start not above the end.
+
 Inbound is deny-all: the group has no inbound rule unless a member rule asks for
 one. Every rule is a separate rule resource and the group has no inline
 `ingress` or `egress` block. AWS gives a new group one allow-all outbound rule;
@@ -36,3 +38,12 @@ which the phase 4 apply must record.
 
 A security group does not filter Amazon's DNS resolver, DHCP, the instance
 metadata service or the time service.
+
+## Phase 4 acceptance record
+
+Mocked tests cannot show what AWS does. The first real apply must record each
+of these, with the command output kept with the apply notes, before the module
+is called verified:
+
+- `aws ec2 describe-security-group-rules` for the group: exactly the five outbound rules (plus any member rules), no every-protocol (`-1`) egress rule, no inbound rule from `0.0.0.0/0` or `::/0`.
+- Known limit: a rule added to the group outside the code is not detected as drift (the group does not declare `egress = []`, because that would fight the separate rule resources). The describe output above is the check, and it should be repeated after any manual console change.

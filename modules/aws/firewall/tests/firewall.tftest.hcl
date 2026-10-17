@@ -223,3 +223,50 @@ run "an_extra_outbound_rule_with_a_bad_port_is_rejected" {
   }
   expect_failures = [var.extra_outbound_rules]
 }
+
+run "ports_above_65535_are_rejected" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "65536" }]
+  }
+  expect_failures = [var.extra_outbound_rules]
+}
+
+run "a_five_digit_nonsense_port_is_rejected" {
+  command = plan
+  variables {
+    inbound_from_member_rules = [{ protocol = "udp", port_range = "99999" }]
+  }
+  expect_failures = [var.inbound_from_member_rules]
+}
+
+run "a_reversed_range_is_rejected" {
+  command = plan
+  variables {
+    outbound_to_member_rules = [{ protocol = "tcp", port_range = "31000-30000" }]
+  }
+  expect_failures = [var.outbound_to_member_rules]
+}
+
+run "a_range_ending_above_65535_is_rejected" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "60000-70000" }]
+  }
+  expect_failures = [var.extra_outbound_rules]
+}
+
+run "boundary_ports_and_single_port_ranges_are_accepted" {
+  command = plan
+  variables {
+    extra_outbound_rules = [
+      { protocol = "tcp", port_range = "0-65535" },
+      { protocol = "udp", port_range = "65535" },
+      { protocol = "udp", port_range = "5000-5000" },
+    ]
+  }
+  assert {
+    condition     = length(aws_vpc_security_group_egress_rule.internet) == 8
+    error_message = "Boundary values must be accepted."
+  }
+}

@@ -23,3 +23,22 @@ private subnet needs a NAT gateway, which costs more than the whole stack
 ([cost lesson](../../../docs/wiki/Provider-AWS-Cost-Lesson.md)). It does not hand
 out public addresses by itself (`map_public_ip_on_launch` is off), and IPv6 is
 off. The module creates no NAT gateway and no elastic address.
+
+`ip_range` must be the network address (`10.0.0.0/24`, not `10.0.0.1/24`);
+AWS rejects anything else.
+
+The VPC's default security group is managed with no rules (`aws_default_security_group`),
+so AWS's self-allow and allow-all-outbound defaults are removed. **UNVERIFIED
+against a live account.** What stays as AWS made it: the default network ACL
+(allow all, both directions). Replacing it needs stateless return-path rules
+and is not done; the security group is this project's filter.
+
+## Phase 4 acceptance record
+
+Mocked tests cannot show what AWS does. The first real apply must record each
+of these, with the command output kept with the apply notes, before the module
+is called verified:
+
+- The VPC's default security group has no rules (`describe-security-group-rules` filtered to it).
+- The subnet's route table is the explicit one, with the `0.0.0.0/0` route to the internet gateway, and the subnet does not use the main table.
+- The default network ACL is still allow-all, as documented.

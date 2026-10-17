@@ -191,7 +191,14 @@ def test_a_nat_gateway_is_rejected_even_if_approved_sources_names_it(tmp_path, c
 
 
 @pytest.mark.parametrize(
-    "rtype", ["aws_vpc", "aws_subnet", "aws_internet_gateway", "aws_security_group"]
+    "rtype",
+    [
+        "aws_vpc",
+        "aws_subnet",
+        "aws_internet_gateway",
+        "aws_security_group",
+        "aws_default_security_group",
+    ],
 )
 def test_free_aws_types_pass(tmp_path, capsys, rtype):
     root = build(tmp_path, aws=TWO)
@@ -248,6 +255,9 @@ def change(rtype, name, after, unknown=None, actions=("create",)):
 
 
 def inst(name="a", itype="t4g.micro", gb=8, public=True, **extra):
+    extra.setdefault("credit_specification", [{"cpu_credits": "standard"}])
+    if extra["credit_specification"] is None:
+        del extra["credit_specification"]
     after = {
         "instance_type": itype,
         "root_block_device": [{"volume_size": gb}],
@@ -982,7 +992,6 @@ def test_an_unpriced_instance_attribute_is_a_problem(extra):
     [
         {"tenancy": "default"},
         {"tenancy": None},
-        {"credit_specification": []},
         {"credit_specification": [{"cpu_credits": "standard"}]},
         {"instance_market_options": []},
         {"placement_group": ""},
@@ -1214,7 +1223,7 @@ UNKNOWN_CASES = [
     (
         "credit_specification",
         {"credit_specification": [{"cpu_credits": True}]},
-        {"credit_specification": []},
+        {"credit_specification": [{"cpu_credits": "standard"}]},
     ),
     ("instance_market_options", {"instance_market_options": True}, {}),
     ("placement_group", {"placement_group": True}, {}),
@@ -1288,3 +1297,28 @@ def test_an_unknown_value_in_a_module_instance_is_found_through_module_calls():
 
 def test_a_module_instance_whose_config_does_not_set_it_passes():
     assert cost_check.plan_cost(module_plan({}), AWS_PRICES)[1] == []
+
+
+@pytest.mark.parametrize("itype", ["t3.micro", "t4g.micro", "t3a.small", "t2.micro"])
+def test_a_burstable_instance_without_standard_credits_fails_closed(itype):
+    prices = dict(AWS_PRICES)
+    prices["instances"] = {**AWS_PRICES["instances"], itype: 0.01}
+    for spec in (None, [], [{"cpu_credits": ""}]):
+        _, problems = cost_check.plan_cost(
+            plan(inst(itype=itype, credit_specification=spec)), prices
+        )
+        assert problems and "credit_specification" in problems[0], (itype, spec)
+
+
+def test_a_burstable_instance_with_standard_credits_is_priced():
+    total, problems = cost_check.plan_cost(plan(inst("a"), inst("b")), AWS_PRICES)
+    assert (total, problems) == (20.84, [])
+
+
+def test_a_non_burstable_type_does_not_need_credit_specification():
+    prices = dict(AWS_PRICES)
+    prices["instances"] = {**AWS_PRICES["instances"], "m7g.large": 0.0816}
+    _, problems = cost_check.plan_cost(
+        plan(inst(itype="m7g.large", credit_specification=None)), prices
+    )
+    assert problems == []

@@ -224,9 +224,10 @@ The AWS versions of the three provider modules, under `modules/aws/`. Same contr
 | `aws_vpc.this` | The address space only. Named `<layer>-<region>-vpc`. IPv6 off. |
 | `aws_subnet.public` | One subnet using the whole range, in one availability zone. No automatic public addresses. |
 | `aws_internet_gateway.this` | Free. What makes a subnet public. |
+| `aws_default_security_group.this` | Empties the VPC's default group (no rules). The default network ACL stays as AWS made it. |
 | `aws_route_table.public`, `aws_route.internet`, `aws_route_table_association.public` | An explicit table with `0.0.0.0/0` sent to the gateway, attached to the subnet. On DigitalOcean none of these exist because the droplet's own public interface does the work. |
 
-Variables: `layer`, `region`, `ip_range` (private range, prefix /16 to /28, validated), `availability_zone` (optional). Outputs: `id`, `ip_range`, `name` (the contract) and `subnet_id` (AWS extension).
+Variables: `layer`, `region`, `ip_range` (private range, network address, prefix /16 to /28, validated), `availability_zone` (optional). Outputs: `id`, `ip_range`, `name` (the contract) and `subnet_id` (AWS extension).
 
 ### modules/aws/firewall
 
@@ -244,9 +245,9 @@ There is no inbound rule unless a member rule asks for one. The contract outputs
 |---|---|
 | `module.bootstrap` | `../../twingate-bootstrap`: the Twingate connector, its tokens and the cloud-init. |
 | `data.aws_ssm_parameter.ubuntu` | Canonical's public parameter for the Ubuntu 24.04 image id (`arm64` by default). |
-| `aws_instance.connector` | The VM. Public address and no inbound rule, IMDSv2 required with hop limit 1, explicit encrypted gp3 root volume of `root_volume_size` GiB (the cost gate's input), no key pair, no instance profile, monitoring off, IPv6 off. `user_data` is the bootstrap's output, unmodified. |
+| `aws_instance.connector` | The VM. Public address and no inbound rule, IMDSv2 required with hop limit 1, explicit encrypted gp3 root volume of `root_volume_size` GiB (the cost gate's input), no key pair, no instance profile, monitoring off, IPv6 off, and `cpu_credits = "standard"` on T-family types (the default, unlimited, bills surplus credits outside the fixed figure). `user_data` is the bootstrap's output, unmodified. |
 
-Variables: `layer`, `region`, `subnet_id`, `security_group_ids`, `instance_type` (the stack reads it from `cost.json`), `architecture`, `root_volume_size` (default 8), and the bootstrap's inputs. Outputs: `instance_id`, `instance_name`, `private_ip`, `size`. No token is an output, and a test checks that.
+Variables: `layer`, `region`, `subnet_id`, `security_group_id` (one string, never a list: rules are additive, so a second group could open the instance to the internet), `instance_type` (the stack reads it from `cost.json`), `architecture` (checked against the type by a precondition), `root_volume_size` (default 8), and the bootstrap's inputs. Outputs: `instance_id`, `instance_name`, `private_ip`, `size`. No token is an output, and a test checks that.
 
 ---
 

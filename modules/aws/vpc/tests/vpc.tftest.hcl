@@ -104,3 +104,34 @@ run "rejects_range_aws_cannot_accept" {
   }
   expect_failures = [var.ip_range]
 }
+
+run "rejects_a_host_address_instead_of_the_network_address" {
+  command = plan
+  variables {
+    ip_range = "10.0.0.1/24"
+  }
+  expect_failures = [var.ip_range]
+}
+
+run "accepts_the_network_address" {
+  command = plan
+  variables {
+    ip_range = "172.16.0.0/16"
+  }
+  assert {
+    condition     = aws_vpc.this.cidr_block == "172.16.0.0/16"
+    error_message = "A canonical range must be accepted."
+  }
+}
+
+run "default_security_group_is_managed_with_no_rules" {
+  command = apply
+  assert {
+    condition     = aws_default_security_group.this.vpc_id == aws_vpc.this.id
+    error_message = "The VPC's default security group must be managed by this module."
+  }
+  assert {
+    condition     = !can(regex("(?m)^\\s*(ingress|egress)\\s*(=|\\{)", file("${path.module}/main.tf")))
+    error_message = "The default security group must declare no ingress or egress rule."
+  }
+}

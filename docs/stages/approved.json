@@ -10,6 +10,15 @@
           "modules/twingate-connector/main.tf"
         ]
       }
+    },
+    "aws": {
+      "approved_monthly_total": 21.0,
+      "active": false,
+      "allowed_sources": {
+        "aws_instance": [
+          "modules/aws/twingate-connector/main.tf"
+        ]
+      }
     }
   }
 }

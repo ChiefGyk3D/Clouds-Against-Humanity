@@ -11,7 +11,7 @@ variables {
   layer                = "access"
   region               = "us-east-1"
   subnet_id            = "subnet-00000000000000000"
-  security_group_ids   = ["sg-00000000000000000"]
+  security_group_id    = "sg-00000000000000000"
   instance_type        = "t4g.micro"
   remote_network_id    = "remote-network-test"
   instance             = "a"
@@ -27,7 +27,7 @@ run "instance_is_named_and_placed_by_the_caller" {
     error_message = "Name must be <layer>-<region>-connector-<instance>."
   }
   assert {
-    condition     = aws_instance.connector.subnet_id == "subnet-00000000000000000" && toset(aws_instance.connector.vpc_security_group_ids) == toset(["sg-00000000000000000"])
+    condition     = aws_instance.connector.subnet_id == "subnet-00000000000000000" && jsonencode(aws_instance.connector.vpc_security_group_ids) == jsonencode(["sg-00000000000000000"])
     error_message = "The instance must launch into the given subnet wearing the given security groups."
   }
 }
@@ -218,12 +218,76 @@ run "outputs_never_carry_connector_secrets" {
   }
 }
 
-run "an_instance_with_no_security_group_is_rejected" {
+run "an_empty_or_malformed_security_group_is_rejected" {
   command = plan
   variables {
-    security_group_ids = []
+    security_group_id = ""
   }
-  expect_failures = [var.security_group_ids]
+  expect_failures = [var.security_group_id]
+}
+
+run "the_module_takes_one_group_never_a_list" {
+  command = plan
+  # Rules are additive: a second group could carry an open inbound rule. The
+  # module must attach exactly the one group it was given and have no list input.
+  assert {
+    condition     = length(aws_instance.connector.vpc_security_group_ids) == 1
+    error_message = "Exactly one security group may be attached."
+  }
+  assert {
+    condition     = !can(regex("variable\\s+\"security_group_ids\"", file("${path.module}/variables.tf"))) && !can(regex("var\\.security_group_ids", file("${path.module}/main.tf"))) && can(regex("vpc_security_group_ids\\s*=\\s*\\[var\\.security_group_id\\]", file("${path.module}/main.tf")))
+    error_message = "The input is a single security_group_id and main.tf attaches only [var.security_group_id]."
+  }
+}
+
+run "t_family_pins_standard_cpu_credits" {
+  command = plan
+  assert {
+    condition     = length(aws_instance.connector.credit_specification) == 1 && aws_instance.connector.credit_specification[0].cpu_credits == "standard"
+    error_message = "A T-family instance must set cpu_credits to standard; the default is unlimited and bills surplus credits outside the fixed figure."
+  }
+}
+
+run "t3_also_pins_standard_credits" {
+  command = plan
+  variables {
+    architecture  = "amd64"
+    instance_type = "t3.micro"
+  }
+  assert {
+    condition     = aws_instance.connector.credit_specification[0].cpu_credits == "standard"
+    error_message = "t3 must set standard credits too."
+  }
+}
+
+run "a_non_burstable_type_has_no_credit_block" {
+  command = plan
+  variables {
+    architecture  = "amd64"
+    instance_type = "m6i.large"
+  }
+  assert {
+    condition     = length(aws_instance.connector.credit_specification) == 0
+    error_message = "EC2 rejects credit_specification outside the T families."
+  }
+}
+
+run "arm_image_on_an_x86_type_is_rejected" {
+  command = plan
+  variables {
+    architecture  = "arm64"
+    instance_type = "t3.micro"
+  }
+  expect_failures = [data.aws_ssm_parameter.ubuntu]
+}
+
+run "x86_image_on_a_graviton_type_is_rejected" {
+  command = plan
+  variables {
+    architecture  = "amd64"
+    instance_type = "t4g.micro"
+  }
+  expect_failures = [data.aws_ssm_parameter.ubuntu]
 }
 
 run "a_malformed_instance_type_is_rejected" {

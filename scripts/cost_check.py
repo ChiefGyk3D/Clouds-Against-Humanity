@@ -78,6 +78,7 @@ FREE_TYPES = {
             "aws_route",
             "aws_route_table_association",
             "aws_security_group",
+            "aws_default_security_group",
             "aws_vpc_security_group_ingress_rule",
             "aws_vpc_security_group_egress_rule",
             "aws_key_pair",
@@ -409,7 +410,8 @@ def unknown_unpriced_attrs(unknown, expressions):
     Not flagged: an unknown attribute the configuration does not set. That is a
     provider default computed at apply (tenancy, placement_group, ...), which a
     normal plan shows as unknown. Not caught either way: a default that is itself
-    priced differently, such as CPU credits left unset on a T-family type.
+    priced differently (CPU credits on a T-family type have their own rule in
+    require_standard_credits).
     """
     found = []
     for attr in AWS_INSTANCE_CHECKED_ATTRS:
@@ -439,6 +441,27 @@ def unpriced_instance_attrs(after):
     return found
 
 
+# Burstable families launch in unlimited CPU-credit mode when nothing is set,
+# and surplus credits are billed on top of the hourly price. Fail closed: the
+# plan must say "standard" for these, because the omitted default is not priced.
+BURSTABLE_FAMILIES = ("t2.", "t3.", "t3a.", "t4g.")
+
+
+def require_standard_credits(addr, after):
+    itype = str(after.get("instance_type") or "")
+    if not itype.startswith(BURSTABLE_FAMILIES):
+        return
+    specs = after.get("credit_specification") or []
+    if not any(
+        str((spec or {}).get("cpu_credits", "")).lower() == "standard" for spec in specs
+    ):
+        raise ValueError(
+            f"{addr}: {itype} is burstable and credit_specification.cpu_credits is not "
+            "'standard' in the plan; the omitted default is unlimited, whose surplus "
+            "credits are not priced"
+        )
+
+
 def plan_instance_cost(addr, after, unknown, prices, expressions=None):
     extras = unpriced_instance_attrs(after) + unknown_unpriced_attrs(
         unknown, expressions
@@ -462,6 +485,7 @@ def plan_instance_cost(addr, after, unknown, prices, expressions=None):
         raise ValueError(f"{addr}: ebs_block_device is not fully known in the plan")
     for extra in after.get("ebs_block_device") or []:
         gb += plan_volume_gb(addr, extra, {}, "volume_size")
+    require_standard_credits(addr, after)
     # Only an explicit false avoids the address. Unset or unknown is treated as
     # public: the subnet default and the later assignment are not visible here.
     public = after.get("associate_public_ip_address") is not False

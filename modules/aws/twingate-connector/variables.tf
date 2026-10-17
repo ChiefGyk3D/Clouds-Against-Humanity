@@ -11,13 +11,13 @@ variable "subnet_id" {
   description = "Public subnet the instance launches into. From the vpc module's subnet_id."
 }
 
-variable "security_group_ids" {
-  type        = list(string)
-  description = "Security groups attached to the instance's network interface at launch, so there is no unprotected moment. From the firewall module's rule_targets."
+variable "security_group_id" {
+  type        = string
+  description = "The one security group attached to the instance's network interface at launch, so there is no unprotected moment. From the firewall module's id (its single rule target). A single string, not a list: security group rules are additive, so any second group a caller added could open inbound access to the public address."
 
   validation {
-    condition     = length(var.security_group_ids) > 0
-    error_message = "At least one security group is required: an instance with none gets the VPC's default group."
+    condition     = can(regex("^sg-[0-9a-f]+$", var.security_group_id))
+    error_message = "security_group_id must be a security group id (sg-...), not an empty value: an instance with none gets the VPC's default group."
   }
 }
 

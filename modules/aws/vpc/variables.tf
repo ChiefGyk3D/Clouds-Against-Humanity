@@ -15,9 +15,10 @@ variable "ip_range" {
     condition = (
       can(cidrnetmask(var.ip_range)) &&
       can(regex("^(10\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.|192\\.168\\.)", var.ip_range)) &&
-      can(regex("/(1[6-9]|2[0-8])$", var.ip_range))
+      can(regex("/(1[6-9]|2[0-8])$", var.ip_range)) &&
+      try(var.ip_range == cidrsubnet(var.ip_range, 0, 0), false)
     )
-    error_message = "ip_range must be a private IPv4 CIDR (10/8, 172.16/12 or 192.168/16) with a prefix length from /16 to /28, the sizes AWS accepts."
+    error_message = "ip_range must be a private IPv4 CIDR (10/8, 172.16/12 or 192.168/16) with a prefix length from /16 to /28, written as its network address (10.0.0.0/24, not 10.0.0.1/24): AWS rejects anything else."
   }
 }
 
