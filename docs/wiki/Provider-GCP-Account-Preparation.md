@@ -69,7 +69,7 @@ A **service account** is an identity for software. Google lets you create a **ke
 
 An organization could enforce this with a policy that forbids key creation. You have no organization, so the enforcement is you. (Whether a specific "disable key creation" constraint exists and is on by default was not confirmed: UNVERIFIED.)
 
-*Checkpoint: the IAM page for your project lists no service-account keys.*
+*Checkpoint: in **IAM & Admin -> Service Accounts**, open each service account, go to its **Keys** tab, and confirm no user-managed keys exist. (The project's IAM permissions page lists principals and role bindings, not keys, so it cannot show this.)*
 
 ## Step 5: a billing budget, before anything else exists
 
@@ -102,8 +102,8 @@ Resources live in a region (subnets) and a zone (machines). Prices differ a litt
 
 - **Predict, then check.** Before you open the free-features page, write down what you think happens to a trial account on day 91. Then read the page. What did you get wrong? (Reference: billing is disabled and resources are stopped; there is a 30-day grace period to upgrade; after that the trial's resources are permanently deleted.)
 - Find your project's **IAM** page and list who has access and at what level. Name one role on that list you did not expect.
-- You have no organization. Name two guardrails an organization policy would have given you, and say what habit replaces each. (Reference, one reasonable answer: "no external addresses except on approved machines" is replaced by checking each machine's address setting; "no service-account keys" is replaced by never creating one and checking the IAM page for existing keys.)
+- You have no organization. Name two guardrails an organization policy would have given you, and say what habit replaces each. (Reference, one reasonable answer: "no external addresses except on approved machines" is replaced by checking each machine's address setting; "no service-account keys" is replaced by never creating one and checking each service account's Keys tab for existing keys.)
 - Create a budget with no email you read. Why is it worse than no budget? (Reference: it looks like protection and gives none.)
-- List three ways someone could end up controlling your Google Account. Which step above closes each? (Reference, one answer: a reused password, closed by Step 3's unique password; a stolen session or phished code, closed by a passkey or key; a lost second factor with no recovery path, closed by Step 3's recovery checkpoint.)
+- List three ways someone could end up controlling your Google Account. Which step above closes each? (Reference, one answer: a reused password, closed by Step 3's unique password; a phished sign-in, closed by a passkey or hardware key, which will not hand a code to a fake site; a stolen already-signed-in session, which a passkey does not stop, answered by signing out other sessions and reviewing account security activity from the Google Account security page, and by keeping the device itself secured (UNVERIFIED as Google-specific steps: check the live account pages); a lost second factor with no recovery path, closed by Step 3's recovery checkpoint.)
 
 Next: [the same four pieces on GCP](Provider-GCP-The-Same-Four-Pieces.md).
