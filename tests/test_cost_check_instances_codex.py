@@ -99,7 +99,7 @@ def test_plan_check_accepts_an_instance_path(tmp_path, capsys):
     root = build(tmp_path, aws=True)
     aws_site(root)
     good = write_plan(root, "plan.json", inst("a"), inst("b"))
-    code, out = plan_run(root, capsys, good, EAST)
+    _code, out = plan_run(root, capsys, good, EAST)
     # The fixture's AWS approval is over the ceiling (a different failure); only
     # the plan result is under test here.
     assert "implemented for aws only" not in out.err
