@@ -1,0 +1,287 @@
+{
+  "name": "Clouds Against Humanity: cited ATT&CK techniques",
+  "versions": {
+    "attack": "20",
+    "navigator": "5.3.2",
+    "layer": "4.5"
+  },
+  "domain": "enterprise-attack",
+  "description": "Coverage layer for the ATT&CK techniques the Clouds Against Humanity threat model cites (ATT&CK v20.0, retrieved 2026-10-16). Colour means the repository names the technique in a threat; it does not mean the technique is detected or mitigated. Generated from docs/threat-model/framework-reference.json.",
+  "sorting": 0,
+  "layout": {
+    "layout": "side",
+    "showName": true,
+    "showID": true,
+    "showAggregateScores": false,
+    "countUnscored": false,
+    "aggregateFunction": "average",
+    "expandedSubtechniques": "annotated"
+  },
+  "hideDisabled": false,
+  "techniques": [
+    {
+      "techniqueID": "T1021.004",
+      "color": "#e8590c",
+      "comment": "SSH. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1072",
+      "color": "#e8590c",
+      "comment": "Software Deployment Tools. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1078",
+      "color": "#e8590c",
+      "comment": "Valid Accounts. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true,
+      "showSubtechniques": true
+    },
+    {
+      "techniqueID": "T1078.004",
+      "color": "#e8590c",
+      "comment": "Cloud Accounts. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1098.001",
+      "color": "#e8590c",
+      "comment": "Additional Cloud Credentials. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1110",
+      "color": "#e8590c",
+      "comment": "Brute Force. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1133",
+      "color": "#e8590c",
+      "comment": "External Remote Services. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1136.003",
+      "color": "#e8590c",
+      "comment": "Cloud Account. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1190",
+      "color": "#e8590c",
+      "comment": "Exploit Public-Facing Application. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1195",
+      "color": "#e8590c",
+      "comment": "Supply Chain Compromise. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true,
+      "showSubtechniques": true
+    },
+    {
+      "techniqueID": "T1195.001",
+      "color": "#e8590c",
+      "comment": "Compromise Software Dependencies and Development Tools. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1195.002",
+      "color": "#e8590c",
+      "comment": "Compromise Software Supply Chain. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1199",
+      "color": "#e8590c",
+      "comment": "Trusted Relationship. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1213",
+      "color": "#e8590c",
+      "comment": "Data from Information Repositories. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1489",
+      "color": "#e8590c",
+      "comment": "Service Stop. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1496.001",
+      "color": "#e8590c",
+      "comment": "Compute Hijacking. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1498",
+      "color": "#e8590c",
+      "comment": "Network Denial of Service. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1499",
+      "color": "#e8590c",
+      "comment": "Endpoint Denial of Service. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1528",
+      "color": "#e8590c",
+      "comment": "Steal Application Access Token. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1550.001",
+      "color": "#e8590c",
+      "comment": "Application Access Token. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1552",
+      "color": "#e8590c",
+      "comment": "Unsecured Credentials. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true,
+      "showSubtechniques": true
+    },
+    {
+      "techniqueID": "T1552.005",
+      "color": "#e8590c",
+      "comment": "Cloud Instance Metadata API. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1555.006",
+      "color": "#e8590c",
+      "comment": "Cloud Secrets Management Stores. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1578.002",
+      "color": "#e8590c",
+      "comment": "Create Cloud Instance. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1589",
+      "color": "#e8590c",
+      "comment": "Gather Victim Identity Information. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1593.003",
+      "color": "#e8590c",
+      "comment": "Code Repositories. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1595.001",
+      "color": "#e8590c",
+      "comment": "Scanning IP Blocks. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1621",
+      "color": "#e8590c",
+      "comment": "Multi-Factor Authentication Request Generation. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1677",
+      "color": "#e8590c",
+      "comment": "Poisoned Pipeline Execution. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1685.002",
+      "color": "#e8590c",
+      "comment": "Disable or Modify Cloud Log. Cited by this repository's threat model; see docs/threat-model/framework-reference.json.",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1021",
+      "showSubtechniques": true,
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1098",
+      "showSubtechniques": true,
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1136",
+      "showSubtechniques": true,
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1496",
+      "showSubtechniques": true,
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1550",
+      "showSubtechniques": true,
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1555",
+      "showSubtechniques": true,
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1578",
+      "showSubtechniques": true,
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1593",
+      "showSubtechniques": true,
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1595",
+      "showSubtechniques": true,
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1685",
+      "showSubtechniques": true,
+      "enabled": true
+    }
+  ],
+  "gradient": {
+    "colors": [
+      "#ffffff",
+      "#e8590c"
+    ],
+    "minValue": 0,
+    "maxValue": 100
+  },
+  "legendItems": [
+    {
+      "label": "Cited in this repository's threat model",
+      "color": "#e8590c"
+    }
+  ],
+  "showTacticRowBackground": false,
+  "tacticRowBackground": "#dddddd",
+  "selectTechniquesAcrossTactics": true,
+  "selectSubtechniquesWithParent": false,
+  "selectVisibleTechniques": false,
+  "metadata": [
+    {
+      "name": "source",
+      "value": "docs/threat-model/framework-reference.json"
+    }
+  ],
+  "links": [
+    {
+      "label": "Navigator layer format v4.5",
+      "url": "https://github.com/mitre-attack/attack-navigator/blob/master/layers/spec/v4.5/layerformat.md"
+    }
+  ]
+}

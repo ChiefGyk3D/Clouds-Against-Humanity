@@ -46,6 +46,11 @@ flowchart TB
     classDef secret fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
 
+> **Screenshot to take yourself:** the Twingate admin console, the Connectors page and the Resources page.
+> Capture: the Remote Network with both connectors listed, then the Resources page with one resource per host and port.
+> Look for: each connector's status reading Alive (check the wording your console version uses), the two connectors in one remote network, and resources that name one address and one port, not a whole range.
+> Redact: the tenant name in the address bar and header, connector names that carry a hostname, IP addresses and CIDR ranges, group member names and email addresses, and the connector token if a dialog shows it.
+
 ## Decisions and why
 
 ### Two connectors, not one

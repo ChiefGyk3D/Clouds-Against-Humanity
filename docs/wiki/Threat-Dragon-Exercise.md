@@ -72,6 +72,10 @@ Do not use the provided model yet. Fifteen minutes.
 - **The supply chain is an actor.** Pinned actions, the Doppler CLI and the Twingate apt repository are drawn as one actor, "Upstream publishers", with three flows. [Threat model](Threat-Model.md#trust-boundaries) draws these as a box; the exercise diagram leaves them out. Threat Dragon has no box for "a thing you did not write and trust anyway", so an actor does the job.
 - **Check your labels.** An arrow labelled just "deploy" or "uses" is a finding: the label is the data, and the data decides the threat. "Merged commit" and "Service token read" lead to different threats. The flow labels in the model are short on purpose, at most four words, so they stay readable on the canvas; the full wording is in each flow's description, under "Full label".
 
+![The pipeline data flow diagram in Threat Dragon: actors on the left, eight dashed trust boundary boxes B1 to B8, processes as circles, data stores as open rectangles, labelled arrows for each flow](images/threat-dragon-stride-diagram.png)
+
+*The whole diagram of `clouds-against-humanity.threat-dragon.json`, exported with the app's own Export, PNG command. Threat Dragon v2.6.2 hosted app, Local Session, captured 2026-10-16. This is the repository's own synthetic model; nothing in it is real.*
+
 ## Step 2: find each trust boundary and say what crosses it
 
 **Predict.** In your own diagram, circle every place trust changes. For each, write one line: *what crosses it* and *what you would check to see that the boundary holds*. Then list the eight boundaries from [Threat model exercise, step 2](Threat-Model-Exercise.md#step-2-draw-the-trust-boundaries) from memory.
@@ -96,6 +100,14 @@ Notice how many boundaries sit in a vendor console. A model records them; it doe
 ## Step 3: predict STRIDE for three flows
 
 STRIDE is Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege. Click a flow in the model and open its threats to see what is attached.
+
+![Threat Dragon with the Spacelift tracked run process selected: the Properties panel on the left and a Threats list with three STRIDE threats on the right, numbered 13, 14 and 15](images/threat-dragon-stride-element-threats.png)
+
+*Selecting an element opens its Properties and its Threats list, here the Spacelift tracked run with threats 13 to 15. Threat Dragon v2.6.2 hosted app, Local Session, captured 2026-10-16. The repository's own synthetic model.*
+
+![The Edit Threat dialog for threat 13: title, type Elevation of privilege, status Open, severity High, a description and a mitigations text](images/threat-dragon-stride-threat-edit.png)
+
+*Click a threat card to open it: title, STRIDE type, status, severity, description and mitigations. Threat Dragon v2.6.2 hosted app, Local Session, captured 2026-10-16. The repository's own synthetic model.*
 
 For each of these three flows, write down which STRIDE letters you expect and *why*, then check. Do not open the flow's threat list until you have written yours.
 

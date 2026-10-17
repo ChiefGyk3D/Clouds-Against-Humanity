@@ -43,6 +43,11 @@ Some of these are not secrets in the "attacker can log in with it" sense (the te
 - **Spacelift holds exactly one secret**: a read-only service token scoped to this project's `prd` config. If it leaks, it reads these values and nothing else, and it cannot write.
 - **Consistency across projects.** The same pattern is used across the author's other repositories, where GitHub Actions fetches from Doppler over OIDC and holds no stored Actions secrets at all.
 
+> **Screenshot to take yourself:** the Doppler config screen and the service token screen.
+> Capture: the project's `prd` config showing only secret names (values hidden), and the Access tab listing the read-only service token with its expiry.
+> Look for: that the token is read-only, scoped to one config, and has an expiry date, and that the values column is masked.
+> Redact: every secret value (keep them masked, never reveal one to take a picture), the token itself if it is ever shown (it is shown once, at creation, so do not capture that dialog), the workspace name, and your email.
+
 ## How the hook works
 
 `scripts/spacelift/doppler-env.sh` is the only code that sees the Doppler token. It is POSIX `sh` (the Spacelift runner is Alpine) and fails closed:

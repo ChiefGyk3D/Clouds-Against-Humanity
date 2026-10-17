@@ -42,6 +42,11 @@ flowchart TB
 
 DigitalOcean evaluates all firewalls attached to a droplet together: traffic is allowed if any attached firewall allows it, and denied otherwise. That is why the two can be layered: the baseline guarantees "nothing in", the connector firewall adds only what connectors need.
 
+> **Screenshot to take yourself:** the Networking, Firewalls screen in the DigitalOcean control panel.
+> Capture: the two firewalls and the rules screen of one of them, with the inbound and outbound tabs each in frame.
+> Look for: zero inbound rules from the internet on the connector firewall, the outbound rules on narrow ports only, and the firewall applying by tag rather than by droplet name.
+> Redact: the team name, droplet names and ids, IP addresses and CIDR blocks (including the VPC range), and any tag that encodes something private.
+
 ## Decisions and why
 
 ### Attach by tag, at creation
