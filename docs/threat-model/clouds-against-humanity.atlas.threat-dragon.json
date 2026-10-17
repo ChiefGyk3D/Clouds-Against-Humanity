@@ -1,0 +1,1574 @@
+{
+  "version": "2.0",
+  "summary": {
+    "title": "Clouds Against Humanity: AI-assisted workflow mapped to MITRE ATLAS",
+    "owner": "Clouds Against Humanity maintainers",
+    "description": "Teaching model of how AI tools touch this public repository: a coding agent, a hosted review assistant and a local model reading pull requests, plans and logs. Each threat cites MITRE ATLAS techniques (release 2026.09). Threat Dragon has no ATLAS threat type: the technique is in the threat title and description, and the STRIDE category in the type field is the nearest native label. Boundaries AB1 to AB5 are specific to this model. A model records what someone believes; it does not verify the system. Generic names only.",
+    "id": 0
+  },
+  "detail": {
+    "contributors": [
+      {
+        "name": "Clouds Against Humanity contributors"
+      }
+    ],
+    "diagrams": [
+      {
+        "version": "2.0",
+        "title": "AI tools and the repository (ATLAS mapped)",
+        "diagramType": "STRIDE",
+        "description": "A coding agent, a hosted review assistant and a local model, the text they read from strangers, the tools they can use and the secrets that should stay out of reach.",
+        "thumbnail": "./public/content/images/thumbnail.stride.jpg",
+        "id": 0,
+        "cells": [
+          {
+            "position": {
+              "x": 20.0,
+              "y": 160.0
+            },
+            "size": {
+              "width": 300,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Contributor (A2)"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "actor",
+            "zIndex": 1,
+            "id": "node-contributor",
+            "data": {
+              "name": "Contributor (A2)",
+              "description": "Full name: Contributor or fork author (A2). A2: anyone who can open a pull request, issue or comment on the public repository. Their text becomes input to the agents.",
+              "type": "tm.Actor",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false,
+              "providesAuthentication": false
+            }
+          },
+          {
+            "position": {
+              "x": 20.0,
+              "y": 1180.0
+            },
+            "size": {
+              "width": 300,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Maintainer (A3/A4)"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "actor",
+            "zIndex": 2,
+            "id": "node-maintainer",
+            "data": {
+              "name": "Maintainer (A3/A4)",
+              "description": "Full name: Maintainer. The person who starts agent sessions, grants tool permissions, reads diffs and merges.",
+              "type": "tm.Actor",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false,
+              "providesAuthentication": false
+            }
+          },
+          {
+            "position": {
+              "x": 20.0,
+              "y": 840.0
+            },
+            "size": {
+              "width": 300,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Upstream publishers"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "actor",
+            "zIndex": 3,
+            "id": "node-upstream",
+            "data": {
+              "name": "Upstream publishers",
+              "description": "Full name: Upstream registries and vendor documentation. Package registries, action repositories and vendor documentation pages. Text and code a model may read or recommend. Untrusted.",
+              "type": "tm.Actor",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false,
+              "providesAuthentication": false
+            }
+          },
+          {
+            "position": {
+              "x": 1280.0,
+              "y": 825.0
+            },
+            "size": {
+              "width": 180,
+              "height": 110
+            },
+            "attrs": {
+              "text": {
+                "text": "AI coding agent session"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "process",
+            "zIndex": 4,
+            "id": "node-agent",
+            "data": {
+              "name": "AI coding agent session",
+              "description": "A coding agent, such as a CLI or editor assistant, running on the maintainer's machine with a set of tools (read files, run commands, git). Backed by a hosted model.",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "threat-a-agent-tools",
+                  "number": 3,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "AML.T0053 AI Agent Tool Invocation: Agent invokes a tool the task never needed",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "Whatever the agent's tools can do, injected or mistaken text can make it do. A shell, a package installer, a git push or a cloud CLI each widen the blast radius. A tool that can delete is a data-destruction path. ATLAS 2026.09: AML.T0053 AI Agent Tool Invocation [AML.TA0005 Execution, AML.TA0012 Privilege Escalation, AML.TA0015 Lateral Movement]; AML.T0101 Data Destruction via AI Agent Tool Invocation [AML.TA0011 Impact].",
+                  "mitigation": "Least privilege for tool permissions, set outside the repository on the machine that runs the agent. The repository's own handoff prompt states the rule: pull requests only, never run tofu apply, never trigger a tracked run. That is a written instruction, which injected text can contradict, so also keep the credentials off the machine. Not verifiable from the repository."
+                },
+                {
+                  "id": "threat-a-agent-fork",
+                  "number": 4,
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "AML.T0050 Command and Scripting Interpreter: Agent runs a fork's code on the maintainer's machine",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "To review a change the agent may run its tests or scripts. That executes a stranger's code with the maintainer's permissions, on the maintainer's machine. ATLAS 2026.09: AML.T0050 Command and Scripting Interpreter [AML.TA0005 Execution]; AML.T0112.000 Local AI Agent [AML.TA0011 Impact].",
+                  "mitigation": "Run untrusted code in CI, where the workflow holds no credentials (B2 in the pipeline model), not through the agent on a workstation. If it must run locally, use a disposable machine or container with no secrets."
+                },
+                {
+                  "id": "threat-a-cost",
+                  "number": 12,
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "AML.T0034.002 Agentic Resource Consumption: An agent loop burns the model quota",
+                  "type": "Denial of service",
+                  "modelType": "STRIDE",
+                  "description": "An agent that retries or fans out can use up a paid quota or credit allowance. Injected text can ask for expensive work on purpose. ATLAS 2026.09: AML.T0034.002 Agentic Resource Consumption [AML.TA0011 Impact].",
+                  "mitigation": "Set a spending or credit limit with the provider, keep sessions short and scoped, and prefer a local model for bulk text. This is a provider setting, not in the repository."
+                }
+              ],
+              "hasOpenThreats": true
+            }
+          },
+          {
+            "position": {
+              "x": 1880.0,
+              "y": 825.0
+            },
+            "size": {
+              "width": 180,
+              "height": 110
+            },
+            "attrs": {
+              "text": {
+                "text": "Hosted model provider"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "process",
+            "zIndex": 5,
+            "id": "node-hosted",
+            "data": {
+              "name": "Hosted model provider",
+              "description": "The provider that runs the model. Prompts, files and command output sent by the agent leave the machine and are handled under the provider's terms.",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": {
+              "x": 1880.0,
+              "y": 145.0
+            },
+            "size": {
+              "width": 180,
+              "height": 110
+            },
+            "attrs": {
+              "text": {
+                "text": "Hosted AI reviewer"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "process",
+            "zIndex": 6,
+            "id": "node-reviewer",
+            "data": {
+              "name": "Hosted AI reviewer",
+              "description": "Full name: Hosted AI review assistant. A bot that reads a pull request diff and posts review comments. Advisory.",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": {
+              "x": 1280.0,
+              "y": 485.0
+            },
+            "size": {
+              "width": 180,
+              "height": 110
+            },
+            "attrs": {
+              "text": {
+                "text": "Local LLM"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "process",
+            "zIndex": 7,
+            "id": "node-local",
+            "data": {
+              "name": "Local LLM",
+              "description": "Full name: Local LLM (text in, text out). A model served on the maintainer's own network and used for drafts and summaries only. No tools, no credentials.",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "threat-a-local-inject",
+                  "number": 10,
+                  "status": "Mitigated",
+                  "severity": "Low",
+                  "title": "AML.T0051.001 Indirect: Pull request text steers the local model's summary",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "The local model summarises pull request text, logs and drafts. Injected text can change the summary. Because the model is used text in, text out, with no tools and no credentials, a bad summary is the whole impact. ATLAS 2026.09: AML.T0051.001 Indirect [AML.TA0005 Execution].",
+                  "mitigation": "Keep it tool-less. Counting, cost math and checks are done by code, not by the model. Read the diff itself before acting on a summary."
+                },
+                {
+                  "id": "threat-a-local-exposed",
+                  "number": 11,
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "AML.T0132 Misconfigured or Publicly Exposed AI Services: The local model server is reachable by more than it should be",
+                  "type": "Denial of service",
+                  "modelType": "STRIDE",
+                  "description": "A model server with no authentication on a flat network is an open compute and data service. Anyone who can reach it can use it and read what it is sent. ATLAS 2026.09: AML.T0132 Misconfigured or Publicly Exposed AI Services [AML.TA0004 Initial Access]; AML.T0006.002 Scan for Exposed AI Infrastructure [AML.TA0002 Reconnaissance].",
+                  "mitigation": "The stage 3 handoff plans a proxy with one key per client, each scoped to one model and rate limited, reached only through a ZTNA resource, never the model server directly. This is a design, not a built control, so it stays Open."
+                }
+              ],
+              "hasOpenThreats": true
+            }
+          },
+          {
+            "position": {
+              "x": 680.0,
+              "y": 145.0
+            },
+            "size": {
+              "width": 180,
+              "height": 110
+            },
+            "attrs": {
+              "text": {
+                "text": "CI (GitHub Actions)"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "process",
+            "zIndex": 8,
+            "id": "node-ci",
+            "data": {
+              "name": "CI (GitHub Actions)",
+              "description": "Runs the tests and checks on pull request code. permissions: {} by default; no cloud credential.",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": {
+              "x": 640.0,
+              "y": 500.0
+            },
+            "size": {
+              "width": 260,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Repository content"
+              },
+              "topLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              },
+              "bottomLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "store",
+            "zIndex": 9,
+            "id": "store-a-repo",
+            "data": {
+              "name": "Repository content",
+              "description": "Full name: Repository content (code, docs, plans, handoff prompts). Public repository. Includes workflow files and the plans and handoff prompts that agents read as instructions.",
+              "type": "tm.Store",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "threat-a-ctx-poison",
+                  "number": 8,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "AML.T0080 AI Agent Context Poisoning: A merged change rewrites the instructions future agents read",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "Plans, specs and handoff prompts in the repository are written to be read by agents as instructions. A malicious or careless edit there steers every later agent run, and nothing marks it as different from a documentation fix. ATLAS 2026.09: AML.T0080 AI Agent Context Poisoning [AML.TA0006 Persistence]; AML.T0081 Modify AI Agent Configuration [AML.TA0006 Persistence, AML.TA0007 Defense Evasion].",
+                  "mitigation": "Review changes to plans, specs and handoff prompts like code. Branch protection and required review are vendor settings (B4 in the pipeline model). Not enforced by anything in the repository itself, so it stays Open."
+                }
+              ],
+              "hasOpenThreats": true,
+              "storesCredentials": false,
+              "isEncrypted": false,
+              "isSigned": false,
+              "isALog": false
+            }
+          },
+          {
+            "position": {
+              "x": 1240.0,
+              "y": 1180.0
+            },
+            "size": {
+              "width": 260,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Agent config"
+              },
+              "topLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              },
+              "bottomLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "store",
+            "zIndex": 10,
+            "id": "store-a-agentcfg",
+            "data": {
+              "name": "Agent config",
+              "description": "Full name: Agent configuration and tool permissions. Settings on the maintainer's machine that decide which tools an agent may use without asking. Outside the repository, so not verifiable from it.",
+              "type": "tm.Store",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false,
+              "storesCredentials": false,
+              "isEncrypted": false,
+              "isSigned": false,
+              "isALog": false
+            }
+          },
+          {
+            "position": {
+              "x": 2440.0,
+              "y": 1180.0
+            },
+            "size": {
+              "width": 260,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Secrets (Doppler)"
+              },
+              "topLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              },
+              "bottomLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "store",
+            "zIndex": 11,
+            "id": "store-a-secrets",
+            "data": {
+              "name": "Secrets (Doppler)",
+              "description": "Full name: Secrets (Doppler prd config). Runtime secrets. Meant to be read by the tracked run only, never by an agent.",
+              "type": "tm.Store",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false,
+              "storesCredentials": true,
+              "isEncrypted": false,
+              "isSigned": false,
+              "isALog": false
+            }
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 12,
+            "connector": "normal",
+            "data": {
+              "name": "Untrusted text",
+              "description": "Full label: Pull request, issue and comment text (untrusted). Text a stranger controls, stored in the public repository.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "threat-a-text-ind",
+                  "number": 1,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "AML.T0051.001 Indirect: Instructions hidden in a pull request, issue or comment",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "A stranger can put text in a public pull request, issue or comment that an AI agent or review assistant later reads. The text can be written as instructions. The model has no reliable way to tell your instruction from a stranger's sentence. ATLAS 2026.09: AML.T0051.001 Indirect [AML.TA0005 Execution]; AML.T0093 Prompt Infiltration via Public-Facing Application [AML.TA0004 Initial Access, AML.TA0006 Persistence].",
+                  "mitigation": "Treat everything in a pull request as data, never as instruction. Give the agent no tool that can reach a secret or a tracked run (see AB2). A person reads the diff before merge (AB5). Run the fork's code only in CI with no credentials (the repository's workflow sets permissions to an empty block)."
+                }
+              ],
+              "hasOpenThreats": true
+            },
+            "id": "flow-a-text",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Untrusted text"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-contributor"
+            },
+            "target": {
+              "cell": "store-a-repo"
+            },
+            "vertices": []
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 13,
+            "connector": "normal",
+            "data": {
+              "name": "Files into context",
+              "description": "Full label: Repository files read into agent context (code, docs, plans). What the agent reads: code, documentation and the plans that tell it what to do.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "Internal",
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [],
+              "hasOpenThreats": false
+            },
+            "id": "flow-a-ctx",
+            "labels": [
+              {
+                "position": 0.7,
+                "attrs": {
+                  "label": {
+                    "text": "Files into context"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "store-a-repo"
+            },
+            "target": {
+              "cell": "node-agent"
+            },
+            "vertices": [
+              {
+                "x": 1035,
+                "y": 771
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 14,
+            "connector": "normal",
+            "data": {
+              "name": "Task and approvals",
+              "description": "Full label: Task and approval of tool calls. The maintainer's instruction and each yes/no on a tool call.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "Internal",
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [],
+              "hasOpenThreats": false
+            },
+            "id": "flow-a-task",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Task and approvals"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-maintainer"
+            },
+            "target": {
+              "cell": "node-agent"
+            },
+            "vertices": []
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 15,
+            "connector": "normal",
+            "data": {
+              "name": "Tool allow-list",
+              "description": "Full label: Tool permissions and allow-list. What the agent may do without asking.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "Internal",
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [],
+              "hasOpenThreats": false
+            },
+            "id": "flow-a-cfg",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Tool allow-list"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "store-a-agentcfg"
+            },
+            "target": {
+              "cell": "node-agent"
+            },
+            "vertices": []
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 16,
+            "connector": "normal",
+            "data": {
+              "name": "Prompt and context",
+              "description": "Full label: Prompt with files, diffs and command output. Everything in the agent's context goes to the provider.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [],
+              "hasOpenThreats": false
+            },
+            "id": "flow-a-prompt",
+            "labels": [
+              {
+                "position": 0.6,
+                "attrs": {
+                  "label": {
+                    "text": "Prompt and context"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-agent"
+            },
+            "target": {
+              "cell": "node-hosted"
+            },
+            "vertices": [
+              {
+                "x": 1670,
+                "y": 950
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 17,
+            "connector": "normal",
+            "data": {
+              "name": "Output and tool calls",
+              "description": "Full label: Model output: text and tool-call requests. What comes back, including requests to run tools.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [],
+              "hasOpenThreats": false
+            },
+            "id": "flow-a-out",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Output and tool calls"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-hosted"
+            },
+            "target": {
+              "cell": "node-agent"
+            },
+            "vertices": [
+              {
+                "x": 1670,
+                "y": 810
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 18,
+            "connector": "normal",
+            "data": {
+              "name": "Agent opens PR",
+              "description": "Full label: Branch and pull request opened by the agent. Code and text the agent publishes to a public repository.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "threat-a-exfil",
+                  "number": 6,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "AML.T0086 Exfiltration via AI Agent Tool Invocation: Agent writes a secret or private identifier into a public place",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "The repository is public. An agent that can push a branch, open a pull request or post a comment can put a secret, an account identifier or a private detail where everyone can read it, either by mistake or because injected text told it to. Rendered output that loads a remote image or link can also carry data out. ATLAS 2026.09: AML.T0086 Exfiltration via AI Agent Tool Invocation [AML.TA0010 Exfiltration]; AML.T0077 LLM Response Rendering [AML.TA0010 Exfiltration].",
+                  "mitigation": "Pushing a branch or posting a pull request or comment makes its contents public at once, even if CI later fails, so no check after the push can undo a disclosure. Prevent it before the push: keep secrets and private identifiers out of the agent's environment and context, and run the identifier check and secret scanning locally or in a pre-commit hook. CI secret scanning and the identifier check on every pull request then act as detection: they find what got through, so the secret is rotated and the history cleaned. Agents open pull requests and do not merge, and a person reads the diff before merge. Whether images in bot comments can leak data was not verified."
+                }
+              ],
+              "hasOpenThreats": true
+            },
+            "id": "flow-a-push",
+            "labels": [
+              {
+                "position": 0.6,
+                "attrs": {
+                  "label": {
+                    "text": "Agent opens PR"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-agent"
+            },
+            "target": {
+              "cell": "store-a-repo"
+            },
+            "vertices": [
+              {
+                "x": 1105,
+                "y": 649
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 19,
+            "connector": "normal",
+            "data": {
+              "name": "Visible secrets",
+              "description": "Full label: Environment variables and files visible to the agent's tools. Any secret present in the shell or on disk is readable by an agent that can run commands.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "Internal",
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "threat-a-secrets-leak",
+                  "number": 5,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "AML.T0057 LLM Data Leakage: Secret values end up in the agent's context",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "Anything the agent can read (environment variables, files, command output, a pasted log) can be sent to a hosted model provider and can be repeated in output. A token in context is a token that left the machine. ATLAS 2026.09: AML.T0057 LLM Data Leakage [AML.TA0010 Exfiltration]; AML.T0083 Credentials from AI Agent Configuration [AML.TA0013 Credential Access]; AML.T0055 Unsecured Credentials [AML.TA0013 Credential Access].",
+                  "mitigation": "Secrets live in Doppler and are fetched at run time; the repository keeps no secret in a committed file. That is not the same as nowhere on disk: the pipeline model records connector tokens in Spacelift state, in droplet user-data and in a root-only token file on the droplet, so a local agent run that can read state, plan output or a droplet can see them. Keep the agent's environment and working files free of them. The repository runs secret scanning and an identifier check in CI, which catch what reaches a commit, not what reaches a prompt. Use a local model for text that contains sensitive detail."
+                }
+              ],
+              "hasOpenThreats": true
+            },
+            "id": "flow-a-secrets",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Visible secrets"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "store-a-secrets"
+            },
+            "target": {
+              "cell": "node-agent"
+            },
+            "vertices": [
+              {
+                "x": 2000,
+                "y": 1100
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 20,
+            "connector": "normal",
+            "data": {
+              "name": "Fetched web content",
+              "description": "Full label: Fetched documentation and package metadata (untrusted). Pages the agent reads when it researches.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "threat-a-web-poison",
+                  "number": 9,
+                  "status": "Mitigated",
+                  "severity": "Medium",
+                  "title": "AML.T0099 AI Agent Tool Data Poisoning: Fetched documentation or web pages carry instructions or wrong facts",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "Research agents read vendor documentation and web pages. Content on those pages can contain instructions, or can simply be out of date or wrong, and the result is written into teaching material. ATLAS 2026.09: AML.T0099 AI Agent Tool Data Poisoning [AML.TA0006 Persistence]; AML.T0051.001 Indirect [AML.TA0005 Execution].",
+                  "mitigation": "The project records its source and retrieval date next to each fact and labels unconfirmed pages as drafts (the phase 0 evidence files and the provider pages say so). A reader can check the source. The label is only as good as the person who applies it."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "flow-a-web",
+            "labels": [
+              {
+                "position": 0.7,
+                "attrs": {
+                  "label": {
+                    "text": "Fetched web content"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-upstream"
+            },
+            "target": {
+              "cell": "node-agent"
+            },
+            "vertices": []
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 21,
+            "connector": "normal",
+            "data": {
+              "name": "Dependency added",
+              "description": "Full label: Dependency, action or download added in a change. A name the agent suggested becomes a pinned dependency.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "threat-a-dep-halluc",
+                  "number": 7,
+                  "status": "Mitigated",
+                  "severity": "High",
+                  "title": "AML.T0060 Publish Hallucinated Entities: Agent suggests a package or action that does not exist, and someone registers it",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "Models invent plausible package, action and URL names. An attacker who registers the invented name waits for the next person to install it. ATLAS 2026.09: AML.T0060 Publish Hallucinated Entities [AML.TA0003 Resource Development]; AML.T0011.001 Malicious Package [AML.TA0005 Execution].",
+                  "mitigation": "Every GitHub Action is pinned by commit, the Doppler CLI download by SHA-256, the Twingate apt key by fingerprint, and the YAML and lint packages by version (see the ci workflow; pytest itself is not pinned there). Check that a new dependency exists, who publishes it, and how old it is, before adding it. Mitigated for what exists today; every new dependency re-opens it."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "flow-a-dep",
+            "labels": [
+              {
+                "position": 0.4,
+                "attrs": {
+                  "label": {
+                    "text": "Dependency added"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-upstream"
+            },
+            "target": {
+              "cell": "store-a-repo"
+            },
+            "vertices": []
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 22,
+            "connector": "normal",
+            "data": {
+              "name": "Diff for review",
+              "description": "Full label: Pull request diff for review. The diff, with the author's description and comments, goes to the review assistant.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "threat-a-diff-bias",
+                  "number": 2,
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "AML.T0051.001 Indirect: Review assistant steered into saying a change is fine",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "The diff or its comments contain text aimed at the review assistant, such as a claim that a check was already done. A review that says 'looks fine' becomes false comfort. ATLAS 2026.09: AML.T0051.001 Indirect [AML.TA0005 Execution]; AML.T0130 AI Agent Response Biasing [AML.TA0011 Impact].",
+                  "mitigation": "The assistant's review is advisory. Branch protection and the CI green check decide (vendor settings, not in the repository). Ask the assistant for findings, not for a verdict. A second, different reviewer reads security-relevant diffs."
+                }
+              ],
+              "hasOpenThreats": true
+            },
+            "id": "flow-a-diff",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Diff for review"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "store-a-repo"
+            },
+            "target": {
+              "cell": "node-reviewer"
+            },
+            "vertices": []
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 23,
+            "connector": "normal",
+            "data": {
+              "name": "Advisory review",
+              "description": "Full label: Review comments (advisory). What the assistant says about the change.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [],
+              "hasOpenThreats": false
+            },
+            "id": "flow-a-review",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Advisory review"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-reviewer"
+            },
+            "target": {
+              "cell": "node-maintainer"
+            },
+            "vertices": [
+              {
+                "x": 1590,
+                "y": 680
+              },
+              {
+                "x": 530,
+                "y": 680
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 24,
+            "connector": "normal",
+            "data": {
+              "name": "Text for summary",
+              "description": "Full label: Pull request text, logs and drafts for summary. Text sent to the local model.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "Internal",
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [],
+              "hasOpenThreats": false
+            },
+            "id": "flow-a-local",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Text for summary"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "store-a-repo"
+            },
+            "target": {
+              "cell": "node-local"
+            },
+            "vertices": []
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 25,
+            "connector": "normal",
+            "data": {
+              "name": "Summary text",
+              "description": "Full label: Summary or draft text (untrusted output). What the local model returns. Read it as a suggestion.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "Internal",
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [],
+              "hasOpenThreats": false
+            },
+            "id": "flow-a-summary",
+            "labels": [
+              {
+                "position": 0.4,
+                "attrs": {
+                  "label": {
+                    "text": "Summary text"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-local"
+            },
+            "target": {
+              "cell": "node-maintainer"
+            },
+            "vertices": []
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 26,
+            "connector": "normal",
+            "data": {
+              "name": "PR code checkout",
+              "description": "Full label: Pull request code checkout (code, no secrets). CI runs the fork's code with no credentials.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [],
+              "hasOpenThreats": false
+            },
+            "id": "flow-a-ci",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "PR code checkout"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "store-a-repo"
+            },
+            "target": {
+              "cell": "node-ci"
+            },
+            "vertices": []
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 27,
+            "connector": "normal",
+            "data": {
+              "name": "Review and merge",
+              "description": "Full label: Review and merge (approval, code). A person approves and merges.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [],
+              "hasOpenThreats": false
+            },
+            "id": "flow-a-merge",
+            "labels": [
+              {
+                "position": 0.6,
+                "attrs": {
+                  "label": {
+                    "text": "Review and merge"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-maintainer"
+            },
+            "target": {
+              "cell": "store-a-repo"
+            },
+            "vertices": []
+          },
+          {
+            "position": {
+              "x": 550.0,
+              "y": 70.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 555.0
+            },
+            "attrs": {
+              "body": {
+                "stroke": "#b45309",
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "AB1: untrusted text becomes model input",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
+              }
+            },
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-AB1",
+            "data": {
+              "type": "tm.BoundaryBox",
+              "name": "AB1: untrusted text becomes model input",
+              "description": "Anything a stranger can write (pull request, issue, comment, web page, package description) is data. It must not gain the authority of an instruction.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": {
+              "x": 1150.0,
+              "y": 750.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 555.0
+            },
+            "attrs": {
+              "body": {
+                "stroke": "#b45309",
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "AB2: agent tool permissions",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
+              }
+            },
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-AB2",
+            "data": {
+              "type": "tm.BoundaryBox",
+              "name": "AB2: agent tool permissions",
+              "description": "What the agent may do. The only hard limit is what the machine and the credentials let it do; a written rule is not a limit.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": {
+              "x": 1750.0,
+              "y": 70.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 910.0
+            },
+            "attrs": {
+              "body": {
+                "stroke": "#b45309",
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "AB3: prompts leave the machine",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
+              }
+            },
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-AB3",
+            "data": {
+              "type": "tm.BoundaryBox",
+              "name": "AB3: prompts leave the machine",
+              "description": "Everything in the agent's context goes to a hosted provider. A local model keeps it on the network.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": {
+              "x": 2350.0,
+              "y": 1105.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 200.0
+            },
+            "attrs": {
+              "body": {
+                "stroke": "#b45309",
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "AB4: secrets never in agent context",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
+              }
+            },
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-AB4",
+            "data": {
+              "type": "tm.BoundaryBox",
+              "name": "AB4: secrets never in agent context",
+              "description": "Secret values are fetched by the tracked run, not by an agent session.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": {
+              "x": -50.0,
+              "y": 1105.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 200.0
+            },
+            "attrs": {
+              "body": {
+                "stroke": "#b45309",
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "AB5: a person reads the diff before merge",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
+              }
+            },
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-AB5",
+            "data": {
+              "type": "tm.BoundaryBox",
+              "name": "AB5: a person reads the diff before merge",
+              "description": "The control that holds even when every other layer is fooled.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            }
+          }
+        ]
+      }
+    ],
+    "diagramTop": 1,
+    "reviewer": "",
+    "threatTop": 12
+  }
+}

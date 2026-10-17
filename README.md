@@ -87,6 +87,7 @@ Clouds-Against-Humanity/
   scripts/gen_timezones.py                 regenerates modules/twingate-bootstrap/timezones.txt from the local tz database
   scripts/hcl_variables.py                 helper module: a fail-closed reader of `variable` blocks (used by tests and the generators)
   scripts/plan_noop_check.py               fails unless a saved plan is a no-op over the golden addresses (run by hand, not in CI)
+  scripts/threat_dragon_layout.py          lays out the Threat Dragon models in docs/threat-model (nodes, boundary boxes, flow routes; --check fails when stale)
   scripts/spacelift/doppler-env.sh         hook that loads Doppler secrets into a run
   scripts/gen-wiki.sh                      writes the wiki pages from docs/wiki (the Wiki workflow publishes them)
   tests/                                   pytest for the cost gate, settings, module policy, secret separation, the hook, the wiki and more
