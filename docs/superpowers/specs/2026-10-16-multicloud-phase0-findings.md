@@ -47,7 +47,7 @@ Arithmetic is in the evidence files. Excludes data transfer, logging and any fre
 | AWS, 2 x t4g.nano + 2 public IPv4 + 2 x 8 GiB gp3 | $14.71 | 0.5 GiB of memory, at the floor of Twingate's smallest documented size. Not recommended. |
 | **AWS, 2 x t4g.micro + 2 public IPv4 + 2 x 8 GiB gp3** | **$20.84** | Cheapest candidate that clears Twingate's smallest documented floor. **It is below Twingate's general guidance of 1 CPU and 2 GB of memory** (the 512 MB figure is for a container deployment), so treat it as an experiment to test; a 2 GiB arm instance costs more and was not priced in phase 0. Arm; see section 7. |
 | AWS, 2 x t3.micro (x86) | $23.76 | Fallback if arm turns out not to work. |
-| Azure, 2 x B2ats_v2 + 2 public IPs + 2 x 32 GiB Standard SSD | about $25.82 | Default disk type unverified. B2pts_v2 (Arm) about $24.36. Lessons only, so not decided. |
+| Azure, 2 x B2ats_v2 + 2 public IPs + 2 x 32 GiB Standard SSD | about $25.82 | Default disk type unverified. B2pts_v2 (Arm) about $24.36. Lessons only, so not decided. **Memory (Microsoft Learn size pages, read 2026-10-16): B2ats_v2 and B2pts_v2 both have 1 GiB, below Twingate's general 1 CPU / 2 GB guidance. A stack meeting that guidance costs about $42.32 (2 x B1ms, 2 GiB, a series Microsoft lists as End of Life) or about $61.16 (2 x B2pls_v2, 4 GiB), each more than the $30 ceiling on its own (hourly prices from the Azure retail price API, East US, 2026-10-16: B1ms $0.0207, B2pls_v2 $0.0336).** |
 | GCP, 2 x e2-small + 2 external IPs + disks | about $34 to $36 | **VM prices unverified.** Twingate suggests e2-small on GCP; e2-micro is below its guidance. Lessons only. |
 
 Reference point: the DigitalOcean stage 1 is $12.
@@ -70,7 +70,7 @@ If it is gated, decision 6 applies: come back to the maintainer before using a s
 - The default root volume size of the Ubuntu image on AWS (assumed 8 GiB from third-party posts; verify in the console launch wizard on the throwaway account).
 - Which EC2 instance types the AWS free plan allows.
 - GCP e2 on-demand and disk prices (Google's page renders prices with JavaScript; use the pricing calculator).
-- Azure memory per B-size, the East US rows for the NAT and load-balancer meters, and whether the free account covers a public IP and a disk.
+- Azure memory for sizes other than B2ats_v2, B2pts_v2, B1ms and B2pls_v2 (those were read 2026-10-16 from Learn size pages), the East US rows for the NAT and load-balancer meters, and whether the free account covers a public IP and a disk.
 - Spacelift OIDC specifics for Azure and GCP; GCP 2-step verification and secure-by-default organization policy pages.
 
 ## 8. What this changes in the plan
