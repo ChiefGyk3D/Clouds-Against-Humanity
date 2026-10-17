@@ -28,8 +28,8 @@ Usage, from anywhere inside a clone:
   scripts/render_diagrams.py --check     offline; exit 1 on a bare block, a missing picture or a stale hash
   scripts/render_diagrams.py --write     wrap bare blocks, render what changed, update the manifest
 
---write needs Mermaid CLI (`mmdc`) and a Chromium: set MMDC to its path if it is not on PATH, and
-PUPPETEER_CONFIG to a JSON file with {"executablePath": "...", "args": ["--no-sandbox"]} if it needs one.
+--write needs Mermaid CLI (`mmdc`) on PATH and a Chromium; set PUPPETEER_EXECUTABLE_PATH to the browser if
+Puppeteer does not find one.
 Pillow shrinks the pictures (at most 2400 px wide, a 128-colour palette).
 """
 
@@ -127,22 +127,19 @@ def check() -> list[str]:
 def render(src: str, out: Path) -> None:
     from PIL import Image  # imported here: --check needs only the standard library
 
-    mmdc = shutil.which(os.environ.get("MMDC", "mmdc"))
-    if not mmdc:
-        raise SystemExit("render_diagrams: Mermaid CLI not found; install it or set MMDC to its path")
-    config = os.environ.get("PUPPETEER_CONFIG")
-    if config and not Path(config).is_file():
-        raise SystemExit("render_diagrams: PUPPETEER_CONFIG is not a file")
+    if not shutil.which("mmdc"):
+        raise SystemExit("render_diagrams: Mermaid CLI (mmdc) not found on PATH")
     os.nice(19)  # headless Chromium at the lowest priority, as the platform rules ask
     with tempfile.TemporaryDirectory() as tmp:
         mmd, raw = Path(tmp) / "d.mmd", Path(tmp) / "d.png"
         mmd.write_text(src + "\n")
-        cmd = [mmdc, "-c", str(THEME), "-t", "dark", "-b", "#0d1117", "-w", "1400", "-s", "2", "-i", str(mmd), "-o", str(raw)]
-        if config:
-            cmd += ["-p", config]
-        # The tool path and config come from the maintainer's own shell, checked above to be a real executable and a real file;
-        # this is a local rendering script, never run in CI or on input from a page (the diagram goes through a temp file).
-        subprocess.run(cmd, check=True, capture_output=True)  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
+        # A fixed command: nothing from the environment goes into it. Mermaid CLI's browser is chosen by
+        # PUPPETEER_EXECUTABLE_PATH, which Puppeteer reads itself.
+        subprocess.run(
+            ["mmdc", "-c", str(THEME), "-t", "dark", "-b", "#0d1117", "-w", "1400", "-s", "2", "-i", str(mmd), "-o", str(raw)],
+            check=True,
+            capture_output=True,
+        )
         img = Image.open(raw).convert("RGB")
         if img.width > MAX_WIDTH:
             img = img.resize((MAX_WIDTH, round(img.height * MAX_WIDTH / img.width)), Image.LANCZOS)
