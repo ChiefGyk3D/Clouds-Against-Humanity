@@ -132,3 +132,18 @@ If Clouds Against Humanity is useful to you, consider supporting continued devel
 | Monero | `84Y34QubRwQYK2HNviezeH9r6aRcPvgWmKtDkN3EwiuVbp6sNLhm9ffRgs6BA9X1n9jY7wEN16ZEpiEngZbecXseUrW8SeQ` |
 | Ethereum | `0x554f18cfB684889c3A60219BDBE7b050C39335ED` |
 | Solana | `5T8h3HbyvHgLxwXgchRYbHSqRjZyAr8J7uwjLN9Fh8Jh` |
+
+## Author and socials
+
+Made by [ChiefGyk3D](https://github.com/ChiefGyk3D).
+
+- [Mastodon](https://social.chiefgyk3d.com/@chiefgyk3d)
+- [Bluesky](https://bsky.app/profile/chiefgyk3d.com)
+- [Twitch](https://twitch.tv/chiefgyk3d)
+- [YouTube](https://www.youtube.com/channel/UCvFY4KyqVBuYd7JAl3NRyiQ)
+- [Kick](https://kick.com/chiefgyk3d)
+- [TikTok](https://www.tiktok.com/@chiefgyk3d)
+- [Instagram](https://www.instagram.com/chiefgyk3d)
+- [Threads](https://www.threads.net/@chiefgyk3d)
+- [Discord](https://discord.chiefgyk3d.com)
+- [Matrix](https://matrix-invite.chiefgyk3d.com)
