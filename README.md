@@ -8,6 +8,11 @@ It is a cloud extension of a homelab and a teaching repository at the same time:
 
 ## How it fits together
 
+![Architecture: Twingate connectors dial out, nothing listens inbound, Spacelift applies OpenTofu](docs/images/architecture.png)
+
+<details>
+<summary>Diagram source (Mermaid)</summary>
+
 ```mermaid
 flowchart LR
     you["You<br/>Twingate client"]:::you
@@ -37,6 +42,8 @@ flowchart LR
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
     classDef secret fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
+
+</details>
 
 | Piece | Job | Why this and not the obvious alternative |
 |---|---|---|
