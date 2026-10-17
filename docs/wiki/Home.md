@@ -60,6 +60,7 @@ After those, come back here and follow the reading order below.
 | 12 | [Roadmap](Roadmap.md) | Stages 0 through 4 |
 | | [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) | Break each safety property on your own computer and watch the check object |
 | | [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) | The replication path, with checkpoints and teardown |
+| | [Troubleshooting index](Troubleshooting-Index.md) | A symptom, its likely cause, and the page that has the fix |
 | | [Glossary](Glossary.md) | Every acronym on these pages |
 
 ## The short version

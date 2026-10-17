@@ -122,7 +122,7 @@ Notice the wording. Nothing failed in the module; a test that *expects* a failur
 
 **What it teaches:** a cost gate that fails closed. Anything it does not recognise is refused.
 
-**Setup.** From the repository root, `python -I scripts/cost_check.py --root .` should print `cost-check: planned $12.00/mo, approved $12.00, ceiling $30.00` and exit 0.
+**Setup.** From the repository root, `python -I scripts/cost_check.py --root .` should print `cost-check: digitalocean: planned $12.00/mo, approved $12.00, active` followed by `cost-check: shared ceiling $30.00` and exit 0.
 
 **Predict.** Append this to `stacks/10-access/main.tf`:
 
@@ -140,12 +140,13 @@ A load balancer is a billable resource. The gate has no price for it. Will the g
 **What really happens.**
 
 ```text
-cost-check: resource type not on the free list or outside its allowed file: stacks/10-access/main.tf: digitalocean_loadbalancer
-cost-check: planned $12.00/mo, approved $12.00, ceiling $30.00
+cost-check: resource type not on the free list, not approved, or outside its allowed file: stacks/10-access/main.tf: digitalocean_loadbalancer (the gate has no price model for it)
+cost-check: digitalocean: planned $12.00/mo, approved $12.00, active
+cost-check: shared ceiling $30.00
 exit 1
 ```
 
-(The two lines are written to different output streams, so they may appear in the other order on your terminal.)
+(The summary lines and the failure line are written to different output streams, so the failure line may appear above or below them on your terminal.)
 
 The total is still `$12.00`, because the gate has no price for the load balancer, yet it fails. That is the point: the gate does not subtract what it does not understand from the bill. An unknown resource type is a failure, not a zero.
 

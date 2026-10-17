@@ -41,6 +41,7 @@
 **Reference**
 - [Terraform reference](Terraform-Reference.md)
 - [Lessons learned](Lessons-Learned.md)
+- [Troubleshooting index](Troubleshooting-Index.md)
 - [Roadmap](Roadmap.md)
 - [Glossary](Glossary.md)
 
