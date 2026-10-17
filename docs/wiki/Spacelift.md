@@ -102,11 +102,11 @@ The ideal is that Spacelift holds no long-lived secret at all: it would present 
 
 ## More than one cloud
 
-When AWS, Azure or GCP stacks are added, each cloud gets its own Doppler config and its own Spacelift context with its own read-only token, attached only to that cloud's stacks. The reason is blast radius: a Doppler token can read its whole config, so keys for several clouds in one config would turn one compromised run into several compromised accounts. A test checks that no stack's `.spacelift/config.yml` entry asks for another cloud's secrets. Naming, the native-integration route and what the test cannot prove are in [docs/spacelift-secrets.md](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#8a-more-than-one-cloud).
+When AWS, Azure or GCP stacks are added, each cloud gets its own Doppler config and its own Spacelift context with its own read-only token, attached only to that cloud's stacks. The reason is blast radius: a Doppler token can read its whole config, so keys for several clouds in one config would turn one compromised run into several compromised accounts. A test checks that no stack's `.spacelift/config.yml` entry names another cloud's secrets (it checks names in the file, not what Doppler or Spacelift actually allow). Naming, the native-integration route and what the test cannot prove are in [docs/spacelift-secrets.md](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#8a-more-than-one-cloud).
 
 ## Adding a stack
 
-1. Create it in Spacelift with the label `cah`, so the Doppler context and the push policy attach themselves.
+1. Create it in Spacelift. A DigitalOcean stack gets the label `cah`, so the Doppler context and the push policy attach themselves. An AWS, Azure or GCP stack must **not** get `cah` (it would receive the DigitalOcean context); give it its own cloud label, and attach the push policy to it before its secret context (see "More than one cloud").
 2. Add its entry to `.spacelift/config.yml`, keyed by the stack id, listing only the secrets it needs.
 3. Add stack dependencies for any outputs it consumes.
 4. Pull request, CI green, merge.

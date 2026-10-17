@@ -180,10 +180,11 @@ The Doppler token in a context can read the **whole config**, not just the names
 
 ### What the test proves, and what it does not
 
-`tests/test_secret_separation.py` reads `.spacelift/config.yml` and fails if:
+`tests/test_secret_separation.py` parses `.spacelift/config.yml` with PyYAML (a pinned CI test dependency) and fails closed: any shape it does not understand is a failure, not a skip. It fails if:
 
-- a stack requests a name with another cloud's prefix (`AWS_` on a DigitalOcean stack, `DIGITALOCEAN_` on `cah-aws-*`, and so on; the prefix table is in the test);
-- a stack requests a name outside its own cloud's prefixes and the shared non-cloud ones (`TWINGATE_`, `ADMIN_`);
+- a stack name is not one of the known DigitalOcean stacks or a `cah-aws-*`, `cah-azure-*` or `cah-gcp-*` name (a typo cannot inherit DigitalOcean's permissions);
+- a hook is not exactly the source line followed by one plain `cah_doppler_env NAME ...` call (extra calls, shell operators, quoting, variables, YAML anchors and aliases, duplicate keys and non-string entries are all refused);
+- a stack requests a name with another cloud's prefix (`AWS_` on a DigitalOcean stack, `DIGITALOCEAN_` on `cah-aws-*`, and so on; the prefix table is in the test), or any name outside its own cloud's prefixes and the exact shared names (`TWINGATE_API_TOKEN`, `TWINGATE_NETWORK`, `ADMIN_SSH_PUBLIC_KEY`, `ADMIN_SSH_KEY_NAME`, `ADMIN_USER_IDS`);
 - `before_init` and `before_apply` differ (the apply phase can run in a fresh container, so both must load the same names);
 - the hook script assigns `DOPPLER_PROJECT`, `DOPPLER_CONFIG` or `DOPPLER_TOKEN`, or hard-codes a config name.
 
