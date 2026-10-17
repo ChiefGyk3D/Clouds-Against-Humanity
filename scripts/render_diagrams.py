@@ -39,6 +39,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -126,14 +127,22 @@ def check() -> list[str]:
 def render(src: str, out: Path) -> None:
     from PIL import Image  # imported here: --check needs only the standard library
 
-    mmdc = os.environ.get("MMDC", "mmdc")
+    mmdc = shutil.which(os.environ.get("MMDC", "mmdc"))
+    if not mmdc:
+        raise SystemExit("render_diagrams: Mermaid CLI not found; install it or set MMDC to its path")
+    config = os.environ.get("PUPPETEER_CONFIG")
+    if config and not Path(config).is_file():
+        raise SystemExit("render_diagrams: PUPPETEER_CONFIG is not a file")
+    os.nice(19)  # headless Chromium at the lowest priority, as the platform rules ask
     with tempfile.TemporaryDirectory() as tmp:
         mmd, raw = Path(tmp) / "d.mmd", Path(tmp) / "d.png"
         mmd.write_text(src + "\n")
-        cmd = ["nice", "-n", "19", mmdc, "-c", str(THEME), "-t", "dark", "-b", "#0d1117", "-w", "1400", "-s", "2", "-i", str(mmd), "-o", str(raw)]
-        if os.environ.get("PUPPETEER_CONFIG"):
-            cmd += ["-p", os.environ["PUPPETEER_CONFIG"]]
-        subprocess.run(cmd, check=True, capture_output=True)
+        cmd = [mmdc, "-c", str(THEME), "-t", "dark", "-b", "#0d1117", "-w", "1400", "-s", "2", "-i", str(mmd), "-o", str(raw)]
+        if config:
+            cmd += ["-p", config]
+        # The tool path and config come from the maintainer's own shell, checked above to be a real executable and a real file;
+        # this is a local rendering script, never run in CI or on input from a page (the diagram goes through a temp file).
+        subprocess.run(cmd, check=True, capture_output=True)  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-tainted-env-args.dangerous-subprocess-use-tainted-env-args
         img = Image.open(raw).convert("RGB")
         if img.width > MAX_WIDTH:
             img = img.resize((MAX_WIDTH, round(img.height * MAX_WIDTH / img.width)), Image.LANCZOS)
