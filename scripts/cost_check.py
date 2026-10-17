@@ -21,6 +21,11 @@ provider's price table and docs/stages/approved.json. It fails when:
 - a module source is not local or goes through a dot-directory, a stack
   directory is misnamed, a dot-directory exists under stacks/ or modules/, or a
   *.tf.json / *.tofu.json file exists (*.tf and *.tofu are both read);
+- a stack instance manifest (stacks/sites/<resource_key>/<stack>/cost.json with
+  instance_of) is malformed, names no stack with its own manifest, carries code,
+  does not match the connector modules of the stack it names, or shares a stack
+  id with another manifest; or a provider's optional `sites` map does not fit
+  (see docs/cost.md, "Stack instances");
 - with --plan, the cost of the planned values in an OpenTofu plan (JSON) differs
   from the manifest, or the plan holds a type the gate cannot price.
 
@@ -109,6 +114,8 @@ TOP_SKIP_DIRS = frozenset({".git", ".venv", ".claude"})
 GUARDED_TOP = frozenset({"stacks", "modules"})
 HCL_SUFFIXES = (".tf", ".tofu")
 JSON_SUFFIXES = (".tf.json", ".tofu.json")
+SITES_DIR = "stacks/sites"
+RESOURCE_KEY_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 STACK_NAME_RE = re.compile(r"^[0-9]+-[A-Za-z0-9][A-Za-z0-9_-]*$")
 CONNECTOR_SOURCE_SUFFIX = "twingate-connector"
 # Connector size attribute -> the manifest key its local must read.
@@ -263,28 +270,111 @@ def stack_manifests(root):
             yield str(Path(rel).parent.as_posix()), Path(root, rel)
 
 
-def provider_totals(root):
-    """Return {provider: total} summed from the manifests."""
-    totals = {}
-    cache = {}
+def is_instance_dir(rel):
+    """True for a directory at or under stacks/sites/ (data-only stack instances)."""
+    return rel == SITES_DIR or rel.startswith(SITES_DIR + "/")
+
+
+def instance_key(rel):
+    """The resource_key of stacks/sites/<resource_key>/..., or None."""
+    parts = Path(rel).parts
+    return parts[2] if is_instance_dir(rel) and len(parts) >= 3 else None
+
+
+def declared_instance_of(data):
+    return data.get("instance_of") if isinstance(data, dict) else None
+
+
+def instance_of_problem(value):
+    """Why `instance_of` is not a plain stack path, or None."""
+    if not isinstance(value, str) or not value:
+        return "must be a non-empty string such as stacks/10-access"
+    parts = value.split("/")
+    if (
+        value != posixpath.normpath(value)
+        or parts[0] != "stacks"
+        or len(parts) < 2
+        or "" in parts
+        or any(p in (".", "..") for p in parts)
+    ):
+        return f"{value!r} must be a normalized stack path such as stacks/10-access"
+    if is_instance_dir(value):
+        return (
+            f"{value!r} must not point into stacks/sites (an instance is not a stack)"
+        )
+    return None
+
+
+def manifest_provider(rel, data):
+    """Provider of a manifest. An instance takes it from the stack it names;
+    an unusable instance_of falls back to the path (structure_problems fails it)."""
+    if is_instance_dir(rel):
+        target = declared_instance_of(data)
+        if instance_of_problem(target) is None:
+            return provider_of_stack(target)
+    return provider_of_stack(rel)
+
+
+def priced_manifests(root):
+    """Yield (rel, provider, site key or None, manifest data) for every manifest."""
     for rel, manifest in stack_manifests(root):
-        provider = provider_of_stack(rel)
+        data = load_json(manifest)
+        yield rel, manifest_provider(rel, data), instance_key(rel), data
+
+
+def site_totals(root):
+    """Return {provider: {"": base stacks total, <resource_key>: site total}}."""
+    totals, cache = {}, {}
+    for rel, provider, key, data in priced_manifests(root):
         if provider not in cache:
             cache[provider] = load_prices(root, provider)
-        for res in load_json(manifest)["resources"]:
-            totals[provider] = totals.get(provider, 0.0) + resource_cost(
+        bucket = totals.setdefault(provider, {})
+        bucket.setdefault(key or "", 0.0)
+        for res in data["resources"]:
+            bucket[key or ""] = bucket.get(key or "", 0.0) + resource_cost(
                 res, cache[provider], provider
             )
-    return {p: round(t, 2) for p, t in totals.items()}
+    return totals
+
+
+def provider_totals(root):
+    """Return {provider: total} summed from the manifests."""
+    return {p: round(sum(parts.values()), 2) for p, parts in site_totals(root).items()}
+
+
+def stack_id(rel, instance_of):
+    """The Spacelift stack id a manifest directory answers to.
+
+    stacks/<path>                          -> cah-<path with / as ->
+    stacks/sites/<key>/<path> (an instance) -> cah-<path with / as ->-<key>
+    """
+    if is_instance_dir(rel):
+        base = Path(instance_of).parts[1:]
+        return "cah-" + "-".join(base) + "-" + instance_key(rel)
+    return "cah-" + "-".join(Path(rel).parts[1:])
+
+
+def manifest_ids(root):
+    """{stack id: [manifest directories]} for every manifest with a usable
+    instance_of (an instance with a bad one maps to no id)."""
+    ids = {}
+    for rel, _, _, data in priced_manifests(root):
+        target = declared_instance_of(data)
+        if is_instance_dir(rel) and (
+            instance_key(rel) is None or instance_of_problem(target)
+        ):
+            continue
+        ids.setdefault(stack_id(rel, target), []).append(rel)
+    return ids
 
 
 def total_cost(root, prices=None):
     """Sum of every provider's manifests. `prices` overrides the DigitalOcean table (tests)."""
     if prices is not None:
         total = 0.0
-        for rel, manifest in stack_manifests(root):
-            if provider_of_stack(rel) == "digitalocean":
-                for res in load_json(manifest)["resources"]:
+        for _, provider, _, data in priced_manifests(root):
+            if provider == "digitalocean":
+                for res in data["resources"]:
                     total += resource_cost(res, prices)
         return round(total, 2)
     return round(sum(provider_totals(root).values()), 2)
@@ -494,13 +584,15 @@ def plan_instance_cost(addr, after, unknown, prices, expressions=None):
 
 def plan_problems(plan_path, stack, root):
     """Compare the cost of a plan with the same stack's manifest."""
-    provider = provider_of_stack(stack)
-    if provider != "aws":
-        return [f"--plan costing is implemented for aws only, not {provider}"]
-    prices = load_prices(root, "aws")
     manifest = Path(root, stack, "cost.json")
     if not manifest.exists():
         return [f"{stack}: no cost.json to reconcile the plan against"]
+    # An instance (stacks/sites/...) takes its provider from instance_of and is
+    # compared with its own manifest, not the base stack's.
+    provider = manifest_provider(stack, load_json(manifest))
+    if provider != "aws":
+        return [f"--plan costing is implemented for aws only, not {provider}"]
+    prices = load_prices(root, "aws")
     declared = round(
         sum(resource_cost(r, prices, "aws") for r in load_json(manifest)["resources"]),
         2,
@@ -772,6 +864,16 @@ def walk_repo(root):
                     f"{where}: hidden directory under {child.parts[0]}/ is refused; "
                     "the gate does not scan it, so nothing may live there"
                 )
+            elif (
+                child.parts[0] == "stacks"
+                and len(child.parts) == 3
+                and child.parts[1] == "sites"
+                and not RESOURCE_KEY_RE.match(child.parts[2])
+            ):
+                problems.append(
+                    f"{where}: resource_key must be lowercase letters, digits and dashes, "
+                    "starting with a letter or digit"
+                )
             elif child.parts[0] == "stacks" and not stack_name_ok(child.parts):
                 problems.append(
                     f"{where}: stack directory name must be NN-name (digits, a dash, then a name) "
@@ -790,7 +892,10 @@ def walk_repo(root):
 
 
 def stack_name_ok(parts):
-    """Naming rule for stacks/<x> and stacks/<provider>/<x>."""
+    """Naming rule for stacks/<x>, stacks/<provider>/<x> and the data-only
+    stacks/sites/<resource_key>/<stack path> (the key is checked by the caller)."""
+    if len(parts) >= 2 and parts[1] == "sites":
+        return len(parts) < 4 or stack_name_ok(("stacks", *parts[3:]))
     if len(parts) == 2:
         return parts[1] in STACK_PROVIDER_DIRS or bool(STACK_NAME_RE.match(parts[1]))
     if len(parts) == 3 and parts[1] in STACK_PROVIDER_DIRS:
@@ -1009,11 +1114,14 @@ def structure_problems(root):
     """
     files, problems = walk_repo(root)
     manifests = dict(stack_manifests(root))
+    bases = {k: v for k, v in manifests.items() if not is_instance_dir(k)}
     if not manifests:
         problems.append(
             "no stacks/**/cost.json manifest found; at least one is required"
         )
     for stack in stack_dirs(root):
+        if is_instance_dir(stack):
+            continue
         if stack not in manifests:
             problems.append(
                 f"{stack}: has OpenTofu files but no cost.json; every stack needs a manifest"
@@ -1024,21 +1132,144 @@ def structure_problems(root):
                 problems.append(
                     f"{rel}: *{suffix} cannot be read by this gate and is refused"
                 )
+        if (
+            is_instance_dir(str(Path(rel).parent.as_posix()))
+            and rel.endswith(HCL_SUFFIXES)
+            and not is_hidden(rel)
+        ):
+            problems.append(
+                f"{rel}: instances carry no code; stacks/sites holds data (cost.json) only"
+            )
     problems += block_problems(root)
     mod_problems, connectors = module_problems(root)
     problems += mod_problems
-    for stack in sorted(set(connectors) | set(manifests)):
+    for stack in sorted(set(connectors) | set(bases)):
         machines = 0
-        if stack in manifests:
-            machines = sum(
-                1
-                for r in load_json(manifests[stack])["resources"]
-                if r.get("kind") in MACHINE_KINDS
-            )
+        if stack in bases:
+            machines = machine_count(bases[stack])
         have = connectors.get(stack, 0)
         if have != machines:
             problems.append(
                 f"{stack}: {have} twingate-connector module block(s) but {machines} machine entr(ies) in its cost.json; they must match"
+            )
+    problems += instance_problems(manifests, bases, connectors)
+    problems += config_problems(root)
+    return problems
+
+
+def config_problems(root):
+    """Every stack id in .spacelift/config.yml answers to exactly one manifest.
+
+    No config file (a fixture) is not a problem; one that cannot be read is."""
+    config = Path(root, ".spacelift/config.yml")
+    if not config.exists():
+        return []
+    try:
+        import yaml
+    except ImportError:
+        return [".spacelift/config.yml exists but PyYAML is not installed to read it"]
+    try:
+        loaded = yaml.safe_load(config.read_text(encoding="utf-8"))
+        stacks = loaded["stacks"]
+        if not isinstance(stacks, dict):
+            raise TypeError("stacks is not a map")
+    except (yaml.YAMLError, OSError, KeyError, TypeError) as err:
+        return [f".spacelift/config.yml is unreadable or has no stacks map: {err!r}"]
+    ids = manifest_ids(root)
+    return [
+        f".spacelift/config.yml stack id {sid} has {len(ids.get(sid, []))} manifest(s), expected exactly 1"
+        for sid in stacks
+        if len(ids.get(sid, [])) != 1
+    ]
+
+
+def machine_count(manifest):
+    return sum(
+        1 for r in load_json(manifest)["resources"] if r.get("kind") in MACHINE_KINDS
+    )
+
+
+def shared_code_problems(rel, data, base_manifest, target):
+    """An instance deploys the base stack's code, which reads its resources from
+    the base stack's own cost.json and creates ALL of them again. Until a stack
+    can select the instance manifest, the instance's resource list (machines,
+    volumes, addresses, every costed entry) must equal the base manifest's,
+    entry by entry, matched by name."""
+    mine = {r.get("name"): r for r in data["resources"]}
+    base = {r.get("name"): r for r in load_json(base_manifest)["resources"]}
+    if set(mine) != set(base) or len(mine) != len(data["resources"]):
+        return [
+            (
+                f"{rel}: resource names must equal the base stack's ({target}); "
+                "the shared code deploys every resource of the base manifest"
+            )
+        ]
+    return [
+        (
+            f"{rel}: resource {name!r} is {res!r} but must equal the base stack's entry "
+            f"{base[name]!r} in {target}/cost.json (the shared code reads the base manifest; "
+            "a site-specific size needs the stack to read the instance manifest)"
+        )
+        for name, res in sorted(mine.items(), key=lambda kv: str(kv[0]))
+        if res != base[name]
+    ]
+
+
+def instance_problems(manifests, bases, connectors):
+    """Rules for stacks/sites/<resource_key>/<stack path>/cost.json (data only)."""
+    problems, owners = [], {}
+    for rel, manifest in sorted(manifests.items()):
+        data = load_json(manifest)
+        target = declared_instance_of(data)
+        if not is_instance_dir(rel):
+            if isinstance(data, dict) and "instance_of" in data:
+                problems.append(
+                    f"{rel}: instance_of is only allowed under stacks/sites/<resource_key>/"
+                )
+            continue
+        key = instance_key(rel)
+        if key is None or len(Path(rel).parts) < 4:
+            problems.append(
+                f"{rel}: an instance manifest must sit at stacks/sites/<resource_key>/<stack path>/cost.json"
+            )
+            continue
+        if target is None:
+            problems.append(
+                f"{rel}: instance_of is missing; an instance manifest must name the stack whose code it deploys"
+            )
+            continue
+        bad = instance_of_problem(target)
+        if bad:
+            problems.append(f"{rel}: instance_of {bad}")
+            continue
+        expected = f"{SITES_DIR}/{key}/{target[len('stacks/') :]}"
+        if rel != expected:
+            problems.append(
+                f"{rel}: must sit at stacks/sites/<resource_key>/{target[len('stacks/') :]} "
+                f"to be an instance of {target}"
+            )
+            continue
+        if target not in bases:
+            problems.append(
+                f"{rel}: instance_of {target!r} names no stack directory with its own cost.json"
+            )
+            continue
+        owners.setdefault(stack_id(rel, target), []).append(rel)
+        problems += shared_code_problems(rel, data, bases[target], target)
+        machines = machine_count(manifest)
+        have = connectors.get(target, 0)
+        if have != machines:
+            problems.append(
+                f"{rel}: {have} twingate-connector module block(s) in {target} but {machines} machine "
+                "entr(ies) in this instance manifest; they must match"
+            )
+    for rel in bases:
+        owners.setdefault(stack_id(rel, None), []).append(rel)
+    for sid, rels in sorted(owners.items()):
+        if len(rels) > 1:
+            problems.append(
+                f"duplicate stack id {sid}: {', '.join(sorted(rels))}; "
+                "every stack id must have exactly one manifest"
             )
     return problems
 
@@ -1046,9 +1277,64 @@ def structure_problems(root):
 # ---- approval ---------------------------------------------------------------
 
 
-def approval_problems(approved, totals):
-    """Per-provider approval and the shared ceiling."""
+def sites_problems(provider, entry, cap, parts):
+    """The optional per-site approvals under one provider.
+
+    `parts` is {"": base stacks total, <resource_key>: site total}. With no
+    `sites` map nothing here applies. With one, every instance must be named in
+    it, each site stays inside its own figure, the sites together stay inside
+    the provider figure, and the base stacks get what the sites leave.
+    """
+    if "sites" not in entry:
+        return []
+    sites = entry["sites"]
+    if not isinstance(sites, dict) or not sites:
+        return [
+            f"{provider}: sites must be a non-empty map of resource_key to an object"
+        ]
+    problems, approved_sum = [], 0.0
+    for key, site in sites.items():
+        if not isinstance(key, str) or not RESOURCE_KEY_RE.match(key):
+            problems.append(f"{provider}: site key {key!r} is not a valid resource_key")
+            continue
+        figure = site.get("approved_monthly_total") if isinstance(site, dict) else None
+        if isinstance(figure, bool) or not isinstance(figure, (int, float)):
+            problems.append(
+                f"{provider}: site {key} needs a numeric approved_monthly_total"
+            )
+            continue
+        site_cap = num(site["approved_monthly_total"], f"{provider} site {key}")
+        approved_sum += site_cap
+        planned = parts.get(key)
+        if planned is not None:
+            planned = round(planned, 2)
+        site_cap = round(site_cap, 2)
+        if planned is not None and planned > site_cap:
+            problems.append(
+                f"{provider}: site {key} planned ${planned:.2f} is above its approved ${site_cap:.2f}"
+            )
+    for key in sorted(k for k in parts if k and k not in sites):
+        problems.append(
+            f"{provider}: site {key} has a manifest but is not in the approved sites map"
+        )
+    approved_sum = round(approved_sum, 2)
+    cap = round(cap, 2)
+    if approved_sum > cap:
+        problems.append(
+            f"{provider}: approved sites add up to ${approved_sum:.2f}, above the provider approved ${cap:.2f}"
+        )
+    base = round(parts.get("", 0.0), 2)
+    if base > round(cap - approved_sum, 2):
+        problems.append(
+            f"{provider}: base stacks planned ${base:.2f} are above approved ${cap:.2f} minus sites ${approved_sum:.2f}"
+        )
+    return problems
+
+
+def approval_problems(approved, totals, parts=None):
+    """Per-provider approval and the shared ceiling. `parts` is site_totals()."""
     problems = []
+    parts = parts or {}
     ceiling = num(approved["ceiling"], "ceiling")
     providers = approved["providers"]
     for provider in totals:
@@ -1070,6 +1356,7 @@ def approval_problems(approved, totals):
             problems.append(
                 f"{provider}: planned ${planned:.2f} is above approved ${cap:.2f}"
             )
+        problems += sites_problems(provider, entry, cap, parts.get(provider, {}))
     if active > ceiling:
         problems.append(
             f"the approved figures of the active providers add up to ${active:.2f}, above the shared ceiling ${ceiling:.2f}; "
@@ -1103,7 +1390,8 @@ def main(argv=None):
     root = Path(args.root)
     approved = load_json(root / "docs/stages/approved.json")
     try:
-        totals = provider_totals(root)
+        parts = site_totals(root)
+        totals = {p: round(sum(v.values()), 2) for p, v in parts.items()}
     except (ValueError, KeyError, TypeError, IndexError, AttributeError) as err:
         print(
             f"cost-check: unreadable manifest, price table or plan input: {err!r}",
@@ -1118,7 +1406,7 @@ def main(argv=None):
     ]
     problems += structure_problems(root)
     try:
-        problems += approval_problems(approved, totals)
+        problems += approval_problems(approved, totals, parts)
         if args.plan:
             if not args.stack:
                 problems.append("--plan needs --stack")
