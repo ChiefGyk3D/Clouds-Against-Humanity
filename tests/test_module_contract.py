@@ -30,9 +30,22 @@ def outputs(path):
     return set(re.findall(r'(?m)^output\s+"([A-Za-z0-9_-]+)"', text))
 
 
-def test_every_role_has_at_least_one_provider():
-    roles = {role for role, _ in provider_modules()}
-    assert roles == set(CONTRACT), f"no module for: {sorted(set(CONTRACT) - roles)}"
+def providers():
+    """Map provider (the path before modules/, '' for DigitalOcean) to its roles."""
+    found = {}
+    for role, path in provider_modules():
+        provider = path.parent.parent.relative_to(ROOT).as_posix()
+        found.setdefault(provider, {})[role] = path
+    return found
+
+
+def test_every_provider_supplies_every_role():
+    assert providers(), "no provider modules found"
+    for provider, roles in providers().items():
+        missing = set(CONTRACT) - set(roles)
+        assert not missing, (
+            f"provider {provider or 'digitalocean'} lacks modules: {sorted(missing)}"
+        )
 
 
 def test_every_provider_module_has_the_contract_outputs():
@@ -43,16 +56,37 @@ def test_every_provider_module_has_the_contract_outputs():
         )
 
 
+def test_no_output_exposes_boot_data_or_tokens():
+    # The connector's user_data holds the Twingate tokens. A contract output
+    # name proves nothing about its value, so look at every output expression.
+    for _, path in provider_modules():
+        text = (path / "outputs.tf").read_text()
+        for needle in (
+            "user_data",
+            "custom_data",
+            "metadata_startup_script",
+            "token",
+            "bootstrap",
+        ):
+            assert needle not in text, (
+                f"{path.relative_to(ROOT)}/outputs.tf mentions {needle!r}"
+            )
+
+
 def test_every_provider_module_documents_roles_and_extensions():
     for role, path in provider_modules():
         readme = path / "README.md"
         assert readme.exists(), f"{path.relative_to(ROOT)} has no README.md"
         text = readme.read_text()
-        assert "| Role |" in text, f"{readme.relative_to(ROOT)}: no role table"
-        assert "## Provider extensions" in text, (
-            f"{readme.relative_to(ROOT)}: no extensions section"
+        rows = re.findall(r"(?m)^\| Role \|.*\n\|[-| ]+\|\n((?:\|.*\n)+)", text)
+        assert rows and len(rows[0].strip().splitlines()) >= 1, (
+            f"{readme.relative_to(ROOT)}: role table has no rows"
+        )
+        ext = re.search(r"## Provider extensions\n+(.+)", text, re.DOTALL)
+        assert ext and len(ext.group(1).strip()) >= 40, (
+            f"{readme.relative_to(ROOT)}: empty extensions section"
         )
         for name in CONTRACT[role]:
-            assert name in text, (
-                f"{readme.relative_to(ROOT)} does not mention contract output {name}"
+            assert f"`{name}`" in text, (
+                f"{readme.relative_to(ROOT)} does not describe contract output `{name}`"
             )
