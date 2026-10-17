@@ -1,0 +1,7 @@
+{
+  "stage": 1,
+  "resources": [
+    { "name": "connector-a", "kind": "instance", "type": "t4g.micro", "root_gb": 8, "public_ip": true },
+    { "name": "connector-b", "kind": "instance", "type": "t4g.micro", "root_gb": 8, "public_ip": true }
+  ]
+}

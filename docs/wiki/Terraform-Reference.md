@@ -215,7 +215,7 @@ No token is an output, and a test checks that.
 
 ## modules/aws/*
 
-The AWS versions of the three provider modules, under `modules/aws/`. Same contract output names as the DigitalOcean modules, different objects underneath, and each has a README with its role table and "Provider extensions". **Tested with mocked providers only. They have never been applied to an AWS account, and no stack calls them yet.** The connector reuses `modules/twingate-bootstrap` unchanged.
+The AWS versions of the three provider modules, under `modules/aws/`. Same contract output names as the DigitalOcean modules, different objects underneath, and each has a README with its role table and "Provider extensions". **Tested with mocked providers only. They have never been applied to an AWS account, and the only callers are the two never-applied stacks `stacks/aws/00-foundation` and `stacks/aws/10-access` ([stage guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/aws-access.md)).** The connector reuses `modules/twingate-bootstrap` unchanged.
 
 ### modules/aws/vpc
 
@@ -248,6 +248,17 @@ There is no inbound rule unless a member rule asks for one. The contract outputs
 | `aws_instance.connector` | The VM. Public address and no inbound rule, IMDSv2 required with hop limit 1, explicit encrypted gp3 root volume of `root_volume_size` GiB (the cost gate's input), no key pair, no instance profile, monitoring off, IPv6 off, and `cpu_credits = "standard"` on T-family types (the default, unlimited, bills surplus credits outside the fixed figure). `user_data` is the bootstrap's output, unmodified. |
 
 Variables: `layer`, `region`, `subnet_id`, `security_group_id` (one string, never a list: rules are additive, so a second group could open the instance to the internet), `instance_type` (the stack reads it from `cost.json`), `architecture` (checked against the type by a precondition), `root_volume_size` (default 8), and the bootstrap's inputs. Outputs: `instance_id`, `instance_name`, `private_ip`, `size`. No token is an output, and a test checks that.
+
+---
+
+## stacks/aws/00-foundation and stacks/aws/10-access
+
+The AWS twins of the two stacks below, under `stacks/aws/`. **Mocked tests only; never applied, and no Spacelift stack exists for them** ([stage guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/aws-access.md)).
+
+| Stack | Calls | Notes |
+|---|---|---|
+| `00-foundation` | `modules/aws/vpc`, `modules/aws/firewall` (baseline: no inbound) | `provider "aws"` takes a `region` variable and a `Project` default tag; no account id, profile or key anywhere. Outputs `vpc_id`, `subnet_id`, `baseline_security_group_id`, `vpc_ip_range`, `region`. Costs nothing. |
+| `10-access` | `modules/aws/firewall` (connector group), two `modules/aws/twingate-connector` | Twingate site, admins group and one TCP-22 resource per connector, as on DigitalOcean. Instance type and root size come from `cost.json` ($20.84). The connector group admits SSH only from itself. `vpc_id`, `subnet_id` and `region` arrive from stack 00 as variables; there is no remote state. |
 
 ---
 

@@ -284,8 +284,9 @@ def variable_directories(root: Path) -> list[Path]:
         for d in sorted(p for p in base.iterdir() if p.is_dir()):
             if any(d.glob("*.tf")):
                 dirs.append(d)
-            elif top == "modules":
-                # modules/<provider>/<role>, such as modules/aws/vpc.
+            else:
+                # modules/<provider>/<role>, such as modules/aws/vpc, and
+                # stacks/<provider>/<NN-name>, such as stacks/aws/10-access.
                 for sub in sorted(q for q in d.iterdir() if q.is_dir()):
                     if not sub.name.startswith(".") and any(sub.glob("*.tf")):
                         dirs.append(sub)
