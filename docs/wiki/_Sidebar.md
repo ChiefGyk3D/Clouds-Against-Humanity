@@ -40,6 +40,9 @@
 - [AWS: account preparation](Provider-AWS-Account-Preparation.md)
 - [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md)
 - [AWS: where the money goes](Provider-AWS-Cost-Lesson.md)
+- [GCP: account preparation](Provider-GCP-Account-Preparation.md)
+- [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md)
+- [GCP: where the money goes](Provider-GCP-Cost-Lesson.md)
 
 **Reference**
 - [Terraform reference](Terraform-Reference.md)

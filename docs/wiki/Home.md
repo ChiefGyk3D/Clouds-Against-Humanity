@@ -10,6 +10,7 @@ A small, cheap, locked-down DigitalOcean environment built with OpenTofu, applie
 | An engineer who knows Terraform and wants the design | [Architecture overview](Architecture-Overview.md) | [Threat model](Threat-Model.md), [Spacelift](Spacelift.md), [Doppler](Doppler-and-Secrets.md), [CI and the cost gate](CI-Tests-and-Cost-Gate.md), then [Why ZTNA](Why-ZTNA-Not-a-VPN.md) for the argument |
 | Building your own copy | [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) | [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipeline.md) |
 | Curious how AWS, Azure and GCP differ (unverified drafts) | [Why the clouds differ](Why-the-Clouds-Differ.md) | [AWS account preparation](Provider-AWS-Account-Preparation.md), [the same four pieces](Provider-AWS-The-Same-Four-Pieces.md), [the cost lesson](Provider-AWS-Cost-Lesson.md) |
+| Curious about Google Cloud specifically (unverified drafts) | [GCP account preparation](Provider-GCP-Account-Preparation.md) | [the same four pieces](Provider-GCP-The-Same-Four-Pieces.md), [the cost lesson](Provider-GCP-Cost-Lesson.md) |
 | Wondering how a company would do this | [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md) | [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) |
 
 If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md): it is the reason the whole thing is shaped the way it is. It is long and opinionated, so newcomers are better off after the primers.
