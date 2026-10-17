@@ -42,7 +42,7 @@
             },
             "shape": "actor",
             "zIndex": 1,
-            "id": "ca211af9-38d6-5859-9874-5e58a11220e9",
+            "id": "node-scanner",
             "data": {
               "name": "Internet scanner (A1)",
               "description": "A1: an anonymous party on the internet with no account. Scans for open ports and exposed services.",
@@ -52,7 +52,7 @@
               "reasonOutOfScope": "",
               "threats": [
                 {
-                  "id": "b2465ce8-c9c0-5622-937f-c604bb0853a1",
+                  "id": "threat-scanner-s",
                   "number": 1,
                   "status": "Mitigated",
                   "severity": "Low",
@@ -88,7 +88,7 @@
             },
             "shape": "actor",
             "zIndex": 2,
-            "id": "c912f33d-7333-5802-aa9a-75789fb37f2a",
+            "id": "node-contributor",
             "data": {
               "name": "Contributor or fork author (A2)",
               "description": "A2: someone who can propose code through a pull request but cannot push or merge.",
@@ -98,7 +98,7 @@
               "reasonOutOfScope": "",
               "threats": [
                 {
-                  "id": "284f7f62-3c95-5d61-86a1-fe0cc9493043",
+                  "id": "threat-contributor-s",
                   "number": 2,
                   "status": "Mitigated",
                   "severity": "Medium",
@@ -109,7 +109,7 @@
                   "mitigation": "Branch protection plus a person reading the changed-file list; CI green is necessary but not sufficient."
                 },
                 {
-                  "id": "509ba823-f722-50e8-b42f-2f499de64d57",
+                  "id": "threat-contributor-r",
                   "number": 3,
                   "status": "Open",
                   "severity": "Low",
@@ -145,7 +145,7 @@
             },
             "shape": "actor",
             "zIndex": 3,
-            "id": "28f2918b-d2da-5353-84ad-0287a4ae33ef",
+            "id": "node-upstream",
             "data": {
               "name": "Upstream publishers (actions, Doppler CLI, apt repos)",
               "description": "Supply chain: the publishers of pinned CI actions, the Doppler CLI release, the Twingate apt repository and Ubuntu mirrors.",
@@ -155,7 +155,7 @@
               "reasonOutOfScope": "",
               "threats": [
                 {
-                  "id": "5317f4ca-22ff-5679-94c9-5814f358dbe5",
+                  "id": "threat-upstream-t",
                   "number": 4,
                   "status": "Mitigated",
                   "severity": "High",
@@ -191,7 +191,7 @@
             },
             "shape": "actor",
             "zIndex": 4,
-            "id": "c17806ff-6954-5918-8050-c53213420658",
+            "id": "node-maintainer",
             "data": {
               "name": "Maintainer and laptop (A3 / A4)",
               "description": "A3: whoever can push to main (one writer today). A4: a stolen maintainer identity (Twingate sign-in plus SSH key). Holds the Twingate client and the SSH key.",
@@ -201,7 +201,7 @@
               "reasonOutOfScope": "",
               "threats": [
                 {
-                  "id": "2fa00838-bc2e-5f3e-b042-4572d52e1b19",
+                  "id": "threat-maintainer-s",
                   "number": 5,
                   "status": "Open",
                   "severity": "High",
@@ -212,7 +212,7 @@
                   "mitigation": "Sign-in delegated to the identity provider (enforce MFA there; not visible in this repository); SSH key still required. Verify account hardening in each vendor console."
                 },
                 {
-                  "id": "a54d32a8-38ad-5fac-9bb8-71c29e09a29c",
+                  "id": "threat-maintainer-e",
                   "number": 6,
                   "status": "Open",
                   "severity": "High",
@@ -248,7 +248,7 @@
             },
             "shape": "process",
             "zIndex": 5,
-            "id": "75c371d7-93f4-5775-bd20-c8d297b313ac",
+            "id": "node-gh_repo",
             "data": {
               "name": "Source repository and main branch",
               "description": "Public repository, branch protection on main, CI green required. Holds code and the pipeline definition. Holds no cloud credential.",
@@ -258,7 +258,7 @@
               "reasonOutOfScope": "",
               "threats": [
                 {
-                  "id": "848977cc-adf9-51e1-bd84-7de0941746fa",
+                  "id": "threat-ghrepo-t",
                   "number": 7,
                   "status": "Mitigated",
                   "severity": "High",
@@ -269,7 +269,7 @@
                   "mitigation": "Push policy never proposes a run; CI holds no cloud credential; branch protection; a person reads the diff."
                 },
                 {
-                  "id": "5234f151-70d0-51b8-9d80-e76efed27573",
+                  "id": "threat-ghrepo-i",
                   "number": 8,
                   "status": "Open",
                   "severity": "Medium",
@@ -280,7 +280,7 @@
                   "mitigation": "Identifiers live in Doppler; SSH key comment stripped; secret scanning in CI. Residual: human error in a commit message or doc."
                 },
                 {
-                  "id": "4ffcd2cf-cca9-5904-a207-bef18861eadc",
+                  "id": "threat-ghrepo-r",
                   "number": 9,
                   "status": "Open",
                   "severity": "Low",
@@ -315,7 +315,7 @@
             },
             "shape": "process",
             "zIndex": 6,
-            "id": "a273fea9-3f63-5a32-9589-113486e4b796",
+            "id": "node-ci",
             "data": {
               "name": "CI (GitHub Actions)",
               "description": "Runs pytest, the cost gate and tofu test on pull request code. permissions: {} by default; no cloud credential.",
@@ -325,7 +325,7 @@
               "reasonOutOfScope": "",
               "threats": [
                 {
-                  "id": "ddbdbb6c-1aab-582e-9737-5bfcea0b1f0c",
+                  "id": "threat-ci-i",
                   "number": 10,
                   "status": "Mitigated",
                   "severity": "Medium",
@@ -336,7 +336,7 @@
                   "mitigation": "CI holds no cloud credential, so there is nothing to read. Worst case is wasted minutes."
                 },
                 {
-                  "id": "c504c502-5b6b-5e5e-afb5-a0d6ee2f65d8",
+                  "id": "threat-ci-t",
                   "number": 11,
                   "status": "Mitigated",
                   "severity": "High",
@@ -371,7 +371,7 @@
             },
             "shape": "process",
             "zIndex": 7,
-            "id": "185b5c0e-ef17-5a6f-a320-43d7e1aed31e",
+            "id": "node-sl_prop",
             "data": {
               "name": "Spacelift proposed run (pull request)",
               "description": "A plan-only run. The push policy never proposes one, so no pull request code should run here. Receives no credentials by design.",
@@ -381,7 +381,7 @@
               "reasonOutOfScope": "",
               "threats": [
                 {
-                  "id": "e059f491-b2cb-506c-a2b7-5bd77e60e48a",
+                  "id": "threat-slprop-e",
                   "number": 12,
                   "status": "Open",
                   "severity": "High",
@@ -416,7 +416,7 @@
             },
             "shape": "process",
             "zIndex": 8,
-            "id": "d8882efa-854f-5f4a-a7f1-1a231497704b",
+            "id": "node-sl_track",
             "data": {
               "name": "Spacelift tracked run (main)",
               "description": "Runs plan and apply for a stack from main. Holds DOPPLER_TOKEN and the per-stack secrets loaded in before_init. Apply waits for a human confirm.",
@@ -426,7 +426,7 @@
               "reasonOutOfScope": "",
               "threats": [
                 {
-                  "id": "71b75d74-5708-5409-84a8-8e4743c766aa",
+                  "id": "threat-sltrack-e",
                   "number": 13,
                   "status": "Open",
                   "severity": "High",
@@ -437,7 +437,7 @@
                   "mitigation": "Gates before main: pull request, CI green, branch protection, one writer. The confirm gate reviews the plan, it does not stop code that already ran."
                 },
                 {
-                  "id": "367c07b7-51ff-5219-8dbf-2425d7d2ee18",
+                  "id": "threat-sltrack-t",
                   "number": 14,
                   "status": "Mitigated",
                   "severity": "Medium",
@@ -448,7 +448,7 @@
                   "mitigation": "Autodeploy off; a person confirms every apply; cost gate and approved totals in review."
                 },
                 {
-                  "id": "24306143-4597-51aa-b861-770814551c9c",
+                  "id": "threat-sltrack-d",
                   "number": 15,
                   "status": "Open",
                   "severity": "Medium",
@@ -488,7 +488,7 @@
             },
             "shape": "store",
             "zIndex": 9,
-            "id": "a9668a9a-0080-5c86-88d0-0ff3d0140d63",
+            "id": "node-state",
             "data": {
               "name": "OpenTofu state in Spacelift",
               "description": "State holds connector tokens and the full resource map. Stored only in Spacelift.",
@@ -498,7 +498,7 @@
               "reasonOutOfScope": "",
               "threats": [
                 {
-                  "id": "20830384-6f91-51e8-8ed9-22f02dcee960",
+                  "id": "threat-state-i",
                   "number": 16,
                   "status": "Accepted",
                   "severity": "High",
@@ -542,7 +542,7 @@
             },
             "shape": "store",
             "zIndex": 10,
-            "id": "1ad3c787-2425-56de-a5e4-7d3efbc2eef2",
+            "id": "node-doppler",
             "data": {
               "name": "Doppler prd config",
               "description": "Every runtime secret: cloud token, Twingate API token, tenant name, admin key name and user ids. Read through a read-only, single-config service token.",
@@ -552,7 +552,7 @@
               "reasonOutOfScope": "",
               "threats": [
                 {
-                  "id": "f780e400-51a3-51b0-8233-197291b5e3df",
+                  "id": "threat-doppler-i",
                   "number": 17,
                   "status": "Open",
                   "severity": "High",
@@ -563,7 +563,7 @@
                   "mitigation": "Read-only, one config, 90-day expiry, write-only in Spacelift, masked in logs. Rotate every value it could read, not only the token."
                 },
                 {
-                  "id": "d1914147-c19a-57a7-b430-3babe3983c7a",
+                  "id": "threat-doppler-v",
                   "number": 18,
                   "status": "Accepted",
                   "severity": "Medium",
@@ -602,7 +602,7 @@
             },
             "shape": "process",
             "zIndex": 11,
-            "id": "04ebb397-295e-58f7-8bbf-f7e115b26746",
+            "id": "node-cloud_api",
             "data": {
               "name": "Cloud provider API",
               "description": "The provider API that creates droplets and firewalls. Reached with a write-scoped token.",
@@ -612,7 +612,7 @@
               "reasonOutOfScope": "",
               "threats": [
                 {
-                  "id": "78cf6712-2362-5985-bdd4-2e5391febe06",
+                  "id": "threat-cloud-d",
                   "number": 19,
                   "status": "Open",
                   "severity": "Medium",
@@ -623,7 +623,7 @@
                   "mitigation": "Cost gate allowlist of free resource types; approved totals; billing alerts at $10 and $25."
                 },
                 {
-                  "id": "41786b17-7a1d-5847-bdf0-54c35c820055",
+                  "id": "threat-cloud-e",
                   "number": 20,
                   "status": "Accepted",
                   "severity": "High",
@@ -658,7 +658,7 @@
             },
             "shape": "process",
             "zIndex": 12,
-            "id": "656b0555-d821-58f9-a1ea-ee1c77f3eb1e",
+            "id": "node-twingate",
             "data": {
               "name": "Twingate controller and relay",
               "description": "Hosted zero-trust control plane. Signs the maintainer in through the identity provider and enforces per-resource access.",
@@ -668,7 +668,7 @@
               "reasonOutOfScope": "",
               "threats": [
                 {
-                  "id": "fbe88ce4-b2c4-5fbc-97d6-1e862fad38ed",
+                  "id": "threat-tg-s",
                   "number": 21,
                   "status": "Mitigated",
                   "severity": "High",
@@ -679,7 +679,7 @@
                   "mitigation": "Sign-in delegated to the identity provider (MFA there); access limited to one host and port per resource; SSH key still required."
                 },
                 {
-                  "id": "65ed4c08-6fe0-560d-a3d7-3e870f80c9f9",
+                  "id": "threat-tg-v",
                   "number": 22,
                   "status": "Accepted",
                   "severity": "Medium",
@@ -714,7 +714,7 @@
             },
             "shape": "process",
             "zIndex": 13,
-            "id": "81eaba8d-83d3-51ca-9faf-29f437a397ed",
+            "id": "node-droplets",
             "data": {
               "name": "Connector droplets (two)",
               "description": "Two outbound-only connector droplets. No public inbound rules. Hold their connector token in a root-only file.",
@@ -724,7 +724,7 @@
               "reasonOutOfScope": "",
               "threats": [
                 {
-                  "id": "d28192e7-8112-5b49-940a-d2f8b5b2d9b5",
+                  "id": "threat-drop-i",
                   "number": 23,
                   "status": "Accepted",
                   "severity": "Medium",
@@ -735,7 +735,7 @@
                   "mitigation": "Token file is root-only 0600; one token per connector, revocable. Accepted: lockdown is a follow-up."
                 },
                 {
-                  "id": "67e3a93c-e6ca-5188-9484-ecb7628cc2f4",
+                  "id": "threat-drop-d",
                   "number": 24,
                   "status": "Accepted",
                   "severity": "Medium",
@@ -746,7 +746,7 @@
                   "mitigation": "Two connectors with staggered reboots and updates. Accepted: recovery is a rebuild through Spacelift."
                 },
                 {
-                  "id": "8cf77286-e690-5ab7-85d2-f8078fd53861",
+                  "id": "threat-drop-e",
                   "number": 25,
                   "status": "Mitigated",
                   "severity": "Medium",
@@ -757,7 +757,7 @@
                   "mitigation": "Provider firewalls: inbound only from the firewall's own tag, no address rules; tests pin the exact set."
                 },
                 {
-                  "id": "6f73ef21-96a3-5aa0-b940-cbb33c820137",
+                  "id": "threat-drop-e1",
                   "number": 26,
                   "status": "Mitigated",
                   "severity": "High",
@@ -797,7 +797,7 @@
             },
             "shape": "store",
             "zIndex": 14,
-            "id": "305ffaf3-b9d7-5369-9eec-e37488d83c51",
+            "id": "node-resources",
             "data": {
               "name": "Protected resources (SSH on a private host)",
               "description": "What Twingate exposes: one host and one port per resource (TCP 22). Placeholder for whatever later sits behind a connector.",
@@ -807,7 +807,7 @@
               "reasonOutOfScope": "",
               "threats": [
                 {
-                  "id": "f4eb9cae-012b-56e4-8af8-da98a807736c",
+                  "id": "threat-res-e",
                   "number": 27,
                   "status": "Open",
                   "severity": "High",
@@ -855,7 +855,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "14f2429c-4e04-5f94-bf7f-09bba947d7bc",
+                  "id": "threat-f-scan-d",
                   "number": 28,
                   "status": "Mitigated",
                   "severity": "Low",
@@ -868,7 +868,7 @@
               ],
               "hasOpenThreats": false
             },
-            "id": "bb2faea7-991c-5e8f-8953-898c20c32644",
+            "id": "flow-f-scan",
             "labels": [
               {
                 "position": 0.5,
@@ -880,10 +880,10 @@
               }
             ],
             "source": {
-              "cell": "ca211af9-38d6-5859-9874-5e58a11220e9"
+              "cell": "node-scanner"
             },
             "target": {
-              "cell": "81eaba8d-83d3-51ca-9faf-29f437a397ed"
+              "cell": "node-droplets"
             },
             "vertices": [
               {
@@ -922,7 +922,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "0e7dbee1-9610-5668-9706-7988a4a6e572",
+                  "id": "threat-f-pr-t",
                   "number": 29,
                   "status": "Mitigated",
                   "severity": "Medium",
@@ -935,7 +935,7 @@
               ],
               "hasOpenThreats": false
             },
-            "id": "36ddf28c-7717-57be-bc6b-31a52f1197c2",
+            "id": "flow-f-pr",
             "labels": [
               {
                 "position": 0.5,
@@ -947,10 +947,10 @@
               }
             ],
             "source": {
-              "cell": "c912f33d-7333-5802-aa9a-75789fb37f2a"
+              "cell": "node-contributor"
             },
             "target": {
-              "cell": "75c371d7-93f4-5775-bd20-c8d297b313ac"
+              "cell": "node-gh_repo"
             },
             "vertices": [
               {
@@ -989,7 +989,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "014cb10b-3660-550c-add1-3a697493ac4a",
+                  "id": "threat-f-ci-e",
                   "number": 30,
                   "status": "Mitigated",
                   "severity": "Medium",
@@ -1002,7 +1002,7 @@
               ],
               "hasOpenThreats": false
             },
-            "id": "3391facf-af2d-54e0-a6cb-7b0977dcbc37",
+            "id": "flow-f-ci",
             "labels": [
               {
                 "position": 0.5,
@@ -1014,10 +1014,10 @@
               }
             ],
             "source": {
-              "cell": "75c371d7-93f4-5775-bd20-c8d297b313ac"
+              "cell": "node-gh_repo"
             },
             "target": {
-              "cell": "a273fea9-3f63-5a32-9589-113486e4b796"
+              "cell": "node-ci"
             },
             "vertices": [
               {
@@ -1057,7 +1057,7 @@
               "threats": [],
               "hasOpenThreats": false
             },
-            "id": "92f5ce82-22d9-5d45-923b-0ac6c3a9e7ba",
+            "id": "flow-f-ci-status",
             "labels": [
               {
                 "position": 0.5,
@@ -1069,10 +1069,10 @@
               }
             ],
             "source": {
-              "cell": "a273fea9-3f63-5a32-9589-113486e4b796"
+              "cell": "node-ci"
             },
             "target": {
-              "cell": "75c371d7-93f4-5775-bd20-c8d297b313ac"
+              "cell": "node-gh_repo"
             },
             "vertices": [
               {
@@ -1111,7 +1111,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "821c8394-872d-586e-aade-66af1d817261",
+                  "id": "threat-f-up-ci-t",
                   "number": 31,
                   "status": "Mitigated",
                   "severity": "High",
@@ -1124,7 +1124,7 @@
               ],
               "hasOpenThreats": false
             },
-            "id": "e70762ab-92a1-5302-a8da-95669184140e",
+            "id": "flow-f-up-ci",
             "labels": [
               {
                 "position": 0.5,
@@ -1136,10 +1136,10 @@
               }
             ],
             "source": {
-              "cell": "28f2918b-d2da-5353-84ad-0287a4ae33ef"
+              "cell": "node-upstream"
             },
             "target": {
-              "cell": "a273fea9-3f63-5a32-9589-113486e4b796"
+              "cell": "node-ci"
             },
             "vertices": [
               {
@@ -1178,7 +1178,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "4dd469f3-f63e-53d5-a4bb-c08a8fc0724c",
+                  "id": "threat-f-merge-r",
                   "number": 32,
                   "status": "Open",
                   "severity": "Low",
@@ -1191,7 +1191,7 @@
               ],
               "hasOpenThreats": true
             },
-            "id": "a6b6a590-f31e-55d7-ad46-6043fdca228d",
+            "id": "flow-f-merge",
             "labels": [
               {
                 "position": 0.5,
@@ -1203,10 +1203,10 @@
               }
             ],
             "source": {
-              "cell": "c17806ff-6954-5918-8050-c53213420658"
+              "cell": "node-maintainer"
             },
             "target": {
-              "cell": "75c371d7-93f4-5775-bd20-c8d297b313ac"
+              "cell": "node-gh_repo"
             },
             "vertices": [
               {
@@ -1245,7 +1245,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "d4fcdf36-6248-5db5-bbdb-9e99a56296da",
+                  "id": "threat-f-push-prop-e",
                   "number": 33,
                   "status": "Open",
                   "severity": "High",
@@ -1258,7 +1258,7 @@
               ],
               "hasOpenThreats": true
             },
-            "id": "e8df2a3a-d0fa-5df3-ba01-4820c62fe99c",
+            "id": "flow-f-push-prop",
             "labels": [
               {
                 "position": 0.5,
@@ -1270,10 +1270,10 @@
               }
             ],
             "source": {
-              "cell": "75c371d7-93f4-5775-bd20-c8d297b313ac"
+              "cell": "node-gh_repo"
             },
             "target": {
-              "cell": "185b5c0e-ef17-5a6f-a320-43d7e1aed31e"
+              "cell": "node-sl_prop"
             },
             "vertices": [
               {
@@ -1312,7 +1312,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "078065d8-481a-5276-833b-0f1fee530625",
+                  "id": "threat-f-push-track-t",
                   "number": 34,
                   "status": "Accepted",
                   "severity": "High",
@@ -1325,7 +1325,7 @@
               ],
               "hasOpenThreats": false
             },
-            "id": "7dd2ca39-7a94-5935-a5b8-0b774b375ef9",
+            "id": "flow-f-push-track",
             "labels": [
               {
                 "position": 0.5,
@@ -1337,10 +1337,10 @@
               }
             ],
             "source": {
-              "cell": "75c371d7-93f4-5775-bd20-c8d297b313ac"
+              "cell": "node-gh_repo"
             },
             "target": {
-              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+              "cell": "node-sl_track"
             },
             "vertices": [
               {
@@ -1379,7 +1379,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "6a6f467c-7966-5991-a77f-21784029de2b",
+                  "id": "threat-f-up-cli-t",
                   "number": 35,
                   "status": "Mitigated",
                   "severity": "High",
@@ -1392,7 +1392,7 @@
               ],
               "hasOpenThreats": false
             },
-            "id": "9e48fff1-da56-524f-9ed3-c9e6e2d9c335",
+            "id": "flow-f-up-doppler-cli",
             "labels": [
               {
                 "position": 0.5,
@@ -1404,10 +1404,10 @@
               }
             ],
             "source": {
-              "cell": "28f2918b-d2da-5353-84ad-0287a4ae33ef"
+              "cell": "node-upstream"
             },
             "target": {
-              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+              "cell": "node-sl_track"
             },
             "vertices": [
               {
@@ -1446,7 +1446,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "0433d4df-6108-5777-adf8-c2e1c7dc3656",
+                  "id": "threat-f-tok-i",
                   "number": 36,
                   "status": "Mitigated",
                   "severity": "High",
@@ -1459,7 +1459,7 @@
               ],
               "hasOpenThreats": false
             },
-            "id": "43cd0013-7d97-5267-9607-012dd125aeac",
+            "id": "flow-f-tok",
             "labels": [
               {
                 "position": 0.5,
@@ -1471,10 +1471,10 @@
               }
             ],
             "source": {
-              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+              "cell": "node-sl_track"
             },
             "target": {
-              "cell": "1ad3c787-2425-56de-a5e4-7d3efbc2eef2"
+              "cell": "node-doppler"
             },
             "vertices": [
               {
@@ -1513,7 +1513,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "aadbe17e-2474-5c9e-bd4d-1e0f16e97db5",
+                  "id": "threat-f-sec-i",
                   "number": 37,
                   "status": "Open",
                   "severity": "High",
@@ -1526,7 +1526,7 @@
               ],
               "hasOpenThreats": true
             },
-            "id": "9a4c78bd-a905-5d0f-850b-72e846e0f49b",
+            "id": "flow-f-sec",
             "labels": [
               {
                 "position": 0.5,
@@ -1538,10 +1538,10 @@
               }
             ],
             "source": {
-              "cell": "1ad3c787-2425-56de-a5e4-7d3efbc2eef2"
+              "cell": "node-doppler"
             },
             "target": {
-              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+              "cell": "node-sl_track"
             },
             "vertices": [
               {
@@ -1582,7 +1582,7 @@
               "isBidirectional": true,
               "threats": [
                 {
-                  "id": "4db2e6d6-863a-581d-b0fe-81f75ec25be6",
+                  "id": "threat-f-state-i",
                   "number": 38,
                   "status": "Accepted",
                   "severity": "High",
@@ -1595,7 +1595,7 @@
               ],
               "hasOpenThreats": false
             },
-            "id": "82d6b09c-da58-557e-abc8-f0b3d18a0740",
+            "id": "flow-f-state",
             "labels": [
               {
                 "position": 0.5,
@@ -1607,10 +1607,10 @@
               }
             ],
             "source": {
-              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+              "cell": "node-sl_track"
             },
             "target": {
-              "cell": "a9668a9a-0080-5c86-88d0-0ff3d0140d63"
+              "cell": "node-state"
             },
             "vertices": [
               {
@@ -1650,7 +1650,7 @@
               "threats": [],
               "hasOpenThreats": false
             },
-            "id": "0ee2684b-405a-502d-868a-37b690bd363e",
+            "id": "flow-f-plan",
             "labels": [
               {
                 "position": 0.5,
@@ -1662,10 +1662,10 @@
               }
             ],
             "source": {
-              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+              "cell": "node-sl_track"
             },
             "target": {
-              "cell": "c17806ff-6954-5918-8050-c53213420658"
+              "cell": "node-maintainer"
             },
             "vertices": [
               {
@@ -1704,7 +1704,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "c4333434-251d-5089-b852-84b78d4d99aa",
+                  "id": "threat-f-confirm-r",
                   "number": 39,
                   "status": "Open",
                   "severity": "Medium",
@@ -1717,7 +1717,7 @@
               ],
               "hasOpenThreats": true
             },
-            "id": "e0373ed5-3335-5705-8889-129b8de6212a",
+            "id": "flow-f-confirm",
             "labels": [
               {
                 "position": 0.5,
@@ -1729,10 +1729,10 @@
               }
             ],
             "source": {
-              "cell": "c17806ff-6954-5918-8050-c53213420658"
+              "cell": "node-maintainer"
             },
             "target": {
-              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+              "cell": "node-sl_track"
             },
             "vertices": [
               {
@@ -1771,7 +1771,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "5bb666de-1fdc-5554-afe0-5f2b3aa41607",
+                  "id": "threat-f-apply-t",
                   "number": 40,
                   "status": "Mitigated",
                   "severity": "High",
@@ -1784,7 +1784,7 @@
               ],
               "hasOpenThreats": false
             },
-            "id": "62265b21-7ae3-58c7-8b7e-6b54c00ceabe",
+            "id": "flow-f-apply",
             "labels": [
               {
                 "position": 0.5,
@@ -1796,10 +1796,10 @@
               }
             ],
             "source": {
-              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+              "cell": "node-sl_track"
             },
             "target": {
-              "cell": "04ebb397-295e-58f7-8bbf-f7e115b26746"
+              "cell": "node-cloud_api"
             },
             "vertices": [
               {
@@ -1838,7 +1838,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "f024261b-8f00-5803-a1c4-1d945b911d9c",
+                  "id": "threat-f-userdata-i",
                   "number": 41,
                   "status": "Accepted",
                   "severity": "Medium",
@@ -1851,7 +1851,7 @@
               ],
               "hasOpenThreats": false
             },
-            "id": "1246b2a4-a98f-5807-8b24-ea0581870928",
+            "id": "flow-f-userdata",
             "labels": [
               {
                 "position": 0.5,
@@ -1863,10 +1863,10 @@
               }
             ],
             "source": {
-              "cell": "04ebb397-295e-58f7-8bbf-f7e115b26746"
+              "cell": "node-cloud_api"
             },
             "target": {
-              "cell": "81eaba8d-83d3-51ca-9faf-29f437a397ed"
+              "cell": "node-droplets"
             },
             "vertices": [
               {
@@ -1905,7 +1905,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "d8d69969-896c-53b4-9afe-8fa14a7ff293",
+                  "id": "threat-f-tg-api-e",
                   "number": 42,
                   "status": "Open",
                   "severity": "High",
@@ -1918,7 +1918,7 @@
               ],
               "hasOpenThreats": true
             },
-            "id": "d3a5e03c-350c-5efd-b621-da30c165c04a",
+            "id": "flow-f-tg-api",
             "labels": [
               {
                 "position": 0.5,
@@ -1930,10 +1930,10 @@
               }
             ],
             "source": {
-              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+              "cell": "node-sl_track"
             },
             "target": {
-              "cell": "656b0555-d821-58f9-a1ea-ee1c77f3eb1e"
+              "cell": "node-twingate"
             },
             "vertices": [
               {
@@ -1972,7 +1972,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "83643342-e683-5dc5-a601-f0ddb8f70776",
+                  "id": "threat-f-login-s",
                   "number": 43,
                   "status": "Mitigated",
                   "severity": "High",
@@ -1985,7 +1985,7 @@
               ],
               "hasOpenThreats": false
             },
-            "id": "63fa41ae-4623-5452-9580-a00c32fdb627",
+            "id": "flow-f-login",
             "labels": [
               {
                 "position": 0.5,
@@ -1997,10 +1997,10 @@
               }
             ],
             "source": {
-              "cell": "c17806ff-6954-5918-8050-c53213420658"
+              "cell": "node-maintainer"
             },
             "target": {
-              "cell": "656b0555-d821-58f9-a1ea-ee1c77f3eb1e"
+              "cell": "node-twingate"
             },
             "vertices": [
               {
@@ -2039,7 +2039,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "ee861753-94fa-5026-b8df-beb6979acd5f",
+                  "id": "threat-f-relay-s",
                   "number": 44,
                   "status": "Mitigated",
                   "severity": "Medium",
@@ -2052,7 +2052,7 @@
               ],
               "hasOpenThreats": false
             },
-            "id": "9766ba27-f6dc-5872-84db-b5a9d9cdf834",
+            "id": "flow-f-relay",
             "labels": [
               {
                 "position": 0.5,
@@ -2064,10 +2064,10 @@
               }
             ],
             "source": {
-              "cell": "656b0555-d821-58f9-a1ea-ee1c77f3eb1e"
+              "cell": "node-twingate"
             },
             "target": {
-              "cell": "81eaba8d-83d3-51ca-9faf-29f437a397ed"
+              "cell": "node-droplets"
             },
             "vertices": [
               {
@@ -2106,7 +2106,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "f7015b6e-7eab-5440-8a68-22acef0f697f",
+                  "id": "threat-f-ssh-e",
                   "number": 45,
                   "status": "Mitigated",
                   "severity": "Medium",
@@ -2119,7 +2119,7 @@
               ],
               "hasOpenThreats": false
             },
-            "id": "c051ac6e-b24b-5af5-bc83-52067e35b522",
+            "id": "flow-f-ssh",
             "labels": [
               {
                 "position": 0.5,
@@ -2131,10 +2131,10 @@
               }
             ],
             "source": {
-              "cell": "81eaba8d-83d3-51ca-9faf-29f437a397ed"
+              "cell": "node-droplets"
             },
             "target": {
-              "cell": "305ffaf3-b9d7-5369-9eec-e37488d83c51"
+              "cell": "node-resources"
             },
             "vertices": [
               {
@@ -2173,7 +2173,7 @@
               "isBidirectional": false,
               "threats": [
                 {
-                  "id": "e0cb5d3e-1094-54a5-8962-642a0e654986",
+                  "id": "threat-f-up-apt-t",
                   "number": 46,
                   "status": "Mitigated",
                   "severity": "High",
@@ -2186,7 +2186,7 @@
               ],
               "hasOpenThreats": false
             },
-            "id": "56f9ac40-01fd-55df-be2b-c226e728edd5",
+            "id": "flow-f-up-apt",
             "labels": [
               {
                 "position": 0.5,
@@ -2198,10 +2198,10 @@
               }
             ],
             "source": {
-              "cell": "28f2918b-d2da-5353-84ad-0287a4ae33ef"
+              "cell": "node-upstream"
             },
             "target": {
-              "cell": "81eaba8d-83d3-51ca-9faf-29f437a397ed"
+              "cell": "node-droplets"
             },
             "vertices": [
               {
@@ -2241,7 +2241,7 @@
               "isTrustBoundary": true,
               "hasOpenThreats": false
             },
-            "id": "7affbcf8-a856-543c-bc1c-7358ef33584a",
+            "id": "boundary-B1",
             "source": {
               "x": 652,
               "y": 551
@@ -2288,7 +2288,7 @@
               "isTrustBoundary": true,
               "hasOpenThreats": false
             },
-            "id": "0c00357b-a746-5eff-96a2-ac9412c7d897",
+            "id": "boundary-B2",
             "source": {
               "x": 255,
               "y": 175
@@ -2335,7 +2335,7 @@
               "isTrustBoundary": true,
               "hasOpenThreats": false
             },
-            "id": "79e6b338-3572-533c-bfcd-e5b6db9fee1f",
+            "id": "boundary-B3",
             "source": {
               "x": 513,
               "y": 134
@@ -2382,7 +2382,7 @@
               "isTrustBoundary": true,
               "hasOpenThreats": false
             },
-            "id": "09489c94-134d-5f0b-a72e-58a4cb940674",
+            "id": "boundary-B4",
             "source": {
               "x": 198,
               "y": 371
@@ -2429,7 +2429,7 @@
               "isTrustBoundary": true,
               "hasOpenThreats": false
             },
-            "id": "26e429af-4803-5b91-8dd2-57f0bf675248",
+            "id": "boundary-B5",
             "source": {
               "x": 557,
               "y": 234
@@ -2476,7 +2476,7 @@
               "isTrustBoundary": true,
               "hasOpenThreats": false
             },
-            "id": "4b76a849-6cbe-57f6-ada9-b7adb82fad53",
+            "id": "boundary-B6",
             "source": {
               "x": 840,
               "y": 275
@@ -2523,7 +2523,7 @@
               "isTrustBoundary": true,
               "hasOpenThreats": false
             },
-            "id": "ca0ae769-60a1-5024-ba83-28ba58e6accd",
+            "id": "boundary-B7",
             "source": {
               "x": 871,
               "y": 380
@@ -2570,7 +2570,7 @@
               "isTrustBoundary": true,
               "hasOpenThreats": false
             },
-            "id": "2f977488-ccf0-5660-8d9f-111ca5c6590f",
+            "id": "boundary-B8",
             "source": {
               "x": 275,
               "y": 559

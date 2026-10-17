@@ -45,10 +45,10 @@ flowchart TB
     end
 
     inet -. "B1: no inbound" .-x drops
-    forks -. "B2: push policy never proposes;<br/>no credentials on proposed runs" .-> sl
-    laptop -- "B3: IdP sign-in,<br/>per-resource ACL" --> tg
+    forks -. "B3: push policy never proposes;<br/>no credentials on proposed runs" .-> sl
+    laptop -- "B8: IdP sign-in,<br/>per-resource ACL" --> tg
     tg --> drops
-    sl -- "B4: human confirms apply" --> doc
+    sl -- "B7: human confirms apply" --> doc
     dp --> sl
     acts --> gh
     cli --> sl
@@ -61,6 +61,8 @@ flowchart TB
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
     classDef warn fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
 ```
+
+Boundary numbers are shared with [Threat model exercise, step 2](Threat-Model-Exercise.md#step-2-draw-the-trust-boundaries), which draws all eight (B1 to B8). This diagram shows only the four that matter most for the threats below, so it skips B2, B4, B5 and B6.
 
 ## Threats, controls, residual risk
 

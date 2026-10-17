@@ -78,7 +78,7 @@ Do not use the provided model yet. Fifteen minutes.
 
 Notice how many boundaries sit in a vendor console. A model records them; it does not check them. The repository can prove B1 and B2. It cannot prove B3 to B8.
 
-**Two numbering systems.** [Threat model](Threat-Model.md#trust-boundaries) numbers four boundaries B1 to B4, and [the exercise](Threat-Model-Exercise.md#step-2-draw-the-trust-boundaries) numbers eight. They overlap in name, not in meaning: the first page's B3 is "IdP sign-in", which is B8 here. This model follows the exercise page. When you cite a boundary, say which page you mean.
+**One numbering.** [Threat model](Threat-Model.md#trust-boundaries) draws four of the eight boundaries and uses the same numbers as [the exercise](Threat-Model-Exercise.md#step-2-draw-the-trust-boundaries): B1, B3, B7 and B8. The model follows both.
 
 ## Step 3: predict STRIDE for three flows
 
