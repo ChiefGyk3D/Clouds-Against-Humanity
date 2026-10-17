@@ -73,12 +73,13 @@ Working ceiling: $30 per month across stages 0 to 4, shared by every cloud. A co
 Clouds-Against-Humanity/
   stacks/00-foundation/                    project, tag, VPC, baseline firewall
   stacks/10-access/                        site, SSH key lookup, two connectors, connector firewall, group, SSH resources
-  stacks/aws/                              00-foundation and 10-access for AWS (mocked tests only, never applied)
+  stacks/20-telemetry/                     stage 2 telemetry settings layer (see docs/stages/02-telemetry.md)
+  stacks/aws/{00-foundation,10-access}     the AWS twin of stages 0 and 1 (mocked tests only, never applied)
   modules/vpc/                             per-region VPC
   modules/firewall/                        tag-based deny-inbound firewall
   modules/twingate-bootstrap/              shared connector boot script and tokens, called by every provider's connector
   modules/twingate-connector/              connector, its tokens, its droplet and cloud-init
-  modules/aws/                             vpc, firewall and twingate-connector for AWS
+  modules/aws/{vpc,firewall,twingate-connector}  the AWS versions of those modules
   scripts/cost_check.py                    cost gate
   scripts/identifier_check.py              fails on cloud account ids in tracked files (never prints them)
   scripts/gen_settings_doc.py              writes docs/wiki/Settings-Reference.md from docs/settings.json (--check fails when stale)
@@ -94,7 +95,7 @@ Clouds-Against-Humanity/
   .github/workflows/wiki.yml               publishes docs/wiki through GYST's wiki-publish.yml
   .spacelift/policies/                     Spacelift push policy and its OPA tests
   docs/wiki/                               the wiki pages (source of truth)
-  docs/stages/                             operator guides: decisions, verify, rollback, per stage
+  docs/stages/                             operator guides: decisions, verify, rollback, per stage  (00-foundation, 01-access, 02-telemetry, aws-access)
   docs/cost.md                             cost gate explained
   docs/cost-prices.json, docs/cost-prices/ price tables (DigitalOcean, and one file per other cloud)
   docs/settings.json                       the settings manifest the Settings reference is generated from
@@ -131,7 +132,7 @@ tofu -chdir=modules/firewall init -backend=false
 tofu -chdir=modules/firewall test
 ```
 
-Run the last pair for each directory in the `directories` list of the tofu job in `.github/workflows/ci.yml`: `modules/vpc`, `modules/firewall`, `modules/twingate-bootstrap`, `modules/twingate-connector`, `modules/aws/vpc`, `modules/aws/firewall`, `modules/aws/twingate-connector`, `stacks/00-foundation`, `stacks/10-access`, `stacks/aws/00-foundation` and `stacks/aws/10-access`. CI runs all of it through git-your-ship-together's shared workflows; the only job this repository defines itself is the `CI green` gate.
+Run the last pair for each directory in the `directories` list of the tofu job in `.github/workflows/ci.yml`: `modules/vpc`, `modules/firewall`, `modules/twingate-bootstrap`, `modules/twingate-connector`, `modules/aws/vpc`, `modules/aws/firewall`, `modules/aws/twingate-connector`, `stacks/00-foundation`, `stacks/10-access`, `stacks/20-telemetry`, `stacks/aws/00-foundation` and `stacks/aws/10-access`. CI runs all of it through git-your-ship-together's shared workflows; the only job this repository defines itself is the `CI green` gate.
 
 ## Documentation
 

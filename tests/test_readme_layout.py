@@ -81,13 +81,67 @@ def test_every_top_level_directory_is_in_the_layout_block():
     assert not missing, f"top-level directories missing from the README layout: {missing}"
 
 
-def test_every_module_and_stack_directory_is_in_the_layout_block():
-    block = layout_block()
-    missing = []
+# Layout convention for directories below modules/ and stacks/: a directory is
+# covered when the layout block names its full path (`modules/aws/vpc`), or when
+# a brace form names it under its parent (`modules/aws/{vpc,firewall}` covers
+# modules/aws/vpc and modules/aws/firewall, and the parent modules/aws). Naming
+# only a parent covers the parent, never the directories under it.
+BRACE = re.compile(r"((?:modules|stacks)(?:/[\w.-]+)*)/\{([^}]*)\}")
+PLAIN = re.compile(r"(?<![\w./{-])((?:modules|stacks)(?:/[\w.-]+)*)")
+
+
+def covered_paths(block: str) -> set[str]:
+    covered = set()
+    for prefix, names in BRACE.findall(block):
+        parts = prefix.split("/")
+        covered.update("/".join(parts[:n]) for n in range(1, len(parts) + 1))
+        covered.update(f"{prefix}/{n.strip()}" for n in names.split(",") if n.strip())
+    stripped = BRACE.sub("", block)
+    covered.update(m.rstrip("/") for m in PLAIN.findall(stripped))
+    return covered
+
+
+def module_and_stack_dirs(root: Path) -> list[str]:
+    """Every directory under modules/ and stacks/ that is a module, a stack or a
+    grouping directory above them (provider, site). Stops at a directory that
+    holds .tf files, and skips tests/ and hidden directories."""
+    found: list[str] = []
+
+    def walk(directory: Path) -> None:
+        for child in sorted(directory.iterdir()):
+            if not child.is_dir() or child.name == "tests" or child.name.startswith("."):
+                continue
+            found.append(child.relative_to(root).as_posix())
+            if not any(child.glob("*.tf")):
+                walk(child)
+
     for top in ("modules", "stacks"):
-        for child in sorted((ROOT / top).iterdir()):
-            if child.is_dir() and not re.search(
-                rf"^\s+{top}/{re.escape(child.name)}/", block, re.MULTILINE
-            ):
-                missing.append(f"{top}/{child.name}")
+        if (root / top).is_dir():
+            walk(root / top)
+    return found
+
+
+def undocumented_dirs(root: Path, block: str) -> list[str]:
+    covered = covered_paths(block)
+    return [d for d in module_and_stack_dirs(root) if d not in covered]
+
+
+def test_every_module_and_stack_directory_is_in_the_layout_block():
+    missing = undocumented_dirs(ROOT, layout_block())
     assert not missing, f"missing from the README layout: {missing}"
+
+
+def test_the_layout_check_reaches_nested_directories(tmp_path):
+    for d in ("modules/aws/vpc", "stacks/aws/00-foundation", "stacks/aws/20-telemetry"):
+        (tmp_path / d).mkdir(parents=True)
+        (tmp_path / d / "main.tf").write_text("")
+    (tmp_path / "stacks/aws/20-telemetry/tests").mkdir()
+    block = "modules/aws/{vpc}\nstacks/aws/{00-foundation}\n"
+    assert undocumented_dirs(tmp_path, block) == ["stacks/aws/20-telemetry"]
+    # naming only the parent does not cover its children
+    assert undocumented_dirs(tmp_path, "modules/aws/\nstacks/aws/\n") == [
+        "modules/aws/vpc",
+        "stacks/aws/00-foundation",
+        "stacks/aws/20-telemetry",
+    ]
+    assert undocumented_dirs(tmp_path, block + "stacks/aws/20-telemetry/  x\n") == []
