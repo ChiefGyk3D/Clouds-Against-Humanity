@@ -130,6 +130,6 @@ On DigitalOcean, `stacks/00-foundation` and `stacks/10-access` are two layers, a
 - Name one thing that was automatic on DigitalOcean and on Azure you must build. Name one that is the other way round.
   *One reasonable answer: DigitalOcean gave outbound access for free and Azure now needs an explicit method; Azure gave you routing for free and AWS made you build it, and Azure's resource group is a thing you create that DigitalOcean's project largely hides.*
 - Find, on Microsoft's NSG page, what an NSG does *not* filter by default. Which threat in the [Threat model](Threat-Model.md) does that touch?
-  *Reference: platform services on the two Microsoft-owned addresses (DHCP, DNS, instance metadata, health monitoring). It touches the boot-data exposure threat (T5), because the metadata address is outside what the NSG controls by default.*
+  *Reference: platform services on the two Microsoft-owned addresses (DHCP, DNS, instance metadata, health monitoring). The Azure boot data in this project is `custom_data`, which is not exposed through IMDS (it is written to the machine and readable by local root), so it is not the same exposure. The IMDS exception would matter for Azure's separate *user data* feature, which is readable from IMDS by any local process; that is why the connector token must not go there. The metadata endpoint is the general lesson (a network filter does not cover platform services), and it touches T5 only if the token were put in user data.*
 
 Next: [the Azure cost lesson](Provider-Azure-Cost-Lesson.md).
