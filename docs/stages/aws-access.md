@@ -30,20 +30,35 @@ What the tests prove (`tofu test`, mocked providers, no account needed): names a
 1. The throwaway AWS account from [AWS account preparation](../wiki/Provider-AWS-Account-Preparation.md): root protected, a billing alert set, nothing else in the account.
 2. The Spacelift AWS integration check passed (the warning at the top). Until then there is no way to run this stack without a long-lived key, which this project does not want.
 3. The Spacelift role needs `ssm:GetParameter` on Canonical's public path `/aws/service/canonical/ubuntu/server/24.04/stable/current/arm64/hvm/ebs-gp3/ami-id`, plus the EC2 permissions to create the objects above. Scope it to the one region.
-4. Doppler config `prd` holds `TWINGATE_API_TOKEN`, `TWINGATE_NETWORK`, `ADMIN_SSH_PUBLIC_KEY` and `ADMIN_USER_IDS`, as for stage 1 (the key pair name `ADMIN_SSH_KEY_NAME` is not used on AWS: there is no key pair). **No AWS secret goes in Doppler** if the native integration is available.
+4. **A separate Doppler setup for AWS, per [spacelift-secrets.md section 8a](../spacelift-secrets.md): do not reuse stage 1's `prd` config.** That config holds `DIGITALOCEAN_TOKEN`, and its service token can read the whole config whatever names the hook asks for, so an AWS run holding it could read the DigitalOcean credential. Create the AWS-only config (8a proposes project `cah`, config `dev_aws`) holding `TWINGATE_API_TOKEN`, `TWINGATE_NETWORK`, `ADMIN_SSH_PUBLIC_KEY` and `ADMIN_USER_IDS` (`ADMIN_SSH_KEY_NAME` is not used on AWS: there is no key pair), its own read-only service token, and its own Spacelift context (8a proposes `cah-doppler-aws`). Label the AWS stacks with a cloud label such as `cah-aws`, so the existing `cah-doppler` context does not auto-attach to them (a stack must never receive two tokens). **Attach the push policy to the AWS stacks before any secret context** (the policy autoattaches on the `cah` label, which the AWS stacks no longer carry): attach it manually or extend its autoattach labels. **No AWS secret goes in Doppler** if the native integration is available.
 5. Confirm `10.78.0.0/24` overlaps no homelab range, or set `vpc_ip_range`.
 6. Record the check date of Twingate's [outbound allowlist article](https://help.twingate.com/articles/1198271128-allowlist-for-outbound-connections-to-twingate-infrastructure) here, as stage 1 does: not yet checked for this stack.
 
 ## 3. Cost
 
-Planned $20.84 a month (two `t4g.micro` at $0.0084 an hour, two public IPv4 addresses at $0.005 an hour, two 8 GiB gp3 volumes at $0.08 per GiB-month), against an approved $21.00 for AWS. `approved.json` lists AWS as **inactive**: the shared ceiling is $30, and DigitalOcean stage 1 ($12) plus AWS ($21) would be $33. So **apply this only while the DigitalOcean access stage is torn down**, and flip `active` to true in `docs/stages/approved.json` at that moment (a deliberate edit, reviewed). Data transfer and anything created outside OpenTofu are not priced; a billing alert only notifies. See [cost](../cost.md) and the [AWS cost lesson](../wiki/Provider-AWS-Cost-Lesson.md).
+Planned $20.84 a month (two `t4g.micro` at $0.0084 an hour, two public IPv4 addresses at $0.005 an hour, two 8 GiB gp3 volumes at $0.08 per GiB-month), against an approved $21.00 for AWS. The shared ceiling is $30, and DigitalOcean stage 1 ($12) plus AWS ($21) would be $33, so **apply this only while the DigitalOcean access stage is torn down**. Data transfer and anything created outside OpenTofu are not priced; a billing alert only notifies. See [cost](../cost.md) and the [AWS cost lesson](../wiki/Provider-AWS-Cost-Lesson.md).
 
-`python3 -I scripts/cost_check.py --root .` reports `aws: planned $20.84/mo, approved $21.00, inactive`. Once a trusted run produces a real plan, run the gate with `--plan plan.json --stack stacks/aws/10-access` before the first apply; it prices what the plan resolves, which source code can hide.
+**The cost switch is two flags, not one.** `providers.digitalocean.active` is `true` today and `providers.aws.active` is `false`. Turning only AWS on fails the gate. Order of operations:
+
+1. Destroy DigitalOcean stage 1 and confirm it is gone.
+2. In `docs/stages/approved.json` set `providers.digitalocean.active` to `false` **and** `providers.aws.active` to `true`, in one reviewed change.
+3. Apply AWS. To return to DigitalOcean: destroy AWS, confirm it is gone, then reverse **both** flags in one change.
+
+The gate for each state, run on copies of the repository with only the flags changed:
+
+| `digitalocean.active` | `aws.active` | Result |
+|---|---|---|
+| true | false (today) | passes: aws inactive, digitalocean $12.00 active |
+| false | true (the AWS stage) | passes: aws $20.84 against $21.00 active, digitalocean inactive |
+| true | true | **fails**: `the approved figures of the active providers add up to $33.00, above the shared ceiling $30.00` |
+| false | false | passes (nothing is attested as applied) |
+
+`python3 -I scripts/cost_check.py --root .` reports `aws: planned $20.84/mo, approved $21.00, inactive` today. Once a trusted run produces a real plan, run the gate with `--plan plan.json --stack stacks/aws/10-access` before the first apply; it prices what the plan resolves, which source code can hide.
 
 ## 4. Bootstrap (when the check has passed)
 
-1. Create `cah-aws-00-foundation` rooted at `stacks/aws/00-foundation`, with the AWS integration attached and `TF_VAR_region` set.
-2. Create `cah-aws-10-access` rooted at `stacks/aws/10-access`, depending on the foundation stack, with this mapping:
+1. Create `cah-aws-00-foundation` rooted at `stacks/aws/00-foundation`, labelled `cah-aws` (not `cah`), with the push policy attached first, then the AWS integration and the `cah-doppler-aws` context, and `TF_VAR_region` set.
+2. Create `cah-aws-10-access` rooted at `stacks/aws/10-access`, labelled `cah-aws`, push policy first, then **the same AWS integration and the `cah-doppler-aws` context attached to this stack too** (a stack dependency passes the mapped outputs, not credentials, so the access stack gets none from the foundation stack). It depends on the foundation stack, with this mapping:
 
    | Foundation output | Environment variable |
    |---|---|
@@ -65,7 +80,7 @@ Planned $20.84 a month (two `t4g.micro` at $0.0084 an hour, two public IPv4 addr
 
 ## 6. Rollback and teardown
 
-Destroy `cah-aws-10-access` first, then `cah-aws-00-foundation`; the VPC is in use by the access stack until then. The connector tokens die with the instances and the Twingate site goes with the stack. Afterwards confirm in the console that no instance, volume or public address remains (an address left allocated keeps billing), then flip `active` back to false in `approved.json` if DigitalOcean stage 1 is returning. To rotate a token or the admin key, replace one connector at a time as in [stage 1 section 3](01-access.md); a changed cloud-init replaces the instance (`user_data_replace_on_change`) and probably changes its private address.
+Destroy `cah-aws-10-access` first, then `cah-aws-00-foundation`; the VPC is in use by the access stack until then. The connector tokens die with the instances and the Twingate site goes with the stack. Afterwards confirm in the console that no instance, volume or public address remains (an address left allocated keeps billing), then, if DigitalOcean stage 1 is returning, reverse both flags in `approved.json` in one change: `providers.aws.active` to `false` and `providers.digitalocean.active` to `true`. To rotate a token or the admin key, replace one connector at a time as in [stage 1 section 3](01-access.md); a changed cloud-init replaces the instance (`user_data_replace_on_change`) and probably changes its private address.
 
 If a connector is offline, use the other one for SSH, then `sudo systemctl status twingate-connector` and `sudo cat /var/log/cah-connector-install.log`, as in stage 1 section 6a. There is no AWS key pair and no console password path by design, so a total loss of both connectors is recovered by replacing them in a run.
 
@@ -98,4 +113,5 @@ From these stacks:
 
 - [ ] A peer-to-peer session through connector a to connector b's SSH resource works (the member rules do their job), and the reverse.
 - [ ] Twingate's outbound allowlist check date recorded (section 2, item 6).
+- [ ] Cross-cloud read denial (manual, from [spacelift-secrets.md section 8a](../spacelift-secrets.md)): from an AWS stack run, ask for `DIGITALOCEAN_TOKEN` through the AWS context and confirm the hook fails with `could not read DIGITALOCEAN_TOKEN from Doppler`. Also confirm the `cah-doppler` context is not attached to either AWS stack, and the push policy is attached to both.
 - [ ] `tofu plan` shows no `Project` tag drift on any resource (default tags interacting with module resources is untested against AWS).
