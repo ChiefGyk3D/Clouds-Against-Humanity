@@ -6,6 +6,8 @@ Everything in this repository is a deliberately small example: two $6 machines, 
 
 An enterprise answers the same questions this project answers, usually with different products, often several at once, because it has thousands of people, hundreds of offices and applications, auditors, contracts, and a decade of decisions it cannot undo. If you leave this wiki thinking "the cloud security stack is Twingate, Doppler, Spacelift and DigitalOcean," you have learned the example, not the field.
 
+The deeper pages on this are [Enterprise networks](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md), [Enterprise infrastructure](Enterprise-Infrastructure-Differences.md), [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md) and [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md).
+
 The better thing to take away is the **list of questions**. Each section below names a question this project answers with one tool, says what a larger organization may use for the same question, and says what stays the same whichever product answers it.
 
 Two honest limits first:
@@ -74,6 +76,20 @@ What stays the same, whichever you pick:
 - Every consumer gets the **least** it needs, and a way to rotate it.
 - A machine proves *who it is* to the store without a secret that is itself long-lived and powerful, when the platform allows it. The best answer to "where do I keep the first secret?" is not to have one, and the second best is to keep it small and expiring.
 
+### Doppler is used in enterprises too
+
+Say it plainly: this project uses Doppler, and Doppler is not only a hobbyist tool. Its own documentation addresses developers, DevOps and platform teams, and security teams, and describes features aimed at larger organizations. That is a statement about what the vendor documents, not an endorsement and not a claim about how many companies use it, which this page has not verified. What the documentation describes, retrieved 2026-10-16 from [docs.doppler.com](https://docs.doppler.com):
+
+- **Environments and configs.** A project holds environments and configs, with branch configs and config inheritance, so development, staging and production hold different values.
+- **Service tokens.** A service token gives access to one config in one project, is read-only by default and can be given an expiry. This is the token type this project uses.
+- **Service accounts and OIDC.** Service accounts tie machine activity to the account rather than a person, and OIDC identities let a CI tool authenticate without a static token. Both are listed as requiring the Team or Enterprise plan.
+- **Roles and groups.** Custom roles for workplace and project permissions (standard on the Enterprise plan or an add-on to Team), and user groups for project access at scale.
+- **SSO and SCIM.** SAML SSO and SCIM provisioning, with guides for identity providers such as Okta, Microsoft Entra ID, JumpCloud and OneLogin. The plan requirements were not stated on the pages read, so confirm them.
+- **Audit logs.** An activity log entry for team actions. Retention and export were not stated on the page read.
+- **Integrations.** Syncs to cloud secret stores (AWS Secrets Manager, Azure Key Vault, GCP Secret Manager), hosting platforms, CI/CD services, Kubernetes and Terraform Cloud.
+
+How that compares: Vault-class tools are known for dynamic, per-request credentials and can be self-hosted, at the price of running them; each cloud's own secrets service is closest to the workloads on that cloud; Bitwarden Secrets Manager and Infisical are the other names already on this page. This page does not rank them. Plans, features and prices change; check the vendor before relying on any line above. The long version, including where this project's Doppler, Spacelift and Twingate model scales and where it breaks, is [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md).
+
 Choosing a secrets manager is a decision about your team and your platform. Switching later is harder than choosing well, which is a reason to keep the names and shapes of your secrets tidy from the start.
 
 ## Change and delivery
@@ -90,6 +106,13 @@ Be honest with yourself about what this project does not teach, because it is ea
 - **Integration.** Real environments are mostly the glue between products that were never designed for each other.
 - **Legacy.** Something old, important and undocumented is always in the way.
 
+## Where to go deeper
+
+- Networks (campus, branch, data center, cloud, segmentation, hub and spoke): [Enterprise networks](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md).
+- Accounts, guardrails, FinOps, images, IaC at scale, recovery, vendors: [Enterprise infrastructure](Enterprise-Infrastructure-Differences.md).
+- Identity providers, provisioning, privilege, workload identity, vaults: [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md).
+- The people who do this work and what to learn next: [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md).
+
 ## Turning this into your own learning
 
 - Pick one row of the first table. Read the vendor's public documentation for two products in that category and write down, in your own words, which part of the question each answers differently from the tool used here. Do not look at a comparison article first; form your own view, then compare.
@@ -97,4 +120,4 @@ Be honest with yourself about what this project does not teach, because it is ea
 - Look at a job description for a cloud or security engineer. Highlight every product name. For each, find which row or rows of the table it answers, and which of its capabilities are separate products or licences. Many will not fit one row, which is the point: products are portfolios and the questions are what stay put.
 - If you work somewhere that uses several of these, ask the person who runs one how it ended up there. The history is usually more instructive than the feature list.
 
-Next: [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md), step 2 of the detection track. Back to the [Reading order](Reading-Order.md).
+Next: [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md), step 2 of the detection track. For the enterprise context track, continue with [Enterprise networks](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md). Back to the [Reading order](Reading-Order.md).

@@ -238,4 +238,4 @@ Open [Trace one change end to end](Trace-One-Change-End-to-End.md) and name two 
 - The text of SOC 2's trust services criteria, ISO/IEC 27001 and your own auditor's SOX test descriptions, if you will work in a regulated company (none were read for this page).
 - Ask someone at a company how an emergency change is approved there. The answer is usually more honest than the policy.
 
-Next: back to [A small example: what an enterprise does differently](Small-Example-Enterprise-Landscape.md), or the [Reading order](Reading-Order.md).
+Next: [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md), or back to [A small example: what an enterprise does differently](Small-Example-Enterprise-Landscape.md) and the [Reading order](Reading-Order.md).
