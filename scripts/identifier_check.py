@@ -3,19 +3,30 @@
 
 This repository is public. The check scans every tracked text file for cloud
 account identifiers written in a structural form (an AWS ARN with an account
-id, an account id next to the word "account", an AWS access key id, an Azure
+id, an account id next to the word "account", an AWS key id, an Azure
 subscription or tenant id next to its key, a GCP project id next to its key)
 and fails when it finds one.
 
-It never prints the matched value. A finding is reported as file:line, the
-kind, and a masked form (the first two characters and an ellipsis), so the
-CI log does not become a second copy of the leak.
+It never prints the matched value, nor any part of it. A finding is reported
+as file:line and the kind, so the CI log does not become a second copy of the
+leak.
 
 It does not look for secrets. Secret scanning is Gitleaks' job; this catches
 identifiers that are not secrets but that a public repository should still
-not publish. Synthetic placeholders are allowed by name (see ALLOWED_VALUES),
-a line may carry the marker below to opt out, and docs/superpowers/plans is
-skipped.
+not publish.
+
+Rules worth knowing:
+- Synthetic placeholders are allowed by name (ALLOWED_VALUES), and a value
+  containing "example" is allowed. A placeholder like <account-id> is not an
+  id-shaped value, so it never matches in the first place. A real id wrapped
+  in angle brackets is still a finding.
+- A line may end with a comment carrying the ignore marker (see IGNORE_RE);
+  the run prints how many were used.
+- A file that is not valid UTF-8 is decoded with replacement characters and
+  scanned anyway. UTF-16 is decoded when it has a byte order mark. A file with
+  NUL bytes and no byte order mark is binary and is counted, not scanned.
+- A bad root, or a run that scanned no file, fails.
+- docs/superpowers/plans is skipped.
 """
 
 from __future__ import annotations
@@ -28,8 +39,10 @@ from pathlib import Path
 
 SKIP_DIRS = frozenset({".git", ".terraform", ".venv"})
 SKIP_PREFIXES = ("docs/superpowers/plans/",)
-IGNORE_MARKER = "identifier-check: ignore"
-MAX_BYTES = 1_000_000
+# The marker counts only inside a comment at the end of the line.
+IGNORE_RE = re.compile(r"(?:#|//|<!--)[ \t]*identifier-check:[ \t]*ignore\b[^\n]*$")
+MAX_BYTES = 64_000_000
+BOMS = (b"\xff\xfe", b"\xfe\xff")
 
 # Synthetic values that lessons may show. Explicit on purpose: a realistic
 # looking 12-digit number is exactly what this check exists to refuse.
@@ -48,80 +61,124 @@ ALLOWED_VALUES = frozenset(
 
 UUID = r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
 GCP_ID = r"[a-z][a-z0-9-]{4,28}[a-z0-9]"
+KEYB = r"(?<![A-Za-z0-9])"  # a key may follow "_" (TF_VAR_, ARM_), never a letter
 TAIL = r"(?![\w.\[(/$-])"
 TAIL_PATH = r"(?![\w.\[($-])"
+# Between a key and its value: optional quotes, ONE run of blanks, then an
+# optional ":" or "=". Only one blank-run quantifier is adjacent to another
+# optional piece, so a long run of spaces cannot cause backtracking blowup.
+OPT_SEP = r"[\"']?[ \t]*(?:[:=][ \t]*)?[\"'<]*"
+REQ_SEP = r"[\"']?[ \t]*[:=][ \t]*[\"'<]*"
+NOT_DIGIT_BEFORE = r"(?<!\d)"
+KEYS_PROJECT = r"(?i:" + KEYB + r"project(?:[_-]?id)?)"
+PREFIXES = "AKIA|ASIA|AIDA|AGPA|ANPA|ABIA|AROA|AIPA|ANVA|ACCA|APKA|ASCA"
 
 # (kind, compiled regex with the value in group "v")
 PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     (
         "AWS ARN account id",
-        re.compile(r"arn:aws[a-z-]*:[a-z0-9-]+:[a-z0-9-]*:(?P<v>\d{12}):"),
+        re.compile(r"(?i)arn:aws[a-z-]*:[a-z0-9-]+:[a-z0-9-]*:<?(?P<v>\d{12})(?!\d)"),
     ),
     (
         "AWS account id",
         re.compile(
-            r"(?i)\b(?:aws[_ -]?account(?:[_ -]?id)?|account[_ -]?id|account)"
-            r"[\"']?\s*[:=]?\s*[\"']?(?P<v>\d{12})(?!\d)"
+            r"(?i)" + KEYB + r"(?:aws[_ -]?account(?:[_ -]?(?:id|number))?"
+            r"|account[_ -]?(?:id|number)|account(?:[ \t]?#)?)"
+            + OPT_SEP
+            + NOT_DIGIT_BEFORE
+            + r"(?P<v>\d{12})(?!\d)"
+        ),
+    ),
+    (
+        "AWS account id",
+        re.compile(
+            r"(?i)"
+            + NOT_DIGIT_BEFORE
+            + r"<?(?P<v>\d{12})>?\.(?:dkr\.ecr[a-z0-9.-]*\.amazonaws\.com"
+            r"|signin\.aws\.amazon\.com)"
+        ),
+    ),
+    (
+        "AWS account id",
+        re.compile(
+            r"(?i)"
+            + KEYB
+            + r"[\"']?owner[_-]?id"
+            + REQ_SEP
+            + NOT_DIGIT_BEFORE
+            + r"(?P<v>\d{12})(?!\d)"
         ),
     ),
     (
         "AWS access key id",
-        re.compile(r"\b(?P<v>(?:AKIA|ASIA)[A-Z0-9]{16})\b"),
+        re.compile(
+            rf"(?<![A-Za-z0-9])(?P<v>(?:{PREFIXES})[A-Z0-9]{{16}})(?![A-Za-z0-9])"
+        ),
     ),
     (
         "Azure subscription or tenant id",
         re.compile(
-            r"(?i)\b(?:subscription[_-]?id|tenant[_-]?id)\b[\"']?\s*[:=]\s*[\"']?"
-            rf"(?P<v>{UUID})\b"
+            r"(?i)"
+            + KEYB
+            + r"(?:subscription[_-]?id|(?:home[_-]?)?tenant[_-]?id|[\"']id[\"'])"
+            + REQ_SEP
+            + rf"(?P<v>{UUID})\b"
         ),
     ),
     (
         "Azure subscription id in a resource path",
-        re.compile(rf"/subscriptions/(?P<v>{UUID})\b"),
+        re.compile(rf"(?i)/subscriptions/(?P<v>{UUID})\b"),
     ),
     (
-        "GCP project id",
+        "Azure tenant id in a sign-in URL",
         re.compile(
-            r"(?i:\bproject[_-]?id)\b[\"']?\s*[:=]\s*[\"']?"
-            rf"(?P<v>{GCP_ID}){TAIL}"
+            r"(?i)(?:login\.microsoftonline\.com|sts\.windows\.net)/"
+            + rf"(?P<v>{UUID})\b"
         ),
     ),
     (
         "GCP project id",
-        re.compile(rf"\bproject:\s*[\"']?(?P<v>{GCP_ID}){TAIL}"),
+        re.compile(
+            KEYS_PROJECT + r"[\"']?[ \t]*[:=][ \t]*[\"']?" + rf"(?P<v>{GCP_ID}){TAIL}"
+        ),
+    ),
+    (
+        "GCP project id",
+        re.compile(
+            r"(?:--project(?:=|[ \t]+)|(?<![A-Za-z0-9])set[ \t]+project[ \t]+)[\"']?"
+            + rf"(?P<v>{GCP_ID}){TAIL}"
+        ),
     ),
     (
         "GCP project id in a resource path",
-        re.compile(rf"\bprojects/(?P<v>{GCP_ID}){TAIL_PATH}"),
+        re.compile(rf"(?<![A-Za-z0-9])projects/(?P<v>{GCP_ID}){TAIL_PATH}"),
     ),
 )
 
 
-def mask(value: str) -> str:
-    return value[:2] + "..."
+def is_allowed(value: str) -> bool:
+    return value.lower() in ALLOWED_VALUES or "example" in value.lower()
 
 
-def is_allowed(value: str, line: str, start: int, end: int) -> bool:
-    if value in ALLOWED_VALUES or value.lower() in ALLOWED_VALUES:
-        return True
-    if "example" in value.lower():
-        return True
-    # Anything written inside <...> is a placeholder the reader fills in.
-    return line.rfind("<", 0, start) > line.rfind(">", 0, start) and ">" in line[end:]
-
-
-def scan_line(line: str) -> list[tuple[str, str]]:
-    """Return (kind, masked value) for each unallowed identifier on a line."""
-    if IGNORE_MARKER in line:
-        return []
-    found: list[tuple[str, str]] = []
+def find_kinds(line: str) -> list[str]:
+    """Kinds of every unallowed identifier on a line, ignoring any marker."""
+    found: list[str] = []
     for kind, pattern in PATTERNS:
         for m in pattern.finditer(line):
-            value = m.group("v")
-            if is_allowed(value, line, m.start("v"), m.end("v")):
-                continue
-            found.append((kind, mask(value)))
+            if not is_allowed(m.group("v")) and kind not in found:
+                found.append(kind)
     return found
+
+
+def has_marker(line: str) -> bool:
+    return IGNORE_RE.search(line) is not None
+
+
+def scan_line(line: str) -> list[str]:
+    """Kinds found on a line; empty when the line carries a valid marker."""
+    if has_marker(line):
+        return []
+    return find_kinds(line)
 
 
 def tracked_files(root: Path) -> list[Path]:
@@ -132,7 +189,9 @@ def tracked_files(root: Path) -> list[Path]:
             capture_output=True,
         ).stdout
         names = [n for n in out.decode("utf-8", "replace").split("\0") if n]
-        return [root / n for n in names if (root / n).is_file()]
+        found = [root / n for n in names if (root / n).is_file()]
+        if found:
+            return found
     except (OSError, subprocess.CalledProcessError):
         pass
     files = []
@@ -144,46 +203,88 @@ def tracked_files(root: Path) -> list[Path]:
     return files
 
 
-def scan_file(path: Path) -> list[tuple[int, str, str]]:
+class Result:
+    def __init__(self) -> None:
+        self.problems: list[str] = []
+        self.scanned = 0
+        self.binary = 0
+        self.ignored = 0
+
+
+def decode(data: bytes) -> str | None:
+    """Text of a file, or None when it is binary."""
+    if data.startswith(BOMS):
+        return data.decode("utf-16", errors="replace")
+    if b"\0" in data:
+        return None
+    return data.decode("utf-8", errors="replace")
+
+
+def scan_file(path: Path, rel: str, result: Result) -> None:
     try:
-        if path.stat().st_size > MAX_BYTES:
-            return []
-        text = path.read_bytes().decode("utf-8")
-    except (OSError, UnicodeDecodeError):
-        return []
-    hits = []
+        size = path.stat().st_size
+        if size > MAX_BYTES:
+            result.problems.append(
+                f"{rel}: not scanned, file is larger than {MAX_BYTES} bytes"
+            )
+            return
+        text = decode(path.read_bytes())
+    except OSError:
+        result.problems.append(f"{rel}: not scanned, could not be read")
+        return
+    if text is None:
+        result.binary += 1
+        return
+    result.scanned += 1
     for number, line in enumerate(text.splitlines(), start=1):
-        for kind, masked in scan_line(line):
-            hits.append((number, kind, masked))
-    return hits
+        kinds = find_kinds(line)
+        if not kinds:
+            continue
+        if has_marker(line):
+            result.ignored += 1
+            continue
+        for kind in kinds:
+            result.problems.append(f"{rel}:{number}: {kind}")
 
 
-def run(root: Path) -> list[str]:
-    problems = []
+def run(root: Path) -> Result:
+    result = Result()
     for path in tracked_files(root):
         rel = path.relative_to(root).as_posix()
         if rel.startswith(SKIP_PREFIXES):
             continue
-        for number, kind, masked in scan_file(path):
-            problems.append(f"{rel}:{number}: {kind} ({masked})")
-    return problems
+        scan_file(path, rel, result)
+    return result
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--root", default=".", help="repository root")
     args = parser.parse_args(argv)
-    problems = run(Path(args.root).resolve())
-    if problems:
-        print("identifier check FAILED (values are never printed in full):")
-        for p in problems:
+    root = Path(args.root).resolve()
+    if not root.is_dir():
+        print(f"identifier check FAILED: root is not a directory: {args.root}")
+        return 2
+    result = run(root)
+    summary = (
+        f"{result.scanned} files scanned, {result.binary} binary skipped, "
+        f"{result.ignored} ignore markers used"
+    )
+    if result.scanned == 0:
+        print(f"identifier check FAILED: no files were scanned ({summary})")
+        return 1
+    if result.problems:
+        print("identifier check FAILED (values are never printed):")
+        for p in result.problems:
             print(f"  {p}")
+        print(summary)
         print(
             "Use a synthetic placeholder (see ALLOWED_VALUES in "
-            "scripts/identifier_check.py) or add '# identifier-check: ignore'."
+            "scripts/identifier_check.py) or end the line with a comment "
+            "'identifier-check: ignore'."
         )
         return 1
-    print("identifier check passed")
+    print(f"identifier check passed ({summary})")
     return 0
 
 

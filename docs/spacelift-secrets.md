@@ -50,7 +50,7 @@ Record the real expiry dates in your password manager, not in this repository. A
 
 1. Doppler project `clouds-against-humanity`, config `prd`, holding `DIGITALOCEAN_TOKEN` (Token A).
 2. A read-only Doppler service token for that project and config, expiring in 90 days.
-3. Spacelift context `cah-doppler` in the root space with the label `autoattach:cah`. Variables: `DOPPLER_TOKEN` (write-only secret), `DOPPLER_PROJECT=clouds-against-humanity`, `DOPPLER_CONFIG=prd`.
+3. Spacelift context `cah-doppler` in the root space with the label `autoattach:cah`. Variables: `DOPPLER_TOKEN` (write-only secret), `DOPPLER_PROJECT=clouds-against-humanity`, `DOPPLER_CONFIG=prd`. <!-- identifier-check: ignore (a Doppler project name, not a GCP project id) -->
 4. Spacelift stacks carry the label `cah`, so the context attaches itself.
 5. This repository's `.spacelift/config.yml` and `scripts/spacelift/doppler-env.sh`.
 
