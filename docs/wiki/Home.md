@@ -113,3 +113,22 @@ Working ceiling: $30 per month in the current phase; every phase has its own cei
 ## Where this wiki comes from
 
 These pages live in the main repository under `docs/wiki/` and are published to the GitHub wiki by the Wiki workflow (`.github/workflows/wiki.yml`, which calls git-your-ship-together's `wiki-publish.yml`) on every merge to `main`. That is deliberate: edits go through a pull request, so the same secret scanning and review that guard the code also guard the documentation. Edits made directly in the GitHub wiki editor are overwritten on the next publish, so send a pull request instead.
+
+## Support this project
+
+If Clouds Against Humanity is useful to you, consider supporting continued development. Everything is also collected at [support.chiefgyk3d.com](https://support.chiefgyk3d.com).
+
+**Recurring support**
+
+- [Patreon](https://patreon.com/chiefgyk3d)
+- [StreamElements](https://streamelements.com/chiefgyk3d/tip)
+- [Merch store](https://shop.chiefgyk3d.com/)
+
+**Cryptocurrency tips**
+
+| Coin | Address |
+|---|---|
+| Bitcoin | `bc1qztdzcy2wyavj2tsuandu4p0tcklzttvdnzalla` |
+| Monero | `84Y34QubRwQYK2HNviezeH9r6aRcPvgWmKtDkN3EwiuVbp6sNLhm9ffRgs6BA9X1n9jY7wEN16ZEpiEngZbecXseUrW8SeQ` |
+| Ethereum | `0x554f18cfB684889c3A60219BDBE7b050C39335ED` |
+| Solana | `5T8h3HbyvHgLxwXgchRYbHSqRjZyAr8J7uwjLN9Fh8Jh` |
