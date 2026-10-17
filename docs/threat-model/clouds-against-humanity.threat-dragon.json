@@ -374,7 +374,7 @@
             "id": "node-sl_prop",
             "data": {
               "name": "Spacelift proposed run (pull request)",
-              "description": "A plan-only run. The push policy never proposes one, so no pull request code should run here. Receives no credentials by design.",
+              "description": "A plan-only run. The push policy never proposes one, so no pull request code should run here. If one does start, the cah-doppler context is attached to every run type and exposes DOPPLER_TOKEN to it; only the unmodified hook skips fetching the named secrets (docs/spacelift-secrets.md, section 8).",
               "type": "tm.Process",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -500,7 +500,7 @@
                 {
                   "id": "threat-state-i",
                   "number": 16,
-                  "status": "Accepted",
+                  "status": "Open",
                   "severity": "High",
                   "title": "Connector token read out of state",
                   "type": "Information disclosure",
@@ -509,7 +509,7 @@
                   "mitigation": "Marked sensitive; state lives only in Spacelift. Accepted: restrict state access in Spacelift."
                 }
               ],
-              "hasOpenThreats": false,
+              "hasOpenThreats": true,
               "storesCredentials": true,
               "isEncrypted": false,
               "isSigned": false,
@@ -565,7 +565,7 @@
                 {
                   "id": "threat-doppler-v",
                   "number": 18,
-                  "status": "Accepted",
+                  "status": "Open",
                   "severity": "Medium",
                   "title": "Vendor compromise or outage",
                   "type": "Denial of service",
@@ -625,7 +625,7 @@
                 {
                   "id": "threat-cloud-e",
                   "number": 20,
-                  "status": "Accepted",
+                  "status": "Open",
                   "severity": "High",
                   "title": "Write token can open anything in the account",
                   "type": "Elevation of privilege",
@@ -681,7 +681,7 @@
                 {
                   "id": "threat-tg-v",
                   "number": 22,
-                  "status": "Accepted",
+                  "status": "Open",
                   "severity": "Medium",
                   "title": "Vendor compromise",
                   "type": "Elevation of privilege",
@@ -690,7 +690,7 @@
                   "mitigation": "Narrow scopes; end-to-end encryption to connectors; separate SSH key gate. Accepted."
                 }
               ],
-              "hasOpenThreats": false
+              "hasOpenThreats": true
             }
           },
           {
@@ -726,7 +726,7 @@
                 {
                   "id": "threat-drop-i",
                   "number": 23,
-                  "status": "Accepted",
+                  "status": "Open",
                   "severity": "Medium",
                   "title": "Connector token readable via the metadata endpoint",
                   "type": "Information disclosure",
@@ -737,7 +737,7 @@
                 {
                   "id": "threat-drop-d",
                   "number": 24,
-                  "status": "Accepted",
+                  "status": "Open",
                   "severity": "Medium",
                   "title": "Both connectors down, operator locked out",
                   "type": "Denial of service",
@@ -768,7 +768,7 @@
                   "mitigation": "Zero public inbound rules attached by tag at creation; sshd keys only, one user."
                 }
               ],
-              "hasOpenThreats": false
+              "hasOpenThreats": true
             }
           },
           {
@@ -1314,7 +1314,7 @@
                 {
                   "id": "threat-f-push-track-t",
                   "number": 34,
-                  "status": "Accepted",
+                  "status": "Open",
                   "severity": "High",
                   "title": "Malicious change merged to main",
                   "type": "Tampering",
@@ -1323,7 +1323,7 @@
                   "mitigation": "Accepted: pull request, CI green, branch protection, one writer."
                 }
               ],
-              "hasOpenThreats": false
+              "hasOpenThreats": true
             },
             "id": "flow-f-push-track",
             "labels": [
@@ -1455,6 +1455,17 @@
                   "modelType": "STRIDE",
                   "description": "T4: the token or a fetched value is printed in a run log.",
                   "mitigation": "Each fetched value is masked with ::add-mask; whether masking works on a real run was still to be confirmed."
+                },
+                {
+                  "id": "threat-f-tok-s",
+                  "number": 47,
+                  "status": "Mitigated",
+                  "severity": "High",
+                  "title": "Stolen service token used to ask Doppler for secrets",
+                  "type": "Spoofing",
+                  "modelType": "STRIDE",
+                  "description": "T4: Doppler decides who is asking by one token, so whoever holds it is treated as the run.",
+                  "mitigation": "Read-only token, scoped to one config, 90-day expiry; revoke on suspicion."
                 }
               ],
               "hasOpenThreats": false
@@ -1584,7 +1595,7 @@
                 {
                   "id": "threat-f-state-i",
                   "number": 38,
-                  "status": "Accepted",
+                  "status": "Open",
                   "severity": "High",
                   "title": "State readable by anyone with stack access",
                   "type": "Information disclosure",
@@ -1593,7 +1604,7 @@
                   "mitigation": "Marked sensitive; restrict state access in Spacelift. Accepted."
                 }
               ],
-              "hasOpenThreats": false
+              "hasOpenThreats": true
             },
             "id": "flow-f-state",
             "labels": [
@@ -1840,7 +1851,7 @@
                 {
                   "id": "threat-f-userdata-i",
                   "number": 41,
-                  "status": "Accepted",
+                  "status": "Open",
                   "severity": "Medium",
                   "title": "Token in user-data",
                   "type": "Information disclosure",
@@ -1849,7 +1860,7 @@
                   "mitigation": "Root-only file; revocable per connector. Accepted."
                 }
               ],
-              "hasOpenThreats": false
+              "hasOpenThreats": true
             },
             "id": "flow-f-userdata",
             "labels": [
@@ -2027,8 +2038,8 @@
             "zIndex": 38,
             "connector": "smooth",
             "data": {
-              "name": "Outbound connector link (connector token) and relayed session",
-              "description": "The connector dials out to Twingate with its token; user traffic arrives over that link.",
+              "name": "Outbound connector link (connector token)",
+              "description": "The connector dials out to Twingate and presents its token. Nothing dials in to the droplet.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -2052,13 +2063,68 @@
               ],
               "hasOpenThreats": false
             },
-            "id": "flow-f-relay",
+            "id": "flow-f-connector-link",
             "labels": [
               {
                 "position": 0.5,
                 "attrs": {
                   "label": {
-                    "text": "Outbound connector link (connector token) and relayed session"
+                    "text": "Outbound connector link (connector token)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-droplets"
+            },
+            "target": {
+              "cell": "node-twingate"
+            },
+            "vertices": [
+              {
+                "x": 537,
+                "y": 625
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 68,
+            "connector": "smooth",
+            "data": {
+              "name": "Relayed session (user traffic)",
+              "description": "Authorised user traffic, carried to the connector over the link the connector opened. One direction in the diagram: Twingate to the droplet.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "TLS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [],
+              "hasOpenThreats": false
+            },
+            "id": "flow-f-session",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Relayed session (user traffic)"
                   }
                 }
               }
@@ -2072,7 +2138,7 @@
             "vertices": [
               {
                 "x": 537,
-                "y": 655
+                "y": 685
               }
             ]
           },
@@ -2591,6 +2657,6 @@
     ],
     "diagramTop": 1,
     "reviewer": "",
-    "threatTop": 46
+    "threatTop": 47
   }
 }

@@ -23,7 +23,8 @@ STRIDE = {
     "Denial of service",
     "Elevation of privilege",
 }
-STATUSES = {"Open", "Mitigated", "Accepted", "Transferred", "Avoided", "NA"}
+# Threat Dragon v2.6.2 (ThreatEditDialog.vue) offers only these three statuses.
+STATUSES = {"Open", "Mitigated", "NotApplicable"}
 SEVERITIES = {"High", "Medium", "Low"}
 
 
@@ -208,3 +209,50 @@ def test_wiki_pages_link_the_exercise():
     for name in ("_Sidebar.md", "Home.md"):
         text = (WIKI / name).read_text(encoding="utf-8")
         assert "(Threat-Dragon-Exercise.md)" in text, name
+
+
+def test_flow_count_matches_exercise_page(cells):
+    page = (WIKI / "Threat-Dragon-Exercise.md").read_text(encoding="utf-8")
+    flows = [c for c in cells if c["shape"] == "flow"]
+    assert f"{len(flows)} labelled flows" in page
+
+
+def test_flows_are_unidirectional_and_connector_link_is_split(cells):
+    # A flow in the model runs one way; a link that carries a token out and
+    # a session back is two flows.
+    by_id = {c["id"]: c for c in cells}
+    for flow in (c for c in cells if c["shape"] == "flow"):
+        if flow["data"].get("isBidirectional"):
+            assert flow["id"] == "flow-f-state", flow["data"]["name"]
+    link, session = by_id["flow-f-connector-link"], by_id["flow-f-session"]
+    assert (link["source"]["cell"], link["target"]["cell"]) == (
+        "node-droplets",
+        "node-twingate",
+    )
+    assert (session["source"]["cell"], session["target"]["cell"]) == (
+        "node-twingate",
+        "node-droplets",
+    )
+    assert "flow-f-relay" not in by_id
+
+
+def test_accepted_risks_stay_open_and_say_so(cells):
+    # The app has no Accepted status, so an accepted risk is Open and its
+    # mitigation text says "Accepted".
+    accepted = [t for _, t in threats_of(cells) if "Accepted" in t["mitigation"]]
+    assert accepted
+    for t in accepted:
+        assert t["status"] == "Open", t["id"]
+
+
+def test_proposed_run_is_not_described_as_credential_free(cells):
+    node = next(c for c in cells if c["id"] == "node-sl_prop")
+    text = node["data"]["description"]
+    assert "no credentials" not in text.lower()
+    assert "DOPPLER_TOKEN" in text
+
+
+def test_exercise_reference_answer_matches_read_request_flow(cells):
+    flow = next(c for c in cells if c["id"] == "flow-f-tok")
+    types = {t["type"] for t in flow["data"]["threats"]}
+    assert {"Spoofing", "Information disclosure"} <= types

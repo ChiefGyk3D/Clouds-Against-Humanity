@@ -54,7 +54,7 @@ Do not use the provided model yet. Fifteen minutes.
 **Check.** Open `docs/threat-model/clouds-against-humanity.threat-dragon.json` in Threat Dragon. Compare.
 
 - It has 14 elements: four actors (internet scanner, contributor, maintainer, and the upstream publishers of pinned actions, the Doppler CLI and apt packages), seven processes (the repository, CI, a Spacelift proposed run, a Spacelift tracked run, the cloud API, Twingate, the connector droplets) and three data stores (OpenTofu state, the Doppler `prd` config, the protected resources).
-- It has 21 labelled flows and 8 trust boundaries.
+- It has 22 labelled flows and 8 trust boundaries. The connector link is two flows, not one: the connector dials out to Twingate with its token, and the relayed session travels back the other way. A flow in the model runs one way, so each direction gets its own arrow.
 - **Two Spacelift boxes, not one.** The model splits Spacelift into a *proposed run* (pull request) and a *tracked run* (main). If you drew one box, that is the most common difference, and it matters: the single most important boundary in the repository, B3, exists to keep a pull request away from the tracked one.
 - **The supply chain is an actor.** Pinned actions, the Doppler CLI and the Twingate apt repository are drawn as one actor, "Upstream publishers", with three flows. [Threat model](Threat-Model.md#trust-boundaries) draws these as a box; the exercise diagram leaves them out. Threat Dragon has no box for "a thing you did not write and trust anyway", so an actor does the job.
 - **Check your labels.** An arrow labelled just "deploy" or "uses" is a finding: the label is the data, and the data decides the threat. "Merged commit on main (code)" and "Read request with service token" lead to different threats.
@@ -88,7 +88,7 @@ For each of these three flows, write down which STRIDE letters you expect and *w
 
 **Flow 1: "Secrets (cloud token, Twingate API token, tenant, admin key)" from Doppler to the Spacelift tracked run.**
 
-*Reference answer.* Information disclosure (T4). The values are loaded into the run's environment before the plan, so any code that executes in the run can read them. The model attaches one threat, High, status Open. If you also wrote Spoofing, that is a reasonable second: who is asking for the secrets is decided by one token. The model puts that on the opposite-direction flow, "Read request with service token". Compare [what if 2](Threat-Model-Exercise.md#what-if-2-a-tracked-spacelift-run-is-compromised): the per-stack secret list narrows what honest code gets; it is not isolation.
+*Reference answer.* Information disclosure (T4). The values are loaded into the run's environment before the plan, so any code that executes in the run can read them. The model attaches one threat, High, status Open. If you also wrote Spoofing, that is a reasonable second: who is asking for the secrets is decided by one token. The model puts that on the opposite-direction flow, "Read request with service token", which carries two threats: Spoofing (a stolen token, T4, Mitigated) and Information disclosure (the token appearing in a log, T4, Mitigated). Compare [what if 2](Threat-Model-Exercise.md#what-if-2-a-tracked-spacelift-run-is-compromised): the per-stack secret list narrows what honest code gets; it is not isolation.
 
 **Flow 2: "Confirm apply (human approval)" from the maintainer to the tracked run.**
 
@@ -150,7 +150,7 @@ If your table has an S row about "AWS access keys leaked", re-read the second bu
 | The model JSON, with generic names: "Doppler prd config", "Connector droplets (two)" | Real hostnames, IP addresses or subnet ranges |
 | Threats that cite a repository file or a T-number | Account ids, tenant names, project names, organisation names |
 | The diagram as SVG for a page, if it has no identifiers in its labels | Token names that reveal a vendor account, key comments, email addresses |
-| A line saying which threats are **Open** and which are **Accepted** | The `.env` of a self-hosted Threat Dragon, encryption keys or any provider secret it holds |
+| A line saying which threats are **Open** because you accepted them (Threat Dragon has no Accepted status) and which are still to fix | The `.env` of a self-hosted Threat Dragon, encryption keys or any provider secret it holds |
 | | A model you wrote about a private system, in a **public** repository |
 
 The model in `docs/threat-model/` is written with generic names, and `tests/test_threat_dragon_model.py` fails on IP addresses, URLs and email addresses in it. That is a guard against a slip, not a guarantee. **Read the whole JSON before you commit**, including the description and the mitigation text: the app writes everything you type, including notes you forgot. If a threat description needs a real address to make sense, the model belongs in a private place.
@@ -164,6 +164,7 @@ A model also gets stale. The file in this repository has no way to notice that a
 - **It does not rank for you.** Severity and status are whatever the person typed. The generated model's "High" and "Medium" are my judgment, to be argued with.
 - **It has no memory of settings outside the repository.** B3, B4, B5 and B7 are vendor settings. A reviewer must go and look.
 - **Open threats are a count, not a risk.** A red element means someone left a threat Open, not that it is dangerous.
+- **It has three statuses: Open, Mitigated and Not applicable.** That is the list in the v2.6.2 threat edit dialog (`ThreatEditDialog.vue`, checked 2026-10-16), and the threat list shows an indicator for each. There is no Accepted. This model records an accepted risk (T5, T6, T10, T13 and others) as **Open**, with "Accepted" at the start of the mitigation text, so those elements stay red on purpose. Do not read a red element as "nobody has looked".
 
 ## Where this shows up in the repo
 
@@ -179,5 +180,5 @@ A model also gets stale. The file in this repository has no way to notice that a
 ## Try it yourself
 
 - Find one flow in the model with no threat attached (for example "CI green status check") and decide whether that is a gap or a correct "nothing to add". Say why.
-- Pick one **Accepted** threat (T5, T6, T10 or T13) and change its status to Open in your copy. Which element turns red? What control would let you move it back to Mitigated, and where would you verify the control?
+- Pick one threat that is **Mitigated** in the model (for example the log-leak threat on "Read request with service token") and change its status to Open in your copy. Which element turns red? Then find a threat the model records as Open because the risk is accepted (the mitigation text starts with "Accepted") and ask what control would let you move it to Mitigated, and where you would verify that control.
 - Run `python3 -m pytest tests/test_threat_dragon_model.py -q`, then, on a scratch branch, rename the boundary `B3` in the committed JSON and run it again (`git restore` afterwards). Which test notices, and what does that tell you about what the tests can and cannot see?
