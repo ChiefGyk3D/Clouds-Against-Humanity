@@ -469,7 +469,7 @@ The first draft (and the stage 2 draft, section 5.1) said no inbound firewall ch
 | Firewall | Change | Module change |
 |---|---|---|
 | Connector firewall (`purpose = "connector"`) | `inbound_from_tag_rules` add tcp 9100 (node exporter) and tcp the connector metrics port; `outbound_to_tag_rules` add the same two ports | None: the module already takes both lists, with the firewall's own tag as source and destination |
-| New SOC firewall (`purpose = "soc"`, tag `cah-soc-<resource_key>`) | One inbound rule: tcp Grafana port, source = the **connector tag**. No outbound to home | The module only admits its own tag; add an optional `inbound_from_other_tags` input (`[{protocol, port_range, source_tag}]`), additive, default empty |
+| New SOC firewall (`purpose = "soc"`, tag `cah-soc-<resource_key>`) | One inbound rule: tcp Grafana port, source = the **connector tag**. No outbound to home | The module only admits its own tag; add an optional `inbound_from_other_tags` input (`[{protocol, port_range, tag}]`), additive, default empty |
 | Connector firewall again | One outbound rule: tcp Grafana port, destination = the SOC tag | An optional `outbound_to_other_tags` input, additive |
 
 Two assertions replace the earlier "no firewall inbound rule appears": (1) **no inbound rule has an address source** (`source_addresses`, `0.0.0.0/0` or `::/0`), checked in `tofu test` and by the existing identifier and policy checks; (2) the set of inbound rules equals an expected list of `(protocol, port, source_tag)` triples, so a new inbound rule is a visible diff. The Twingate resources still use no public path. The step 5 plan will show new inbound rules and the maintainer reads them; "zero public inbound" is preserved, "zero inbound rules" is not.

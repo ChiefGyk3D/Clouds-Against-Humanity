@@ -116,6 +116,8 @@ A DigitalOcean cloud firewall attached to a **tag**, not to a droplet. Any dropl
 | `extra_outbound_rules` | list of `{protocol, port_range}` | `[]` | Outbound rules added to the defaults. These apply to *any address*. |
 | `inbound_from_tag_rules` | list of `{protocol, port_range}` | `[]` | Inbound rules that admit only droplets carrying the firewall's own tag. Empty means deny-all inbound. **Validation:** every rule needs protocol `tcp` or `udp` and a non-empty port range. |
 | `outbound_to_tag_rules` | list of `{protocol, port_range}` | `[]` | Outbound rules that reach only droplets carrying the firewall's own tag. Same validation. |
+| `inbound_from_other_tags` | list of `{protocol, port_range, tag}` | `[]` | Inbound rules that admit only droplets carrying the given *other* tag, one rule per entry (`source_tags = [tag]`, never an address). Additive; rendered after `inbound_from_tag_rules`. A tag equal to the firewall's own `tag` is rejected (use `inbound_from_tag_rules`). **Validation:** protocol `tcp` or `udp`; port range a port or an ascending range within 1 to 65535; tag 1 to 255 characters of letters, digits, `:`, `-`, `_`; no duplicate `(protocol, port_range, tag)`. |
+| `outbound_to_other_tags` | list of `{protocol, port_range, tag}` | `[]` | Outbound rules that reach only droplets carrying the given other tag (`destination_tags = [tag]`, never an address). Same validation; rendered last. |
 
 Why three lists? DigitalOcean firewalls are stateful for *replies* only. Admitting a connection needs an inbound rule at the receiver, and *opening* a connection needs an outbound rule at the sender. Two connectors that must reach each other's SSH therefore need both `inbound_from_tag_rules` and `outbound_to_tag_rules`. Neither names an address, only the tag.
 
@@ -135,6 +137,8 @@ Why three lists? DigitalOcean firewalls are stateful for *replies* only. Admitti
 | `inbound_rule` | `var.inbound_from_tag_rules` | `source_tags = [var.tag]`, never an address |
 | `outbound_rule` (addresses) | `local.outbound` | `destination_addresses = ["0.0.0.0/0", "::/0"]`, specific ports only |
 | `outbound_rule` (tags) | `var.outbound_to_tag_rules` | `destination_tags = [var.tag]`, never an address |
+| `inbound_rule` (other tags) | `var.inbound_from_other_tags` | `source_tags = [rule.tag]`, never an address; after the rules above |
+| `outbound_rule` (other tags) | `var.outbound_to_other_tags` | `destination_tags = [rule.tag]`, never an address; last |
 
 The comment `#trivy:ignore:AVD-DIG-0003` above the resource is a documented exception to a scanner finding about egress to any address. The reasoning is in the code comment: ports are specific, inbound is zero, and the hosts being reached (Twingate relays, package mirrors) have no fixed addresses to pin.
 

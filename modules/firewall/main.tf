@@ -15,7 +15,8 @@ locals {
 # Inbound is deny-all: DigitalOcean denies all inbound traffic that no rule
 # allows, and inbound_from_tag_rules is empty by default. When it lists
 # something, each rule admits only droplets that carry this firewall's own tag
-# (source_tags), never an address, so nothing outside the tagged group gets in.
+# (source_tags), never an address. inbound_from_other_tags does the same for
+# another group's tag (one tag per rule), so nothing outside the tagged group gets in.
 # The sending side is the other half: DigitalOcean allows outbound traffic only
 # when an outbound rule permits it (replies to an admitted connection are
 # stateful, a new connection is not), so outbound_to_tag_rules opens the same
@@ -33,12 +34,34 @@ resource "digitalocean_firewall" "this" {
   name = "${var.layer}-${local.name_key}-${var.purpose}"
   tags = [var.tag]
 
+  # A precondition rather than a variable validation: it compares two variables,
+  # which a validation cannot do on older OpenTofu. A rule for the firewall's own
+  # tag in an "other" list would duplicate one in the own-tag lists (rules are
+  # set-like), so it is rejected.
+  lifecycle {
+    precondition {
+      condition     = alltrue([for r in concat(var.inbound_from_other_tags, var.outbound_to_other_tags) : r.tag != var.tag])
+      error_message = "inbound_from_other_tags and outbound_to_other_tags are for OTHER tags; use inbound_from_tag_rules or outbound_to_tag_rules for the firewall's own tag."
+    }
+  }
+
   dynamic "inbound_rule" {
     for_each = var.inbound_from_tag_rules
     content {
       protocol    = inbound_rule.value.protocol
       port_range  = inbound_rule.value.port_range
       source_tags = [var.tag]
+    }
+  }
+
+  # Appended after the existing inbound rules so a call that leaves
+  # inbound_from_other_tags at its default renders exactly what it did before.
+  dynamic "inbound_rule" {
+    for_each = var.inbound_from_other_tags
+    content {
+      protocol    = inbound_rule.value.protocol
+      port_range  = inbound_rule.value.port_range
+      source_tags = [inbound_rule.value.tag]
     }
   }
 
@@ -57,6 +80,15 @@ resource "digitalocean_firewall" "this" {
       protocol         = outbound_rule.value.protocol
       port_range       = outbound_rule.value.port_range
       destination_tags = [var.tag]
+    }
+  }
+  # Appended last, for the same reason as the inbound block above.
+  dynamic "outbound_rule" {
+    for_each = var.outbound_to_other_tags
+    content {
+      protocol         = outbound_rule.value.protocol
+      port_range       = outbound_rule.value.port_range
+      destination_tags = [outbound_rule.value.tag]
     }
   }
 }

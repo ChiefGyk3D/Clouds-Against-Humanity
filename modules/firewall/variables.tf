@@ -53,6 +53,62 @@ variable "outbound_to_tag_rules" {
   }
 }
 
+variable "inbound_from_other_tags" {
+  type = list(object({
+    protocol   = string
+    port_range = string
+    tag        = string
+  }))
+  default     = []
+  description = "Inbound rules that admit only droplets carrying the given OTHER tag (one rule per entry, source_tags = [tag], never an address). Additive to inbound_from_tag_rules. Empty means none."
+
+  validation {
+    condition = alltrue([
+      for r in var.inbound_from_other_tags :
+      contains(["tcp", "udp"], r.protocol) && try(can(regex("^[1-9][0-9]{0,4}(-[1-9][0-9]{0,4})?$", r.port_range)) && tonumber(split("-", r.port_range)[0]) <= tonumber(reverse(split("-", r.port_range))[0]) && tonumber(reverse(split("-", r.port_range))[0]) <= 65535, false)
+    ])
+    error_message = "Each rule needs protocol tcp or udp and a port_range of a port or range between 1 and 65535 in ascending order (443, 30000-31000)."
+  }
+
+  validation {
+    condition     = alltrue([for r in var.inbound_from_other_tags : can(regex("^[A-Za-z0-9:_-]{1,255}$", r.tag))])
+    error_message = "Each tag must be 1 to 255 characters: letters, digits, colon, hyphen or underscore (the DigitalOcean tag shape)."
+  }
+
+  validation {
+    condition     = length(distinct([for r in var.inbound_from_other_tags : join("/", [r.protocol, r.port_range, r.tag])])) == length(var.inbound_from_other_tags)
+    error_message = "Each (protocol, port_range, tag) may appear only once."
+  }
+}
+
+variable "outbound_to_other_tags" {
+  type = list(object({
+    protocol   = string
+    port_range = string
+    tag        = string
+  }))
+  default     = []
+  description = "Outbound rules that reach only droplets carrying the given OTHER tag (one rule per entry, destination_tags = [tag], never an address). Additive to outbound_to_tag_rules. Empty means none."
+
+  validation {
+    condition = alltrue([
+      for r in var.outbound_to_other_tags :
+      contains(["tcp", "udp"], r.protocol) && try(can(regex("^[1-9][0-9]{0,4}(-[1-9][0-9]{0,4})?$", r.port_range)) && tonumber(split("-", r.port_range)[0]) <= tonumber(reverse(split("-", r.port_range))[0]) && tonumber(reverse(split("-", r.port_range))[0]) <= 65535, false)
+    ])
+    error_message = "Each rule needs protocol tcp or udp and a port_range of a port or range between 1 and 65535 in ascending order (443, 30000-31000)."
+  }
+
+  validation {
+    condition     = alltrue([for r in var.outbound_to_other_tags : can(regex("^[A-Za-z0-9:_-]{1,255}$", r.tag))])
+    error_message = "Each tag must be 1 to 255 characters: letters, digits, colon, hyphen or underscore (the DigitalOcean tag shape)."
+  }
+
+  validation {
+    condition     = length(distinct([for r in var.outbound_to_other_tags : join("/", [r.protocol, r.port_range, r.tag])])) == length(var.outbound_to_other_tags)
+    error_message = "Each (protocol, port_range, tag) may appear only once."
+  }
+}
+
 variable "resource_key" {
   type        = string
   default     = ""
