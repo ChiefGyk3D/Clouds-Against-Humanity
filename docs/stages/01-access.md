@@ -171,7 +171,7 @@ Verify before apply (not confirmed yet):
 - [ ] The Twingate install page title and date. It was read on 2026-10-10 through a summarizing fetch (page title: "Minecraft Server with Twingate (Linux)"), not directly, so read the page itself.
   Verified on:
 
-Known follow-up: the provider emits a deprecation warning when `access_group` is read on `twingate_resource`. Replace it with the provider's current access setting before a provider upgrade removes it.
+Known note (corrected 2026-10-17): the `access_group` block on `twingate_resource` is not deprecated in any provider release, and nothing replaces it. Only two attributes nested inside it (`approval_mode` and `usage_based_autolock_duration_days`) are deprecated, and this repository sets neither. The "deprecated source" warnings `tofu test` prints come from the test assertions that read the whole block, not from `main.tf`; `tofu validate` on the stack is clean. The provider is pinned to 3.x (3.8.0, the last 3.x release); moving to 4.x or 5.x is a separate, optional upgrade (issue #93) with its own plan to read.
 
 ## 5. Bootstrap
 
