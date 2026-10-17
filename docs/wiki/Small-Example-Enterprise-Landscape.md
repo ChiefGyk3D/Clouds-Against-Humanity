@@ -78,7 +78,7 @@ Choosing a secrets manager is a decision about your team and your platform. Swit
 
 ## Change and delivery
 
-The pipeline in the [capstone page](Fork-Private-Stacks-and-the-Pipeline.md#where-the-pipeline-actually-starts) has seven gates. An enterprise has the same ones with more people inside them, and may add a change request, a named approver, separate development, staging and production environments, a freeze calendar, or a platform team that owns the pipeline and offers it to everyone else. The tools differ (other CI systems, other infrastructure-as-code runners, policy engines, ticketing). The reason for every gate is the same as here.
+The pipeline in the [capstone page](Fork-Private-Stacks-and-the-Pipeline.md#where-the-pipeline-actually-starts) has seven gates. An enterprise has the same ones with more people inside them, and may add a change request, a named approver, separate development, staging and production environments, a freeze calendar, or a platform team that owns the pipeline and offers it to everyone else. The tools differ (other CI systems, other infrastructure-as-code runners, policy engines, ticketing). The reason for every gate is the same as here. For the change-request vocabulary (standard, normal and emergency changes, CAB, freeze windows) and an honest list of what this project does not do, see [Enterprise change management for beginners](Enterprise-Change-Management-for-Beginners.md).
 
 ## What you cannot get from a small example
 

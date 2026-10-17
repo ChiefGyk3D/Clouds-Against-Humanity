@@ -73,6 +73,13 @@ The [Threat model](Threat-Model.md) is core step 19.
 </details>
 
 <details>
+<summary><b>Enterprise context</b></summary>
+
+- [Enterprise change management for beginners (not used here)](Enterprise-Change-Management-for-Beginners.md)
+
+</details>
+
+<details>
 <summary><b>Track: other clouds (unverified drafts)</b></summary>
 
 - [Why the clouds differ](Why-the-Clouds-Differ.md)

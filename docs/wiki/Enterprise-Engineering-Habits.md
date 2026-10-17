@@ -10,7 +10,7 @@ That reaction is correct, and the ceremony is the point. These are the habits th
 
 **The habit.** No change to the environment happens outside the repository. Every change is a pull request, with checks and a description, even when the author is the only person who will ever read it.
 
-**What it is for.** Review catches mistakes, but the bigger value is the record. Two years from now, "why does the connector firewall allow UDP on every port?" is answered by the pull request that added it, not by memory. And a change that has to be written down tends to be a change that was thought about.
+**What it is for.** Review catches mistakes, but the bigger value is the record. Two years from now, "why does the connector firewall allow UDP on every port?" is answered by the pull request that added it, not by memory. And a change that has to be written down tends to be a change that was thought about. Companies formalise this habit as change management (tickets, approvers, a change advisory board); [Enterprise change management for beginners](Enterprise-Change-Management-for-Beginners.md) explains it and says plainly that this project does not use it.
 
 **At home.** Keep your compose files and configs in a git repository, and write a one-line commit message that says why. That alone puts you ahead of most homelabs.
 
