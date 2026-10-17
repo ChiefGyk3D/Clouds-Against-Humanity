@@ -92,11 +92,27 @@ Key ideas:
 
 It reads HCL with regular expressions and never executes it. It will not see a resource type built dynamically, a paid resource created outside this repository, or bandwidth overage. It is a guardrail against honest mistakes, not a proof. The billing alerts set during stage 0 (at $10 and $25) are the backstop.
 
+## The identifier check
+
+A public repository should not publish which cloud account it deploys into. `scripts/identifier_check.py` scans every tracked text file and fails when it finds a cloud identifier written in a recognisable form:
+
+- an AWS ARN that carries a 12-digit account id, or a 12-digit number next to the word `account` (`account_id`, `aws_account`, `Account ID`);
+- an AWS access key id (`AKIA` or `ASIA` followed by 16 characters);
+- an Azure subscription or tenant id next to `subscription_id` or `tenant_id`, or inside a `/subscriptions/...` path;
+- a GCP project id next to `project_id`, `project:` or inside a `projects/...` path.
+
+It reads the lines and nothing else. It does **not** see secrets: a password, token or private key has no such shape, and that is [Gitleaks](https://github.com/gitleaks/gitleaks)' job in the `security` workflow. It also cannot find an identifier that is split across lines, encoded, or written with no label beside it, so it is a guardrail, not a proof.
+
+It never prints the value it matched. A failure reads `path:line: kind (xx...)`, with the first two characters at most, because a CI log on a public repository is itself public and a check that echoed the leak would copy it somewhere new.
+
+To show an example in a lesson, use one of the synthetic placeholders the script allows by name: `123456789012`, `000000000000`, `111122223333`, the all-zero and all-one UUIDs, `my-project-id`, `your-project-id`, `project-id`, any value containing `example`, or anything written inside angle brackets such as `<your-account-id>`. Avoid a realistic-looking 12-digit number even when it is invented, since it may be someone's real account. If a line must stay as it is, end it with `identifier-check: ignore` in a comment and say why in the same comment. The list lives in `ALLOWED_VALUES` in the script and is pinned by a test, so widening it shows up in review. The design plans under `docs/superpowers/plans` are not scanned.
+
 ## Run it all locally
 
 ```bash
 python3 -I scripts/cost_check.py --root .
 python3 -I -m pytest tests -q
+python3 -I scripts/identifier_check.py --root .
 
 for d in modules/vpc modules/firewall modules/twingate-connector stacks/00-foundation stacks/10-access; do
   tofu -chdir="$d" init -backend=false -input=false

@@ -10,7 +10,7 @@ mock_provider "twingate" {}
 variables {
   region               = "tor1"
   vpc_id               = "vpc-test"
-  project_id           = "project-test"
+  project_id           = "project-test" # identifier-check: ignore (mocked DigitalOcean project, not a GCP id)
   baseline_tag         = "cah-baseline-tor1"
   twingate_network     = "acme"
   admin_ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAItest"
