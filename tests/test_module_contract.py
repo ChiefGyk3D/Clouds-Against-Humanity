@@ -19,7 +19,7 @@ CONTRACT = {
 
 def provider_modules():
     for role in CONTRACT:
-        for path in sorted(ROOT.glob(f"**/modules/{role}")):
+        for path in sorted((ROOT / "modules").glob(f"**/{role}")):
             if ".terraform" in path.parts or not path.is_dir():
                 continue
             yield role, path
@@ -31,10 +31,11 @@ def outputs(path):
 
 
 def providers():
-    """Map provider (the path before modules/, '' for DigitalOcean) to its roles."""
+    """Map provider (modules/<provider>/<role>; DigitalOcean is modules/<role>) to its roles."""
     found = {}
     for role, path in provider_modules():
-        provider = path.parent.parent.relative_to(ROOT).as_posix()
+        # DigitalOcean sits directly under modules/; others under modules/<provider>/.
+        provider = "digitalocean" if path.parent.name == "modules" else path.parent.name
         found.setdefault(provider, {})[role] = path
     return found
 
@@ -43,9 +44,7 @@ def test_every_provider_supplies_every_role():
     assert providers(), "no provider modules found"
     for provider, roles in providers().items():
         missing = set(CONTRACT) - set(roles)
-        assert not missing, (
-            f"provider {provider or 'digitalocean'} lacks modules: {sorted(missing)}"
-        )
+        assert not missing, f"provider {provider} lacks modules: {sorted(missing)}"
 
 
 def test_every_provider_module_has_the_contract_outputs():
