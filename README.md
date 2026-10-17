@@ -107,6 +107,7 @@ Clouds-Against-Humanity/
   docs/golden-addresses/                   resource addresses the plan no-op check compares against
   docs/superpowers/                        dated design records (specs and plans), not maintained as guides
   docs/spacelift-secrets.md                how secrets reach a run, rotation, upgrades
+  board.yaml                               the project board as code (Scrum Around and Find Out): fields, sprints, views
   media/                                   icons and images for the README's Support section
 ```
 
@@ -148,6 +149,7 @@ Run the last pair for each directory in the `directories` list of the tofu job i
 | Building or operating a stage | [Stage 0: foundation](docs/stages/00-foundation.md), [Stage 1: access](docs/stages/01-access.md) |
 | Secrets, rotation, troubleshooting runs | [Spacelift and Doppler secrets](docs/spacelift-secrets.md) |
 | The money | [Cost](docs/cost.md) |
+| How the work is planned: the board, sprints, sizes, definition of done | [How this project is planned](docs/wiki/How-This-Project-Is-Planned.md), the [project board](https://github.com/users/ChiefGyk3D/projects/4) and `board.yaml` |
 | What could go wrong | [Threat model](docs/wiki/Threat-Model.md), [Lessons learned](docs/wiki/Lessons-Learned.md) |
 
 The wiki is generated from `docs/wiki/`, so corrections go in as pull requests and get the same review and secret scanning as the code. The Wiki workflow publishes them on every merge to `main`.

@@ -1,0 +1,88 @@
+# How this project is planned
+
+> Prerequisites: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) and the [Roadmap](Roadmap.md). This page is about how the work is organised, not what the stages are.
+
+The work is planned the way a small team plans software: a written backlog, a size on every item, two-week sprints, a review at the end of each, and a definition of done. The plan lives in GitHub, next to the code, so a change to the plan is as visible as a change to the code.
+
+- **The board:** the [Clouds Against Humanity project](https://github.com/users/ChiefGyk3D/projects/4) (Sprint board, Sprint plan, Roadmap, Backlog and Agents at work views).
+- **The backlog:** the repository's [issues](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues), grouped into epics and milestones.
+- **The board as code:** `board.yaml` in the repository root. It names every field, option, iteration and view, and [Scrum Around and Find Out](https://github.com/ChiefGyk3D/scrum-around-and-find-out) (SAFO) creates and checks the board from it.
+
+## The shape of the plan
+
+| Level | What it is | Where |
+|---|---|---|
+| Epic | One theme, such as stage 2 telemetry. Labelled `epic`, with sub-issues. Has a start and a target date that draw its bar on the Roadmap view | Issue |
+| Milestone | The same theme as a release gate, with a due date | Milestone |
+| Issue | One piece of work with a reason, a "done when" list and, where it applies, a gate | Issue, sub-issue of an epic |
+| Sprint | A two-week slice, Tuesday to Monday | Board field |
+
+The eight epics are operations and gates, stage 1 hardening, stage 2 telemetry, stage 3 workloads, the edge and DMZ, multi-cloud, learning and wiki, and process.
+
+## Sprints and what "scheduled" means
+
+Sprints run two weeks from a Tuesday. Sprint 1 starts on 2026-10-20; eight are defined, through 2027-02-08. Anything with a sprint is scheduled. Anything without one is backlog: wanted, ordered by priority, not promised.
+
+Dates beyond the sprint calendar are **indicative**. A milestone for stage 3 or the edge carries a date so the Roadmap view has a shape, but those stages wait on a cost decision and on earlier stages, and the date moves at the sprint review when the facts do. A moved date is not a failure; a date nobody revisits is.
+
+## Capacity
+
+The maintainer has a day job and works on this in the evenings and at weekends, and has other projects. The plan is built so he can also rest:
+
+- The sprint load counts the maintainer's own hours: the items whose Agent is **You**. About 10 to 12 hours is the ceiling for one sprint, less around holidays.
+- Items worked by agents are limited by the agents' budgets and by review time, not by his hours. At most three agent items are in flight at once, each with its own branch and worktree.
+- Sizes convert to hours so a sprint can be added up: **S** is about 2 hours, **M** about 5, **L** about 12 and **XL** about 30. An XL is split into smaller issues before it is scheduled; none sits in a sprint.
+
+## The flow of an issue
+
+| Status | Meaning |
+|---|---|
+| Backlog | Not scheduled |
+| Next | Scheduled for a sprint |
+| In progress | Being worked, or a draft pull request is open |
+| In review | A pull request is open and checks and reviews are running |
+| Blocked | Needs the maintainer or an answer from outside |
+| Done | Closed or merged, with the date in **Done on** |
+
+SAFO moves a card as GitHub events happen: an opened issue is Backlog, a ready pull request is In review, a merged one is Done. The sprint, size, area, priority and agent are set by hand when an issue is planned.
+
+## Definition of ready
+
+An issue goes into a sprint when it has a reason, a "done when" checklist, a size, an owner (the maintainer or an agent), and its gate named: the decision, approval or earlier issue it waits on. An issue that cannot say what done looks like is a question, not a task.
+
+## Definition of done
+
+A pull request closes its issue when all of these are true:
+
+1. The checks are green, including the `CI green` gate and the secret scan.
+2. Tests exist for what changed, and a test that should fail without the change was shown to fail.
+3. The docs and the wiki say what is now true, including the Roadmap status line.
+4. A change that touches live infrastructure shows its plan, and the maintainer read it. A plan that replaces a droplet is discarded unless that was the point.
+5. Risky changes had a second review: an adversarial pass by an agent that did not write the code.
+6. The maintainer merged it. Agents open pull requests; they do not decide what ships.
+
+## Who does the work
+
+Work is routed by what it is, from measurements recorded in SAFO:
+
+| Kind of work | Goes to |
+|---|---|
+| Decisions, approvals, anything that changes a live account or a credential | The maintainer |
+| Implementation from a written description, wiki pages, tests | A Sonnet agent |
+| Security-sensitive changes | Built by one agent, attacked by another before merge |
+| Text in, text out (summaries, triage, drafts) | The local model first, checked before anything is applied |
+
+The Agent field on the board names the intended owner. The maintainer-only steps carry the `needs-maintainer` label so they are easy to filter.
+
+## The rhythm
+
+- **Planning** (the first day of a sprint): pull the next ready items from the top of the backlog until the load is full. Check the maintainer's hours first.
+- **During:** one branch per issue, one pull request per change, small enough to review.
+- **Review** (the last day): post a project status update (`safo status --post` builds it from the board, counted in code), note what slipped and why, and re-order the next sprint. The first review is scheduled as an issue so the habit exists from day one.
+- **Keeping the board current:** a user-owned GitHub Project cannot be written by an App, so the maintainer runs `safo --board board.yaml reconcile` from his own login on a timer. It adds new issues, marks closed ones Done and fills the area. No token is stored in CI.
+
+## Changing the plan
+
+Plans change in the open. To add work, open an issue with a reason and a "done when" list. To change the sequence or the board's shape, open a pull request: `board.yaml` is reviewed like code, and `safo --board board.yaml audit` reports where the live board differs from the file. A few settings (the Roadmap view's date fields, view grouping and the project's built-in workflows) cannot be set through GitHub's API; `board.yaml` lists them under `ui_only` so they are checked by eye.
+
+Next: [Roadmap](Roadmap.md).
