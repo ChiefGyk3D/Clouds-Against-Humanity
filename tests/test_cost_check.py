@@ -113,7 +113,9 @@ def test_costed_resource_outside_allowed_file_is_flagged(tmp_path):
     found = cost_check.uncosted_sources(
         root, {"digitalocean_droplet": ["modules/ok/main.tf"]}
     )
-    assert found == ["stacks/10-access/sneaky.tf: digitalocean_volume"]
+    assert found == [
+        "stacks/10-access/sneaky.tf: digitalocean_volume (the gate has no price model for it)"
+    ]
 
 
 def test_provider_cache_directories_are_ignored(tmp_path):

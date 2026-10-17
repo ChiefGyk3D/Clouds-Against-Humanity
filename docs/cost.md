@@ -52,7 +52,7 @@ Source code hides the expensive parts: on AWS a public address is an attribute o
 python3 -I scripts/cost_check.py --root . --plan plan.json --stack stacks/aws/10-access
 ```
 
-It prices each planned instance (hourly price times 730, plus a public address unless `associate_public_ip_address` is explicitly `false`, plus the root disk, which must be set explicitly because the image default is not priced), each elastic address and each volume, then requires the result to equal the stack's `cost.json`. Anything it cannot price, such as a load balancer or an unknown instance type, is a failure rather than a zero, and a NAT gateway is rejected outright at this ceiling. Where the plan comes from matters: a plan file checked into a pull request can be edited to say anything, so the check is only a guarantee on a plan produced by the trusted run; on a pull request it is an early warning.
+It prices each planned instance (hourly price times 730, plus a public address unless `associate_public_ip_address` is explicitly `false`, plus the root disk, which must be set explicitly because the image default is not priced), each elastic address and each volume, then requires the result to equal the stack's `cost.json`. Anything it cannot price, such as a load balancer or an unknown instance type, is a failure rather than a zero, and a NAT gateway is rejected outright at this ceiling. The required CI check does not run it today: CI has no AWS plan to give it, and there is no AWS stack yet. It belongs in the trusted run that produces the real plan, which is part of the AWS code phase. Where the plan comes from matters: a plan file checked into a pull request can be edited to say anything, so the check is only a guarantee on a plan produced by the trusted run; on a pull request it is an early warning.
 
 ## Not yet verified
 
@@ -62,3 +62,11 @@ These are not priced, or not confirmed against the vendor's current page. Check 
 - Bandwidth overage.
 - Snapshots.
 - Free-tier limits of Spacelift, Doppler and Twingate.
+
+### What `active` means
+
+`active` in `approved.json` is the maintainer's statement that a cloud is applied right now. The gate adds up the active figures against the shared ceiling, but it cannot see what is actually running: a cloud marked inactive can still have a manifest in the repository (the code exists, it is just not applied), and nothing checks that its stacks are destroyed. Marking a cloud inactive is a promise to tear it down first, backed by the billing alert, not by the gate.
+
+### Other limits of the source scan
+
+Comments are removed and braces inside quoted strings are ignored, but heredocs, dynamic module sources and resource types built from strings are not understood. A type the gate has no price model for fails even when `approved.json` names a file for it: approval can place a priced type in a file, not invent a price.

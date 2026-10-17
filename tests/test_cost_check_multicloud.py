@@ -365,3 +365,115 @@ def test_plan_needs_a_stack(tmp_path, capsys):
     p.write_text("{}")
     code, out = run(root, capsys, "--plan", str(p))
     assert code == 1 and "--plan needs --stack" in out.err
+
+
+# ---- review findings: each was a way to pass the gate -----------------------
+
+
+def test_a_commented_local_source_does_not_hide_a_remote_one(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    (root / "stacks/aws/10-access/db.tf").write_text(
+        'module "db" {\n  /*\n  source = "./looks-local"\n  */\n  # source = "./also-local"\n  source = "terraform-aws-modules/rds/aws"\n}\n'
+    )
+    code, out = run(root, capsys)
+    assert code == 1 and "non-local source" in out.err
+
+
+def test_a_brace_in_a_string_or_comment_does_not_end_a_connector_block(
+    tmp_path, capsys
+):
+    root = build(tmp_path, aws=TWO)
+    (root / "stacks/aws/10-access/m.tf").write_text(
+        'module "c" {\n  source = "../../../modules/aws/twingate-connector"\n  note   = "}"\n  # }\n  count  = 100\n}\n'
+        + CONNECTOR.format(i=7)
+    )
+    code, out = run(root, capsys)
+    assert code == 1 and "uses count" in out.err
+
+
+def test_a_commented_out_resource_is_not_flagged(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    (root / "stacks/aws/10-access/x.tf").write_text('# resource "aws_lb" "x" {}\n')
+    assert run(root, capsys)[0] == 0
+
+
+def test_approved_json_cannot_approve_a_type_with_no_price_model(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    (root / "modules/aws/lb.tf").write_text('resource "aws_lb" "l" {}\n')
+    approved = json.loads((root / "docs/stages/approved.json").read_text())
+    approved["providers"]["aws"]["allowed_sources"]["aws_lb"] = ["modules/aws/lb.tf"]
+    (root / "docs/stages/approved.json").write_text(json.dumps(approved))
+    code, out = run(root, capsys)
+    assert code == 1 and "no price model" in out.err
+
+
+@pytest.mark.parametrize("bad", ["nan", "inf", "-1", "abc", None])
+def test_a_non_finite_or_negative_approval_fails(tmp_path, capsys, bad):
+    root = build(tmp_path, aws=TWO)
+    approved = json.loads((root / "docs/stages/approved.json").read_text())
+    approved["providers"]["aws"]["approved_monthly_total"] = bad
+    (root / "docs/stages/approved.json").write_text(json.dumps(approved))
+    code, out = run(root, capsys)
+    assert code == 1 and "cost-check:" in out.err
+
+
+def test_a_nan_ceiling_fails(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    approved = json.loads((root / "docs/stages/approved.json").read_text())
+    approved["ceiling"] = "nan"
+    (root / "docs/stages/approved.json").write_text(json.dumps(approved))
+    assert run(root, capsys)[0] == 1
+
+
+def test_unknown_extra_disks_are_a_problem_not_zero():
+    unk = inst(public=False, ebs_block_device=[])
+    unk["change"]["after_unknown"] = {"ebs_block_device": True}
+    _, problems = cost_check.plan_cost(plan(unk), AWS_PRICES)
+    assert problems and "ebs_block_device" in problems[0]
+
+
+def test_a_stack_directly_under_stacks_aws_is_aws(tmp_path):
+    assert cost_check.provider_of_stack("stacks/aws") == "aws"
+    assert cost_check.provider_of_stack("stacks/aws/10-access") == "aws"
+    assert cost_check.provider_of_stack("stacks/10-access") == "digitalocean"
+
+
+def test_a_malformed_manifest_exits_nonzero_instead_of_crashing(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    (root / "stacks/aws/10-access/cost.json").write_text(
+        '{"resources": [{"kind": "instance"}]}'
+    )
+    code, _ = run(root, capsys)
+    assert code == 1
+
+
+def test_malformed_plan_shapes_exit_nonzero(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    p = tmp_path / "p.json"
+    p.write_text(
+        json.dumps(
+            {
+                "resource_changes": [
+                    {
+                        "type": "aws_instance",
+                        "change": {
+                            "actions": ["create"],
+                            "after": {
+                                "instance_type": "t4g.micro",
+                                "root_block_device": ["x"],
+                            },
+                        },
+                    }
+                ]
+            }
+        )
+    )
+    assert (
+        run(root, capsys, "--plan", str(p), "--stack", "stacks/aws/10-access")[0] == 1
+    )
+
+
+def test_inactive_providers_are_reported_as_an_attestation(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO, aws_active=False)
+    out = run(root, capsys)[1].out
+    assert "aws: planned $20.84/mo, approved $21.00, inactive" in out
