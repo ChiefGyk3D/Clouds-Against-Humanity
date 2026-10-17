@@ -790,6 +790,32 @@
         "status": "exists"
       },
       {
+        "name": "inbound_from_other_tags",
+        "type": "list(object({protocol=string,port_range=string,tag=string}))",
+        "description": "Inbound rules that admit only droplets carrying the given other tag (source_tags, never an address). Additive. Empty means none.",
+        "required": false,
+        "default": [],
+        "validation": "protocol tcp or udp; port_range a port or ascending range within 1..65535; tag 1 to 255 characters of letters, digits, colon, hyphen, underscore; no duplicate (protocol, port_range, tag)",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "[{protocol=\"tcp\", port_range=\"9100\", tag=\"cah-connector-tor1\"}]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "outbound_to_other_tags",
+        "type": "list(object({protocol=string,port_range=string,tag=string}))",
+        "description": "Outbound rules that reach only droplets carrying the given other tag (destination_tags, never an address). Additive. Empty means none.",
+        "required": false,
+        "default": [],
+        "validation": "protocol tcp or udp; port_range a port or ascending range within 1..65535; tag 1 to 255 characters of letters, digits, colon, hyphen, underscore; no duplicate (protocol, port_range, tag)",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "[{protocol=\"tcp\", port_range=\"9100\", tag=\"cah-connector-tor1\"}]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
         "name": "resource_key",
         "type": "string",
         "description": "Key used in resource names in place of region; empty means region. Set by the calling stack from its resource_key.",
