@@ -19,6 +19,8 @@
 **How it works (engineers start here)**
 - [Architecture overview](Architecture-Overview.md)
 - [Threat model](Threat-Model.md)
+- [Threat model exercise: build your own](Threat-Model-Exercise.md)
+- [Trace one change end to end](Trace-One-Change-End-to-End.md)
 - [Twingate](Twingate.md)
 - [Spacelift](Spacelift.md)
 - [Doppler and secrets](Doppler-and-Secrets.md)
