@@ -60,6 +60,7 @@ After those, come back here and follow the reading order below.
 | 12 | [Roadmap](Roadmap.md) | Stages 0 through 4 |
 | | [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) | Break each safety property on your own computer and watch the check object |
 | | [Threat model exercise](Threat-Model-Exercise.md) | Build your own threat model for this repo, then answer three what-if scenarios |
+| | [Threat Dragon exercise](Threat-Dragon-Exercise.md) | Open a ready-made OWASP Threat Dragon model of the pipeline, find each trust boundary, then add a second cloud |
 | | [Trace one change end to end](Trace-One-Change-End-to-End.md) | Follow one real pull request through every gate to the Spacelift confirm |
 | | [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) | The replication path, with checkpoints and teardown |
 | | [Troubleshooting index](Troubleshooting-Index.md) | A symptom, its likely cause, and the page that has the fix |
