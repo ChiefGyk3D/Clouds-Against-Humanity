@@ -1000,3 +1000,118 @@ def test_main_fails_a_plan_with_a_dedicated_instance(tmp_path, capsys):
     p.write_text(json.dumps(plan(inst("a", tenancy="dedicated"), inst("b"))))
     code, out = run(root, capsys, "--plan", str(p), "--stack", AWS_STACK)
     assert code == 1 and "unpriced attribute" in out.err
+
+
+# ---- second review round -----------------------------------------------------
+
+
+def test_a_utf8_bom_does_not_hide_the_first_block(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    (root / f"{AWS_STACK}/bom.tf").write_bytes(b"\xef\xbb\xbf" + NAT.encode())
+    fails(root, capsys, "aws_nat_gateway")
+
+
+def test_a_bom_before_a_module_is_read(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    (root / f"{AWS_STACK}/bom.tf").write_bytes(
+        b'\xef\xbb\xbfmodule "r" {\n  source = "git::x"\n}\n'
+    )
+    fails(root, capsys, "non-local source")
+
+
+def test_crlf_files_are_read(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    text = (
+        (
+            'module "c" {\r\n  source = "../../../modules/aws/twingate-connector"\r\n'
+            "  instance_type = local.c.type\r\n  count = 4\r\n}\r\n" + NAT
+        )
+        .replace("\n", "\r\n")
+        .replace("\r\r", "\r")
+    )
+    (root / f"{AWS_STACK}/crlf.tf").write_bytes(text.encode())
+    fails(root, capsys, "uses count", "aws_nat_gateway")
+
+
+def test_a_crlf_connector_size_reference_passes(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    (root / f"{AWS_STACK}/m.tf").write_bytes(
+        b'module "c0" {\r\n  source = "../../../modules/aws/twingate-connector"\r\n'
+        b"  instance_type = local.c.type\r\n}\r\n" + CONNECTOR.format(i=1).encode()
+    )
+    assert run(root, capsys)[0] == 0
+
+
+def test_a_root_level_directory_symlink_is_refused(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    outside = tmp_path.parent / (tmp_path.name + "-ext")
+    (outside / "twingate-connector").mkdir(parents=True)
+    (outside / "twingate-connector/main.tf").write_text(
+        'resource "digitalocean_kubernetes_cluster" "x" {}\n'
+    )
+    (root / "vendor").symlink_to(outside)
+    add(
+        root,
+        f"{AWS_STACK}/x.tf",
+        'module "v" {\n  source = "../../../vendor/twingate-connector"\n  size = local.c.size\n}\n',
+    )
+    fails(root, capsys, "vendor: symlinked directory is refused")
+
+
+def test_a_symlinked_module_target_escaping_the_root_is_refused(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    outside = tmp_path.parent / (tmp_path.name + "-ext2")
+    outside.mkdir()
+    link = root / "stacks/10-access/ln"
+    link.symlink_to(outside)
+    add(
+        root,
+        f"{AWS_STACK}/x.tf",
+        'module "v" {\n  source = "../../../stacks/10-access/ln"\n}\n',
+    )
+    fails(root, capsys, "outside the repository")
+
+
+def test_a_symlinked_tf_file_is_refused(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    target = tmp_path.parent / (tmp_path.name + "-f.tf")
+    target.write_text(NAT)
+    (root / f"{AWS_STACK}/link.tf").symlink_to(target)
+    fails(root, capsys, "symlink")
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        'locals {\n  x = "${1 /* } " <<FAKE */ + 2}"\n}\n',
+        'locals {\n  x = "${(1 # } " <<FAKE\n    + 2)}"\n}\n',
+        'locals {\n  x = "${(1 // } " <<FAKE\n    + 2)}"\n}\n',
+    ],
+)
+def test_comments_inside_interpolation_are_comments(tmp_path, capsys, text):
+    root = build(tmp_path, aws=TWO)
+    add(root, f"{AWS_STACK}/x.tf", text)
+    assert run(root, capsys)[0] == 0
+
+
+def test_a_connector_in_an_ordinary_module_directory_is_not_a_stack(tmp_path, capsys):
+    root = build(tmp_path, aws=TWO)
+    add(
+        root,
+        "modules/wrapper/main.tf",
+        'locals {\n  c = { size = "s-1vcpu-1gb" }\n}\n\n'
+        'module "inner" {\n  source = "../twingate-connector"\n  size = local.c.size\n}\n',
+    )
+    assert run(root, capsys)[0] == 0
+
+
+def test_a_connector_in_a_module_directory_still_has_its_source_and_size_checked(
+    tmp_path, capsys
+):
+    root = build(tmp_path, aws=TWO)
+    add(
+        root,
+        "modules/wrapper/main.tf",
+        'module "inner" {\n  source = "../twingate-connector"\n  size = "s-32vcpu-192gb"\n}\n',
+    )
+    fails(root, capsys, "docs/cost.md")

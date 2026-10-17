@@ -457,6 +457,16 @@ def skip_interpolation(text, j):
         if c == '"':
             j = skip_string(text, j)
             continue
+        if c == "#" or text.startswith("//", j):
+            nl = text.find("\n", j)
+            j = n if nl == -1 else nl
+            continue
+        if text.startswith("/*", j):
+            end = text.find("*/", j + 2)
+            if end == -1:
+                raise HclError("unterminated /* comment in an interpolation")
+            j = end + 2
+            continue
         if c == "{":
             depth += 1
         elif c == "}":
@@ -652,9 +662,9 @@ def walk_repo(root):
             child = rel_dir / name
             where = child.as_posix()
             guarded = child.parts[0] in GUARDED_TOP
-            if guarded and Path(dirpath, name).is_symlink():
+            if Path(dirpath, name).is_symlink():
                 problems.append(
-                    f"{where}: symlinked directory under {child.parts[0]}/ is refused"
+                    f"{where}: symlinked directory is refused; the gate does not follow it, OpenTofu does"
                 )
                 continue
             if guarded and name.startswith("."):
@@ -669,7 +679,13 @@ def walk_repo(root):
                 )
             keep.append(name)
         dirnames[:] = keep
-        files += [(rel_dir / f).as_posix() for f in sorted(filenames)]
+        for f in sorted(filenames):
+            if f.endswith(HCL_SUFFIXES) and Path(dirpath, f).is_symlink():
+                problems.append(
+                    f"{(rel_dir / f).as_posix()}: symlinked OpenTofu file is refused"
+                )
+                continue
+            files.append((rel_dir / f).as_posix())
     return sorted(files), problems
 
 
@@ -692,7 +708,11 @@ def hcl_files(root):
         if not rel.endswith(HCL_SUFFIXES):
             continue
         try:
-            yield rel, strip_comments(Path(root, rel).read_text()), None
+            yield (
+                rel,
+                strip_comments(Path(root, rel).read_text(encoding="utf-8-sig")),
+                None,
+            )
         except (HclError, UnicodeDecodeError) as err:
             yield rel, None, str(err)
 
@@ -763,7 +783,7 @@ def module_blocks(text):
     ]
 
 
-def module_source_problem(rel, block):
+def module_source_problem(root, rel, block):
     """(source or None, problem or None) for one module block."""
     sources = [v for k, v in block.attrs() if k == "source"]
     if len(sources) > 1:
@@ -788,23 +808,33 @@ def module_source_problem(rel, block):
         return None, (
             f"{rel}:{block.line}: module {block.labels[0]!r} source {source!r} is outside the repository"
         )
+    resolved = Path(root, posixpath.dirname(rel), source).resolve()
+    if not resolved.is_relative_to(Path(root).resolve()):
+        return None, (
+            f"{rel}:{block.line}: module {block.labels[0]!r} source {source!r} is outside the repository "
+            "once symlinks are resolved"
+        )
     return source, None
 
 
 def module_problems(root):
     """Check module blocks. Returns (problems, {stack dir: connector module count})."""
     problems, connectors = [], {}
+    manifests = dict(stack_manifests(root))
     for rel, block in file_blocks(root):
         if block.kind != "module" or block.problem:
             continue
         name = block.labels[0]
-        source, problem = module_source_problem(rel, block)
+        source, problem = module_source_problem(root, rel, block)
         if problem:
             problems.append(problem)
             continue
         if source.rstrip("/").endswith(CONNECTOR_SOURCE_SUFFIX):
             stack = str(Path(rel).parent.as_posix())
-            connectors[stack] = connectors.get(stack, 0) + 1
+            # Only a stack's own connector blocks reconcile with its manifest; a
+            # module directory may compose one without being a stack.
+            if stack in manifests or stack.startswith("stacks/"):
+                connectors[stack] = connectors.get(stack, 0) + 1
             attrs = block.attrs()
             for key, _ in attrs:
                 if key in ("count", "for_each"):
