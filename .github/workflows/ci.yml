@@ -30,9 +30,11 @@ jobs:
       python-versions: '["3.12", "3.13"]'
       install-command: pip install pytest pyyaml==6.0.2
       # The cost gate first: it is a script in this repository, so it rides the
-      # Python job rather than needing a job of its own. The identifier check
-      # (no cloud account ids in a public repository) runs last.
-      test-command: python -I scripts/cost_check.py --root . && python -I -m pytest tests -q && python -I scripts/identifier_check.py --root .
+      # Python job rather than needing a job of its own. The settings page check
+      # fails when docs/wiki/Settings-Reference.md is stale against
+      # docs/settings.json. The identifier check (no cloud account ids in a
+      # public repository) runs last.
+      test-command: python -I scripts/cost_check.py --root . && python -I scripts/gen_settings_doc.py --check && python -I -m pytest tests -q && python -I scripts/identifier_check.py --root .
       lint-install-command: pip install ruff==0.17.0
       lint-command: ruff check scripts tests
       workflow-lint: false
