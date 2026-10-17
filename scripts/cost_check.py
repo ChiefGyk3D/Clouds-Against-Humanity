@@ -256,7 +256,7 @@ def plan_cost(plan, prices):
     for rc in plan.get("resource_changes", []):
         rtype, addr = rc.get("type", ""), rc.get("address", "?")
         change = rc.get("change", {})
-        if change.get("actions") == ["delete"]:
+        if rc.get("mode") == "data" or change.get("actions") == ["delete"]:
             continue
         if not rtype.startswith("aws_"):
             continue
@@ -285,7 +285,25 @@ def plan_cost(plan, prices):
     return round(total, 2), problems
 
 
+GP3_BASELINE = {"iops": 3000, "throughput": 125}
+
+
+def check_volume_shape(addr, block, unknown, type_key):
+    """The price table is gp3 at baseline performance. Anything else costs
+    more or differently, so it is refused until it is modeled."""
+    vtype = block.get(type_key)
+    if unknown.get(type_key) or vtype not in (None, "gp3"):
+        raise ValueError(f"{addr}: volume type {vtype!r} is not priced (only gp3 is)")
+    for key, baseline in GP3_BASELINE.items():
+        value = block.get(key)
+        if unknown.get(key) or value not in (None, 0, baseline):
+            raise ValueError(
+                f"{addr}: provisioned {key} {value!r} is above the gp3 baseline and is not priced"
+            )
+
+
 def plan_volume_gb(addr, block, unknown, key):
+    check_volume_shape(addr, block, unknown, "type" if key == "size" else "volume_type")
     if unknown.get(key) or block.get(key) is None:
         raise ValueError(
             f"{addr}: volume size is not known in the plan; set it explicitly"

@@ -477,3 +477,42 @@ def test_inactive_providers_are_reported_as_an_attestation(tmp_path, capsys):
     root = build(tmp_path, aws=TWO, aws_active=False)
     out = run(root, capsys)[1].out
     assert "aws: planned $20.84/mo, approved $21.00, inactive" in out
+
+
+def test_data_sources_in_the_plan_are_neither_priced_nor_rejected():
+    ami = change("aws_ami", "x", {})
+    ami["mode"] = "data"
+    lookup = inst()
+    lookup["mode"] = "data"
+    assert cost_check.plan_cost(plan(ami, lookup), AWS_PRICES) == (0.0, [])
+
+
+@pytest.mark.parametrize(
+    "block",
+    [
+        {"volume_size": 8, "volume_type": "io2"},
+        {"volume_size": 8, "volume_type": "gp2"},
+        {"volume_size": 8, "iops": 16000},
+        {"volume_size": 8, "throughput": 1000},
+    ],
+)
+def test_unpriced_root_volume_shapes_are_a_problem(block):
+    bad = inst()
+    bad["change"]["after"]["root_block_device"] = [block]
+    _, problems = cost_check.plan_cost(plan(bad), AWS_PRICES)
+    assert problems
+
+
+def test_gp3_at_baseline_is_priced():
+    ok = inst()
+    ok["change"]["after"]["root_block_device"] = [
+        {"volume_size": 8, "volume_type": "gp3", "iops": 3000, "throughput": 125}
+    ]
+    assert cost_check.plan_cost(plan(ok), AWS_PRICES)[1] == []
+
+
+def test_standalone_and_extra_volumes_are_shape_checked():
+    vol = change("aws_ebs_volume", "v", {"size": 10, "type": "io1", "iops": 5000})
+    assert cost_check.plan_cost(plan(vol), AWS_PRICES)[1]
+    extra = inst(ebs_block_device=[{"volume_size": 10, "volume_type": "st1"}])
+    assert cost_check.plan_cost(plan(extra), AWS_PRICES)[1]
