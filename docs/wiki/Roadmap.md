@@ -2,7 +2,7 @@
 
 > Prerequisites: the [Architecture overview](Architecture-Overview.md) and the [How money works in the cloud](How-Money-Works-in-the-Cloud.md) primer, because every stage here is a cost decision.
 
-The environment grows one stage at a time. Each stage gets its own design, its own cost approval and its own guide before it costs anything. Working ceiling across stages 0 to 4: $30 per month.
+The environment grows one stage at a time. Each stage gets its own design, its own cost approval and its own guide before it costs anything. Working ceiling in the current phase: $30 per month. Every phase carries its own ceiling in `docs/stages/approved.json`, with a reason and a decision date, and a later phase can raise it on purpose (see the [per-phase cost table](#cost-per-phase) below).
 
 ```mermaid
 flowchart LR
@@ -16,6 +16,24 @@ flowchart LR
     classDef done fill:#132a1f,stroke:#4ade80,color:#dcfce7
     classDef plan fill:#1e1b3a,stroke:#a78bfa,color:#ede9fe
 ```
+
+## Cost per phase
+
+The gate enforces the ceiling of the current phase (`stage-1`, $30). The other rows are proposals from the stage designs; none is approved until its phase becomes current. "Reference spend" is what the reference environment adds to the cloud bill; "extras" are optional builds for a learner or a later decision. Prices are in `docs/cost-prices.json` (DigitalOcean, retrieved 2026-10-10), `docs/cost-prices/aws.json` (retrieved 2026-10-16) and the Spaces price read 2026-10-11 in `docs/cost.md`.
+
+| Phase id | Status | Ceiling | Reference spend, with arithmetic | Optional extras |
+|---|---|---|---|---|
+| `stage-0` | done | $30 | $0 | none |
+| `stage-1` | current | $30 | two `s-1vcpu-1gb` connectors, $6 + $6 = $12 | none |
+| `stage-2` | planned | $30 | $0 added: logs go to the on-prem SIEM, so still $12 | none |
+| `stage-3` | planned | $30 | $12 connectors + $12 `s-1vcpu-2gb` droplet + $5 bucket = $29 ($1 left) | a larger droplet or no bucket: $30 to $41 (see [cost](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md#stage-3-estimate-not-approved)) |
+| `stage-4` | planned | $30 | $0 added: Grafana runs on-prem, so still $29 | none |
+| `aws-twin` | planned | $30 | two `t4g.micro`: 2 x (730 h x $0.0084 + 730 h x $0.005 + 8 GiB x $0.08) = 2 x $10.42 = $20.84, applied only while the DigitalOcean connectors are torn down | none |
+| `edge` | planned | $35 | not costed: its design sets the number. The floor is $29 + one $6 droplet = $35 | placeholder only |
+| `second-site` | planned | $41 | $29 + a second site's two connectors, $12 = $41 | a second AWS or DigitalOcean site |
+| `learner-soc` | planned | $53 | the reference environment stays at $29 | a learner's cloud mini SOC: $29 + $6, $12, $18 or $24 = $35, $41, $47 or $53 ([Build your own mini SOC](Build-Your-Own-Mini-SOC.md)) |
+
+Reading the table: a ceiling may stay equal or rise from one phase to the next, and a decrease has to be written down as one (`"lowers": true`). The edge, second-site and learner-soc rows are the first places the ceiling rises past $30. To raise a ceiling: add or edit the phase entry (ceiling, reason, decided), set `current_phase`, and raise the provider approval separately; `scripts/cost_raise.py` prints the diff. Procedure in [docs/cost.md](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md#to-raise-the-ceiling).
 
 ## Stage 0: foundation (built)
 
@@ -58,7 +76,7 @@ One workload droplet in the VPC running Docker Engine and Portainer CE, hardened
 
 All of them are outbound-only pollers that read their secrets from Doppler, which is why they are a good first set. They were written for one Docker container on a Raspberry Pi, so the stage includes a "cloud-optimized install" for each: state moves from the container's disk into an S3-compatible bucket (DigitalOcean Spaces, $5 flat, versioning on), each gets a run-once mode, and the jobs that already run on a timer (the penguin-overlord runners, solarstorm_scout) move to DigitalOcean Functions, the Lambda equivalent, inside its free allowance. With state off the host the droplet is disposable and the thin size is enough.
 
-Estimated cost: $12 for an `s-1vcpu-2gb` droplet plus $5 for the bucket, $17 in all, which brings the running total to $29 under the $30 ceiling with droplet backups off. Backups come from the versioned bucket and a nightly copy off the account instead. Larger droplets, a free-tier bucket at another provider and the costs of each are in the draft.
+Estimated cost: $12 for an `s-1vcpu-2gb` droplet plus $5 for the bucket, $17 in all, which brings the running total to $29 under the $30 ceiling proposed for the `stage-3` phase with droplet backups off. Backups come from the versioned bucket and a nightly copy off the account instead. Larger droplets, a free-tier bucket at another provider and the costs of each are in the draft.
 
 Depends on stage 2 for two things: the daemons reaching the on-prem Ollama server (until then the AI text is off or on Gemini), and the nightly copy of the bucket going home.
 
@@ -74,7 +92,7 @@ Handoff: [2026-10-12 edge DMZ handoff](https://github.com/ChiefGyk3D/Clouds-Agai
 - iperf3 measured over two paths to the same endpoint, direct and through Twingate, cheap probes often and throughput tests rarely.
 - Stage 1 hardening first: nftables default-drop on core droplets, a plan policy denying inbound rules on core tags, an IPv6 check, an external zero-open-ports check and the metadata-endpoint restriction.
 - Stage 3 amendments: a cloud Uptime Kuma, the LLM contract through a LiteLLM proxy, the Discord bridge decision order, and webhook receivers on DigitalOcean Functions writing to the bucket so the workload host keeps zero inbound.
-- Cost: this lands past the $30 ceiling (stage 3 is already at $29). The design must lay out raising it, deferring something or moving pieces; the ceiling is not raised by default.
+- Cost: this lands past the $30 ceiling (stage 3 is already at $29). The design must lay out raising it, deferring something or moving pieces; the ceiling is not raised by default. The `edge` phase holds a $35 placeholder (stage 3's $29 plus one $6 droplet) that the design replaces with a costed number.
 - Honeypot: a design doc only, on a separate account or provider, never in this project's apply path.
 - PeerTube is a DMZ-class workload and needs its own costed stage. Not designed yet.
 

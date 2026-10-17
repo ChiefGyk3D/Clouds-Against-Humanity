@@ -7,7 +7,7 @@
 - A baseline tag, `cah-baseline-tor1`.
 - A baseline firewall attached to that tag with zero inbound rules. DigitalOcean denies any inbound traffic that no rule allows, so every droplet that carries the tag is closed to the internet from the moment it exists.
 
-Cost: $0. Nothing in this stage is billed.
+Cost: $0. Nothing in this stage is billed. Phase id `stage-0`, ceiling $30 (`phases` in `docs/stages/approved.json`, see [cost](../cost.md#ceilings-per-phase)).
 
 ## 2. Account hardening checklist
 

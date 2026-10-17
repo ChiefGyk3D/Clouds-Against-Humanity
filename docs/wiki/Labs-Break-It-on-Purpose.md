@@ -122,7 +122,7 @@ Notice the wording. Nothing failed in the module; a test that *expects* a failur
 
 **What it teaches:** a cost gate that fails closed. Anything it does not recognise is refused.
 
-**Setup.** From the repository root, `python -I scripts/cost_check.py --root .` should print `cost-check: digitalocean: planned $12.00/mo, approved $12.00, active` followed by `cost-check: shared ceiling $30.00` and exit 0.
+**Setup.** From the repository root, `python -I scripts/cost_check.py --root .` should print `cost-check: digitalocean: planned $12.00/mo, approved $12.00, active` followed by `cost-check: phase stage-1 ceiling $30.00 (reason: ...)` and exit 0.
 
 **Predict.** Append this to `stacks/10-access/main.tf`:
 
@@ -142,7 +142,7 @@ A load balancer is a billable resource. The gate has no price for it. Will the g
 ```text
 cost-check: resource type not on the free list, not approved, or outside its allowed file: stacks/10-access/main.tf: digitalocean_loadbalancer (the gate has no price model for it)
 cost-check: digitalocean: planned $12.00/mo, approved $12.00, active
-cost-check: shared ceiling $30.00
+cost-check: phase stage-1 ceiling $30.00 (reason: Two Twingate connector droplets at $6 each, $12 in all, approved under the original $30 working ceiling.)
 exit 1
 ```
 

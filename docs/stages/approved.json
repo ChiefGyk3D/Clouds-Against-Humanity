@@ -1,6 +1,64 @@
 {
   "stage": 1,
-  "ceiling": 30.0,
+  "current_phase": "stage-1",
+  "hard_max": 60.0,
+  "hard_max_reason": "Absolute monthly limit no phase ceiling may pass: just above the largest proposed phase ($53, the learner mini SOC). Raising it is its own reviewed edit.",
+  "phases": {
+    "stage-0": {
+      "ceiling": 30.0,
+      "reason": "The working ceiling set in the foundation design; stage 0 itself costs $0.",
+      "decided": "2026-10-10",
+      "status": "done"
+    },
+    "stage-1": {
+      "ceiling": 30.0,
+      "reason": "Two Twingate connector droplets at $6 each, $12 in all, approved under the original $30 working ceiling.",
+      "decided": "2026-10-10",
+      "status": "current"
+    },
+    "stage-2": {
+      "ceiling": 30.0,
+      "reason": "Proposed in the stage design: the reference environment adds $0 to the cloud bill (logs go to the on-prem SIEM), so the ceiling stays equal. Needs the maintainer's approval before becoming current.",
+      "decided": "2026-10-16",
+      "status": "planned"
+    },
+    "stage-3": {
+      "ceiling": 30.0,
+      "reason": "Proposed in the stage design: needs $29 (connectors $12, s-1vcpu-2gb droplet $12, Spaces bucket $5); the ceiling stays at $30 and leaves $1. Needs the maintainer's approval before becoming current.",
+      "decided": "2026-10-16",
+      "status": "planned"
+    },
+    "stage-4": {
+      "ceiling": 30.0,
+      "reason": "Proposed in the stage design: Grafana runs on-prem and adds $0 to the cloud bill, so the ceiling stays equal. Needs the maintainer's approval before becoming current.",
+      "decided": "2026-10-16",
+      "status": "planned"
+    },
+    "aws-twin": {
+      "ceiling": 30.0,
+      "reason": "Proposed: the AWS twin of stage 1 is $20.84 and is applied only while the DigitalOcean connectors are torn down, so it fits under $30 alone. Needs the maintainer's approval before becoming current.",
+      "decided": "2026-10-16",
+      "status": "planned"
+    },
+    "edge": {
+      "ceiling": 35.0,
+      "reason": "Placeholder, not costed: the public edge (DMZ) design has no price yet. $35 is the floor, stage 3's $29 plus one $6 droplet. The edge design sets the real number; needs the maintainer's approval before becoming current.",
+      "decided": "2026-10-16",
+      "status": "planned"
+    },
+    "second-site": {
+      "ceiling": 41.0,
+      "reason": "Proposed: a second DigitalOcean site adds two more $6 connectors, +$12, to stage 3's $29, $41. Needs the maintainer's approval before becoming current.",
+      "decided": "2026-10-16",
+      "status": "planned"
+    },
+    "learner-soc": {
+      "ceiling": 53.0,
+      "reason": "Proposed: a learner's own cloud mini SOC at the largest single-droplet option, $24, on top of stage 3's $29. Not part of the reference environment; needs the maintainer's approval before becoming current.",
+      "decided": "2026-10-16",
+      "status": "planned"
+    }
+  },
   "providers": {
     "digitalocean": {
       "approved_monthly_total": 12.0,

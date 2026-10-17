@@ -1,6 +1,6 @@
 # Cost
 
-Working ceiling: $30 per month for stages 0 to 4. Each stage must be costed and approved before it runs.
+Working ceiling: $30 per month in the current phase (`stage-1`). The ceiling is a decision per phase, kept in `docs/stages/approved.json` (see "Ceilings per phase" below), and a later phase may raise it on purpose. Each stage must be costed and approved before it runs.
 
 | Stage | Adds | Monthly | Running |
 |---|---|---|---|
@@ -24,18 +24,72 @@ Stage 3 adds one Docker host running Portainer CE, five small daemons, an S3-com
 
 Prices read 2026-10-11: Spaces is $5 per month for 250 GiB stored and 1 TiB outbound transfer per account, then $0.02 per GiB stored and $0.01 per GiB out. Functions have a free allowance of 90,000 GiB-seconds per month per team, then $0.0000185 per GiB-second; the stage's expected use is near the allowance and an overage month would cost cents. Functions are deployed with `doctl`, not OpenTofu, so the gate cannot see them: their spend is a line someone checks on the usage page.
 
-None of this is in `approved.json` yet. Droplet backups are off in every row; the bucket's versioning and a nightly copy off the account are the backups. Block storage is not needed. Approving the stage means picking one row, raising `approved_monthly_total` to its running total on purpose, adding the new module and the bucket's file to `allowed_sources`, and teaching the gate to price a `spaces` manifest entry as a flat amount.
+The stage 3 phase exists in `approved.json` as a planned entry with a $30 placeholder ceiling, but nothing about it is approved. Droplet backups are off in every row; the bucket's versioning and a nightly copy off the account are the backups. Block storage is not needed. Approving the stage means picking one row, raising `approved_monthly_total` to its running total on purpose, adding the new module and the bucket's file to `allowed_sources`, and teaching the gate to price a `spaces` manifest entry as a flat amount.
+
+## Ceilings per phase
+
+The ceiling is not one hard-coded number. `docs/stages/approved.json` holds an ordered map `phases`, one entry per phase of the project, and `current_phase` names the one the gate enforces:
+
+```json
+"current_phase": "stage-1",
+"phases": {
+  "stage-1": { "ceiling": 30.0, "reason": "why this number", "decided": "2026-10-10", "status": "current" },
+  "stage-3": { "ceiling": 30.0, "reason": "...", "decided": "2026-10-16", "status": "planned" }
+}
+```
+
+| Phase id | Ceiling | Status | What it covers |
+|---|---|---|---|
+| `stage-0` | $30 | done | Foundation, $0 |
+| `stage-1` | $30 | current | Two connectors, $12 |
+| `stage-2` | $30 | planned | Logs and the link home, $0 in the reference environment |
+| `stage-3` | $30 | planned | Workload host, bucket, Functions, $29 |
+| `stage-4` | $30 | planned | Grafana on-prem, $0 |
+| `aws-twin` | $30 | planned | The AWS twin of stage 1, $20.84, applied only while the DigitalOcean connectors are down |
+| `edge` | $35 | planned | Public edge (DMZ); placeholder, not costed, the floor is stage 3 plus one $6 droplet |
+| `second-site` | $41 | planned | A second DigitalOcean site on top of stage 3: $29 + $12 |
+| `learner-soc` | $53 | planned | A learner's own cloud mini SOC on top of stage 3: $29 + $24 for the largest single-droplet option |
+
+The planned rows are proposals taken from the stage designs; none of them is approved until it becomes `current`. The [Roadmap](wiki/Roadmap.md) shows the arithmetic.
+
+The gate enforces, for the current phase:
+
+- `current_phase` is a key of `phases`, and exactly one phase has `status: "current"`, which is `current_phase`;
+- every phase has a finite, non-negative `ceiling`, a non-empty `reason`, a `decided` date (`YYYY-MM-DD`) and a `status` of `planned`, `current` or `done`;
+- over the declared order a ceiling may stay equal or rise. A **decrease** must be explicit: the phase carries `"lowers": true` (and a reason), so a limit is never weakened quietly. `lowers: true` on a phase that does not go lower also fails;
+- a top-level `hard_max` (with a `hard_max_reason`) is required whenever `phases` exists. It is the absolute limit: any phase ceiling above it fails, so a ceiling can only go past it by editing `hard_max` in the same reviewed diff (today $60);
+- ceilings, `hard_max` and every `approved_monthly_total` must be JSON numbers (a string such as `"1e6"` fails) with at most two decimal places, so the number the gate enforces is the one a reviewer reads;
+- phases run `planned -> current -> done`, in declared order: every `done` phase comes before the current one and every `planned` phase after it. `lowers: true` on the first phase fails (nothing comes before it). A `done` phase may not have a ceiling above the current phase's: one file cannot prove that a finished phase is real, so finished phases are a ratchet and a large ceiling planted in one cannot be switched on later. The price is that a ceiling lower than any finished phase is not supported; to go lower you start a new approved file in a reviewed change;
+- a JSON file with a repeated key (`current_phase` twice, say) fails, because Python would keep the last one silently. This covers `approved.json`, every `cost.json` and the price tables;
+- the per-provider approvals and the sum of the `active` providers are checked against the current phase's ceiling (everything else in the next section is unchanged);
+- a top-level `ceiling` is read only when `phases` is absent (an older file); with both present, the file fails.
+
+The summary line names the phase: `cost-check: phase stage-1 ceiling $30.00 (reason: ...)`.
+
+One file cannot show history, so the lifecycle between versions is checked when the gate is given the base branch's copy: `python3 -I scripts/cost_check.py --root . --base-approved <base approved.json>`. CI does this on every pull request through `scripts/ci_cost_gate.sh`, which fetches the base branch tip (shallow, from the same host the checkout uses) and **fails** if it cannot get it; on a push to main it prints that there is no base and runs the plain gate. The gate then also fails when a phase of any status is removed, when a `done` phase changes or becomes current again (a large ceiling planted in a finished phase could otherwise be switched on without looking like a raise), when a status moves any way but planned, current, done, or when a new phase starts as `done`, and it prints `EFFECTIVE CEILING CHANGED: phase A $X -> phase B $Y` whenever the enforced number moves. `scripts/cost_raise.py` always runs the same check on its own edit.
+
+### To raise the ceiling
+
+Add or edit the phase entry (`ceiling`, `reason`, `decided`), set `current_phase` (and move `status: "current"` to match), and raise the provider approval separately. The diff is the review: a reviewer sees the new number, why, and when it was decided, in one pull request. `scripts/cost_raise.py` prints that diff for you:
+
+```bash
+python3 -I scripts/cost_raise.py --phase stage-3 --ceiling 36 --reason 'bigger droplet for the bridge' --make-current --cascade
+python3 -I scripts/cost_raise.py --phase stage-3 --ceiling 36 --reason 'bigger droplet for the bridge' --make-current --cascade --write
+```
+
+The first line is a dry run: it starts with `EFFECTIVE CEILING: phase stage-1 $30.00 -> phase stage-3 $36.00` (the number the gate will enforce, before and after), then shows the proposed `approved.json` diff and any problem the gate finds. It runs every check `cost_check.py` runs (allowlist, structure, approvals, phases and the lifecycle), not only the totals. The second edits the file, only if those pass: it takes an exclusive lock on the directory, re-reads the file and refuses if it changed since the first read, then writes a temporary file in the same directory, syncs it and renames it over the original. A phase that is `done` cannot be edited or made current again, and `--make-current` moves one phase forward at a time. `--cascade` also raises later phases whose ceiling would otherwise be a quiet decrease (each keeps its reason with a note and gets the new date). A later deliberate `lowers` decrease is kept while it is still a decrease; its flag is dropped only when it no longer goes below its predecessor. Without `--cascade` such a raise fails the no-quiet-decrease rule. `--lowers` marks a deliberate decrease, `--after PHASE` places a new phase, `--decided DATE` overrides today. The helper never changes a provider's `approved_monthly_total`: raise that yourself, in the same pull request, together with the `cost.json` and the allowed file.
 
 ## How the gate works
 
 `scripts/cost_check.py` reads each stack's `cost.json` (found anywhere under `stacks/`; the planned machines, their sizes and whether backups are on), looks each up in that cloud's price table and adds them up per cloud. The DigitalOcean table is `docs/cost-prices.json`; other clouds have `docs/cost-prices/<cloud>.json`. A stack under `stacks/aws/` belongs to AWS; any other stack belongs to DigitalOcean. It fails if:
 
-- a cloud's total is above that cloud's `approved_monthly_total` in `docs/stages/approved.json` (currently DigitalOcean $12.00 of a shared $30.00 ceiling);
-- the approved figures of the clouds marked `active` add up to more than the shared ceiling. A cloud that is not applied right now is marked inactive, which is how a second cloud fits under one budget: you apply it while the other is torn down;
+- a cloud's total is above that cloud's `approved_monthly_total` in `docs/stages/approved.json` (currently DigitalOcean $12.00 of the current phase's $30.00 ceiling);
+- the approved figures of the clouds marked `active` add up to more than the current phase's ceiling. A cloud that is not applied right now is marked inactive, which is how a second cloud fits under one budget: you apply it while the other is torn down;
 - a stack directory has OpenTofu files but no `cost.json`;
 - a size is missing from the price table;
 - backups are requested while the backup price is unverified (see below);
-- the approved total is itself above the ceiling;
+- a cloud's approved total is itself above the current phase's ceiling;
+- the per-phase ceilings are malformed, a ceiling is lower than the phase before it without `lowers`, or a ceiling is above `hard_max` (see "Ceilings per phase");
 - a `digitalocean_*` resource type that is not on the free list appears in any `.tf` or `.tofu` file. The gate is an allowlist: `digitalocean_project`, `digitalocean_project_resources`, `digitalocean_tag`, `digitalocean_vpc`, `digitalocean_firewall` and `digitalocean_ssh_key` are free, and the droplet is allowed only in the file listed under `allowed_sources` (the connector module). Anything else, such as a NAT gateway, app, container registry, Kubernetes node pool or CDN, is refused by name and file;
 - no `stacks/**/cost.json` manifest exists, or, in any one stack, the number of `twingate-connector` module blocks differs from the number of machine entries (`droplet` or `instance`) in that stack's manifest, or a connector module block uses `count` or `for_each` (each connector is costed as its own instance, so the gate wants one module block per manifest entry);
 - a module source is not local (`./` or `../`), goes through a dot-directory, or leaves the repository, or a `*.tf.json` or `*.tofu.json` file exists, because the gate cannot read them. `*.tf` and `*.tofu` files are both read, override files included;
@@ -113,7 +167,7 @@ These are not priced, or not confirmed against the vendor's current page. Check 
 
 ### What `active` means
 
-`active` in `approved.json` is the maintainer's statement that a cloud is applied right now. The gate adds up the active figures against the shared ceiling, but it cannot see what is actually running: a cloud marked inactive can still have a manifest in the repository (the code exists, it is just not applied), and nothing checks that its stacks are destroyed. Marking a cloud inactive is a promise to tear it down first, backed by the billing alert, not by the gate.
+`active` in `approved.json` is the maintainer's statement that a cloud is applied right now. The gate adds up the active figures against the current phase's ceiling, but it cannot see what is actually running: a cloud marked inactive can still have a manifest in the repository (the code exists, it is just not applied), and nothing checks that its stacks are destroyed. Marking a cloud inactive is a promise to tear it down first, backed by the billing alert, not by the gate.
 
 ### Other limits of the source scan
 
@@ -121,4 +175,4 @@ Comments are removed and braces inside quoted strings are ignored, but heredocs,
 
 ## AWS in `approved.json`
 
-`aws` is listed with `approved_monthly_total` 21.0 (the two-connector stack is $20.84) and `active: false`: the shared $30 ceiling cannot hold DigitalOcean stage 1 ($12) and AWS ($21) together, so the AWS stack is applied only while DigitalOcean stage 1 is torn down, and `active` is flipped on purpose at that point. `modules/aws/twingate-connector/main.tf` is the only file allowed to declare an `aws_instance`. `aws_default_security_group` is a free type. On a plan, a T-family instance (`t2`, `t3`, `t3a`, `t4g`) must state `credit_specification.cpu_credits = "standard"`: the omitted default is unlimited, whose surplus credits are billed outside the fixed figure, so the gate fails closed when the block is missing.
+`aws` is listed with `approved_monthly_total` 21.0 (the two-connector stack is $20.84) and `active: false`: the current phase's $30 ceiling cannot hold DigitalOcean stage 1 ($12) and AWS ($21) together, so the AWS stack is applied only while DigitalOcean stage 1 is torn down, and `active` is flipped on purpose at that point. `modules/aws/twingate-connector/main.tf` is the only file allowed to declare an `aws_instance`. `aws_default_security_group` is a free type. On a plan, a T-family instance (`t2`, `t3`, `t3a`, `t4g`) must state `credit_specification.cpu_credits = "standard"`: the omitted default is unlimited, whose surplus credits are billed outside the fixed figure, so the gate fails closed when the block is missing.

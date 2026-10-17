@@ -32,7 +32,7 @@ Success looks like:
 - A provider-abstraction layer for settings. The multi-cloud rule applies: the differences are the lesson.
 - Shipping telemetry to a SaaS, packet capture, or any public inbound port.
 - Writing anything into the home SIEM repository in this work.
-- Changing the cost ceiling. It stays $30 shared (section 1.3).
+- Changing the cost ceiling. It stays $30 shared (section 1.3). (Update 2026-10-16: the ceiling is now decided per phase in `approved.json`, with every phase proposing $30 or more; the current phase, `stage-1`, is still $30. See `docs/cost.md`, "Ceilings per phase".)
 
 **Change from the stage 2 draft.** The stage 2 draft (section 1) lists "the stage 4 Grafana" as a non-goal, and the roadmap says stage 4 runs on-prem, with the cost document saying stages 2 and 4 add $0. Grafana in the cloud is now in scope as an **optional, later stage** (section 5, stages N1 to S2). The default stays $0 in the cloud: the home Grafana is extended first (section 3.2), and a cloud Grafana is built only if the maintainer approves a cost row from the table below.
 

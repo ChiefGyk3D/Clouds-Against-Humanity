@@ -6,7 +6,10 @@ provider's price table and docs/stages/approved.json. It fails when:
 
 - a stack directory has no cost.json (stacks/**/ , found recursively);
 - a provider's total is above its approved figure, or the approved figures of
-  the active providers together are above the shared ceiling;
+  the active providers together are above the current phase's ceiling
+  (approved.json `phases` and `current_phase`; see docs/cost.md);
+- the per-phase ceilings are malformed, one is lower than the phase before it
+  without an explicit `lowers`, or one is above `hard_max`;
 - a size or instance type has no price, or backups are priced from an
   unverified fraction;
 - a resource type from a provider (digitalocean_, aws_, azurerm_, google_) is
@@ -40,12 +43,14 @@ trusted run, not a file anyone can edit in a pull request.
 from __future__ import annotations
 
 import argparse
+import datetime
 import json
 import math
 import os
 import posixpath
 import re
 import sys
+from decimal import Decimal
 from pathlib import Path
 
 HOURS_PER_MONTH = 730
@@ -154,8 +159,33 @@ AWS_INSTANCE_CHECKED_ATTRS = AWS_INSTANCE_UNPRICED_ATTRS + (
 )
 
 
+def _no_duplicate_keys(pairs):
+    """Python keeps the last of a repeated key, so the value enforced would
+    differ from the one a reviewer reads first. Refuse the file instead."""
+    seen = set()
+    for key, _ in pairs:
+        if key in seen:
+            raise ValueError(f"duplicate key {key!r} in a JSON object")
+        seen.add(key)
+    return dict(pairs)
+
+
+def _no_constant(name):
+    raise ValueError(f"{name} is not a JSON number")
+
+
+def parse_json(text):
+    """json.loads that rejects duplicate keys and NaN/Infinity literals."""
+    return json.loads(
+        text, object_pairs_hook=_no_duplicate_keys, parse_constant=_no_constant
+    )
+
+
 def load_json(path):
-    return json.loads(Path(path).read_text())
+    try:
+        return parse_json(Path(path).read_text())
+    except ValueError as err:
+        raise ValueError(f"{path}: {err}") from None
 
 
 def num(value, label):
@@ -163,7 +193,7 @@ def num(value, label):
     comparison false and silently disable a limit, so it is refused here."""
     try:
         out = float(value)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         raise ValueError(f"{label}: {value!r} is not a number") from None
     if not math.isfinite(out) or out < 0:
         raise ValueError(f"{label}: {value!r} must be a finite number, zero or more")
@@ -1303,7 +1333,7 @@ def sites_problems(provider, entry, cap, parts):
                 f"{provider}: site {key} needs a numeric approved_monthly_total"
             )
             continue
-        site_cap = num(site["approved_monthly_total"], f"{provider} site {key}")
+        site_cap = money(site["approved_monthly_total"], f"{provider} site {key}")
         approved_sum += site_cap
         planned = parts.get(key)
         if planned is not None:
@@ -1331,11 +1361,277 @@ def sites_problems(provider, entry, cap, parts):
     return problems
 
 
-def approval_problems(approved, totals, parts=None):
-    """Per-provider approval and the shared ceiling. `parts` is site_totals()."""
+PHASE_ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
+PHASE_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+PHASE_STATUSES = ("planned", "current", "done")
+
+
+def money(value, label):
+    """A dollar figure in approved.json: a JSON number (not a string, not a
+    bool), finite, zero or more, with at most two decimal places so the
+    comparison the gate makes is the one a reviewer reads. Else ValueError."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"{label}: {value!r} must be a JSON number")  # noqa: TRY004
+    if isinstance(value, int) and abs(value) > sys.float_info.max:
+        raise ValueError(f"{label}: the number is too large")
+    out = num(value, label)
+    if Decimal(repr(out)).as_tuple().exponent < -2:
+        raise ValueError(f"{label}: {value!r} has more than two decimal places")
+    return out
+
+
+def phase_number(value):
+    """money() or None, for the phase checks that report their own message."""
+    try:
+        return money(value, "value")
+    except ValueError:
+        return None
+
+
+def current_ceiling(approved):
+    """(phase id, ceiling, reason) the gate enforces.
+
+    With `phases` the ceiling is the `current_phase` entry's. A legacy top-level
+    `ceiling` is read only when `phases` is absent. Raises ValueError when no
+    usable ceiling can be found; phase_problems() explains why."""
+    if "phases" not in approved:
+        return "legacy", money(approved["ceiling"], "ceiling"), "legacy top-level ceiling"
+    phases, current = approved["phases"], approved.get("current_phase")
+    if not isinstance(phases, dict) or current not in phases:
+        raise ValueError(f"current_phase {current!r} is not in phases")
+    entry = phases[current]
+    if not isinstance(entry, dict):
+        raise ValueError(f"phase {current}: not an object")  # noqa: TRY004
+    ceiling = money(entry.get("ceiling"), f"phase {current} ceiling")
+    return current, ceiling, str(entry.get("reason", ""))
+
+
+def phase_date_ok(value):
+    if not isinstance(value, str) or not PHASE_DATE_RE.match(value):
+        return False
+    try:
+        datetime.date.fromisoformat(value)
+    except ValueError:
+        return False
+    return True
+
+
+STATUS_RANK = {"done": 0, "current": 1, "planned": 2}
+
+
+def lifecycle_order_problems(phases):
+    """Phases run planned -> current -> done, in declared order: every done phase
+    comes before the current one and every planned phase after it. A done phase
+    therefore cannot be quietly switched back on without also moving others."""
+    problems, last, last_key = [], -1, None
+    for key, entry in phases.items():
+        rank = STATUS_RANK.get(entry.get("status")) if isinstance(entry, dict) else None
+        if rank is None:
+            continue
+        if rank < last:
+            problems.append(
+                f"phase {key}: status {entry['status']} comes after {last_key}; phases are done, then current, then planned, in declared order"
+            )
+        else:
+            last, last_key = rank, key
+    return problems
+
+
+def finished_phase_problems(phases, current):
+    """A finished phase may not be above the live ceiling.
+
+    One file cannot show that a done phase is genuine, and a large ceiling
+    planted in one (followed by a "lowers" on the next phase) could be switched
+    on later. So a done phase above the current phase's ceiling is refused
+    outright: finished phases are a ratchet, and the ceiling cannot be lowered
+    below a phase that already ran. The cost is that a ceiling lower than any
+    finished phase is not supported in this file (see docs/cost.md)."""
+    entry = phases.get(current) if isinstance(phases, dict) else None
+    live = phase_number(entry.get("ceiling")) if isinstance(entry, dict) else None
+    if live is None:
+        return []
     problems = []
+    for key, value in phases.items():
+        if not isinstance(value, dict) or value.get("status") != "done":
+            continue
+        done = phase_number(value.get("ceiling"))
+        if done is not None and done > live:
+            problems.append(
+                f"phase {key}: done at ${done:.2f}, above the current ceiling ${live:.2f}; "
+                "a finished phase may not exceed the live ceiling"
+            )
+    return problems
+
+
+def transition_problems(old, new):
+    """Lifecycle of each phase between two versions of approved.json.
+
+    planned -> current -> done only. A done phase never changes again, so a
+    large ceiling planted in one cannot be switched on; a phase that is current
+    stops being current only when another becomes current (the new file has
+    exactly one). A new phase arrives planned or current. Not used by the
+    plain gate (it sees one file); cost_raise runs it, and the gate runs it with
+    --base-approved FILE when CI can supply the merge base's copy."""
+    old_phases, new_phases = old.get("phases"), new.get("phases")
+    if not isinstance(old_phases, dict) or not isinstance(new_phases, dict):
+        return []
+    problems = []
+    for key, was in old_phases.items():
+        if not isinstance(was, dict):
+            continue
+        now = new_phases.get(key)
+        if now is None:
+            problems.append(
+                f"phase {key} ({was.get('status')}) may not be removed; change it instead"
+            )
+            continue
+        if was.get("status") == "done" and now != was:
+            problems.append(f"phase {key} is done and may not change")
+            continue
+        before, after = was.get("status"), (now or {}).get("status")
+        if before != after and (before, after) not in (
+            ("planned", "current"),
+            ("current", "done"),
+        ):
+            problems.append(
+                f"phase {key}: status may not go from {before} to {after} (planned, then current, then done)"
+            )
+    for key, now in new_phases.items():
+        if (
+            key not in old_phases
+            and isinstance(now, dict)
+            and now.get("status") == "done"
+        ):
+            problems.append(f"phase {key} is new and may not start as done")
+    return problems
+
+
+def effective_change(old, new):
+    """(old, new) of (phase id, ceiling), or None where one cannot be read."""
+    out = []
+    for doc in (old, new):
+        try:
+            out.append(current_ceiling(doc)[:2])
+        except (ValueError, KeyError, TypeError):
+            out.append(None)
+    return tuple(out)
+
+
+def phase_problems(approved):
+    """Shape of the per-phase ceilings (docs/cost.md, "Ceilings per phase")."""
+    hard_max = None
+    if "hard_max" in approved:
+        hard_max = phase_number(approved["hard_max"])
+        if hard_max is None:
+            return [
+                f"hard_max {approved['hard_max']!r} must be a finite number, zero or more"
+            ]
+    if "phases" in approved and "hard_max" not in approved:
+        hard_problem = [
+            "hard_max is required when phases exist (the absolute limit no phase may pass)"
+        ]
+    else:
+        hard_problem = []
+    if "phases" not in approved:
+        legacy = phase_number(approved.get("ceiling"))
+        if legacy is not None and hard_max is not None and legacy > hard_max:
+            return [f"ceiling ${legacy:.2f} is above hard_max ${hard_max:.2f}"]
+        return []
+    problems = list(hard_problem)
+    if hard_max is not None:
+        why = approved.get("hard_max_reason")
+        if not isinstance(why, str) or not why.strip():
+            problems.append("hard_max_reason must say why hard_max is that number")
+    if "ceiling" in approved:
+        problems.append(
+            "approved.json has phases and a top-level ceiling; remove the top-level ceiling, the current phase decides"
+        )
+    phases = approved["phases"]
+    if not isinstance(phases, dict) or not phases:
+        return problems + ["phases must be a non-empty map of phase id to an object"]
+    current = approved.get("current_phase")
+    if not isinstance(current, str) or current not in phases:
+        problems.append(f"current_phase {current} is not in phases")
+    now = [
+        k
+        for k, v in phases.items()
+        if isinstance(v, dict) and v.get("status") == "current"
+    ]
+    if len(now) != 1:
+        found = f" ({', '.join(now)})" if now else ""
+        problems.append(
+            f"exactly one phase must have status current, found {len(now)}{found}"
+        )
+    elif now[0] != current:
+        problems.append(
+            f"phase {now[0]} has status current but current_phase is {current}"
+        )
+    problems += lifecycle_order_problems(phases)
+    previous = None
+    for index, (key, entry) in enumerate(phases.items()):
+        if not isinstance(key, str) or not PHASE_ID_RE.match(key):
+            problems.append(
+                f"phase id {key!r} must be lowercase letters, digits and dashes"
+            )
+            previous = None
+            continue
+        if not isinstance(entry, dict):
+            problems.append(f"phase {key}: must be an object")
+            previous = None
+            continue
+        ceiling = phase_number(entry.get("ceiling"))
+        if ceiling is None:
+            problems.append(
+                f"phase {key}: ceiling {entry.get('ceiling')!r} must be a finite number, zero or more"
+            )
+        reason = entry.get("reason")
+        if not isinstance(reason, str) or not reason.strip():
+            problems.append(f"phase {key}: reason must be a non-empty string")
+        if not phase_date_ok(entry.get("decided")):
+            problems.append(
+                f"phase {key}: decided {entry.get('decided')!r} must be an ISO date (YYYY-MM-DD)"
+            )
+        if entry.get("status") not in PHASE_STATUSES:
+            problems.append(
+                f"phase {key}: status {entry.get('status')!r} must be one of {', '.join(PHASE_STATUSES)}"
+            )
+        lowers = entry.get("lowers", False)
+        if not isinstance(lowers, bool):
+            problems.append(f"phase {key}: lowers must be true or false")
+            lowers = False
+        if ceiling is not None and hard_max is not None and ceiling > hard_max:
+            problems.append(
+                f"phase {key}: ceiling ${ceiling:.2f} is above hard_max ${hard_max:.2f}"
+            )
+        if lowers and previous is None and index == 0:
+            problems.append(
+                f"phase {key}: marked lowers but it is the first phase, nothing comes before it"
+            )
+        if ceiling is not None and previous is not None:
+            prev_key, prev_ceiling = previous
+            decreased = ceiling < prev_ceiling
+            if decreased and not lowers:
+                problems.append(
+                    f"phase {key}: ceiling ${ceiling:.2f} is below {prev_key} ${prev_ceiling:.2f}; "
+                    'a lower ceiling needs "lowers": true and a reason'
+                )
+            if lowers and not decreased:
+                problems.append(
+                    f"phase {key}: marked lowers but the ceiling does not go below {prev_key} ${prev_ceiling:.2f}"
+                )
+        previous = (key, ceiling) if ceiling is not None else None
+    problems += finished_phase_problems(phases, current)
+    return problems
+
+
+def approval_problems(approved, totals, parts=None):
+    """Per-provider approval and the current phase's ceiling. `parts` is site_totals()."""
+    problems = phase_problems(approved)
     parts = parts or {}
-    ceiling = num(approved["ceiling"], "ceiling")
+    try:
+        ceiling = current_ceiling(approved)[1]
+    except ValueError:
+        return problems or ["approved.json has no usable ceiling"]
     providers = approved["providers"]
     for provider in totals:
         if provider not in providers:
@@ -1344,7 +1640,7 @@ def approval_problems(approved, totals, parts=None):
             )
     active = 0.0
     for provider, entry in providers.items():
-        cap = num(entry["approved_monthly_total"], f"{provider} approved_monthly_total")
+        cap = money(entry["approved_monthly_total"], f"{provider} approved_monthly_total")
         if cap > ceiling:
             problems.append(
                 f"{provider}: approved ${cap:.2f} is above the ceiling ${ceiling:.2f}"
@@ -1373,6 +1669,31 @@ def allowed_sources(approved):
     return merged
 
 
+def fmt_effective(pair):
+    return "unreadable" if pair is None else f"phase {pair[0]} ${pair[1]:.2f}"
+
+
+def gate_problems(root, approved, plan=None, stack=None):
+    """Every problem the gate finds and the per-provider totals. Raises
+    ValueError/KeyError/TypeError/IndexError/AttributeError on unreadable input."""
+    parts = site_totals(root)
+    totals = {p: round(sum(v.values()), 2) for p, v in parts.items()}
+    problems = [
+        f"resource type not on the free list, not approved, or outside its allowed file: {item}"
+        for item in uncosted_sources(
+            root, allowed_sources(approved), set(approved["providers"])
+        )
+    ]
+    problems += structure_problems(root)
+    problems += approval_problems(approved, totals, parts)
+    if plan:
+        if not stack:
+            problems.append("--plan needs --stack")
+        else:
+            problems += plan_problems(plan, stack, root)
+    return problems, totals
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -1386,37 +1707,33 @@ def main(argv=None):
         "--stack",
         help="the stack directory the --plan belongs to, for example stacks/aws/10-access",
     )
+    parser.add_argument(
+        "--base-approved",
+        help="the merge base's docs/stages/approved.json; checks the phase lifecycle (planned, current, done) and reports a change of the effective ceiling",
+    )
     args = parser.parse_args(argv)
     root = Path(args.root)
-    approved = load_json(root / "docs/stages/approved.json")
     try:
-        parts = site_totals(root)
-        totals = {p: round(sum(v.values()), 2) for p, v in parts.items()}
-    except (ValueError, KeyError, TypeError, IndexError, AttributeError) as err:
+        approved = load_json(root / "docs/stages/approved.json")
+        base = load_json(args.base_approved) if args.base_approved else None
+    except (OSError, ValueError) as err:
+        print(f"cost-check: unreadable approved.json: {err}", file=sys.stderr)
+        return 1
+    try:
+        problems, totals = gate_problems(root, approved, args.plan, args.stack)
+    except (ValueError, KeyError, TypeError, IndexError, AttributeError, OverflowError) as err:
         print(
-            f"cost-check: unreadable manifest, price table or plan input: {err!r}",
+            f"cost-check: unreadable manifest, price table, approval or plan input: {err!r}",
             file=sys.stderr,
         )
         return 1
-    problems = [
-        f"resource type not on the free list, not approved, or outside its allowed file: {item}"
-        for item in uncosted_sources(
-            root, allowed_sources(approved), set(approved["providers"])
-        )
-    ]
-    problems += structure_problems(root)
-    try:
-        problems += approval_problems(approved, totals, parts)
-        if args.plan:
-            if not args.stack:
-                problems.append("--plan needs --stack")
-            else:
-                problems += plan_problems(args.plan, args.stack, root)
-    except (ValueError, KeyError, TypeError, IndexError, AttributeError) as err:
-        print(
-            f"cost-check: unreadable approval or plan input: {err!r}", file=sys.stderr
-        )
-        return 1
+    if base is not None:
+        problems += transition_problems(base, approved)
+        was, now = effective_change(base, approved)
+        if was != now:
+            print(
+                f"cost-check: EFFECTIVE CEILING CHANGED: {fmt_effective(was)} -> {fmt_effective(now)}"
+            )
     for provider, total in sorted(totals.items()):
         entry = approved["providers"].get(provider, {})
         state = (
@@ -1427,7 +1744,13 @@ def main(argv=None):
         print(
             f"cost-check: {provider}: planned ${total:.2f}/mo, approved ${float(entry.get('approved_monthly_total', 0.0)):.2f}, {state}"
         )
-    print(f"cost-check: shared ceiling ${float(approved['ceiling']):.2f}")
+    try:
+        phase_id, phase_ceiling, phase_reason = current_ceiling(approved)
+        print(
+            f"cost-check: phase {phase_id} ceiling ${phase_ceiling:.2f} (reason: {phase_reason})"
+        )
+    except ValueError:
+        pass  # approval_problems() already reported why
     for problem in problems:
         print(f"cost-check: {problem}", file=sys.stderr)
     return 1 if problems else 0

@@ -50,7 +50,7 @@ The repository was public from its first commit. Free code scanning and dependen
 
 ## The cost gate
 
-A $30 per month ceiling is easy to blow past by accident: one wrong droplet size, one managed database, one load balancer. The cost gate makes the bill a reviewed number.
+A per-month ceiling (today $30, set per phase) is easy to blow past by accident: one wrong droplet size, one managed database, one load balancer. The cost gate makes the bill a reviewed number.
 
 ```mermaid
 flowchart TD
@@ -59,7 +59,7 @@ flowchart TD
     price["Price each machine from that cloud's table<br/>docs/cost-prices.json, docs/cost-prices/cloud.json"]:::ctrl
     scan["Scan every .tf and .tofu file for<br/>resource types and module blocks"]:::ctrl
     q1{"A cloud's total above its<br/>approved_monthly_total, or a site<br/>above its own figure in the sites map?"}:::warn
-    q1b{"Approved totals of the active clouds<br/>above the shared ceiling?"}:::warn
+    q1b{"Approved totals of the active clouds<br/>above the current phase ceiling?"}:::warn
     q2{"Resource type not on that cloud's<br/>free list, or a costed type outside<br/>its allowed file?"}:::warn
     q3{"Connector module blocks differ<br/>from manifest machines, or<br/>a stack id has no single manifest?"}:::warn
     q4{"Remote module source, *.tf.json,<br/>misnamed stack directory, or backups<br/>with unverified price?"}:::warn
@@ -87,7 +87,7 @@ Key ideas:
 
 - **The free list is an allowlist, per cloud.** For DigitalOcean, `digitalocean_project`, `_project_resources`, `_tag`, `_vpc`, `_firewall` and `_ssh_key` are free, and a droplet is allowed only inside its connector module; AWS has its own list and its instance is allowed only in `modules/aws/twingate-connector`. Anything else (a NAT gateway, Kubernetes node pool, container registry, CDN, app) is refused by name until someone deliberately prices and approves it.
 - **Raising the budget is a visible change.** To add something paid, you edit a `cost.json`, raise that cloud's `approved_monthly_total` in `docs/stages/approved.json`, and that diff is reviewed like code.
-- **Each cloud has its own approved figure under one shared ceiling.** A cloud you are not using right now is marked inactive, so the active figures together must fit under the ceiling. This is how a second cloud shares one budget with the first. A provider entry may also list approved `sites`, so a second site of the same stack code (a stack instance under `stacks/sites/`) is costed on its own; see [Multiple sites and identity](Multiple-Sites-and-Identity.md).
+- **Each phase has its own ceiling, and each cloud its own approved figure under it.** `docs/stages/approved.json` lists the phases in order, each with a `ceiling`, a `reason` and a `decided` date, and `current_phase` picks the one the gate enforces. A later phase may raise the ceiling; lowering one needs an explicit `lowers: true`, and a required `hard_max` caps them all. Phases run planned, current, done and a finished phase cannot be switched back on. On a pull request CI runs `scripts/ci_cost_gate.sh`, which hands the gate the base branch's `approved.json` so history is compared (no phase deleted, no done phase edited) and fails if the base cannot be fetched. A cloud you are not using right now is marked inactive, so the active figures together must fit under the current phase's ceiling. To raise it, edit the phase entry and raise the provider approval separately; `scripts/cost_raise.py` prints the diff (see [docs/cost.md](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md#ceilings-per-phase)). This is how a second cloud shares one budget with the first. A provider entry may also list approved `sites`, so a second site of the same stack code (a stack instance under `stacks/sites/`) is costed on its own; see [Multiple sites and identity](Multiple-Sites-and-Identity.md).
 - **Prices are per cloud.** The DigitalOcean table is `docs/cost-prices.json`; other clouds have `docs/cost-prices/<cloud>.json`.
 - **Some costs are attributes, not resources.** On AWS a public address is a setting on an instance, so for AWS the gate can also price an OpenTofu plan in JSON and require it to match the stack's `cost.json`. See [the AWS cost lesson](Provider-AWS-Cost-Lesson.md).
 - **Prices come from each vendor's own price source** (for DigitalOcean the sizes API), recorded with the date they were retrieved. Backup pricing is marked unverified, so the gate refuses any backup-enabled droplet until someone checks it.

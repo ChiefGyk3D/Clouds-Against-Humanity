@@ -1701,13 +1701,13 @@
       "status": "exists"
     },
     {
-      "name": "monthly ceiling",
+      "name": "monthly ceiling (current phase)",
       "file": "docs/stages/approved.json",
-      "pointer": "/ceiling",
+      "pointer": "/phases/stage-1/ceiling",
       "current": 30.0,
       "stack": "all stacks",
-      "validation": "number of dollars",
-      "set_where": "approved.json",
+      "validation": "dollars; one ceiling per phase in phases, the one named by current_phase is enforced; a later phase may raise it, lowering needs lowers: true, and hard_max (required, with hard_max_reason) caps every phase",
+      "set_where": "approved.json (or python3 -I scripts/cost_raise.py)",
       "example": "30.0",
       "sensitivity": "public",
       "status": "exists"

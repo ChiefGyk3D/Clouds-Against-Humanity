@@ -9,7 +9,7 @@ The on-premises version of this idea is a working security-monitoring stack. Thi
 Two decisions frame it:
 
 - **The reference environment of this repository stays at stage 3** (about $29 a month, see below) and uses the maintainer's existing Grafana at home for the cloud's dashboards. It does not build the cloud mini SOC.
-- **The cloud mini SIEM, NOC and SOC is the learner's own build.** The cost rows below are worked examples against the shared $30 ceiling; your copy sets its own.
+- **The cloud mini SIEM, NOC and SOC is the learner's own build.** The cost rows below are worked examples against the $30 ceiling of the current phase; your copy sets its own, per phase (the `learner-soc` phase in `docs/stages/approved.json` carries a proposed $53).
 
 ## How it maps to the home stack, by role
 

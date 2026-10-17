@@ -5,7 +5,7 @@ Every term the wiki uses, in plain language, with a pointer to the page that exp
 | Term | Meaning |
 |---|---|
 | **ACL** | Access control list: a list of who may reach what. In Twingate, a signed list of the resources a client (or connector) is allowed to reach. [Twingate: the four pieces](Twingate.md#the-four-pieces) |
-| **Active provider** | A cloud marked `active: true` in `docs/stages/approved.json`, meaning it is applied right now. The active providers' approved figures must together fit under the shared ceiling. [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md#the-cost-gate) |
+| **Active provider** | A cloud marked `active: true` in `docs/stages/approved.json`, meaning it is applied right now. The active providers' approved figures must together fit under the current phase's ceiling. [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md#the-cost-gate) |
 | **API** (basics) | Application programming interface. Here: the web interface a cloud provider exposes so programs can create and change resources. Everything the web console does is an API call underneath. [What is the cloud](What-Is-the-Cloud.md) |
 | **API token** (basics) | A long random string that authenticates a program to an API. As powerful as a password, and usually less protected. [Identity, secrets and zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) |
 | **Apply** (basics) | The OpenTofu step that carries out a plan and changes real infrastructure. Always preceded by a plan a human has read. [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) |
