@@ -11,7 +11,7 @@ Pick the row that sounds like you. Every path is a numbered list: read in that o
 | [The core path](#the-core-path) | Everyone, and anyone unsure where to start. | 21 | about 3 h 15 min of reading |
 | [Build it yourself](#build-it-yourself) | A learner replicating the build in their own accounts. | 5 | about 1 h 10 min of reading |
 | [Understand the design](#understand-the-design) | An engineer who wants the design without the primers. | 11 | about 1 h 30 min of reading |
-| [Security and threat modelling](#security-and-threat-modelling) | A security-minded reader. | 4 | about 0 h 50 min of reading |
+| [Security and threat modelling](#security-and-threat-modelling) | A security-minded reader. | 5 | about 1 h 15 min of reading |
 | [Detection and monitoring](#detection-and-monitoring) | Someone asking how it would be watched, and who wants to build a small version. | 8 | about 1 h 55 min of reading |
 | [Enterprise context](#enterprise-context) | A reader who wants to know how companies run changes, and what this project does instead. | 1 | about 0 h 30 min of reading |
 | [Other clouds (unverified drafts)](#other-clouds-unverified-drafts) | A multi-cloud reader (unverified drafts). | 10 | about 2 h 15 min of reading |
@@ -96,9 +96,10 @@ The settings reference is a lookup page: it is generated from one manifest and m
 | 1 | [Threat model exercise: build your own](Threat-Model-Exercise.md) | 20 min | Steps 1 to 3 done before you open the threat model; then compare. |
 | 2 | [Threat model](Threat-Model.md) | 10 min | Your list against the worked one: what did you miss, what did you rate differently. |
 | 3 | [Threat Dragon exercise: trust boundaries](Threat-Dragon-Exercise.md) | 20 min | You found each trust boundary in the diagram; the last part adds a second cloud and links the unverified AWS drafts. |
-| 4 | [Troubleshooting index](Troubleshooting-Index.md) | lookup | You can go from a symptom to the page that has the fix. |
+| 4 | [Threat frameworks: STRIDE, ATT&CK and ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md) | 25 min | You can say which of the three frameworks answers which question, and you imported at least one of the two extra models into Threat Dragon. |
+| 5 | [Troubleshooting index](Troubleshooting-Index.md) | lookup | You can go from a symptom to the page that has the fix. |
 
-The exercise page tells you to stop after step 3 and read the threat model only then, so the threat model is listed second. Do not open it first. Doing, not just reading: Threat model exercise adds about 40 minutes (a ten-minute predict step and three what-ifs at ten minutes each, as the page says). Doing, not just reading: Threat Dragon exercise adds about 60 minutes (the page asks for an hour).
+The exercise page tells you to stop after step 3 and read the threat model only then, so the threat model is listed second. Do not open it first. Doing, not just reading: Threat model exercise adds about 40 minutes (a ten-minute predict step and three what-ifs at ten minutes each, as the page says). Doing, not just reading: Threat Dragon exercise adds about 60 minutes (the page asks for an hour). Threat frameworks adds about an hour (importing two models and the predict-then-check exercises).
 
 ## Detection and monitoring
 

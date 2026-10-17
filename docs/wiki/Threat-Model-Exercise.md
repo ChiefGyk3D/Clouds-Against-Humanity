@@ -197,6 +197,7 @@ A threat model that does not say what it left out is selling comfort. This one, 
 | What a connector refuses on first boot | `modules/twingate-bootstrap/cloud-init.yaml.tftpl`, [Droplet hardening](Droplet-Hardening.md) |
 | Checks that fire when a safety property is removed | [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) |
 | One real change through every gate | [Trace one change end to end](Trace-One-Change-End-to-End.md) |
+| The same threats through MITRE ATT&CK (detection) and MITRE ATLAS (the AI tools around the repository) | [Threat frameworks: STRIDE, ATT&CK and ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md) |
 
 ## Try it yourself
 

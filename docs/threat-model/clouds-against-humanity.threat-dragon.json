@@ -23,11 +23,11 @@
         "cells": [
           {
             "position": {
-              "x": 40,
-              "y": 40
+              "x": 20.0,
+              "y": 1520.0
             },
             "size": {
-              "width": 160,
+              "width": 300,
               "height": 80
             },
             "attrs": {
@@ -69,16 +69,16 @@
           },
           {
             "position": {
-              "x": 40,
-              "y": 200
+              "x": 20.0,
+              "y": 500.0
             },
             "size": {
-              "width": 160,
+              "width": 300,
               "height": 80
             },
             "attrs": {
               "text": {
-                "text": "Contributor or fork author (A2)"
+                "text": "Contributor (A2)"
               },
               "body": {
                 "stroke": "#333333",
@@ -90,8 +90,8 @@
             "zIndex": 2,
             "id": "node-contributor",
             "data": {
-              "name": "Contributor or fork author (A2)",
-              "description": "A2: someone who can propose code through a pull request but cannot push or merge.",
+              "name": "Contributor (A2)",
+              "description": "Full name: Contributor or fork author (A2). A2: someone who can propose code through a pull request but cannot push or merge.",
               "type": "tm.Actor",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -126,16 +126,16 @@
           },
           {
             "position": {
-              "x": 40,
-              "y": 360
+              "x": 20.0,
+              "y": 840.0
             },
             "size": {
-              "width": 160,
+              "width": 300,
               "height": 80
             },
             "attrs": {
               "text": {
-                "text": "Upstream publishers (actions, Doppler CLI, apt repos)"
+                "text": "Upstream publishers"
               },
               "body": {
                 "stroke": "#333333",
@@ -147,8 +147,8 @@
             "zIndex": 3,
             "id": "node-upstream",
             "data": {
-              "name": "Upstream publishers (actions, Doppler CLI, apt repos)",
-              "description": "Supply chain: the publishers of pinned CI actions, the Doppler CLI release, the Twingate apt repository and Ubuntu mirrors.",
+              "name": "Upstream publishers",
+              "description": "Full name: Upstream publishers (actions, Doppler CLI, apt repos). Supply chain: the publishers of pinned CI actions, the Doppler CLI release, the Twingate apt repository and Ubuntu mirrors.",
               "type": "tm.Actor",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -172,16 +172,16 @@
           },
           {
             "position": {
-              "x": 40,
-              "y": 540
+              "x": 20.0,
+              "y": 1180.0
             },
             "size": {
-              "width": 160,
+              "width": 300,
               "height": 80
             },
             "attrs": {
               "text": {
-                "text": "Maintainer and laptop (A3 / A4)"
+                "text": "Maintainer (A3/A4)"
               },
               "body": {
                 "stroke": "#333333",
@@ -193,8 +193,8 @@
             "zIndex": 4,
             "id": "node-maintainer",
             "data": {
-              "name": "Maintainer and laptop (A3 / A4)",
-              "description": "A3: whoever can push to main (one writer today). A4: a stolen maintainer identity (Twingate sign-in plus SSH key). Holds the Twingate client and the SSH key.",
+              "name": "Maintainer (A3/A4)",
+              "description": "Full name: Maintainer and laptop (A3 / A4). A3: whoever can push to main (one writer today). A4: a stolen maintainer identity (Twingate sign-in plus SSH key). Holds the Twingate client and the SSH key.",
               "type": "tm.Actor",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -229,16 +229,16 @@
           },
           {
             "position": {
-              "x": 320,
-              "y": 200
+              "x": 680.0,
+              "y": 485.0
             },
             "size": {
-              "width": 130,
-              "height": 100
+              "width": 180,
+              "height": 110
             },
             "attrs": {
               "text": {
-                "text": "Source repository and main branch"
+                "text": "Source repo"
               },
               "body": {
                 "stroke": "#333333",
@@ -250,8 +250,8 @@
             "zIndex": 5,
             "id": "node-gh_repo",
             "data": {
-              "name": "Source repository and main branch",
-              "description": "Public repository, branch protection on main, CI green required. Holds code and the pipeline definition. Holds no cloud credential.",
+              "name": "Source repo",
+              "description": "Full name: Source repository and main branch. Public repository, branch protection on main, CI green required. Holds code and the pipeline definition. Holds no cloud credential.",
               "type": "tm.Process",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -296,12 +296,12 @@
           },
           {
             "position": {
-              "x": 320,
-              "y": 380
+              "x": 680.0,
+              "y": 145.0
             },
             "size": {
-              "width": 130,
-              "height": 100
+              "width": 180,
+              "height": 110
             },
             "attrs": {
               "text": {
@@ -352,16 +352,16 @@
           },
           {
             "position": {
-              "x": 620,
-              "y": 100
+              "x": 1280.0,
+              "y": 145.0
             },
             "size": {
-              "width": 130,
-              "height": 100
+              "width": 180,
+              "height": 110
             },
             "attrs": {
               "text": {
-                "text": "Spacelift proposed run (pull request)"
+                "text": "Spacelift proposed run"
               },
               "body": {
                 "stroke": "#333333",
@@ -373,8 +373,8 @@
             "zIndex": 7,
             "id": "node-sl_prop",
             "data": {
-              "name": "Spacelift proposed run (pull request)",
-              "description": "A plan-only run. The push policy never proposes one, so no pull request code should run here. If one does start, the cah-doppler context is attached to every run type and exposes DOPPLER_TOKEN to it; only the unmodified hook skips fetching the named secrets (docs/spacelift-secrets.md, section 8).",
+              "name": "Spacelift proposed run",
+              "description": "Full name: Spacelift proposed run (pull request). A plan-only run. The push policy never proposes one, so no pull request code should run here. If one does start, the cah-doppler context is attached to every run type and exposes DOPPLER_TOKEN to it; only the unmodified hook skips fetching the named secrets (docs/spacelift-secrets.md, section 8).",
               "type": "tm.Process",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -397,16 +397,16 @@
           },
           {
             "position": {
-              "x": 620,
-              "y": 300
+              "x": 1280.0,
+              "y": 825.0
             },
             "size": {
-              "width": 130,
-              "height": 100
+              "width": 180,
+              "height": 110
             },
             "attrs": {
               "text": {
-                "text": "Spacelift tracked run (main)"
+                "text": "Spacelift tracked run"
               },
               "body": {
                 "stroke": "#333333",
@@ -418,8 +418,8 @@
             "zIndex": 8,
             "id": "node-sl_track",
             "data": {
-              "name": "Spacelift tracked run (main)",
-              "description": "Runs plan and apply for a stack from main. Holds DOPPLER_TOKEN and the per-stack secrets loaded in before_init. Apply waits for a human confirm.",
+              "name": "Spacelift tracked run",
+              "description": "Full name: Spacelift tracked run (main). Runs plan and apply for a stack from main. Holds DOPPLER_TOKEN and the per-stack secrets loaded in before_init. Apply waits for a human confirm.",
               "type": "tm.Process",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -464,16 +464,16 @@
           },
           {
             "position": {
-              "x": 620,
-              "y": 480
+              "x": 1240.0,
+              "y": 1180.0
             },
             "size": {
-              "width": 160,
+              "width": 260,
               "height": 80
             },
             "attrs": {
               "text": {
-                "text": "OpenTofu state in Spacelift"
+                "text": "OpenTofu state"
               },
               "topLine": {
                 "stroke": "#333333",
@@ -490,8 +490,8 @@
             "zIndex": 9,
             "id": "node-state",
             "data": {
-              "name": "OpenTofu state in Spacelift",
-              "description": "State holds connector tokens and the full resource map. Stored only in Spacelift.",
+              "name": "OpenTofu state",
+              "description": "Full name: OpenTofu state in Spacelift. State holds connector tokens and the full resource map. Stored only in Spacelift.",
               "type": "tm.Store",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -518,11 +518,11 @@
           },
           {
             "position": {
-              "x": 920,
-              "y": 300
+              "x": 1840.0,
+              "y": 500.0
             },
             "size": {
-              "width": 160,
+              "width": 260,
               "height": 80
             },
             "attrs": {
@@ -583,12 +583,12 @@
           },
           {
             "position": {
-              "x": 920,
-              "y": 480
+              "x": 1880.0,
+              "y": 1165.0
             },
             "size": {
-              "width": 130,
-              "height": 100
+              "width": 180,
+              "height": 110
             },
             "attrs": {
               "text": {
@@ -639,16 +639,16 @@
           },
           {
             "position": {
-              "x": 320,
-              "y": 620
+              "x": 2480.0,
+              "y": 485.0
             },
             "size": {
-              "width": 130,
-              "height": 100
+              "width": 180,
+              "height": 110
             },
             "attrs": {
               "text": {
-                "text": "Twingate controller and relay"
+                "text": "Twingate"
               },
               "body": {
                 "stroke": "#333333",
@@ -660,8 +660,8 @@
             "zIndex": 12,
             "id": "node-twingate",
             "data": {
-              "name": "Twingate controller and relay",
-              "description": "Hosted zero-trust control plane. Signs the maintainer in through the identity provider and enforces per-resource access.",
+              "name": "Twingate",
+              "description": "Full name: Twingate controller and relay. Hosted zero-trust control plane. Signs the maintainer in through the identity provider and enforces per-resource access.",
               "type": "tm.Process",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -695,16 +695,16 @@
           },
           {
             "position": {
-              "x": 620,
-              "y": 640
+              "x": 2480.0,
+              "y": 1165.0
             },
             "size": {
-              "width": 130,
-              "height": 100
+              "width": 180,
+              "height": 110
             },
             "attrs": {
               "text": {
-                "text": "Connector droplets (two)"
+                "text": "Connector droplets"
               },
               "body": {
                 "stroke": "#333333",
@@ -716,8 +716,8 @@
             "zIndex": 13,
             "id": "node-droplets",
             "data": {
-              "name": "Connector droplets (two)",
-              "description": "Two outbound-only connector droplets. No public inbound rules. Hold their connector token in a root-only file.",
+              "name": "Connector droplets",
+              "description": "Full name: Connector droplets (two). Two outbound-only connector droplets. No public inbound rules. Hold their connector token in a root-only file.",
               "type": "tm.Process",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -773,16 +773,16 @@
           },
           {
             "position": {
-              "x": 920,
-              "y": 640
+              "x": 2440.0,
+              "y": 1520.0
             },
             "size": {
-              "width": 160,
+              "width": 260,
               "height": 80
             },
             "attrs": {
               "text": {
-                "text": "Protected resources (SSH on a private host)"
+                "text": "Protected resources"
               },
               "topLine": {
                 "stroke": "#333333",
@@ -799,8 +799,8 @@
             "zIndex": 14,
             "id": "node-resources",
             "data": {
-              "name": "Protected resources (SSH on a private host)",
-              "description": "What Twingate exposes: one host and one port per resource (TCP 22). Placeholder for whatever later sits behind a connector.",
+              "name": "Protected resources",
+              "description": "Full name: Protected resources (SSH on a private host). What Twingate exposes: one host and one port per resource (TCP 22). Placeholder for whatever later sits behind a connector.",
               "type": "tm.Store",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -841,10 +841,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 20,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Unsolicited inbound traffic (blocked)",
-              "description": "Port scans and connection attempts from the internet. Nothing is listening: no inbound rules.",
+              "name": "Blocked inbound traffic",
+              "description": "Full label: Unsolicited inbound traffic (blocked). Port scans and connection attempts from the internet. Nothing is listening: no inbound rules.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -871,10 +871,10 @@
             "id": "flow-f-scan",
             "labels": [
               {
-                "position": 0.5,
+                "position": 0.4,
                 "attrs": {
                   "label": {
-                    "text": "Unsolicited inbound traffic (blocked)"
+                    "text": "Blocked inbound traffic"
                   }
                 }
               }
@@ -887,8 +887,8 @@
             },
             "vertices": [
               {
-                "x": 421,
-                "y": 368
+                "x": 2130,
+                "y": 1560
               }
             ]
           },
@@ -908,10 +908,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 21,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Fork pull request (code, no secrets)",
-              "description": "Proposed code. No credentials cross this flow in either direction.",
+              "name": "Fork pull request",
+              "description": "Full label: Fork pull request (code, no secrets). Proposed code. No credentials cross this flow in either direction.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -938,10 +938,10 @@
             "id": "flow-f-pr",
             "labels": [
               {
-                "position": 0.5,
+                "position": 0.6,
                 "attrs": {
                   "label": {
-                    "text": "Fork pull request (code, no secrets)"
+                    "text": "Fork pull request"
                   }
                 }
               }
@@ -952,12 +952,7 @@
             "target": {
               "cell": "node-gh_repo"
             },
-            "vertices": [
-              {
-                "x": 252,
-                "y": 245
-              }
-            ]
+            "vertices": []
           },
           {
             "shape": "flow",
@@ -975,10 +970,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 22,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Pull request code checkout (code)",
-              "description": "CI checks out the pull request code and runs repository code on it.",
+              "name": "PR code checkout",
+              "description": "Full label: Pull request code checkout (code). CI checks out the pull request code and runs repository code on it.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -1008,7 +1003,7 @@
                 "position": 0.5,
                 "attrs": {
                   "label": {
-                    "text": "Pull request code checkout (code)"
+                    "text": "PR code checkout"
                   }
                 }
               }
@@ -1021,8 +1016,8 @@
             },
             "vertices": [
               {
-                "x": 360,
-                "y": 340
+                "x": 840,
+                "y": 370
               }
             ]
           },
@@ -1042,10 +1037,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 23,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "CI green status check (build result)",
-              "description": "The CI result that branch protection requires before merge.",
+              "name": "CI status check",
+              "description": "Full label: CI green status check (build result). The CI result that branch protection requires before merge.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -1063,7 +1058,7 @@
                 "position": 0.5,
                 "attrs": {
                   "label": {
-                    "text": "CI green status check (build result)"
+                    "text": "CI status check"
                   }
                 }
               }
@@ -1076,8 +1071,8 @@
             },
             "vertices": [
               {
-                "x": 360,
-                "y": 340
+                "x": 700,
+                "y": 370
               }
             ]
           },
@@ -1097,10 +1092,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 24,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Action refs resolved by commit SHA (code)",
-              "description": "Third-party action code fetched at a pinned commit.",
+              "name": "Action refs by SHA",
+              "description": "Full label: Action refs resolved by commit SHA (code). Third-party action code fetched at a pinned commit.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -1127,10 +1122,10 @@
             "id": "flow-f-up-ci",
             "labels": [
               {
-                "position": 0.5,
+                "position": 0.35,
                 "attrs": {
                   "label": {
-                    "text": "Action refs resolved by commit SHA (code)"
+                    "text": "Action refs by SHA"
                   }
                 }
               }
@@ -1143,8 +1138,12 @@
             },
             "vertices": [
               {
-                "x": 252,
-                "y": 415
+                "x": 430,
+                "y": 880
+              },
+              {
+                "x": 430,
+                "y": 200
               }
             ]
           },
@@ -1164,10 +1163,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 25,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Review and merge (approval, code)",
-              "description": "The maintainer reviews the diff and merges to main. The only path to a tracked run.",
+              "name": "Review and merge",
+              "description": "Full label: Review and merge (approval, code). The maintainer reviews the diff and merges to main. The only path to a tracked run.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -1194,10 +1193,10 @@
             "id": "flow-f-merge",
             "labels": [
               {
-                "position": 0.5,
+                "position": 0.6,
                 "attrs": {
                   "label": {
-                    "text": "Review and merge (approval, code)"
+                    "text": "Review and merge"
                   }
                 }
               }
@@ -1208,12 +1207,7 @@
             "target": {
               "cell": "node-gh_repo"
             },
-            "vertices": [
-              {
-                "x": 272,
-                "y": 431
-              }
-            ]
+            "vertices": []
           },
           {
             "shape": "flow",
@@ -1231,10 +1225,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 26,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Pull request push event (commit ref; policy decides)",
-              "description": "Webhook telling Spacelift about a pull request branch. The push policy should answer: never propose.",
+              "name": "PR push event",
+              "description": "Full label: Pull request push event (commit ref; policy decides). Webhook telling Spacelift about a pull request branch. The push policy should answer: never propose.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -1264,7 +1258,7 @@
                 "position": 0.5,
                 "attrs": {
                   "label": {
-                    "text": "Pull request push event (commit ref; policy decides)"
+                    "text": "PR push event"
                   }
                 }
               }
@@ -1275,12 +1269,7 @@
             "target": {
               "cell": "node-sl_prop"
             },
-            "vertices": [
-              {
-                "x": 527,
-                "y": 176
-              }
-            ]
+            "vertices": []
           },
           {
             "shape": "flow",
@@ -1298,10 +1287,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 27,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Merged commit on main (code)",
-              "description": "The commit a tracked run will plan and apply.",
+              "name": "Merged commit",
+              "description": "Full label: Merged commit on main (code). The commit a tracked run will plan and apply.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -1331,7 +1320,7 @@
                 "position": 0.5,
                 "attrs": {
                   "label": {
-                    "text": "Merged commit on main (code)"
+                    "text": "Merged commit"
                   }
                 }
               }
@@ -1342,12 +1331,7 @@
             "target": {
               "cell": "node-sl_track"
             },
-            "vertices": [
-              {
-                "x": 535,
-                "y": 300
-              }
-            ]
+            "vertices": []
           },
           {
             "shape": "flow",
@@ -1365,10 +1349,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 28,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Doppler CLI download (binary)",
-              "description": "The pinned Doppler CLI release fetched by the secrets hook.",
+              "name": "Doppler CLI download",
+              "description": "Full label: Doppler CLI download (binary). The pinned Doppler CLI release fetched by the secrets hook.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -1398,7 +1382,7 @@
                 "position": 0.5,
                 "attrs": {
                   "label": {
-                    "text": "Doppler CLI download (binary)"
+                    "text": "Doppler CLI download"
                   }
                 }
               }
@@ -1409,12 +1393,7 @@
             "target": {
               "cell": "node-sl_track"
             },
-            "vertices": [
-              {
-                "x": 405,
-                "y": 400
-              }
-            ]
+            "vertices": []
           },
           {
             "shape": "flow",
@@ -1432,10 +1411,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 29,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Read request with service token (DOPPLER_TOKEN)",
-              "description": "The run presents the read-only service token and asks for secrets by name.",
+              "name": "Service token read",
+              "description": "Full label: Read request with service token (DOPPLER_TOKEN). The run presents the read-only service token and asks for secrets by name.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -1473,10 +1452,10 @@
             "id": "flow-f-tok",
             "labels": [
               {
-                "position": 0.5,
+                "position": 0.6,
                 "attrs": {
                   "label": {
-                    "text": "Read request with service token (DOPPLER_TOKEN)"
+                    "text": "Service token read"
                   }
                 }
               }
@@ -1489,8 +1468,8 @@
             },
             "vertices": [
               {
-                "x": 842,
-                "y": 320
+                "x": 1705,
+                "y": 771
               }
             ]
           },
@@ -1510,10 +1489,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 30,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Secrets (cloud token, Twingate API token, tenant, admin key)",
-              "description": "Secret values returned to the run and loaded into the environment before the plan.",
+              "name": "Secrets returned",
+              "description": "Full label: Secrets (cloud token, Twingate API token, tenant, admin key). Secret values returned to the run and loaded into the environment before the plan.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -1543,7 +1522,7 @@
                 "position": 0.5,
                 "attrs": {
                   "label": {
-                    "text": "Secrets (cloud token, Twingate API token, tenant, admin key)"
+                    "text": "Secrets returned"
                   }
                 }
               }
@@ -1556,8 +1535,8 @@
             },
             "vertices": [
               {
-                "x": 842,
-                "y": 345
+                "x": 1635,
+                "y": 649
               }
             ]
           },
@@ -1579,10 +1558,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 31,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "OpenTofu state (connector tokens, resource map)",
-              "description": "State written and read by the run.",
+              "name": "State and tokens",
+              "description": "Full label: OpenTofu state (connector tokens, resource map). State written and read by the run.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -1612,7 +1591,7 @@
                 "position": 0.5,
                 "attrs": {
                   "label": {
-                    "text": "OpenTofu state (connector tokens, resource map)"
+                    "text": "State and tokens"
                   }
                 }
               }
@@ -1623,12 +1602,7 @@
             "target": {
               "cell": "node-state"
             },
-            "vertices": [
-              {
-                "x": 668,
-                "y": 437
-              }
-            ]
+            "vertices": []
           },
           {
             "shape": "flow",
@@ -1646,10 +1620,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 32,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Plan for review (resource changes)",
-              "description": "The plan a human reads before confirming.",
+              "name": "Plan for review",
+              "description": "Full label: Plan for review (resource changes). The plan a human reads before confirming.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -1667,7 +1641,7 @@
                 "position": 0.5,
                 "attrs": {
                   "label": {
-                    "text": "Plan for review (resource changes)"
+                    "text": "Plan for review"
                   }
                 }
               }
@@ -1680,8 +1654,8 @@
             },
             "vertices": [
               {
-                "x": 412,
-                "y": 488
+                "x": 751,
+                "y": 983
               }
             ]
           },
@@ -1701,10 +1675,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 33,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Confirm apply (human approval)",
-              "description": "The single human gate between plan and apply.",
+              "name": "Human confirms apply",
+              "description": "Full label: Confirm apply (human approval). The single human gate between plan and apply.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -1734,7 +1708,7 @@
                 "position": 0.5,
                 "attrs": {
                   "label": {
-                    "text": "Confirm apply (human approval)"
+                    "text": "Human confirms apply"
                   }
                 }
               }
@@ -1747,8 +1721,8 @@
             },
             "vertices": [
               {
-                "x": 402,
-                "y": 465
+                "x": 789,
+                "y": 1117
               }
             ]
           },
@@ -1768,10 +1742,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 34,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Apply: create or destroy droplets and firewalls (cloud token)",
-              "description": "Provider API calls made with the write-scoped token after confirm.",
+              "name": "Apply with cloud token",
+              "description": "Full label: Apply: create or destroy droplets and firewalls (cloud token). Provider API calls made with the write-scoped token after confirm.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -1801,7 +1775,7 @@
                 "position": 0.5,
                 "attrs": {
                   "label": {
-                    "text": "Apply: create or destroy droplets and firewalls (cloud token)"
+                    "text": "Apply with cloud token"
                   }
                 }
               }
@@ -1812,12 +1786,7 @@
             "target": {
               "cell": "node-cloud_api"
             },
-            "vertices": [
-              {
-                "x": 822,
-                "y": 461
-              }
-            ]
+            "vertices": []
           },
           {
             "shape": "flow",
@@ -1835,10 +1804,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 35,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Droplet create with user-data (connector token)",
-              "description": "Cloud-init carries the connector token to the droplet.",
+              "name": "Create droplet",
+              "description": "Full label: Droplet create with user-data (connector token). Cloud-init carries the connector token to the droplet.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -1865,10 +1834,10 @@
             "id": "flow-f-userdata",
             "labels": [
               {
-                "position": 0.5,
+                "position": 0.4,
                 "attrs": {
                   "label": {
-                    "text": "Droplet create with user-data (connector token)"
+                    "text": "Create droplet"
                   }
                 }
               }
@@ -1879,12 +1848,7 @@
             "target": {
               "cell": "node-droplets"
             },
-            "vertices": [
-              {
-                "x": 847,
-                "y": 632
-              }
-            ]
+            "vertices": []
           },
           {
             "shape": "flow",
@@ -1902,10 +1866,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 36,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Twingate API: resources, connectors, tokens (API token)",
-              "description": "The run uses the Read, Write and Provision key to create connectors and issue tokens.",
+              "name": "Twingate API call",
+              "description": "Full label: Twingate API: resources, connectors, tokens (API token). The run uses the Read, Write and Provision key to create connectors and issue tokens.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -1935,7 +1899,7 @@
                 "position": 0.5,
                 "attrs": {
                   "label": {
-                    "text": "Twingate API: resources, connectors, tokens (API token)"
+                    "text": "Twingate API call"
                   }
                 }
               }
@@ -1946,12 +1910,7 @@
             "target": {
               "cell": "node-twingate"
             },
-            "vertices": [
-              {
-                "x": 535,
-                "y": 510
-              }
-            ]
+            "vertices": []
           },
           {
             "shape": "flow",
@@ -1969,10 +1928,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 37,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "IdP sign-in and resource request (identity)",
-              "description": "The maintainer signs in through the identity provider and requests one resource.",
+              "name": "IdP sign-in",
+              "description": "Full label: IdP sign-in and resource request (identity). The maintainer signs in through the identity provider and requests one resource.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -1999,10 +1958,10 @@
             "id": "flow-f-login",
             "labels": [
               {
-                "position": 0.5,
+                "position": 0.35,
                 "attrs": {
                   "label": {
-                    "text": "IdP sign-in and resource request (identity)"
+                    "text": "IdP sign-in"
                   }
                 }
               }
@@ -2015,8 +1974,16 @@
             },
             "vertices": [
               {
-                "x": 244,
-                "y": 649
+                "x": 170,
+                "y": 1420
+              },
+              {
+                "x": 2270,
+                "y": 1420
+              },
+              {
+                "x": 2270,
+                "y": 540
               }
             ]
           },
@@ -2036,10 +2003,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 38,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Outbound connector link (connector token)",
-              "description": "The connector dials out to Twingate and presents its token. Nothing dials in to the droplet.",
+              "name": "Outbound connector link",
+              "description": "Full label: Outbound connector link (connector token). The connector dials out to Twingate and presents its token. Nothing dials in to the droplet.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -2069,7 +2036,7 @@
                 "position": 0.5,
                 "attrs": {
                   "label": {
-                    "text": "Outbound connector link (connector token)"
+                    "text": "Outbound connector link"
                   }
                 }
               }
@@ -2082,8 +2049,8 @@
             },
             "vertices": [
               {
-                "x": 537,
-                "y": 625
+                "x": 2640,
+                "y": 880
               }
             ]
           },
@@ -2103,10 +2070,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 68,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Relayed session (user traffic)",
-              "description": "Authorised user traffic, carried to the connector over the link the connector opened. One direction in the diagram: Twingate to the droplet.",
+              "name": "Relayed session",
+              "description": "Full label: Relayed session (user traffic). Authorised user traffic, carried to the connector over the link the connector opened. One direction in the diagram: Twingate to the droplet.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -2121,10 +2088,10 @@
             "id": "flow-f-session",
             "labels": [
               {
-                "position": 0.5,
+                "position": 0.3,
                 "attrs": {
                   "label": {
-                    "text": "Relayed session (user traffic)"
+                    "text": "Relayed session"
                   }
                 }
               }
@@ -2137,8 +2104,8 @@
             },
             "vertices": [
               {
-                "x": 537,
-                "y": 685
+                "x": 2500,
+                "y": 880
               }
             ]
           },
@@ -2158,10 +2125,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 39,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "SSH to the protected resource (TCP 22, key required)",
-              "description": "The only traffic Twingate admits.",
+              "name": "SSH to resource",
+              "description": "Full label: SSH to the protected resource (TCP 22, key required). The only traffic Twingate admits.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -2191,7 +2158,7 @@
                 "position": 0.5,
                 "attrs": {
                   "label": {
-                    "text": "SSH to the protected resource (TCP 22, key required)"
+                    "text": "SSH to resource"
                   }
                 }
               }
@@ -2202,12 +2169,7 @@
             "target": {
               "cell": "node-resources"
             },
-            "vertices": [
-              {
-                "x": 842,
-                "y": 685
-              }
-            ]
+            "vertices": []
           },
           {
             "shape": "flow",
@@ -2225,10 +2187,10 @@
             "width": 200,
             "height": 100,
             "zIndex": 40,
-            "connector": "smooth",
+            "connector": "normal",
             "data": {
-              "name": "Signed packages (apt repo, pinned key)",
-              "description": "Twingate and Ubuntu packages installed at first boot.",
+              "name": "Signed apt packages",
+              "description": "Full label: Signed packages (apt repo, pinned key). Twingate and Ubuntu packages installed at first boot.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -2258,7 +2220,7 @@
                 "position": 0.5,
                 "attrs": {
                   "label": {
-                    "text": "Signed packages (apt repo, pinned key)"
+                    "text": "Signed apt packages"
                   }
                 }
               }
@@ -2271,386 +2233,298 @@
             },
             "vertices": [
               {
-                "x": 391,
-                "y": 567
+                "x": 360,
+                "y": 880
+              },
+              {
+                "x": 360,
+                "y": 1480
+              },
+              {
+                "x": 2190,
+                "y": 1480
               }
             ]
           },
           {
-            "shape": "trust-boundary-curve",
+            "position": {
+              "x": 2350.0,
+              "y": 1090.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 555.0
+            },
             "attrs": {
-              "line": {
+              "body": {
                 "stroke": "#b45309",
-                "strokeWidth": 2,
-                "strokeDasharray": "6 4",
-                "targetMarker": "",
-                "sourceMarker": ""
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "B1: no inbound",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
               }
             },
-            "width": 200,
-            "height": 100,
-            "zIndex": 60,
-            "connector": "smooth",
-            "labels": [
-              {
-                "attrs": {
-                  "text": {
-                    "text": "B1: no inbound"
-                  }
-                }
-              }
-            ],
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-B1",
             "data": {
-              "type": "tm.Boundary",
+              "type": "tm.BoundaryBox",
               "name": "B1: no inbound",
               "description": "Nothing from the internet may reach a connector droplet. Zero public inbound rules.",
               "isTrustBoundary": true,
               "hasOpenThreats": false
-            },
-            "id": "boundary-B1",
-            "source": {
-              "x": 652,
-              "y": 551
-            },
-            "target": {
-              "x": 549,
-              "y": 646
-            },
-            "vertices": [
-              {
-                "x": 608,
-                "y": 607
-              }
-            ]
+            }
           },
           {
-            "shape": "trust-boundary-curve",
+            "position": {
+              "x": 550.0,
+              "y": 70.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 230.0
+            },
             "attrs": {
-              "line": {
+              "body": {
                 "stroke": "#b45309",
-                "strokeWidth": 2,
-                "strokeDasharray": "6 4",
-                "targetMarker": "",
-                "sourceMarker": ""
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "B2: PR, CI only",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
               }
             },
-            "width": 200,
-            "height": 100,
-            "zIndex": 61,
-            "connector": "smooth",
-            "labels": [
-              {
-                "attrs": {
-                  "text": {
-                    "text": "B2: PR, CI only"
-                  }
-                }
-              }
-            ],
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-B2",
             "data": {
-              "type": "tm.Boundary",
+              "type": "tm.BoundaryBox",
               "name": "B2: PR, CI only",
               "description": "A stranger's pull request reaches the repository and CI only, with no credentials.",
               "isTrustBoundary": true,
               "hasOpenThreats": false
-            },
-            "id": "boundary-B2",
-            "source": {
-              "x": 255,
-              "y": 175
-            },
-            "target": {
-              "x": 250,
-              "y": 315
-            },
-            "vertices": [
-              {
-                "x": 264,
-                "y": 245
-              }
-            ]
+            }
           },
           {
-            "shape": "trust-boundary-curve",
+            "position": {
+              "x": 1150.0,
+              "y": 70.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 230.0
+            },
             "attrs": {
-              "line": {
+              "body": {
                 "stroke": "#b45309",
-                "strokeWidth": 2,
-                "strokeDasharray": "6 4",
-                "targetMarker": "",
-                "sourceMarker": ""
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "B3: push policy never proposes a Spacelift run",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
               }
             },
-            "width": 200,
-            "height": 100,
-            "zIndex": 62,
-            "connector": "smooth",
-            "labels": [
-              {
-                "attrs": {
-                  "text": {
-                    "text": "B3: push policy never proposes a Spacelift run"
-                  }
-                }
-              }
-            ],
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-B3",
             "data": {
-              "type": "tm.Boundary",
+              "type": "tm.BoundaryBox",
               "name": "B3: push policy never proposes a Spacelift run",
               "description": "Pull request code must not start a Spacelift run. The policy lives in Spacelift, not in the repository.",
               "isTrustBoundary": true,
               "hasOpenThreats": false
-            },
-            "id": "boundary-B3",
-            "source": {
-              "x": 513,
-              "y": 134
-            },
-            "target": {
-              "x": 557,
-              "y": 266
-            },
-            "vertices": [
-              {
-                "x": 546,
-                "y": 196
-              }
-            ]
+            }
           },
           {
-            "shape": "trust-boundary-curve",
+            "position": {
+              "x": 550.0,
+              "y": 410.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 230.0
+            },
             "attrs": {
-              "line": {
+              "body": {
                 "stroke": "#b45309",
-                "strokeWidth": 2,
-                "strokeDasharray": "6 4",
-                "targetMarker": "",
-                "sourceMarker": ""
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "B4: branch protection + CI green",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
               }
             },
-            "width": 200,
-            "height": 100,
-            "zIndex": 63,
-            "connector": "smooth",
-            "labels": [
-              {
-                "attrs": {
-                  "text": {
-                    "text": "B4: branch protection + CI green"
-                  }
-                }
-              }
-            ],
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-B4",
             "data": {
-              "type": "tm.Boundary",
+              "type": "tm.BoundaryBox",
               "name": "B4: branch protection + CI green",
               "description": "The only path to main. Branch protection is a setting outside the repository.",
               "isTrustBoundary": true,
               "hasOpenThreats": false
-            },
-            "id": "boundary-B4",
-            "source": {
-              "x": 198,
-              "y": 371
-            },
-            "target": {
-              "x": 307,
-              "y": 459
-            },
-            "vertices": [
-              {
-                "x": 260,
-                "y": 406
-              }
-            ]
+            }
           },
           {
-            "shape": "trust-boundary-curve",
+            "position": {
+              "x": 1150.0,
+              "y": 750.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 555.0
+            },
             "attrs": {
-              "line": {
+              "body": {
                 "stroke": "#b45309",
-                "strokeWidth": 2,
-                "strokeDasharray": "6 4",
-                "targetMarker": "",
-                "sourceMarker": ""
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "B5: tracked run on main",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
               }
             },
-            "width": 200,
-            "height": 100,
-            "zIndex": 64,
-            "connector": "smooth",
-            "labels": [
-              {
-                "attrs": {
-                  "text": {
-                    "text": "B5: tracked run on main"
-                  }
-                }
-              }
-            ],
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-B5",
             "data": {
-              "type": "tm.Boundary",
+              "type": "tm.BoundaryBox",
               "name": "B5: tracked run on main",
               "description": "Only a merged commit on main becomes a tracked run.",
               "isTrustBoundary": true,
               "hasOpenThreats": false
-            },
-            "id": "boundary-B5",
-            "source": {
-              "x": 557,
-              "y": 234
-            },
-            "target": {
-              "x": 513,
-              "y": 366
-            },
-            "vertices": [
-              {
-                "x": 546,
-                "y": 304
-              }
-            ]
+            }
           },
           {
-            "shape": "trust-boundary-curve",
+            "position": {
+              "x": 1750.0,
+              "y": 425.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 200.0
+            },
             "attrs": {
-              "line": {
+              "body": {
                 "stroke": "#b45309",
-                "strokeWidth": 2,
-                "strokeDasharray": "6 4",
-                "targetMarker": "",
-                "sourceMarker": ""
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "B6: read-only token, fetched by name",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
               }
             },
-            "width": 200,
-            "height": 100,
-            "zIndex": 65,
-            "connector": "smooth",
-            "labels": [
-              {
-                "attrs": {
-                  "text": {
-                    "text": "B6: read-only token, fetched by name"
-                  }
-                }
-              }
-            ],
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-B6",
             "data": {
-              "type": "tm.Boundary",
+              "type": "tm.BoundaryBox",
               "name": "B6: read-only token, fetched by name",
               "description": "Doppler to Spacelift: read-only service token scoped to the one prd config.",
               "isTrustBoundary": true,
               "hasOpenThreats": false
-            },
-            "id": "boundary-B6",
-            "source": {
-              "x": 840,
-              "y": 275
-            },
-            "target": {
-              "x": 845,
-              "y": 415
-            },
-            "vertices": [
-              {
-                "x": 854,
-                "y": 345
-              }
-            ]
+            }
           },
           {
-            "shape": "trust-boundary-curve",
+            "position": {
+              "x": 1750.0,
+              "y": 1090.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 230.0
+            },
             "attrs": {
-              "line": {
+              "body": {
                 "stroke": "#b45309",
-                "strokeWidth": 2,
-                "strokeDasharray": "6 4",
-                "targetMarker": "",
-                "sourceMarker": ""
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "B7: human confirms apply",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
               }
             },
-            "width": 200,
-            "height": 100,
-            "zIndex": 66,
-            "connector": "smooth",
-            "labels": [
-              {
-                "attrs": {
-                  "text": {
-                    "text": "B7: human confirms apply"
-                  }
-                }
-              }
-            ],
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-B7",
             "data": {
-              "type": "tm.Boundary",
+              "type": "tm.BoundaryBox",
               "name": "B7: human confirms apply",
               "description": "Spacelift to the cloud API: apply waits for a person.",
               "isTrustBoundary": true,
               "hasOpenThreats": false
-            },
-            "id": "boundary-B7",
-            "source": {
-              "x": 871,
-              "y": 380
-            },
-            "target": {
-              "x": 799,
-              "y": 500
-            },
-            "vertices": [
-              {
-                "x": 845,
-                "y": 446
-              }
-            ]
+            }
           },
           {
-            "shape": "trust-boundary-curve",
+            "position": {
+              "x": 2350.0,
+              "y": 410.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 230.0
+            },
             "attrs": {
-              "line": {
+              "body": {
                 "stroke": "#b45309",
-                "strokeWidth": 2,
-                "strokeDasharray": "6 4",
-                "targetMarker": "",
-                "sourceMarker": ""
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "B8: IdP sign-in, per-resource ACL",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
               }
             },
-            "width": 200,
-            "height": 100,
-            "zIndex": 67,
-            "connector": "smooth",
-            "labels": [
-              {
-                "attrs": {
-                  "text": {
-                    "text": "B8: IdP sign-in, per-resource ACL"
-                  }
-                }
-              }
-            ],
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-B8",
             "data": {
-              "type": "tm.Boundary",
+              "type": "tm.BoundaryBox",
               "name": "B8: IdP sign-in, per-resource ACL",
               "description": "Maintainer to Twingate: identity provider sign-in and one host and port per resource.",
               "isTrustBoundary": true,
               "hasOpenThreats": false
-            },
-            "id": "boundary-B8",
-            "source": {
-              "x": 275,
-              "y": 559
-            },
-            "target": {
-              "x": 230,
-              "y": 691
-            },
-            "vertices": [
-              {
-                "x": 264,
-                "y": 629
-              }
-            ]
+            }
           }
         ]
       }
