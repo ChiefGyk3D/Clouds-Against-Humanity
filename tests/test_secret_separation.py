@@ -44,7 +44,7 @@ def provider_for(stack):
 
 
 def parse_calls(text):
-    """Map stack -> hook -> cah_doppler_env arguments. Stdlib only, no YAML parser."""
+    """Map stack -> hook -> arguments of EVERY cah_doppler_env call. Stdlib only, no YAML parser."""
     calls, stack, hook = {}, None, None
     for line in text.splitlines():
         if re.match(r"^  [a-z0-9-]+:\s*$", line):
@@ -54,7 +54,8 @@ def parse_calls(text):
         elif re.match(r"^    (before|after)_[a-z]+:\s*$", line):
             hook = line.strip().rstrip(":")
         elif "cah_doppler_env" in line and stack and hook:
-            calls[stack][hook] = line.split("cah_doppler_env", 1)[1].split()
+            args = line.split("cah_doppler_env", 1)[1].split()
+            calls[stack].setdefault(hook, []).extend(args)
     return calls
 
 
@@ -91,13 +92,14 @@ def violations(calls):
 def write_config(path, stacks):
     lines = ['version: "1"', "", "stacks:"]
     for stack, args in stacks.items():
+        calls = [args] if isinstance(args, str) else args
         lines.append(f"  {stack}:")
         for hook in ("before_init", "before_apply"):
             lines += [
                 f"    {hook}:",
                 "      - . /mnt/workspace/source/scripts/spacelift/doppler-env.sh",
-                f"      - cah_doppler_env {args}",
             ]
+            lines += [f"      - cah_doppler_env {call}" for call in calls]
     path.write_text("\n".join(lines) + "\n")
     return path
 
@@ -117,7 +119,7 @@ def test_real_config_has_stacks_and_passes():
 
 
 def test_stacks_map_to_the_expected_provider():
-    for stack in parse_calls(CONFIG.read_text()):
+    for stack in ("cah-00-foundation", "cah-10-access"):
         assert provider_for(stack) == "digitalocean", stack
     assert provider_for("cah-aws-00-foundation") == "aws"
     assert provider_for("cah-azure-00-foundation") == "azure"
@@ -206,3 +208,16 @@ def test_script_takes_project_and_config_only_from_the_environment():
 
 def test_config_does_not_set_doppler_context_variables():
     assert not re.search(r"DOPPLER_(PROJECT|CONFIG|TOKEN)", code_lines(CONFIG))
+
+
+def test_every_call_in_a_hook_is_checked_not_just_the_last(tmp_path):
+    path = write_config(
+        tmp_path / "config.yml",
+        {"cah-00-foundation": ["AWS_SECRET_ACCESS_KEY", "DIGITALOCEAN_TOKEN"]},
+    )
+    calls = parse_calls(path.read_text())
+    assert calls["cah-00-foundation"]["before_init"] == [
+        "AWS_SECRET_ACCESS_KEY",
+        "DIGITALOCEAN_TOKEN",
+    ]
+    assert any("AWS_SECRET" in p for p in violations(calls))

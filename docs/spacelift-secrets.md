@@ -166,11 +166,13 @@ The names below are a **convention proposed here, not something already set up o
 
 Each context holds the same three variables as today (`DOPPLER_TOKEN`, write-only; `DOPPLER_PROJECT`; `DOPPLER_CONFIG`), with values for that cloud only. The hook script is unchanged: it reads those three from the environment, so which config a run can read is decided entirely by which context is attached. The existing auto-attach on the `cah` label must not also catch the new clouds' stacks, or one stack would receive two tokens; give them a different label.
 
+**Attach the push policy first.** Section 9 attaches the push policy to the `cah` label (`autoattach:cah`), so changing the label also drops that auto-attachment. Before attaching any secret context to a new cloud's stacks, attach the policy to them manually or extend its autoattach labels to the new label. A stack that has a secret context without the policy would let a pull request's run sit next to the token.
+
 ### Prefer a native integration for the cloud login
 
 Where Spacelift offers it, a native cloud integration beats any stored key, because the credential is short-lived and nothing is kept in Doppler. For AWS that means Spacelift assuming an IAM role in your account, with a per-stack external id in the role's trust policy, so one stack's role cannot be used by another. Doppler would then hold only non-credential settings for that cloud.
 
-**Unverified:** whether the maintainer's Spacelift plan includes cloud integrations. The DigitalOcean setup used Doppler because the plan issued no run-level identity token, which is a separate feature. The answer is an open check in issue #22 (phase 0). Until it is known, assume the Doppler route and treat the integration as the upgrade.
+**Unverified:** whether the maintainer's Spacelift plan includes cloud integrations. The DigitalOcean setup used Doppler because the plan issued no run-level identity token, which is a separate feature. The answer is an open check in issue #22 (phase 0). This is a gate, not a preference (design section 10, decision 6): AWS stack creation waits for that check, so no long-lived AWS key is needed. If the integration is not available, return to the maintainer; falling back to a static key in a separate Doppler config is a new decision, not the default.
 
 ### Why separate contexts
 
