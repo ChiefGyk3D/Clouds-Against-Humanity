@@ -13,7 +13,7 @@ Pick the row that sounds like you. Every path is a numbered list: read in that o
 | [Understand the design](#understand-the-design) | An engineer who wants the design without the primers. | 11 | about 1 h 30 min of reading |
 | [Security and threat modelling](#security-and-threat-modelling) | A security-minded reader. | 4 | about 0 h 50 min of reading |
 | [Detection and monitoring](#detection-and-monitoring) | Someone asking how it would be watched, and who wants to build a small version. | 8 | about 1 h 55 min of reading |
-| [Enterprise context](#enterprise-context) | A reader who wants to know how companies run changes, and what this project does instead. | 1 | about 0 h 30 min of reading |
+| [Enterprise context](#enterprise-context) | A reader who wants to see how companies build networks, run infrastructure and handle identity, how they run changes, and what roles and skills surround that work. | 5 | about 1 h 30 min of reading |
 | [Other clouds (unverified drafts)](#other-clouds-unverified-drafts) | A multi-cloud reader (unverified drafts). | 10 | about 2 h 15 min of reading |
 | [Reference](#reference-look-things-up) | Anyone, at any point. | 7 | lookup, not read through |
 
@@ -121,15 +121,19 @@ Nothing on these pages is deployed. The cloud hosts do not ship logs anywhere ye
 
 ## Enterprise context
 
-**Who it is for.** A reader who will meet change tickets, CABs and freeze calendars at work and wants the vocabulary, and an honest account of which of it this project does not use.
+**Who it is for.** A reader who will meet corporate networks, landing zones, identity providers, change tickets and vaults at work and wants the vocabulary, an honest account of what this project does instead, and a map of the roles and skills around it. These pages are orientation, not design guides: claims checked against a vendor page are dated, the rest is marked as general knowledge or UNVERIFIED.
 
-**Before you start.** The core path through step 6 (pull requests) and, ideally, Trace one change end to end.
+**Before you start.** The core path through step 13 (DigitalOcean network and firewalls) and step 17 (Doppler and secrets), and [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md).
 
 | # | Page | Read | Checkpoint |
 |---|---|---|---|
-| 1 | [Enterprise change management for beginners (not used in this project)](Enterprise-Change-Management-for-Beginners.md) | 30 min | You can classify a change as standard, normal or emergency, and name three enterprise controls this project does not have. |
+| 1 | [Enterprise networks: campus, branch, data center and cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md) | 15 min | You can say what a hub-and-spoke landing zone adds to this project's one VPC, and why a flat network fails. |
+| 2 | [Enterprise infrastructure: how large organizations run it differently](Enterprise-Infrastructure-Differences.md) | 15 min | For each section you can say what this project does instead and when that would stop being fine. |
+| 3 | [Enterprise change management for beginners (not used in this project)](Enterprise-Change-Management-for-Beginners.md) | 30 min | You can classify a change as standard, normal or emergency, and name three enterprise controls this project does not have. |
+| 4 | [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md) | 15 min | You can name where this project's Doppler, Spacelift and Twingate model scales and where it breaks. |
+| 5 | [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md) | 15 min | You can name three roles that fit your interests and the next three rungs of your own skills ladder. |
 
-Doing, not just reading: the page ends with five predict-then-check exercises; the time above is reading only.
+Doing, not just reading: each page ends with a predict-then-check set; the times above are reading only, rounded up to 5 minutes (the change management page is about 26 minutes at 200 words a minute, so 30; the others are 10 to 15).
 
 ## Other clouds (unverified drafts)
 
