@@ -1,0 +1,2596 @@
+{
+  "version": "2.0",
+  "summary": {
+    "title": "Clouds Against Humanity: pipeline data flow diagram",
+    "owner": "Clouds Against Humanity maintainers",
+    "description": "Teaching model for the Threat Dragon exercise. Trust boundaries B1 to B8 match docs/wiki/Threat-Model-Exercise.md; T-numbers match docs/wiki/Threat-Model.md. A model records what someone believes; it does not verify the system. Generic names only.",
+    "id": 0
+  },
+  "detail": {
+    "contributors": [
+      {
+        "name": "Clouds Against Humanity contributors"
+      }
+    ],
+    "diagrams": [
+      {
+        "version": "2.0",
+        "title": "Contributor to protected resource",
+        "diagramType": "STRIDE",
+        "description": "Contributor and maintainer through the repository, CI, Spacelift, Doppler and the cloud API to the connector droplets and Twingate.",
+        "thumbnail": "./public/content/images/thumbnail.stride.jpg",
+        "id": 0,
+        "cells": [
+          {
+            "position": {
+              "x": 40,
+              "y": 40
+            },
+            "size": {
+              "width": 160,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Internet scanner (A1)"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "actor",
+            "zIndex": 1,
+            "id": "ca211af9-38d6-5859-9874-5e58a11220e9",
+            "data": {
+              "name": "Internet scanner (A1)",
+              "description": "A1: an anonymous party on the internet with no account. Scans for open ports and exposed services.",
+              "type": "tm.Actor",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "b2465ce8-c9c0-5622-937f-c604bb0853a1",
+                  "number": 1,
+                  "status": "Mitigated",
+                  "severity": "Low",
+                  "title": "Scanner pretends to be a legitimate client",
+                  "type": "Spoofing",
+                  "modelType": "STRIDE",
+                  "description": "T1: an anonymous party tries to talk to a connector as if it were a client.",
+                  "mitigation": "There is nothing to talk to: zero public inbound rules, connectors are outbound-only."
+                }
+              ],
+              "hasOpenThreats": false,
+              "providesAuthentication": false
+            }
+          },
+          {
+            "position": {
+              "x": 40,
+              "y": 200
+            },
+            "size": {
+              "width": 160,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Contributor or fork author (A2)"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "actor",
+            "zIndex": 2,
+            "id": "c912f33d-7333-5802-aa9a-75789fb37f2a",
+            "data": {
+              "name": "Contributor or fork author (A2)",
+              "description": "A2: someone who can propose code through a pull request but cannot push or merge.",
+              "type": "tm.Actor",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "284f7f62-3c95-5d61-86a1-fe0cc9493043",
+                  "number": 2,
+                  "status": "Mitigated",
+                  "severity": "Medium",
+                  "title": "Pull request made to look like a trusted change",
+                  "type": "Spoofing",
+                  "modelType": "STRIDE",
+                  "description": "T3: a pull request edits a security-critical file (the secrets hook) alongside a harmless-looking test change.",
+                  "mitigation": "Branch protection plus a person reading the changed-file list; CI green is necessary but not sufficient."
+                },
+                {
+                  "id": "509ba823-f722-50e8-b42f-2f499de64d57",
+                  "number": 3,
+                  "status": "Open",
+                  "severity": "Low",
+                  "title": "No proof of who confirmed or authored a change beyond repository history",
+                  "type": "Repudiation",
+                  "modelType": "STRIDE",
+                  "description": "No T-number: repudiation is the weakest letter in Threat-Model.md. History shows authors; nothing in the repository proves who pressed confirm in Spacelift.",
+                  "mitigation": "Open gap. Candidate control: review the Spacelift audit trail (verify in the vendor console)."
+                }
+              ],
+              "hasOpenThreats": true,
+              "providesAuthentication": false
+            }
+          },
+          {
+            "position": {
+              "x": 40,
+              "y": 360
+            },
+            "size": {
+              "width": 160,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Upstream publishers (actions, Doppler CLI, apt repos)"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "actor",
+            "zIndex": 3,
+            "id": "28f2918b-d2da-5353-84ad-0287a4ae33ef",
+            "data": {
+              "name": "Upstream publishers (actions, Doppler CLI, apt repos)",
+              "description": "Supply chain: the publishers of pinned CI actions, the Doppler CLI release, the Twingate apt repository and Ubuntu mirrors.",
+              "type": "tm.Actor",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "5317f4ca-22ff-5679-94c9-5814f358dbe5",
+                  "number": 4,
+                  "status": "Mitigated",
+                  "severity": "High",
+                  "title": "Tampered download or action",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "T7, T8, T9: a compromised action, CLI binary or package is pulled into the pipeline or onto a droplet.",
+                  "mitigation": "Actions pinned by commit SHA; Doppler CLI pinned by SHA-256 (fail closed); Twingate apt key checked against a pinned fingerprint; apt verifies signatures. Residual: a pinned commit that was already malicious."
+                }
+              ],
+              "hasOpenThreats": false,
+              "providesAuthentication": false
+            }
+          },
+          {
+            "position": {
+              "x": 40,
+              "y": 540
+            },
+            "size": {
+              "width": 160,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Maintainer and laptop (A3 / A4)"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "actor",
+            "zIndex": 4,
+            "id": "c17806ff-6954-5918-8050-c53213420658",
+            "data": {
+              "name": "Maintainer and laptop (A3 / A4)",
+              "description": "A3: whoever can push to main (one writer today). A4: a stolen maintainer identity (Twingate sign-in plus SSH key). Holds the Twingate client and the SSH key.",
+              "type": "tm.Actor",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "2fa00838-bc2e-5f3e-b042-4572d52e1b19",
+                  "number": 5,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "Maintainer identity or session stolen",
+                  "type": "Spoofing",
+                  "modelType": "STRIDE",
+                  "description": "T2: stolen Twingate credentials. Together with the SSH key this gives a shell on a connector. The exercise notes there is no numbered threat for takeover of the maintainer's own accounts.",
+                  "mitigation": "Sign-in delegated to the identity provider (enforce MFA there; not visible in this repository); SSH key still required. Verify account hardening in each vendor console."
+                },
+                {
+                  "id": "a54d32a8-38ad-5fac-9bb8-71c29e09a29c",
+                  "number": 6,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "Anyone who can push to main is trusted",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "T3: the design assumes one writer. A second writer, or a taken-over writer account, makes pull request and tracked-run attacks real.",
+                  "mitigation": "Branch protection, one writer, required reviews before adding a second writer. Settings live outside the repository: verify by hand."
+                }
+              ],
+              "hasOpenThreats": true,
+              "providesAuthentication": true
+            }
+          },
+          {
+            "position": {
+              "x": 320,
+              "y": 200
+            },
+            "size": {
+              "width": 130,
+              "height": 100
+            },
+            "attrs": {
+              "text": {
+                "text": "Source repository and main branch"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "process",
+            "zIndex": 5,
+            "id": "75c371d7-93f4-5775-bd20-c8d297b313ac",
+            "data": {
+              "name": "Source repository and main branch",
+              "description": "Public repository, branch protection on main, CI green required. Holds code and the pipeline definition. Holds no cloud credential.",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "848977cc-adf9-51e1-bd84-7de0941746fa",
+                  "number": 7,
+                  "status": "Mitigated",
+                  "severity": "High",
+                  "title": "Malicious change to the secrets hook or .spacelift/config.yml",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "T3: a change makes the hook print the Doppler token. Every automated check can pass a few changed lines.",
+                  "mitigation": "Push policy never proposes a run; CI holds no cloud credential; branch protection; a person reads the diff."
+                },
+                {
+                  "id": "5234f151-70d0-51b8-9d80-e76efed27573",
+                  "number": 8,
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "Operator identifiers leak through the public repository",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "T14: account ids, address ranges, names or machine identifiers end up in a commit, doc or issue.",
+                  "mitigation": "Identifiers live in Doppler; SSH key comment stripped; secret scanning in CI. Residual: human error in a commit message or doc."
+                },
+                {
+                  "id": "4ffcd2cf-cca9-5904-a207-bef18861eadc",
+                  "number": 9,
+                  "status": "Open",
+                  "severity": "Low",
+                  "title": "Branch protection is a setting, not a file",
+                  "type": "Repudiation",
+                  "modelType": "STRIDE",
+                  "description": "No T-number. If branch protection is switched off, nothing in the diff shows it.",
+                  "mitigation": "Verify the setting by hand in the repository settings; it cannot be checked from a clone."
+                }
+              ],
+              "hasOpenThreats": true
+            }
+          },
+          {
+            "position": {
+              "x": 320,
+              "y": 380
+            },
+            "size": {
+              "width": 130,
+              "height": 100
+            },
+            "attrs": {
+              "text": {
+                "text": "CI (GitHub Actions)"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "process",
+            "zIndex": 6,
+            "id": "a273fea9-3f63-5a32-9589-113486e4b796",
+            "data": {
+              "name": "CI (GitHub Actions)",
+              "description": "Runs pytest, the cost gate and tofu test on pull request code. permissions: {} by default; no cloud credential.",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "ddbdbb6c-1aab-582e-9737-5bfcea0b1f0c",
+                  "number": 10,
+                  "status": "Mitigated",
+                  "severity": "Medium",
+                  "title": "Hostile test prints a secret",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "T3, T7: a pull request's code runs in CI and tries to read or print a secret.",
+                  "mitigation": "CI holds no cloud credential, so there is nothing to read. Worst case is wasted minutes."
+                },
+                {
+                  "id": "c504c502-5b6b-5e5e-afb5-a0d6ee2f65d8",
+                  "number": 11,
+                  "status": "Mitigated",
+                  "severity": "High",
+                  "title": "Compromised action runs in CI",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "T7: a pinned action is malicious or its pin is moved.",
+                  "mitigation": "Every action pinned by commit SHA; permissions: {} by default. Residual: a compromised pinned commit is trusted until the pin changes."
+                }
+              ],
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": {
+              "x": 620,
+              "y": 100
+            },
+            "size": {
+              "width": 130,
+              "height": 100
+            },
+            "attrs": {
+              "text": {
+                "text": "Spacelift proposed run (pull request)"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "process",
+            "zIndex": 7,
+            "id": "185b5c0e-ef17-5a6f-a320-43d7e1aed31e",
+            "data": {
+              "name": "Spacelift proposed run (pull request)",
+              "description": "A plan-only run. The push policy never proposes one, so no pull request code should run here. Receives no credentials by design.",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "e059f491-b2cb-506c-a2b7-5bd77e60e48a",
+                  "number": 12,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "A pull request becomes a run next to the secrets",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "T3: until the push policy is attached in Spacelift, a same-repository pull request that changes a stack still gets a proposed run, and the hook script is read from the pull request's branch.",
+                  "mitigation": "Attach .spacelift/policies/push.rego in Spacelift (paid plan) or narrow project roots and globs (free plan); nobody else opens pull requests until then. Verify in the console."
+                }
+              ],
+              "hasOpenThreats": true
+            }
+          },
+          {
+            "position": {
+              "x": 620,
+              "y": 300
+            },
+            "size": {
+              "width": 130,
+              "height": 100
+            },
+            "attrs": {
+              "text": {
+                "text": "Spacelift tracked run (main)"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "process",
+            "zIndex": 8,
+            "id": "d8882efa-854f-5f4a-a7f1-1a231497704b",
+            "data": {
+              "name": "Spacelift tracked run (main)",
+              "description": "Runs plan and apply for a stack from main. Holds DOPPLER_TOKEN and the per-stack secrets loaded in before_init. Apply waits for a human confirm.",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "71b75d74-5708-5409-84a8-8e4743c766aa",
+                  "number": 13,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "A compromised tracked run reaches every prd secret",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "T3, T4, T10: code that executes during init or plan runs before the confirm gate, with DOPPLER_TOKEN scoped to the whole prd config. The per-stack secret list is not isolation.",
+                  "mitigation": "Gates before main: pull request, CI green, branch protection, one writer. The confirm gate reviews the plan, it does not stop code that already ran."
+                },
+                {
+                  "id": "367c07b7-51ff-5219-8dbf-2425d7d2ee18",
+                  "number": 14,
+                  "status": "Mitigated",
+                  "severity": "Medium",
+                  "title": "Apply of a plan nobody reviewed",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "T11: autodeploy applies a bad plan.",
+                  "mitigation": "Autodeploy off; a person confirms every apply; cost gate and approved totals in review."
+                },
+                {
+                  "id": "24306143-4597-51aa-b861-770814551c9c",
+                  "number": 15,
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "Resources outside the repository run up the bill",
+                  "type": "Denial of service",
+                  "modelType": "STRIDE",
+                  "description": "T11: spend from resources created outside the repository or bandwidth overage is not covered by the cost gate.",
+                  "mitigation": "Billing alerts at $10 and $25. Residual: check the cloud account for undeclared resources."
+                }
+              ],
+              "hasOpenThreats": true
+            }
+          },
+          {
+            "position": {
+              "x": 620,
+              "y": 480
+            },
+            "size": {
+              "width": 160,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "OpenTofu state in Spacelift"
+              },
+              "topLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              },
+              "bottomLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "store",
+            "zIndex": 9,
+            "id": "a9668a9a-0080-5c86-88d0-0ff3d0140d63",
+            "data": {
+              "name": "OpenTofu state in Spacelift",
+              "description": "State holds connector tokens and the full resource map. Stored only in Spacelift.",
+              "type": "tm.Store",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "20830384-6f91-51e8-8ed9-22f02dcee960",
+                  "number": 16,
+                  "status": "Accepted",
+                  "severity": "High",
+                  "title": "Connector token read out of state",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "T6: anyone who can read stack state sees the connector tokens.",
+                  "mitigation": "Marked sensitive; state lives only in Spacelift. Accepted: restrict state access in Spacelift."
+                }
+              ],
+              "hasOpenThreats": false,
+              "storesCredentials": true,
+              "isEncrypted": false,
+              "isSigned": false,
+              "isALog": false
+            }
+          },
+          {
+            "position": {
+              "x": 920,
+              "y": 300
+            },
+            "size": {
+              "width": 160,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Doppler prd config"
+              },
+              "topLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              },
+              "bottomLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "store",
+            "zIndex": 10,
+            "id": "1ad3c787-2425-56de-a5e4-7d3efbc2eef2",
+            "data": {
+              "name": "Doppler prd config",
+              "description": "Every runtime secret: cloud token, Twingate API token, tenant name, admin key name and user ids. Read through a read-only, single-config service token.",
+              "type": "tm.Store",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "f780e400-51a3-51b0-8233-197291b5e3df",
+                  "number": 17,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "Doppler service token leaks",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "T4: the service token reads all prd secrets until revoked. Nothing records who read the config.",
+                  "mitigation": "Read-only, one config, 90-day expiry, write-only in Spacelift, masked in logs. Rotate every value it could read, not only the token."
+                },
+                {
+                  "id": "d1914147-c19a-57a7-b430-3babe3983c7a",
+                  "number": 18,
+                  "status": "Accepted",
+                  "severity": "Medium",
+                  "title": "Vendor compromise or outage",
+                  "type": "Denial of service",
+                  "modelType": "STRIDE",
+                  "description": "T10: a hosted control plane is compromised or unavailable.",
+                  "mitigation": "Accepted: inherent to using hosted control planes."
+                }
+              ],
+              "hasOpenThreats": true,
+              "storesCredentials": true,
+              "isEncrypted": true,
+              "isSigned": false,
+              "isALog": false
+            }
+          },
+          {
+            "position": {
+              "x": 920,
+              "y": 480
+            },
+            "size": {
+              "width": 130,
+              "height": 100
+            },
+            "attrs": {
+              "text": {
+                "text": "Cloud provider API"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "process",
+            "zIndex": 11,
+            "id": "04ebb397-295e-58f7-8bbf-f7e115b26746",
+            "data": {
+              "name": "Cloud provider API",
+              "description": "The provider API that creates droplets and firewalls. Reached with a write-scoped token.",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "78cf6712-2362-5985-bdd4-2e5391febe06",
+                  "number": 19,
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "Runaway bill through the provider API",
+                  "type": "Denial of service",
+                  "modelType": "STRIDE",
+                  "description": "T11: an unreviewed or malicious apply creates expensive resources.",
+                  "mitigation": "Cost gate allowlist of free resource types; approved totals; billing alerts at $10 and $25."
+                },
+                {
+                  "id": "41786b17-7a1d-5847-bdf0-54c35c820055",
+                  "number": 20,
+                  "status": "Accepted",
+                  "severity": "High",
+                  "title": "Write token can open anything in the account",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "T10: a stolen write token can create, destroy or open anything in the account.",
+                  "mitigation": "Custom scopes limited to droplets, firewalls and tags; token held only by Spacelift runs. Accepted vendor trust."
+                }
+              ],
+              "hasOpenThreats": true
+            }
+          },
+          {
+            "position": {
+              "x": 320,
+              "y": 620
+            },
+            "size": {
+              "width": 130,
+              "height": 100
+            },
+            "attrs": {
+              "text": {
+                "text": "Twingate controller and relay"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "process",
+            "zIndex": 12,
+            "id": "656b0555-d821-58f9-a1ea-ee1c77f3eb1e",
+            "data": {
+              "name": "Twingate controller and relay",
+              "description": "Hosted zero-trust control plane. Signs the maintainer in through the identity provider and enforces per-resource access.",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "fbe88ce4-b2c4-5fbc-97d6-1e862fad38ed",
+                  "number": 21,
+                  "status": "Mitigated",
+                  "severity": "High",
+                  "title": "Stolen Twingate credentials",
+                  "type": "Spoofing",
+                  "modelType": "STRIDE",
+                  "description": "T2: an attacker presents the maintainer's identity to Twingate.",
+                  "mitigation": "Sign-in delegated to the identity provider (MFA there); access limited to one host and port per resource; SSH key still required."
+                },
+                {
+                  "id": "65ed4c08-6fe0-560d-a3d7-3e870f80c9f9",
+                  "number": 22,
+                  "status": "Accepted",
+                  "severity": "Medium",
+                  "title": "Vendor compromise",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "T10: the control plane is compromised.",
+                  "mitigation": "Narrow scopes; end-to-end encryption to connectors; separate SSH key gate. Accepted."
+                }
+              ],
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": {
+              "x": 620,
+              "y": 640
+            },
+            "size": {
+              "width": 130,
+              "height": 100
+            },
+            "attrs": {
+              "text": {
+                "text": "Connector droplets (two)"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "process",
+            "zIndex": 13,
+            "id": "81eaba8d-83d3-51ca-9faf-29f437a397ed",
+            "data": {
+              "name": "Connector droplets (two)",
+              "description": "Two outbound-only connector droplets. No public inbound rules. Hold their connector token in a root-only file.",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "d28192e7-8112-5b49-940a-d2f8b5b2d9b5",
+                  "number": 23,
+                  "status": "Accepted",
+                  "severity": "Medium",
+                  "title": "Connector token readable via the metadata endpoint",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "T5: user-data is readable by any local process through the metadata endpoint.",
+                  "mitigation": "Token file is root-only 0600; one token per connector, revocable. Accepted: lockdown is a follow-up."
+                },
+                {
+                  "id": "67e3a93c-e6ca-5188-9484-ecb7628cc2f4",
+                  "number": 24,
+                  "status": "Accepted",
+                  "severity": "Medium",
+                  "title": "Both connectors down, operator locked out",
+                  "type": "Denial of service",
+                  "modelType": "STRIDE",
+                  "description": "T13: no console password by design.",
+                  "mitigation": "Two connectors with staggered reboots and updates. Accepted: recovery is a rebuild through Spacelift."
+                },
+                {
+                  "id": "8cf77286-e690-5ab7-85d2-f8078fd53861",
+                  "number": 25,
+                  "status": "Mitigated",
+                  "severity": "Medium",
+                  "title": "Lateral movement between droplets",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "T12: a compromised droplet moves to another.",
+                  "mitigation": "Provider firewalls: inbound only from the firewall's own tag, no address rules; tests pin the exact set."
+                },
+                {
+                  "id": "6f73ef21-96a3-5aa0-b940-cbb33c820137",
+                  "number": 26,
+                  "status": "Mitigated",
+                  "severity": "High",
+                  "title": "Exposed service exploited from the internet",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "T1: scanning, brute force or exploit of an exposed service.",
+                  "mitigation": "Zero public inbound rules attached by tag at creation; sshd keys only, one user."
+                }
+              ],
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": {
+              "x": 920,
+              "y": 640
+            },
+            "size": {
+              "width": 160,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Protected resources (SSH on a private host)"
+              },
+              "topLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              },
+              "bottomLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "store",
+            "zIndex": 14,
+            "id": "305ffaf3-b9d7-5369-9eec-e37488d83c51",
+            "data": {
+              "name": "Protected resources (SSH on a private host)",
+              "description": "What Twingate exposes: one host and one port per resource (TCP 22). Placeholder for whatever later sits behind a connector.",
+              "type": "tm.Store",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "f4eb9cae-012b-56e4-8af8-da98a807736c",
+                  "number": 27,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "Identity plus SSH key together give a shell",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "T2: an attacker with both the identity and the SSH key gets a shell. Stage 2 would make this a foothold with a path home.",
+                  "mitigation": "One host and port per resource; sshd allows only the admin user with a key. Stage 2 needs its own Twingate group and service account."
+                }
+              ],
+              "hasOpenThreats": true,
+              "storesCredentials": false,
+              "isEncrypted": false,
+              "isSigned": false,
+              "isALog": false
+            }
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 20,
+            "connector": "smooth",
+            "data": {
+              "name": "Unsolicited inbound traffic (blocked)",
+              "description": "Port scans and connection attempts from the internet. Nothing is listening: no inbound rules.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "TCP/UDP",
+              "isEncrypted": false,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "14f2429c-4e04-5f94-bf7f-09bba947d7bc",
+                  "number": 28,
+                  "status": "Mitigated",
+                  "severity": "Low",
+                  "title": "Flood or brute force against a connector",
+                  "type": "Denial of service",
+                  "modelType": "STRIDE",
+                  "description": "T1: unsolicited traffic aimed at the droplets.",
+                  "mitigation": "Zero public inbound rules; connectors are outbound-only."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "bb2faea7-991c-5e8f-8953-898c20c32644",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Unsolicited inbound traffic (blocked)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "ca211af9-38d6-5859-9874-5e58a11220e9"
+            },
+            "target": {
+              "cell": "81eaba8d-83d3-51ca-9faf-29f437a397ed"
+            },
+            "vertices": [
+              {
+                "x": 421,
+                "y": 368
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 21,
+            "connector": "smooth",
+            "data": {
+              "name": "Fork pull request (code, no secrets)",
+              "description": "Proposed code. No credentials cross this flow in either direction.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "0e7dbee1-9610-5668-9706-7988a4a6e572",
+                  "number": 29,
+                  "status": "Mitigated",
+                  "severity": "Medium",
+                  "title": "Pull request edits the pipeline",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "T3: the pull request changes scripts, workflows or stack definitions.",
+                  "mitigation": "CI only; branch protection; review of the changed-file list."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "36ddf28c-7717-57be-bc6b-31a52f1197c2",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Fork pull request (code, no secrets)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "c912f33d-7333-5802-aa9a-75789fb37f2a"
+            },
+            "target": {
+              "cell": "75c371d7-93f4-5775-bd20-c8d297b313ac"
+            },
+            "vertices": [
+              {
+                "x": 252,
+                "y": 245
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 22,
+            "connector": "smooth",
+            "data": {
+              "name": "Pull request code checkout (code)",
+              "description": "CI checks out the pull request code and runs repository code on it.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "014cb10b-3660-550c-add1-3a697493ac4a",
+                  "number": 30,
+                  "status": "Mitigated",
+                  "severity": "Medium",
+                  "title": "Pull request code runs with CI permissions",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "T3, T7: hostile repository code runs in CI.",
+                  "mitigation": "permissions: {} by default; no cloud credential in CI."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "3391facf-af2d-54e0-a6cb-7b0977dcbc37",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Pull request code checkout (code)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "75c371d7-93f4-5775-bd20-c8d297b313ac"
+            },
+            "target": {
+              "cell": "a273fea9-3f63-5a32-9589-113486e4b796"
+            },
+            "vertices": [
+              {
+                "x": 360,
+                "y": 340
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 23,
+            "connector": "smooth",
+            "data": {
+              "name": "CI green status check (build result)",
+              "description": "The CI result that branch protection requires before merge.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [],
+              "hasOpenThreats": false
+            },
+            "id": "92f5ce82-22d9-5d45-923b-0ac6c3a9e7ba",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "CI green status check (build result)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "a273fea9-3f63-5a32-9589-113486e4b796"
+            },
+            "target": {
+              "cell": "75c371d7-93f4-5775-bd20-c8d297b313ac"
+            },
+            "vertices": [
+              {
+                "x": 360,
+                "y": 340
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 24,
+            "connector": "smooth",
+            "data": {
+              "name": "Action refs resolved by commit SHA (code)",
+              "description": "Third-party action code fetched at a pinned commit.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "821c8394-872d-586e-aade-66af1d817261",
+                  "number": 31,
+                  "status": "Mitigated",
+                  "severity": "High",
+                  "title": "Action pin moved to malicious code",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "T7: the pinned reference changes or the pinned commit was already malicious.",
+                  "mitigation": "Pin by full commit SHA; review pin changes."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "e70762ab-92a1-5302-a8da-95669184140e",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Action refs resolved by commit SHA (code)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "28f2918b-d2da-5353-84ad-0287a4ae33ef"
+            },
+            "target": {
+              "cell": "a273fea9-3f63-5a32-9589-113486e4b796"
+            },
+            "vertices": [
+              {
+                "x": 252,
+                "y": 415
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 25,
+            "connector": "smooth",
+            "data": {
+              "name": "Review and merge (approval, code)",
+              "description": "The maintainer reviews the diff and merges to main. The only path to a tracked run.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "4dd469f3-f63e-53d5-a4bb-c08a8fc0724c",
+                  "number": 32,
+                  "status": "Open",
+                  "severity": "Low",
+                  "title": "Merge authorship rests on repository history only",
+                  "type": "Repudiation",
+                  "modelType": "STRIDE",
+                  "description": "No T-number: the repository records the merge, not whether branch protection was on at the time.",
+                  "mitigation": "Verify branch protection settings by hand; review audit logs in the vendor console."
+                }
+              ],
+              "hasOpenThreats": true
+            },
+            "id": "a6b6a590-f31e-55d7-ad46-6043fdca228d",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Review and merge (approval, code)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "c17806ff-6954-5918-8050-c53213420658"
+            },
+            "target": {
+              "cell": "75c371d7-93f4-5775-bd20-c8d297b313ac"
+            },
+            "vertices": [
+              {
+                "x": 272,
+                "y": 431
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 26,
+            "connector": "smooth",
+            "data": {
+              "name": "Pull request push event (commit ref; policy decides)",
+              "description": "Webhook telling Spacelift about a pull request branch. The push policy should answer: never propose.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "d4fcdf36-6248-5db5-bbdb-9e99a56296da",
+                  "number": 33,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "Policy missing: pull request starts a proposed run",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "T3: without the push policy attached, a same-repository pull request gets a proposed run. A fork starts nothing unless a policy defines allow_fork.",
+                  "mitigation": "Attach the push policy in Spacelift; it is not read from the repository."
+                }
+              ],
+              "hasOpenThreats": true
+            },
+            "id": "e8df2a3a-d0fa-5df3-ba01-4820c62fe99c",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Pull request push event (commit ref; policy decides)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "75c371d7-93f4-5775-bd20-c8d297b313ac"
+            },
+            "target": {
+              "cell": "185b5c0e-ef17-5a6f-a320-43d7e1aed31e"
+            },
+            "vertices": [
+              {
+                "x": 527,
+                "y": 176
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 27,
+            "connector": "smooth",
+            "data": {
+              "name": "Merged commit on main (code)",
+              "description": "The commit a tracked run will plan and apply.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "078065d8-481a-5276-833b-0f1fee530625",
+                  "number": 34,
+                  "status": "Accepted",
+                  "severity": "High",
+                  "title": "Malicious change merged to main",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "T3: anyone who can push to main is trusted.",
+                  "mitigation": "Accepted: pull request, CI green, branch protection, one writer."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "7dd2ca39-7a94-5935-a5b8-0b774b375ef9",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Merged commit on main (code)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "75c371d7-93f4-5775-bd20-c8d297b313ac"
+            },
+            "target": {
+              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+            },
+            "vertices": [
+              {
+                "x": 535,
+                "y": 300
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 28,
+            "connector": "smooth",
+            "data": {
+              "name": "Doppler CLI download (binary)",
+              "description": "The pinned Doppler CLI release fetched by the secrets hook.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "6a6f467c-7966-5991-a77f-21784029de2b",
+                  "number": 35,
+                  "status": "Mitigated",
+                  "severity": "High",
+                  "title": "Tampered Doppler CLI",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "T8: a modified binary runs next to the secrets.",
+                  "mitigation": "Pinned version and SHA-256 per architecture; mismatch deletes the file and stops the run."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "9e48fff1-da56-524f-9ed3-c9e6e2d9c335",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Doppler CLI download (binary)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "28f2918b-d2da-5353-84ad-0287a4ae33ef"
+            },
+            "target": {
+              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+            },
+            "vertices": [
+              {
+                "x": 405,
+                "y": 400
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 29,
+            "connector": "smooth",
+            "data": {
+              "name": "Read request with service token (DOPPLER_TOKEN)",
+              "description": "The run presents the read-only service token and asks for secrets by name.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "0433d4df-6108-5777-adf8-c2e1c7dc3656",
+                  "number": 36,
+                  "status": "Mitigated",
+                  "severity": "High",
+                  "title": "Service token appears in a log",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "T4: the token or a fetched value is printed in a run log.",
+                  "mitigation": "Each fetched value is masked with ::add-mask; whether masking works on a real run was still to be confirmed."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "43cd0013-7d97-5267-9607-012dd125aeac",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Read request with service token (DOPPLER_TOKEN)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+            },
+            "target": {
+              "cell": "1ad3c787-2425-56de-a5e4-7d3efbc2eef2"
+            },
+            "vertices": [
+              {
+                "x": 842,
+                "y": 320
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 30,
+            "connector": "smooth",
+            "data": {
+              "name": "Secrets (cloud token, Twingate API token, tenant, admin key)",
+              "description": "Secret values returned to the run and loaded into the environment before the plan.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "aadbe17e-2474-5c9e-bd4d-1e0f16e97db5",
+                  "number": 37,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "Secrets read in transit or by run code",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "T4: any code that executes in the run can read the environment.",
+                  "mitigation": "TLS to Doppler; masking; gates before main."
+                }
+              ],
+              "hasOpenThreats": true
+            },
+            "id": "9a4c78bd-a905-5d0f-850b-72e846e0f49b",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Secrets (cloud token, Twingate API token, tenant, admin key)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "1ad3c787-2425-56de-a5e4-7d3efbc2eef2"
+            },
+            "target": {
+              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+            },
+            "vertices": [
+              {
+                "x": 842,
+                "y": 345
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": {
+                  "name": "block"
+                }
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 31,
+            "connector": "smooth",
+            "data": {
+              "name": "OpenTofu state (connector tokens, resource map)",
+              "description": "State written and read by the run.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "Internal",
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "isBidirectional": true,
+              "threats": [
+                {
+                  "id": "4db2e6d6-863a-581d-b0fe-81f75ec25be6",
+                  "number": 38,
+                  "status": "Accepted",
+                  "severity": "High",
+                  "title": "State readable by anyone with stack access",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "T6: connector tokens sit in state.",
+                  "mitigation": "Marked sensitive; restrict state access in Spacelift. Accepted."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "82d6b09c-da58-557e-abc8-f0b3d18a0740",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "OpenTofu state (connector tokens, resource map)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+            },
+            "target": {
+              "cell": "a9668a9a-0080-5c86-88d0-0ff3d0140d63"
+            },
+            "vertices": [
+              {
+                "x": 668,
+                "y": 437
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 32,
+            "connector": "smooth",
+            "data": {
+              "name": "Plan for review (resource changes)",
+              "description": "The plan a human reads before confirming.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [],
+              "hasOpenThreats": false
+            },
+            "id": "0ee2684b-405a-502d-868a-37b690bd363e",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Plan for review (resource changes)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+            },
+            "target": {
+              "cell": "c17806ff-6954-5918-8050-c53213420658"
+            },
+            "vertices": [
+              {
+                "x": 412,
+                "y": 488
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 33,
+            "connector": "smooth",
+            "data": {
+              "name": "Confirm apply (human approval)",
+              "description": "The single human gate between plan and apply.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "c4333434-251d-5089-b852-84b78d4d99aa",
+                  "number": 39,
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "Nothing in the repository proves who pressed confirm",
+                  "type": "Repudiation",
+                  "modelType": "STRIDE",
+                  "description": "No T-number: the model's weakest letter.",
+                  "mitigation": "Open. Review the Spacelift audit trail; verify in the console."
+                }
+              ],
+              "hasOpenThreats": true
+            },
+            "id": "e0373ed5-3335-5705-8889-129b8de6212a",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Confirm apply (human approval)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "c17806ff-6954-5918-8050-c53213420658"
+            },
+            "target": {
+              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+            },
+            "vertices": [
+              {
+                "x": 402,
+                "y": 465
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 34,
+            "connector": "smooth",
+            "data": {
+              "name": "Apply: create or destroy droplets and firewalls (cloud token)",
+              "description": "Provider API calls made with the write-scoped token after confirm.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "5bb666de-1fdc-5554-afe0-5f2b3aa41607",
+                  "number": 40,
+                  "status": "Mitigated",
+                  "severity": "High",
+                  "title": "Plan differs from what the code would do",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "T3, T11: code that ran during plan calls the provider directly, before any confirm.",
+                  "mitigation": "Gates before main. The confirm only reviews the plan through honest tooling."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "62265b21-7ae3-58c7-8b7e-6b54c00ceabe",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Apply: create or destroy droplets and firewalls (cloud token)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+            },
+            "target": {
+              "cell": "04ebb397-295e-58f7-8bbf-f7e115b26746"
+            },
+            "vertices": [
+              {
+                "x": 822,
+                "y": 461
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 35,
+            "connector": "smooth",
+            "data": {
+              "name": "Droplet create with user-data (connector token)",
+              "description": "Cloud-init carries the connector token to the droplet.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "f024261b-8f00-5803-a1c4-1d945b911d9c",
+                  "number": 41,
+                  "status": "Accepted",
+                  "severity": "Medium",
+                  "title": "Token in user-data",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "T5, T6: the connector token travels in user-data and sits in state.",
+                  "mitigation": "Root-only file; revocable per connector. Accepted."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "1246b2a4-a98f-5807-8b24-ea0581870928",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Droplet create with user-data (connector token)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "04ebb397-295e-58f7-8bbf-f7e115b26746"
+            },
+            "target": {
+              "cell": "81eaba8d-83d3-51ca-9faf-29f437a397ed"
+            },
+            "vertices": [
+              {
+                "x": 847,
+                "y": 632
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 36,
+            "connector": "smooth",
+            "data": {
+              "name": "Twingate API: resources, connectors, tokens (API token)",
+              "description": "The run uses the Read, Write and Provision key to create connectors and issue tokens.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "d8d69969-896c-53b4-9afe-8fa14a7ff293",
+                  "number": 42,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "Stolen API key creates its own connector",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "T4: whoever holds the Twingate key can create a connector or issue tokens for an existing one.",
+                  "mitigation": "After a leak, rotate the key and look in the console for connectors the code does not declare."
+                }
+              ],
+              "hasOpenThreats": true
+            },
+            "id": "d3a5e03c-350c-5efd-b621-da30c165c04a",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Twingate API: resources, connectors, tokens (API token)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "d8882efa-854f-5f4a-a7f1-1a231497704b"
+            },
+            "target": {
+              "cell": "656b0555-d821-58f9-a1ea-ee1c77f3eb1e"
+            },
+            "vertices": [
+              {
+                "x": 535,
+                "y": 510
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 37,
+            "connector": "smooth",
+            "data": {
+              "name": "IdP sign-in and resource request (identity)",
+              "description": "The maintainer signs in through the identity provider and requests one resource.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "83643342-e683-5dc5-a601-f0ddb8f70776",
+                  "number": 43,
+                  "status": "Mitigated",
+                  "severity": "High",
+                  "title": "Identity replayed or phished",
+                  "type": "Spoofing",
+                  "modelType": "STRIDE",
+                  "description": "T2: stolen credentials or session.",
+                  "mitigation": "MFA at the identity provider; per-resource ACL."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "63fa41ae-4623-5452-9580-a00c32fdb627",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "IdP sign-in and resource request (identity)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "c17806ff-6954-5918-8050-c53213420658"
+            },
+            "target": {
+              "cell": "656b0555-d821-58f9-a1ea-ee1c77f3eb1e"
+            },
+            "vertices": [
+              {
+                "x": 244,
+                "y": 649
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 38,
+            "connector": "smooth",
+            "data": {
+              "name": "Outbound connector link (connector token) and relayed session",
+              "description": "The connector dials out to Twingate with its token; user traffic arrives over that link.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "TLS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "ee861753-94fa-5026-b8df-beb6979acd5f",
+                  "number": 44,
+                  "status": "Mitigated",
+                  "severity": "Medium",
+                  "title": "Stolen connector token used to impersonate a connector",
+                  "type": "Spoofing",
+                  "modelType": "STRIDE",
+                  "description": "T5: a token taken from the droplet or state is presented elsewhere.",
+                  "mitigation": "One token per connector; revocable."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "9766ba27-f6dc-5872-84db-b5a9d9cdf834",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Outbound connector link (connector token) and relayed session"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "656b0555-d821-58f9-a1ea-ee1c77f3eb1e"
+            },
+            "target": {
+              "cell": "81eaba8d-83d3-51ca-9faf-29f437a397ed"
+            },
+            "vertices": [
+              {
+                "x": 537,
+                "y": 655
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 39,
+            "connector": "smooth",
+            "data": {
+              "name": "SSH to the protected resource (TCP 22, key required)",
+              "description": "The only traffic Twingate admits.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "SSH",
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "f7015b6e-7eab-5440-8a68-22acef0f697f",
+                  "number": 45,
+                  "status": "Mitigated",
+                  "severity": "Medium",
+                  "title": "Move from one droplet to another",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "T12: lateral movement.",
+                  "mitigation": "Firewall admits only connector-to-connector SSH by tag."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "c051ac6e-b24b-5af5-bc83-52067e35b522",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "SSH to the protected resource (TCP 22, key required)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "81eaba8d-83d3-51ca-9faf-29f437a397ed"
+            },
+            "target": {
+              "cell": "305ffaf3-b9d7-5369-9eec-e37488d83c51"
+            },
+            "vertices": [
+              {
+                "x": 842,
+                "y": 685
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 40,
+            "connector": "smooth",
+            "data": {
+              "name": "Signed packages (apt repo, pinned key)",
+              "description": "Twingate and Ubuntu packages installed at first boot.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": true,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "e0cb5d3e-1094-54a5-8962-642a0e654986",
+                  "number": 46,
+                  "status": "Mitigated",
+                  "severity": "High",
+                  "title": "Tampered Twingate package",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "T9: a modified package installs on a connector.",
+                  "mitigation": "Key checked against a pinned fingerprint; apt verifies signatures."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "56f9ac40-01fd-55df-be2b-c226e728edd5",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Signed packages (apt repo, pinned key)"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "28f2918b-d2da-5353-84ad-0287a4ae33ef"
+            },
+            "target": {
+              "cell": "81eaba8d-83d3-51ca-9faf-29f437a397ed"
+            },
+            "vertices": [
+              {
+                "x": 391,
+                "y": 567
+              }
+            ]
+          },
+          {
+            "shape": "trust-boundary-curve",
+            "attrs": {
+              "line": {
+                "stroke": "#b45309",
+                "strokeWidth": 2,
+                "strokeDasharray": "6 4",
+                "targetMarker": "",
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 60,
+            "connector": "smooth",
+            "labels": [
+              {
+                "attrs": {
+                  "text": {
+                    "text": "B1: no inbound"
+                  }
+                }
+              }
+            ],
+            "data": {
+              "type": "tm.Boundary",
+              "name": "B1: no inbound",
+              "description": "Nothing from the internet may reach a connector droplet. Zero public inbound rules.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            },
+            "id": "7affbcf8-a856-543c-bc1c-7358ef33584a",
+            "source": {
+              "x": 652,
+              "y": 551
+            },
+            "target": {
+              "x": 549,
+              "y": 646
+            },
+            "vertices": [
+              {
+                "x": 608,
+                "y": 607
+              }
+            ]
+          },
+          {
+            "shape": "trust-boundary-curve",
+            "attrs": {
+              "line": {
+                "stroke": "#b45309",
+                "strokeWidth": 2,
+                "strokeDasharray": "6 4",
+                "targetMarker": "",
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 61,
+            "connector": "smooth",
+            "labels": [
+              {
+                "attrs": {
+                  "text": {
+                    "text": "B2: PR, CI only"
+                  }
+                }
+              }
+            ],
+            "data": {
+              "type": "tm.Boundary",
+              "name": "B2: PR, CI only",
+              "description": "A stranger's pull request reaches the repository and CI only, with no credentials.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            },
+            "id": "0c00357b-a746-5eff-96a2-ac9412c7d897",
+            "source": {
+              "x": 255,
+              "y": 175
+            },
+            "target": {
+              "x": 250,
+              "y": 315
+            },
+            "vertices": [
+              {
+                "x": 264,
+                "y": 245
+              }
+            ]
+          },
+          {
+            "shape": "trust-boundary-curve",
+            "attrs": {
+              "line": {
+                "stroke": "#b45309",
+                "strokeWidth": 2,
+                "strokeDasharray": "6 4",
+                "targetMarker": "",
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 62,
+            "connector": "smooth",
+            "labels": [
+              {
+                "attrs": {
+                  "text": {
+                    "text": "B3: push policy never proposes a Spacelift run"
+                  }
+                }
+              }
+            ],
+            "data": {
+              "type": "tm.Boundary",
+              "name": "B3: push policy never proposes a Spacelift run",
+              "description": "Pull request code must not start a Spacelift run. The policy lives in Spacelift, not in the repository.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            },
+            "id": "79e6b338-3572-533c-bfcd-e5b6db9fee1f",
+            "source": {
+              "x": 513,
+              "y": 134
+            },
+            "target": {
+              "x": 557,
+              "y": 266
+            },
+            "vertices": [
+              {
+                "x": 546,
+                "y": 196
+              }
+            ]
+          },
+          {
+            "shape": "trust-boundary-curve",
+            "attrs": {
+              "line": {
+                "stroke": "#b45309",
+                "strokeWidth": 2,
+                "strokeDasharray": "6 4",
+                "targetMarker": "",
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 63,
+            "connector": "smooth",
+            "labels": [
+              {
+                "attrs": {
+                  "text": {
+                    "text": "B4: branch protection + CI green"
+                  }
+                }
+              }
+            ],
+            "data": {
+              "type": "tm.Boundary",
+              "name": "B4: branch protection + CI green",
+              "description": "The only path to main. Branch protection is a setting outside the repository.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            },
+            "id": "09489c94-134d-5f0b-a72e-58a4cb940674",
+            "source": {
+              "x": 198,
+              "y": 371
+            },
+            "target": {
+              "x": 307,
+              "y": 459
+            },
+            "vertices": [
+              {
+                "x": 260,
+                "y": 406
+              }
+            ]
+          },
+          {
+            "shape": "trust-boundary-curve",
+            "attrs": {
+              "line": {
+                "stroke": "#b45309",
+                "strokeWidth": 2,
+                "strokeDasharray": "6 4",
+                "targetMarker": "",
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 64,
+            "connector": "smooth",
+            "labels": [
+              {
+                "attrs": {
+                  "text": {
+                    "text": "B5: tracked run on main"
+                  }
+                }
+              }
+            ],
+            "data": {
+              "type": "tm.Boundary",
+              "name": "B5: tracked run on main",
+              "description": "Only a merged commit on main becomes a tracked run.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            },
+            "id": "26e429af-4803-5b91-8dd2-57f0bf675248",
+            "source": {
+              "x": 557,
+              "y": 234
+            },
+            "target": {
+              "x": 513,
+              "y": 366
+            },
+            "vertices": [
+              {
+                "x": 546,
+                "y": 304
+              }
+            ]
+          },
+          {
+            "shape": "trust-boundary-curve",
+            "attrs": {
+              "line": {
+                "stroke": "#b45309",
+                "strokeWidth": 2,
+                "strokeDasharray": "6 4",
+                "targetMarker": "",
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 65,
+            "connector": "smooth",
+            "labels": [
+              {
+                "attrs": {
+                  "text": {
+                    "text": "B6: read-only token, fetched by name"
+                  }
+                }
+              }
+            ],
+            "data": {
+              "type": "tm.Boundary",
+              "name": "B6: read-only token, fetched by name",
+              "description": "Doppler to Spacelift: read-only service token scoped to the one prd config.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            },
+            "id": "4b76a849-6cbe-57f6-ada9-b7adb82fad53",
+            "source": {
+              "x": 840,
+              "y": 275
+            },
+            "target": {
+              "x": 845,
+              "y": 415
+            },
+            "vertices": [
+              {
+                "x": 854,
+                "y": 345
+              }
+            ]
+          },
+          {
+            "shape": "trust-boundary-curve",
+            "attrs": {
+              "line": {
+                "stroke": "#b45309",
+                "strokeWidth": 2,
+                "strokeDasharray": "6 4",
+                "targetMarker": "",
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 66,
+            "connector": "smooth",
+            "labels": [
+              {
+                "attrs": {
+                  "text": {
+                    "text": "B7: human confirms apply"
+                  }
+                }
+              }
+            ],
+            "data": {
+              "type": "tm.Boundary",
+              "name": "B7: human confirms apply",
+              "description": "Spacelift to the cloud API: apply waits for a person.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            },
+            "id": "ca0ae769-60a1-5024-ba83-28ba58e6accd",
+            "source": {
+              "x": 871,
+              "y": 380
+            },
+            "target": {
+              "x": 799,
+              "y": 500
+            },
+            "vertices": [
+              {
+                "x": 845,
+                "y": 446
+              }
+            ]
+          },
+          {
+            "shape": "trust-boundary-curve",
+            "attrs": {
+              "line": {
+                "stroke": "#b45309",
+                "strokeWidth": 2,
+                "strokeDasharray": "6 4",
+                "targetMarker": "",
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 67,
+            "connector": "smooth",
+            "labels": [
+              {
+                "attrs": {
+                  "text": {
+                    "text": "B8: IdP sign-in, per-resource ACL"
+                  }
+                }
+              }
+            ],
+            "data": {
+              "type": "tm.Boundary",
+              "name": "B8: IdP sign-in, per-resource ACL",
+              "description": "Maintainer to Twingate: identity provider sign-in and one host and port per resource.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            },
+            "id": "2f977488-ccf0-5660-8d9f-111ca5c6590f",
+            "source": {
+              "x": 275,
+              "y": 559
+            },
+            "target": {
+              "x": 230,
+              "y": 691
+            },
+            "vertices": [
+              {
+                "x": 264,
+                "y": 629
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "diagramTop": 1,
+    "reviewer": "",
+    "threatTop": 46
+  }
+}

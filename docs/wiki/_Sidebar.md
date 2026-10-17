@@ -20,6 +20,7 @@
 - [Architecture overview](Architecture-Overview.md)
 - [Threat model](Threat-Model.md)
 - [Threat model exercise: build your own](Threat-Model-Exercise.md)
+- [Threat Dragon exercise: trust boundaries](Threat-Dragon-Exercise.md)
 - [Trace one change end to end](Trace-One-Change-End-to-End.md)
 - [Twingate](Twingate.md)
 - [Spacelift](Spacelift.md)
