@@ -28,7 +28,7 @@ jobs:
       id-token: write
     with:
       python-versions: '["3.12", "3.13"]'
-      install-command: pip install pytest
+      install-command: pip install pytest pyyaml==6.0.2
       # The cost gate first: it is a script in this repository, so it rides the
       # Python job rather than needing a job of its own.
       test-command: python -I scripts/cost_check.py --root . && python -I -m pytest tests -q

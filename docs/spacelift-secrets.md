@@ -148,6 +148,48 @@ The script tests run it under plain `sh` with stubbed `doppler` and `curl`, and 
 - **Masking must be confirmed on the first tracked run.** The script masks each value with Spacelift's documented `echo "::add-mask <value>"` command, which the runner is meant to consume without showing it. The documentation does not say the mask line itself is hidden from the log. After the first tracked run, search that run's log for the token prefix (`dop_v1_`) and confirm it never appears. If it does, revoke the token at once, then remove the `echo "::add-mask"` line and replace it with a different masking approach.
 - **Unverified until the first tracked run:** that hooks run with `/mnt/workspace/source/` as the checkout path, and that the Alpine runner image has `curl`, `tar` and `sha256sum`. If either is wrong the run fails closed with a clear message; fix the path or the install step.
 
+## 8a. More than one cloud
+
+Everything above describes one cloud (DigitalOcean) and one Doppler token. When AWS, Azure or GCP stacks join (issue #22, design section 4 point 4), do not add their credentials to the existing config. Nothing here changes the live stacks or the `cah-doppler` context.
+
+### The rule
+
+One Doppler config and one Spacelift context **per cloud**, each with its own read-only service token, attached only to that cloud's stacks.
+
+The names below are a **convention proposed here, not something already set up or verified**:
+
+| Cloud | Doppler project / config | Spacelift context | Stack names | Attached to |
+|---|---|---|---|---|
+| DigitalOcean | the existing `prd` setup, left as is | `cah-doppler` (existing, not renamed) | `cah-00-...`, `cah-10-...` | label `cah` today |
+| AWS | project `cah`, config `dev_aws` | `cah-doppler-aws` | `cah-aws-...` | a cloud label such as `cah-aws`, not the DigitalOcean one |
+| Azure, GCP | same pattern: `dev_azure`, `dev_gcp` | `cah-doppler-azure`, `cah-doppler-gcp` | `cah-azure-...`, `cah-gcp-...` | their own labels |
+
+Each context holds the same three variables as today (`DOPPLER_TOKEN`, write-only; `DOPPLER_PROJECT`; `DOPPLER_CONFIG`), with values for that cloud only. The hook script is unchanged: it reads those three from the environment, so which config a run can read is decided entirely by which context is attached. The existing auto-attach on the `cah` label must not also catch the new clouds' stacks, or one stack would receive two tokens; give them a different label.
+
+**Attach the push policy first.** Section 9 attaches the push policy to the `cah` label (`autoattach:cah`), so changing the label also drops that auto-attachment. Before attaching any secret context to a new cloud's stacks, attach the policy to them manually or extend its autoattach labels to the new label. A stack that has a secret context without the policy would let a pull request's run sit next to the token.
+
+### Prefer a native integration for the cloud login
+
+Where Spacelift offers it, a native cloud integration beats any stored key, because the credential is short-lived and nothing is kept in Doppler. For AWS that means Spacelift assuming an IAM role in your account, with a per-stack external id in the role's trust policy, so one stack's role cannot be used by another. Doppler would then hold only non-credential settings for that cloud.
+
+**Unverified:** whether the maintainer's Spacelift plan includes cloud integrations. The DigitalOcean setup used Doppler because the plan issued no run-level identity token, which is a separate feature. The answer is an open check in issue #22 (phase 0). This is a gate, not a preference (design section 10, decision 6): AWS stack creation waits for that check, so no long-lived AWS key is needed. If the integration is not available, return to the maintainer; falling back to a static key in a separate Doppler config is a new decision, not the default.
+
+### Why separate contexts
+
+The Doppler token in a context can read the **whole config**, not just the names a stack asks for (the hook only fetches named secrets, but code on a tracked run can use the token directly; see section 8). If the AWS keys sat in the DigitalOcean config, a compromised DigitalOcean run would reach AWS too. Per-cloud configs and contexts keep a compromise inside one cloud's control plane.
+
+### What the test proves, and what it does not
+
+`tests/test_secret_separation.py` parses `.spacelift/config.yml` with PyYAML (a pinned CI test dependency) and fails closed: any shape it does not understand is a failure, not a skip. It fails if:
+
+- a stack name is not one of the known DigitalOcean stacks or a `cah-aws-*`, `cah-azure-*` or `cah-gcp-*` name (a typo cannot inherit DigitalOcean's permissions);
+- a hook is not exactly the source line followed by one plain `cah_doppler_env NAME ...` call (extra calls, shell operators, quoting, variables, YAML anchors and aliases, duplicate keys and non-string entries are all refused);
+- a stack requests a name with another cloud's prefix (`AWS_` on a DigitalOcean stack, `DIGITALOCEAN_` on `cah-aws-*`, and so on; the prefix table is in the test), or any name outside its own cloud's prefixes and the exact shared names (`TWINGATE_API_TOKEN`, `TWINGATE_NETWORK`, `ADMIN_SSH_PUBLIC_KEY`, `ADMIN_SSH_KEY_NAME`, `ADMIN_USER_IDS`);
+- `before_init` and `before_apply` differ (the apply phase can run in a fresh container, so both must load the same names);
+- the hook script assigns `DOPPLER_PROJECT`, `DOPPLER_CONFIG` or `DOPPLER_TOKEN`, or hard-codes a config name.
+
+It proves the **declared requests** are separated. It does **not** prove that a Doppler token cannot read another config, that a context is attached to the right stacks, or that the secret names sit in the right Doppler config. Those are Doppler and Spacelift settings. The design asks for "request another cloud's secret from one stack and show the secret store refuses it"; that needs live Doppler and Spacelift, so it is a manual check to run and record when the first second cloud is wired up: from an AWS stack run, ask for `DIGITALOCEAN_TOKEN` through the AWS context and expect the hook to fail with `could not read DIGITALOCEAN_TOKEN from Doppler`.
+
 ## 9. The push policy
 
 `.spacelift/policies/push.rego` decides which Git events start a Spacelift run. Spacelift does not read it from the repository; it is a policy object in Spacelift with this file as its body. The tests next to it (`push_test.rego`) run on every pull request through the `policy (OPA)` job of git-your-ship-together's `tofu-ci.yml`.
