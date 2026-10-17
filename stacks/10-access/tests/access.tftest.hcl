@@ -1065,3 +1065,52 @@ run "host_firewall_instances_rejects_a_repeat" {
   }
   expect_failures = [var.host_firewall_instances]
 }
+
+# Tightened host_firewall_ssh_sources validation: nft rejects leading zeros, and
+# a /0 would defeat the narrowing to private space.
+run "host_firewall_sources_reject_a_leading_zero_prefix" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["10.0.0.0/08"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_reject_a_leading_zero_octet" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["010.0.0.0/8"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_reject_slash_zero" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["0.0.0.0/0"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_reject_a_prefix_over_32" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["10.0.0.0/33"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_reject_an_octet_over_255" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["10.0.0.256/32"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_accept_host_bits_overlaps_and_the_extremes" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["10.0.0.1/8", "10.1.0.0/16", "192.0.2.7/32", "128.0.0.0/1"]
+  }
+}

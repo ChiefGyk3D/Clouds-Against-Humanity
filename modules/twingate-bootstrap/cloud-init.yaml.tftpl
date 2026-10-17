@@ -67,18 +67,31 @@ ${telemetry_conf}%{ if metadata_lock ~}
       EOF
       echo "cah-metadata-lock: metadata endpoint allowed for uids: $allowed"
   # After cloud-final so the do-agent user already exists on first boot.
+  # Ubuntu's nftables.service loads /etc/nftables.conf, which starts with
+  # "flush ruleset", on start, restart and reload, and its package upgrade
+  # try-restarts it: that would silently drop our table. So this unit is ordered
+  # After= it, is PartOf= it (a stop or restart of nftables.service restarts this
+  # unit, which re-runs the idempotent script) and takes its reloads too. All
+  # three are soft: no Requires=, Wants= or Requisite=, so when nftables.service
+  # is inactive (the first-boot state) this unit still starts and does not fail.
+  # PartOf= and ReloadPropagatedFrom= only forward jobs that nftables.service
+  # already has; they never start it. Untested on a real machine.
   - path: /etc/systemd/system/cah-metadata-lock.service
     permissions: "0644"
     content: |
       [Unit]
       Description=Restrict the droplet metadata endpoint to root and do-agent
       After=cloud-final.service network-online.target
+      After=nftables.service
+      PartOf=nftables.service
+      ReloadPropagatedFrom=nftables.service
       Wants=network-online.target
 
       [Service]
       Type=oneshot
       RemainAfterExit=yes
       ExecStart=/usr/local/sbin/cah-metadata-lock
+      ExecReload=/usr/local/sbin/cah-metadata-lock
 
       [Install]
       WantedBy=multi-user.target
@@ -146,18 +159,26 @@ ${telemetry_conf}%{ if metadata_lock ~}
         exit 1
       fi
       echo "cah-host-firewall: loaded; ssh and metrics allowed from: $ssh_sources"
+  # Same reasoning as the metadata lock unit: nftables.service flushes the whole
+  # ruleset, so this unit is After=, PartOf= and ReloadPropagatedFrom= it (soft,
+  # nothing is pulled in, and it still starts when nftables.service is inactive).
+  # No ExecStop: a plain "stop nftables" still flushes our table, and the docs say so.
   - path: /etc/systemd/system/cah-host-firewall.service
     permissions: "0644"
     content: |
       [Unit]
       Description=Default-drop host firewall (inet cah_host)
       After=cloud-final.service network-online.target
+      After=nftables.service
+      PartOf=nftables.service
+      ReloadPropagatedFrom=nftables.service
       Wants=network-online.target
 
       [Service]
       Type=oneshot
       RemainAfterExit=yes
       ExecStart=/usr/local/sbin/cah-host-firewall
+      ExecReload=/usr/local/sbin/cah-host-firewall
 
       [Install]
       WantedBy=multi-user.target

@@ -1467,3 +1467,99 @@ run "metadata_lock_alone_still_renders_nftables_once" {
     error_message = "The metadata lock alone must keep one nftables entry and no firewall."
   }
 }
+
+# Persistence (issue #90 review): Ubuntu's nftables.service starts with
+# `flush ruleset` and is try-restarted by package upgrades, which would drop our
+# tables silently. Both units must be ordered after it and be part of it so a
+# restart of nftables.service re-runs our script.
+run "host_firewall_unit_follows_nftables_service" {
+  command = plan
+  variables {
+    host_firewall = true
+  }
+  assert {
+    condition = alltrue([
+      for s in ["After=nftables.service", "PartOf=nftables.service", "ReloadPropagatedFrom=nftables.service", "ExecReload=/usr/local/sbin/cah-host-firewall", "After=cloud-final.service network-online.target"] :
+      strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/etc/systemd/system/cah-host-firewall.service"]), s)
+    ])
+    error_message = "cah-host-firewall.service must be After= and PartOf= nftables.service."
+  }
+}
+
+run "metadata_lock_unit_follows_nftables_service" {
+  command = plan
+  variables {
+    metadata_lock = true
+  }
+  assert {
+    condition = alltrue([
+      for s in ["After=nftables.service", "PartOf=nftables.service", "ReloadPropagatedFrom=nftables.service", "ExecReload=/usr/local/sbin/cah-metadata-lock", "After=cloud-final.service network-online.target"] :
+      strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/etc/systemd/system/cah-metadata-lock.service"]), s)
+    ])
+    error_message = "cah-metadata-lock.service must be After= and PartOf= nftables.service."
+  }
+}
+
+run "both_units_follow_nftables_service_when_both_features_are_on" {
+  command = plan
+  variables {
+    host_firewall = true
+    metadata_lock = true
+  }
+  assert {
+    condition = alltrue([
+      for p in ["/etc/systemd/system/cah-host-firewall.service", "/etc/systemd/system/cah-metadata-lock.service"] :
+      strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == p]), "PartOf=nftables.service") && strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == p]), "After=nftables.service")
+    ])
+    error_message = "Both units must follow nftables.service."
+  }
+}
+
+# Tightened host_firewall_ssh_sources validation: nft rejects leading zeros, and
+# a /0 would defeat the narrowing to private space.
+run "host_firewall_sources_reject_a_leading_zero_prefix" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["10.0.0.0/08"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_reject_a_leading_zero_octet" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["010.0.0.0/8"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_reject_slash_zero" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["0.0.0.0/0"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_reject_a_prefix_over_32" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["10.0.0.0/33"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_reject_an_octet_over_255" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["10.0.0.256/32"]
+  }
+  expect_failures = [var.host_firewall_ssh_sources]
+}
+
+run "host_firewall_sources_accept_host_bits_overlaps_and_the_extremes" {
+  command = plan
+  variables {
+    host_firewall_ssh_sources = ["10.0.0.1/8", "10.1.0.0/16", "192.0.2.7/32", "128.0.0.0/1"]
+  }
+}

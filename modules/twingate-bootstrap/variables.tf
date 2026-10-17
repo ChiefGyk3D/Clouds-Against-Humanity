@@ -135,12 +135,12 @@ variable "host_firewall_ssh_sources" {
   type        = list(string)
   default     = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
   nullable    = false
-  description = "IPv4 CIDRs allowed to reach TCP 22 (and the telemetry metrics port) when host_firewall is true. Default the three private RFC 1918 blocks: the cloud firewall already limits SSH to the connector tag, and this only narrows it to private space, because this module does not know the VPC CIDR. Narrow it to the VPC range if you know it. IPv4 only (the machines have no public IPv6). Ignored while host_firewall is false."
+  description = "IPv4 CIDRs allowed to reach TCP 22 (and the telemetry metrics port) when host_firewall is true. Default the three private RFC 1918 blocks: the cloud firewall already limits SSH to the connector tag, and this only narrows it to private space, because this module does not know the VPC CIDR. Narrow it to the VPC range if you know it. IPv4 only (the machines have no public IPv6). No leading zeros in octets or prefix and a prefix of 1 to 32; a /0 is refused on purpose because it would defeat the narrowing (the cloud firewall is still the outer layer). Host bits and overlapping entries are allowed. Ignored while host_firewall is false."
 
   validation {
     condition = length(var.host_firewall_ssh_sources) >= 1 && length(distinct(var.host_firewall_ssh_sources)) == length(var.host_firewall_ssh_sources) && alltrue([
-      for c in var.host_firewall_ssh_sources : can(regex("^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}/[0-9]{1,2}$", c)) && can(cidrnetmask(c))
+      for c in var.host_firewall_ssh_sources : can(regex("^(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])/([1-9]|[12][0-9]|3[0-2])$", c)) && can(cidrnetmask(c))
     ])
-    error_message = "host_firewall_ssh_sources must hold at least one IPv4 CIDR (for example 10.0.0.0/8), each at most once."
+    error_message = "host_firewall_ssh_sources must hold at least one IPv4 CIDR (for example 10.0.0.0/8), each at most once, written without leading zeros (nft rejects 10.0.0.0/08) and with a prefix of 1 to 32. A /0 (0.0.0.0/0) is refused on purpose: it would defeat the narrowing to private space, and the cloud firewall stays the outer layer either way."
   }
 }

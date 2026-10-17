@@ -130,14 +130,14 @@
       {
         "name": "host_firewall_ssh_sources",
         "type": "list(string)",
-        "description": "IPv4 CIDRs allowed to reach TCP 22 (and the connector metrics port) through the host firewall. Default the three private RFC 1918 blocks: the cloud firewall already limits SSH to the connector tag and this only narrows it to private space, because the module does not know the VPC CIDR. Narrow it to your VPC range if you know it. Only matters once host_firewall is true.",
+        "description": "IPv4 CIDRs allowed to reach TCP 22 (and the connector metrics port) through the host firewall. Default the three private RFC 1918 blocks: the cloud firewall already limits SSH to the connector tag and this only narrows it to private space, because the module does not know the VPC CIDR. Narrow it to your VPC range if you know it. A /0 is refused on purpose: it would defeat the narrowing, and the cloud firewall stays the outer layer. Only matters once host_firewall is true.",
         "required": false,
         "default": [
           "10.0.0.0/8",
           "172.16.0.0/12",
           "192.168.0.0/16"
         ],
-        "validation": "at least one IPv4 CIDR, no repeats (host bits and IPv6 are refused)",
+        "validation": "at least one IPv4 CIDR, no repeats; no leading zeros in octets or prefix; prefix 1 to 32 (/0 is refused on purpose); host bits and overlaps allowed",
         "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
         "example": "[\"10.0.0.0/8\"]",
         "sensitivity": "public",
@@ -536,14 +536,14 @@
       {
         "name": "host_firewall_ssh_sources",
         "type": "list(string)",
-        "description": "IPv4 CIDRs allowed to reach TCP 22 (and the connector metrics port) through the host firewall. Default the three private RFC 1918 blocks: the cloud firewall already limits SSH to the connector tag and this only narrows it to private space, because the module does not know the VPC CIDR. Narrow it to your VPC range if you know it. Only matters once host_firewall is true.",
+        "description": "IPv4 CIDRs allowed to reach TCP 22 (and the connector metrics port) through the host firewall. Default the three private RFC 1918 blocks: the cloud firewall already limits SSH to the connector tag and this only narrows it to private space, because the module does not know the VPC CIDR. Narrow it to your VPC range if you know it. A /0 is refused on purpose: it would defeat the narrowing, and the cloud firewall stays the outer layer. Only matters once host_firewall is true.",
         "required": false,
         "default": [
           "10.0.0.0/8",
           "172.16.0.0/12",
           "192.168.0.0/16"
         ],
-        "validation": "at least one IPv4 CIDR, no repeats (host bits and IPv6 are refused)",
+        "validation": "at least one IPv4 CIDR, no repeats; no leading zeros in octets or prefix; prefix 1 to 32 (/0 is refused on purpose); host bits and overlaps allowed",
         "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
         "example": "[\"10.0.0.0/8\"]",
         "sensitivity": "public",
@@ -1181,7 +1181,7 @@
           "172.16.0.0/12",
           "192.168.0.0/16"
         ],
-        "validation": "at least one IPv4 CIDR, no repeats (host bits and IPv6 are refused)",
+        "validation": "at least one IPv4 CIDR, no repeats; no leading zeros in octets or prefix; prefix 1 to 32 (/0 is refused on purpose); host bits and overlaps allowed",
         "set_where": "the calling module",
         "example": "[\"10.0.0.0/8\"]",
         "sensitivity": "public",
@@ -1351,7 +1351,7 @@
           "172.16.0.0/12",
           "192.168.0.0/16"
         ],
-        "validation": "none here; the bootstrap module requires at least one IPv4 CIDR, no repeats",
+        "validation": "none here; the bootstrap module requires IPv4 CIDRs without leading zeros, prefix 1 to 32 (/0 refused), no repeats",
         "set_where": "the calling stack",
         "example": "[\"10.0.0.0/8\"]",
         "sensitivity": "public",
@@ -1710,7 +1710,7 @@
           "172.16.0.0/12",
           "192.168.0.0/16"
         ],
-        "validation": "none here; the bootstrap module requires at least one IPv4 CIDR, no repeats",
+        "validation": "none here; the bootstrap module requires IPv4 CIDRs without leading zeros, prefix 1 to 32 (/0 refused), no repeats",
         "set_where": "the calling stack",
         "example": "[\"10.0.0.0/8\"]",
         "sensitivity": "public",

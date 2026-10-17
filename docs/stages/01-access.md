@@ -66,6 +66,8 @@ Rollback: set `metadata_lock = false` (this replaces the droplet again), or on o
 ssh -t cah-admin@host 'sudo nft delete table inet cah_metadata'
 ```
 
+The metadata lock unit also follows `nftables.service`, so a restart of it re-applies the lock (see "Surviving `nftables.service`" under the host firewall below; untested on a real machine).
+
 ### Host firewall (built, off by default)
 
 The DigitalOcean cloud firewall is the only inbound layer today. If a tag is ever set wrong, nothing else stands in the way. The `host_firewall` setting (default `false`) adds a second layer on each connector: an nftables table of its own (`inet cah_host`, input chain only, policy drop; the `inet cah_metadata` table and the output and forward chains are never touched, and the ruleset is never flushed). It lets in only loopback, replies to traffic the machine started, the few ICMP types and ICMPv6 neighbour discovery the network card needs, DHCPv4 replies so leases renew, TCP 22 from `host_firewall_ssh_sources` (default the three private blocks `10.0.0.0/8`, `172.16.0.0/12` and `192.168.0.0/16`; the cloud firewall already limits SSH to the connector tag, so this only narrows it to private space, because the module does not know the VPC range) and, when `connector_telemetry.metrics_port` is set, that one port from the same sources. The same template serves DigitalOcean and AWS. A systemd unit (`cah-host-firewall.service`, after `cloud-final.service`, enabled with `--no-block` so it cannot deadlock cloud-init) runs `/usr/local/sbin/cah-host-firewall` at every boot.
@@ -88,13 +90,15 @@ ssh -t cah-admin@HOST 'sudo journalctl -u cah-host-firewall.service --no-pager -
 
 The first line must print the table with `policy drop` and a `tcp dport 22` rule, and both units in the second must be `active`.
 
-If you lose SSH: use the Droplet Console in the DigitalOcean panel (out of band, it does not go through the firewall), then run the rollback below. If even that fails, replace the droplet through OpenTofu (set `host_firewall = false` and apply), which is the fallback.
+If you lose SSH: the Droplet Console in the DigitalOcean panel is believed to be an out-of-band path that does not go through the host firewall, but that is **not tested**; do not rely on it. The documented fallback is to replace the droplet through OpenTofu: set `host_firewall = false` and apply, which is a replace (a new droplet, so the lost one is destroyed). If the console does work, run the rollback below from it.
 
 Rollback: set `host_firewall = false` (this replaces the droplet again), or on one box, without waiting for a rebuild (this lasts until the next boot, so also set the setting to false):
 
 ```
 ssh -t cah-admin@HOST 'sudo nft delete table inet cah_host'
 ```
+
+Surviving `nftables.service` (applies to both the host firewall and the metadata lock above): Ubuntu's `nftables.service` is a oneshot that loads `/etc/nftables.conf`, which begins with `flush ruleset`, on start, restart and reload, and its package upgrade runs `try-restart` on it. Left alone, that would silently delete the `inet cah_host` and `inet cah_metadata` tables (the rules would fail open and nothing would notice). So `cah-host-firewall.service` and `cah-metadata-lock.service` are both `After=nftables.service` and `PartOf=nftables.service`, with `ReloadPropagatedFrom=nftables.service` and an `ExecReload` that re-runs the script: a restart or reload of `nftables.service` restarts or reloads our unit, which loads its table again. The relationship is soft on purpose (no `Requires=`, `Wants=` or `Requisite=`), so when `nftables.service` is inactive, as on first boot, our unit still starts and does not fail. A plain `systemctl stop nftables` still flushes the ruleset and our unit is not restarted by it; do not stop it. This is reasoning from the unit semantics and the unpacked Ubuntu 24.04 package, **not tested on a real machine**. To see it work, run `ssh -t cah-admin@HOST 'sudo systemctl restart nftables.service && sudo nft list tables'` on a staged connector and check that the table is listed again (this also reloads the firewall, so do it only with the Twingate session you already have open).
 
 Not covered yet: when the node exporter is installed on the connectors (stage 2), its port needs its own rule; today nothing on the connectors listens on it.
 

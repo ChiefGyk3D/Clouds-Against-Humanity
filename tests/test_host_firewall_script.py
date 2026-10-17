@@ -213,6 +213,8 @@ def test_ruleset_is_idempotent_self_contained_and_drops_by_default(tmp_path):
         'iifname "lo" accept',
         "ct state established,related accept",
         "ct state invalid drop",
+        "icmp type { echo-request, destination-unreachable, time-exceeded } accept",
+        "icmpv6 type { destination-unreachable, packet-too-big, time-exceeded, echo-request, nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert } accept",
         "udp sport 67 udp dport 68 accept",
         f"tcp dport 22 ip saddr {{ {DEFAULT_SOURCES} }} accept",
     ):
@@ -332,8 +334,11 @@ def _nft_check(ruleset: str):
         {"metrics_port": "9999"},
         {"sources": "10.20.0.0/16, 192.0.2.7/32"},
         {"sources": "10.20.0.0/16", "metrics_port": "1024"},
+        # Everything the tightened variable validation still accepts: host bits,
+        # overlapping entries, and the prefix extremes 1 and 32.
+        {"sources": "10.0.0.1/8, 10.1.0.0/16, 128.0.0.0/1, 192.0.2.7/32"},
     ],
-    ids=["defaults", "telemetry-port", "custom-sources", "both"],
+    ids=["defaults", "telemetry-port", "custom-sources", "both", "validation-extremes"],
 )
 def test_generated_ruleset_passes_nft_syntax_check(tmp_path, kw):
     _proc, _calls, ruleset, _ = run_script(tmp_path, **kw)
@@ -364,3 +369,57 @@ def test_template_gates_the_firewall_on_host_firewall():
     # nftables is listed exactly once, whichever feature asks for it.
     assert len(re.findall(r"^  - nftables$", text, flags=re.MULTILINE)) == 1
     assert "--no-block" in text
+
+
+# --- persistence across nftables.service (issue #90 review) ----------------------
+
+METADATA_UNIT_PATH = "/etc/systemd/system/cah-metadata-lock.service"
+
+
+def follows_nftables(unit: str, script: str) -> bool:
+    """True when the unit is ordered after, restarts with, and reloads with
+    nftables.service (which flushes the whole ruleset), and never hard-depends
+    on it."""
+    lines = unit.splitlines()
+    wanted = (
+        "After=nftables.service",
+        "PartOf=nftables.service",
+        "ReloadPropagatedFrom=nftables.service",
+        f"ExecReload={script}",
+        "After=cloud-final.service network-online.target",
+        "Type=oneshot",
+    )
+    hard = ("Requires=nftables", "Requisite=nftables", "BindsTo=nftables", "Wants=nftables")
+    return (
+        all(w in lines for w in wanted)
+        and not any(h in unit for h in hard)
+        and "ExecStop" not in unit
+    )
+
+
+@pytest.mark.parametrize(
+    ("path", "script"),
+    [
+        (UNIT_PATH, "/usr/local/sbin/cah-host-firewall"),
+        (METADATA_UNIT_PATH, "/usr/local/sbin/cah-metadata-lock"),
+    ],
+    ids=["host-firewall", "metadata-lock"],
+)
+def test_both_units_follow_nftables_service(path, script):
+    # Ubuntu's nftables.service flushes the whole ruleset on start, restart and
+    # reload (and package upgrades try-restart it). Each unit must be ordered
+    # after it, restart with it, and re-run its script on a reload. The checks
+    # are soft (no Requires=/Wants=): nftables.service may be inactive on first
+    # boot and our unit must still start.
+    unit = extract_file(TEMPLATE.read_text(encoding="utf-8"), path)
+    assert follows_nftables(unit, script)
+
+
+def test_follows_nftables_negative_cases_the_guard_bites():
+    unit = extract_file(TEMPLATE.read_text(encoding="utf-8"), UNIT_PATH)
+    script = "/usr/local/sbin/cah-host-firewall"
+    assert follows_nftables(unit, script)
+    for needle in ("PartOf=nftables.service", "After=nftables.service", "ReloadPropagatedFrom=nftables.service"):
+        assert not follows_nftables(unit.replace(needle, "# removed"), script)
+    assert not follows_nftables(unit + "Requires=nftables.service\n", script)
+    assert not follows_nftables(unit + "ExecStop=/usr/sbin/nft flush ruleset\n", script)
