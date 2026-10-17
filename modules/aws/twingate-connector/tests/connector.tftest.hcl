@@ -1,0 +1,259 @@
+mock_provider "aws" {
+  mock_data "aws_ssm_parameter" {
+    defaults = {
+      insecure_value = "ami-00000000000000000"
+    }
+  }
+}
+mock_provider "twingate" {}
+
+variables {
+  layer                = "access"
+  region               = "us-east-1"
+  subnet_id            = "subnet-00000000000000000"
+  security_group_ids   = ["sg-00000000000000000"]
+  instance_type        = "t4g.micro"
+  remote_network_id    = "remote-network-test"
+  instance             = "a"
+  twingate_network     = "acme"
+  admin_ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAItest"
+  reboot_time          = "03:00"
+}
+
+run "instance_is_named_and_placed_by_the_caller" {
+  command = plan
+  assert {
+    condition     = aws_instance.connector.tags["Name"] == "access-us-east-1-connector-a"
+    error_message = "Name must be <layer>-<region>-connector-<instance>."
+  }
+  assert {
+    condition     = aws_instance.connector.subnet_id == "subnet-00000000000000000" && toset(aws_instance.connector.vpc_security_group_ids) == toset(["sg-00000000000000000"])
+    error_message = "The instance must launch into the given subnet wearing the given security groups."
+  }
+}
+
+run "connector_and_instance_names_carry_the_instance_letter" {
+  command = plan
+  variables {
+    instance = "b"
+  }
+  assert {
+    condition     = module.bootstrap.name == "access-us-east-1-connector-b" && aws_instance.connector.tags["Name"] == "access-us-east-1-connector-b"
+    error_message = "Both the Twingate connector and the instance must be named with the instance letter."
+  }
+}
+
+run "image_is_canonical_ubuntu_2404_for_the_chosen_architecture" {
+  command = plan
+  assert {
+    condition     = data.aws_ssm_parameter.ubuntu.name == "/aws/service/canonical/ubuntu/server/24.04/stable/current/arm64/hvm/ebs-gp3/ami-id"
+    error_message = "The AMI must come from Canonical's public Ubuntu 24.04 arm64 parameter."
+  }
+  assert {
+    condition     = aws_instance.connector.ami == "ami-00000000000000000"
+    error_message = "The instance must use the looked-up AMI."
+  }
+}
+
+run "x86_fallback_changes_only_the_image_path" {
+  command = plan
+  variables {
+    architecture  = "amd64"
+    instance_type = "t3.micro"
+  }
+  assert {
+    condition     = strcontains(data.aws_ssm_parameter.ubuntu.name, "/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id") && aws_instance.connector.instance_type == "t3.micro"
+    error_message = "amd64 must select the amd64 image."
+  }
+}
+
+run "imds_v2_is_required_with_a_single_hop" {
+  command = plan
+  assert {
+    condition     = aws_instance.connector.metadata_options[0].http_tokens == "required" && aws_instance.connector.metadata_options[0].http_endpoint == "enabled"
+    error_message = "The metadata service must require IMDSv2 session tokens."
+  }
+  assert {
+    condition     = aws_instance.connector.metadata_options[0].http_put_response_hop_limit == 1
+    error_message = "The metadata token hop limit must be 1."
+  }
+}
+
+run "public_address_is_requested_and_nothing_else_is_extra" {
+  command = plan
+  assert {
+    condition     = aws_instance.connector.associate_public_ip_address == true
+    error_message = "The connector needs a public address to reach Twingate without a NAT gateway."
+  }
+  assert {
+    condition     = aws_instance.connector.ipv6_address_count == 0 && aws_instance.connector.monitoring == false
+    error_message = "IPv6 and detailed monitoring must stay off."
+  }
+  assert {
+    condition     = !can(regex("(?m)^\\s*(iam_instance_profile|key_name)\\s*=", file("${path.module}/main.tf")))
+    error_message = "The connector has no instance profile and no AWS key pair."
+  }
+  assert {
+    condition     = !can(regex("(?m)^resource\\s+\"aws_(eip|nat_gateway|ebs_volume|security_group|key_pair)", file("${path.module}/main.tf")))
+    error_message = "This module creates only the instance; groups, addresses, gateways and extra disks are not its business."
+  }
+}
+
+run "root_volume_is_explicit_gp3_sized_by_the_variable" {
+  command = plan
+  assert {
+    condition     = aws_instance.connector.root_block_device[0].volume_type == "gp3" && aws_instance.connector.root_block_device[0].volume_size == 8
+    error_message = "Default root disk is an explicit 8 GiB gp3."
+  }
+  assert {
+    condition     = aws_instance.connector.root_block_device[0].iops == 3000 && aws_instance.connector.root_block_device[0].throughput == 125 && aws_instance.connector.root_block_device[0].encrypted == true
+    error_message = "gp3 at its baseline performance, encrypted."
+  }
+  assert {
+    condition     = length(aws_instance.connector.ebs_block_device) == 0
+    error_message = "No extra block devices."
+  }
+}
+
+run "root_volume_size_follows_the_variable" {
+  command = plan
+  variables {
+    root_volume_size = 20
+  }
+  assert {
+    condition     = aws_instance.connector.root_block_device[0].volume_size == 20
+    error_message = "volume_size must come from root_volume_size."
+  }
+}
+
+run "instance_type_comes_from_the_variable" {
+  command = plan
+  variables {
+    instance_type = "t4g.small"
+  }
+  assert {
+    condition     = aws_instance.connector.instance_type == "t4g.small"
+    error_message = "instance_type must come from the variable."
+  }
+}
+
+run "boot_data_is_the_shared_bootstraps_output_with_the_hardening_in_it" {
+  command = plan
+  assert {
+    condition     = aws_instance.connector.user_data == module.bootstrap.user_data
+    error_message = "The instance's boot data must be exactly the shared bootstrap output."
+  }
+  assert {
+    condition     = strcontains(aws_instance.connector.user_data, "99-cah-hardening") && strcontains(aws_instance.connector.user_data, "PasswordAuthentication no")
+    error_message = "The shared hardening must reach the instance."
+  }
+  assert {
+    condition     = aws_instance.connector.user_data_replace_on_change == true
+    error_message = "A changed cloud-init must replace the instance, since it only runs on first boot."
+  }
+}
+
+run "this_module_holds_no_private_copy_of_the_bootstrap" {
+  command = plan
+  assert {
+    condition     = !fileexists("${path.module}/cloud-init.yaml.tftpl") && !strcontains(file("${path.module}/main.tf"), "templatefile") && !can(regex("(?m)^resource\\s+\"twingate_", file("${path.module}/main.tf"))) && strcontains(file("${path.module}/main.tf"), "source = \"../../twingate-bootstrap\"")
+    error_message = "A provider module must call the bootstrap module, not carry its own cloud-init or Twingate resources."
+  }
+}
+
+run "tokens_never_leave_the_module" {
+  command = plan
+  assert {
+    condition     = !strcontains(file("${path.module}/outputs.tf"), "token")
+    error_message = "No output may mention or expose connector tokens."
+  }
+}
+
+run "outputs_never_carry_connector_secrets" {
+  command = apply
+
+  override_resource {
+    target = module.bootstrap.twingate_connector_tokens.this
+    values = {
+      access_token  = "FAKE-ACCESS-TOKEN-1"
+      refresh_token = "FAKE-REFRESH-TOKEN-1"
+    }
+  }
+
+  # Test setup sanity: the fake values really reach the instance's user_data.
+  assert {
+    condition     = strcontains(aws_instance.connector.user_data, "FAKE-ACCESS-TOKEN-1") && strcontains(aws_instance.connector.user_data, "FAKE-REFRESH-TOKEN-1")
+    error_message = "Test setup: fake tokens must flow into user_data."
+  }
+
+  # The test can only name outputs it knows, so pin the output set.
+  assert {
+    condition     = length(regexall("output \"", file("${path.module}/outputs.tf"))) == 4
+    error_message = "outputs.tf must declare exactly 4 outputs. Add one only after proving it carries no connector secret and extending this test."
+  }
+
+  assert {
+    condition     = jsonencode(sort(flatten(regexall("output \"([A-Za-z0-9_-]+)\"", file("${path.module}/outputs.tf"))))) == jsonencode(["instance_id", "instance_name", "private_ip", "size"])
+    error_message = "outputs.tf declares an output this test does not inspect. Add it here only after proving it carries no connector secret."
+  }
+
+  # Each output must be exactly its intended non-secret source. Searching for
+  # the fake tokens alone would miss an output that re-encodes the boot data.
+  assert {
+    condition = (
+      output.instance_id == aws_instance.connector.id &&
+      output.instance_name == aws_instance.connector.tags["Name"] &&
+      output.private_ip == aws_instance.connector.private_ip &&
+      output.size == aws_instance.connector.instance_type
+    )
+    error_message = "Every output must be exactly its instance attribute, never derived from the boot data."
+  }
+
+  assert {
+    condition = !anytrue([
+      for v in [output.instance_id, output.instance_name, output.private_ip, output.size] :
+      strcontains(tostring(v), "FAKE-ACCESS-TOKEN-1") || strcontains(tostring(v), "FAKE-REFRESH-TOKEN-1")
+    ])
+    error_message = "A module output carries a connector access or refresh token."
+  }
+}
+
+run "an_instance_with_no_security_group_is_rejected" {
+  command = plan
+  variables {
+    security_group_ids = []
+  }
+  expect_failures = [var.security_group_ids]
+}
+
+run "a_malformed_instance_type_is_rejected" {
+  command = plan
+  variables {
+    instance_type = "micro"
+  }
+  expect_failures = [var.instance_type]
+}
+
+run "an_unknown_architecture_is_rejected" {
+  command = plan
+  variables {
+    architecture = "x86_64"
+  }
+  expect_failures = [var.architecture]
+}
+
+run "a_root_volume_below_the_image_size_is_rejected" {
+  command = plan
+  variables {
+    root_volume_size = 4
+  }
+  expect_failures = [var.root_volume_size]
+}
+
+run "an_oversized_root_volume_is_rejected" {
+  command = plan
+  variables {
+    root_volume_size = 500
+  }
+  expect_failures = [var.root_volume_size]
+}

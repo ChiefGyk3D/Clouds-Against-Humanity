@@ -1,6 +1,6 @@
 # AWS: the same four pieces
 
-> **Status: unverified draft.** Written 2026-10-16 from AWS's documentation (sources in the [phase 0 evidence](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-multicloud-phase0-evidence-aws.md)). **No AWS version of this project has been built yet.** The resource lists below are a teaching map of what such a build would need, not code in this repository, and the actual build may differ. Not yet reviewed by the maintainer.
+> **Status: unverified draft.** Written 2026-10-16 from AWS's documentation (sources in the [phase 0 evidence](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-multicloud-phase0-evidence-aws.md)). **The three AWS modules now exist (see "Where this is built" below) and are tested with mocked providers only. They have never been applied to an AWS account, and there is no AWS stack yet.** The resource lists below are still a teaching map, and the code may differ from your answer for good reasons. Not yet reviewed by the maintainer.
 
 Read [Why the clouds differ](Why-the-Clouds-Differ.md) and [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) first. This page walks the four pieces that this project builds on DigitalOcean (a private network, a firewall, a machine, an identity for the machine), points at the DigitalOcean file where each lives, and says what you would build on AWS instead and why it is not a one-line rename.
 
@@ -75,6 +75,10 @@ A different identity matters in this project: the one that lets **Spacelift** ac
 ## Putting the pieces together
 
 On DigitalOcean, `stacks/00-foundation` and `stacks/10-access` are two layers, and the second depends on outputs of the first. The same layering makes sense on AWS: a foundation layer (network, base security group) and an access layer (instances, connector group). The shared parts, the Twingate resources, the boot script, the Doppler hook and the cost gate, are provider-neutral and are not rewritten. [The design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-multicloud-design.md) explains how the two trees would sit side by side.
+
+## Where this is built
+
+Check your predictions against the code, in the repository under `modules/aws/`: [`vpc`](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/tree/main/modules/aws/vpc), [`firewall`](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/tree/main/modules/aws/firewall) and [`twingate-connector`](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/tree/main/modules/aws/twingate-connector), each with a README mapping the DigitalOcean object to the AWS one. The connector calls the same shared bootstrap as the DigitalOcean one, so the hardening is not copied. They are tested with mocked providers (`tofu test`), which proves the shape of the code and not how AWS behaves: nothing has been applied. The [Terraform reference](Terraform-Reference.md) walks through them. Piece 4 is a decision in the code: the instance has no instance profile and no AWS key pair.
 
 ## Try it yourself
 
