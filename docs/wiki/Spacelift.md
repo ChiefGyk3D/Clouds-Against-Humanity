@@ -85,6 +85,12 @@ This is the one place this wiki states the caveat in full; other pages link here
 
 **Push policies are a paid Spacelift feature.** On the free plan the same effect is only half available. Spacelift's built-in behaviour already ignores changes outside a stack's project root and project globs, so setting those narrowly (the stack's own directory plus `modules/**`, `scripts/spacelift/**` and `.spacelift/**`) stops docs-only pull requests and merges from starting anything. A pull request that changes a stack still gets a proposed run that fails without credentials. That is a real limit of the free plan, written down rather than hidden. The steps are in [section 9 of the secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#9-the-push-policy). [Lessons learned, "A red check from a run that could never pass"](Lessons-Learned.md#10-a-red-check-from-a-run-that-could-never-pass) is the story of the red check that prompted it.
 
+### The plan policy: no open ports in a plan
+
+A second policy, `.spacelift/policies/plan.rego`, reads the plan before an apply and denies it if it would open a port on a core machine: a firewall inbound rule with a source address or `0.0.0.0/0`, an AWS ingress rule from a CIDR range, or IPv6 turned on for a droplet or an AWS network. A rule that admits only a tag (the only kind the firewall module emits) passes. The firewall module's tests catch the same mistakes in CI; this catches them in the plan that is about to be applied.
+
+A deliberate exception is a reviewed code change: the exact resource address goes in an allowlist inside the policy file, with a threat-model note. A stack label or a plan field cannot grant one. It is written and tested but **not yet attached**, and it is a policy in Spacelift like the push policy, so the same paid-plan caveat applies; whether the plan policy type is available on the maintainer's plan is unconfirmed. The steps are in [section 9a of the secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#9a-the-plan-policy). The destroy and autodeploy guard is a separate policy.
+
 ### Why autodeploy is off
 
 Every apply needs a human to read the plan and press confirm. For infrastructure that costs money and controls access, the plan is the review. A plan that shows "1 to destroy" on a connector when you expected an in-place change is exactly the thing you want a person to catch.

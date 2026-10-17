@@ -105,7 +105,7 @@ Clouds-Against-Humanity/
   .spacelift/config.yml                    which secrets each stack loads
   .github/workflows/ci.yml                 GYST callers only (tofu, python, security) + CI green
   .github/workflows/wiki.yml               publishes docs/wiki through GYST's wiki-publish.yml
-  .spacelift/policies/                     Spacelift push policy and its OPA tests
+  .spacelift/policies/                     Spacelift push and plan policies and their OPA tests
   docs/wiki/                               the wiki pages (source of truth)
   docs/stages/                             operator guides: decisions, verify, rollback, per stage  (00-foundation, 01-access, 02-telemetry, aws-access)
   docs/cost.md                             cost gate explained

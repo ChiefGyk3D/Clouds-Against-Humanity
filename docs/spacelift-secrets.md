@@ -242,3 +242,47 @@ opa fmt --list --fail .spacelift/policies
 ```
 
 Use OPA 1.21.0, the version CI pins (`opa_linux_amd64_static`, SHA-256 `5eef70644868bb04d0556bcc795ee42f2ab379e73f51d1bfa30f83e1305bc9b9`).
+
+## 9a. The plan policy
+
+`.spacelift/policies/plan.rego` decides whether a plan may be applied. Like the push policy, it is a policy object in Spacelift with this file as its body; Spacelift does not read it from the repository. Its tests (`plan_test.rego`) run on every pull request in the same `policy (OPA)` CI job.
+
+Why it exists: a careless pull request could open a port on a connector. The firewall module's tests catch that after the fact, in CI, for the code they exercise. The plan policy checks the plan Spacelift is about to apply, so a tracked run with an open port is denied before anyone can confirm the apply.
+
+It denies a created or updated resource that is:
+
+| Resource | Denied when |
+|---|---|
+| `digitalocean_firewall` | An inbound rule has any source other than a tag: a source address (and `0.0.0.0/0` or `::/0` is called out as the whole internet), a droplet id, a load balancer or a Kubernetes cluster. The firewall module only ever emits `source_tags`, so a tag-scoped rule passes. |
+| `aws_vpc_security_group_ingress_rule`, `aws_security_group_rule` (ingress), `aws_security_group` (inline ingress) | The source is a CIDR range, IPv4 or IPv6. A reference to a security group passes. |
+| `digitalocean_droplet` | `ipv6 = true`. |
+| `aws_vpc`, `aws_subnet`, `aws_instance` | The plan turns on an IPv6 range or address. |
+
+Deletes and no-ops are ignored. The destroy and autodeploy guard is a separate policy (issue #92) and is not part of this one.
+
+**Plan check first.** Spacelift's documentation lists policies under **Enforce Guardrails > Policies**, and the push policy type is paid-plan only (section 9). I have not confirmed whether the plan policy type is available on the maintainer's plan; if **Create policy** offers no **Plan** type, the policy stays in the repository, tested, until the plan changes. Until it is attached, the firewall module's own tests in CI are the only check on inbound rules, and they run on the pull request, not on the plan Spacelift applies.
+
+### Attach it (once)
+
+1. In Spacelift, open **Enforce Guardrails > Policies**, choose **Create policy**, name it `cah-plan`, and pick the type **Plan**.
+2. Paste the contents of `.spacelift/policies/plan.rego` as the body. Do not paste `plan_test.rego`.
+3. Add the label `autoattach:cah`, so it attaches to every stack labelled `cah`, or attach it by hand to each stack.
+4. When the policy changes in a pull request, paste the new body into the same policy after the merge. The file in the repository is the reviewed copy, not the live one.
+
+### A deliberate exception
+
+A deliberate inbound rule is allowed only by a reviewed code change. Add the exact resource address, as the plan shows it (for example `module.fw.digitalocean_firewall.this`), to `inbound_allowlist` in `plan.rego`, in a pull request. Every entry needs a threat-model note (`docs/wiki/Threat-Model.md`) naming the port, the source and the reason, and a review. After the merge, paste the new body into Spacelift. There is no stack label, environment variable or plan field that grants an exception, on purpose: a branch must not be able to grant its own. The list is empty today. The IPv6 checks have no exception.
+
+### Reading a denial
+
+A denial names the resource address and the rule, for example:
+
+```text
+module.fw.digitalocean_firewall.this: inbound rule tcp/8080 opens the port to the whole internet (address 0.0.0.0/0). Inbound on core tags must come from a tag only.
+```
+
+Find that address in the plan, then change the code so the rule uses a tag source (or, for a reviewed exception, see above). Messages carry addresses and rule shapes only, never a secret.
+
+### Verify it
+
+The input shape (`input.terraform.resource_changes`, each with `address`, `type`, and `change.actions` and `change.after`) comes from Spacelift's published plan-policy contract and the Terraform JSON plan format, not from a real run on this account. After attaching it, check those fields against a real run's plan input in the policy workbench (the policy sets `sample := true`, so Spacelift keeps recent inputs). Local tests are the same as section 9: `opa test .spacelift/policies -v`.
