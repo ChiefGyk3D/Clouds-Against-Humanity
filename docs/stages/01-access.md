@@ -159,6 +159,14 @@ Known follow-up: the provider emits a deprecation warning when `access_group` is
 2. From a Twingate client: `ssh <user>@<connector private IP>` works for each connector's private IP (`connector_private_ips` output, keys `a` and `b`).
 3. From outside Twingate: `nmap -Pn -p 22,80,443 <connector public IP>` shows the ports filtered on both droplets. Scanning your own droplet is authorized.
 4. `python3 -I scripts/cost_check.py --root .` still reports `digitalocean: planned $12.00/mo, approved $12.00`.
+5. **IPv6 stays closed.** The automated test `tests/test_ipv6_closed.py` (part of `pytest tests`, so part of CI) fails if any droplet lacks an explicit `ipv6 = false`, if any inbound firewall or security group rule has an IPv6 source, if IPv6 settings or resources appear on the AWS VPC, subnet or instance side, or if a .tf file cannot be read or parsed. It checks the declared configuration only. To check a real connector by hand, over Twingate (replace `host` with the connector's private address), the second line should print nothing:
+
+   ```
+   ssh -t cah-admin@host 'ip -6 addr show scope global'
+   ssh -t cah-admin@host 'ip -6 route show default'
+   ```
+
+   Then open the droplet in the DigitalOcean panel: the Networking tab should show no IPv6 address and the "Enable IPv6" option should be off. Not yet run: this hand check has not been run against a real droplet.
 
 ## 6a. If a connector shows offline
 

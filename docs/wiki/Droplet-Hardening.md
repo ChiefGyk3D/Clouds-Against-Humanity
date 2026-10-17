@@ -93,6 +93,10 @@ Any process on a droplet can read the cloud-init user-data from `169.254.169.254
 
 It changes `user_data`, so turning it on replaces the droplet, and it has **not been tested on a real droplet yet**. It is a rollout you stage: `metadata_lock = true` with `metadata_lock_instances = ["a"]`, apply, check SSH through Twingate, then `["a", "b"]`. The verify and rollback commands are in the [stage 1 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md).
 
+## IPv6 stays closed
+
+"Zero inbound" is only true if IPv6 is closed as well, so `tests/test_ipv6_closed.py` fails the build if a droplet does not state `ipv6 = false`, if a firewall or security group inbound rule has an IPv6 source such as `::/0`, if a VPC or subnet is given IPv6 settings, if an instance asks for IPv6 addresses, or if an IPv6 association or egress-only gateway resource appears. It reads the resource blocks in `modules/` and `stacks/` offline, so it proves what the repository declares, not what a cloud account shows. Outbound rules that list `::/0` as a destination are not flagged; the droplets have no IPv6 address to send from. The by-hand check is in the [stage 1 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md).
+
 ## Not done yet
 
 - **Audit logging** (auditd, and shipping auth logs off the box). Planned for stage 2 alongside the SIEM link.

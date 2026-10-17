@@ -116,6 +116,7 @@ Besides the cost gate and the identifier check, the `pytest tests` step covers t
 
 - **Settings page and manifest.** `scripts/gen_settings_doc.py --check` fails when [Settings reference](Settings-Reference.md) is stale against `docs/settings.json`, and a test fails when a `variable` exists in a stack or module but not in the manifest (or the reverse).
 - **Module policy and contract.** Every provider connector module must reuse the shared `twingate-bootstrap`, CI must list every module and stack directory, and every provider supplies the same module roles with the same output names and a README.
+- **IPv6 stays closed.** `tests/test_ipv6_closed.py` reads every resource in `modules/` and `stacks/` and fails if a droplet does not state `ipv6 = false`, if an inbound rule has an IPv6 source, or if anything creates IPv6 plumbing or addresses. See [Droplet hardening](Droplet-Hardening.md).
 - **Secret separation.** Each stack may only ask for its own cloud's secret names in `.spacelift/config.yml`. This proves what the repository declares, not what a Doppler token can actually read.
 - **Examples and unused variables.** Each live stack's `terraform.tfvars.example` is complete and valid, and an unused variable must be on a short documented list.
 - **Wiki and threat model files.** Sidebar, reading order and `Next:` lines stay consistent; the Threat Dragon model parses; the telemetry lesson pages carry their draft banner and their cost tables are recomputed.
