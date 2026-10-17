@@ -1,0 +1,139 @@
+# Telemetry crosses the trust boundary
+
+> **Unverified draft: written from the design, none of stage 2 has been built or applied.** Sources: the [stage 2 logging design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-11-stage-2-logging-design.md) (2026-10-11) and the [settings and mini SOC design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-stage2-settings-and-mini-soc-design.md) sections 2.8, 4 and 5.3 (2026-10-16). Every port, resource and rule below is a plan. Facts about Twingate and Wazuh that the design marks UNVERIFIED are marked here too. All addresses are from documentation ranges.
+
+**Prerequisites:** [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md), [Twingate](Twingate.md), [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) and the [Threat model](Threat-Model.md).
+
+The repository's central promise is that nothing on the cloud side listens to the Internet. Telemetry needs data to move between the cloud and the home SIEM. This page is about how that happens without breaking the promise, and about the places where it still costs something.
+
+## The picture
+
+```mermaid
+flowchart LR
+    subgraph cloud["Cloud site (no public inbound)"]
+        conn["Connector droplets a and b<br/>metrics exporter<br/>log agent"]:::cloud
+        tgc["Twingate connectors<br/>cloud remote network"]:::ctrl
+    end
+    tg["Twingate<br/>identity and policy<br/>one resource, one port"]:::ctrl
+    subgraph home["Home site"]
+        hc["Home-logging connector<br/>own VLAN, firewall allow-list"]:::ctrl
+        prom["Prometheus<br/>headless client, pulls metrics"]:::you
+        mgr["Log manager<br/>ports 1514 and 1515"]:::you
+    end
+    dp["Doppler<br/>per-site boot config"]:::secret
+
+    prom -- "metrics: home PULLS" --> tg --> tgc --> conn
+    conn -- "logs: cloud PUSHES" --> tg --> hc --> mgr
+    dp -. "first boot: the host pulls its own secrets" .-> conn
+
+    classDef you fill:#132a1f,stroke:#4ade80,color:#dcfce7
+    classDef ctrl fill:#1e1b3a,stroke:#a78bfa,color:#ede9fe
+    classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
+    classDef secret fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
+```
+
+"Pull" and "push" here are *policy* directions: who asks for the data. Twingate's tunnels are outbound from both ends, which is why neither side opens a port.
+
+## Pull for metrics, push for logs
+
+| | Metrics | Logs |
+|---|---|---|
+| Who starts the request | Prometheus at home asks each cloud endpoint | The agent on each cloud host connects out to the manager |
+| Why | Prometheus pulls by design. Keeping that means no push gateway and no change to the dashboards and alert rules that already select on the job | Wazuh agents push by design, the same direction the on-prem hosts use |
+| Twingate resources | One per endpoint and port: the node exporter (9100) and the connector's own metrics port on each connector | One per manager port: 1514 (events) and 1515 (enrollment) |
+| Service that holds the access | A scrape service, only the metrics resources | A logging service, only those two ports |
+| What a leak of that access reaches | The metrics endpoints of that site | Those two ports on the manager, and nothing else if the design holds |
+
+The two directions are different resources and different services on purpose, so rotating or losing one does not touch the other. Compare the choice on the Twingate page: [one resource per host and port, never "the whole VPC"](Twingate.md#one-resource-per-host-and-port-never-the-whole-vpc). A resource here is a single address with `tcp` restricted to one port, UDP denied, ICMP off. Telemetry adds more of them; it does not loosen the form.
+
+The metrics port of the connector is not decided yet. The design lists it as an open question (the documentation for the connector says nothing about the address it binds to or about authentication), and the stage 2 design says to test on one connector before choosing.
+
+## A one-port resource is not read-only
+
+It is tempting to think "I only opened port 9090, so it is read-only". Twingate limits the **host and port** a client can reach. The design assumes (from Twingate's resource model; the page it read does not document the point) that it does not limit the HTTP method or path. A service that exposes dashboards on one port exposes its whole HTTP surface on that port: queries, and, if enabled, administrative and write endpoints.
+
+So the design gives the cloud **no path to the home Prometheus**. Order of preference:
+
+1. **No path.** A cloud-side Grafana reads a cloud-side Prometheus. If it needs home data, home pushes selected series outward (`remote_write`, filtered), so home initiates and nothing in the cloud can query home.
+2. If a query path is ever needed, a read-only, authenticated reverse proxy at home that permits only query endpoints, and is the only thing the Twingate resource points at.
+
+Federation is not chosen, because it makes the cloud pull from home. The push option has its own surface: the receiving Prometheus accepts writes (a flag enables it; UNVERIFIED), so its resource is granted only to the home Prometheus's service and it listens on the private address.
+
+## The cloud firewall still has a say
+
+Twingate does not bypass the destination's firewall. A connector opens an ordinary connection inside the VPC to the target, so the target's firewall must accept it. The access stack already records this: either connector can be the one that reaches the other, so SSH between connectors needs a tag-sourced inbound rule on the target and an outbound rule on the sender. Metrics need the same pair. The design's changes are all scoped by **tag** (the source is the connector tag), never by address, and it states two assertions to test: no inbound rule has an address source, and the set of inbound rules equals an expected list of `(protocol, port, source tag)` triples.
+
+The consequence is stated plainly in the design: "zero public inbound" is preserved; "zero inbound rules" is not. Read [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) for why tags beat addresses.
+
+## The first-boot secret pull, and where secrets still live
+
+Putting a secret in Doppler does not keep it out of OpenTofu state or the droplet. If a Doppler value is passed through a variable into the droplet's `user_data`, it is held by the state, the provider's API, the droplet's metadata endpoint, any root process on the droplet, and any backup of state or disk. The connector tokens already work this way, and the project [accepts that](Twingate.md#accepted-risk-the-connector-tokens). The design does not extend the acceptance to anything new.
+
+**The mechanism.** OpenTofu receives one value, a short-lived, read-only Doppler token for a per-site boot config. The token is created out of band by the maintainer so it is not a resource in state. At first boot, the host pulls its own secrets (its Twingate service key and the log enrollment password), writes them to root-only files and **deletes the token file**. The Twingate service keys are created out of band too, one per host, and OpenTofu manages the service accounts and their grants but not the keys.
+
+Where that still leaks, in the design's own list:
+
+| Still holds the secret | For how long |
+|---|---|
+| `user_data`, state and the metadata endpoint hold the **bootstrap token** | While it is valid. Whether a Doppler token can expire within hours or be single-use is UNVERIFIED; the design needs only "expires within a day", and otherwise the maintainer revokes it after first boot |
+| Any root process on the droplet can read the secrets files | For the host's lifetime |
+| The disk | For the host's lifetime |
+| The log enrollment password | Removed from the host after enrollment; the per-host agent key it yields stays |
+
+If the maintainer prefers not to build the out-of-band step, the fallback is to treat state, the API, metadata, root and backups as holders of the long-lived key, and to record it as a downgrade. Read the design's tests for this (user-data secret absence, state search after a real apply) as the proof the pull works; none of them has run.
+
+## The home firewall prerequisite
+
+The Twingate resource list is identity-level control. The home firewall is the backstop if Twingate is misconfigured or the home connector is compromised. The design therefore makes it a prerequisite with evidence: the steps that create logging or scrape resources do not apply until the evidence exists. The firewall sees only the connector's address as the source, so it cannot tell cloud hosts apart; per-host separation is Twingate's job alone.
+
+Worked example, documentation ranges only. The connector is at `192.0.2.50` in a logging VLAN; the log manager is at `192.0.2.10`; a management subnet is `198.51.100.0/24`; a user subnet is `203.0.113.0/24`.
+
+| Rule | Source | Destination | Port | Action |
+|---|---|---|---|---|
+| 1 | `192.0.2.50` | `192.0.2.10` | tcp 1514 | allow |
+| 2 | `192.0.2.50` | `192.0.2.10` | tcp 1515 | allow |
+| 3 | `192.0.2.50` | any | any | deny, and log |
+
+Allow rules without a final deny are not a boundary; they are a suggestion. The test that proves the boundary is **negative**: from the connector's address, connecting to `198.51.100.10` on tcp 22 and 443, to `203.0.113.20` on tcp 445, and to `192.0.2.10` on tcp 9200 must all fail, while the connector's outbound path to the Twingate controller must work. The record states the date, the tester and the rule set version, and the test is repeated after every rule change. Nothing in this repository can verify that the home firewall is configured; that is the operator's change.
+
+## Threats this adds
+
+The worked [Threat model](Threat-Model.md) has fourteen entries, T1 to T14. Several are directly touched by telemetry: T2 (stolen Twingate credentials: a service key is a credential too), T5 and T6 (connector token theft from the droplet and from state: the same exposure, now for service keys), T10 (vendor compromise: Twingate sees the tunnels) and T12 (lateral movement between droplets: metrics add tag-sourced rules). These candidates are not in the worked model; write your own entries using [Threat model exercise](Threat-Model-Exercise.md), and draw the home side with the [Threat Dragon exercise](Threat-Dragon-Exercise.md), whose step 4 adds a second cloud to the diagram.
+
+| Candidate | Position | Control the design names | Residual |
+|---|---|---|---|
+| A compromised droplet uses its service key | Cloud host to Twingate | Key per host; service scoped to one site's logging resources; no inbound rule | It reaches the logging ports of its own site and can send false logs |
+| A compromised home connector | Twingate to home | One resource per port; firewall allow-list and negative tests | It reaches only the listed hosts and ports |
+| Metrics endpoints are unauthenticated | Home to cloud | Private address; scrape service holds only these resources | Exposure is bounded by the resource list, not by authentication (UNVERIFIED) |
+| The bootstrap token window | Doppler to the droplet | Read-only, per-site, short-lived, deleted after use | Valid while it sits in `user_data` and state |
+| Logs contain secrets | Host to SIEM | Collect deliberately | The SIEM becomes a place to find them |
+| A quiet agent | Cloud host | Expected-target inventory for metrics; nothing yet for logs | See [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) |
+
+## Predict, then check
+
+1. Draw the diagram above from memory, then compare. Mark which arrows are pull and which are push.
+2. A droplet is compromised. List every address and port its stolen credentials could reach through Twingate, and name the control for each.
+3. Why is "I only exposed one port" not the same as "read-only"? Give one thing a Prometheus port would expose that a dashboard viewer does not need.
+4. The metrics endpoints have no authentication. Why does that matter less than it sounds, and under which two conditions does it matter a lot?
+5. The negative test list has four failures and one success. Why is the success there?
+6. After the first boot, where is the bootstrap token, and where is each long-lived secret?
+
+<details>
+<summary>Reference answers</summary>
+
+1. Metrics: home pulls (Prometheus, through the scrape service, to the cloud connectors). Logs: the cloud pushes (the agent, through the logging service, to the manager). The first-boot pull from Doppler is a third, one-time arrow from the host.
+2. Its own site's logging service reaches the manager on 1514 and 1515, and nothing else in the design. Controls: the service is scoped to those two resources (Twingate), the home firewall allows only those two ports from the home connector, and the key is per host. The droplet's own VPC peers are limited by the tag-sourced firewall rules (T12). Whether the key can reach more depends on mistakes in the grants, which is why the negative tests exist.
+3. Twingate limits host and port, not HTTP method or path (assumed, not documented on the page the design read). A Prometheus port exposes its whole HTTP interface, including administrative and write endpoints if they are enabled. A dashboard viewer needs only queries.
+4. The endpoints bind to the private address and are reachable only through the scrape service's resources, so exposure is bounded by the resource list. It matters a lot if the resource list grows to include more than the metrics endpoints, or if an endpoint binds to all interfaces (the binding is UNVERIFIED and must be tested).
+5. A rule set that blocks everything also blocks the connector's own link to the Twingate controller, and the connector stops working. The success proves the deny rule is narrow enough to leave the one required outbound path.
+6. The bootstrap token is in `user_data`, the state and the metadata endpoint until it expires or is revoked, and the file on the host is deleted after the pull. The Twingate service key and the agent key stay on the host's disk in root-only files for its lifetime. The log enrollment password is removed after enrollment. None of this has been run; the design's tests would search state and the metadata response for the long-lived values after a real apply.
+
+</details>
+
+## Try it yourself
+
+- **No cost.** Write the firewall rule table for a second log manager at `192.0.2.11` on port 1514 only, and the negative test you would add for it.
+- Add one candidate from the threat table to your own threat model copy with a position, a control, a residual risk and the file or test that would prove the control.
+- Take any one of the four boundaries in the design's table and write the sentence that begins "If this control fails, then...".
+
+Next: [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md). Back to the [Reading order](Reading-Order.md).

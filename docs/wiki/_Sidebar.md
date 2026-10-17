@@ -64,6 +64,11 @@ The [Threat model](Threat-Model.md) is core step 19.
 
 - [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md)
 - [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md)
+- [Cloud telemetry: what and why (unverified draft)](Cloud-Telemetry-What-and-Why.md)
+- [Multiple sites and identity (unverified draft)](Multiple-Sites-and-Identity.md)
+- [Telemetry crosses the trust boundary (unverified draft)](Telemetry-Crosses-the-Trust-Boundary.md)
+- [Reading a dashboard as an operator (unverified draft)](Reading-a-Dashboard-as-an-Operator.md)
+- [Build your own mini SOC (unverified draft)](Build-Your-Own-Mini-SOC.md)
 
 </details>
 
