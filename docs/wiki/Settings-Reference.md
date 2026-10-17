@@ -1,0 +1,195 @@
+<!-- GENERATED from docs/settings.json by scripts/gen_settings_doc.py. Do not edit
+this page by hand: change the manifest and run `python -I scripts/gen_settings_doc.py`.
+CI fails when this page is out of date. -->
+
+# Settings reference: every tunable setting
+
+> New to the tools? Read [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) first. This page is a lookup table, not a lesson.
+
+This page lists every setting you can change in this repository, where each one lives, and what values it accepts. It is generated from one machine-readable file, `docs/settings.json`, and tests check that file against the code, so a variable cannot be added without being listed here.
+
+## Four kinds of place a value can live
+
+| Place | What it holds | In git? | Example here |
+|---|---|---|---|
+| A variable (`variables.tf`) | The name, type, description, validation and default of a setting. This is the *definition*, not the value for your site. | Yes | `region`, `vpc_ip_range` |
+| A value file (`terraform.tfvars`) | The values for *your* site. Ignored by git (`.gitignore` covers `*.tfvars`, `*.tfvars.json`, `*.auto.tfvars.json` and `*.tfplan`), so a real value never lands in a public repository by accident. A committed `terraform.tfvars.example` shows the shape with documentation-range values only. | No (the `.example` file, yes) | a private copy of the repository keeps its own |
+| Environment variables (`TF_VAR_*`) | The same values delivered to a run, from the Spacelift stack environment (non-secret) or from Doppler (private values and secrets). | No | `TF_VAR_admin_user_ids` |
+| `cost.json` and `approved.json` | Droplet sizes and the approved spend. The cost gate reads them, so the size lives there and nowhere else. | Yes | `stacks/10-access/cost.json` |
+
+Two rules follow. **A secret is never a variable default and never in a value file**: a value file is a plain file with no access control, and it is copied to laptops, chats and shell history. Secrets live in Doppler and arrive as an environment variable for one run. And **a setting that is hard-coded today is listed too**, so you can see it is not yet a knob.
+
+Related pages: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) (what a stack and a module are), [Doppler and secrets](Doppler-and-Secrets.md) (how a secret reaches a run), [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipeline.md) (keeping your real values in a private copy), [Terraform reference](Terraform-Reference.md) (each declaration explained).
+
+**How to read the tables.** *Status* is `exists` (in the code today) or `planned` (in the stage 2 design, not built yet). *Sensitivity* is `public` (safe for anyone), `private` (not a credential, but it identifies the owner's network or accounts) or `secret` (a credential). Examples use documentation ranges (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`), private ranges, and `example.com` only; none is a real value.
+
+## OpenTofu variables
+
+Stack variables are the settings you set per site. Module variables are filled in by the calling stack; they are listed so the table is complete, and you normally leave them alone.
+
+### stacks/00-foundation
+
+| Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
+|---|---|---|---|---|---|---|---|
+| `region`<br>DigitalOcean region slug. Planned change: Regex validation for the region slug; the description should say to check the account's available sizes first. | `string` | `"tor1"` | none today (planned: pattern check) | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `tor1` | public | exists |
+| `vpc_ip_range`<br>Private CIDR. Must not overlap any homelab range (confirmed in the stage 0 guide before apply). Planned change: Prefix length between /16 and /28, and no overlap with reserved_ranges. | `string` | `"10.78.0.0/24"` | none in the stack; modules/vpc checks it is a private IPv4 CIDR (10/8, 172.16/12, 192.168/16) | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `10.99.0.0/24` | private (not a credential, but identifies the owner) | exists |
+| `project_name`<br>Name of the DigitalOcean project that groups the resources (the code has no description for it). | `string` | `"clouds-against-humanity"` | none today (DigitalOcean's allowed character set is UNVERIFIED) | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `clouds-against-humanity` | public | exists |
+| `reserved_ranges`<br>Ranges you connect to (home networks); vpc_ip_range must not overlap them. | `list(string)` | `[]` | each entry a valid CIDR; vpc_ip_range must not overlap any entry | Doppler or private tfvars (identifies the owner's network) | `["10.50.0.0/16", "10.60.0.0/16"]` | private (not a credential, but identifies the owner) | planned |
+| `resource_key`<br>Key used in resource names instead of region; empty means region. | `string` | `""` | empty, or ^[a-z][a-z0-9-]{1,23}\$; immutable on a live stack | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `tor1` | public | planned |
+| `site_name`<br>Telemetry label for the site; empty means site-&lt;region&gt;. In no resource name or tag. | `string` | `""` | empty, or ^[a-z][a-z0-9-]{1,23}\$; unique across sites | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `site-tor1` | public | planned |
+| `provider_name`<br>Label for the cloud provider; does not select modules. | `string` | `"digitalocean"` | one of the implemented providers | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `digitalocean` | public | planned |
+
+### stacks/10-access
+
+| Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
+|---|---|---|---|---|---|---|---|
+| `region`<br>DigitalOcean region slug, the same value as stack 00 (the code has no description for it). | `string` | required | none today | Spacelift stack dependency, mapped to a TF_VAR_* environment variable (output of stack 00) | `tor1` | public | exists |
+| `vpc_id`<br>ID of the VPC created by stack 00 (the code has no description for it). | `string` | required | none today (planned: non-empty) | Spacelift stack dependency, mapped to a TF_VAR_* environment variable (output of stack 00) | `00000000-0000-4000-8000-000000000000` | public | exists |
+| `project_id`<br>ID of the DigitalOcean project created by stack 00 (the code has no description for it). | `string` | required | none today (planned: non-empty) | Spacelift stack dependency, mapped to a TF_VAR_* environment variable (output of stack 00) | `00000000-0000-4000-8000-000000000001` | public | exists |
+| `baseline_tag`<br>Baseline firewall tag created by stack 00; the connectors carry it. | `string` | required | starts with "cah-baseline-" | Spacelift stack dependency, mapped to a TF_VAR_* environment variable (output of stack 00) | `cah-baseline-tor1` | public | exists |
+| `twingate_network`<br>Bare Twingate network subdomain (the tenant name). | `string` | required | ^[a-z0-9-]+\$ (no URL, no quotes) | Doppler (config prd), exported as TF_VAR_* by the Spacelift hook (TWINGATE_NETWORK) | `example-tenant` | private (not a credential, but identifies the owner) | exists |
+| `admin_ssh_public_key`<br>Public SSH key for the cah-admin user on the connectors (the stack has no description; modules/twingate-bootstrap requires type and key with no comment). | `string` | required | none in the stack (the bootstrap module requires '&lt;ssh-ed25519\|ssh-rsa&gt; &lt;key&gt;' with no comment); planned: accept a trailing comment | Doppler (config prd), exported as TF_VAR_* by the Spacelift hook (ADMIN_SSH_PUBLIC_KEY) | `ssh-ed25519 AAAAEXAMPLEONLYNOTAREALKEY` | private (not a credential, but identifies the owner) | exists |
+| `admin_ssh_key_name`<br>Name of an SSH key already registered on the DigitalOcean account. | `string` | required | non-empty | Doppler (config prd), exported as TF_VAR_* by the Spacelift hook (ADMIN_SSH_KEY_NAME) | `example-admin-key` | private (not a credential, but identifies the owner) | exists |
+| `admin_user_ids`<br>Twingate user ids placed in the admin group. | `list(string)` | required | at least one entry | Doppler (config prd), exported as TF_VAR_* by the Spacelift hook (ADMIN_USER_IDS, a JSON list) | `["example-user-id"]` | private (not a credential, but identifies the owner) | exists |
+| `resource_key`<br>Key used in resource names instead of region; empty means region. | `string` | `""` | empty, or ^[a-z][a-z0-9-]{1,23}\$; immutable on a live stack | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `tor1` | public | planned |
+| `site_name`<br>Telemetry label for the site; empty means site-&lt;region&gt;. | `string` | `""` | empty, or ^[a-z][a-z0-9-]{1,23}\$ | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `site-tor1` | public | planned |
+| `provider_name`<br>Label for the cloud provider; does not select modules. | `string` | `"digitalocean"` | one of the implemented providers | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `digitalocean` | public | planned |
+| `reboot_times`<br>Reboot time per connector (HH:MM, droplet local time). Replaces two literals in main.tf. | `map(string)` | `{a = "04:00", b = "05:00"}` | HH:MM 24-hour; the two differ by at least 30 minutes | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `{a = "04:00", b = "05:00"}` | public | planned |
+| `timezone`<br>Timezone of the droplets. Replaces a literal in the cloud-init template. | `string` | `"America/New_York"` | name from a fixed allow-list of common zones | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `America/New_York` | public | planned |
+| `metrics_enabled`<br>Install node exporter and expose connector metrics. | `bool` | `false` | none | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `true` | public | planned |
+| `node_exporter_port`<br>Node exporter port. | `number` | `9100` | 1024 to 65535 | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `9100` | public | planned |
+| `metrics_port_connector`<br>Connector metrics port. | `number` | required | 1024 to 65535; differs from node_exporter_port | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `9101` | public | planned |
+| `wazuh_agent_group`<br>Wazuh agent group for the cloud hosts. | `string` | `"cloud"` | ^[a-zA-Z0-9_.-]+\$ | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `cloud-site-tor1` | public | planned |
+| `labels`<br>Telemetry labels. | `map(string)` | `{}` | keys limited to env, role, owner_team; values at most 32 characters | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `{env = "lab"}` | public | planned |
+
+### stacks/20-telemetry (not built yet)
+
+| Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
+|---|---|---|---|---|---|---|---|
+| `logging_servers`<br>Home logging endpoints reached only through Twingate; one Twingate resource per element. | `list(object({name=string,address=string,port=number,protocol=string,purpose=string}))` | `[]` | name unique and ^[a-z][a-z0-9-]*\$; address an RFC 1918 or RFC 5737 IPv4 literal or a hostname with no scheme; port 1-65535; protocol tcp or udp; purpose one of wazuh-agent, wazuh-enroll, syslog, metrics-remote-write | Per-site Doppler config as JSON (private, non-secret) | `[{name="siem-home-agent", address="192.0.2.10", port=1514, protocol="tcp", purpose="wazuh-agent"}]` | private (not a credential, but identifies the owner) | planned |
+| `logging_enabled`<br>Gate: nothing from stage 2 exists until true. | `bool` | `false` | none | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `true` | public | planned |
+| `metrics_enabled`<br>Create the metrics resources. | `bool` | `false` | none | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `true` | public | planned |
+| `scrape_allowlist`<br>Which cloud endpoints become Twingate resources for scraping. | `list(object({name=string,host_role=string,port=number}))` | required | each name unique; ports from the metrics port settings | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `[{name="node", host_role="connector", port=9100}]` | public | planned |
+| `resource_key`<br>Key used in resource names instead of region; empty means region. | `string` | `""` | empty, or ^[a-z][a-z0-9-]{1,23}\$; immutable on a live stack | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `tor1` | public | planned |
+| `site_name`<br>Telemetry label for the site. | `string` | `""` | empty, or ^[a-z][a-z0-9-]{1,23}\$ | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `site-tor1` | public | planned |
+| `wazuh_agent_group`<br>Wazuh agent group for the cloud hosts. | `string` | `"cloud"` | ^[a-zA-Z0-9_.-]+\$ | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `cloud-site-tor1` | public | planned |
+| `labels`<br>Telemetry labels. | `map(string)` | `{}` | keys limited to env, role, owner_team; values at most 32 characters | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `{env = "lab"}` | public | planned |
+
+### planned/optional-noc-soc (not built yet)
+
+| Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
+|---|---|---|---|---|---|---|---|
+| `grafana_enabled`<br>Create the optional Grafana host. | `bool` | `false` | none | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `false` | public | planned |
+| `grafana_droplet_size`<br>Droplet size for the Grafana host; belongs in cost.json like the connectors. | `string` | `"s-1vcpu-1gb"` | present in docs/cost-prices.json | cost.json | `s-1vcpu-1gb` | public | planned |
+| `metrics_retention_days`<br>Days of metrics kept by the cloud local store. | `number` | `15` | 1 to 400 | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `15` | public | planned |
+| `log_retention_days`<br>Days of logs kept by the cloud local store. | `number` | `30` | 1 to 400 | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `30` | public | planned |
+| `soc_admin_user_ids`<br>Twingate user ids for the SOC tools. | `list(string)` | required | at least one when grafana_enabled | Doppler (config prd), exported as TF_VAR_* by the Spacelift hook | `["example-user-id"]` | private (not a credential, but identifies the owner) | planned |
+
+### modules/vpc
+
+| Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
+|---|---|---|---|---|---|---|---|
+| `layer`<br>Stack layer, used in names (for example foundation). | `string` | required | none | set by the calling stack (not a user setting) | `foundation` | public | exists |
+| `region`<br>DigitalOcean region slug. | `string` | required | none | set by the calling stack (not a user setting) | `tor1` | public | exists |
+| `ip_range`<br>Private IPv4 CIDR for the VPC. | `string` | required | valid CIDR in 10/8, 172.16/12 or 192.168/16 | set by the calling stack (not a user setting) | `10.99.0.0/24` | private (not a credential, but identifies the owner) | exists |
+
+### modules/firewall
+
+| Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
+|---|---|---|---|---|---|---|---|
+| `layer`<br>Stack layer, used in names (the module has no description for it). | `string` | required | none | set by the calling stack (not a user setting) | `access` | public | exists |
+| `region`<br>Region, used in names (the module has no description for it). | `string` | required | none | set by the calling stack (not a user setting) | `tor1` | public | exists |
+| `purpose`<br>Role in the firewall name (for example baseline or connector). | `string` | required | none | set by the calling stack (not a user setting) | `connector` | public | exists |
+| `tag`<br>Droplet tag this firewall attaches to. | `string` | required | none | set by the calling stack (not a user setting) | `cah-connector-tor1` | public | exists |
+| `extra_outbound_rules`<br>Outbound rules appended to the defaults. | `list(object({protocol=string,port_range=string}))` | `[]` | none | set by the calling stack (not a user setting) | `[{protocol="tcp", port_range="30000-31000"}]` | public | exists |
+| `inbound_from_tag_rules`<br>Inbound rules that admit only droplets carrying this firewall's own tag. Empty means deny-all inbound. | `list(object({protocol=string,port_range=string}))` | `[]` | protocol tcp or udp and a non-empty port_range | set by the calling stack (not a user setting) | `[{protocol="tcp", port_range="22"}]` | public | exists |
+| `outbound_to_tag_rules`<br>Outbound rules that reach only droplets carrying this firewall's own tag (no addresses). Empty means none. | `list(object({protocol=string,port_range=string}))` | `[]` | protocol tcp or udp and a non-empty port_range | set by the calling stack (not a user setting) | `[{protocol="tcp", port_range="22"}]` | public | exists |
+
+### modules/twingate-bootstrap
+
+| Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
+|---|---|---|---|---|---|---|---|
+| `layer`<br>Stack layer, used in names (the module has no description for it). | `string` | required | none | set by the calling stack (not a user setting) | `access` | public | exists |
+| `region`<br>Region, used in names (the module has no description for it). | `string` | required | none | set by the calling stack (not a user setting) | `tor1` | public | exists |
+| `remote_network_id`<br>Twingate remote network (site) shared by every connector of the stack. | `string` | required | none | set by the calling stack (not a user setting) | `example-remote-network-id` | public | exists |
+| `instance`<br>One lowercase letter or digit that tells this connector from its siblings (a, b). | `string` | required | ^[a-z0-9]\$ | set by the calling stack (not a user setting) | `a` | public | exists |
+| `twingate_network`<br>Bare Twingate network subdomain. | `string` | required | ^[a-z0-9-]+\$ | set by the calling stack (not a user setting) | `example-tenant` | private (not a credential, but identifies the owner) | exists |
+| `admin_ssh_public_key`<br>Public key (type and key, no comment) for the cah-admin user. | `string` | required | ^ssh-(ed25519\|rsa) [A-Za-z0-9+/=]+\$ (no comment field) | set by the calling stack (not a user setting) | `ssh-ed25519 AAAAEXAMPLEONLYNOTAREALKEY` | private (not a credential, but identifies the owner) | exists |
+| `reboot_time`<br>HH:MM (America/New_York, the droplet's local time) when unattended-upgrades may reboot this droplet. | `string` | required | ^([01][0-9]\|2[0-3]):[0-5][0-9]\$ | set by the calling stack (not a user setting) | `04:00` | public | exists |
+
+### modules/twingate-connector
+
+| Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
+|---|---|---|---|---|---|---|---|
+| `layer`<br>Stack layer, used in names (the module has no description for it). | `string` | required | none | set by the calling stack (not a user setting) | `access` | public | exists |
+| `region`<br>Region, used in names (the module has no description for it). | `string` | required | none | set by the calling stack (not a user setting) | `tor1` | public | exists |
+| `vpc_id`<br>VPC the droplet joins (the module has no description for it). | `string` | required | none | set by the calling stack (not a user setting) | `00000000-0000-4000-8000-000000000000` | public | exists |
+| `tags`<br>Droplet tags, including the baseline firewall tag. Set at creation. | `list(string)` | required | none | set by the calling stack (not a user setting) | `["cah-baseline-tor1", "cah-connector-tor1"]` | public | exists |
+| `size`<br>Droplet size slug. The stack reads it from cost.json. | `string` | required | none in the module (cost_check.py checks the price table) | set by the calling stack (not a user setting) | `s-1vcpu-1gb` | public | exists |
+| `remote_network_id`<br>Twingate remote network (site) shared by every connector of the stack. | `string` | required | none | set by the calling stack (not a user setting) | `example-remote-network-id` | public | exists |
+| `ssh_key_fingerprint`<br>Fingerprint of the stack's admin SSH key. | `string` | required | none | set by the calling stack (not a user setting) | `00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00` | public | exists |
+| `instance`<br>One lowercase letter or digit that tells this connector from its siblings (a, b). | `string` | required | none in this module (the bootstrap module checks it) | set by the calling stack (not a user setting) | `a` | public | exists |
+| `twingate_network`<br>Bare Twingate network subdomain. | `string` | required | none in this module (the bootstrap module checks it) | set by the calling stack (not a user setting) | `example-tenant` | private (not a credential, but identifies the owner) | exists |
+| `admin_ssh_public_key`<br>Public key for the cah-admin user. | `string` | required | none in this module (the bootstrap module checks it) | set by the calling stack (not a user setting) | `ssh-ed25519 AAAAEXAMPLEONLYNOTAREALKEY` | private (not a credential, but identifies the owner) | exists |
+| `reboot_time`<br>HH:MM (America/New_York) when unattended-upgrades may reboot. | `string` | required | none in this module (the bootstrap module checks it) | set by the calling stack (not a user setting) | `04:00` | public | exists |
+
+## Values read from `cost.json`, `approved.json` and the price table
+
+These are not OpenTofu variables. The cost gate (`scripts/cost_check.py`) reads them, and stack 10 reads its droplet sizes from `cost.json`, so there is one source of truth for money. To change a size you edit `cost.json` and `docs/stages/approved.json` together; that is the lesson.
+
+| Setting | File | Pointer | Current value | Validation | Example | Status |
+|---|---|---|---|---|---|---|
+| connector-a size | `stacks/10-access/cost.json` | `/resources/0/size` | `"s-1vcpu-1gb"` | price must exist in docs/cost-prices.json; both connectors are kept equal by a test | `s-1vcpu-1gb` | exists |
+| connector-b size | `stacks/10-access/cost.json` | `/resources/1/size` | `"s-1vcpu-1gb"` | price must exist in docs/cost-prices.json | `s-1vcpu-1gb` | exists |
+| connector-a backups | `stacks/10-access/cost.json` | `/resources/0/backups` | `false` | false or true; true adds 20% of the droplet price | `false` | exists |
+| connector-b backups | `stacks/10-access/cost.json` | `/resources/1/backups` | `false` | false or true | `false` | exists |
+| stage 0 resources | `stacks/00-foundation/cost.json` | `/resources` | `[]` | list of costed resources; empty because stage 0 costs nothing | `[]` | exists |
+| approved monthly total (DigitalOcean) | `docs/stages/approved.json` | `/providers/digitalocean/approved_monthly_total` | `12.0` | the computed total may not exceed it; the sum across providers may not exceed the ceiling | `12.0` | exists |
+| monthly ceiling | `docs/stages/approved.json` | `/ceiling` | `30.0` | number of dollars | `30.0` | exists |
+| droplet price table entry | `docs/cost-prices.json` | `/droplets/s-1vcpu-1gb` | `6` | dollars per month for a size; a size absent from the table fails the gate | `6` | exists |
+
+## Settings that are hard-coded today
+
+These are literals in the code, not variables. They are listed so the table is complete and so you know a change is a code edit, not a value.
+
+| Setting | Where | Current value | Validation | Plan | Status |
+|---|---|---|---|---|---|
+| reboot time, connector a | `stacks/10-access/main.tf` | `04:00` | the bootstrap module checks HH:MM | reboot_times (step 2) | exists |
+| reboot time, connector b | `stacks/10-access/main.tf` | `05:00` | the bootstrap module checks HH:MM | reboot_times (step 2) | exists |
+| droplet timezone | `modules/twingate-bootstrap/cloud-init.yaml.tftpl` | `America/New_York` | asserted by the module tests | timezone (step 2; changes the rendered template) | exists |
+| connector extra outbound rules | `stacks/10-access/main.tf` | `tcp 30000-31000 and udp 1-65535` | none | kept hard-coded on purpose (low value to expose) | exists |
+| connector SSH rule between connectors | `stacks/10-access/main.tf` | `tcp 22, tag to tag` | firewall module validation | kept hard-coded on purpose | exists |
+| Twingate remote network location | `stacks/10-access/main.tf` | `OTHER` | Twingate provider enum | not planned | exists |
+| project environment | `stacks/00-foundation/main.tf` | `Production` | DigitalOcean enum | not planned | exists |
+
+## Secrets and private values: names only
+
+This table lists names and where they live. It never holds a value. See [Doppler and secrets](Doppler-and-Secrets.md) for how they reach a run.
+
+| Name | Class | Lives in | Used by | Delivered as | Expiry | Rotation | Status |
+|---|---|---|---|---|---|---|---|
+| `DIGITALOCEAN_TOKEN` | secret | Doppler config prd | stacks/00-foundation, stacks/10-access | DIGITALOCEAN_TOKEN | 90 days | docs/spacelift-secrets.md | exists |
+| `TWINGATE_API_TOKEN` | secret | Doppler config prd | stacks/10-access | TWINGATE_API_TOKEN | 90 days | docs/spacelift-secrets.md | exists |
+| `TWINGATE_NETWORK` | private | Doppler config prd | stacks/10-access | TWINGATE_NETWORK and TF_VAR_twingate_network | none | not a credential | exists |
+| `ADMIN_SSH_PUBLIC_KEY` | private | Doppler config prd | stacks/10-access | TF_VAR_admin_ssh_public_key | none | replace the key and re-apply | exists |
+| `ADMIN_SSH_KEY_NAME` | private | Doppler config prd | stacks/10-access | TF_VAR_admin_ssh_key_name | none | not a credential | exists |
+| `ADMIN_USER_IDS` | private | Doppler config prd | stacks/10-access | TF_VAR_admin_user_ids | none | not a credential | exists |
+| `DOPPLER_TOKEN` | secret | Spacelift context cah-doppler (write-only) | the Spacelift hook script | DOPPLER_TOKEN | 90 days | docs/spacelift-secrets.md | exists |
+| `DOPPLER_PROJECT` | private | Spacelift context cah-doppler | the Spacelift hook script | DOPPLER_PROJECT | none | not a credential | exists |
+| `DOPPLER_CONFIG` | private | Spacelift context cah-doppler | the Spacelift hook script | DOPPLER_CONFIG | none | not a credential | exists |
+| `Per-host Twingate service keys` | secret | Doppler hostboot config (one per site) | each host, pulled at first boot | first-boot pull, never a variable | 365 days by default | issue a new key, revoke the old one | planned |
+| `Wazuh enrollment password` | secret | Doppler hostboot config (one per site) | each host, pulled at first boot | first-boot pull, never a variable | rotated after each enrollment window | rotate on the manager | planned |
+| `Grafana admin password` | secret | Doppler hostboot config (one per site) | optional NOC host | first-boot pull, never a variable | none | rotate in Doppler and on the host | planned |
+
+## Settings that live somewhere else
+
+Nothing here is checked by a machine except that a pointer file exists. Each has an owner and a place to look.
+
+| Setting | Owner | Where | Pointer | Status |
+|---|---|---|---|---|
+| Spacelift stack environment (foundation outputs mapped to TF_VAR_*) | maintainer | Spacelift UI, stack dependencies of cah-10-access | docs/stages/01-access.md | exists |
+| Doppler project and config prd | maintainer | Doppler console | docs/spacelift-secrets.md | exists |
+| Twingate console (remote network, connectors, users) | maintainer | Twingate admin console | docs/wiki/Twingate.md | exists |
+| DigitalOcean account (sizes available to the account, SSH key registration) | maintainer | DigitalOcean console and API | docs/cost.md | exists |
+| Home Prometheus scrape interval | home monitoring repository | that repository's target file | specified in the stage 2 design, not built here | planned |
+| Home firewall rules for the logging connector | maintainer | the home firewall | specified in the stage 2 design, not built here | planned |

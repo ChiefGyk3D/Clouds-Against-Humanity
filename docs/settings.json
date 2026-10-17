@@ -1,0 +1,1263 @@
+{
+  "schema_version": 1,
+  "about": "Machine-readable inventory of every tunable setting. Checked against the code by tests/test_settings_manifest.py and rendered by scripts/gen_settings_doc.py into docs/wiki/Settings-Reference.md. Examples use documentation ranges only. Secrets list names, never values.",
+  "variables": {
+    "stacks/00-foundation": [
+      {
+        "name": "region",
+        "type": "string",
+        "description": "DigitalOcean region slug.",
+        "required": false,
+        "default": "tor1",
+        "validation": "none today (planned: pattern check)",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "planned_change": "Regex validation for the region slug; the description should say to check the account's available sizes first."
+      },
+      {
+        "name": "vpc_ip_range",
+        "type": "string",
+        "description": "Private CIDR. Must not overlap any homelab range (confirmed in the stage 0 guide before apply).",
+        "required": false,
+        "default": "10.78.0.0/24",
+        "validation": "none in the stack; modules/vpc checks it is a private IPv4 CIDR (10/8, 172.16/12, 192.168/16)",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "10.99.0.0/24",
+        "sensitivity": "private",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2",
+        "planned_change": "Prefix length between /16 and /28, and no overlap with reserved_ranges."
+      },
+      {
+        "name": "project_name",
+        "type": "string",
+        "description": "Name of the DigitalOcean project that groups the resources (the code has no description for it).",
+        "required": false,
+        "default": "clouds-against-humanity",
+        "validation": "none today (DigitalOcean's allowed character set is UNVERIFIED)",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "clouds-against-humanity",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "reserved_ranges",
+        "type": "list(string)",
+        "description": "Ranges you connect to (home networks); vpc_ip_range must not overlap them.",
+        "required": false,
+        "default": [],
+        "validation": "each entry a valid CIDR; vpc_ip_range must not overlap any entry",
+        "set_where": "Doppler or private tfvars (identifies the owner's network)",
+        "example": "[\"10.50.0.0/16\", \"10.60.0.0/16\"]",
+        "sensitivity": "private",
+        "sensitive_in_code": true,
+        "status": "planned",
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
+      },
+      {
+        "name": "resource_key",
+        "type": "string",
+        "description": "Key used in resource names instead of region; empty means region.",
+        "required": false,
+        "default": "",
+        "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$; immutable on a live stack",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "site_name",
+        "type": "string",
+        "description": "Telemetry label for the site; empty means site-<region>. In no resource name or tag.",
+        "required": false,
+        "default": "",
+        "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$; unique across sites",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "site-tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "provider_name",
+        "type": "string",
+        "description": "Label for the cloud provider; does not select modules.",
+        "required": false,
+        "default": "digitalocean",
+        "validation": "one of the implemented providers",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "digitalocean",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      }
+    ],
+    "stacks/10-access": [
+      {
+        "name": "region",
+        "type": "string",
+        "description": "DigitalOcean region slug, the same value as stack 00 (the code has no description for it).",
+        "required": true,
+        "validation": "none today",
+        "set_where": "Spacelift stack dependency, mapped to a TF_VAR_* environment variable (output of stack 00)",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "vpc_id",
+        "type": "string",
+        "description": "ID of the VPC created by stack 00 (the code has no description for it).",
+        "required": true,
+        "validation": "none today (planned: non-empty)",
+        "set_where": "Spacelift stack dependency, mapped to a TF_VAR_* environment variable (output of stack 00)",
+        "example": "00000000-0000-4000-8000-000000000000",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "project_id",
+        "type": "string",
+        "description": "ID of the DigitalOcean project created by stack 00 (the code has no description for it).",
+        "required": true,
+        "validation": "none today (planned: non-empty)",
+        "set_where": "Spacelift stack dependency, mapped to a TF_VAR_* environment variable (output of stack 00)",
+        "example": "00000000-0000-4000-8000-000000000001",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "baseline_tag",
+        "type": "string",
+        "description": "Baseline firewall tag created by stack 00; the connectors carry it.",
+        "required": true,
+        "validation": "starts with \"cah-baseline-\"",
+        "set_where": "Spacelift stack dependency, mapped to a TF_VAR_* environment variable (output of stack 00)",
+        "example": "cah-baseline-tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "twingate_network",
+        "type": "string",
+        "description": "Bare Twingate network subdomain (the tenant name).",
+        "required": true,
+        "validation": "^[a-z0-9-]+$ (no URL, no quotes)",
+        "set_where": "Doppler (config prd), exported as TF_VAR_* by the Spacelift hook (TWINGATE_NETWORK)",
+        "example": "example-tenant",
+        "sensitivity": "private",
+        "sensitive_in_code": true,
+        "status": "exists",
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
+      },
+      {
+        "name": "admin_ssh_public_key",
+        "type": "string",
+        "description": "Public SSH key for the cah-admin user on the connectors (the stack has no description; modules/twingate-bootstrap requires type and key with no comment).",
+        "required": true,
+        "validation": "none in the stack (the bootstrap module requires '<ssh-ed25519|ssh-rsa> <key>' with no comment); planned: accept a trailing comment",
+        "set_where": "Doppler (config prd), exported as TF_VAR_* by the Spacelift hook (ADMIN_SSH_PUBLIC_KEY)",
+        "example": "ssh-ed25519 AAAAEXAMPLEONLYNOTAREALKEY",
+        "sensitivity": "private",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
+      },
+      {
+        "name": "admin_ssh_key_name",
+        "type": "string",
+        "description": "Name of an SSH key already registered on the DigitalOcean account.",
+        "required": true,
+        "validation": "non-empty",
+        "set_where": "Doppler (config prd), exported as TF_VAR_* by the Spacelift hook (ADMIN_SSH_KEY_NAME)",
+        "example": "example-admin-key",
+        "sensitivity": "private",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
+      },
+      {
+        "name": "admin_user_ids",
+        "type": "list(string)",
+        "description": "Twingate user ids placed in the admin group.",
+        "required": true,
+        "validation": "at least one entry",
+        "set_where": "Doppler (config prd), exported as TF_VAR_* by the Spacelift hook (ADMIN_USER_IDS, a JSON list)",
+        "example": "[\"example-user-id\"]",
+        "sensitivity": "private",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
+      },
+      {
+        "name": "resource_key",
+        "type": "string",
+        "description": "Key used in resource names instead of region; empty means region.",
+        "required": false,
+        "default": "",
+        "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$; immutable on a live stack",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "site_name",
+        "type": "string",
+        "description": "Telemetry label for the site; empty means site-<region>.",
+        "required": false,
+        "default": "",
+        "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "site-tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "provider_name",
+        "type": "string",
+        "description": "Label for the cloud provider; does not select modules.",
+        "required": false,
+        "default": "digitalocean",
+        "validation": "one of the implemented providers",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "digitalocean",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "reboot_times",
+        "type": "map(string)",
+        "description": "Reboot time per connector (HH:MM, droplet local time). Replaces two literals in main.tf.",
+        "required": false,
+        "default": "{a = \"04:00\", b = \"05:00\"}",
+        "validation": "HH:MM 24-hour; the two differ by at least 30 minutes",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "{a = \"04:00\", b = \"05:00\"}",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "timezone",
+        "type": "string",
+        "description": "Timezone of the droplets. Replaces a literal in the cloud-init template.",
+        "required": false,
+        "default": "America/New_York",
+        "validation": "name from a fixed allow-list of common zones",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "America/New_York",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "metrics_enabled",
+        "type": "bool",
+        "description": "Install node exporter and expose connector metrics.",
+        "required": false,
+        "default": false,
+        "validation": "none",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "true",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "node_exporter_port",
+        "type": "number",
+        "description": "Node exporter port.",
+        "required": false,
+        "default": 9100,
+        "validation": "1024 to 65535",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "9100",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "metrics_port_connector",
+        "type": "number",
+        "description": "Connector metrics port.",
+        "required": true,
+        "validation": "1024 to 65535; differs from node_exporter_port",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "9101",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "wazuh_agent_group",
+        "type": "string",
+        "description": "Wazuh agent group for the cloud hosts.",
+        "required": false,
+        "default": "cloud",
+        "validation": "^[a-zA-Z0-9_.-]+$",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "cloud-site-tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "labels",
+        "type": "map(string)",
+        "description": "Telemetry labels.",
+        "required": false,
+        "default": {},
+        "validation": "keys limited to env, role, owner_team; values at most 32 characters",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "{env = \"lab\"}",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      }
+    ],
+    "stacks/20-telemetry (not built yet)": [
+      {
+        "name": "logging_servers",
+        "type": "list(object({name=string,address=string,port=number,protocol=string,purpose=string}))",
+        "description": "Home logging endpoints reached only through Twingate; one Twingate resource per element.",
+        "required": false,
+        "default": [],
+        "validation": "name unique and ^[a-z][a-z0-9-]*$; address an RFC 1918 or RFC 5737 IPv4 literal or a hostname with no scheme; port 1-65535; protocol tcp or udp; purpose one of wazuh-agent, wazuh-enroll, syslog, metrics-remote-write",
+        "set_where": "Per-site Doppler config as JSON (private, non-secret)",
+        "example": "[{name=\"siem-home-agent\", address=\"192.0.2.10\", port=1514, protocol=\"tcp\", purpose=\"wazuh-agent\"}]",
+        "sensitivity": "private",
+        "sensitive_in_code": true,
+        "status": "planned",
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
+      },
+      {
+        "name": "logging_enabled",
+        "type": "bool",
+        "description": "Gate: nothing from stage 2 exists until true.",
+        "required": false,
+        "default": false,
+        "validation": "none",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "true",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "metrics_enabled",
+        "type": "bool",
+        "description": "Create the metrics resources.",
+        "required": false,
+        "default": false,
+        "validation": "none",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "true",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "scrape_allowlist",
+        "type": "list(object({name=string,host_role=string,port=number}))",
+        "description": "Which cloud endpoints become Twingate resources for scraping.",
+        "required": true,
+        "validation": "each name unique; ports from the metrics port settings",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "[{name=\"node\", host_role=\"connector\", port=9100}]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "resource_key",
+        "type": "string",
+        "description": "Key used in resource names instead of region; empty means region.",
+        "required": false,
+        "default": "",
+        "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$; immutable on a live stack",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "site_name",
+        "type": "string",
+        "description": "Telemetry label for the site.",
+        "required": false,
+        "default": "",
+        "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "site-tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "wazuh_agent_group",
+        "type": "string",
+        "description": "Wazuh agent group for the cloud hosts.",
+        "required": false,
+        "default": "cloud",
+        "validation": "^[a-zA-Z0-9_.-]+$",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "cloud-site-tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "labels",
+        "type": "map(string)",
+        "description": "Telemetry labels.",
+        "required": false,
+        "default": {},
+        "validation": "keys limited to env, role, owner_team; values at most 32 characters",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "{env = \"lab\"}",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      }
+    ],
+    "planned/optional-noc-soc (not built yet)": [
+      {
+        "name": "grafana_enabled",
+        "type": "bool",
+        "description": "Create the optional Grafana host.",
+        "required": false,
+        "default": false,
+        "validation": "none",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "false",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "grafana_droplet_size",
+        "type": "string",
+        "description": "Droplet size for the Grafana host; belongs in cost.json like the connectors.",
+        "required": false,
+        "default": "s-1vcpu-1gb",
+        "validation": "present in docs/cost-prices.json",
+        "set_where": "cost.json",
+        "example": "s-1vcpu-1gb",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "metrics_retention_days",
+        "type": "number",
+        "description": "Days of metrics kept by the cloud local store.",
+        "required": false,
+        "default": 15,
+        "validation": "1 to 400",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "15",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "log_retention_days",
+        "type": "number",
+        "description": "Days of logs kept by the cloud local store.",
+        "required": false,
+        "default": 30,
+        "validation": "1 to 400",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "30",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "planned"
+      },
+      {
+        "name": "soc_admin_user_ids",
+        "type": "list(string)",
+        "description": "Twingate user ids for the SOC tools.",
+        "required": true,
+        "validation": "at least one when grafana_enabled",
+        "set_where": "Doppler (config prd), exported as TF_VAR_* by the Spacelift hook",
+        "example": "[\"example-user-id\"]",
+        "sensitivity": "private",
+        "sensitive_in_code": true,
+        "status": "planned",
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
+      }
+    ],
+    "modules/vpc": [
+      {
+        "name": "layer",
+        "type": "string",
+        "description": "Stack layer, used in names (for example foundation).",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "foundation",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "region",
+        "type": "string",
+        "description": "DigitalOcean region slug.",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "ip_range",
+        "type": "string",
+        "description": "Private IPv4 CIDR for the VPC.",
+        "required": true,
+        "validation": "valid CIDR in 10/8, 172.16/12 or 192.168/16",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "10.99.0.0/24",
+        "sensitivity": "private",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "readers": "same as the calling stack's variable of the same name"
+      }
+    ],
+    "modules/firewall": [
+      {
+        "name": "layer",
+        "type": "string",
+        "description": "Stack layer, used in names (the module has no description for it).",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "access",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "region",
+        "type": "string",
+        "description": "Region, used in names (the module has no description for it).",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "purpose",
+        "type": "string",
+        "description": "Role in the firewall name (for example baseline or connector).",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "connector",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "tag",
+        "type": "string",
+        "description": "Droplet tag this firewall attaches to.",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "cah-connector-tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "extra_outbound_rules",
+        "type": "list(object({protocol=string,port_range=string}))",
+        "description": "Outbound rules appended to the defaults.",
+        "required": false,
+        "default": [],
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "[{protocol=\"tcp\", port_range=\"30000-31000\"}]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "inbound_from_tag_rules",
+        "type": "list(object({protocol=string,port_range=string}))",
+        "description": "Inbound rules that admit only droplets carrying this firewall's own tag. Empty means deny-all inbound.",
+        "required": false,
+        "default": [],
+        "validation": "protocol tcp or udp and a non-empty port_range",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "[{protocol=\"tcp\", port_range=\"22\"}]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "outbound_to_tag_rules",
+        "type": "list(object({protocol=string,port_range=string}))",
+        "description": "Outbound rules that reach only droplets carrying this firewall's own tag (no addresses). Empty means none.",
+        "required": false,
+        "default": [],
+        "validation": "protocol tcp or udp and a non-empty port_range",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "[{protocol=\"tcp\", port_range=\"22\"}]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      }
+    ],
+    "modules/twingate-bootstrap": [
+      {
+        "name": "layer",
+        "type": "string",
+        "description": "Stack layer, used in names (the module has no description for it).",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "access",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "region",
+        "type": "string",
+        "description": "Region, used in names (the module has no description for it).",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "remote_network_id",
+        "type": "string",
+        "description": "Twingate remote network (site) shared by every connector of the stack.",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "example-remote-network-id",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "instance",
+        "type": "string",
+        "description": "One lowercase letter or digit that tells this connector from its siblings (a, b).",
+        "required": true,
+        "validation": "^[a-z0-9]$",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "a",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "twingate_network",
+        "type": "string",
+        "description": "Bare Twingate network subdomain.",
+        "required": true,
+        "validation": "^[a-z0-9-]+$",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "example-tenant",
+        "sensitivity": "private",
+        "sensitive_in_code": true,
+        "status": "exists",
+        "readers": "same as the calling stack's variable of the same name"
+      },
+      {
+        "name": "admin_ssh_public_key",
+        "type": "string",
+        "description": "Public key (type and key, no comment) for the cah-admin user.",
+        "required": true,
+        "validation": "^ssh-(ed25519|rsa) [A-Za-z0-9+/=]+$ (no comment field)",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "ssh-ed25519 AAAAEXAMPLEONLYNOTAREALKEY",
+        "sensitivity": "private",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "readers": "same as the calling stack's variable of the same name"
+      },
+      {
+        "name": "reboot_time",
+        "type": "string",
+        "description": "HH:MM (America/New_York, the droplet's local time) when unattended-upgrades may reboot this droplet.",
+        "required": true,
+        "validation": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "04:00",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      }
+    ],
+    "modules/twingate-connector": [
+      {
+        "name": "layer",
+        "type": "string",
+        "description": "Stack layer, used in names (the module has no description for it).",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "access",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "region",
+        "type": "string",
+        "description": "Region, used in names (the module has no description for it).",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "vpc_id",
+        "type": "string",
+        "description": "VPC the droplet joins (the module has no description for it).",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "00000000-0000-4000-8000-000000000000",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "tags",
+        "type": "list(string)",
+        "description": "Droplet tags, including the baseline firewall tag. Set at creation.",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "[\"cah-baseline-tor1\", \"cah-connector-tor1\"]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "size",
+        "type": "string",
+        "description": "Droplet size slug. The stack reads it from cost.json.",
+        "required": true,
+        "validation": "none in the module (cost_check.py checks the price table)",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "s-1vcpu-1gb",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "remote_network_id",
+        "type": "string",
+        "description": "Twingate remote network (site) shared by every connector of the stack.",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "example-remote-network-id",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "ssh_key_fingerprint",
+        "type": "string",
+        "description": "Fingerprint of the stack's admin SSH key.",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "00:00:00:00:00:00:00:00:00:00:00:00:00:00:00:00",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "instance",
+        "type": "string",
+        "description": "One lowercase letter or digit that tells this connector from its siblings (a, b).",
+        "required": true,
+        "validation": "none in this module (the bootstrap module checks it)",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "a",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "twingate_network",
+        "type": "string",
+        "description": "Bare Twingate network subdomain.",
+        "required": true,
+        "validation": "none in this module (the bootstrap module checks it)",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "example-tenant",
+        "sensitivity": "private",
+        "sensitive_in_code": true,
+        "status": "exists",
+        "readers": "same as the calling stack's variable of the same name"
+      },
+      {
+        "name": "admin_ssh_public_key",
+        "type": "string",
+        "description": "Public key for the cah-admin user.",
+        "required": true,
+        "validation": "none in this module (the bootstrap module checks it)",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "ssh-ed25519 AAAAEXAMPLEONLYNOTAREALKEY",
+        "sensitivity": "private",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "readers": "same as the calling stack's variable of the same name"
+      },
+      {
+        "name": "reboot_time",
+        "type": "string",
+        "description": "HH:MM (America/New_York) when unattended-upgrades may reboot.",
+        "required": true,
+        "validation": "none in this module (the bootstrap module checks it)",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "04:00",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      }
+    ]
+  },
+  "manifests": [
+    {
+      "name": "connector-a size",
+      "file": "stacks/10-access/cost.json",
+      "pointer": "/resources/0/size",
+      "current": "s-1vcpu-1gb",
+      "stack": "stacks/10-access",
+      "validation": "price must exist in docs/cost-prices.json; both connectors are kept equal by a test",
+      "set_where": "cost.json (edit together with docs/stages/approved.json)",
+      "example": "s-1vcpu-1gb",
+      "sensitivity": "public",
+      "status": "exists"
+    },
+    {
+      "name": "connector-b size",
+      "file": "stacks/10-access/cost.json",
+      "pointer": "/resources/1/size",
+      "current": "s-1vcpu-1gb",
+      "stack": "stacks/10-access",
+      "validation": "price must exist in docs/cost-prices.json",
+      "set_where": "cost.json",
+      "example": "s-1vcpu-1gb",
+      "sensitivity": "public",
+      "status": "exists"
+    },
+    {
+      "name": "connector-a backups",
+      "file": "stacks/10-access/cost.json",
+      "pointer": "/resources/0/backups",
+      "current": false,
+      "stack": "stacks/10-access",
+      "validation": "false or true; true adds 20% of the droplet price",
+      "set_where": "cost.json",
+      "example": "false",
+      "sensitivity": "public",
+      "status": "exists"
+    },
+    {
+      "name": "connector-b backups",
+      "file": "stacks/10-access/cost.json",
+      "pointer": "/resources/1/backups",
+      "current": false,
+      "stack": "stacks/10-access",
+      "validation": "false or true",
+      "set_where": "cost.json",
+      "example": "false",
+      "sensitivity": "public",
+      "status": "exists"
+    },
+    {
+      "name": "stage 0 resources",
+      "file": "stacks/00-foundation/cost.json",
+      "pointer": "/resources",
+      "current": [],
+      "stack": "stacks/00-foundation",
+      "validation": "list of costed resources; empty because stage 0 costs nothing",
+      "set_where": "cost.json",
+      "example": "[]",
+      "sensitivity": "public",
+      "status": "exists"
+    },
+    {
+      "name": "approved monthly total (DigitalOcean)",
+      "file": "docs/stages/approved.json",
+      "pointer": "/providers/digitalocean/approved_monthly_total",
+      "current": 12.0,
+      "stack": "all stacks",
+      "validation": "the computed total may not exceed it; the sum across providers may not exceed the ceiling",
+      "set_where": "approved.json",
+      "example": "12.0",
+      "sensitivity": "public",
+      "status": "exists"
+    },
+    {
+      "name": "monthly ceiling",
+      "file": "docs/stages/approved.json",
+      "pointer": "/ceiling",
+      "current": 30.0,
+      "stack": "all stacks",
+      "validation": "number of dollars",
+      "set_where": "approved.json",
+      "example": "30.0",
+      "sensitivity": "public",
+      "status": "exists"
+    },
+    {
+      "name": "droplet price table entry",
+      "file": "docs/cost-prices.json",
+      "pointer": "/droplets/s-1vcpu-1gb",
+      "current": 6,
+      "stack": "all stacks",
+      "validation": "dollars per month for a size; a size absent from the table fails the gate",
+      "set_where": "cost-prices.json (retrieved from the provider API)",
+      "example": "6",
+      "sensitivity": "public",
+      "status": "exists"
+    }
+  ],
+  "secrets": [
+    {
+      "name": "DIGITALOCEAN_TOKEN",
+      "class": "secret",
+      "store": "Doppler config prd",
+      "used_by": [
+        "stacks/00-foundation",
+        "stacks/10-access"
+      ],
+      "delivered_as": "DIGITALOCEAN_TOKEN",
+      "expiry": "90 days",
+      "rotation": "docs/spacelift-secrets.md",
+      "sensitivity": "secret",
+      "status": "exists"
+    },
+    {
+      "name": "TWINGATE_API_TOKEN",
+      "class": "secret",
+      "store": "Doppler config prd",
+      "used_by": [
+        "stacks/10-access"
+      ],
+      "delivered_as": "TWINGATE_API_TOKEN",
+      "expiry": "90 days",
+      "rotation": "docs/spacelift-secrets.md",
+      "sensitivity": "secret",
+      "status": "exists"
+    },
+    {
+      "name": "TWINGATE_NETWORK",
+      "class": "private",
+      "store": "Doppler config prd",
+      "used_by": [
+        "stacks/10-access"
+      ],
+      "delivered_as": "TWINGATE_NETWORK and TF_VAR_twingate_network",
+      "expiry": "none",
+      "rotation": "not a credential",
+      "sensitivity": "private",
+      "status": "exists"
+    },
+    {
+      "name": "ADMIN_SSH_PUBLIC_KEY",
+      "class": "private",
+      "store": "Doppler config prd",
+      "used_by": [
+        "stacks/10-access"
+      ],
+      "delivered_as": "TF_VAR_admin_ssh_public_key",
+      "expiry": "none",
+      "rotation": "replace the key and re-apply",
+      "sensitivity": "private",
+      "status": "exists"
+    },
+    {
+      "name": "ADMIN_SSH_KEY_NAME",
+      "class": "private",
+      "store": "Doppler config prd",
+      "used_by": [
+        "stacks/10-access"
+      ],
+      "delivered_as": "TF_VAR_admin_ssh_key_name",
+      "expiry": "none",
+      "rotation": "not a credential",
+      "sensitivity": "private",
+      "status": "exists"
+    },
+    {
+      "name": "ADMIN_USER_IDS",
+      "class": "private",
+      "store": "Doppler config prd",
+      "used_by": [
+        "stacks/10-access"
+      ],
+      "delivered_as": "TF_VAR_admin_user_ids",
+      "expiry": "none",
+      "rotation": "not a credential",
+      "sensitivity": "private",
+      "status": "exists"
+    },
+    {
+      "name": "DOPPLER_TOKEN",
+      "class": "secret",
+      "store": "Spacelift context cah-doppler (write-only)",
+      "used_by": [
+        "the Spacelift hook script"
+      ],
+      "delivered_as": "DOPPLER_TOKEN",
+      "expiry": "90 days",
+      "rotation": "docs/spacelift-secrets.md",
+      "sensitivity": "secret",
+      "status": "exists"
+    },
+    {
+      "name": "DOPPLER_PROJECT",
+      "class": "private",
+      "store": "Spacelift context cah-doppler",
+      "used_by": [
+        "the Spacelift hook script"
+      ],
+      "delivered_as": "DOPPLER_PROJECT",
+      "expiry": "none",
+      "rotation": "not a credential",
+      "sensitivity": "private",
+      "status": "exists"
+    },
+    {
+      "name": "DOPPLER_CONFIG",
+      "class": "private",
+      "store": "Spacelift context cah-doppler",
+      "used_by": [
+        "the Spacelift hook script"
+      ],
+      "delivered_as": "DOPPLER_CONFIG",
+      "expiry": "none",
+      "rotation": "not a credential",
+      "sensitivity": "private",
+      "status": "exists"
+    },
+    {
+      "name": "Per-host Twingate service keys",
+      "class": "secret",
+      "store": "Doppler hostboot config (one per site)",
+      "used_by": [
+        "each host, pulled at first boot"
+      ],
+      "delivered_as": "first-boot pull, never a variable",
+      "expiry": "365 days by default",
+      "rotation": "issue a new key, revoke the old one",
+      "sensitivity": "secret",
+      "status": "planned"
+    },
+    {
+      "name": "Wazuh enrollment password",
+      "class": "secret",
+      "store": "Doppler hostboot config (one per site)",
+      "used_by": [
+        "each host, pulled at first boot"
+      ],
+      "delivered_as": "first-boot pull, never a variable",
+      "expiry": "rotated after each enrollment window",
+      "rotation": "rotate on the manager",
+      "sensitivity": "secret",
+      "status": "planned"
+    },
+    {
+      "name": "Grafana admin password",
+      "class": "secret",
+      "store": "Doppler hostboot config (one per site)",
+      "used_by": [
+        "optional NOC host"
+      ],
+      "delivered_as": "first-boot pull, never a variable",
+      "expiry": "none",
+      "rotation": "rotate in Doppler and on the host",
+      "sensitivity": "secret",
+      "status": "planned"
+    }
+  ],
+  "hardcoded": [
+    {
+      "name": "reboot time, connector a",
+      "file": "stacks/10-access/main.tf",
+      "literal": "reboot_time = \"04:00\"",
+      "current": "04:00",
+      "stack": "stacks/10-access",
+      "validation": "the bootstrap module checks HH:MM",
+      "set_where": "hard-coded in stacks/10-access/main.tf",
+      "example": "04:00",
+      "sensitivity": "public",
+      "converted_by": "reboot_times (step 2)",
+      "status": "exists"
+    },
+    {
+      "name": "reboot time, connector b",
+      "file": "stacks/10-access/main.tf",
+      "literal": "reboot_time = \"05:00\"",
+      "current": "05:00",
+      "stack": "stacks/10-access",
+      "validation": "the bootstrap module checks HH:MM",
+      "set_where": "hard-coded in stacks/10-access/main.tf",
+      "example": "05:00",
+      "sensitivity": "public",
+      "converted_by": "reboot_times (step 2)",
+      "status": "exists"
+    },
+    {
+      "name": "droplet timezone",
+      "file": "modules/twingate-bootstrap/cloud-init.yaml.tftpl",
+      "literal": "timezone: America/New_York",
+      "current": "America/New_York",
+      "stack": "modules/twingate-bootstrap",
+      "validation": "asserted by the module tests",
+      "set_where": "hard-coded in modules/twingate-bootstrap/cloud-init.yaml.tftpl",
+      "example": "America/New_York",
+      "sensitivity": "public",
+      "converted_by": "timezone (step 2; changes the rendered template)",
+      "status": "exists"
+    },
+    {
+      "name": "connector extra outbound rules",
+      "file": "stacks/10-access/main.tf",
+      "literal": "{ protocol = \"tcp\", port_range = \"30000-31000\" }",
+      "current": "tcp 30000-31000 and udp 1-65535",
+      "stack": "stacks/10-access",
+      "validation": "none",
+      "set_where": "hard-coded in stacks/10-access/main.tf",
+      "example": "tcp 30000-31000",
+      "sensitivity": "public",
+      "converted_by": "kept hard-coded on purpose (low value to expose)",
+      "status": "exists"
+    },
+    {
+      "name": "connector SSH rule between connectors",
+      "file": "stacks/10-access/main.tf",
+      "literal": "{ protocol = \"tcp\", port_range = \"22\" }",
+      "current": "tcp 22, tag to tag",
+      "stack": "stacks/10-access",
+      "validation": "firewall module validation",
+      "set_where": "hard-coded in stacks/10-access/main.tf",
+      "example": "tcp 22",
+      "sensitivity": "public",
+      "converted_by": "kept hard-coded on purpose",
+      "status": "exists"
+    },
+    {
+      "name": "Twingate remote network location",
+      "file": "stacks/10-access/main.tf",
+      "literal": "location = \"OTHER\"",
+      "current": "OTHER",
+      "stack": "stacks/10-access",
+      "validation": "Twingate provider enum",
+      "set_where": "hard-coded in stacks/10-access/main.tf",
+      "example": "OTHER",
+      "sensitivity": "public",
+      "converted_by": "not planned",
+      "status": "exists"
+    },
+    {
+      "name": "project environment",
+      "file": "stacks/00-foundation/main.tf",
+      "literal": "environment = \"Production\"",
+      "current": "Production",
+      "stack": "stacks/00-foundation",
+      "validation": "DigitalOcean enum",
+      "set_where": "hard-coded in stacks/00-foundation/main.tf",
+      "example": "Production",
+      "sensitivity": "public",
+      "converted_by": "not planned",
+      "status": "exists"
+    }
+  ],
+  "external": [
+    {
+      "name": "Spacelift stack environment (foundation outputs mapped to TF_VAR_*)",
+      "owner": "maintainer",
+      "where": "Spacelift UI, stack dependencies of cah-10-access",
+      "pointer": "docs/stages/01-access.md",
+      "sensitivity": "public",
+      "status": "exists",
+      "pointer_file": "docs/stages/01-access.md"
+    },
+    {
+      "name": "Doppler project and config prd",
+      "owner": "maintainer",
+      "where": "Doppler console",
+      "pointer": "docs/spacelift-secrets.md",
+      "sensitivity": "private",
+      "status": "exists",
+      "pointer_file": "docs/spacelift-secrets.md"
+    },
+    {
+      "name": "Twingate console (remote network, connectors, users)",
+      "owner": "maintainer",
+      "where": "Twingate admin console",
+      "pointer": "docs/wiki/Twingate.md",
+      "sensitivity": "private",
+      "status": "exists",
+      "pointer_file": "docs/wiki/Twingate.md"
+    },
+    {
+      "name": "DigitalOcean account (sizes available to the account, SSH key registration)",
+      "owner": "maintainer",
+      "where": "DigitalOcean console and API",
+      "pointer": "docs/cost.md",
+      "sensitivity": "private",
+      "status": "exists",
+      "pointer_file": "docs/cost.md"
+    },
+    {
+      "name": "Home Prometheus scrape interval",
+      "owner": "home monitoring repository",
+      "where": "that repository's target file",
+      "pointer": "specified in the stage 2 design, not built here",
+      "sensitivity": "public",
+      "status": "planned"
+    },
+    {
+      "name": "Home firewall rules for the logging connector",
+      "owner": "maintainer",
+      "where": "the home firewall",
+      "pointer": "specified in the stage 2 design, not built here",
+      "sensitivity": "private",
+      "status": "planned"
+    }
+  ]
+}
