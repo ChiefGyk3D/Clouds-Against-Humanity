@@ -55,6 +55,10 @@ resource "twingate_service_account" "scrape" {
       error_message = "metrics_port_connector must differ from node_exporter_port."
     }
     precondition {
+      condition     = var.metrics_port_connector != 9100
+      error_message = "metrics_port_connector must not be 9100: the access stack keeps 9100 for the node exporter and refuses it as connector_telemetry.metrics_port."
+    }
+    precondition {
       condition     = alltrue([for s in var.scrape_allowlist : contains(compact([tostring(var.node_exporter_port), var.metrics_port_connector == null ? "" : tostring(var.metrics_port_connector)]), tostring(s.port))])
       error_message = "Every scrape_allowlist port must be node_exporter_port or metrics_port_connector."
     }

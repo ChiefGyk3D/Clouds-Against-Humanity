@@ -75,6 +75,8 @@ NEED_NOT_SAY_EXAMPLE = {
     "host_firewall_ssh_sources",
     "metadata_lock",
     "metadata_lock_instances",
+    "node_exporter",
+    "node_exporter_instances",
     "reboot_times",
     "reserved_ranges",
     "resource_key",
@@ -118,6 +120,12 @@ def type_ok(type_text: str, value) -> bool:
             "metrics_port": (int, float),
             "labels": dict,
         }
+        return isinstance(value, dict) and all(
+            k in allowed and isinstance(v, allowed[k]) for k, v in value.items()
+        )
+    if type_text == "object({enabled=optional(bool,false),port=optional(number,9100)})":
+        # node_exporter: an object whose every field is optional.
+        allowed = {"enabled": bool, "port": (int, float)}
         return isinstance(value, dict) and all(
             k in allowed and isinstance(v, allowed[k]) for k, v in value.items()
         )

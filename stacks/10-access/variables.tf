@@ -118,7 +118,7 @@ variable "connector_telemetry" {
   })
   default     = {}
   nullable    = false
-  description = "Twingate connector telemetry for both connectors. The default ({}) is the live state and changes nothing: merging code with this unset plans no change. status_updates_enabled is a provider setting that is not sent while unset, and never replaces anything. Setting log_level (3, 4, 5 or 7), connection_logs (true writes TWINGATE_LOG_ANALYTICS=v3), metrics_port (TWINGATE_METRICS_PORT, 1024 to 65535, not 9100) or labels (KEY = value becomes TWINGATE_LABEL_KEY=value, shown in the Twingate Admin Console, so never put a secret in a label) adds lines to /etc/twingate/connector.conf, which changes user_data and REPLACES the droplet of every connector listed in connector_telemetry_instances (both by default). Roll out one connector at a time: connector_telemetry_instances = [\"a\"] first, then [\"a\", \"b\"], with an SSH-through-Twingate check between (docs/wiki/Trace-One-Change-End-to-End.md, variant C). It opens no firewall port: scraping the metrics port needs a separate firewall change."
+  description = "Twingate connector telemetry for both connectors. The default ({}) is the live state and changes nothing: merging code with this unset plans no change. status_updates_enabled is a provider setting that is not sent while unset, and never replaces anything. Setting log_level (3, 4, 5 or 7), connection_logs (true writes TWINGATE_LOG_ANALYTICS=v3), metrics_port (TWINGATE_METRICS_PORT, 1024 to 65535, not 9100) or labels (KEY = value becomes TWINGATE_LABEL_KEY=value, shown in the Twingate Admin Console, so never put a secret in a label) adds lines to /etc/twingate/connector.conf, which changes user_data and REPLACES the droplet of every connector listed in connector_telemetry_instances (both by default). Roll out one connector at a time: connector_telemetry_instances = [\"a\"] first, then [\"a\", \"b\"], with an SSH-through-Twingate check between (docs/wiki/Trace-One-Change-End-to-End.md, variant C). It opens no firewall port by itself: set metrics_source_tag to admit the metrics port from that one tag."
 
   validation {
     condition     = var.connector_telemetry.log_level == null ? true : contains([3, 4, 5, 7], var.connector_telemetry.log_level)
@@ -217,6 +217,45 @@ variable "metadata_lock_instances" {
   validation {
     condition     = length(var.metadata_lock_instances) >= 1 && alltrue([for i in var.metadata_lock_instances : contains(["a", "b"], i)]) && length(distinct(var.metadata_lock_instances)) == length(var.metadata_lock_instances)
     error_message = "metadata_lock_instances must hold a, b or both, each at most once (at least one entry)."
+  }
+}
+
+variable "node_exporter" {
+  type = object({
+    enabled = optional(bool, false)
+    port    = optional(number, 9100)
+  })
+  default     = {}
+  nullable    = false
+  description = "Opt-in node exporter (prometheus-node-exporter from the distro archive) on each connector, bound to its private address only. The default ({}) is the live state and changes nothing: merging code with this unset plans no change. enabled = true adds a package, a script and a systemd drop-in through user_data, which REPLACES the droplet of every connector listed in node_exporter_instances (both by default). port is 1024 to 65535 (default 9100) and must differ from connector_telemetry.metrics_port. It opens no firewall port by itself: set metrics_source_tag as well, which admits the port from that one tag. Roll out one connector at a time: node_exporter = { enabled = true } with node_exporter_instances = [\"a\"], apply, check SSH through Twingate to the new connector and the memory headroom of the 1 GB droplet, then [\"a\", \"b\"]. NOT applied and NOT tested on a real machine yet."
+
+  validation {
+    condition     = var.node_exporter.port == floor(var.node_exporter.port) && var.node_exporter.port >= 1024 && var.node_exporter.port <= 65535
+    error_message = "node_exporter.port must be a whole number from 1024 to 65535."
+  }
+}
+
+variable "node_exporter_instances" {
+  type        = list(string)
+  default     = ["a", "b"]
+  nullable    = false
+  description = "Which connectors get node_exporter: a, b or both (default both, and only matters once node_exporter.enabled is true). Set [\"a\"] first, apply, check SSH through Twingate to the new connector, then [\"a\", \"b\"] and apply again. A connector not listed runs without the exporter, as it does today."
+
+  validation {
+    condition     = length(var.node_exporter_instances) >= 1 && alltrue([for i in var.node_exporter_instances : contains(["a", "b"], i)]) && length(distinct(var.node_exporter_instances)) == length(var.node_exporter_instances)
+    error_message = "node_exporter_instances must hold a, b or both, each at most once (at least one entry)."
+  }
+}
+
+variable "metrics_source_tag" {
+  type        = string
+  default     = ""
+  nullable    = false
+  description = "DigitalOcean tag of the droplets that may scrape the connectors' metrics ports (the node exporter port and connector_telemetry.metrics_port, tcp). Empty (the default) is the live state: no metrics rule exists and merging code with this unset plans no change. When set, the connector firewall gains one tag-sourced inbound rule per enabled metrics port (source_tags = [this tag], never an address, never a public source); nothing is added for a port that is not enabled. The tag must be a tag name, so an address or CIDR is refused. It must already exist on the account (the stack that creates the scraping droplets owns it); this stack does not create it. Changes the firewall only; replaces no droplet."
+
+  validation {
+    condition     = var.metrics_source_tag == "" || can(regex("^[A-Za-z0-9:_-]{1,255}$", var.metrics_source_tag))
+    error_message = "metrics_source_tag must be empty or a DigitalOcean tag name: 1 to 255 letters, digits, colon, hyphen or underscore. An address or CIDR is refused."
   }
 }
 

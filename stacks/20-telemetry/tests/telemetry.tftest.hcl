@@ -286,6 +286,40 @@ run "an_allowlist_port_outside_the_two_metrics_ports_is_refused" {
   expect_failures = [twingate_service_account.scrape]
 }
 
+# Stack 10 refuses 9100 as the connector metrics port (kept for the node
+# exporter), so stack 20 must not accept it either, even when the node exporter
+# itself listens elsewhere. Otherwise the two stacks would disagree.
+run "connector_metrics_port_9100_is_refused_even_on_another_exporter_port" {
+  command = plan
+  variables {
+    metrics_enabled        = true
+    node_exporter_port     = 9200
+    metrics_port_connector = 9100
+    scrape_allowlist = [
+      { name = "node", host_role = "connector", port = 9200 },
+      { name = "connector", host_role = "connector", port = 9100 },
+    ]
+  }
+  expect_failures = [twingate_service_account.scrape]
+}
+
+# The default pair agrees with stack 10: node exporter on 9100, connector metrics
+# on another port, each scraped through its own resource and carried as a target.
+run "the_default_exporter_port_and_a_distinct_connector_port_plan" {
+  command = plan
+  variables {
+    metrics_enabled = true
+  }
+  assert {
+    condition     = var.node_exporter_port == 9100 && var.metrics_port_connector != 9100
+    error_message = "The default node exporter port is 9100 and the connector metrics port differs."
+  }
+  assert {
+    condition     = toset([for k, t in output.scrape_targets : t.port]) == toset([9100, 9101])
+    error_message = "scrape_targets must carry exactly the allowlisted node exporter and connector metrics ports."
+  }
+}
+
 run "the_two_metrics_ports_must_differ" {
   command = plan
   variables {

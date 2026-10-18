@@ -12,6 +12,9 @@ package_upgrade: true
 packages:
   - unattended-upgrades
   - chrony
+%{ if node_exporter ~}
+  - prometheus-node-exporter
+%{ endif ~}
 %{ if metadata_lock || host_firewall ~}
   - nftables
 %{ endif ~}
@@ -114,6 +117,12 @@ ${telemetry_conf}%{ if metadata_lock ~}
       if [ -n "$metrics_port" ]; then
         metrics_rule="tcp dport $metrics_port ip saddr { $ssh_sources } accept"
       fi
+      # Empty unless node_exporter is enabled.
+      node_exporter_port="${host_firewall_node_exporter}"
+      node_exporter_rule=""
+      if [ -n "$node_exporter_port" ]; then
+        node_exporter_rule="tcp dport $node_exporter_port ip saddr { $ssh_sources } accept"
+      fi
       # Why each accept exists:
       #  - lo and established/related: local traffic and replies to what this
       #    machine started (the connector, apt, DNS, NTP all work on replies).
@@ -138,6 +147,7 @@ ${telemetry_conf}%{ if metadata_lock ~}
           udp sport 67 udp dport 68 accept
           tcp dport 22 ip saddr { $ssh_sources } accept
           $metrics_rule
+          $node_exporter_rule
         }
       }
       EOF
@@ -182,6 +192,45 @@ ${telemetry_conf}%{ if metadata_lock ~}
 
       [Install]
       WantedBy=multi-user.target
+%{ endif ~}
+%{ if node_exporter ~}
+  # Host metrics (node exporter), bound to the private address only. The Ubuntu
+  # package starts the exporter on every interface by default, so a systemd
+  # drop-in replaces its command line before the package ever starts it
+  # (write_files runs before the package install). The drop-in runs the bind
+  # script first; if the script finds no private IPv4 address it fails and the
+  # exporter does not start at all, so there is no wildcard fallback. The
+  # exporter has no authentication: the cloud firewall (tag-sourced rule) and
+  # the optional host firewall are what limit who reaches it.
+  - path: /usr/local/sbin/cah-node-exporter-bind
+    permissions: "0750"
+    owner: root:root
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+      port="${node_exporter_port}"
+      addr=""
+      # The first RFC 1918 IPv4 address of any interface (DigitalOcean's VPC
+      # address, AWS's primary address).
+      while read -r cand; do
+        case "$cand" in
+          10.*|192.168.*|172.1[6-9].*|172.2[0-9].*|172.3[01].*) addr="$cand"; break ;;
+        esac
+      done < <(ip -4 -o addr show scope global | awk '{ split($4, a, "/"); print a[1] }')
+      if [ -z "$addr" ]; then
+        echo "cah-node-exporter-bind: no private IPv4 address found; refusing to start the node exporter" >&2
+        exit 1
+      fi
+      printf 'CAH_NODE_EXPORTER_ADDR=%s:%s\n' "$addr" "$port" > /run/cah-node-exporter.env
+      echo "cah-node-exporter-bind: node exporter will listen on $addr:$port"
+  - path: /etc/systemd/system/prometheus-node-exporter.service.d/10-cah-private-bind.conf
+    permissions: "0644"
+    content: |
+      [Service]
+      ExecStartPre=+/usr/local/sbin/cah-node-exporter-bind
+      EnvironmentFile=-/run/cah-node-exporter.env
+      ExecStart=
+      ExecStart=/usr/bin/prometheus-node-exporter --web.listen-address=$${CAH_NODE_EXPORTER_ADDR}
 %{ endif ~}
   - path: /etc/apt/apt.conf.d/99cah-lock-wait
     permissions: "0644"
@@ -257,6 +306,12 @@ runcmd:
   # allows replies, so it can come up before the connector installs.
   - [systemctl, daemon-reload]
   - [systemctl, enable, --now, --no-block, cah-host-firewall.service]
+%{ endif ~}
+%{ if node_exporter ~}
+  # Pick up the drop-in and restart so the exporter runs with the private
+  # address even if the package started it first. A failure here (no private
+  # address) is reported and does not stop the connector install below.
+  - [bash, -c, "systemctl daemon-reload; systemctl restart prometheus-node-exporter || echo 'cah: node exporter did not start' >&2"]
 %{ endif ~}
   # Install the connector from Twingate's signed apt repository and start it,
   # the way their Terraform guide does, instead of running their setup.sh (an

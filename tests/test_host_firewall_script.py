@@ -58,7 +58,7 @@ def extract_file(
     for name, value in (subs or {}).items():
         text = text.replace("${" + name + "}", value)
     # tftpl: "$$" renders as "$"; any other "${...}" would be an interpolation.
-    assert "${" not in text, "an unescaped template interpolation reached the script"
+    assert "${" not in text.replace("$${", ""), "an unescaped template interpolation reached the script"
     return text.replace("$$", "$")
 
 
@@ -66,6 +66,7 @@ def extract_script(
     template_text: str,
     sources: str = DEFAULT_SOURCES,
     metrics_port: str = "",
+    node_exporter_port: str = "",
     path: str = SCRIPT_PATH,
 ) -> str:
     return extract_file(
@@ -74,6 +75,7 @@ def extract_script(
         {
             "host_firewall_ssh_sources": sources,
             "host_firewall_metrics_port": metrics_port,
+            "host_firewall_node_exporter": node_exporter_port,
         },
     )
 
@@ -135,10 +137,22 @@ def make_fakes(
     return bindir, calls
 
 
-def run_script(tmp: Path, *, sources=DEFAULT_SOURCES, metrics_port="", **fake_kw):
+def run_script(
+    tmp: Path,
+    *,
+    sources=DEFAULT_SOURCES,
+    metrics_port="",
+    node_exporter_port="",
+    **fake_kw,
+):
     script = tmp / "cah-host-firewall"
     script.write_text(
-        extract_script(TEMPLATE.read_text(encoding="utf-8"), sources, metrics_port)
+        extract_script(
+            TEMPLATE.read_text(encoding="utf-8"),
+            sources,
+            metrics_port,
+            node_exporter_port,
+        )
     )
     bindir, calls = make_fakes(tmp, **fake_kw)
     env = {"PATH": str(bindir), "HOME": str(tmp)}
@@ -238,6 +252,21 @@ def test_metrics_port_rule_uses_the_same_private_sources(tmp_path):
     assert len(re.findall(r"tcp dport", ruleset)) == 2
 
 
+def test_node_exporter_port_rule_uses_the_same_private_sources(tmp_path):
+    _proc, _calls, ruleset, _ = run_script(tmp_path, node_exporter_port="9200")
+    lines = [line.strip() for line in ruleset.splitlines()]
+    assert f"tcp dport 9200 ip saddr {{ {DEFAULT_SOURCES} }} accept" in lines
+    assert len(re.findall(r"tcp dport", ruleset)) == 2
+
+
+def test_node_exporter_and_connector_metrics_rules_coexist(tmp_path):
+    _proc, _calls, ruleset, _ = run_script(
+        tmp_path, metrics_port="9999", node_exporter_port="9100"
+    )
+    assert len(re.findall(r"tcp dport", ruleset)) == 3
+    assert "tcp dport 9100 ip saddr" in ruleset and "tcp dport 9999 ip saddr" in ruleset
+
+
 def test_custom_sources_replace_the_defaults(tmp_path):
     _proc, _calls, ruleset, _ = run_script(
         tmp_path, sources="10.20.0.0/16, 192.0.2.7/32"
@@ -332,13 +361,21 @@ def _nft_check(ruleset: str):
     [
         {},
         {"metrics_port": "9999"},
+        {"metrics_port": "9999", "node_exporter_port": "9100"},
         {"sources": "10.20.0.0/16, 192.0.2.7/32"},
         {"sources": "10.20.0.0/16", "metrics_port": "1024"},
         # Everything the tightened variable validation still accepts: host bits,
         # overlapping entries, and the prefix extremes 1 and 32.
         {"sources": "10.0.0.1/8, 10.1.0.0/16, 128.0.0.0/1, 192.0.2.7/32"},
     ],
-    ids=["defaults", "telemetry-port", "custom-sources", "both", "validation-extremes"],
+    ids=[
+        "defaults",
+        "telemetry-port",
+        "both-ports",
+        "custom-sources",
+        "both",
+        "validation-extremes",
+    ],
 )
 def test_generated_ruleset_passes_nft_syntax_check(tmp_path, kw):
     _proc, _calls, ruleset, _ = run_script(tmp_path, **kw)

@@ -64,7 +64,7 @@ resource_key = ""
 # droplets REPLACED. Roll out one connector at a time with
 # connector_telemetry_instances (["a"] first, then ["a", "b"]) and an
 # SSH-through-Twingate check between (docs/wiki/Trace-One-Change-End-to-End.md,
-# variant C). It opens no firewall port. Uncomment to try it; the values are
+# variant C). It opens no firewall port by itself (see metrics_source_tag). Uncomment to try it; the values are
 # placeholders.
 # connector_telemetry = {
 #   status_updates_enabled = true         # provider setting, not sent while unset, never replaces anything
@@ -110,6 +110,26 @@ host_firewall_instances = ["a", "b"]
 # IPv4 CIDRs allowed to reach SSH through the host firewall. Default the three
 # private blocks; narrow to your VPC range if you know it.
 host_firewall_ssh_sources = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]
+
+# Opt-in node exporter (prometheus-node-exporter from the distro archive), bound
+# to each connector's private address only. The default, {}, changes nothing.
+# enabled = true REPLACES the droplet of every connector in node_exporter_instances
+# (user_data changes): roll out one at a time, check SSH through Twingate and the
+# memory headroom of the 1 GB droplet between. It opens no firewall port by
+# itself: set metrics_source_tag as well. NOT applied and NOT tested on a real
+# machine yet. Uncomment to try it; the values are placeholders.
+# node_exporter = { enabled = true, port = 9100 }
+node_exporter = {}
+
+# Which connectors get node_exporter (a, b or both). Default both.
+node_exporter_instances = ["a", "b"]
+
+# The DigitalOcean tag of the droplets that may scrape the metrics ports (the node
+# exporter port and connector_telemetry.metrics_port). Empty, the default, adds no
+# firewall rule. When set, the connector firewall admits each enabled metrics port
+# from THIS TAG ONLY (never an address, never a public source). The tag must
+# already exist; this stack does not create it. Example: "cah-telemetry-tor1".
+metrics_source_tag = ""
 
 # A label for telemetry only (empty means "site-<region>"). It appears in no
 # resource name, tag or output, and changing it replaces nothing.
