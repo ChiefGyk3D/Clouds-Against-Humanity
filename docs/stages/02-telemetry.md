@@ -75,7 +75,7 @@ Order matters. The home side must be in place first: [the home-side runbook](../
 **M1. Prometheus lists the targets up.** Run from any machine that can reach the home Prometheus:
 
 ```
-curl -fsS 'http://prometheus.example.com:9090/api/v1/targets?state=active' | jq -r '.data.activeTargets[] | select(.labels.site == "site-tor1") | [.labels.site, .labels.instance, .scrapeUrl, .health] | @tsv'
+curl -fsS 'http://prometheus.example.com:9090/api/v1/targets?state=active' | jq -r '.data.activeTargets[] | select(.labels.job == "twingate-ztna" and .labels.site == "site-tor1") | [.labels.site, .labels.instance, .scrapeUrl, .health] | @tsv'
 ```
 
 Pass: one line per expected target, each ending in `up`. For one site with two connectors and two exporters per connector (node exporter and connector metrics) that is **four lines**. A `down` line with a timeout in `lastError` points at the firewall pair (design section 4.2), the Twingate resource or the home headless client, in that order. Fewer lines than expected means the target file is missing an entry.
