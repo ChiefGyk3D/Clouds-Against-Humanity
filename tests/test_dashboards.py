@@ -38,13 +38,14 @@ PANEL_TYPES = {"row", "stat", "gauge", "table", "timeseries", "state-timeline", 
 # Variables a query may use to scope itself. `instance` is itself filtered by
 # site; `monitored_agent` is the Wazuh monitoring index's own agent list.
 SCOPE_VARS = ("site", "instance", "monitored_agent")
-SITE_REF = re.compile(r"\$(?:%s)\b|\$\{(?:%s)[:}]" % ("|".join(SCOPE_VARS), "|".join(SCOPE_VARS)))
+_SCOPE_ALT = "|".join(SCOPE_VARS)
+SITE_REF = re.compile(rf"\$(?:{_SCOPE_ALT})\b|\$\{{(?:{_SCOPE_ALT})[:}}]")
 # Names that may appear in text: documentation hosts and loopback.
-ALLOWED_HOST = re.compile(r"(?:^|\.)(?:example\.(?:com|net|org)|localhost)$", re.I)
+ALLOWED_HOST = re.compile(r"(?:^|\.)(?:example\.(?:com|net|org)|localhost)$", re.IGNORECASE)
 # A bare host name: dotted labels ending in a TLD a real host would use.
 # Dotted field names (agent.name, rule.groups, syscheck.path) are not hosts.
 TLDS = "com|net|org|io|co|uk|dev|app|cloud|local|lan|internal|home|corp|intranet|ca|us|de|eu|info|biz|xyz|ai|me|tv"
-HOSTNAME = re.compile(rf"(?<![\w.-])(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:{TLDS})(?![\w-])", re.I)
+HOSTNAME = re.compile(rf"(?<![\w.-])(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:{TLDS})(?![\w-])", re.IGNORECASE)
 HOST_PORT = re.compile(r"(?<![\w.-])(?=[\w.-]*[A-Za-z.])[\w.-]+:\d{2,5}(?![\w])")
 IPV6_CANDIDATE = re.compile(r"(?<![\w:])[0-9A-Fa-f:]{3,}(?![\w:])")
 BY_LIST = re.compile(r"\bby\s*\(([^)]*)\)")
