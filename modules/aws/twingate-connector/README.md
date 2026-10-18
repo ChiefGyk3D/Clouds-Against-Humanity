@@ -48,6 +48,11 @@ Contract outputs: `instance_id`, `instance_name`, `private_ip`, `size`.
   it elsewhere), and the cost gate fails a T-family plan that does not state it.
 - **Image and type must agree.** An arm image on an x86 type (or the reverse) is
   refused at plan time by a precondition on the image lookup.
+- **Node exporter.** `node_exporter` (default `{}`, off) is passed to the
+  bootstrap, which installs the exporter bound to the private address. The
+  default renders byte-identical `user_data` (golden hashes in the tests);
+  `enabled = true` changes it and so replaces the instance. It opens no
+  security group port: the access stack admits the port from another group.
 - **Replacement.** A changed cloud-init replaces the instance
   (`user_data_replace_on_change`), because cloud-init runs only on first boot.
 

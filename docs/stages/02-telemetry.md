@@ -48,7 +48,7 @@ What is **not** known or **not** done:
 - The node exporter has no authentication. Its only protection is the cloud firewall tag rule and, if on, the host firewall.
 - The telemetry tag is **not created by this repository**: the stack that creates the scraping droplets owns it, and the tag must exist before the rule can apply. Until then leave `metrics_source_tag` empty.
 - Design section 4.2 also lists tag-to-tag rules for the connector tag itself (a Twingate session can be routed through either connector, so connector a may open the connection to connector b's metrics port). This change does **not** add them: it admits the telemetry tag only, as the issue asks. If the scrape path turns out to be connector to connector, that is a follow-up (own-tag inbound and outbound rules for the two metrics ports) and must be reviewed on its own.
-- The AWS stack (`stacks/aws/10-access`) uses security groups, not this firewall module, so issue #99 is not done there. The bootstrap module already supports the node exporter (it is cloud-neutral), but the AWS connector module and stack do not pass it through yet.
+- The AWS half of issue #99 is described in section 2.3 below. Everything in this section is the DigitalOcean stack.
 - The `awk` and `ip` based address pick, the systemd drop-in (`ExecStart=` reset to the wrapper) and the order of package install against `write_files` are reasoned from the documentation and the unit file of the Ubuntu package, and tested only as text and with a fake `ip`. They need a first boot on one connector.
 - `connector_private_ips` is the access stack's `connector_private_ips` output (keys `a` and `b`). Passing a map through a Spacelift stack dependency is not verified: supply it as a JSON value in the stack environment if it does not work.
 - `cloud_remote_network_id` is not an output of stack 10 today. Copy it from the Twingate console (the remote network `access-<resource_key>`) until a later step adds the output.
@@ -56,6 +56,31 @@ What is **not** known or **not** done:
 ### 2.2 Dashboards
 
 The repository ships three importable Grafana dashboards in [`dashboards/`](../../dashboards/): a sites overview, droplet health and Wazuh agents, all with `site` and `instance` variables and data sources as variables. They expect an `endpoint` label on every scrape target and a `cah_expected_targets` inventory (see the runbook sections 5 and 6). They are checked for shape by `tests/test_dashboards.py` and are **not** imported into a live Grafana or run against real data. What each panel shows and what is unverified: [Grafana dashboards](../wiki/Grafana-Dashboards.md).
+
+### 2.3 Metrics on the AWS connectors (stage 2 step 5, issue #99, AWS half)
+
+**Status: written and mock-tested only. Nothing is applied, no AWS account or Spacelift stack exists for this code, and the maintainer's check of Spacelift's native AWS integration is still open ([AWS stages 0 and 1](aws-access.md)). Do not assume it works.**
+
+The same three opt-in settings exist in `stacks/aws/10-access`, with one difference: the source of the metrics rule is a security group, not a tag. All three default to off and the plan is then a no-op (golden `user_data` hashes in the AWS connector module tests, connector a and connector b).
+
+| Setting | What it does | Replaces instances? |
+|---|---|---|
+| `node_exporter = { enabled = true, port = 9100 }` | Passed through `modules/aws/twingate-connector` to the shared bootstrap, which installs the exporter and binds it to the private IPv4 address only (section 2.1 describes the script). | **Yes**: `user_data` changes and the instance has `user_data_replace_on_change`, so each connector in `node_exporter_instances` is REPLACED, with its public address (there is no Elastic IP). Roll out `["a"]`, check SSH through Twingate, then `["a", "b"]` |
+| `node_exporter_instances` | Which connectors get it (default both) | n/a |
+| `metrics_source_security_group_id = "sg-..."` | The connector security group gains one inbound rule per enabled metrics port (the node exporter port and `connector_telemetry.metrics_port`, including the previous value during a rollout) whose source is that security group (`referenced_security_group_id`), through the AWS firewall module's `inbound_from_other_groups`. Never an address, an IPv6 range or a prefix list. Empty (default) adds no rule | No, a security group change only |
+
+What the tests prove (`tofu test` with mocked providers, plus `tests/test_metrics_firewall_aws.py`): the exact ingress list at the defaults (only SSH from the group itself) and with the exporter on; a source group with nothing enabled opens nothing; metrics enabled with no source group opens nothing; the variable refuses an address, a CIDR and an empty-looking value; and a source scan that no ingress rule in the AWS firewall module can take `cidr_blocks`, `ipv6_cidr_blocks`, `cidr_ipv4`, `cidr_ipv6` or a prefix list (with a negative case proving the scan bites).
+
+Not known or not done:
+
+- The source security group is **supplied by the operator** and is not created here. It must exist before the rule applies, and a security group reference only works inside the same VPC or a peered one. Until a scraper exists, leave it empty.
+- The source group must be **different from the connector group**: naming the connector group itself is refused (a precondition in the firewall module, and one on the stack output), since it would admit connector-to-connector metrics. The module check runs at plan once the group exists, and at apply on a first creation (the new group's id is unknown until then).
+- **Changing the source group takes two applies.** A different group is a different rule key, so one plan removes the old rules and adds the new ones, and AWS may briefly hold both, or reject the add as a duplicate if it runs first. Set `metrics_source_security_group_id = ""` and apply, then set the new group and apply. Scraping is down between the two, as intended.
+- The node exporter has no authentication. Its only protection is the security group rule and, if on, the host firewall.
+- The connector's own metrics bind address stays UNVERIFIED, as in section 2.1.
+- Connector-to-connector scraping is not added (only the one source group), as in section 2.1.
+- Log shipping is **not** added on AWS. That is a later follow-up, after the DigitalOcean change lands.
+- The AWS `connector_private_ips` handoff to stack 20 is as unverified as in section 2.1; and stack 20 itself has no AWS variant.
 
 ## 3. Your manual steps (nothing here is automatic)
 

@@ -13,10 +13,16 @@ output "outbound_rules" {
 
 # Sorted "<protocol>/<from>-<to>/<source group>" descriptors for the inbound rules.
 output "inbound_rules" {
-  value = sort([
-    for r in aws_vpc_security_group_ingress_rule.member :
-    "${r.ip_protocol}/${r.from_port}-${r.to_port}/${r.referenced_security_group_id}"
-  ])
+  value = sort(concat(
+    [
+      for r in aws_vpc_security_group_ingress_rule.member :
+      "${r.ip_protocol}/${r.from_port}-${r.to_port}/${r.referenced_security_group_id}"
+    ],
+    [
+      for r in aws_vpc_security_group_ingress_rule.other_group :
+      "${r.ip_protocol}/${r.from_port}-${r.to_port}/${r.referenced_security_group_id}"
+    ],
+  ))
 }
 
 # Sorted descriptors for the outbound rules that reach group members.
@@ -38,6 +44,7 @@ output "id" {
   # install races them. (UNVERIFIED ordering until an apply.)
   depends_on = [
     aws_vpc_security_group_ingress_rule.member,
+    aws_vpc_security_group_ingress_rule.other_group,
     aws_vpc_security_group_egress_rule.internet,
     aws_vpc_security_group_egress_rule.member,
   ]
@@ -53,15 +60,20 @@ output "rule_targets" {
   # install races them. (UNVERIFIED ordering until an apply.)
   depends_on = [
     aws_vpc_security_group_ingress_rule.member,
+    aws_vpc_security_group_ingress_rule.other_group,
     aws_vpc_security_group_egress_rule.internet,
     aws_vpc_security_group_egress_rule.member,
   ]
 }
 
 # Who may reach the targets by membership rather than by address. Here: the
-# security groups named as the source of an inbound rule (this group itself).
+# security groups named as the source of an inbound rule (this group itself and
+# any other group from inbound_from_other_groups).
 output "source_members" {
-  value = sort(distinct([for r in aws_vpc_security_group_ingress_rule.member : r.referenced_security_group_id]))
+  value = sort(distinct(concat(
+    [for r in aws_vpc_security_group_ingress_rule.member : r.referenced_security_group_id],
+    [for r in aws_vpc_security_group_ingress_rule.other_group : r.referenced_security_group_id],
+  )))
 }
 
 # What the targets may reach by membership. Here: the security groups named as

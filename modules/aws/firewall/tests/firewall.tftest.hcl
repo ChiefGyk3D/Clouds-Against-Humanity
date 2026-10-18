@@ -278,8 +278,141 @@ run "launch_facing_outputs_wait_for_every_rule" {
   assert {
     condition = alltrue([
       for name in ["id", "rule_targets"] :
-      can(regex("output \"${name}\" \\{[^}]*depends_on = \\[[^\\]]*aws_vpc_security_group_ingress_rule\\.member[^\\]]*aws_vpc_security_group_egress_rule\\.internet[^\\]]*aws_vpc_security_group_egress_rule\\.member", file("${path.module}/outputs.tf")))
+      can(regex("output \"${name}\" \\{[^}]*depends_on = \\[[^\\]]*aws_vpc_security_group_ingress_rule\\.member[^\\]]*aws_vpc_security_group_ingress_rule\\.other_group[^\\]]*aws_vpc_security_group_egress_rule\\.internet[^\\]]*aws_vpc_security_group_egress_rule\\.member", file("${path.module}/outputs.tf")))
     ])
-    error_message = "id and rule_targets must depend on all three rule resources."
+    error_message = "id and rule_targets must depend on all four rule resources."
   }
+}
+
+# The other-group inbound rules (issue #99, AWS half): a source that is another
+# security group, never an address. The ids below are fake, built at run time.
+run "default_has_no_other_group_rule" {
+  command = apply
+  assert {
+    condition     = length(aws_vpc_security_group_ingress_rule.other_group) == 0 && length(output.inbound_rules) == 0
+    error_message = "With inbound_from_other_groups unset the group has no inbound rule at all."
+  }
+}
+
+run "other_group_rules_name_a_group_never_an_address" {
+  command = apply
+  variables {
+    inbound_from_member_rules = [{ protocol = "tcp", port_range = "22" }]
+    inbound_from_other_groups = [
+      { protocol = "tcp", port_range = "9100", security_group_id = "sg-0abc1230abc123450" },
+      { protocol = "tcp", port_range = "9999", security_group_id = "sg-0abc1230abc123450" },
+    ]
+  }
+  assert {
+    condition     = length(aws_vpc_security_group_ingress_rule.other_group) == 2
+    error_message = "Exactly the listed other-group rules must render."
+  }
+  assert {
+    condition = alltrue([
+      for r in values(aws_vpc_security_group_ingress_rule.other_group) :
+      r.referenced_security_group_id == "sg-0abc1230abc123450" && r.cidr_ipv4 == null && r.cidr_ipv6 == null && r.prefix_list_id == null
+    ])
+    error_message = "Every other-group rule must have that group as its source and no address, IPv6 range or prefix list."
+  }
+  assert {
+    condition = jsonencode(output.inbound_rules) == jsonencode(sort([
+      "tcp/22-22/${aws_security_group.this.id}",
+      "tcp/9100-9100/sg-0abc1230abc123450",
+      "tcp/9999-9999/sg-0abc1230abc123450",
+    ]))
+    error_message = "inbound_rules must list the member rule and exactly the other-group rules."
+  }
+  assert {
+    condition     = jsonencode(output.source_members) == jsonencode(sort([aws_security_group.this.id, "sg-0abc1230abc123450"]))
+    error_message = "source_members must name every group that is a source."
+  }
+  assert {
+    condition     = length(output.outbound_rules) == 5
+    error_message = "Other-group inbound rules must not change the internet egress set."
+  }
+}
+
+run "other_group_source_may_not_be_the_group_itself" {
+  command = plan
+  # The member rules are the place for "this group": an other-group rule whose
+  # source is the target group would admit connector-to-connector metrics, which
+  # the docs say this change does not do.
+  override_resource {
+    target = aws_security_group.this
+    values = {
+      id = "sg-0abc1230abc123450"
+    }
+  }
+  variables {
+    inbound_from_other_groups = [{ protocol = "tcp", port_range = "9100", security_group_id = "sg-0abc1230abc123450" }]
+  }
+  expect_failures = [aws_vpc_security_group_ingress_rule.other_group]
+}
+
+run "other_group_source_that_differs_from_the_group_is_accepted" {
+  command = apply
+  override_resource {
+    target = aws_security_group.this
+    values = {
+      id = "sg-0abc1230abc123450"
+    }
+  }
+  variables {
+    inbound_from_other_groups = [{ protocol = "tcp", port_range = "9100", security_group_id = "sg-0def4560def456780" }]
+  }
+  assert {
+    condition     = jsonencode(output.inbound_rules) == jsonencode(["tcp/9100-9100/sg-0def4560def456780"])
+    error_message = "A different source group must be accepted."
+  }
+}
+
+run "other_group_must_be_a_security_group_id_not_an_address" {
+  command = plan
+  variables {
+    inbound_from_other_groups = [{ protocol = "tcp", port_range = "9100", security_group_id = "10.0.0.0/8" }]
+  }
+  expect_failures = [var.inbound_from_other_groups]
+}
+
+run "other_group_refuses_the_internet" {
+  command = plan
+  variables {
+    inbound_from_other_groups = [{ protocol = "tcp", port_range = "9100", security_group_id = "0.0.0.0/0" }]
+  }
+  expect_failures = [var.inbound_from_other_groups]
+}
+
+run "other_group_refuses_an_empty_source" {
+  command = plan
+  variables {
+    inbound_from_other_groups = [{ protocol = "tcp", port_range = "9100", security_group_id = "" }]
+  }
+  expect_failures = [var.inbound_from_other_groups]
+}
+
+run "other_group_refuses_a_bad_protocol_and_ports" {
+  command = plan
+  variables {
+    inbound_from_other_groups = [{ protocol = "icmp", port_range = "9100", security_group_id = "sg-0abc1230abc123450" }]
+  }
+  expect_failures = [var.inbound_from_other_groups]
+}
+
+run "other_group_refuses_port_zero_and_all" {
+  command = plan
+  variables {
+    inbound_from_other_groups = [{ protocol = "tcp", port_range = "all", security_group_id = "sg-0abc1230abc123450" }]
+  }
+  expect_failures = [var.inbound_from_other_groups]
+}
+
+run "other_group_refuses_a_duplicate" {
+  command = plan
+  variables {
+    inbound_from_other_groups = [
+      { protocol = "tcp", port_range = "9100", security_group_id = "sg-0abc1230abc123450" },
+      { protocol = "tcp", port_range = "9100", security_group_id = "sg-0abc1230abc123450" },
+    ]
+  }
+  expect_failures = [var.inbound_from_other_groups]
 }
