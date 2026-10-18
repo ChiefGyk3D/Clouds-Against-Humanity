@@ -75,7 +75,7 @@ Metrics are **pulled**: your Prometheus scrapes the cloud connectors through Twi
 
 ## 5. The target file shape
 
-Prometheus reads the cloud targets from a `file_sd` JSON file, kept next to your existing target files and listed under the scrape job named `twingate-ztna`, the job the on-prem Twingate targets use (the file carries no `job` label: Prometheus sets it from the job name). One entry per scrape endpoint. The label set is the same on every entry, and `instance` is the one host label every panel and alert uses (design section 3.2):
+Prometheus reads the cloud targets from a `file_sd` JSON file, kept next to your existing target files and listed under the scrape job named `twingate-ztna`, the job the on-prem Twingate targets use (the file carries no `job` label: Prometheus sets it from the job name). One entry per scrape endpoint. The label set is the same on every entry except `endpoint`, and `instance` is the one host label every panel and alert uses (design section 3.2). **`endpoint` is required**: the node exporter and the connector metrics of one host share `job`, `site` and `instance`, so without a label that tells them apart their `up` and `scrape_*` series would be identical and collide. Use exactly `node-exporter` or `connector-metrics`; the dashboards in this repository filter and group on it (`role` is taken: it names the host):
 
 ```json
 [
@@ -86,7 +86,8 @@ Prometheus reads the cloud targets from a `file_sd` JSON file, kept next to your
       "region": "tor1",
       "provider": "digitalocean",
       "role": "connector",
-      "instance": "site-tor1-connector-a"
+      "instance": "site-tor1-connector-a",
+      "endpoint": "node-exporter"
     }
   },
   {
@@ -96,13 +97,14 @@ Prometheus reads the cloud targets from a `file_sd` JSON file, kept next to your
       "region": "tor1",
       "provider": "digitalocean",
       "role": "connector",
-      "instance": "site-tor1-connector-a"
+      "instance": "site-tor1-connector-a",
+      "endpoint": "connector-metrics"
     }
   }
 ]
 ```
 
-Repeat both entries for connector b (`192.0.2.22`). Notes:
+Repeat both entries for connector b (`192.0.2.22`). That is four entries, so four expected endpoints per site (the inventory in section 6 counts endpoints, not hosts). Notes:
 
 - The address and port come from the stack 20 `scrape_targets` output (sensitive; read it with `tofu output -json scrape_targets`). The port `9101` here is only an example: your connector metrics port is the value you set for `metrics_port_connector`, which has no default and is never `9100` (node exporter keeps that).
 - Port, label and `site` values are placeholders. `site` is the telemetry label `site_name` (default `site-<region>`), not the `resource_key` that names cloud objects.
@@ -151,4 +153,4 @@ Rollback: remove the cloud entries from the target file and reload Prometheus, d
 - It does not describe the home SIEM repository's own changes (dashboards, journald rules, notes). Those are written only after the cloud side is applied and confirmed working.
 - It does not record your VLAN ids, addresses, host names or tenant names. Every value above is a placeholder.
 
-Next: [Roadmap](Roadmap.md), where stage 2 is tracked.
+Next: [Grafana dashboards](Grafana-Dashboards.md), the importable dashboards for what you just set up. Then the [Roadmap](Roadmap.md), where stage 2 is tracked.

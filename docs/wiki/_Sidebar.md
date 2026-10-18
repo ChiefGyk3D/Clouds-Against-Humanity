@@ -72,6 +72,7 @@ The [Threat model](Threat-Model.md) is core step 19.
 - [Reading a dashboard as an operator (unverified draft)](Reading-a-Dashboard-as-an-Operator.md)
 - [Build your own mini SOC (unverified draft)](Build-Your-Own-Mini-SOC.md)
 - [Stage 2 home-side runbook (unverified draft)](Stage-2-Home-Side-Runbook.md)
+- [Grafana dashboards (unverified draft)](Grafana-Dashboards.md)
 
 </details>
 

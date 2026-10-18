@@ -1,0 +1,694 @@
+{
+  "uid": "cah-sites-overview",
+  "title": "CAH: Sites overview",
+  "description": "Per-site and per-instance view of the Clouds Against Humanity cloud sites: are the targets answering, is collection healthy, and how much connector traffic goes direct versus through a relay. Prometheus only.",
+  "tags": [
+    "cah"
+  ],
+  "schemaVersion": 41,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "timezone": "browser",
+  "refresh": "1m",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "links": [],
+  "annotations": {
+    "list": []
+  },
+  "templating": {
+    "list": [
+      {
+        "type": "datasource",
+        "name": "DS_PROMETHEUS",
+        "label": "Prometheus",
+        "query": "prometheus",
+        "current": {},
+        "hide": 0,
+        "refresh": 1,
+        "regex": "",
+        "multi": false,
+        "includeAll": false,
+        "options": []
+      },
+      {
+        "type": "query",
+        "name": "site",
+        "label": "Site",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "query": {
+          "query": "label_values(up{job=\"twingate-ztna\"}, site)",
+          "refId": "site"
+        },
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "hide": 0,
+        "options": [],
+        "regex": "",
+        "allValue": ".*"
+      },
+      {
+        "type": "query",
+        "name": "instance",
+        "label": "Instance",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "query": {
+          "query": "label_values(up{job=\"twingate-ztna\", site=~\"$site\"}, instance)",
+          "refId": "instance"
+        },
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "hide": 0,
+        "options": [],
+        "regex": "",
+        "allValue": ".*"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Is each site reachable?",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Targets up per site",
+      "description": "One number per site: how many of its scrape endpoints answered the last scrape. The query starts from the expected-target inventory (cah_expected_targets, one series per site), so a site whose targets are all down or gone still appears, as 0, instead of vanishing. Compare the number with what the inventory expects. Without the inventory (not built yet) a fully silent site cannot appear: there is nothing left to list.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "count by (site) (up{job=\"twingate-ztna\", site=~\"$site\"} == 1) or on (site) (0 * cah_expected_targets{site=~\"$site\"})",
+          "legendFormat": "{{site}}",
+          "range": false,
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value_and_name"
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Targets down per site",
+      "description": "One number per site: how many scrape endpoints are missing or down. It is the expected count from the inventory (cah_expected_targets) minus the endpoints that are up, so an endpoint that vanished counts as down, not only one that answers 0. Above 0 means a connector, an exporter or the path to it has a problem. If the inventory does not exist the panel falls back to counting series that read 0, which cannot see a vanished site.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "clamp_min(cah_expected_targets{site=~\"$site\"} - on (site) (count by (site) (up{job=\"twingate-ztna\", site=~\"$site\"} == 1) or on (site) (0 * cah_expected_targets{site=~\"$site\"})), 0) or on (site) count by (site) (up{job=\"twingate-ztna\", site=~\"$site\"} == 0)",
+          "legendFormat": "{{site}}",
+          "range": false,
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value_and_name"
+      }
+    },
+    {
+      "id": 4,
+      "type": "table",
+      "title": "Targets that are not up",
+      "description": "Lists every scrape target that is down right now, with its site and instance. Empty means everything answered. Use it to find which machine to look at first.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "up{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"} == 0",
+          "legendFormat": "",
+          "range": false,
+          "instant": true,
+          "format": "table",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {},
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true,
+              "job": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "state-timeline",
+      "title": "Target state per instance",
+      "description": "A green and red timeline of up and down for every site, instance and scrape endpoint over the chosen time range. Red bars show when a target stopped answering and for how long. The endpoint label (node-exporter or connector-metrics) separates the two ports of one host, so you can tell which one failed.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "up{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": "down",
+                  "color": "red",
+                  "index": 0
+                },
+                "1": {
+                  "text": "up",
+                  "color": "green",
+                  "index": 1
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "showValue": "never",
+        "mergeValues": true,
+        "legend": {
+          "showLegend": false
+        }
+      }
+    },
+    {
+      "id": 6,
+      "type": "row",
+      "title": "Is metrics collection healthy?",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "panels": []
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Scrape duration",
+      "description": "How long Prometheus took to fetch each target's metrics. A slow or growing line means the path through Twingate or the exporter is struggling, and a scrape that takes longer than the scrape interval will start to drop samples.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "scrape_duration_seconds{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Samples scraped",
+      "description": "How many samples each target returned per scrape. A sudden drop to a small number means the exporter answered but is exporting almost nothing, which a plain up or down check would still call healthy.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "scrape_samples_scraped{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 19
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "type": "row",
+      "title": "Connector traffic: direct versus relay",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 27
+      },
+      "panels": []
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Connector inbound traffic by path",
+      "description": "Bytes per second arriving at each connector, split by the transport label Twingate sets: direct (a peer-to-peer path) or relay (through a Twingate relay). Compare sites and connectors to see which one carries the load.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (site, instance, endpoint, transport) (rate(twingate_inbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", endpoint=\"connector-metrics\"}[5m]))",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}} {{transport}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 28
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Connector outbound traffic by path",
+      "description": "Bytes per second leaving each connector, split into direct and relay in the same way. If outbound is much larger than inbound for a connector, ask what is being downloaded through it.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (site, instance, endpoint, transport) (rate(twingate_outbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", endpoint=\"connector-metrics\"}[5m]))",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}} {{transport}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 28
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Share of traffic through a relay",
+      "description": "The fraction of each site's connector traffic (in plus out) that went through a Twingate relay instead of a direct path. Each direction is summed per site first and a direction with no series counts as 0, so a missing series cannot silently drop the site. A high share is not an outage, but it usually means higher latency and a firewall or NAT that blocks direct connections. It shows no data when a site moved no bytes in the window (0 divided by 0).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "(((sum by (site) (rate(twingate_inbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", endpoint=\"connector-metrics\", transport=\"relay\"}[5m]))) or on (site) (0 * count by (site) (up{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}))) + ((sum by (site) (rate(twingate_outbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", endpoint=\"connector-metrics\", transport=\"relay\"}[5m]))) or on (site) (0 * count by (site) (up{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"})))) / (((sum by (site) (rate(twingate_inbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", endpoint=\"connector-metrics\"}[5m]))) or on (site) (0 * count by (site) (up{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}))) + ((sum by (site) (rate(twingate_outbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", endpoint=\"connector-metrics\"}[5m]))) or on (site) (0 * count by (site) (up{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}))))",
+          "legendFormat": "{{site}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 36
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Connector uptime",
+      "description": "Seconds each connector process has been running, as it reports itself. A line that drops back to zero is a restart, whether from an update, a crash or a rebuilt droplet. It is the connector's uptime, not the machine's; the droplet health dashboard shows that.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "twingate_connector_uptime_seconds{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", endpoint=\"connector-metrics\"}",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 36
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    }
+  ]
+}

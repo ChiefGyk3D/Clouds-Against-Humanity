@@ -1,0 +1,631 @@
+{
+  "uid": "cah-droplet-health",
+  "title": "CAH: Droplet health",
+  "description": "Node exporter health of each cloud droplet (CPU, memory, swap, disk, network, uptime), per site and instance. Prometheus only.",
+  "tags": [
+    "cah"
+  ],
+  "schemaVersion": 41,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "timezone": "browser",
+  "refresh": "1m",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "links": [],
+  "annotations": {
+    "list": []
+  },
+  "templating": {
+    "list": [
+      {
+        "type": "datasource",
+        "name": "DS_PROMETHEUS",
+        "label": "Prometheus",
+        "query": "prometheus",
+        "current": {},
+        "hide": 0,
+        "refresh": 1,
+        "regex": "",
+        "multi": false,
+        "includeAll": false,
+        "options": []
+      },
+      {
+        "type": "query",
+        "name": "site",
+        "label": "Site",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "query": {
+          "query": "label_values(up{job=\"twingate-ztna\"}, site)",
+          "refId": "site"
+        },
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "hide": 0,
+        "options": [],
+        "regex": "",
+        "allValue": ".*"
+      },
+      {
+        "type": "query",
+        "name": "instance",
+        "label": "Instance",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${DS_PROMETHEUS}"
+        },
+        "query": {
+          "query": "label_values(up{job=\"twingate-ztna\", site=~\"$site\"}, instance)",
+          "refId": "instance"
+        },
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "hide": 0,
+        "options": [],
+        "regex": "",
+        "allValue": ".*"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Right now",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Uptime since boot",
+      "description": "How long each droplet has been running since its last boot. A small number on a machine nobody rebooted means it restarted by itself, or it was rebuilt, which is the normal result of a cloud-init change.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "time() - node_boot_time_seconds{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\"}",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
+          "range": false,
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "graphMode": "none",
+        "colorMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "textMode": "value_and_name"
+      }
+    },
+    {
+      "id": 3,
+      "type": "gauge",
+      "title": "Memory used now",
+      "description": "Percent of memory in use right now (total minus what the kernel calls available). The connector droplets are small, so this is the number to watch before adding anything to one.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * (1 - node_memory_MemAvailable_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\"} / node_memory_MemTotal_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\"})",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
+          "range": false,
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 75
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 4,
+      "type": "gauge",
+      "title": "Fullest disk now",
+      "description": "Percent used on the fullest real filesystem of each droplet (tmpfs, overlay and similar are left out). A full disk stops logging and package updates, so it is worth a look above 80 percent.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "max by (site, instance, endpoint) (100 * (1 - node_filesystem_avail_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\", fstype!~\"tmpfs|ramfs|squashfs|overlay|devtmpfs|fuse.*\"} / node_filesystem_size_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\", fstype!~\"tmpfs|ramfs|squashfs|overlay|devtmpfs|fuse.*\"}))",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
+          "range": false,
+          "instant": true,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 80
+              },
+              {
+                "color": "red",
+                "value": 90
+              }
+            ]
+          },
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "showThresholdMarkers": true
+      }
+    },
+    {
+      "id": 5,
+      "type": "row",
+      "title": "Over time",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "panels": []
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "CPU busy",
+      "description": "Percent of CPU time not spent idle, averaged over all cores, per droplet. Steady high values mean the droplet is too small or something is running away; short spikes during updates are normal.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * (1 - avg by (site, instance, endpoint) (rate(node_cpu_seconds_total{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\", mode=\"idle\"}[5m])))",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Memory used",
+      "description": "Percent of memory in use over time. A line that climbs and never falls back suggests a leak; a line that hits the top is when the kernel starts killing processes.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * (1 - node_memory_MemAvailable_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\"} / node_memory_MemTotal_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\"})",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Swap used",
+      "description": "Bytes of swap in use. Most droplets here have none, so this normally reads 0 or shows no data; a rising line on a machine with swap means memory is short and everything gets slower.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "node_memory_SwapTotal_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\"} - node_memory_SwapFree_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\"}",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Disk used by filesystem",
+      "description": "Percent used on each real filesystem, per droplet and mount point. It rises slowly, so the slope tells you how many days remain before it fills.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * (1 - node_filesystem_avail_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\", fstype!~\"tmpfs|ramfs|squashfs|overlay|devtmpfs|fuse.*\"} / node_filesystem_size_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\", fstype!~\"tmpfs|ramfs|squashfs|overlay|devtmpfs|fuse.*\"})",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}} {{mountpoint}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Network traffic",
+      "description": "Bytes per second received and sent on the droplet's network interfaces (loopback and container interfaces left out). A connector's traffic should follow how much the users are doing; a flat high send rate at night is worth a question.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (site, instance, endpoint) (rate(node_network_receive_bytes_total{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\", device!~\"lo|docker.*|veth.*|br-.*\"}[5m]))",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}} received",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        },
+        {
+          "refId": "B",
+          "expr": "sum by (site, instance, endpoint) (rate(node_network_transmit_bytes_total{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\", device!~\"lo|docker.*|veth.*|br-.*\"}[5m]))",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}} sent",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 26
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Network errors and drops",
+      "description": "Packets per second the network interfaces reported as errors or dropped, both directions added together. It should sit at 0. A steady non-zero line points at a network problem, not at the application.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (site, instance, endpoint) (rate({__name__=~\"node_network_(receive|transmit)_(errs|drop)_total\", job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\"}[5m]))",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
+          "range": true,
+          "instant": false,
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 26
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "pps",
+          "custom": {
+            "lineWidth": 1,
+            "fillOpacity": 10
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    }
+  ]
+}

@@ -87,6 +87,7 @@ Clouds-Against-Humanity/
   modules/twingate-bootstrap/              shared connector boot script and tokens, called by every provider's connector
   modules/twingate-connector/              connector, its tokens, its droplet and cloud-init
   modules/aws/{vpc,firewall,twingate-connector}  the AWS versions of those modules
+  dashboards/                              importable Grafana dashboards (sites overview, droplet health, Wazuh agents); see docs/wiki/Grafana-Dashboards.md
   scripts/cost_check.py                    cost gate
   scripts/ci_cost_gate.sh                  the cost gate as CI runs it: compares approved.json with the base branch on pull requests
   scripts/cost_raise.py                    proposes (dry run) or makes a per-phase ceiling change in approved.json
