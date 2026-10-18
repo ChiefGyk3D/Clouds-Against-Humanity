@@ -10,7 +10,7 @@ Pick the row that sounds like you. Every path is a numbered list: read in that o
 |---|---|---|---|
 | [The core path](#the-core-path) | Everyone, and anyone unsure where to start. | 21 | about 3 h 15 min of reading |
 | [Build it yourself](#build-it-yourself) | A learner replicating the build in their own accounts. | 5 | about 1 h 10 min of reading |
-| [Understand the design](#understand-the-design) | An engineer who wants the design without the primers. | 11 | about 1 h 30 min of reading |
+| [Understand the design](#understand-the-design) | An engineer who wants the design without the primers. | 12 | about 1 h 35 min of reading |
 | [Security and threat modelling](#security-and-threat-modelling) | A security-minded reader. | 5 | about 1 h 15 min of reading |
 | [Detection and monitoring](#detection-and-monitoring) | Someone asking how it would be watched, and who wants to build a small version. | 8 | about 1 h 55 min of reading |
 | [Enterprise context](#enterprise-context) | A reader who wants to see how companies build networks, run infrastructure and handle identity, how they run changes, and what roles and skills surround that work. | 5 | about 1 h 30 min of reading |
@@ -73,17 +73,18 @@ The settings reference is a lookup page: it is generated from one manifest and m
 
 | # | Page | Read | Checkpoint |
 |---|---|---|---|
-| 1 | [Architecture overview](Architecture-Overview.md) | 10 min |  |
-| 2 | [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) | 5 min |  |
-| 3 | [Terraform reference](Terraform-Reference.md) | 25 min | You can read any file in `stacks/` and say what it creates. |
-| 4 | [Spacelift](Spacelift.md) | 10 min |  |
-| 5 | [Doppler and secrets](Doppler-and-Secrets.md) | 5 min |  |
-| 6 | [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) | 10 min |  |
-| 7 | [Trace one change end to end](Trace-One-Change-End-to-End.md) | 15 min | You can name each gate one real pull request passed through, in order. |
-| 8 | [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) | 15 min | You can argue for or against the no-VPN decision with the page's evidence. |
-| 9 | [Twingate](Twingate.md) | 10 min |  |
-| 10 | [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) | 5 min |  |
-| 11 | [Droplet hardening](Droplet-Hardening.md) | 5 min |  |
+| 1  | [Architecture overview](Architecture-Overview.md) | 10 min |  |
+| 2 | [Why I picked these tools](Why-I-Picked-These-Tools.md) | 5 min | You can say which pieces are personal picks and where each would change at a small business or an enterprise. |
+| 3 | [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) | 5 min |  |
+| 4 | [Terraform reference](Terraform-Reference.md) | 25 min | You can read any file in `stacks/` and say what it creates. |
+| 5 | [Spacelift](Spacelift.md) | 10 min |  |
+| 6 | [Doppler and secrets](Doppler-and-Secrets.md) | 5 min |  |
+| 7 | [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) | 10 min |  |
+| 8 | [Trace one change end to end](Trace-One-Change-End-to-End.md) | 15 min | You can name each gate one real pull request passed through, in order. |
+| 9 | [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) | 15 min | You can argue for or against the no-VPN decision with the page's evidence. |
+| 10 | [Twingate](Twingate.md) | 10 min |  |
+| 11 | [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) | 5 min |  |
+| 12 | [Droplet hardening](Droplet-Hardening.md) | 5 min |  |
 
 ## Security and threat modelling
 
