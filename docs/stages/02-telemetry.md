@@ -13,7 +13,7 @@ Design: [2026-10-16 settings layer, multi-site telemetry and the mini cloud SOC]
 
 Cost: $0.00. `cost.json` lists no resources, and the cost gate requires the file to exist anyway. Phase id `stage-2`, planned, proposed ceiling $30 (the reference environment adds $0; see [cost](../cost.md#ceilings-per-phase)).
 
-What it does **not** do yet: it creates no firewall rule, no droplet, no agent, no exporter and no service key. Service keys are issued out of band, one per host, so no key is ever in state (design section 2.8). Metrics need an exporter on the connectors (step 5 of the design) and logs need an agent (step 7, section 2.2: written but not applied, and without the Twingate headless client), so enabling a flag in this stack only creates the Twingate side.
+What it does **not** do yet: it creates no firewall rule, no droplet, no agent, no exporter and no service key. Service keys are issued out of band, one per host, so no key is ever in state (design section 2.8). Metrics need an exporter on the connectors (step 5 of the design) and logs need an agent (step 7, section 2.4: written but not applied, and without the Twingate headless client), so enabling a flag in this stack only creates the Twingate side.
 
 Outputs: `scrape_targets` (sensitive; empty unless metrics are on) and `site_identity` (site label, region, provider, agent group, labels). The scrape targets carry private connector addresses, so the output is hidden in plan and run logs. The home logging addresses are in no output, name or tag.
 
