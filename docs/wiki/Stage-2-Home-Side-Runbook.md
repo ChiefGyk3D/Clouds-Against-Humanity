@@ -151,4 +151,4 @@ Rollback: remove the cloud entries from the target file and reload Prometheus, d
 - It does not describe the home SIEM repository's own changes (dashboards, journald rules, notes). Those are written only after the cloud side is applied and confirmed working.
 - It does not record your VLAN ids, addresses, host names or tenant names. Every value above is a placeholder.
 
-Next: [Roadmap](Roadmap.md), where stage 2 is tracked.
+Next: [Grafana dashboards](Grafana-Dashboards.md), the importable dashboards for what you just set up. Then the [Roadmap](Roadmap.md), where stage 2 is tracked.

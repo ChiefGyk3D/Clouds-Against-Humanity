@@ -53,6 +53,10 @@ What is **not** known or **not** done:
 - `connector_private_ips` is the access stack's `connector_private_ips` output (keys `a` and `b`). Passing a map through a Spacelift stack dependency is not verified: supply it as a JSON value in the stack environment if it does not work.
 - `cloud_remote_network_id` is not an output of stack 10 today. Copy it from the Twingate console (the remote network `access-<resource_key>`) until a later step adds the output.
 
+### 2.2 Dashboards
+
+The repository ships three importable Grafana dashboards in [`dashboards/`](../../dashboards/): a sites overview, droplet health and Wazuh agents, all with `site` and `instance` variables and data sources as variables. They are checked for shape by `tests/test_dashboards.py` and are **not** imported into a live Grafana or run against real data. What each panel shows and what is unverified: [Grafana dashboards](../wiki/Grafana-Dashboards.md).
+
 ## 3. Your manual steps (nothing here is automatic)
 
 1. **Verify the Twingate plan limits for services before enabling anything. UNVERIFIED.** The design needs one service per site per role (two per site) and the Twingate services page documents no plan limit either way. Check your plan in the Twingate console or with Twingate support, and record the date here: `Verified on:`. If the plan cannot hold the count, stop and choose between upgrading, fewer sites or a written downgrade (design section 3.4). Do not share one service between sites to get around it.

@@ -12,7 +12,7 @@ Pick the row that sounds like you. Every path is a numbered list: read in that o
 | [Build it yourself](#build-it-yourself) | A learner replicating the build in their own accounts. | 5 | about 1 h 10 min of reading |
 | [Understand the design](#understand-the-design) | An engineer who wants the design without the primers. | 12 | about 1 h 35 min of reading |
 | [Security and threat modelling](#security-and-threat-modelling) | A security-minded reader. | 5 | about 1 h 15 min of reading |
-| [Detection and monitoring](#detection-and-monitoring) | Someone asking how it would be watched, and who wants to build a small version. | 8 | about 1 h 55 min of reading |
+| [Detection and monitoring](#detection-and-monitoring) | Someone asking how it would be watched, and who wants to build a small version. | 9 | about 2 h 10 min of reading |
 | [Enterprise context](#enterprise-context) | A reader who wants to see how companies build networks, run infrastructure and handle identity, how they run changes, and what roles and skills surround that work. | 5 | about 1 h 30 min of reading |
 | [Other clouds (unverified drafts)](#other-clouds-unverified-drafts) | A multi-cloud reader (unverified drafts). | 10 | about 2 h 15 min of reading |
 | [Reference](#reference-look-things-up) | Anyone, at any point. | 7 | lookup, not read through |
@@ -104,7 +104,7 @@ The exercise page tells you to stop after step 3 and read the threat model only 
 
 ## Detection and monitoring
 
-**Who it is for.** Someone asking how a company would watch this, what the lab does and does not detect today, and how to build a small cloud version of the watching. Rows 3 to 8 are unverified drafts: written from the design, with none of stage 2 built or applied.
+**Who it is for.** Someone asking how a company would watch this, what the lab does and does not detect today, and how to build a small cloud version of the watching. Rows 3 to 9 are unverified drafts: written from the design, with none of stage 2 built or applied.
 
 **Before you start.** The Threat model (core step 19), because the detection page starts from its residual-risk column. Rows 3 to 7 also lean on Twingate (core step 12) and, for the last one, the cost gate (core step 18).
 
@@ -118,7 +118,8 @@ The exercise page tells you to stop after step 3 and read the threat model only 
 | 6 | [Reading a dashboard as an operator (unverified draft)](Reading-a-Dashboard-as-an-Operator.md) | 15 min | You can say why `absent()` cannot find a silent site and what does. |
 | 7 | [Build your own mini SOC (unverified draft)](Build-Your-Own-Mini-SOC.md) | 20 min | You can fill the cost table for your own ceiling and name what each stage teaches. |
 | 8 | [Stage 2 home-side runbook (unverified draft)](Stage-2-Home-Side-Runbook.md) | 15 min | You can say what must exist at home, with a recorded negative test, before any cloud host sends a log. |
-| 9 | [Roadmap](Roadmap.md) | 10 min | You know stage 2 is a design with the cloud side in progress, not applied. |
+| 9 | [Grafana dashboards (unverified draft)](Grafana-Dashboards.md) | 10 min | You can say which of the three dashboards answers "is a site up", "is a droplet healthy" and "did anyone log in", and which panels' field names are still UNVERIFIED. |
+| 10 | [Roadmap](Roadmap.md) | 10 min | You know stage 2 is a design with the cloud side in progress, not applied. |
 
 Nothing on these pages is deployed. The cloud hosts do not ship logs anywhere yet; the detection page says so at the top. Doing, not just reading: each telemetry page ends with a predict-then-check set; the times above are reading only.
 

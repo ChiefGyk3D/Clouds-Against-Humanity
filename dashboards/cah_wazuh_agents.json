@@ -1,0 +1,697 @@
+{
+  "uid": "cah-wazuh-agents",
+  "title": "CAH: Wazuh agents",
+  "description": "Wazuh agent status and security events for the cloud droplets: agent health, SSH, failed logins, sudo, and file integrity under /etc/twingate. OpenSearch only. Field names are marked UNVERIFIED panel by panel.",
+  "tags": [
+    "cah"
+  ],
+  "schemaVersion": 41,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "timezone": "browser",
+  "refresh": "1m",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "links": [],
+  "annotations": {
+    "list": []
+  },
+  "templating": {
+    "list": [
+      {
+        "type": "datasource",
+        "name": "DS_OPENSEARCH",
+        "label": "Wazuh alerts (OpenSearch)",
+        "query": "grafana-opensearch-datasource",
+        "current": {},
+        "hide": 0,
+        "refresh": 1,
+        "regex": "",
+        "multi": false,
+        "includeAll": false,
+        "options": []
+      },
+      {
+        "type": "datasource",
+        "name": "DS_OPENSEARCH_MONITORING",
+        "label": "Wazuh monitoring index (OpenSearch)",
+        "query": "grafana-opensearch-datasource",
+        "current": {},
+        "hide": 0,
+        "refresh": 1,
+        "regex": "",
+        "multi": false,
+        "includeAll": false,
+        "options": []
+      },
+      {
+        "type": "query",
+        "name": "site",
+        "label": "Site",
+        "datasource": {
+          "type": "grafana-opensearch-datasource",
+          "uid": "${DS_OPENSEARCH}"
+        },
+        "query": "{\"find\": \"terms\", \"field\": \"agent.labels.site\", \"size\": 100}",
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "hide": 0,
+        "options": [],
+        "regex": ""
+      },
+      {
+        "type": "query",
+        "name": "instance",
+        "label": "Instance",
+        "datasource": {
+          "type": "grafana-opensearch-datasource",
+          "uid": "${DS_OPENSEARCH}"
+        },
+        "query": "{\"find\": \"terms\", \"field\": \"agent.name\", \"size\": 100, \"query\": \"agent.labels.site:${site:lucene}\"}",
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "hide": 0,
+        "options": [],
+        "regex": ""
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Which agents are there?",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": []
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Agents reporting",
+      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; no agent configuration in this repository does yet. How many different agents produced at least one alert in the chosen time range. It counts agents that spoke, so an agent that is connected but quiet is not counted; use the status table to see connected agents.",
+      "datasource": {
+        "type": "grafana-opensearch-datasource",
+        "uid": "${DS_OPENSEARCH}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "agent.labels.site:${site:lucene} AND agent.name:${instance:lucene}",
+          "timeField": "@timestamp",
+          "bucketAggs": [],
+          "metrics": [
+            {
+              "id": "1",
+              "type": "cardinality",
+              "field": "agent.name",
+              "settings": {}
+            }
+          ],
+          "datasource": {
+            "type": "grafana-opensearch-datasource",
+            "uid": "${DS_OPENSEARCH}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {
+        "graphMode": "none",
+        "colorMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "table",
+      "title": "Agent status and last keepalive",
+      "description": "UNVERIFIED: reads a Wazuh monitoring index (documents with name, status, lastKeepAlive and group fields). Those names come from the Wazuh monitoring index of the 4.x series as remembered, not from this project's manager, and newer Wazuh releases may no longer write that index; the panel would then show no data. Needs its own data source (the Wazuh monitoring index), chosen with the DS_OPENSEARCH_MONITORING variable. Shows each agent's status (active, disconnected, never connected) and when it last checked in; a disconnected connector agent means its logs are not arriving.",
+      "datasource": {
+        "type": "grafana-opensearch-datasource",
+        "uid": "${DS_OPENSEARCH_MONITORING}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "name:${instance:lucene}",
+          "timeField": "@timestamp",
+          "metrics": [
+            {
+              "id": "1",
+              "type": "max",
+              "field": "lastKeepAlive",
+              "settings": {}
+            }
+          ],
+          "bucketAggs": [
+            {
+              "id": "2",
+              "type": "terms",
+              "field": "name",
+              "settings": {
+                "min_doc_count": "1",
+                "order": "asc",
+                "orderBy": "_term",
+                "size": "100"
+              }
+            },
+            {
+              "id": "3",
+              "type": "terms",
+              "field": "status",
+              "settings": {
+                "min_doc_count": "1",
+                "order": "desc",
+                "orderBy": "_count",
+                "size": "5"
+              }
+            }
+          ],
+          "datasource": {
+            "type": "grafana-opensearch-datasource",
+            "uid": "${DS_OPENSEARCH_MONITORING}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 18,
+        "x": 6,
+        "y": 1
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 4,
+      "type": "table",
+      "title": "Last alert seen per agent",
+      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; no agent configuration in this repository does yet. The time of the newest alert from each agent. It is a stand-in for a keepalive: an agent with no alerts for a long time is either very quiet or not sending. It cannot tell those apart, which is why the status table above exists.",
+      "datasource": {
+        "type": "grafana-opensearch-datasource",
+        "uid": "${DS_OPENSEARCH}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "agent.labels.site:${site:lucene} AND agent.name:${instance:lucene}",
+          "timeField": "@timestamp",
+          "metrics": [
+            {
+              "id": "1",
+              "type": "max",
+              "field": "@timestamp",
+              "settings": {}
+            }
+          ],
+          "bucketAggs": [
+            {
+              "id": "2",
+              "type": "terms",
+              "field": "agent.name",
+              "settings": {
+                "min_doc_count": "1",
+                "order": "asc",
+                "orderBy": "_term",
+                "size": "100"
+              }
+            }
+          ],
+          "datasource": {
+            "type": "grafana-opensearch-datasource",
+            "uid": "${DS_OPENSEARCH}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 5,
+      "type": "row",
+      "title": "Who is logging in?",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "panels": []
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "SSH events",
+      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; no agent configuration in this repository does yet. All alerts from the stock SSH rules (group sshd), per agent. Connectors are reached by SSH through Twingate only, so any burst here that you did not cause deserves a look. Whether login lines reach these rules depends on the agent reading the journal, which the design marks UNVERIFIED.",
+      "datasource": {
+        "type": "grafana-opensearch-datasource",
+        "uid": "${DS_OPENSEARCH}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "agent.labels.site:${site:lucene} AND agent.name:${instance:lucene} AND (rule.groups:sshd)",
+          "alias": "",
+          "timeField": "@timestamp",
+          "metrics": [
+            {
+              "id": "1",
+              "type": "count"
+            }
+          ],
+          "bucketAggs": [
+            {
+              "id": "2",
+              "type": "terms",
+              "field": "agent.name",
+              "settings": {
+                "min_doc_count": "0",
+                "order": "desc",
+                "orderBy": "_count",
+                "size": "10"
+              }
+            },
+            {
+              "id": "3",
+              "type": "date_histogram",
+              "field": "@timestamp",
+              "settings": {
+                "interval": "auto",
+                "min_doc_count": "0"
+              }
+            }
+          ],
+          "datasource": {
+            "type": "grafana-opensearch-datasource",
+            "uid": "${DS_OPENSEARCH}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "stacking": {
+              "mode": "normal"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Failed logins",
+      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; no agent configuration in this repository does yet. Alerts in the stock group authentication_failed (wrong password, unknown user, refused key), per agent. On a droplet with password login off and no public SSH, this should be near zero; a steady stream means something is reaching port 22.",
+      "datasource": {
+        "type": "grafana-opensearch-datasource",
+        "uid": "${DS_OPENSEARCH}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "agent.labels.site:${site:lucene} AND agent.name:${instance:lucene} AND (rule.groups:authentication_failed)",
+          "alias": "",
+          "timeField": "@timestamp",
+          "metrics": [
+            {
+              "id": "1",
+              "type": "count"
+            }
+          ],
+          "bucketAggs": [
+            {
+              "id": "2",
+              "type": "terms",
+              "field": "agent.name",
+              "settings": {
+                "min_doc_count": "0",
+                "order": "desc",
+                "orderBy": "_count",
+                "size": "10"
+              }
+            },
+            {
+              "id": "3",
+              "type": "date_histogram",
+              "field": "@timestamp",
+              "settings": {
+                "interval": "auto",
+                "min_doc_count": "0"
+              }
+            }
+          ],
+          "datasource": {
+            "type": "grafana-opensearch-datasource",
+            "uid": "${DS_OPENSEARCH}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "stacking": {
+              "mode": "normal"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Sudo events",
+      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; no agent configuration in this repository does yet. Alerts from the stock sudo rules (group sudo), per agent: someone ran a command with elevated rights. The design expects this to be rare because the one admin is the only user.",
+      "datasource": {
+        "type": "grafana-opensearch-datasource",
+        "uid": "${DS_OPENSEARCH}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "agent.labels.site:${site:lucene} AND agent.name:${instance:lucene} AND (rule.groups:sudo)",
+          "alias": "",
+          "timeField": "@timestamp",
+          "metrics": [
+            {
+              "id": "1",
+              "type": "count"
+            }
+          ],
+          "bucketAggs": [
+            {
+              "id": "2",
+              "type": "terms",
+              "field": "agent.name",
+              "settings": {
+                "min_doc_count": "0",
+                "order": "desc",
+                "orderBy": "_count",
+                "size": "10"
+              }
+            },
+            {
+              "id": "3",
+              "type": "date_histogram",
+              "field": "@timestamp",
+              "settings": {
+                "interval": "auto",
+                "min_doc_count": "0"
+              }
+            }
+          ],
+          "datasource": {
+            "type": "grafana-opensearch-datasource",
+            "uid": "${DS_OPENSEARCH}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 26
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "stacking": {
+              "mode": "normal"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 9,
+      "type": "table",
+      "title": "Recent login and sudo alerts",
+      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; no agent configuration in this repository does yet. The newest individual alerts from the SSH, failed-login and sudo groups: time, agent, rule level and the rule's description. Read the description first; the full log line is in the alert itself and may carry user names or addresses, so do not paste it anywhere public.",
+      "datasource": {
+        "type": "grafana-opensearch-datasource",
+        "uid": "${DS_OPENSEARCH}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "agent.labels.site:${site:lucene} AND agent.name:${instance:lucene} AND (rule.groups:sshd OR rule.groups:sudo OR rule.groups:authentication_failed)",
+          "timeField": "@timestamp",
+          "metrics": [
+            {
+              "id": "1",
+              "type": "raw_data",
+              "settings": {
+                "size": "50"
+              }
+            }
+          ],
+          "bucketAggs": [],
+          "datasource": {
+            "type": "grafana-opensearch-datasource",
+            "uid": "${DS_OPENSEARCH}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 26
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {},
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "includeByName": {
+              "@timestamp": true,
+              "agent.name": true,
+              "rule.level": true,
+              "rule.description": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "row",
+      "title": "Files that should not change",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 34
+      },
+      "panels": []
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "File integrity events under /etc/twingate",
+      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; no agent configuration in this repository does yet. Alerts from Wazuh file integrity monitoring (group syscheck) for paths under /etc/twingate, where the connector keeps its configuration and tokens, per agent. A change here that you did not make is the clearest sign a connector was tampered with. Which directories are watched is set in the agent configuration, and the design lists /etc/twingate as one; that configuration is not built yet.",
+      "datasource": {
+        "type": "grafana-opensearch-datasource",
+        "uid": "${DS_OPENSEARCH}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "agent.labels.site:${site:lucene} AND agent.name:${instance:lucene} AND (rule.groups:syscheck AND syscheck.path:\\/etc\\/twingate\\/*)",
+          "alias": "",
+          "timeField": "@timestamp",
+          "metrics": [
+            {
+              "id": "1",
+              "type": "count"
+            }
+          ],
+          "bucketAggs": [
+            {
+              "id": "2",
+              "type": "terms",
+              "field": "agent.name",
+              "settings": {
+                "min_doc_count": "0",
+                "order": "desc",
+                "orderBy": "_count",
+                "size": "10"
+              }
+            },
+            {
+              "id": "3",
+              "type": "date_histogram",
+              "field": "@timestamp",
+              "settings": {
+                "interval": "auto",
+                "min_doc_count": "0"
+              }
+            }
+          ],
+          "datasource": {
+            "type": "grafana-opensearch-datasource",
+            "uid": "${DS_OPENSEARCH}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 35
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "stacking": {
+              "mode": "normal"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 12,
+      "type": "table",
+      "title": "Recent file integrity events",
+      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; no agent configuration in this repository does yet. The newest individual file integrity alerts for /etc/twingate: time, agent, event (added, modified, deleted) and path. The path and event fields are the ones the Wazuh syscheck module writes into alerts.",
+      "datasource": {
+        "type": "grafana-opensearch-datasource",
+        "uid": "${DS_OPENSEARCH}"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "query": "agent.labels.site:${site:lucene} AND agent.name:${instance:lucene} AND (rule.groups:syscheck AND syscheck.path:\\/etc\\/twingate\\/*)",
+          "timeField": "@timestamp",
+          "metrics": [
+            {
+              "id": "1",
+              "type": "raw_data",
+              "settings": {
+                "size": "50"
+              }
+            }
+          ],
+          "bucketAggs": [],
+          "datasource": {
+            "type": "grafana-opensearch-datasource",
+            "uid": "${DS_OPENSEARCH}"
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 35
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {},
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "includeByName": {
+              "@timestamp": true,
+              "agent.name": true,
+              "syscheck.event": true,
+              "syscheck.path": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
