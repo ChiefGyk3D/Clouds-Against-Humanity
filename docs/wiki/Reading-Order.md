@@ -103,7 +103,7 @@ The exercise page tells you to stop after step 3 and read the threat model only 
 
 ## Detection and monitoring
 
-**Who it is for.** Someone asking how a company would watch this, what the lab does and does not detect today, and how to build a small cloud version of the watching. Rows 3 to 7 are unverified drafts: written from the design, with none of stage 2 built or applied.
+**Who it is for.** Someone asking how a company would watch this, what the lab does and does not detect today, and how to build a small cloud version of the watching. Rows 3 to 8 are unverified drafts: written from the design, with none of stage 2 built or applied.
 
 **Before you start.** The Threat model (core step 19), because the detection page starts from its residual-risk column. Rows 3 to 7 also lean on Twingate (core step 12) and, for the last one, the cost gate (core step 18).
 
@@ -116,7 +116,8 @@ The exercise page tells you to stop after step 3 and read the threat model only 
 | 5 | [Telemetry crosses the trust boundary (unverified draft)](Telemetry-Crosses-the-Trust-Boundary.md) | 15 min | You can explain why a one-port resource is not read-only and where the secrets still live. |
 | 6 | [Reading a dashboard as an operator (unverified draft)](Reading-a-Dashboard-as-an-Operator.md) | 15 min | You can say why `absent()` cannot find a silent site and what does. |
 | 7 | [Build your own mini SOC (unverified draft)](Build-Your-Own-Mini-SOC.md) | 20 min | You can fill the cost table for your own ceiling and name what each stage teaches. |
-| 8 | [Roadmap](Roadmap.md) | 10 min | You know stage 2 is planned, not built. |
+| 8 | [Stage 2 home-side runbook (unverified draft)](Stage-2-Home-Side-Runbook.md) | 15 min | You can say what must exist at home, with a recorded negative test, before any cloud host sends a log. |
+| 9 | [Roadmap](Roadmap.md) | 10 min | You know stage 2 is a design with the cloud side in progress, not applied. |
 
 Nothing on these pages is deployed. The cloud hosts do not ship logs anywhere yet; the detection page says so at the top. Doing, not just reading: each telemetry page ends with a predict-then-check set; the times above are reading only.
 
