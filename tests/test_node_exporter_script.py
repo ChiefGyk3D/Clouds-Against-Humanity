@@ -1,11 +1,11 @@
-"""Hermetic tests for the node-exporter bind script in the connector cloud-init.
+"""Hermetic tests for the node-exporter wrapper in the connector cloud-init.
 
 The script is extracted from modules/twingate-bootstrap/cloud-init.yaml.tftpl
 (same extraction as the host-firewall tests) and run with a fake `ip` on a PATH
 that holds nothing but that fake and awk, inside a temporary directory. The
-output file the script writes under /run is redirected into the temporary
-directory. Nothing here touches this machine's network, services or /run.
-Documentation and private ranges only.
+exporter binary it `exec`s is replaced by a fake that records its arguments.
+Nothing here touches this machine's network or services. Documentation and
+private ranges only.
 """
 
 import re
@@ -18,9 +18,9 @@ from test_host_firewall_script import TEMPLATE, extract_file
 
 BASH = shutil.which("bash")
 AWK = shutil.which("awk")
-SCRIPT_PATH = "/usr/local/sbin/cah-node-exporter-bind"
+SCRIPT_PATH = "/usr/local/sbin/cah-node-exporter-run"
+EXPORTER = "/usr/bin/prometheus-node-exporter"
 DROPIN_PATH = "/etc/systemd/system/prometheus-node-exporter.service.d/10-cah-private-bind.conf"
-ENV_FILE = "/run/cah-node-exporter.env"
 
 pytestmark = pytest.mark.skipif(BASH is None or AWK is None, reason="bash and awk are required")
 
@@ -51,11 +51,14 @@ def run_script(tmp: Path, ip_out: str, port: str = "9100"):
     )
     fake_ip.chmod(0o755)
     (bindir / "awk").symlink_to(AWK)
-    env_file = tmp / "node-exporter.env"
-    script = tmp / "bind.sh"
+    args_file = tmp / "exporter.args"
+    fake_exporter = tmp / "fake-exporter"
+    fake_exporter.write_text(f'#!{BASH}\nprintf \'%s\\n\' "$@" > "{args_file}"\n')
+    fake_exporter.chmod(0o755)
+    script = tmp / "run.sh"
     text = extract(port)
-    assert ENV_FILE in text
-    script.write_text(text.replace(ENV_FILE, str(env_file)))
+    assert EXPORTER in text
+    script.write_text(text.replace(EXPORTER, str(fake_exporter)))
     proc = subprocess.run(
         [BASH, str(script)],
         env={"PATH": str(bindir), "HOME": str(tmp)},
@@ -64,7 +67,7 @@ def run_script(tmp: Path, ip_out: str, port: str = "9100"):
         timeout=30,
         check=False,
     )
-    return proc, (env_file.read_text() if env_file.exists() else None)
+    return proc, (args_file.read_text() if args_file.exists() else None)
 
 
 def test_extraction_finds_the_script():
@@ -72,28 +75,27 @@ def test_extraction_finds_the_script():
 
 
 def test_picks_the_private_address_not_the_public_one(tmp_path):
-    proc, env = run_script(tmp_path, DO_LIKE)
+    proc, args = run_script(tmp_path, DO_LIKE)
     assert proc.returncode == 0, proc.stderr
-    assert env == "CAH_NODE_EXPORTER_ADDR=10.118.0.2:9100\n"
+    assert args == "--web.listen-address=10.118.0.2:9100\n"
 
 
 def test_uses_the_configured_port(tmp_path):
-    proc, env = run_script(tmp_path, DO_LIKE, port="9200")
+    proc, args = run_script(tmp_path, DO_LIKE, port="9200")
     assert proc.returncode == 0, proc.stderr
-    assert env == "CAH_NODE_EXPORTER_ADDR=10.118.0.2:9200\n"
+    assert args == "--web.listen-address=10.118.0.2:9200\n"
 
 
 @pytest.mark.parametrize("addr", ["10.0.0.5", "172.16.0.5", "172.31.255.1", "192.168.1.1"])
 def test_every_rfc1918_block_is_accepted(tmp_path, addr):
     line = f"2: eth0    inet {addr}/24 brd 0.0.0.0 scope global eth0\n"
-    proc, env = run_script(tmp_path, line)
+    proc, args = run_script(tmp_path, line)
     assert proc.returncode == 0, proc.stderr
-    assert env == f"CAH_NODE_EXPORTER_ADDR={addr}:9100\n"
+    assert args == f"--web.listen-address={addr}:9100\n"
 
 
 # Negative cases: the guard bites. With no private address the script fails and
-# writes nothing, so the unit (ExecStartPre) refuses to start the exporter and
-# there is no wildcard fallback.
+# never execs the exporter, so the unit fails and there is no wildcard fallback.
 @pytest.mark.parametrize(
     "ip_out",
     [
@@ -106,27 +108,28 @@ def test_every_rfc1918_block_is_accepted(tmp_path, addr):
     ids=["public-only", "no-address", "172.32", "172.15", "cgnat"],
 )
 def test_no_private_address_fails_closed(tmp_path, ip_out):
-    proc, env = run_script(tmp_path, ip_out)
+    proc, args = run_script(tmp_path, ip_out)
     assert proc.returncode != 0
-    assert env is None
+    assert args is None
     assert "refusing to start" in proc.stderr
 
 
 def test_the_script_never_writes_a_wildcard_address():
     text = extract()
     assert "0.0.0.0" not in text
-    assert not re.search(r"ADDR=:", text)
+    assert not re.search(r"listen-address=:", text)
+    assert "exec " + EXPORTER in text
 
 
-def test_dropin_replaces_exec_start_and_runs_the_script_first():
+def test_dropin_replaces_exec_start_with_the_wrapper_and_nothing_order_dependent():
     text = extract_file(TEMPLATE.read_text(encoding="utf-8"), DROPIN_PATH)
     lines = text.splitlines()
-    assert "ExecStartPre=+/usr/local/sbin/cah-node-exporter-bind" in lines
     # An empty ExecStart= clears the package's own command line before ours.
     first = lines.index("ExecStart=")
-    assert lines[first + 1].startswith("ExecStart=/usr/bin/prometheus-node-exporter ")
-    assert "--web.listen-address=${CAH_NODE_EXPORTER_ADDR}" in lines[first + 1]
-    assert "EnvironmentFile=-/run/cah-node-exporter.env" in lines
+    assert lines[first + 1] == "ExecStart=/usr/local/sbin/cah-node-exporter-run"
+    # systemd reads EnvironmentFile= before ExecStartPre= runs, so neither may
+    # carry the address.
+    assert "EnvironmentFile" not in text and "ExecStartPre" not in text
 
 
 def test_extraction_negative_case_missing_path_is_an_error():
@@ -143,6 +146,8 @@ def test_template_gates_every_node_exporter_piece_on_the_flag():
         SCRIPT_PATH,
         "prometheus-node-exporter.service.d",
         "systemctl restart prometheus-node-exporter",
+        "node_exporter_rule",
+        "host_firewall_node_exporter",
     )
     for needle in needles:
         found = list(re.finditer(re.escape(needle), text))

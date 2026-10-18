@@ -212,6 +212,7 @@ def test_template_gates_the_lock_on_metadata_lock():
     assert len(re.findall(r"%\{ if metadata_lock ~\}", text)) == 2
     assert len(re.findall(r"%\{ if metadata_lock \|\| host_firewall ~\}", text)) == 1
     # Two more endifs close the host_firewall blocks (script/unit and runcmd).
-    # Three more close the node_exporter blocks (package, files and runcmd).
-    assert len(re.findall(r"%\{ endif ~\}", text)) == 8
-    assert len(re.findall(r"%\{ if node_exporter ~\}", text)) == 3
+    # Five more close the node_exporter blocks (package, files, runcmd, and the
+    # two lines inside the host firewall script).
+    assert len(re.findall(r"%\{ endif ~\}", text)) == 10
+    assert len(re.findall(r"%\{ if node_exporter ~\}", text)) == 5
