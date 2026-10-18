@@ -41,6 +41,7 @@
 <details>
 <summary><b>Track: understand the design</b></summary>
 
+- [Why I picked these tools](Why-I-Picked-These-Tools.md)
 - [Terraform reference](Terraform-Reference.md)
 - [Trace one change end to end](Trace-One-Change-End-to-End.md)
 
