@@ -93,6 +93,16 @@ variable "metadata_lock" {
   description = "Lock the metadata endpoint (169.254.169.254) to root and the do-agent user, passed to the bootstrap module, which explains it. The default (false) changes nothing. true changes user_data and replaces the droplet."
 }
 
+variable "node_exporter" {
+  type = object({
+    enabled = optional(bool, false)
+    port    = optional(number, 9100)
+  })
+  default     = {}
+  nullable    = false
+  description = "Opt-in node exporter bound to the private address, passed to the bootstrap module, which validates it and explains it. The default ({}) changes nothing. enabled = true changes user_data and replaces the droplet."
+}
+
 variable "host_firewall" {
   type        = bool
   default     = false

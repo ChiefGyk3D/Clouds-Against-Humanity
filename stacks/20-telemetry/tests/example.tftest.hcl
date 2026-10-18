@@ -47,11 +47,14 @@ variables {
   # Required when metrics_enabled.
   cloud_remote_network_id = "example-cloud-remote-network-id"
 
-  # TCP port of the node exporter on each connector.
+  # TCP port of the node exporter on each connector. Keep it equal to
+  # node_exporter.port in the access stack (stack 10), which installs the exporter.
   node_exporter_port = 9100
 
-  # TCP port of the connector's own metrics endpoint. Illustrative only: the real
-  # bind port is unverified and has no default. Test it on one connector first.
+  # TCP port of the connector's own metrics endpoint. Keep it equal to
+  # connector_telemetry.metrics_port in the access stack, and never 9100. Illustrative
+  # only: the connector's metrics bind address is unverified and the port has no
+  # default. Test it on one connector first.
   metrics_port_connector = 9101
 
   # Which connector endpoints become Twingate resources for scraping. Each port must

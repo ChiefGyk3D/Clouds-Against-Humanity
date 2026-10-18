@@ -25,5 +25,14 @@ output "user_data" {
     host_firewall              = var.host_firewall
     host_firewall_ssh_sources  = join(", ", var.host_firewall_ssh_sources)
     host_firewall_metrics_port = var.connector_telemetry.metrics_port == null ? "" : tostring(var.connector_telemetry.metrics_port)
+
+    node_exporter               = var.node_exporter.enabled
+    node_exporter_port          = var.node_exporter.port
+    host_firewall_node_exporter = var.node_exporter.enabled ? tostring(var.node_exporter.port) : ""
   })
+
+  precondition {
+    condition     = !var.node_exporter.enabled || var.connector_telemetry.metrics_port != var.node_exporter.port
+    error_message = "node_exporter.port must differ from connector_telemetry.metrics_port (two listeners cannot share a port)."
+  }
 }

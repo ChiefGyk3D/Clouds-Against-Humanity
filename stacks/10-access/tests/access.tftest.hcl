@@ -780,14 +780,21 @@ run "connector_telemetry_enabled_plans_without_renaming_anything" {
   }
 }
 
-run "enabling_telemetry_opens_no_firewall_port" {
+run "enabling_telemetry_alone_opens_no_firewall_port" {
   command = plan
   variables {
     connector_telemetry = { metrics_port = 9999 }
   }
+  # Issue #99 added an opt-in, tag-sourced metrics rule (metrics_source_tag). It
+  # is empty unless that tag is set, so telemetry alone still opens nothing, and
+  # no port number is hard-coded in the stack.
   assert {
-    condition     = !strcontains(file("${path.module}/main.tf"), "9999") && length(regexall("port_range\\s*=", file("${path.module}/main.tf"))) == 4
-    error_message = "This stack must not add a firewall rule for the metrics port; that is a separate change."
+    condition     = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(["tcp/22/cah-connector-tor1"]) && module.connector_firewall.inbound_rule_count == 1
+    error_message = "Without metrics_source_tag the metrics port must stay closed: the only inbound rule is tcp 22 from the connector tag."
+  }
+  assert {
+    condition     = !strcontains(file("${path.module}/main.tf"), "9999") && !strcontains(file("${path.module}/main.tf"), "9100")
+    error_message = "No metrics port number may be hard-coded in this stack."
   }
 }
 
@@ -1113,4 +1120,207 @@ run "host_firewall_sources_accept_host_bits_overlaps_and_the_extremes" {
   variables {
     host_firewall_ssh_sources = ["10.0.0.1/8", "10.1.0.0/16", "192.0.2.7/32", "128.0.0.0/1"]
   }
+}
+
+# Metrics ports on the connector firewall (issue #99, stage 2 step 5). With the
+# new inputs at their defaults nothing changes; with a telemetry tag AND a metrics
+# source switched on, the connector firewall admits those ports from that one tag
+# and from nothing else. Nothing here was applied or tested on a real machine.
+run "metrics_firewall_defaults_change_nothing" {
+  command = plan
+  assert {
+    condition     = var.metrics_source_tag == "" && var.node_exporter.enabled == false && jsonencode(var.node_exporter_instances) == jsonencode(["a", "b"])
+    error_message = "metrics_source_tag, node_exporter and node_exporter_instances must default to off, off and both."
+  }
+  assert {
+    condition     = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(["tcp/22/cah-connector-tor1"])
+    error_message = "With the defaults the only inbound rule is the existing tcp 22 from the connector tag."
+  }
+}
+
+run "metrics_ports_are_admitted_from_the_telemetry_tag_only" {
+  command = plan
+  variables {
+    metrics_source_tag  = "cah-telemetry-tor1"
+    node_exporter       = { enabled = true, port = 9100 }
+    connector_telemetry = { metrics_port = 9999 }
+  }
+  assert {
+    condition = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(sort([
+      "tcp/22/cah-connector-tor1",
+      "tcp/9100/cah-telemetry-tor1",
+      "tcp/9999/cah-telemetry-tor1",
+    ]))
+    error_message = "The inbound rules must be exactly tcp 22 from the connector tag and the two metrics ports from the telemetry tag."
+  }
+  assert {
+    condition     = module.connector_firewall.inbound_rule_count == 3
+    error_message = "Exactly three inbound rules."
+  }
+  # Every inbound descriptor is "<protocol>/<port>/<source tags>": a rule with an
+  # address source and no tag would render with an empty tag list ("tcp/80/") or
+  # fail to evaluate, and the equality above would not hold. The static scan in
+  # tests/test_metrics_firewall.py also proves no inbound_rule can name an address.
+  assert {
+    condition     = alltrue([for d in module.connector_firewall.inbound_rules : can(regex("^tcp/[0-9]+/[A-Za-z0-9:_-]+$", d))])
+    error_message = "Every inbound rule must name a source tag, never an address."
+  }
+  assert {
+    condition     = jsonencode(module.connector_firewall.source_members) == jsonencode(["cah-connector-tor1", "cah-telemetry-tor1"])
+    error_message = "Inbound sources must be the connector tag and the telemetry tag, nothing else."
+  }
+}
+
+run "node_exporter_alone_opens_only_its_port" {
+  command = plan
+  variables {
+    metrics_source_tag = "cah-telemetry-tor1"
+    node_exporter      = { enabled = true, port = 9200 }
+  }
+  assert {
+    condition     = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(sort(["tcp/22/cah-connector-tor1", "tcp/9200/cah-telemetry-tor1"]))
+    error_message = "Only the node exporter port may be added."
+  }
+}
+
+run "connector_metrics_port_alone_opens_only_that_port" {
+  command = plan
+  variables {
+    metrics_source_tag  = "cah-telemetry-tor1"
+    connector_telemetry = { metrics_port = 9999 }
+  }
+  assert {
+    condition     = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(sort(["tcp/22/cah-connector-tor1", "tcp/9999/cah-telemetry-tor1"]))
+    error_message = "Only the connector metrics port may be added."
+  }
+}
+
+run "previous_metrics_port_stays_open_during_a_rollout" {
+  command = plan
+  variables {
+    metrics_source_tag            = "cah-telemetry-tor1"
+    connector_telemetry           = { metrics_port = 9999 }
+    connector_telemetry_previous  = { metrics_port = 8888 }
+    connector_telemetry_instances = ["a"]
+  }
+  assert {
+    condition     = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(sort(["tcp/22/cah-connector-tor1", "tcp/8888/cah-telemetry-tor1", "tcp/9999/cah-telemetry-tor1"]))
+    error_message = "While connector b still runs the previous port, both ports must stay admitted."
+  }
+}
+
+run "the_same_port_in_both_places_makes_one_rule" {
+  command = plan
+  variables {
+    metrics_source_tag           = "cah-telemetry-tor1"
+    connector_telemetry          = { metrics_port = 9999 }
+    connector_telemetry_previous = { metrics_port = 9999 }
+  }
+  assert {
+    condition     = module.connector_firewall.inbound_rule_count == 2
+    error_message = "A repeated port must not produce a duplicate rule."
+  }
+}
+
+run "no_telemetry_tag_means_no_metrics_rule_even_when_metrics_are_on" {
+  command = plan
+  variables {
+    node_exporter       = { enabled = true }
+    connector_telemetry = { metrics_port = 9999 }
+  }
+  assert {
+    condition     = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(["tcp/22/cah-connector-tor1"])
+    error_message = "Without metrics_source_tag no metrics port may be opened (there is no public or address-sourced fallback)."
+  }
+}
+
+run "a_telemetry_tag_alone_opens_nothing" {
+  command = plan
+  variables {
+    metrics_source_tag = "cah-telemetry-tor1"
+  }
+  assert {
+    condition     = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(["tcp/22/cah-connector-tor1"])
+    error_message = "A tag with no metrics source on must open nothing."
+  }
+}
+
+run "metrics_source_tag_rejects_an_address" {
+  command = plan
+  variables {
+    metrics_source_tag = "192.0.2.10"
+  }
+  expect_failures = [var.metrics_source_tag]
+}
+
+run "metrics_source_tag_rejects_a_cidr" {
+  command = plan
+  variables {
+    metrics_source_tag = "0.0.0.0/0"
+  }
+  expect_failures = [var.metrics_source_tag]
+}
+
+run "metrics_source_tag_rejects_a_space" {
+  command = plan
+  variables {
+    metrics_source_tag = "cah telemetry"
+  }
+  expect_failures = [var.metrics_source_tag]
+}
+
+run "node_exporter_is_wired_to_both_connectors_gated_on_its_instances" {
+  command = plan
+  assert {
+    condition     = length(regexall("node_exporter\\s*=\\s*\\{[^}]*enabled\\s*=\\s*var\\.node_exporter\\.enabled && contains\\(var\\.node_exporter_instances", file("${path.module}/main.tf"))) == 2
+    error_message = "Both connectors must receive node_exporter gated on node_exporter_instances."
+  }
+  assert {
+    condition     = length(regexall("contains\\(var\\.node_exporter_instances, \"a\"\\)", file("${path.module}/main.tf"))) == 1 && length(regexall("contains\\(var\\.node_exporter_instances, \"b\"\\)", file("${path.module}/main.tf"))) == 1
+    error_message = "Connector a must be gated on \"a\" and connector b on \"b\" in node_exporter_instances."
+  }
+}
+
+run "node_exporter_on_plans_and_rolls_out_to_one_connector" {
+  command = plan
+  variables {
+    node_exporter           = { enabled = true }
+    node_exporter_instances = ["a"]
+  }
+  assert {
+    condition     = module.connector_a.size != "" && module.connector_b.size != ""
+    error_message = "Rolling the node exporter out to one connector must plan."
+  }
+}
+
+run "node_exporter_instances_rejects_an_empty_list" {
+  command = plan
+  variables {
+    node_exporter_instances = []
+  }
+  expect_failures = [var.node_exporter_instances]
+}
+
+run "node_exporter_instances_rejects_c" {
+  command = plan
+  variables {
+    node_exporter_instances = ["c"]
+  }
+  expect_failures = [var.node_exporter_instances]
+}
+
+run "node_exporter_instances_rejects_a_repeat" {
+  command = plan
+  variables {
+    node_exporter_instances = ["a", "a"]
+  }
+  expect_failures = [var.node_exporter_instances]
+}
+
+run "node_exporter_port_rejects_a_privileged_port" {
+  command = plan
+  variables {
+    node_exporter = { enabled = true, port = 22 }
+  }
+  expect_failures = [var.node_exporter]
 }

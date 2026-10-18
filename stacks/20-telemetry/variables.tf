@@ -107,7 +107,7 @@ variable "cloud_remote_network_id" {
 variable "node_exporter_port" {
   type        = number
   default     = 9100
-  description = "TCP port the node exporter listens on, on each connector. 1024 to 65535."
+  description = "TCP port the node exporter listens on, on each connector. 1024 to 65535. Must equal node_exporter.port in the access stack (stack 10), which installs the exporter (opt-in, off by default) and opens this port from metrics_source_tag; the stacks are separate, so keep the values in step by hand."
 
   validation {
     condition     = var.node_exporter_port >= 1024 && var.node_exporter_port <= 65535 && var.node_exporter_port == floor(var.node_exporter_port)
@@ -118,7 +118,7 @@ variable "node_exporter_port" {
 variable "metrics_port_connector" {
   type        = number
   default     = null
-  description = "TCP port of the Twingate connector's own metrics endpoint. No default: the bind port and address are UNVERIFIED and must be tested on one connector first. Required when metrics_enabled; 1024 to 65535 and different from node_exporter_port."
+  description = "TCP port of the Twingate connector's own metrics endpoint. Must equal connector_telemetry.metrics_port in the access stack (stack 10), which is what makes the connector listen and what the connector firewall admits from metrics_source_tag; the two stacks are separate, so keep the values in step by hand. No default: the connector's metrics bind address is UNVERIFIED and must be tested on one connector first. Required when metrics_enabled; 1024 to 65535, different from node_exporter_port and never 9100 (kept for the node exporter, as in the access stack)."
 
   validation {
     condition     = var.metrics_port_connector == null || try(var.metrics_port_connector >= 1024 && var.metrics_port_connector <= 65535 && var.metrics_port_connector == floor(var.metrics_port_connector), false)

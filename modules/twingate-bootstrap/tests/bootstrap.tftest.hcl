@@ -1563,3 +1563,298 @@ run "host_firewall_sources_accept_host_bits_overlaps_and_the_extremes" {
     host_firewall_ssh_sources = ["10.0.0.1/8", "10.1.0.0/16", "192.0.2.7/32", "128.0.0.0/1"]
   }
 }
+
+# node_exporter (stage 2 step 5, issue #99): opt-in host metrics. Off by default,
+# and off adds nothing at all, so user_data is byte-identical to the live machine.
+# Enabling it changes user_data and therefore replaces the droplet. Nothing here
+# was applied or tested on a real machine.
+run "node_exporter_default_is_the_golden_user_data_a" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time   = "04:00"
+    node_exporter = { enabled = false, port = 9100 }
+  }
+  assert {
+    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    error_message = "node_exporter disabled must render the golden user_data of connector a."
+  }
+}
+
+run "node_exporter_default_is_the_golden_user_data_b" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    instance      = "b"
+    reboot_time   = "05:00"
+    node_exporter = {}
+  }
+  assert {
+    condition     = sha256(output.user_data) == "de2de6286f955100f199779f2b8a4d0a194b72f28619965c80f858061742790b"
+    error_message = "An empty node_exporter must render the golden user_data of connector b."
+  }
+}
+
+run "node_exporter_port_alone_does_not_enable_it" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time   = "04:00"
+    node_exporter = { port = 9200 }
+  }
+  assert {
+    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    error_message = "Setting only the port must not change user_data."
+  }
+}
+
+run "node_exporter_null_object_means_off_not_a_crash" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time   = "04:00"
+    node_exporter = null
+  }
+  assert {
+    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    error_message = "A null node_exporter must behave as {} and render the golden user_data."
+  }
+}
+
+run "node_exporter_default_adds_nothing_by_name" {
+  command = plan
+  assert {
+    condition     = !strcontains(output.user_data, "node-exporter") && !strcontains(output.user_data, "node_exporter") && !strcontains(output.user_data, "web.listen-address")
+    error_message = "With node_exporter off no package, script, unit drop-in or listen address may appear in user_data."
+  }
+}
+
+run "node_exporter_on_installs_the_archive_package_once" {
+  command = plan
+  variables {
+    node_exporter = { enabled = true }
+  }
+  assert {
+    condition     = length([for p in yamldecode(output.user_data).packages : p if p == "prometheus-node-exporter"]) == 1
+    error_message = "prometheus-node-exporter must be installed from the distro archive, exactly once."
+  }
+  assert {
+    condition     = contains(yamldecode(output.user_data).packages, "chrony") && contains(yamldecode(output.user_data).packages, "unattended-upgrades")
+    error_message = "The existing packages must stay."
+  }
+}
+
+run "node_exporter_on_binds_to_the_private_address_only" {
+  command = plan
+  variables {
+    node_exporter = { enabled = true }
+  }
+  assert {
+    condition     = strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/usr/local/sbin/cah-node-exporter-run"]), "exec /usr/bin/prometheus-node-exporter \"--web.listen-address=$addr:$port\"")
+    error_message = "The wrapper must exec the exporter with --web.listen-address set to the private address it found."
+  }
+  assert {
+    condition     = strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/etc/systemd/system/prometheus-node-exporter.service.d/10-cah-private-bind.conf"]), "ExecStart=\nExecStart=/usr/local/sbin/cah-node-exporter-run")
+    error_message = "The drop-in must clear the package's ExecStart and run the wrapper, which picks the address at every start."
+  }
+  assert {
+    condition     = !strcontains(output.user_data, "EnvironmentFile") && !strcontains(output.user_data, "ExecStartPre") && !strcontains(output.user_data, "cah-node-exporter.env")
+    error_message = "No start-order-dependent mechanism (EnvironmentFile, ExecStartPre, a /run file) may be used."
+  }
+  assert {
+    condition     = !strcontains(output.user_data, "0.0.0.0:9100") && !strcontains(output.user_data, "--web.listen-address=:") && !strcontains(output.user_data, "--web.listen-address=0.0.0.0")
+    error_message = "No wildcard listen address may be rendered."
+  }
+  assert {
+    condition     = one([for f in yamldecode(output.user_data).write_files : f.permissions if f.path == "/usr/local/sbin/cah-node-exporter-run"]) == "0755" && one([for f in yamldecode(output.user_data).write_files : f.owner if f.path == "/usr/local/sbin/cah-node-exporter-run"]) == "root:root"
+    error_message = "The wrapper must be root-owned and 0755 (the exporter unit runs it as its own user)."
+  }
+}
+
+run "node_exporter_port_is_rendered_into_the_bind_script" {
+  command = plan
+  variables {
+    node_exporter = { enabled = true, port = 9200 }
+  }
+  assert {
+    condition     = strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/usr/local/sbin/cah-node-exporter-run"]), "port=\"9200\"")
+    error_message = "The configured port must reach the bind script."
+  }
+}
+
+run "node_exporter_default_port_is_9100" {
+  command = plan
+  variables {
+    node_exporter = { enabled = true }
+  }
+  assert {
+    condition     = strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/usr/local/sbin/cah-node-exporter-run"]), "port=\"9100\"")
+    error_message = "The default port must be 9100."
+  }
+}
+
+run "node_exporter_on_keeps_the_rest_of_the_cloud_init" {
+  command = plan
+  variables {
+    node_exporter = { enabled = true }
+  }
+  assert {
+    condition     = alltrue([for p in ["/etc/twingate/connector.conf", "/etc/ssh/sshd_config.d/99-cah-hardening.conf", "/etc/sysctl.d/99-cah-hardening.conf", "/etc/cron.d/twingate-connector-update"] : contains([for f in yamldecode(output.user_data).write_files : f.path], p)])
+    error_message = "Enabling the node exporter must not drop any existing file."
+  }
+}
+
+run "node_exporter_restart_is_in_runcmd_once" {
+  command = plan
+  variables {
+    node_exporter = { enabled = true }
+  }
+  assert {
+    condition     = length([for c in yamldecode(output.user_data).runcmd : c if strcontains(jsonencode(c), "prometheus-node-exporter")]) == 1
+    error_message = "runcmd must restart the exporter once, after the drop-in exists."
+  }
+}
+
+run "node_exporter_port_rejects_a_privileged_port" {
+  command = plan
+  variables {
+    node_exporter = { enabled = true, port = 1023 }
+  }
+  expect_failures = [var.node_exporter]
+}
+
+run "node_exporter_port_rejects_65536" {
+  command = plan
+  variables {
+    node_exporter = { enabled = true, port = 65536 }
+  }
+  expect_failures = [var.node_exporter]
+}
+
+run "node_exporter_port_rejects_a_fraction" {
+  command = plan
+  variables {
+    node_exporter = { enabled = true, port = 9100.5 }
+  }
+  expect_failures = [var.node_exporter]
+}
+
+run "node_exporter_port_is_checked_even_while_disabled" {
+  command = plan
+  variables {
+    node_exporter = { enabled = false, port = 22 }
+  }
+  expect_failures = [var.node_exporter]
+}
+
+run "node_exporter_port_must_differ_from_the_connector_metrics_port" {
+  command = plan
+  variables {
+    node_exporter       = { enabled = true, port = 9999 }
+    connector_telemetry = { metrics_port = 9999 }
+  }
+  expect_failures = [output.user_data]
+}
+
+run "node_exporter_and_connector_metrics_on_different_ports_plan" {
+  command = plan
+  variables {
+    node_exporter       = { enabled = true, port = 9100 }
+    connector_telemetry = { metrics_port = 9999 }
+  }
+  assert {
+    condition     = strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/etc/twingate/connector.conf"]), "TWINGATE_METRICS_PORT=9999")
+    error_message = "Both metrics sources must render together."
+  }
+}
+
+run "node_exporter_with_host_firewall_tells_the_firewall_its_port" {
+  command = plan
+  variables {
+    node_exporter = { enabled = true, port = 9200 }
+    host_firewall = true
+  }
+  assert {
+    condition     = strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/usr/local/sbin/cah-host-firewall"]), "node_exporter_port=\"9200\"")
+    error_message = "The host firewall must be told the node exporter port."
+  }
+}
+
+# Existing host_firewall users must not see user_data change when the node
+# exporter is off. These hashes were taken from origin/main (before the node
+# exporter existed) with host_firewall = true.
+run "host_firewall_without_node_exporter_renders_nothing_about_it" {
+  command = plan
+  variables {
+    host_firewall = true
+  }
+  assert {
+    condition     = !strcontains(output.user_data, "node_exporter") && !strcontains(output.user_data, "node-exporter")
+    error_message = "With the node exporter off the host firewall script must not mention it."
+  }
+}
+
+run "host_firewall_true_exporter_off_is_the_main_user_data_a" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time   = "04:00"
+    host_firewall = true
+  }
+  assert {
+    condition     = sha256(output.user_data) == "2cbd81c5de0b470fb9e75d6e926c987492a9f2c6823c8ebe01fa8316d6a34a07"
+    error_message = "host_firewall = true with the node exporter off must render exactly what origin/main rendered."
+  }
+}
+
+run "host_firewall_true_exporter_off_with_metrics_port_is_the_main_user_data_b" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    instance            = "b"
+    reboot_time         = "05:00"
+    host_firewall       = true
+    connector_telemetry = { metrics_port = 9999 }
+    node_exporter       = { enabled = false }
+  }
+  assert {
+    condition     = sha256(output.user_data) == "fb047dee8fbaf79aa36b8b223e13ba03d963c42bd40fe5123e194d525a1e13b9"
+    error_message = "host_firewall = true with a metrics port and the node exporter off must render exactly what origin/main rendered."
+  }
+}

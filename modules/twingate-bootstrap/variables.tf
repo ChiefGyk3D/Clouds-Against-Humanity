@@ -144,3 +144,18 @@ variable "host_firewall_ssh_sources" {
     error_message = "host_firewall_ssh_sources must hold at least one IPv4 CIDR (for example 10.0.0.0/8), each at most once, written without leading zeros (nft rejects 10.0.0.0/08) and with a prefix of 1 to 32. A /0 (0.0.0.0/0) is refused on purpose: it would defeat the narrowing to private space, and the cloud firewall stays the outer layer either way."
   }
 }
+
+variable "node_exporter" {
+  type = object({
+    enabled = optional(bool, false)
+    port    = optional(number, 9100)
+  })
+  default     = {}
+  nullable    = false
+  description = "Opt-in host metrics: installs prometheus-node-exporter from the distro archive and binds it to the machine's private IPv4 address only (--web.listen-address=<private address>:<port>; a boot-time script picks the first RFC 1918 address and refuses to start the exporter when it finds none, so it never falls back to a wildcard address). The default ({}, enabled false) is the live state: user_data is byte-identical (golden hashes in the tests) and nothing is replaced. enabled = true adds a package, a script and a systemd drop-in to user_data, which REPLACES the machine (roll out one connector at a time). port is 1024 to 65535 (default 9100), is checked even while disabled, and must differ from connector_telemetry.metrics_port. Opens no cloud firewall port: that is the access stack's separate, tag-sourced rule; with host_firewall the port is allowed from host_firewall_ssh_sources. NOT applied and NOT tested on a real machine yet."
+
+  validation {
+    condition     = var.node_exporter.port == floor(var.node_exporter.port) && var.node_exporter.port >= 1024 && var.node_exporter.port <= 65535
+    error_message = "node_exporter.port must be a whole number from 1024 to 65535."
+  }
+}

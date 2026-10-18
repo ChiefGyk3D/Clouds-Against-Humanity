@@ -145,6 +145,48 @@
         "status": "exists"
       },
       {
+        "name": "node_exporter",
+        "type": "object({enabled = optional(bool, false), port = optional(number, 9100)})",
+        "description": "Opt-in node exporter (prometheus-node-exporter from the distro archive) on each connector, bound to its private IPv4 address only. Default {} (enabled false) is the live state: merging code with this unset plans no change. enabled = true adds a package, a script and a systemd drop-in through user_data, which REPLACES the droplet of every connector in node_exporter_instances (both by default). port defaults to 9100. Opens no firewall port by itself: set metrics_source_tag as well. Roll out one connector at a time, checking SSH through Twingate and the memory headroom of the 1 GB droplet. NOT applied and NOT tested on a real machine yet.",
+        "required": false,
+        "default": {},
+        "validation": "port a whole number from 1024 to 65535; non-nullable (null means {})",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "{ enabled = true, port = 9100 }",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "node_exporter_instances",
+        "type": "list(string)",
+        "description": "Which connectors get node_exporter: a, b or both. Only matters once node_exporter.enabled is true. Set [\"a\"] first, apply, check SSH through Twingate to the new connector, then [\"a\", \"b\"]. A connector not listed runs without the exporter, as it does today.",
+        "required": false,
+        "default": [
+          "a",
+          "b"
+        ],
+        "validation": "at least one entry; each entry is a or b, no repeats",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "[\"a\"]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "metrics_source_tag",
+        "type": "string",
+        "description": "DigitalOcean tag of the droplets that may scrape the connectors' metrics ports (the node exporter port and connector_telemetry.metrics_port, tcp). Empty (default) is the live state: no metrics rule exists. When set, the connector firewall gains one tag-sourced inbound rule (source_tags = [this tag]) per enabled metrics port: never an address, never a public source. The tag must already exist on the account. Changes the firewall only; replaces no droplet.",
+        "required": false,
+        "default": "",
+        "validation": "empty, or ^[A-Za-z0-9:_-]{1,255}$ (a tag name: an address or CIDR is refused)",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "cah-telemetry-tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
         "name": "region",
         "type": "string",
         "description": "DigitalOcean region slug, from the foundation stack's region output. Names are built from resource_key, which defaults to this.",
@@ -344,7 +386,7 @@
       {
         "name": "connector_telemetry",
         "type": "object({status_updates_enabled = optional(bool), log_level = optional(number), connection_logs = optional(bool, false), metrics_port = optional(number), labels = optional(map(string), {})})",
-        "description": "Twingate connector telemetry for both connectors. Default {} is the live state and changes nothing. status_updates_enabled is a provider setting that is not sent while unset, and replaces nothing. log_level (TWINGATE_LOG_LEVEL), connection_logs (true writes TWINGATE_LOG_ANALYTICS=v3), metrics_port (TWINGATE_METRICS_PORT) and labels (TWINGATE_LABEL_<KEY>) add lines to /etc/twingate/connector.conf: that changes user_data and the plan shows the droplets of every connector in connector_telemetry_instances REPLACED (both by default). Roll out one connector at a time with connector_telemetry_instances, with an SSH-through-Twingate check between (Trace-One-Change-End-to-End, variant C). Opens no firewall port. Labels are shown in the Twingate Admin Console: never put a secret in one.",
+        "description": "Twingate connector telemetry for both connectors. Default {} is the live state and changes nothing. status_updates_enabled is a provider setting that is not sent while unset, and replaces nothing. log_level (TWINGATE_LOG_LEVEL), connection_logs (true writes TWINGATE_LOG_ANALYTICS=v3), metrics_port (TWINGATE_METRICS_PORT) and labels (TWINGATE_LABEL_<KEY>) add lines to /etc/twingate/connector.conf: that changes user_data and the plan shows the droplets of every connector in connector_telemetry_instances REPLACED (both by default). Roll out one connector at a time with connector_telemetry_instances, with an SSH-through-Twingate check between (Trace-One-Change-End-to-End, variant C). Opens no firewall port by itself: set metrics_source_tag to admit the metrics port from that one tag. Labels are shown in the Twingate Admin Console: never put a secret in one.",
         "required": false,
         "default": {},
         "validation": "log_level in {3, 4, 5, 7} or unset; metrics_port a whole number 1024 to 65535 and not 9100, or unset; labels: at most 10, keys ^[A-Z][A-Z0-9_]{0,31}$, values ^[A-Za-z0-9._-]{1,64}$ (no spaces, quotes or line breaks, because they are written into the connector config); connector_telemetry is non-nullable (null means {})",
@@ -833,7 +875,7 @@
       {
         "name": "node_exporter_port",
         "type": "number",
-        "description": "TCP port the node exporter listens on, on each connector.",
+        "description": "TCP port the node exporter listens on, on each connector. Keep it equal to node_exporter.port in the access stack (stack 10), which installs the exporter (opt-in) and opens the port from metrics_source_tag; the stacks are separate, so the two values are kept in step by hand.",
         "required": false,
         "default": 9100,
         "validation": "whole number from 1024 to 65535",
@@ -846,10 +888,10 @@
       {
         "name": "metrics_port_connector",
         "type": "number",
-        "description": "TCP port of the Twingate connector's own metrics endpoint. No default: the bind port and address are UNVERIFIED. Required when metrics_enabled (a precondition).",
+        "description": "TCP port of the Twingate connector's own metrics endpoint. Keep it equal to connector_telemetry.metrics_port in the access stack (stack 10). No default: the connector's metrics bind address is UNVERIFIED. Required when metrics_enabled (a precondition).",
         "required": false,
         "default": null,
-        "validation": "unset, or a whole number from 1024 to 65535; when metrics_enabled it must be set and differ from node_exporter_port",
+        "validation": "unset, or a whole number from 1024 to 65535; when metrics_enabled it must be set, differ from node_exporter_port and not be 9100 (kept for the node exporter, as in the access stack)",
         "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
         "example": "9101 (illustrative)",
         "sensitivity": "public",
@@ -1301,6 +1343,19 @@
         "status": "exists"
       },
       {
+        "name": "node_exporter",
+        "type": "object({enabled = optional(bool, false), port = optional(number, 9100)})",
+        "description": "Opt-in node exporter: installs prometheus-node-exporter from the distro archive and binds it to the machine's private IPv4 address only (a boot-time script picks the first RFC 1918 address and refuses to start the exporter if there is none). Default {} (enabled false): user_data is byte-identical (golden hashes in the tests). enabled = true changes user_data and REPLACES the machine. With host_firewall the port is allowed from host_firewall_ssh_sources. NOT applied and NOT tested on a real machine yet.",
+        "required": false,
+        "default": {},
+        "validation": "port a whole number from 1024 to 65535 (checked even while disabled); non-nullable (null means {}); must differ from connector_telemetry.metrics_port (a precondition)",
+        "set_where": "the calling module",
+        "example": "{ enabled = true, port = 9100 }",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
         "name": "metadata_lock",
         "type": "bool",
         "description": "Lock the metadata endpoint (169.254.169.254) to root and the do-agent user. Default false changes nothing: user_data is byte-identical (golden hashes in the tests). true adds an nftables table, a script, a systemd unit and the nftables package to user_data, which replaces the machine.",
@@ -1514,6 +1569,19 @@
         "validation": "none (validated in modules/twingate-bootstrap); connector_telemetry is non-nullable (null means {})",
         "set_where": "the calling stack",
         "example": "{ log_level = 5, connection_logs = true, metrics_port = 9999, labels = { DEPLOYED_BY = \"opentofu\" } }",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "node_exporter",
+        "type": "object({enabled = optional(bool, false), port = optional(number, 9100)})",
+        "description": "Opt-in node exporter bound to the private address, passed to the bootstrap module, which validates it. Default {} changes nothing. enabled = true changes user_data and replaces the droplet.",
+        "required": false,
+        "default": {},
+        "validation": "none (validated in modules/twingate-bootstrap); node_exporter is non-nullable (null means {})",
+        "set_where": "the calling stack",
+        "example": "{ enabled = true, port = 9100 }",
         "sensitivity": "public",
         "sensitive_in_code": false,
         "status": "exists"
