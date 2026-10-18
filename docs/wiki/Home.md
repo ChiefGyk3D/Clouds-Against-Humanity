@@ -123,34 +123,29 @@ These pages live in the main repository under `docs/wiki/` and are published to 
 
 ## Support this project
 
-If Clouds Against Humanity is useful to you, consider supporting continued development. Everything is also collected at [support.chiefgyk3d.com](https://support.chiefgyk3d.com).
+If Clouds Against Humanity is useful to you, consider supporting continued development. Everything is also collected at **[support.chiefgyk3d.com](https://support.chiefgyk3d.com)**.
 
 **Recurring support**
 
-- [Patreon](https://patreon.com/chiefgyk3d)
-- [StreamElements](https://streamelements.com/chiefgyk3d/tip)
-- [Merch store](https://shop.chiefgyk3d.com/)
+| [![Patreon logo icon](images/support-icon-patreon.png)](https://patreon.com/chiefgyk3d) | [![StreamElements logo icon](images/support-icon-streamelements.png)](https://streamelements.com/chiefgyk3d/tip) | [![Merch store logo icon](images/support-icon-merch.png)](https://shop.chiefgyk3d.com/) |
+|:---:|:---:|:---:|
+| [**Patreon**](https://patreon.com/chiefgyk3d) | [**StreamElements**](https://streamelements.com/chiefgyk3d/tip) | [**Merch store**](https://shop.chiefgyk3d.com/) |
 
 **Cryptocurrency tips**
 
-| Coin | Address |
-|---|---|
-| Bitcoin | `bc1qztdzcy2wyavj2tsuandu4p0tcklzttvdnzalla` |
-| Monero | `84Y34QubRwQYK2HNviezeH9r6aRcPvgWmKtDkN3EwiuVbp6sNLhm9ffRgs6BA9X1n9jY7wEN16ZEpiEngZbecXseUrW8SeQ` |
-| Ethereum | `0x554f18cfB684889c3A60219BDBE7b050C39335ED` |
-| Solana | `5T8h3HbyvHgLxwXgchRYbHSqRjZyAr8J7uwjLN9Fh8Jh` |
+| | Coin | Address |
+|:---:|---|---|
+| ![Bitcoin logo icon](images/support-icon-bitcoin.png) | Bitcoin | `bc1qztdzcy2wyavj2tsuandu4p0tcklzttvdnzalla` |
+| ![Monero logo icon](images/support-icon-monero.png) | Monero | `84Y34QubRwQYK2HNviezeH9r6aRcPvgWmKtDkN3EwiuVbp6sNLhm9ffRgs6BA9X1n9jY7wEN16ZEpiEngZbecXseUrW8SeQ` |
+| ![Ethereum logo icon](images/support-icon-ethereum.png) | Ethereum | `0x554f18cfB684889c3A60219BDBE7b050C39335ED` |
+| ![Solana logo icon](images/support-icon-solana.png) | Solana | `5T8h3HbyvHgLxwXgchRYbHSqRjZyAr8J7uwjLN9Fh8Jh` |
+
+---
 
 ## Author and socials
 
-Made by [ChiefGyk3D](https://github.com/ChiefGyk3D).
+| [![Mastodon logo icon](images/support-icon-mastodon.png)](https://social.chiefgyk3d.com/@chiefgyk3d) | [![Bluesky logo icon](images/support-icon-bluesky.png)](https://bsky.app/profile/chiefgyk3d.com) | [![Twitch logo icon](images/support-icon-twitch.png)](https://twitch.tv/chiefgyk3d) | [![YouTube logo icon](images/support-icon-youtube.png)](https://www.youtube.com/channel/UCvFY4KyqVBuYd7JAl3NRyiQ) | [![Kick logo icon](images/support-icon-kick.png)](https://kick.com/chiefgyk3d) | [![TikTok logo icon](images/support-icon-tiktok.png)](https://www.tiktok.com/@chiefgyk3d) | [![Instagram logo icon](images/support-icon-instagram.png)](https://www.instagram.com/chiefgyk3d) | [![Threads logo icon](images/support-icon-threads.png)](https://www.threads.net/@chiefgyk3d) | [![Discord logo icon](images/support-icon-discord.png)](https://discord.chiefgyk3d.com) | [![Matrix logo icon](images/support-icon-matrix.png)](https://matrix-invite.chiefgyk3d.com) |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| [**Mastodon**](https://social.chiefgyk3d.com/@chiefgyk3d) | [**Bluesky**](https://bsky.app/profile/chiefgyk3d.com) | [**Twitch**](https://twitch.tv/chiefgyk3d) | [**YouTube**](https://www.youtube.com/channel/UCvFY4KyqVBuYd7JAl3NRyiQ) | [**Kick**](https://kick.com/chiefgyk3d) | [**TikTok**](https://www.tiktok.com/@chiefgyk3d) | [**Instagram**](https://www.instagram.com/chiefgyk3d) | [**Threads**](https://www.threads.net/@chiefgyk3d) | [**Discord**](https://discord.chiefgyk3d.com) | [**Matrix**](https://matrix-invite.chiefgyk3d.com) |
 
-- [Mastodon](https://social.chiefgyk3d.com/@chiefgyk3d)
-- [Bluesky](https://bsky.app/profile/chiefgyk3d.com)
-- [Twitch](https://twitch.tv/chiefgyk3d)
-- [YouTube](https://www.youtube.com/channel/UCvFY4KyqVBuYd7JAl3NRyiQ)
-- [Kick](https://kick.com/chiefgyk3d)
-- [TikTok](https://www.tiktok.com/@chiefgyk3d)
-- [Instagram](https://www.instagram.com/chiefgyk3d)
-- [Threads](https://www.threads.net/@chiefgyk3d)
-- [Discord](https://discord.chiefgyk3d.com)
-- [Matrix](https://matrix-invite.chiefgyk3d.com)
+<sub>Made with ❤️ by [ChiefGyk3D](https://github.com/ChiefGyk3D)</sub>
