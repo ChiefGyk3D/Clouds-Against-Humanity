@@ -332,6 +332,40 @@ run "other_group_rules_name_a_group_never_an_address" {
   }
 }
 
+run "other_group_source_may_not_be_the_group_itself" {
+  command = plan
+  # The member rules are the place for "this group": an other-group rule whose
+  # source is the target group would admit connector-to-connector metrics, which
+  # the docs say this change does not do.
+  override_resource {
+    target = aws_security_group.this
+    values = {
+      id = "sg-0abc1230abc123450"
+    }
+  }
+  variables {
+    inbound_from_other_groups = [{ protocol = "tcp", port_range = "9100", security_group_id = "sg-0abc1230abc123450" }]
+  }
+  expect_failures = [aws_vpc_security_group_ingress_rule.other_group]
+}
+
+run "other_group_source_that_differs_from_the_group_is_accepted" {
+  command = apply
+  override_resource {
+    target = aws_security_group.this
+    values = {
+      id = "sg-0abc1230abc123450"
+    }
+  }
+  variables {
+    inbound_from_other_groups = [{ protocol = "tcp", port_range = "9100", security_group_id = "sg-0def4560def456780" }]
+  }
+  assert {
+    condition     = jsonencode(output.inbound_rules) == jsonencode(["tcp/9100-9100/sg-0def4560def456780"])
+    error_message = "A different source group must be accepted."
+  }
+}
+
 run "other_group_must_be_a_security_group_id_not_an_address" {
   command = plan
   variables {

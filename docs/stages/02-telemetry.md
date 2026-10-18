@@ -74,6 +74,8 @@ What the tests prove (`tofu test` with mocked providers, plus `tests/test_metric
 Not known or not done:
 
 - The source security group is **supplied by the operator** and is not created here. It must exist before the rule applies, and a security group reference only works inside the same VPC or a peered one. Until a scraper exists, leave it empty.
+- The source group must be **different from the connector group**: naming the connector group itself is refused (a precondition in the firewall module, and one on the stack output), since it would admit connector-to-connector metrics. The module check runs at plan once the group exists, and at apply on a first creation (the new group's id is unknown until then).
+- **Changing the source group takes two applies.** A different group is a different rule key, so one plan removes the old rules and adds the new ones, and AWS may briefly hold both, or reject the add as a duplicate if it runs first. Set `metrics_source_security_group_id = ""` and apply, then set the new group and apply. Scraping is down between the two, as intended.
 - The node exporter has no authentication. Its only protection is the security group rule and, if on, the host firewall.
 - The connector's own metrics bind address stays UNVERIFIED, as in section 2.1.
 - Connector-to-connector scraping is not added (only the one source group), as in section 2.1.

@@ -29,8 +29,12 @@ itself, never an address, so only machines wearing the group can use them.
 entry. The source is always `referenced_security_group_id`: the variable has no
 address field, the rule resource sets no `cidr_ipv4`, `cidr_ipv6` or
 `prefix_list_id`, and `tests/test_metrics_firewall_aws.py` scans the source for
-that. `inbound_rules` and `source_members` list these rules too. The group must
-exist in the same VPC or a peered one.
+that. `inbound_rules` and `source_members` list these rules too. A source equal to
+this module's own group is refused by a precondition on the rule (use
+`inbound_from_member_rules` for that; the check runs at plan once the group
+exists, at apply on its first creation). The group must exist in the same VPC or
+a peered one. Changing a rule's source group changes its key (remove, then add);
+a caller that swaps the group should apply once with the list empty first.
 
 The `id` and `rule_targets` outputs declare `depends_on` for all the rule
 resources, so an instance in the same apply launches after its egress rules exist

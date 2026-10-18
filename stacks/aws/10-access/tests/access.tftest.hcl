@@ -762,6 +762,28 @@ run "metrics_source_security_group_rejects_a_space" {
   expect_failures = [var.metrics_source_security_group_id]
 }
 
+run "metrics_source_may_not_be_the_connector_group_itself" {
+  command = plan
+  # Naming the connector group as the metrics source would admit
+  # connector-to-connector metrics. The firewall module's rule precondition
+  # refuses it (tested in modules/aws/firewall) and fails first; a test cannot
+  # name a resource inside a module in expect_failures, so the stack's own
+  # precondition on the output that exports the group id is pinned at source
+  # level here, and a different source group must plan.
+  variables {
+    metrics_source_security_group_id = "sg-0abc1230abc123450"
+    node_exporter                    = { enabled = true }
+  }
+  assert {
+    condition     = can(regex("(?s)output \"connector_security_group_id\" \\{.*precondition \\{\\s*condition\\s*=\\s*var\\.metrics_source_security_group_id != module\\.connector_firewall\\.id", file("${path.module}/outputs.tf")))
+    error_message = "The output that exports the connector group id must carry a precondition that the metrics source is a different group."
+  }
+  assert {
+    condition     = output.connector_security_group_id == "sg-00000000000000002"
+    error_message = "A different source group must plan and leave the exported id alone."
+  }
+}
+
 run "node_exporter_is_wired_to_both_connectors_gated_on_its_instances" {
   command = plan
   assert {

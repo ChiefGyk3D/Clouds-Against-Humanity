@@ -121,6 +121,23 @@ def test_stack_feeds_the_firewall_only_security_group_sourced_metrics_rules():
     assert not ADDRESS_ATTRS.search(text)
 
 
+def test_other_group_rule_refuses_its_own_group_as_source():
+    text = code((FIREWALL / "main.tf").read_text())
+    body = ingress_blocks(text)["other_group"]
+    assert re.search(
+        r"precondition\s*\{\s*condition\s*=\s*each\.value\.source\s*!=\s*aws_security_group\.this\.id",
+        body,
+    )
+    out = code((ACCESS / "outputs.tf").read_text())
+    assert re.search(
+        r"precondition\s*\{\s*condition\s*=\s*var\.metrics_source_security_group_id\s*!=\s*module\.connector_firewall\.id",
+        out,
+    )
+    # The guard bites: the check is the rule's only precondition, so removing it
+    # leaves none (and the pattern above would fail).
+    assert body.count("precondition") == 1
+
+
 def test_stack_hard_codes_no_metrics_port():
     text = code((ACCESS / "main.tf").read_text())
     assert "9100" not in text and "9999" not in text

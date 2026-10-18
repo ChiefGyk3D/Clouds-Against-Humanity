@@ -438,6 +438,21 @@ run "host_firewall_sources_reach_the_instance_user_data" {
 # byte-identical to what main rendered before the node_exporter input existed,
 # so merging the pass-through plans no change to a live connector. The tokens
 # are fixed so the hash is stable.
+#
+# Provenance: both hashes were captured on UNMODIFIED origin/main (commit
+# beff54c, before this module had a node_exporter variable) with exactly the
+# inputs of the two runs below (this file's default variables, fixed tokens;
+# run b adds instance "b", reboot_time "05:00", host_firewall true). To
+# regenerate from a parent revision:
+#   git worktree add <dir> beff54c
+#   cd <dir>/modules/aws/twingate-connector && tofu init -backend=false
+#   copy only these two runs into tests/ there, and set each assertion's
+#   error_message to "${nonsensitive(sha256(aws_instance.connector.user_data))}"
+#   (the user_data is sensitive, so the hash is read through nonsensitive);
+#   tofu test prints the hash in the failure message.
+# A hash that changes after a later edit to the bootstrap template is a real
+# change to every live connector's user_data: review it, do not just paste the
+# new value.
 run "node_exporter_default_user_data_is_the_main_user_data_a" {
   command = plan
   override_resource {

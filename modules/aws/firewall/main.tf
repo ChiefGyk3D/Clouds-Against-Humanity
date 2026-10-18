@@ -92,6 +92,18 @@ resource "aws_vpc_security_group_ingress_rule" "other_group" {
   from_port                    = each.value.from
   to_port                      = each.value.to
   description                  = "from members of ${each.value.source}, ${each.value.protocol} ${each.value.from}-${each.value.to}"
+
+  # This resource is for OTHER groups. A source equal to the target group would
+  # admit every machine wearing it (for connectors: connector-to-connector
+  # metrics), which is the member rules' job and a separate decision. The id of
+  # a group that does not exist yet is unknown at plan time, so this is checked
+  # at apply for a first creation and at plan afterwards.
+  lifecycle {
+    precondition {
+      condition     = each.value.source != aws_security_group.this.id
+      error_message = "inbound_from_other_groups names this security group itself (${each.value.source}) as a source. Use a different group; rules that admit the group's own members belong in inbound_from_member_rules."
+    }
+  }
 }
 
 # Trivy AWS-0104 flags egress to any address. It is accepted here for the same
