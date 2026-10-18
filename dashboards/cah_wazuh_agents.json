@@ -98,6 +98,32 @@
         "hide": 0,
         "options": [],
         "regex": ""
+      },
+      {
+        "type": "query",
+        "name": "monitored_agent",
+        "label": "Monitored agent (monitoring index)",
+        "datasource": {
+          "type": "grafana-opensearch-datasource",
+          "uid": "${DS_OPENSEARCH_MONITORING}"
+        },
+        "query": "{\"find\": \"terms\", \"field\": \"name\", \"size\": 100}",
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "current": {
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "hide": 0,
+        "options": [],
+        "regex": ""
       }
     ]
   },
@@ -168,7 +194,7 @@
       "id": 3,
       "type": "table",
       "title": "Agent status and last keepalive",
-      "description": "UNVERIFIED: reads a Wazuh monitoring index (documents with name, status, lastKeepAlive and group fields). Those names come from the Wazuh monitoring index of the 4.x series as remembered, not from this project's manager, and newer Wazuh releases may no longer write that index; the panel would then show no data. Needs its own data source (the Wazuh monitoring index), chosen with the DS_OPENSEARCH_MONITORING variable. Shows each agent's status (active, disconnected, never connected) and when it last checked in; a disconnected connector agent means its logs are not arriving.",
+      "description": "UNVERIFIED: reads a Wazuh monitoring index (documents with name, status, lastKeepAlive and group fields). Those names come from the Wazuh monitoring index of the 4.x series as remembered, not from this project's manager, and newer Wazuh releases may no longer write that index; the panel would then show no data. It does not use the site and instance variables, which are built from alerts and so list only agents that have already raised one: a quiet or never-reporting agent could not be selected there. Its own variable, monitored_agent, is built from the monitoring index itself. Needs its own data source (the Wazuh monitoring index), chosen with the DS_OPENSEARCH_MONITORING variable. Shows each agent's status (active, disconnected, never connected) and when it last checked in; a disconnected connector agent means its logs are not arriving.",
       "datasource": {
         "type": "grafana-opensearch-datasource",
         "uid": "${DS_OPENSEARCH_MONITORING}"
@@ -176,7 +202,7 @@
       "targets": [
         {
           "refId": "A",
-          "query": "name:${instance:lucene}",
+          "query": "name:${monitored_agent:lucene}",
           "timeField": "@timestamp",
           "metrics": [
             {

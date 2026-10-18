@@ -55,7 +55,7 @@ What is **not** known or **not** done:
 
 ### 2.2 Dashboards
 
-The repository ships three importable Grafana dashboards in [`dashboards/`](../../dashboards/): a sites overview, droplet health and Wazuh agents, all with `site` and `instance` variables and data sources as variables. They are checked for shape by `tests/test_dashboards.py` and are **not** imported into a live Grafana or run against real data. What each panel shows and what is unverified: [Grafana dashboards](../wiki/Grafana-Dashboards.md).
+The repository ships three importable Grafana dashboards in [`dashboards/`](../../dashboards/): a sites overview, droplet health and Wazuh agents, all with `site` and `instance` variables and data sources as variables. They expect an `endpoint` label on every scrape target and a `cah_expected_targets` inventory (see the runbook sections 5 and 6). They are checked for shape by `tests/test_dashboards.py` and are **not** imported into a live Grafana or run against real data. What each panel shows and what is unverified: [Grafana dashboards](../wiki/Grafana-Dashboards.md).
 
 ## 3. Your manual steps (nothing here is automatic)
 
@@ -103,10 +103,10 @@ Order matters. The home side must be in place first: [the home-side runbook](../
 **M1. Prometheus lists the targets up.** Run from any machine that can reach the home Prometheus:
 
 ```
-curl -fsS 'http://prometheus.example.com:9090/api/v1/targets?state=active' | jq -r '.data.activeTargets[] | select(.labels.site == "site-tor1") | [.labels.site, .labels.instance, .scrapeUrl, .health] | @tsv'
+curl -fsS 'http://prometheus.example.com:9090/api/v1/targets?state=active' | jq -r '.data.activeTargets[] | select(.labels.site == "site-tor1") | [.labels.site, .labels.instance, .labels.endpoint, .scrapeUrl, .health] | @tsv'
 ```
 
-Pass: one line per expected target, each ending in `up`. For one site with two connectors and two exporters per connector (node exporter and connector metrics) that is **four lines**. A `down` line with a timeout in `lastError` points at the firewall pair (design section 4.2), the Twingate resource or the home headless client, in that order. Fewer lines than expected means the target file is missing an entry.
+Pass: one line per expected target, each ending in `up`. For one site with two connectors and two exporters per connector (node exporter and connector metrics) that is **four lines**, told apart by the `endpoint` label (`node-exporter` or `connector-metrics`), which every scrape target must carry because the two endpoints of one host otherwise produce identical series (see [the target file shape](../wiki/Stage-2-Home-Side-Runbook.md#5-the-target-file-shape)). A `down` line with a timeout in `lastError` points at the firewall pair (design section 4.2), the Twingate resource or the home headless client, in that order. Fewer lines than expected means the target file is missing an entry.
 
 **M2. The count matches the inventory.** The inventory is a recorded metric (`cah_expected_targets`), so one query compares both sides:
 

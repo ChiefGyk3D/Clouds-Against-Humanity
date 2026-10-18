@@ -114,7 +114,7 @@
       "id": 2,
       "type": "stat",
       "title": "Targets up per site",
-      "description": "One number per site: how many of its scrape targets answered the last scrape. A site that shows 0 here is not sending metrics at all, so every other panel for it is empty. Compare the number with how many targets you expect (two connectors, two ports each, for a default site).",
+      "description": "One number per site: how many of its scrape endpoints answered the last scrape. The query starts from the expected-target inventory (cah_expected_targets, one series per site), so a site whose targets are all down or gone still appears, as 0, instead of vanishing. Compare the number with what the inventory expects. Without the inventory (not built yet) a fully silent site cannot appear: there is nothing left to list.",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
@@ -122,7 +122,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "count by (site) (up{job=\"twingate-ztna\", site=~\"$site\"} == 1)",
+          "expr": "count by (site) (up{job=\"twingate-ztna\", site=~\"$site\"} == 1) or on (site) (0 * cah_expected_targets{site=~\"$site\"})",
           "legendFormat": "{{site}}",
           "range": false,
           "instant": true,
@@ -171,7 +171,7 @@
       "id": 3,
       "type": "stat",
       "title": "Targets down per site",
-      "description": "One number per site: how many scrape targets are answering as down right now. Anything above 0 means a connector, its exporter or the path to it has a problem. A site whose targets have vanished completely does not appear here at all; the Sites overview note in the wiki explains why and what catches it.",
+      "description": "One number per site: how many scrape endpoints are missing or down. It is the expected count from the inventory (cah_expected_targets) minus the endpoints that are up, so an endpoint that vanished counts as down, not only one that answers 0. Above 0 means a connector, an exporter or the path to it has a problem. If the inventory does not exist the panel falls back to counting series that read 0, which cannot see a vanished site.",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
@@ -179,7 +179,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "count by (site) (up{job=\"twingate-ztna\", site=~\"$site\"} == 0) or on (site) (0 * count by (site) (up{job=\"twingate-ztna\", site=~\"$site\"}))",
+          "expr": "clamp_min(cah_expected_targets{site=~\"$site\"} - on (site) (count by (site) (up{job=\"twingate-ztna\", site=~\"$site\"} == 1) or on (site) (0 * cah_expected_targets{site=~\"$site\"})), 0) or on (site) count by (site) (up{job=\"twingate-ztna\", site=~\"$site\"} == 0)",
           "legendFormat": "{{site}}",
           "range": false,
           "instant": true,
@@ -275,7 +275,7 @@
       "id": 5,
       "type": "state-timeline",
       "title": "Target state per instance",
-      "description": "A green and red timeline of up and down for every site and instance over the chosen time range. Red bars show when a target stopped answering and how long it stayed that way. Both the node exporter port and the connector metrics port of one host share the same instance name, so one row can hide which of the two failed; check the Targets table for the port.",
+      "description": "A green and red timeline of up and down for every site, instance and scrape endpoint over the chosen time range. Red bars show when a target stopped answering and for how long. The endpoint label (node-exporter or connector-metrics) separates the two ports of one host, so you can tell which one failed.",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
@@ -284,7 +284,7 @@
         {
           "refId": "A",
           "expr": "up{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}",
-          "legendFormat": "{{site}} / {{instance}}",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
           "range": true,
           "instant": false,
           "datasource": {
@@ -370,7 +370,7 @@
         {
           "refId": "A",
           "expr": "scrape_duration_seconds{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}",
-          "legendFormat": "{{site}} / {{instance}}",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
           "range": true,
           "instant": false,
           "datasource": {
@@ -423,7 +423,7 @@
         {
           "refId": "A",
           "expr": "scrape_samples_scraped{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}",
-          "legendFormat": "{{site}} / {{instance}}",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
           "range": true,
           "instant": false,
           "datasource": {
@@ -488,8 +488,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (site, instance, transport) (rate(twingate_inbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}[5m]))",
-          "legendFormat": "{{site}} / {{instance}} {{transport}}",
+          "expr": "sum by (site, instance, endpoint, transport) (rate(twingate_inbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", endpoint=\"connector-metrics\"}[5m]))",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}} {{transport}}",
           "range": true,
           "instant": false,
           "datasource": {
@@ -541,8 +541,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (site, instance, transport) (rate(twingate_outbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}[5m]))",
-          "legendFormat": "{{site}} / {{instance}} {{transport}}",
+          "expr": "sum by (site, instance, endpoint, transport) (rate(twingate_outbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", endpoint=\"connector-metrics\"}[5m]))",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}} {{transport}}",
           "range": true,
           "instant": false,
           "datasource": {
@@ -586,7 +586,7 @@
       "id": 12,
       "type": "timeseries",
       "title": "Share of traffic through a relay",
-      "description": "The fraction of each site's connector traffic (in plus out) that went through a Twingate relay instead of a direct path. A high share is not an outage, but it usually means higher latency and a firewall or NAT that blocks direct connections. It shows no data when a site has moved no bytes in the window.",
+      "description": "The fraction of each site's connector traffic (in plus out) that went through a Twingate relay instead of a direct path. Each direction is summed per site first and a direction with no series counts as 0, so a missing series cannot silently drop the site. A high share is not an outage, but it usually means higher latency and a firewall or NAT that blocks direct connections. It shows no data when a site moved no bytes in the window (0 divided by 0).",
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_PROMETHEUS}"
@@ -594,7 +594,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (site) (rate(twingate_inbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", transport=\"relay\"}[5m]) + rate(twingate_outbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", transport=\"relay\"}[5m])) / sum by (site) (rate(twingate_inbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}[5m]) + rate(twingate_outbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}[5m]))",
+          "expr": "(((sum by (site) (rate(twingate_inbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", endpoint=\"connector-metrics\", transport=\"relay\"}[5m]))) or on (site) (0 * count by (site) (up{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}))) + ((sum by (site) (rate(twingate_outbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", endpoint=\"connector-metrics\", transport=\"relay\"}[5m]))) or on (site) (0 * count by (site) (up{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"})))) / (((sum by (site) (rate(twingate_inbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", endpoint=\"connector-metrics\"}[5m]))) or on (site) (0 * count by (site) (up{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}))) + ((sum by (site) (rate(twingate_outbound_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", endpoint=\"connector-metrics\"}[5m]))) or on (site) (0 * count by (site) (up{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}))))",
           "legendFormat": "{{site}}",
           "range": true,
           "instant": false,
@@ -649,8 +649,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "twingate_connector_uptime_seconds{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}",
-          "legendFormat": "{{site}} / {{instance}}",
+          "expr": "twingate_connector_uptime_seconds{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", endpoint=\"connector-metrics\"}",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
           "range": true,
           "instant": false,
           "datasource": {

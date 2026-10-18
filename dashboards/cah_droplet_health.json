@@ -122,8 +122,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "time() - node_boot_time_seconds{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}",
-          "legendFormat": "{{site}} / {{instance}}",
+          "expr": "time() - node_boot_time_seconds{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\"}",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
           "range": false,
           "instant": true,
           "datasource": {
@@ -167,8 +167,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * (1 - node_memory_MemAvailable_bytes{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"} / node_memory_MemTotal_bytes{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"})",
-          "legendFormat": "{{site}} / {{instance}}",
+          "expr": "100 * (1 - node_memory_MemAvailable_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\"} / node_memory_MemTotal_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\"})",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
           "range": false,
           "instant": true,
           "datasource": {
@@ -229,8 +229,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "max by (site, instance) (100 * (1 - node_filesystem_avail_bytes{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", fstype!~\"tmpfs|ramfs|squashfs|overlay|devtmpfs|fuse.*\"} / node_filesystem_size_bytes{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", fstype!~\"tmpfs|ramfs|squashfs|overlay|devtmpfs|fuse.*\"}))",
-          "legendFormat": "{{site}} / {{instance}}",
+          "expr": "max by (site, instance, endpoint) (100 * (1 - node_filesystem_avail_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\", fstype!~\"tmpfs|ramfs|squashfs|overlay|devtmpfs|fuse.*\"} / node_filesystem_size_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\", fstype!~\"tmpfs|ramfs|squashfs|overlay|devtmpfs|fuse.*\"}))",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
           "range": false,
           "instant": true,
           "datasource": {
@@ -304,8 +304,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * (1 - avg by (site, instance) (rate(node_cpu_seconds_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", mode=\"idle\"}[5m])))",
-          "legendFormat": "{{site}} / {{instance}}",
+          "expr": "100 * (1 - avg by (site, instance, endpoint) (rate(node_cpu_seconds_total{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\", mode=\"idle\"}[5m])))",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
           "range": true,
           "instant": false,
           "datasource": {
@@ -359,8 +359,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * (1 - node_memory_MemAvailable_bytes{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"} / node_memory_MemTotal_bytes{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"})",
-          "legendFormat": "{{site}} / {{instance}}",
+          "expr": "100 * (1 - node_memory_MemAvailable_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\"} / node_memory_MemTotal_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\"})",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
           "range": true,
           "instant": false,
           "datasource": {
@@ -414,8 +414,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "node_memory_SwapTotal_bytes{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"} - node_memory_SwapFree_bytes{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}",
-          "legendFormat": "{{site}} / {{instance}}",
+          "expr": "node_memory_SwapTotal_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\"} - node_memory_SwapFree_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\"}",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
           "range": true,
           "instant": false,
           "datasource": {
@@ -467,8 +467,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * (1 - node_filesystem_avail_bytes{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", fstype!~\"tmpfs|ramfs|squashfs|overlay|devtmpfs|fuse.*\"} / node_filesystem_size_bytes{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", fstype!~\"tmpfs|ramfs|squashfs|overlay|devtmpfs|fuse.*\"})",
-          "legendFormat": "{{site}} / {{instance}} {{mountpoint}}",
+          "expr": "100 * (1 - node_filesystem_avail_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\", fstype!~\"tmpfs|ramfs|squashfs|overlay|devtmpfs|fuse.*\"} / node_filesystem_size_bytes{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\", fstype!~\"tmpfs|ramfs|squashfs|overlay|devtmpfs|fuse.*\"})",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}} {{mountpoint}}",
           "range": true,
           "instant": false,
           "datasource": {
@@ -522,8 +522,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (site, instance) (rate(node_network_receive_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", device!~\"lo|docker.*|veth.*|br-.*\"}[5m]))",
-          "legendFormat": "{{site}} / {{instance}} received",
+          "expr": "sum by (site, instance, endpoint) (rate(node_network_receive_bytes_total{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\", device!~\"lo|docker.*|veth.*|br-.*\"}[5m]))",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}} received",
           "range": true,
           "instant": false,
           "datasource": {
@@ -533,8 +533,8 @@
         },
         {
           "refId": "B",
-          "expr": "sum by (site, instance) (rate(node_network_transmit_bytes_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\", device!~\"lo|docker.*|veth.*|br-.*\"}[5m]))",
-          "legendFormat": "{{site}} / {{instance}} sent",
+          "expr": "sum by (site, instance, endpoint) (rate(node_network_transmit_bytes_total{job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\", device!~\"lo|docker.*|veth.*|br-.*\"}[5m]))",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}} sent",
           "range": true,
           "instant": false,
           "datasource": {
@@ -586,8 +586,8 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (site, instance) (rate(node_network_receive_errs_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}[5m]) + rate(node_network_transmit_errs_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}[5m]) + rate(node_network_receive_drop_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}[5m]) + rate(node_network_transmit_drop_total{job=\"twingate-ztna\", site=~\"$site\", instance=~\"$instance\"}[5m]))",
-          "legendFormat": "{{site}} / {{instance}}",
+          "expr": "sum by (site, instance, endpoint) (rate({__name__=~\"node_network_(receive|transmit)_(errs|drop)_total\", job=\"twingate-ztna\", endpoint=\"node-exporter\", site=~\"$site\", instance=~\"$instance\"}[5m]))",
+          "legendFormat": "{{site}} / {{instance}} / {{endpoint}}",
           "range": true,
           "instant": false,
           "datasource": {
