@@ -1858,3 +1858,560 @@ run "host_firewall_true_exporter_off_with_metrics_port_is_the_main_user_data_b" 
     error_message = "host_firewall = true with a metrics port and the node exporter off must render exactly what origin/main rendered."
   }
 }
+
+# log_shipping (stage 2 step 7): opt-in Wazuh agent and auditd, enrolled at first
+# boot with a secret pulled from Doppler. Off by default, and off adds nothing at
+# all, so user_data is byte-identical to the live machine. Enabling it changes
+# user_data and therefore replaces the droplet. Nothing here was applied or tested
+# on a real machine. Fixture values are obviously fake and built at run time.
+
+# The four goldens: connector a and b, host_firewall false and true, with
+# node_exporter and log_shipping off. They are the same hashes as the node
+# exporter goldens above and were taken before log_shipping existed.
+run "log_shipping_default_is_the_golden_user_data_a" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time  = "04:00"
+    log_shipping = { enabled = false }
+  }
+  assert {
+    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    error_message = "log_shipping disabled must render the golden user_data of connector a."
+  }
+}
+
+run "log_shipping_default_is_the_golden_user_data_b" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    instance     = "b"
+    reboot_time  = "05:00"
+    log_shipping = {}
+  }
+  assert {
+    condition     = sha256(output.user_data) == "de2de6286f955100f199779f2b8a4d0a194b72f28619965c80f858061742790b"
+    error_message = "An empty log_shipping must render the golden user_data of connector b."
+  }
+}
+
+run "log_shipping_default_with_host_firewall_is_the_golden_user_data_a" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time   = "04:00"
+    host_firewall = true
+    log_shipping  = {}
+  }
+  assert {
+    condition     = sha256(output.user_data) == "2cbd81c5de0b470fb9e75d6e926c987492a9f2c6823c8ebe01fa8316d6a34a07"
+    error_message = "host_firewall = true with log_shipping off must render the golden user_data of connector a."
+  }
+}
+
+run "log_shipping_default_with_host_firewall_is_the_golden_user_data_b" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    instance            = "b"
+    reboot_time         = "05:00"
+    host_firewall       = true
+    connector_telemetry = { metrics_port = 9999 }
+    log_shipping        = {}
+  }
+  assert {
+    condition     = sha256(output.user_data) == "fb047dee8fbaf79aa36b8b223e13ba03d963c42bd40fe5123e194d525a1e13b9"
+    error_message = "host_firewall = true with log_shipping off must render the golden user_data of connector b."
+  }
+}
+
+# Settings that are only configuration of a feature that is off change nothing,
+# including a token that is supplied while the feature is off.
+run "log_shipping_off_ignores_its_other_settings_and_a_stray_token" {
+  command = plan
+  override_resource {
+    target = twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    reboot_time = "04:00"
+    log_shipping = {
+      enabled         = false
+      manager_address = "siem.example.com"
+      agent_name      = "site-tor1-connector-a"
+      agent_group     = "site-tor1"
+      agent_version   = "4.9.2-1"
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  assert {
+    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    error_message = "With log_shipping off no setting and no token may reach user_data."
+  }
+}
+
+run "log_shipping_default_adds_nothing_by_name" {
+  command = plan
+  assert {
+    condition     = !strcontains(output.user_data, "wazuh") && !strcontains(output.user_data, "auditd") && !strcontains(output.user_data, "hostboot") && !strcontains(output.user_data, "doppler")
+    error_message = "With log_shipping off no package, script, file or URL for it may appear in user_data."
+  }
+}
+
+run "log_shipping_on_installs_the_agent_pieces" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      agent_name          = "site-tor1-connector-a"
+      agent_group         = "site-tor1"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  assert {
+    condition     = length([for p in yamldecode(output.user_data).packages : p if p == "auditd"]) == 1
+    error_message = "auditd must be installed from the distro archive, exactly once."
+  }
+  assert {
+    condition     = contains(yamldecode(output.user_data).packages, "chrony") && contains(yamldecode(output.user_data).packages, "unattended-upgrades")
+    error_message = "The existing packages must stay."
+  }
+  assert {
+    condition     = alltrue([for p in ["/etc/cah/hostboot.token", "/usr/local/sbin/cah-log-shipping-firstboot", "/etc/cah/wazuh-localfile.xml", "/etc/audit/rules.d/60-cah.rules", "/etc/twingate/connector.conf", "/etc/ssh/sshd_config.d/99-cah-hardening.conf"] : contains([for f in yamldecode(output.user_data).write_files : f.path], p)])
+    error_message = "Enabling log shipping must add its files and keep every existing one."
+  }
+  assert {
+    condition     = one([for f in yamldecode(output.user_data).write_files : f.permissions if f.path == "/etc/cah/hostboot.token"]) == "0600" && one([for f in yamldecode(output.user_data).write_files : f.owner if f.path == "/etc/cah/hostboot.token"]) == "root:root"
+    error_message = "The token file must be root-owned and 0600."
+  }
+  assert {
+    condition     = one([for f in yamldecode(output.user_data).write_files : f.permissions if f.path == "/usr/local/sbin/cah-log-shipping-firstboot"]) == "0750"
+    error_message = "The first-boot script must be 0750."
+  }
+}
+
+run "log_shipping_on_renders_the_settings_into_the_first_boot_script" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      manager_port        = 1600
+      enroll_port         = 1601
+      agent_name          = "site-tor1-connector-a"
+      agent_group         = "site-tor1"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  assert {
+    condition     = alltrue([for l in ["manager=\"siem.example.com\"", "manager_port=\"1600\"", "enroll_port=\"1601\"", "agent_name=\"site-tor1-connector-a\"", "agent_group=\"site-tor1\""] : strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/usr/local/sbin/cah-log-shipping-firstboot"]), l)])
+    error_message = "The manager, ports, agent name and group must reach the first-boot script."
+  }
+}
+
+run "log_shipping_default_ports_are_1514_and_1515" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      agent_name          = "site-tor1-connector-a"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  assert {
+    condition     = strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/usr/local/sbin/cah-log-shipping-firstboot"]), "manager_port=\"1514\"") && strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/usr/local/sbin/cah-log-shipping-firstboot"]), "enroll_port=\"1515\"")
+    error_message = "The defaults must be the Wazuh agent port 1514 and the enrollment port 1515."
+  }
+}
+
+run "log_shipping_apt_key_is_pinned_to_the_given_fingerprint" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      agent_name          = "site-tor1-connector-a"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  assert {
+    condition     = strcontains(output.user_data, join("", ["FPR=", "0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])) && strcontains(output.user_data, "https://packages.wazuh.com/key/GPG-KEY-WAZUH")
+    error_message = "The Wazuh key must be checked against the fingerprint input."
+  }
+  assert {
+    condition     = strcontains(output.user_data, "AGENT_PACKAGE=wazuh-agent\n")
+    error_message = "With no agent_version the package is wazuh-agent, unpinned."
+  }
+}
+
+run "log_shipping_agent_version_pins_the_package" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      agent_name          = "site-tor1-connector-a"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+      agent_version       = "4.9.2-1"
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  assert {
+    condition     = strcontains(output.user_data, "AGENT_PACKAGE=wazuh-agent=4.9.2-1\n")
+    error_message = "agent_version must pin the package."
+  }
+}
+
+run "log_shipping_on_runs_the_install_then_the_first_boot_script_once_each" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      agent_name          = "site-tor1-connector-a"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  assert {
+    condition     = length([for c in yamldecode(output.user_data).runcmd : c if strcontains(jsonencode(c), "packages.wazuh.com")]) == 1
+    error_message = "runcmd must install the agent once."
+  }
+  assert {
+    condition     = length([for c in yamldecode(output.user_data).runcmd : c if strcontains(jsonencode(c), "cah-log-shipping-firstboot")]) == 1
+    error_message = "runcmd must run the first-boot script once."
+  }
+  assert {
+    condition     = length([for c in yamldecode(output.user_data).runcmd : c if strcontains(jsonencode(c), "twingate-connector-keyring")]) == 1
+    error_message = "The connector install must stay, once."
+  }
+}
+
+# The secret rule (design section 2.8): user_data holds the bootstrap token and no
+# other secret. The fixtures below are supplied as extra attributes of the
+# log_shipping object. An object conversion drops attributes the type does not
+# declare, so these prove no such attribute reaches user_data, and the test fails
+# the day one is declared and rendered.
+run "log_shipping_user_data_holds_the_bootstrap_token_and_no_other_secret" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled              = true
+      manager_address      = "siem.example.com"
+      agent_name           = "site-tor1-connector-a"
+      apt_key_fingerprint  = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+      enrollment_password  = join("-", ["fixture", "wazuh", "enroll", "password", "0001"])
+      twingate_service_key = join("-", ["fixture", "twingate", "service", "key", "0001"])
+      doppler_secret       = join("-", ["fixture", "doppler", "secret", "value", "0001"])
+    }
+    log_shipping_bootstrap_token = join("-", ["fixture", "bootstrap", "token", "0001"])
+  }
+  assert {
+    condition     = length(split("fixture-bootstrap-token-0001", output.user_data)) == 2
+    error_message = "The bootstrap token must appear exactly once in user_data."
+  }
+  assert {
+    condition     = trimspace(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/etc/cah/hostboot.token"])) == "fixture-bootstrap-token-0001"
+    error_message = "The one occurrence must be the root-only token file."
+  }
+  assert {
+    condition     = !strcontains(output.user_data, "fixture-wazuh-enroll-password-0001") && !strcontains(output.user_data, "fixture-twingate-service-key-0001") && !strcontains(output.user_data, "fixture-doppler-secret-value-0001")
+    error_message = "No enrollment password, Twingate service key or Doppler secret value may reach user_data."
+  }
+  assert {
+    condition     = !strcontains(jsonencode(yamldecode(output.user_data).runcmd), "fixture-bootstrap-token-0001")
+    error_message = "The token must not be in any command line."
+  }
+  assert {
+    condition     = length(regexall("(?i)(WAZUH_REGISTRATION_PASSWORD|TWINGATE_SERVICE_KEY|private_key|--password)", output.user_data)) == 0
+    error_message = "No password assignment, deployment variable or key blob may be rendered."
+  }
+}
+
+run "log_shipping_module_declares_no_variable_that_could_carry_a_secret" {
+  command = plan
+  assert {
+    condition     = length(regexall("(?m)^variable \"[a-z_]*(password|secret|service_key|private_key|api_key)[a-z_]*\"", file("${path.module}/variables.tf"))) == 0
+    error_message = "The bootstrap module must declare no variable for an enrollment password, service key or other secret (only the bootstrap token)."
+  }
+  assert {
+    condition     = length(regexall("(?s)variable \"log_shipping_bootstrap_token\" \\{[^}]*sensitive\\s*=\\s*true", file("${path.module}/variables.tf"))) == 1
+    error_message = "The bootstrap token variable must be sensitive."
+  }
+}
+
+run "log_shipping_token_is_not_rendered_when_it_is_the_only_thing_set" {
+  command = plan
+  variables {
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  assert {
+    condition     = !strcontains(output.user_data, "fixture-bootstrap-token-0001")
+    error_message = "A token with the feature off must not reach user_data."
+  }
+}
+
+run "log_shipping_on_requires_the_bootstrap_token" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      agent_name          = "site-tor1-connector-a"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+  }
+  expect_failures = [output.user_data]
+}
+
+run "log_shipping_on_requires_the_manager_address" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      agent_name          = "site-tor1-connector-a"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_on_requires_the_agent_name" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_on_requires_the_pinned_fingerprint_and_has_no_default" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled         = true
+      manager_address = "siem.example.com"
+      agent_name      = "site-tor1-connector-a"
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_fingerprint_must_be_forty_uppercase_hex_digits" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      agent_name          = "site-tor1-connector-a"
+      apt_key_fingerprint = join("", ["0123456789", "abcdef0123", "456789abcd", "ef01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_fingerprint_with_spaces_is_refused" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      agent_name          = "site-tor1-connector-a"
+      apt_key_fingerprint = "0123 4567 89AB CDEF 0123 4567 89AB CDEF 0123 4567"
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_agent_name_must_end_in_connector_and_this_instance" {
+  command = plan
+  variables {
+    instance = "b"
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      agent_name          = "site-tor1-connector-a"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  expect_failures = [output.user_data]
+}
+
+run "log_shipping_agent_name_rejects_shell_metacharacters" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      agent_name          = "x\"; id; echo \"-connector-a"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_manager_address_rejects_a_url_a_port_and_a_quote" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "https://siem.example.com:1514"
+      agent_name          = "site-tor1-connector-a"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_manager_address_accepts_an_ipv4_literal" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "192.0.2.10"
+      agent_name          = "site-tor1-connector-a"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+}
+
+run "log_shipping_agent_group_rejects_a_space" {
+  command = plan
+  variables {
+    log_shipping = {
+      agent_group = "two words"
+    }
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_agent_version_rejects_a_range" {
+  command = plan
+  variables {
+    log_shipping = {
+      agent_version = "4.x"
+    }
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_ports_are_checked_even_while_disabled" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled      = false
+      manager_port = 70000
+    }
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_enroll_port_rejects_a_fraction" {
+  command = plan
+  variables {
+    log_shipping = {
+      enroll_port = 1515.5
+    }
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_bootstrap_token_rejects_a_quote_and_a_newline" {
+  command = plan
+  variables {
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001\"\nruncmd: [x]"
+  }
+  expect_failures = [var.log_shipping_bootstrap_token]
+}
+
+run "log_shipping_bootstrap_token_rejects_a_short_value" {
+  command = plan
+  variables {
+    log_shipping_bootstrap_token = "short"
+  }
+  expect_failures = [var.log_shipping_bootstrap_token]
+}
+
+run "log_shipping_hostboot_config_is_named_from_the_resource_key" {
+  command = plan
+  variables {
+    resource_key = "tor1-b"
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      agent_name          = "site-tor1-connector-a"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  assert {
+    condition     = strcontains(output.user_data, "cah-tor1-b-hostboot")
+    error_message = "The hostboot config name must come from resource_key (cah-<resource_key>-hostboot)."
+  }
+}
+
+run "log_shipping_on_is_valid_cloud_config_yaml_with_every_feature_on" {
+  command = plan
+  variables {
+    host_firewall       = true
+    metadata_lock       = true
+    node_exporter       = { enabled = true }
+    connector_telemetry = { metrics_port = 9999 }
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      agent_name          = "site-tor1-connector-a"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  assert {
+    condition     = length(yamldecode(output.user_data).write_files) > 8 && length(yamldecode(output.user_data).runcmd) > 8
+    error_message = "The cloud-init must still decode with every feature on."
+  }
+}

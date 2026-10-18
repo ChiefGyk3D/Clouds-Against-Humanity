@@ -37,7 +37,12 @@ import hcl_variables
 MANIFEST = ROOT / "docs" / "settings.json"
 SECTIONS = ("variables", "manifests", "secrets", "hardcoded", "external")
 STATUSES = ("exists", "planned")
-SENSITIVITIES = ("public", "private", "secret")
+# "bootstrap-credential" is the one credential class a variable entry may have: a
+# short-lived bearer token the machine uses once at first boot and that therefore
+# has to be rendered into user_data. A plain "secret" is still never a variable
+# (see test_no_secret_has_a_value).
+SENSITIVITIES = ("public", "private", "secret", "bootstrap-credential")
+BOOTSTRAP_CREDENTIAL_VARIABLES = {"log_shipping_bootstrap_token"}
 
 VARIABLE_FIELDS = {
     "name",
@@ -531,6 +536,28 @@ def test_no_secret_has_a_value():
                 raise AssertionError(
                     f"{place}.{e['name']}: a secret must not be a variable entry"
                 )
+
+
+def test_the_bootstrap_token_is_classed_as_the_credential_it_is():
+    manifest = load()
+    found = set()
+    for place, entries in manifest["variables"].items():
+        for e in entries:
+            if e["name"] in BOOTSTRAP_CREDENTIAL_VARIABLES:
+                assert e["sensitivity"] == "bootstrap-credential", (
+                    f"{place}.{e['name']} is a bearer credential rendered into user_data, "
+                    f"not '{e['sensitivity']}'"
+                )
+                assert e["sensitive_in_code"] is True and e.get("readers"), place
+            if e["sensitivity"] == "bootstrap-credential":
+                found.add(e["name"])
+    # The class cannot be used to wave an arbitrary secret into a variable.
+    assert found == BOOTSTRAP_CREDENTIAL_VARIABLES
+
+
+def test_the_generated_page_explains_the_bootstrap_credential_class():
+    page = (ROOT / "docs" / "wiki" / "Settings-Reference.md").read_text(encoding="utf-8")
+    assert "`bootstrap-credential`" in page
 
 
 # --- examples ----------------------------------------------------------------
