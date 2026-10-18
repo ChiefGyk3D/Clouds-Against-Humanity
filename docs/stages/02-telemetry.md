@@ -58,7 +58,7 @@ Set the flags back to false and apply: the Twingate objects are destroyed and no
 
 ## 7. Verification after an apply (every item is "not run yet")
 
-Nothing in stage 2 is applied, so **every check below is marked `not run yet`**. Change a mark to a dated result only when you have run the command and read the output. All checks are read-only: none changes a stack, a firewall, an agent or a rule. Addresses and names are placeholders from the documentation ranges (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`) and `example.com`; replace them with your own, and keep your real values out of this file, issues and pull requests.
+Nothing in stage 2 is applied, so **every check below is marked `not run yet`**. Change a mark to a dated result only when you have run the command and read the output. No check changes a stack, a firewall, an agent or a rule, but two are active probes that leave traces: L3 creates a failed login and a Wazuh alert, and X2 scans a connector's public address. Run those two only against hosts you own, and expect detections or lockout controls to see them. Addresses and names are placeholders from the documentation ranges (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`) and `example.com`; replace them with your own, and keep your real values out of this file, issues and pull requests.
 
 Three facts are **UNVERIFIED** and change what a pass looks like, so settle them first. The connector's metrics bind address is not documented: test it on one connector before relying on the metrics checks. Whether the Wazuh agent can read journald on the version your manager runs is not known: if it cannot, the log checks pass only for file sources such as `/var/log/auth.log`. The Twingate plan limit for services is not documented either (section 3, step 1).
 
@@ -123,13 +123,16 @@ Pass: one line per cloud host with status `Active`, named `<site_name>-<role>-<a
 **L3. A test event and its alert.** Create one harmless authentication failure on a connector from the operator machine (an invalid user over SSH, through Twingate):
 
 ```
+date -u +%Y-%m-%dT%H:%M:%SZ
 ssh -o BatchMode=yes -o ConnectTimeout=10 no-such-user@192.0.2.21 true
 ```
+
+The first line records the test time; the alert's `time` field must be later than it.
 
 Then read the newest alert for that agent on the manager:
 
 ```
-docker exec wazuh-manager sh -c "grep 'site-tor1-connector-a' /var/ossec/logs/alerts/alerts.json | tail -n 1" | jq '{rule: .rule.id, level: .rule.level, description: .rule.description, agent: .agent.name}'
+docker exec wazuh-manager sh -c "grep 'site-tor1-connector-a' /var/ossec/logs/alerts/alerts.json | tail -n 1" | jq '{time: .timestamp, rule: .rule.id, level: .rule.level, description: .rule.description, agent: .agent.name}'
 ```
 
 Pass: an alert exists with a timestamp after the test, from the agent you tested. Record **the alert's text with identifiers removed**: replace addresses, user names, host names and the agent name with placeholders before pasting it anywhere. If no alert arrives, check the source first: the invalid-user line is in `/var/log/auth.log` and in journald, and the agent reads journald only if it supports it (UNVERIFIED). The rule ids are the manager's stock rules until the journald rule file exists in the home repository.
@@ -143,7 +146,7 @@ Pass: an alert exists with a timestamp after the test, from the agent you tested
 | X3 | The plan is a no-op for stacks 00 and 10 | not run yet |
 | X4 | The plan for stack 20 matches its flags | not run yet |
 
-**X1. No inbound rule has an address source.** Read-only, with `doctl` authenticated by a read-only token:
+**X1. No inbound rule has an address source.** Read-only, with `doctl` authenticated by a read-only token. First confirm which firewalls are attached to the connectors (`doctl compute firewall list-by-droplet <droplet-id>` for each connector) and that the list is not empty; the query below covers every firewall in the account, so an empty result on an account with no attached firewall proves nothing. Pass needs both: the expected firewalls are attached, and no inbound rule among them has an address source:
 
 ```
 doctl compute firewall list --output json | jq '[.[].inbound_rules[]? | select((.sources.addresses // []) | length > 0)] | length'

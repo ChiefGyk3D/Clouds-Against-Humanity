@@ -43,7 +43,7 @@ Notes:
 
 ## 3. The recorded negative reachability tests
 
-A rule you have not tested to fail is a rule you hope works. From the connector's address (or from a test host placed in the connector's VLAN with the same rules), try each connection below. **Every "must fail" row is expected to time out or be refused.** Run the set again after any rule change, and keep the filled table with your private notes; do not paste real addresses into the repository.
+A rule you have not tested to fail is a rule you hope works. Run each connection below from the connector itself. The rules are keyed to the connector's source address, so a different test host is denied for the wrong reason and proves nothing about them; if you must use another host, first give it the connector's rules by a temporary, recorded source-address substitution, and remove that afterwards. **Every "must fail" row is expected to time out or be refused.** Run the set again after any rule change, and keep the filled table with your private notes; do not paste real addresses into the repository.
 
 | # | From | To | Port | Expected | Result | Date | Tester | Rule set version |
 |---|---|---|---|---|---|---|---|---|
