@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: Apache-2.0
 # The project board for this repository, defined as code for Scrum Around and Find Out (SAFO).
 # A user-owned GitHub Project: no App can write one, so it is kept current from the maintainer's own
 # `gh` login with `safo --board board.yaml reconcile` (no token is stored in CI).
