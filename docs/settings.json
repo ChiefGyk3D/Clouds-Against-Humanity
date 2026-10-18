@@ -187,6 +187,50 @@
         "status": "exists"
       },
       {
+        "name": "log_shipping",
+        "type": "object({enabled = optional(bool, false), manager_address = optional(string, \"\"), manager_port = optional(number, 1514), enroll_port = optional(number, 1515), agent_name_prefix = optional(string, \"\"), agent_group = optional(string, \"\"), apt_key_fingerprint = optional(string, \"\"), agent_version = optional(string, \"\")})",
+        "description": "Opt-in log shipping: the Wazuh agent (from Wazuh's apt repository, key checked against apt_key_fingerprint) and auditd on each connector, enrolled at first boot with a secret pulled from Doppler. Default {} is the live state: merging code with this unset plans no change. enabled = true changes user_data and REPLACES the droplet of every connector in log_shipping_instances (both by default). Roll out one connector at a time, checking SSH through Twingate and the memory headroom of the 1 GB droplet (UNMEASURED). Required when enabled: manager_address (the manager as reached through Twingate), agent_name_prefix (agents are named <prefix>-connector-<a or b>; use the same value as site_name, but it is a separate input because it lands in user_data), apt_key_fingerprint (40 uppercase hex digits, no default on purpose) and log_shipping_bootstrap_token. manager_port 1514 and enroll_port 1515 must match the logging_servers ports in stack 20. The Twingate headless client the agent needs to reach the manager is NOT part of this change. NOT applied and NOT tested on a real machine.",
+        "required": false,
+        "default": {},
+        "validation": "ports whole numbers 1-65535 (checked even while disabled); agent_name_prefix empty or ^[a-z][a-z0-9-]{1,40}$ and required when enabled; manager_address required when enabled (letters, digits, dots, hyphens); apt_key_fingerprint required when enabled and ^[0-9A-F]{40}$; agent_group empty or letters, digits, dot, underscore, hyphen; agent_version empty or like 4.9.2-1; non-nullable (null means {})",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*); the manager address is private",
+        "example": "{ enabled = true, manager_address = \"siem.example.com\", agent_name_prefix = \"site-tor1\", apt_key_fingerprint = \"<40 uppercase hex characters>\" }",
+        "sensitivity": "private",
+        "sensitive_in_code": true,
+        "status": "exists",
+        "readers": "UNVERIFIED: Spacelift stack environment readers and, for a value kept in Doppler, the members of the site's Doppler config; the manager address is also in state, the provider API and the metadata endpoint of the machine"
+      },
+      {
+        "name": "log_shipping_instances",
+        "type": "list(string)",
+        "description": "Which connectors get log_shipping: a, b or both. Only matters once log_shipping.enabled is true. Set [\"a\"] first, apply, check SSH through Twingate and the memory headroom, then [\"a\", \"b\"]. A connector not listed runs without the agent, as it does today.",
+        "required": false,
+        "default": [
+          "a",
+          "b"
+        ],
+        "validation": "at least one entry; each entry is a or b, no repeats",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "[\"a\"]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "log_shipping_bootstrap_token",
+        "type": "string",
+        "description": "The one secret-shaped value log shipping puts in user_data: a short-lived, read-only Doppler service token for the config cah-<resource_key>-hostboot, created out of band (not by OpenTofu). The first-boot script deletes the token file before using it. Required when log_shipping.enabled; never rendered otherwise. Sensitive, but note that sensitive hides a value from output and does not keep it out of state.",
+        "required": false,
+        "default": "",
+        "validation": "empty or 16-512 characters of letters, digits, dot, underscore, hyphen; required when log_shipping.enabled",
+        "set_where": "Spacelift stack environment (TF_VAR_log_shipping_bootstrap_token), write-only; never a value file",
+        "example": "\"\"",
+        "sensitivity": "bootstrap-credential",
+        "sensitive_in_code": true,
+        "status": "exists",
+        "readers": "UNVERIFIED: Spacelift stack environment readers; while valid it is also in state, the provider API, the machine's metadata endpoint and cloud-init's own copy of user_data, and any root process on the machine until the first-boot script deletes the file"
+      },
+      {
         "name": "region",
         "type": "string",
         "description": "DigitalOcean region slug, from the foundation stack's region output. Names are built from resource_key, which defaults to this.",
@@ -1398,6 +1442,34 @@
         "status": "exists"
       },
       {
+        "name": "log_shipping",
+        "type": "object({enabled = optional(bool, false), manager_address = optional(string, \"\"), manager_port = optional(number, 1514), enroll_port = optional(number, 1515), agent_name = optional(string, \"\"), agent_group = optional(string, \"\"), apt_key_fingerprint = optional(string, \"\"), agent_version = optional(string, \"\")})",
+        "description": "Opt-in log shipping (Wazuh agent and auditd, enrolled at first boot with a secret pulled from Doppler). Default {} (enabled false): user_data is byte-identical (golden hashes in the tests). enabled = true changes user_data and REPLACES the machine. Required when enabled: manager_address, agent_name (<site>-connector-<instance>, ending in this machine's instance) and apt_key_fingerprint (40 uppercase hex digits, no default on purpose). No secret is an input here. NOT applied and NOT tested on a real machine; the 1 GB droplet's memory headroom is UNMEASURED.",
+        "required": false,
+        "default": {},
+        "validation": "ports whole numbers 1-65535 (checked even while disabled); manager_address, agent_name (^[a-z][a-z0-9-]{0,55}-connector-[a-z0-9]$) and apt_key_fingerprint (^[0-9A-F]{40}$) required when enabled; agent_group and agent_version format checks; agent_name must end in -connector-<instance> (a precondition)",
+        "set_where": "the calling module",
+        "example": "{ enabled = true, manager_address = \"siem.example.com\", agent_name = \"site-tor1-connector-a\", apt_key_fingerprint = \"<40 uppercase hex characters>\" }",
+        "sensitivity": "private",
+        "sensitive_in_code": true,
+        "status": "exists",
+        "readers": "UNVERIFIED: Spacelift stack environment readers and, for a value kept in Doppler, the members of the site's Doppler config; the manager address is also in state, the provider API and the metadata endpoint of the machine"
+      },
+      {
+        "name": "log_shipping_bootstrap_token",
+        "type": "string",
+        "description": "The one secret-shaped value that reaches user_data when log_shipping is enabled: a short-lived, read-only Doppler token for the hostboot config. Written to a root-only file that the first-boot script deletes before using it. Required when log_shipping.enabled; never rendered otherwise.",
+        "required": false,
+        "default": "",
+        "validation": "empty or 16-512 characters of letters, digits, dot, underscore, hyphen; required when log_shipping.enabled (a precondition)",
+        "set_where": "the calling module",
+        "example": "\"\"",
+        "sensitivity": "bootstrap-credential",
+        "sensitive_in_code": true,
+        "status": "exists",
+        "readers": "UNVERIFIED: Spacelift stack environment readers; while valid it is also in state, the provider API, the machine's metadata endpoint and cloud-init's own copy of user_data, and any root process on the machine until the first-boot script deletes the file"
+      },
+      {
         "name": "metadata_lock",
         "type": "bool",
         "description": "Lock the metadata endpoint (169.254.169.254) to root and the do-agent user. Default false changes nothing: user_data is byte-identical (golden hashes in the tests). true adds an nftables table, a script, a systemd unit and the nftables package to user_data, which replaces the machine.",
@@ -1627,6 +1699,34 @@
         "sensitivity": "public",
         "sensitive_in_code": false,
         "status": "exists"
+      },
+      {
+        "name": "log_shipping",
+        "type": "object({enabled = optional(bool, false), manager_address = optional(string, \"\"), manager_port = optional(number, 1514), enroll_port = optional(number, 1515), agent_name = optional(string, \"\"), agent_group = optional(string, \"\"), apt_key_fingerprint = optional(string, \"\"), agent_version = optional(string, \"\")})",
+        "description": "Opt-in Wazuh agent and auditd with a first-boot enrollment, passed to the bootstrap module, which validates it. Default {} changes nothing. enabled = true changes user_data and replaces the droplet.",
+        "required": false,
+        "default": {},
+        "validation": "none (validated in modules/twingate-bootstrap); non-nullable (null means {})",
+        "set_where": "the calling stack",
+        "example": "{ enabled = true, manager_address = \"siem.example.com\", agent_name = \"site-tor1-connector-a\", apt_key_fingerprint = \"<40 uppercase hex characters>\" }",
+        "sensitivity": "private",
+        "sensitive_in_code": true,
+        "status": "exists",
+        "readers": "UNVERIFIED: Spacelift stack environment readers and, for a value kept in Doppler, the members of the site's Doppler config; the manager address is also in state, the provider API and the metadata endpoint of the machine"
+      },
+      {
+        "name": "log_shipping_bootstrap_token",
+        "type": "string",
+        "description": "Short-lived, read-only Doppler token for the hostboot config, passed to the bootstrap module. Required when log_shipping.enabled; never rendered otherwise.",
+        "required": false,
+        "default": "",
+        "validation": "none (validated in modules/twingate-bootstrap)",
+        "set_where": "the calling stack",
+        "example": "\"\"",
+        "sensitivity": "bootstrap-credential",
+        "sensitive_in_code": true,
+        "status": "exists",
+        "readers": "UNVERIFIED: Spacelift stack environment readers; while valid it is also in state, the provider API, the machine's metadata endpoint and cloud-init's own copy of user_data, and any root process on the machine until the first-boot script deletes the file"
       },
       {
         "name": "metadata_lock",
@@ -2311,11 +2411,24 @@
       "status": "planned"
     },
     {
+      "name": "Doppler hostboot bootstrap token",
+      "class": "secret",
+      "store": "Doppler service token for the config cah-<resource_key>-hostboot, created out of band; handed to the stack as TF_VAR_log_shipping_bootstrap_token",
+      "used_by": [
+        "stacks/10-access (user_data of each connector with log_shipping.enabled)"
+      ],
+      "delivered_as": "sensitive stack variable log_shipping_bootstrap_token; the first-boot script deletes the token file",
+      "expiry": "UNVERIFIED: must expire on its own within a day; revoke after the first boot if Doppler's minimum is longer",
+      "rotation": "create a new token for each rebuild; revoke the old one",
+      "sensitivity": "secret",
+      "status": "planned"
+    },
+    {
       "name": "Wazuh enrollment password",
       "class": "secret",
       "store": "Doppler hostboot config (one per site)",
       "used_by": [
-        "each host, pulled at first boot"
+        "each connector with log_shipping.enabled, pulled at first boot as WAZUH_ENROLLMENT_PASSWORD"
       ],
       "delivered_as": "first-boot pull, never a variable",
       "expiry": "rotated after each enrollment window",

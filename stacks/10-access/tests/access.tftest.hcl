@@ -1324,3 +1324,279 @@ run "node_exporter_port_rejects_a_privileged_port" {
   }
   expect_failures = [var.node_exporter]
 }
+
+# log_shipping (stage 2 step 7): opt-in Wazuh agent and auditd on the connectors.
+# Off by default; the byte-identical user_data is proved by the golden hashes in
+# the bootstrap module's tests. Enabling it changes user_data and so REPLACES the
+# droplet. Nothing here was applied or tested on a real machine. The fixture
+# values are obviously fake.
+# Proves only that the default plans and leaves log shipping off with no token. It
+# does NOT prove the live droplets are untouched: that rests on the golden user_data
+# hashes in modules/twingate-bootstrap/tests (byte-identical when off).
+run "log_shipping_default_plans_with_the_agent_off" {
+  command = plan
+  assert {
+    condition     = module.connector_a.size != "" && module.connector_b.size != ""
+    error_message = "The defaults must plan."
+  }
+  assert {
+    condition     = var.log_shipping.enabled == false && var.log_shipping_bootstrap_token == "" && var.log_shipping.manager_port == 1514 && var.log_shipping.enroll_port == 1515
+    error_message = "log_shipping must default to off, with no token and the Wazuh ports 1514 and 1515."
+  }
+}
+
+run "log_shipping_is_wired_to_both_connectors_gated_on_its_instances" {
+  command = plan
+  assert {
+    condition     = length(regexall("log_shipping\\s*=\\s*local\\.log_shipping_a", file("${path.module}/main.tf"))) == 1 && length(regexall("log_shipping\\s*=\\s*local\\.log_shipping_b", file("${path.module}/main.tf"))) == 1
+    error_message = "Connector a and b must each receive their own log_shipping value."
+  }
+  assert {
+    condition     = length(regexall("contains\\(var\\.log_shipping_instances, \"a\"\\)", file("${path.module}/main.tf"))) == 1 && length(regexall("contains\\(var\\.log_shipping_instances, \"b\"\\)", file("${path.module}/main.tf"))) == 1
+    error_message = "Connector a must be gated on \"a\" and connector b on \"b\" in log_shipping_instances."
+  }
+  assert {
+    condition     = length(regexall("log_shipping_bootstrap_token\\s*=\\s*var\\.log_shipping_bootstrap_token", file("${path.module}/main.tf"))) == 2
+    error_message = "Both connectors must receive the bootstrap token variable and nothing else secret-shaped."
+  }
+  assert {
+    condition     = length(regexall("-connector-a\"", file("${path.module}/main.tf"))) >= 1 && length(regexall("-connector-b\"", file("${path.module}/main.tf"))) >= 1
+    error_message = "The agent names must be <prefix>-connector-a and <prefix>-connector-b."
+  }
+}
+
+run "log_shipping_never_reads_site_name" {
+  command = plan
+  assert {
+    condition     = !strcontains(file("${path.module}/main.tf"), "site_name")
+    error_message = "site_name replaces nothing and is a telemetry label only; the agent name comes from log_shipping.agent_name_prefix."
+  }
+}
+
+run "log_shipping_on_plans_for_both_connectors" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      agent_name_prefix   = "site-tor1"
+      agent_group         = "site-tor1"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  assert {
+    condition     = module.connector_a.size != "" && module.connector_b.size != ""
+    error_message = "Enabling log shipping must plan."
+  }
+}
+
+run "log_shipping_on_rolls_out_to_one_connector" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "192.0.2.10"
+      agent_name_prefix   = "site-tor1"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+    log_shipping_instances       = ["a"]
+  }
+  assert {
+    condition     = module.connector_a.size != "" && module.connector_b.size != ""
+    error_message = "Rolling log shipping out to one connector must plan."
+  }
+}
+
+run "log_shipping_on_can_use_a_different_instance_list_for_b" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      agent_name_prefix   = "site-tor1"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+    log_shipping_instances       = ["b"]
+  }
+  assert {
+    condition     = module.connector_b.size != ""
+    error_message = "Rolling log shipping out to connector b alone must plan."
+  }
+}
+
+run "log_shipping_on_requires_the_bootstrap_token" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      agent_name_prefix   = "site-tor1"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+  }
+  expect_failures = [var.log_shipping_bootstrap_token]
+}
+
+run "log_shipping_on_requires_a_name_prefix" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_on_requires_the_manager_address" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      agent_name_prefix   = "site-tor1"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_on_requires_the_fingerprint_which_has_no_default" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled           = true
+      manager_address   = "siem.example.com"
+      agent_name_prefix = "site-tor1"
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_fingerprint_rejects_lowercase_and_short_values" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      agent_name_prefix   = "site-tor1"
+      apt_key_fingerprint = "short"
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_name_prefix_rejects_uppercase_and_quotes" {
+  command = plan
+  variables {
+    log_shipping = {
+      agent_name_prefix = "Site\"x"
+    }
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_manager_address_rejects_a_url" {
+  command = plan
+  variables {
+    log_shipping = {
+      enabled             = true
+      manager_address     = "https://siem.example.com"
+      agent_name_prefix   = "site-tor1"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_ports_are_checked_even_while_disabled" {
+  command = plan
+  variables {
+    log_shipping = {
+      manager_port = 0
+    }
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_enroll_port_rejects_65536" {
+  command = plan
+  variables {
+    log_shipping = {
+      enroll_port = 65536
+    }
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_agent_group_rejects_a_space" {
+  command = plan
+  variables {
+    log_shipping = {
+      agent_group = "two words"
+    }
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_agent_version_rejects_a_range" {
+  command = plan
+  variables {
+    log_shipping = {
+      agent_version = "4.x"
+    }
+  }
+  expect_failures = [var.log_shipping]
+}
+
+run "log_shipping_instances_rejects_an_empty_list" {
+  command = plan
+  variables {
+    log_shipping_instances = []
+  }
+  expect_failures = [var.log_shipping_instances]
+}
+
+run "log_shipping_instances_rejects_c" {
+  command = plan
+  variables {
+    log_shipping_instances = ["a", "c"]
+  }
+  expect_failures = [var.log_shipping_instances]
+}
+
+run "log_shipping_instances_rejects_a_repeat" {
+  command = plan
+  variables {
+    log_shipping_instances = ["a", "a"]
+  }
+  expect_failures = [var.log_shipping_instances]
+}
+
+run "log_shipping_bootstrap_token_rejects_a_quote_and_a_short_value" {
+  command = plan
+  variables {
+    log_shipping_bootstrap_token = "short\""
+  }
+  expect_failures = [var.log_shipping_bootstrap_token]
+}
+
+run "log_shipping_secret_inputs_are_sensitive_and_nothing_secret_is_an_output" {
+  command = plan
+  assert {
+    condition     = length(regexall("(?s)variable \"log_shipping_bootstrap_token\" \\{.*?sensitive\\s*=\\s*true", file("${path.module}/variables.tf"))) == 1 && length(regexall("(?s)variable \"log_shipping\" \\{.*?sensitive\\s*=\\s*true", file("${path.module}/variables.tf"))) == 1
+    error_message = "The bootstrap token and the log_shipping object (it holds the manager address) must be sensitive."
+  }
+  assert {
+    condition     = length(regexall("log_shipping", file("${path.module}/outputs.tf"))) == 0
+    error_message = "No output may carry a log_shipping value."
+  }
+}

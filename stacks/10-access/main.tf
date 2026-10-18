@@ -28,6 +28,26 @@ locals {
       tag        = var.metrics_source_tag
     }
   ]
+
+  # Log shipping, per connector: the agent is named <prefix>-connector-<a or b>
+  # and is on only for the instances listed. With the default ({}) every field is
+  # empty or false, so the bootstrap module renders exactly the user_data it did
+  # before (golden hashes in its tests). The bootstrap token is passed on as it
+  # is and is rendered only while the feature is on.
+  log_shipping_a = {
+    enabled             = var.log_shipping.enabled && contains(var.log_shipping_instances, "a")
+    manager_address     = var.log_shipping.manager_address
+    manager_port        = var.log_shipping.manager_port
+    enroll_port         = var.log_shipping.enroll_port
+    agent_name          = var.log_shipping.enabled ? "${var.log_shipping.agent_name_prefix}-connector-a" : ""
+    agent_group         = var.log_shipping.agent_group
+    apt_key_fingerprint = var.log_shipping.apt_key_fingerprint
+    agent_version       = var.log_shipping.agent_version
+  }
+  log_shipping_b = merge(local.log_shipping_a, {
+    enabled    = var.log_shipping.enabled && contains(var.log_shipping_instances, "b")
+    agent_name = var.log_shipping.enabled ? "${var.log_shipping.agent_name_prefix}-connector-b" : ""
+  })
 }
 
 resource "digitalocean_tag" "connector" {
@@ -72,6 +92,9 @@ module "connector_a" {
 
   node_exporter = { enabled = var.node_exporter.enabled && contains(var.node_exporter_instances, "a"), port = var.node_exporter.port }
 
+  log_shipping                 = local.log_shipping_a
+  log_shipping_bootstrap_token = var.log_shipping_bootstrap_token
+
   host_firewall             = var.host_firewall && contains(var.host_firewall_instances, "a")
   host_firewall_ssh_sources = var.host_firewall_ssh_sources
 
@@ -101,6 +124,9 @@ module "connector_b" {
   metadata_lock = var.metadata_lock && contains(var.metadata_lock_instances, "b")
 
   node_exporter = { enabled = var.node_exporter.enabled && contains(var.node_exporter_instances, "b"), port = var.node_exporter.port }
+
+  log_shipping                 = local.log_shipping_b
+  log_shipping_bootstrap_token = var.log_shipping_bootstrap_token
 
   host_firewall             = var.host_firewall && contains(var.host_firewall_instances, "b")
   host_firewall_ssh_sources = var.host_firewall_ssh_sources

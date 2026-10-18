@@ -103,6 +103,31 @@ variable "node_exporter" {
   description = "Opt-in node exporter bound to the private address, passed to the bootstrap module, which validates it and explains it. The default ({}) changes nothing. enabled = true changes user_data and replaces the droplet."
 }
 
+variable "log_shipping" {
+  type = object({
+    enabled             = optional(bool, false)
+    manager_address     = optional(string, "")
+    manager_port        = optional(number, 1514)
+    enroll_port         = optional(number, 1515)
+    agent_name          = optional(string, "")
+    agent_group         = optional(string, "")
+    apt_key_fingerprint = optional(string, "")
+    agent_version       = optional(string, "")
+  })
+  default     = {}
+  nullable    = false
+  sensitive   = true
+  description = "Opt-in Wazuh agent and auditd with a first-boot enrollment, passed to the bootstrap module, which validates it and explains it. The default ({}) changes nothing. enabled = true changes user_data and replaces the droplet."
+}
+
+variable "log_shipping_bootstrap_token" {
+  type        = string
+  default     = ""
+  nullable    = false
+  sensitive   = true
+  description = "Short-lived, read-only Doppler token for the hostboot config, passed to the bootstrap module. Required when log_shipping.enabled; never rendered otherwise."
+}
+
 variable "host_firewall" {
   type        = bool
   default     = false

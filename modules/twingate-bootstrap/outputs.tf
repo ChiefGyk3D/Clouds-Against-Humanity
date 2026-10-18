@@ -29,10 +29,34 @@ output "user_data" {
     node_exporter               = var.node_exporter.enabled
     node_exporter_port          = var.node_exporter.port
     host_firewall_node_exporter = var.node_exporter.enabled ? tostring(var.node_exporter.port) : ""
+
+    # Log shipping. Every value except the bootstrap token is plain, validated
+    # configuration; the token is the only secret-shaped value and it is rendered
+    # only while log_shipping is enabled (so the default user_data is unchanged).
+    log_shipping                 = var.log_shipping.enabled
+    log_shipping_manager_address = var.log_shipping.enabled ? var.log_shipping.manager_address : ""
+    log_shipping_manager_port    = tostring(var.log_shipping.manager_port)
+    log_shipping_enroll_port     = tostring(var.log_shipping.enroll_port)
+    log_shipping_agent_name      = var.log_shipping.enabled ? var.log_shipping.agent_name : ""
+    log_shipping_agent_group     = var.log_shipping.enabled ? var.log_shipping.agent_group : ""
+    log_shipping_key_fingerprint = var.log_shipping.enabled ? var.log_shipping.apt_key_fingerprint : ""
+    log_shipping_agent_package   = var.log_shipping.agent_version == "" ? "wazuh-agent" : "wazuh-agent=${var.log_shipping.agent_version}"
+    log_shipping_hostboot_config = "cah-${local.name_key}-hostboot"
+    log_shipping_bootstrap_token = var.log_shipping.enabled ? var.log_shipping_bootstrap_token : ""
   })
 
   precondition {
     condition     = !var.node_exporter.enabled || var.connector_telemetry.metrics_port != var.node_exporter.port
     error_message = "node_exporter.port must differ from connector_telemetry.metrics_port (two listeners cannot share a port)."
+  }
+
+  precondition {
+    condition     = !var.log_shipping.enabled || var.log_shipping_bootstrap_token != ""
+    error_message = "log_shipping.enabled needs log_shipping_bootstrap_token (a short-lived, read-only Doppler token for the hostboot config). Without it the first-boot pull cannot run and the agent would never enroll."
+  }
+
+  precondition {
+    condition     = !var.log_shipping.enabled || endswith(var.log_shipping.agent_name, "-connector-${var.instance}")
+    error_message = "log_shipping.agent_name must end in -connector-<instance> for this machine's instance (for example site-tor1-connector-a for instance a)."
   }
 }

@@ -15,6 +15,9 @@ packages:
 %{ if node_exporter ~}
   - prometheus-node-exporter
 %{ endif ~}
+%{ if log_shipping ~}
+  - auditd
+%{ endif ~}
 %{ if metadata_lock || host_firewall ~}
   - nftables
 %{ endif ~}
@@ -231,6 +234,369 @@ ${telemetry_conf}%{ if metadata_lock ~}
       ExecStart=
       ExecStart=/usr/local/sbin/cah-node-exporter-run
 %{ endif ~}
+%{ if log_shipping ~}
+  # Log shipping (opt-in): the Wazuh agent and auditd. The ONLY secret-related
+  # value in this file is the short-lived, read-only Doppler token for the
+  # config "${log_shipping_hostboot_config}", written to a root-only file that the
+  # first-boot script deletes before it uses the token. The enrollment password
+  # is NOT here: the script pulls it from Doppler at first boot, uses it once and
+  # removes it. No Twingate service key and no Doppler secret value is rendered
+  # anywhere. Untested on a real machine.
+  - path: /etc/cah/hostboot.token
+    permissions: "0600"
+    owner: root:root
+    content: |
+      ${log_shipping_bootstrap_token}
+  # Runs once, from runcmd, after the agent package is installed. Fails closed:
+  # when the pull or the enrollment fails the agent is never enabled or started,
+  # the reason goes to the cloud-init log, and nothing falls back to a literal.
+  # Never add set -x here: it would print the token and the password.
+  - path: /usr/local/sbin/cah-log-shipping-firstboot
+    permissions: "0750"
+    owner: root:root
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+      umask 077
+      TOKEN_FILE=/etc/cah/hostboot.token
+      PASS_FILE=/var/ossec/etc/authd.pass
+      GUARD=/usr/local/sbin/cah-agent-guard
+      OSSEC_INSERT=/usr/local/sbin/cah-ossec-insert
+      OSSEC_CONF=/var/ossec/etc/ossec.conf
+      LOCALFILE_XML=/etc/cah/wazuh-localfile.xml
+      AGENT_AUTH=/var/ossec/bin/agent-auth
+      RUN_DIR=/run/cah-log-shipping
+      manager="${log_shipping_manager_address}"
+      manager_port="${log_shipping_manager_port}"
+      enroll_port="${log_shipping_enroll_port}"
+      agent_name="${log_shipping_agent_name}"
+      agent_group="${log_shipping_agent_group}"
+      work=""
+      log() { echo "cah-log-shipping: $*" >&2; }
+      fail() {
+        log "FAILED: $1; failing closed, the Wazuh agent is not started"
+        systemctl stop wazuh-agent >/dev/null 2>&1 || true
+        systemctl disable wazuh-agent >/dev/null 2>&1 || true
+        # The unit is masked directly first, whatever state policy-rc.d is in.
+        if ! systemctl mask wazuh-agent; then
+          log "CRITICAL: could not mask wazuh-agent; it may be startable, check it by hand"
+        fi
+        # Then both guards back. If the guard cannot restore the policy-rc.d
+        # denial (an unmanaged file is in the way), it has already masked the unit,
+        # and this says so on the record instead of hiding it.
+        if ! "$GUARD" deny; then
+          log "CRITICAL: the guard could not restore the policy-rc.d denial; the unit is masked and stopped, check /usr/sbin/policy-rc.d by hand"
+        fi
+        exit 1
+      }
+      # Whatever happens, the token file, the password file and the pulled
+      # config do not outlive this script.
+      cleanup() {
+        rm -f "$TOKEN_FILE" "$PASS_FILE"
+        if [ -n "$work" ]; then rm -rf "$work"; fi
+      }
+      trap cleanup EXIT
+      # A killed earlier run (SIGKILL, power loss) skips the trap. A password
+      # file or a pulled config found now can only be such a leftover, so remove
+      # it before anything else. The token file is this script's input and is not
+      # swept here; the boot-time sweep unit covers a token that outlived a boot.
+      rm -f "$PASS_FILE"
+      rm -rf "$RUN_DIR"
+      [ -f "$TOKEN_FILE" ] || fail "no bootstrap token file at $TOKEN_FILE"
+      token="$(cat "$TOKEN_FILE")"
+      rm -f "$TOKEN_FILE"
+      [ -n "$token" ] || fail "the bootstrap token file was empty"
+      [ -x "$AGENT_AUTH" ] || fail "the Wazuh agent is not installed ($AGENT_AUTH is missing)"
+      augenrules --load || fail "augenrules --load failed"
+      mkdir -p "$RUN_DIR"
+      work="$(mktemp -d "$RUN_DIR/pull.XXXXXX")"
+      # The token goes to curl on stdin (-K -), so it is never in an argument list.
+      if ! printf 'user = "%s:"\n' "$token" | curl -fsS --proto '=https' --tlsv1.2 --retry 3 --max-time 60 -K - -o "$work/secrets.json" "https://api.doppler.com/v3/configs/config/secrets/download?format=json"; then
+        fail "pull from Doppler failed (config ${log_shipping_hostboot_config}; the token may have expired)"
+      fi
+      unset token
+      if ! password="$(python3 -c 'import json,sys; v=json.load(open(sys.argv[1])).get(sys.argv[2]); sys.exit(1) if (not isinstance(v, str) or not v or chr(10) in v) else sys.stdout.write(v)' "$work/secrets.json" WAZUH_ENROLLMENT_PASSWORD 2>/dev/null)"; then
+        fail "the pulled config has no usable WAZUH_ENROLLMENT_PASSWORD"
+      fi
+      # Only that one value is kept; the rest of the pulled config goes now.
+      rm -rf "$work"
+      work=""
+      printf '%s' "$password" > "$PASS_FILE"
+      chmod 0600 "$PASS_FILE"
+      unset password
+      args=(-m "$manager" -p "$enroll_port" -A "$agent_name")
+      if [ -n "$agent_group" ]; then args+=(-G "$agent_group"); fi
+      if ! "$AGENT_AUTH" "$${args[@]}"; then
+        rm -f "$PASS_FILE"
+        fail "enrollment failed (agent-auth against $manager:$enroll_port)"
+      fi
+      # Enrolled: the password is not needed again. The per-host agent key stays.
+      rm -f "$PASS_FILE"
+      sed -i -e "0,/<address>[^<]*<\/address>/s//<address>$manager<\/address>/" -e "0,/<port>[^<]*<\/port>/s//<port>$manager_port<\/port>/" "$OSSEC_CONF" || fail "could not set the manager in $OSSEC_CONF"
+      if ! grep -q 'cah-log-shipping-localfiles' "$OSSEC_CONF"; then
+        "$OSSEC_INSERT" "$OSSEC_CONF" "$LOCALFILE_XML" || fail "could not add the log sources to $OSSEC_CONF"
+      fi
+      # Enrolled and configured: only now is the agent allowed to run. Both
+      # guards (the mask and the policy-rc.d denial) are lifted here and nowhere
+      # else; every failure above leaves them in place, and a failure after this
+      # point puts both back.
+      "$GUARD" allow || fail "could not lift the guards on wazuh-agent"
+      systemctl enable --now wazuh-agent || fail "wazuh-agent did not start"
+      systemctl is-active --quiet wazuh-agent || fail "wazuh-agent is not active after start"
+      log "agent $agent_name enrolled with $manager and started"
+  # Log sources, inserted inside the agent's existing <ossec_config> element by
+  # the script above (a fragment of <localfile> blocks, not a document). The
+  # journald log format and its filter fields are UNVERIFIED against the agent
+  # version your manager runs (design section 6.1); if the agent rejects them,
+  # remove the journald blocks and use the documented syslog fallback.
+  - path: /etc/cah/wazuh-localfile.xml
+    permissions: "0640"
+    owner: root:root
+    content: |
+      <!-- cah-log-shipping-localfiles -->
+      <localfile>
+        <log_format>journald</log_format>
+        <location>journald</location>
+        <filter field="_SYSTEMD_UNIT">^twingate-connector\.service$</filter>
+      </localfile>
+      <localfile>
+        <log_format>journald</log_format>
+        <location>journald</location>
+        <filter field="_SYSTEMD_UNIT">^(ssh|sshd)\.service$</filter>
+      </localfile>
+      <localfile>
+        <log_format>journald</log_format>
+        <location>journald</location>
+        <filter field="SYSLOG_IDENTIFIER">^sudo$</filter>
+      </localfile>
+      <localfile>
+        <log_format>syslog</log_format>
+        <location>/var/log/auth.log</location>
+      </localfile>
+      <localfile>
+        <log_format>audit</log_format>
+        <location>/var/log/audit/audit.log</location>
+      </localfile>
+  # A short auditd rule set: watches only (who changed identity files, sudo
+  # configuration or the Twingate config). No syscall rules, because per-command
+  # auditing is too noisy for the 1 GB droplets.
+  - path: /etc/audit/rules.d/60-cah.rules
+    permissions: "0640"
+    owner: root:root
+    content: |
+      -w /etc/passwd -p wa -k cah_identity
+      -w /etc/group -p wa -k cah_identity
+      -w /etc/shadow -p wa -k cah_identity
+      -w /etc/gshadow -p wa -k cah_identity
+      -w /etc/sudoers -p wa -k cah_sudo
+      -w /etc/sudoers.d/ -p wa -k cah_sudo
+      -w /etc/twingate/ -p wa -k cah_twingate
+  # The Wazuh deb may start its service when it is installed, before the agent is
+  # enrolled. This script puts both guards in place (deny) or lifts them (allow):
+  # the unit is masked, and a policy-rc.d answers 101 ("denied") for wazuh-agent
+  # only. Any policy-rc.d that already existed is moved aside, not replaced: the
+  # new one delegates every other request to it, and "allow" puts it back byte for
+  # byte (or removes ours when there was none).
+  # Ownership of the policy file is not guessed from its text. deny records the
+  # sha256 of exactly what it installed in a state file; a policy is ours only
+  # when that file exists and the hash still matches, so an unrelated policy that
+  # happens to mention a marker is never overwritten or deleted. A symlink is
+  # refused (nothing is written through it) and the policy is installed from a
+  # temporary file in the same directory by rename. deny masks the unit FIRST and
+  # whatever else happens, so a policy problem can never leave the unit startable;
+  # any problem is reported on stderr and makes the script exit non-zero.
+  # UNVERIFIED on a real machine.
+  - path: /usr/local/sbin/cah-agent-guard
+    permissions: "0755"
+    owner: root:root
+    content: |
+      #!/usr/bin/env bash
+      set -uo pipefail
+      POLICY_RC=/usr/sbin/policy-rc.d
+      POLICY_ORIG=/usr/sbin/policy-rc.d.cah-orig
+      STATE=/var/lib/cah/agent-guard.state
+      problem=0
+      warn() { echo "cah-agent-guard: $1" >&2; }
+      refuse() { warn "refusing: $1"; problem=1; }
+      hash_of() { local h _; read -r h _ < <(sha256sum "$1") && printf '%s\n' "$h"; }
+      ours() {
+        local want have
+        [ -f "$STATE" ] && [ -f "$POLICY_RC" ] && [ ! -L "$POLICY_RC" ] || return 1
+        read -r want < "$STATE" || return 1
+        have="$(hash_of "$POLICY_RC")" || return 1
+        [ -n "$want" ] && [ "$want" = "$have" ]
+      }
+      install_policy() {
+        local dir tmp
+        dir="$(dirname "$POLICY_RC")"
+        tmp="$(mktemp "$dir/.cah-policy.XXXXXX")" || { refuse "could not create a temporary file in $dir"; return; }
+        cat > "$tmp" <<'EOF'
+      #!/bin/sh
+      # cah-wazuh-deny
+      if [ "$1" = "wazuh-agent" ]; then
+        exit 101
+      fi
+      if [ -x /usr/sbin/policy-rc.d.cah-orig ]; then
+        exec /usr/sbin/policy-rc.d.cah-orig "$@"
+      fi
+      exit 0
+      EOF
+        chmod 0755 "$tmp"
+        mkdir -p "$(dirname "$STATE")"
+        hash_of "$tmp" > "$STATE.new" && mv -f "$STATE.new" "$STATE" || { rm -f "$tmp" "$STATE.new"; refuse "could not record the policy hash"; return; }
+        mv -T -f "$tmp" "$POLICY_RC" || { rm -f "$tmp"; refuse "could not install $POLICY_RC"; return; }
+      }
+      deny() {
+        systemctl mask wazuh-agent || { warn "could not mask wazuh-agent"; problem=1; }
+        if [ -L "$POLICY_RC" ]; then refuse "$POLICY_RC is a symlink"; return; fi
+        if [ -e "$POLICY_RC" ] && ! ours; then
+          if [ -e "$POLICY_ORIG" ] || [ -L "$POLICY_ORIG" ]; then
+            refuse "an unmanaged $POLICY_RC and a saved original both exist; leaving both untouched"
+            return
+          fi
+          mv -T "$POLICY_RC" "$POLICY_ORIG" || { refuse "could not save the existing policy"; return; }
+        fi
+        install_policy
+      }
+      allow() {
+        systemctl unmask wazuh-agent || { warn "could not unmask wazuh-agent; leaving both guards in place"; problem=1; return; }
+        if [ -L "$POLICY_RC" ]; then warn "$POLICY_RC is a symlink; leaving it alone"; return; fi
+        if ours; then
+          if [ -e "$POLICY_ORIG" ]; then
+            mv -T -f "$POLICY_ORIG" "$POLICY_RC" || { refuse "could not restore the original policy"; return; }
+          else
+            rm -f "$POLICY_RC"
+          fi
+          rm -f "$STATE"
+        fi
+      }
+      case "$${1:-}" in
+        deny) deny ;;
+        allow) allow ;;
+        *) warn "usage: cah-agent-guard deny|allow"; exit 1 ;;
+      esac
+      exit "$problem"
+  # Inserts the log sources into the agent's ossec.conf. The file is rewritten by
+  # a same-directory temporary file (written, flushed, fsynced, mode and owner
+  # copied) and an atomic rename, so a full disk or a kill leaves the original
+  # intact. The result must be well-formed and must not add a top-level element;
+  # otherwise nothing is installed.
+  - path: /usr/local/sbin/cah-ossec-insert
+    permissions: "0755"
+    owner: root:root
+    content: |
+      #!/usr/bin/env python3
+      import os
+      import sys
+      import tempfile
+      import xml.etree.ElementTree as ET
+
+
+      def refuse(why):
+          sys.stderr.write("cah-ossec-insert: refusing: " + why + "\n")
+          sys.exit(1)
+
+
+      def top_level(text):
+          return len(ET.fromstring("<cah>" + text + "</cah>"))
+
+
+      path, frag_path = sys.argv[1], sys.argv[2]
+      with open(path) as f:
+          conf = f.read()
+      with open(frag_path) as f:
+          frag = f.read()
+      i = conf.rfind("</ossec_config>")
+      if i < 0:
+          refuse(path + " has no closing </ossec_config>")
+      new = conf[:i] + frag + conf[i:]
+      try:
+          before, after = top_level(conf), top_level(new)
+      except ET.ParseError as exc:
+          refuse("the result would not be well-formed XML (" + str(exc) + ")")
+      if before != after:
+          refuse("the result would have " + str(after) + " top-level elements, not " + str(before))
+      st = os.stat(path)
+      fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path) or ".", prefix=".ossec.conf.")
+      try:
+          with os.fdopen(fd, "w") as out:
+              out.write(new)
+              out.flush()
+              os.fsync(out.fileno())
+          os.chmod(tmp, st.st_mode & 0o7777)
+          os.chown(tmp, st.st_uid, st.st_gid)
+          os.replace(tmp, path)
+      except BaseException:
+          try:
+              os.unlink(tmp)
+          except OSError:
+              pass
+          raise
+  # The pinned-key check. gpg lists the downloaded key file; this accepts it only
+  # when it holds exactly ONE primary key (one pub record, no secret keys) whose
+  # primary fingerprint equals the pin. A subkey carries its own fpr record, so an
+  # fpr is accepted only directly after a sub record; a second fpr that follows
+  # no sub, or any second pub, is refused. So a bundle of the pinned key plus an
+  # attacker key is never trusted.
+  - path: /usr/local/sbin/cah-wazuh-key-check
+    permissions: "0755"
+    owner: root:root
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+      refuse() { echo "cah-wazuh-key-check: refusing: $1" >&2; exit 1; }
+      [ "$#" -eq 2 ] || refuse "usage: cah-wazuh-key-check <keyfile> <fingerprint>"
+      keyfile="$1"
+      pin="$2"
+      listing="$(gpg --show-keys --with-colons "$keyfile")" || refuse "gpg could not read the key file"
+      pubs=0
+      primary=""
+      prev=""
+      while IFS=: read -r rec _ _ _ _ _ _ _ _ f10 _; do
+        case "$rec" in
+          pub) pubs=$((pubs + 1)); prev=pub ;;
+          sub) prev=sub ;;
+          sec|ssb) refuse "the file holds a secret key" ;;
+          fpr)
+            if [ "$prev" = pub ] && [ -z "$primary" ]; then
+              primary="$f10"
+              prev=fpr
+            elif [ "$prev" = sub ]; then
+              prev=fpr
+            else
+              refuse "an unexpected extra fingerprint record"
+            fi
+            ;;
+        esac
+      done <<< "$listing"
+      [ "$pubs" -eq 1 ] || refuse "expected exactly one public key, found $pubs"
+      [ "$primary" = "$pin" ] || refuse "the key fingerprint is not the pinned one"
+  # Belt and braces for a SIGKILL or power loss that skipped the first-boot
+  # script's cleanup: remove a leftover token and password file at every boot,
+  # before the agent starts. Enabled for the NEXT boot only (never --now), because
+  # on the first boot the token file is still needed by the first-boot script.
+  - path: /etc/systemd/system/cah-log-shipping-sweep.service
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Remove any leftover log-shipping token and enrollment password
+      Before=wazuh-agent.service
+
+      [Service]
+      Type=oneshot
+      ExecStart=/bin/rm -f /etc/cah/hostboot.token /var/ossec/etc/authd.pass
+
+      [Install]
+      WantedBy=multi-user.target
+  # The agent never needs the enrollment password after it has enrolled, so a stale
+  # file is removed before every start of the agent (the leading "-" ignores a
+  # missing file).
+  - path: /etc/systemd/system/wazuh-agent.service.d/10-cah-no-stale-password.conf
+    permissions: "0644"
+    content: |
+      [Service]
+      ExecStartPre=-/bin/rm -f /var/ossec/etc/authd.pass
+%{ endif ~}
   - path: /etc/apt/apt.conf.d/99cah-lock-wait
     permissions: "0644"
     content: |
@@ -343,6 +709,47 @@ runcmd:
       done
       echo "cah: connector install failed after 10 attempts" >&2
       exit 1
+%{ if log_shipping ~}
+  # Install the Wazuh agent from Wazuh's signed apt repository, the same way the
+  # connector is installed above. The key file must hold exactly one key, whose
+  # fingerprint is the pinned one (an input, never a default), before it is
+  # trusted. The agent must NOT start from the install: the unit is masked first
+  # (and policy-rc.d denies it, see cah-agent-guard), and the first-boot script lifts
+  # both only after a successful enrollment. If the mask fails nothing is
+  # installed. Retry up to 10 times, 30 seconds apart. Never add set -x here.
+  - - bash
+    - -o
+    - pipefail
+    - -c
+    - |
+      export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a
+      KEYRING=/usr/share/keyrings/wazuh-agent-keyring.gpg
+      FPR=${log_shipping_key_fingerprint}
+      AGENT_PACKAGE=${log_shipping_agent_package}
+      /usr/local/sbin/cah-agent-guard deny || { echo "cah: could not guard wazuh-agent; not installing it" >&2; exit 1; }
+      for attempt in $(seq 1 10); do
+        if curl -fsSL --proto '=https' --tlsv1.2 --retry 5 -o /root/wazuh.gpg.key https://packages.wazuh.com/key/GPG-KEY-WAZUH \
+          && /usr/local/sbin/cah-wazuh-key-check /root/wazuh.gpg.key "$FPR" \
+          && gpg --dearmor --yes -o "$KEYRING" /root/wazuh.gpg.key \
+          && echo "deb [signed-by=$KEYRING] https://packages.wazuh.com/4.x/apt/ stable main" > /etc/apt/sources.list.d/wazuh.list \
+          && apt-get update -q \
+          && apt-get install -yq "$AGENT_PACKAGE"; then
+          echo "cah: wazuh agent install succeeded on attempt $attempt"
+          exit 0
+        fi
+        echo "cah: wazuh agent install attempt $attempt of 10 failed"
+        sleep 30
+      done
+      echo "cah: wazuh agent install failed after 10 attempts" >&2
+      exit 1
+  # Remove a leftover token or password file at every LATER boot (never started
+  # now: the token file is still needed below). The audit rules are loaded inside
+  # the first-boot script, where a failure fails closed.
+  - [bash, -c, "systemctl daemon-reload && systemctl enable cah-log-shipping-sweep.service"]
+  # Always runs, even when the install above failed, so the token file is
+  # deleted either way; the script then fails closed.
+  - [/usr/local/sbin/cah-log-shipping-firstboot]
+%{ endif ~}
   # Leave the outcome where someone can read it later. No token is read here.
   - - bash
     - -c

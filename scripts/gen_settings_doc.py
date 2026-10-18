@@ -27,6 +27,7 @@ SENSITIVITY_TEXT = {
     "public": "public",
     "private": "private (not a credential, but identifies the owner)",
     "secret": "secret",
+    "bootstrap-credential": "bootstrap credential (a short-lived bearer token rendered into user_data for first boot)",
 }
 
 HEADER = """\
@@ -53,7 +54,7 @@ Two rules follow. **A secret is never a variable default and never in a value fi
 
 Related pages: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) (what a stack and a module are), [Doppler and secrets](Doppler-and-Secrets.md) (how a secret reaches a run), [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipeline.md) (keeping your real values in a private copy), [Terraform reference](Terraform-Reference.md) (each declaration explained).
 
-**How to read the tables.** *Status* is `exists` (in the code today) or `planned` (in the stage 2 design, not built yet). *Sensitivity* is `public` (safe for anyone), `private` (not a credential, but it identifies the owner's network or accounts) or `secret` (a credential). Examples use documentation ranges (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`), private ranges, and `example.com` only; none is a real value.
+**How to read the tables.** *Status* is `exists` (in the code today) or `planned` (in the stage 2 design, not built yet). *Sensitivity* is `public` (safe for anyone), `private` (not a credential, but it identifies the owner's network or accounts) `secret` (a credential) or `bootstrap-credential` (a short-lived bearer token that has to be rendered into `user_data` so a machine can pull its own secrets once at first boot; it is a credential, not a plain private value, and only the log shipping bootstrap token has this class). Examples use documentation ranges (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`), private ranges, and `example.com` only; none is a real value.
 """
 
 

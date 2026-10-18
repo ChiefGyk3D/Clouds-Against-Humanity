@@ -73,6 +73,9 @@ NEED_NOT_SAY_EXAMPLE = {
     "host_firewall",
     "host_firewall_instances",
     "host_firewall_ssh_sources",
+    "log_shipping",
+    "log_shipping_bootstrap_token",
+    "log_shipping_instances",
     "metadata_lock",
     "metadata_lock_instances",
     "node_exporter",
@@ -126,6 +129,21 @@ def type_ok(type_text: str, value) -> bool:
     if type_text == "object({enabled=optional(bool,false),port=optional(number,9100)})":
         # node_exporter: an object whose every field is optional.
         allowed = {"enabled": bool, "port": (int, float)}
+        return isinstance(value, dict) and all(
+            k in allowed and isinstance(v, allowed[k]) for k, v in value.items()
+        )
+    if type_text.startswith("object({enabled=optional(bool,false),manager_address="):
+        # log_shipping: an object whose every field is optional.
+        allowed = {
+            "enabled": bool,
+            "manager_address": str,
+            "manager_port": (int, float),
+            "enroll_port": (int, float),
+            "agent_name_prefix": str,
+            "agent_group": str,
+            "apt_key_fingerprint": str,
+            "agent_version": str,
+        }
         return isinstance(value, dict) and all(
             k in allowed and isinstance(v, allowed[k]) for k, v in value.items()
         )

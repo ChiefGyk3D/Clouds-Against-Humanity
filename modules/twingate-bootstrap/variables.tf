@@ -159,3 +159,63 @@ variable "node_exporter" {
     error_message = "node_exporter.port must be a whole number from 1024 to 65535."
   }
 }
+
+variable "log_shipping" {
+  type = object({
+    enabled             = optional(bool, false)
+    manager_address     = optional(string, "")
+    manager_port        = optional(number, 1514)
+    enroll_port         = optional(number, 1515)
+    agent_name          = optional(string, "")
+    agent_group         = optional(string, "")
+    apt_key_fingerprint = optional(string, "")
+    agent_version       = optional(string, "")
+  })
+  default     = {}
+  nullable    = false
+  sensitive   = true
+  description = "Opt-in log shipping: installs the Wazuh agent from Wazuh's apt repository (the repository key is checked against apt_key_fingerprint before it is trusted), adds auditd with a short watch-only rule set (identity and sudo files, /etc/twingate; no execve), collects journald for the twingate-connector, ssh and sudo units plus /var/log/auth.log, and enrolls the agent at first boot with a secret pulled from Doppler (see log_shipping_bootstrap_token). The default ({}, enabled false) is the live state: user_data is byte-identical (golden hashes in the tests) and nothing is replaced. enabled = true adds packages, scripts and files to user_data, which REPLACES the machine (roll out one connector at a time). Required when enabled: manager_address (a host name or IPv4 literal; the manager as reached through Twingate), agent_name (<site>-connector-<instance>, for example site-tor1-connector-a, ending in -connector- and this machine's instance), and apt_key_fingerprint (the 40 hex digits of Wazuh's repository signing key; deliberately no default: read it from Wazuh's documentation and compare it yourself). agent_group is optional and must already exist on the manager. agent_version pins the agent package (for example 4.9.2-1); empty takes the newest 4.x, and an agent newer than the manager is unsupported by Wazuh, so pin it to the manager's version. manager_port (default 1514) and enroll_port (default 1515) are checked even while disabled and must agree with the logging_servers ports in stack 20. Sensitive because the manager address identifies the owner's network. No secret is an input here: the enrollment password, any Twingate service key and any Doppler secret value are never rendered into user_data. The Twingate headless client the agent needs to reach the manager is NOT part of this change. NOT applied and NOT tested on a real machine; the 1 GB droplet's memory headroom with the agent is UNMEASURED."
+
+  validation {
+    condition     = alltrue([for p in [var.log_shipping.manager_port, var.log_shipping.enroll_port] : p == floor(p) && p >= 1 && p <= 65535])
+    error_message = "log_shipping.manager_port and log_shipping.enroll_port must be whole numbers from 1 to 65535."
+  }
+
+  validation {
+    condition     = !var.log_shipping.enabled || can(regex("^[A-Za-z0-9]([A-Za-z0-9.-]{0,251}[A-Za-z0-9])?$", var.log_shipping.manager_address))
+    error_message = "log_shipping.manager_address is required when enabled: a host name or IPv4 address of letters, digits, dots and hyphens (no scheme, port, path or spaces)."
+  }
+
+  validation {
+    condition     = !var.log_shipping.enabled || can(regex("^[a-z][a-z0-9-]{0,55}-connector-[a-z0-9]$", var.log_shipping.agent_name))
+    error_message = "log_shipping.agent_name is required when enabled and must look like <site>-connector-<instance> (lowercase letters, digits and hyphens, for example site-tor1-connector-a)."
+  }
+
+  validation {
+    condition     = can(regex("^([A-Za-z0-9_][A-Za-z0-9_.-]{0,63})?$", var.log_shipping.agent_group))
+    error_message = "log_shipping.agent_group must be empty or 1 to 64 letters, digits, dot, underscore or hyphen, not starting with a dot or hyphen."
+  }
+
+  validation {
+    condition     = !var.log_shipping.enabled || can(regex("^[0-9A-F]{40}$", var.log_shipping.apt_key_fingerprint))
+    error_message = "log_shipping.apt_key_fingerprint is required when enabled: the 40 uppercase hex digits of Wazuh's repository signing key, no spaces. There is no default on purpose: read it from Wazuh's documentation and compare it before you set it."
+  }
+
+  validation {
+    condition     = can(regex("^([0-9]+[.][0-9]+[.][0-9]+-[0-9]+)?$", var.log_shipping.agent_version))
+    error_message = "log_shipping.agent_version must be empty or a package version such as 4.9.2-1."
+  }
+}
+
+variable "log_shipping_bootstrap_token" {
+  type        = string
+  default     = ""
+  nullable    = false
+  sensitive   = true
+  description = "The one secret-shaped value that reaches user_data when log_shipping is enabled: a short-lived, read-only Doppler service token for the config cah-<resource_key>-hostboot, created by the maintainer out of band (not by OpenTofu). It is written to a root-only file that the first-boot script deletes before using it, and it expires on its own (the shortest lifetime Doppler allows is UNVERIFIED; revoke it after the first boot if that is long). Required when log_shipping.enabled, ignored (and never rendered) otherwise. It is still in the state, the provider API, the metadata endpoint and cloud-init's own copy of user_data until it expires or is revoked. Letters, digits, dot, underscore and hyphen only, 16 to 512 characters."
+
+  validation {
+    condition     = var.log_shipping_bootstrap_token == "" || can(regex("^[A-Za-z0-9._-]{16,512}$", var.log_shipping_bootstrap_token))
+    error_message = "log_shipping_bootstrap_token must be empty or 16 to 512 characters of letters, digits, dot, underscore and hyphen."
+  }
+}

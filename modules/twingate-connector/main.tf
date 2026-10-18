@@ -16,6 +16,9 @@ module "bootstrap" {
   metadata_lock        = var.metadata_lock
   node_exporter        = var.node_exporter
 
+  log_shipping                 = var.log_shipping
+  log_shipping_bootstrap_token = var.log_shipping_bootstrap_token
+
   host_firewall             = var.host_firewall
   host_firewall_ssh_sources = var.host_firewall_ssh_sources
 }

@@ -131,6 +131,42 @@ node_exporter_instances = ["a", "b"]
 # already exist; this stack does not create it. Example: "cah-telemetry-tor1".
 metrics_source_tag = ""
 
+# Opt-in log shipping: the Wazuh agent (from Wazuh's apt repository) and auditd on
+# each connector, enrolled at first boot with a secret pulled from Doppler. The
+# default, {}, changes nothing. enabled = true REPLACES the droplet of every
+# connector in log_shipping_instances (user_data changes): roll out one at a time,
+# check SSH through Twingate and the memory headroom of the 1 GB droplet between
+# (UNMEASURED). manager_address is the Wazuh manager as reached through Twingate
+# (private: the real one comes from Doppler or the Spacelift environment, never
+# from a committed file). apt_key_fingerprint has no default on purpose: read the
+# 40 uppercase hex digits from Wazuh's documentation and compare them yourself.
+# agent_name_prefix names each agent <prefix>-connector-<a or b>; use the same
+# value as site_name. agent_group must already exist on the manager. The Twingate
+# headless client the agent needs to reach the manager is NOT part of this
+# change. NOT applied and NOT tested on a real machine yet. Uncomment to try it;
+# the values are placeholders (replace the fingerprint placeholder with the real digits).
+# log_shipping = {
+#   enabled             = true
+#   manager_address     = "siem.example.com"
+#   manager_port        = 1514        # must match the wazuh-agent logging_servers port in stack 20
+#   enroll_port         = 1515        # must match the wazuh-enroll logging_servers port in stack 20
+#   agent_name_prefix   = "site-tor1"
+#   agent_group         = "site-tor1"
+#   apt_key_fingerprint = "<40 uppercase hex characters>"
+#   agent_version       = "4.9.2-1"   # match the manager; an agent newer than the manager is unsupported
+# }
+log_shipping = {}
+
+# Which connectors get log_shipping (a, b or both). Default both.
+log_shipping_instances = ["a", "b"]
+
+# The short-lived, read-only Doppler token for the config cah-<resource_key>-hostboot.
+# NEVER put the real token here: a value file is a plain file. Set it as the
+# sensitive Spacelift stack environment variable TF_VAR_log_shipping_bootstrap_token
+# when you enable log_shipping, and revoke it after the first boot. Empty, the
+# default, is the live state.
+log_shipping_bootstrap_token = ""
+
 # A label for telemetry only (empty means "site-<region>"). It appears in no
 # resource name, tag or output, and changing it replaces nothing.
 site_name = "site-tor1"
