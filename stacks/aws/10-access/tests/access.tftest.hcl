@@ -621,3 +621,210 @@ run "host_firewall_sources_accept_host_bits_overlaps_and_the_extremes" {
     host_firewall_ssh_sources = ["10.0.0.1/8", "10.1.0.0/16", "192.0.2.7/32", "128.0.0.0/1"]
   }
 }
+
+# Metrics ports on the connector security group (issue #99, AWS half). With the
+# new inputs at their defaults nothing changes; with a source security group AND
+# a metrics source switched on, the connector group admits those ports from that
+# one group and from nothing else. The ids below are fake and built for the test.
+# Nothing here was applied or tested against a real account.
+run "metrics_rules_defaults_change_nothing" {
+  command = plan
+  assert {
+    condition     = var.metrics_source_security_group_id == "" && var.node_exporter.enabled == false && jsonencode(var.node_exporter_instances) == jsonencode(["a", "b"])
+    error_message = "metrics_source_security_group_id, node_exporter and node_exporter_instances must default to off, off and both."
+  }
+  assert {
+    condition     = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(["tcp/22-22/sg-00000000000000002"])
+    error_message = "With the defaults the only inbound rule is the existing tcp 22 from the group itself."
+  }
+}
+
+run "metrics_ports_are_admitted_from_the_source_group_only" {
+  command = plan
+  variables {
+    metrics_source_security_group_id = "sg-0abc1230abc123450"
+    node_exporter                    = { enabled = true, port = 9100 }
+    connector_telemetry              = { metrics_port = 9999 }
+  }
+  assert {
+    condition = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(sort([
+      "tcp/22-22/sg-00000000000000002",
+      "tcp/9100-9100/sg-0abc1230abc123450",
+      "tcp/9999-9999/sg-0abc1230abc123450",
+    ]))
+    error_message = "The inbound rules must be exactly tcp 22 from the group itself and the two metrics ports from the source group."
+  }
+  assert {
+    condition     = jsonencode(module.connector_firewall.source_members) == jsonencode(sort(["sg-00000000000000002", "sg-0abc1230abc123450"]))
+    error_message = "Inbound sources must be the connector group and the source group, nothing else."
+  }
+  assert {
+    condition     = alltrue([for d in module.connector_firewall.inbound_rules : can(regex("^tcp/[0-9]+-[0-9]+/sg-[0-9a-f]+$", d))])
+    error_message = "Every inbound rule must name a source security group, never an address."
+  }
+}
+
+run "node_exporter_alone_opens_only_its_port" {
+  command = plan
+  variables {
+    metrics_source_security_group_id = "sg-0abc1230abc123450"
+    node_exporter                    = { enabled = true, port = 9200 }
+  }
+  assert {
+    condition     = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(sort(["tcp/22-22/sg-00000000000000002", "tcp/9200-9200/sg-0abc1230abc123450"]))
+    error_message = "Only the node exporter port may be added."
+  }
+}
+
+run "connector_metrics_port_alone_opens_only_that_port" {
+  command = plan
+  variables {
+    metrics_source_security_group_id = "sg-0abc1230abc123450"
+    connector_telemetry              = { metrics_port = 9999 }
+  }
+  assert {
+    condition     = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(sort(["tcp/22-22/sg-00000000000000002", "tcp/9999-9999/sg-0abc1230abc123450"]))
+    error_message = "Only the connector metrics port may be added."
+  }
+}
+
+run "previous_metrics_port_stays_open_during_a_rollout" {
+  command = plan
+  variables {
+    metrics_source_security_group_id = "sg-0abc1230abc123450"
+    connector_telemetry              = { metrics_port = 9999 }
+    connector_telemetry_previous     = { metrics_port = 8888 }
+    connector_telemetry_instances    = ["a"]
+  }
+  assert {
+    condition     = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(sort(["tcp/22-22/sg-00000000000000002", "tcp/8888-8888/sg-0abc1230abc123450", "tcp/9999-9999/sg-0abc1230abc123450"]))
+    error_message = "While connector b still runs the previous port, both ports must stay admitted."
+  }
+}
+
+run "the_same_port_in_both_places_makes_one_rule" {
+  command = plan
+  variables {
+    metrics_source_security_group_id = "sg-0abc1230abc123450"
+    connector_telemetry              = { metrics_port = 9999 }
+    connector_telemetry_previous     = { metrics_port = 9999 }
+  }
+  assert {
+    condition     = length(module.connector_firewall.inbound_rules) == 2
+    error_message = "A repeated port must not produce a duplicate rule."
+  }
+}
+
+run "no_source_group_means_no_metrics_rule_even_when_metrics_are_on" {
+  command = plan
+  variables {
+    node_exporter       = { enabled = true }
+    connector_telemetry = { metrics_port = 9999 }
+  }
+  assert {
+    condition     = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(["tcp/22-22/sg-00000000000000002"])
+    error_message = "Without metrics_source_security_group_id no metrics port may be opened (there is no public or address-sourced fallback)."
+  }
+}
+
+run "a_source_group_alone_opens_nothing" {
+  command = plan
+  variables {
+    metrics_source_security_group_id = "sg-0abc1230abc123450"
+  }
+  assert {
+    condition     = jsonencode(module.connector_firewall.inbound_rules) == jsonencode(["tcp/22-22/sg-00000000000000002"])
+    error_message = "A source group with no metrics source on must open nothing."
+  }
+}
+
+run "metrics_source_security_group_rejects_an_address" {
+  command = plan
+  variables {
+    metrics_source_security_group_id = "192.0.2.10"
+  }
+  expect_failures = [var.metrics_source_security_group_id]
+}
+
+run "metrics_source_security_group_rejects_a_cidr" {
+  command = plan
+  variables {
+    metrics_source_security_group_id = "0.0.0.0/0"
+  }
+  expect_failures = [var.metrics_source_security_group_id]
+}
+
+run "metrics_source_security_group_rejects_a_space" {
+  command = plan
+  variables {
+    metrics_source_security_group_id = "sg 0abc1230abc123450"
+  }
+  expect_failures = [var.metrics_source_security_group_id]
+}
+
+run "node_exporter_is_wired_to_both_connectors_gated_on_its_instances" {
+  command = plan
+  assert {
+    condition     = length(regexall("node_exporter\\s*=\\s*\\{[^}]*enabled\\s*=\\s*var\\.node_exporter\\.enabled && contains\\(var\\.node_exporter_instances", file("${path.module}/main.tf"))) == 2
+    error_message = "Both connectors must receive node_exporter gated on node_exporter_instances."
+  }
+  assert {
+    condition     = length(regexall("contains\\(var\\.node_exporter_instances, \"a\"\\)", file("${path.module}/main.tf"))) == 1 && length(regexall("contains\\(var\\.node_exporter_instances, \"b\"\\)", file("${path.module}/main.tf"))) == 1
+    error_message = "Connector a must be gated on \"a\" and connector b on \"b\" in node_exporter_instances."
+  }
+}
+
+run "node_exporter_on_plans_and_rolls_out_to_one_connector" {
+  command = plan
+  variables {
+    node_exporter           = { enabled = true }
+    node_exporter_instances = ["a"]
+  }
+  assert {
+    condition     = module.connector_a.size != "" && module.connector_b.size != ""
+    error_message = "Rolling the node exporter out to one connector must plan."
+  }
+}
+
+run "node_exporter_instances_rejects_an_empty_list" {
+  command = plan
+  variables {
+    node_exporter_instances = []
+  }
+  expect_failures = [var.node_exporter_instances]
+}
+
+run "node_exporter_instances_rejects_c" {
+  command = plan
+  variables {
+    node_exporter_instances = ["c"]
+  }
+  expect_failures = [var.node_exporter_instances]
+}
+
+run "node_exporter_instances_rejects_a_repeat" {
+  command = plan
+  variables {
+    node_exporter_instances = ["a", "a"]
+  }
+  expect_failures = [var.node_exporter_instances]
+}
+
+run "node_exporter_port_rejects_a_privileged_port" {
+  command = plan
+  variables {
+    node_exporter = { enabled = true, port = 22 }
+  }
+  expect_failures = [var.node_exporter]
+}
+
+run "no_metrics_port_number_is_hard_coded_in_the_stack" {
+  command = plan
+  variables {
+    connector_telemetry = { metrics_port = 9999 }
+  }
+  assert {
+    condition     = !strcontains(file("${path.module}/main.tf"), "9999") && !strcontains(file("${path.module}/main.tf"), "9100")
+    error_message = "No metrics port number may be hard-coded in this stack."
+  }
+}

@@ -24,6 +24,14 @@ Contract outputs: `id`, `name`, `rule_targets`, `source_members`, `destination_m
 `inbound_from_member_rules` and `outbound_to_member_rules`; both name this group
 itself, never an address, so only machines wearing the group can use them.
 
+`inbound_from_other_groups` takes `[{protocol, port_range, security_group_id}]`
+(default empty) to admit members of a different security group, one rule per
+entry. The source is always `referenced_security_group_id`: the variable has no
+address field, the rule resource sets no `cidr_ipv4`, `cidr_ipv6` or
+`prefix_list_id`, and `tests/test_metrics_firewall_aws.py` scans the source for
+that. `inbound_rules` and `source_members` list these rules too. The group must
+exist in the same VPC or a peered one.
+
 The `id` and `rule_targets` outputs declare `depends_on` for all the rule
 resources, so an instance in the same apply launches after its egress rules exist
 (ordering UNVERIFIED until an apply; the test checks the declaration only).

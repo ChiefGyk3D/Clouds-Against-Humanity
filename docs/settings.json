@@ -725,7 +725,7 @@
       {
         "name": "connector_telemetry",
         "type": "object({status_updates_enabled = optional(bool), log_level = optional(number), connection_logs = optional(bool, false), metrics_port = optional(number), labels = optional(map(string), {})})",
-        "description": "Twingate connector telemetry for both connectors. Default {} is the live state and changes nothing. status_updates_enabled is a provider setting that is not sent while unset, and replaces nothing. log_level (TWINGATE_LOG_LEVEL), connection_logs (true writes TWINGATE_LOG_ANALYTICS=v3), metrics_port (TWINGATE_METRICS_PORT) and labels (TWINGATE_LABEL_<KEY>) add lines to /etc/twingate/connector.conf: that changes user_data and the plan shows the instances of every connector in connector_telemetry_instances REPLACED (both by default). Roll out one connector at a time with connector_telemetry_instances, with an SSH-through-Twingate check between (Trace-One-Change-End-to-End, variant C). Opens no firewall port. Labels are shown in the Twingate Admin Console: never put a secret in one.",
+        "description": "Twingate connector telemetry for both connectors. Default {} is the live state and changes nothing. status_updates_enabled is a provider setting that is not sent while unset, and replaces nothing. log_level (TWINGATE_LOG_LEVEL), connection_logs (true writes TWINGATE_LOG_ANALYTICS=v3), metrics_port (TWINGATE_METRICS_PORT) and labels (TWINGATE_LABEL_<KEY>) add lines to /etc/twingate/connector.conf: that changes user_data and the plan shows the instances of every connector in connector_telemetry_instances REPLACED (both by default). Roll out one connector at a time with connector_telemetry_instances, with an SSH-through-Twingate check between (Trace-One-Change-End-to-End, variant C). Opens no security group port by itself: set metrics_source_security_group_id to admit the metrics port from that one security group. Labels are shown in the Twingate Admin Console: never put a secret in one.",
         "required": false,
         "default": {},
         "validation": "log_level in {3, 4, 5, 7} or unset; metrics_port a whole number 1024 to 65535 and not 9100, or unset; labels: at most 10, keys ^[A-Z][A-Z0-9_]{0,31}$, values ^[A-Za-z0-9._-]{1,64}$ (no spaces, quotes or line breaks, because they are written into the connector config); connector_telemetry is non-nullable (null means {})",
@@ -760,6 +760,48 @@
         "validation": "at least one entry; each entry is a or b, no repeats",
         "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
         "example": "[\"a\"]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "node_exporter",
+        "type": "object({enabled = optional(bool, false), port = optional(number, 9100)})",
+        "description": "Opt-in node exporter (prometheus-node-exporter from the distro archive) on each connector, bound to its private IPv4 address only. Default {} (enabled false) is the live state: merging code with this unset plans no change (user_data is byte-identical). enabled = true adds a package, a script and a systemd drop-in through user_data, which REPLACES the instance of every connector in node_exporter_instances (both by default; user_data_replace_on_change), and with it the instance's public address. port defaults to 9100. Opens no security group port by itself: set metrics_source_security_group_id as well. Roll out one connector at a time, checking SSH through Twingate. NOT applied and NOT tested on a real machine or account yet; Spacelift's AWS integration is still unchecked and no Spacelift stack exists for this code.",
+        "required": false,
+        "default": {},
+        "validation": "port a whole number from 1024 to 65535; non-nullable (null means {})",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "{ enabled = true, port = 9100 }",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "node_exporter_instances",
+        "type": "list(string)",
+        "description": "Which connectors get node_exporter: a, b or both. Only matters once node_exporter.enabled is true. Set [\"a\"] first, apply, check SSH through Twingate to the new connector, then [\"a\", \"b\"]. A connector not listed runs without the exporter, as it does today.",
+        "required": false,
+        "default": [
+          "a",
+          "b"
+        ],
+        "validation": "at least one entry; each entry is a or b, no repeats",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "[\"a\"]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "metrics_source_security_group_id",
+        "type": "string",
+        "description": "Security group id of the machines that may scrape the connectors' metrics ports (the node exporter port and connector_telemetry.metrics_port, tcp), supplied by the operator. Empty (default) is the live state: no metrics rule exists. When set, the connector security group gains one inbound rule per enabled metrics port whose source is that group (referenced_security_group_id): never an address, an IPv6 range or a prefix list. The group must already exist in the same VPC. Changes the security group only; replaces no instance.",
+        "required": false,
+        "default": "",
+        "validation": "empty, or ^sg-[0-9a-f]{8,17}$ (a security group id: an address or CIDR is refused)",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "sg-0123456789abcdef0 (illustrative)",
         "sensitivity": "public",
         "sensitive_in_code": false,
         "status": "exists"
@@ -1741,6 +1783,19 @@
         "status": "exists"
       },
       {
+        "name": "inbound_from_other_groups",
+        "type": "list(object({protocol=string,port_range=string,security_group_id=string}))",
+        "description": "Inbound rules that admit only members of the given OTHER security group (one rule per entry, source = that group, never an address, IPv6 range or prefix list). Additive to inbound_from_member_rules. Empty means none.",
+        "required": false,
+        "default": [],
+        "validation": "see the validation blocks in variables.tf (tcp or udp, ports 1 to 65535, sg-... id, no repeats)",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "[{ protocol = \"tcp\", port_range = \"9100\", security_group_id = \"sg-0123456789abcdef0\" }]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
         "name": "outbound_to_member_rules",
         "type": "list(object({protocol=string,port_range=string}))",
         "description": "Outbound rules that reach only members of this security group itself (a rule whose destination is the group, no address). Empty means none.",
@@ -1968,6 +2023,19 @@
         "validation": "none; non-nullable (null means false)",
         "set_where": "the calling stack",
         "example": "true",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "node_exporter",
+        "type": "object({enabled = optional(bool, false), port = optional(number, 9100)})",
+        "description": "Opt-in node exporter bound to the private address, passed to the bootstrap module, which validates it. Default {} changes nothing (user_data is byte-identical, golden hashes in the tests). enabled = true changes user_data and replaces the instance.",
+        "required": false,
+        "default": {},
+        "validation": "none (validated in modules/twingate-bootstrap); node_exporter is non-nullable (null means {})",
+        "set_where": "the calling stack",
+        "example": "{ enabled = true, port = 9100 }",
         "sensitivity": "public",
         "sensitive_in_code": false,
         "status": "exists"

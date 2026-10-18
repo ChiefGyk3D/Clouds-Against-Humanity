@@ -23,7 +23,9 @@ Stack `stacks/aws/10-access` (cost: $20.84 a month):
 
 Values pass between the stacks the way they do on DigitalOcean: Spacelift stack dependencies mapped to `TF_VAR_*` variables, no remote state.
 
-What the tests prove (`tofu test`, mocked providers, no account needed): names and wiring; instance type and root size read from `cost.json`; two connectors with distinct reboot times; the connector group has exactly the member-only SSH rule and no inbound from an address anywhere; the baseline has zero inbound; outputs; and that no stack file names an account id, profile, key or role. What they cannot prove is in section 7.
+**Opt-in metrics (issue #99, AWS half; all off by default, the plan is a no-op).** `node_exporter` and `node_exporter_instances` install a node exporter bound to each connector's private address; `metrics_source_security_group_id` (an `sg-...` id you supply, empty by default) admits the enabled metrics ports (the exporter's, and `connector_telemetry.metrics_port` with its previous value during a rollout) from **that one security group only**, as `inbound_from_other_groups` of the firewall module: never a CIDR, an IPv6 range or a prefix list. **Turning the exporter on changes `user_data`, so it REPLACES the instance (and its public address, there is no Elastic IP)** of every connector in `node_exporter_instances`: roll out `["a"]`, check SSH through Twingate, then `["a", "b"]`. Setting only the source group (or only the telemetry port) changes the security group and replaces no instance. The group must exist in the same VPC and is not created here. This is written and mock-tested only: nothing is applied, no Spacelift stack exists for these AWS stacks, and Spacelift's native AWS integration is still unchecked, so do not assume it works. Details and limits: [stage 2, section 2.2](02-telemetry.md). Log shipping is not offered on AWS yet.
+
+What the tests prove (`tofu test`, mocked providers, no account needed): names and wiring; instance type and root size read from `cost.json`; two connectors with distinct reboot times; the connector group has exactly the member-only SSH rule and no inbound from an address anywhere; the baseline has zero inbound; with the metrics inputs on, the exact ingress list (member SSH plus the enabled metrics ports from the one source group); the golden `user_data` hashes at the default; outputs; and that no stack file names an account id, profile, key or role. What they cannot prove is in section 7.
 
 ## 2. Prerequisites
 
@@ -96,7 +98,7 @@ From the `vpc` module:
 
 From the `firewall` module:
 
-- [ ] `aws ec2 describe-security-group-rules` for the connector group: the seven outbound rules to `0.0.0.0/0`, the member rules (TCP 22 in and out, source and destination the group itself), no every-protocol (`-1`) egress rule, no inbound rule from `0.0.0.0/0` or `::/0`. The baseline group: five outbound rules, no inbound. Repeat after any manual console change (drift in a rule added outside the code is not detected).
+- [ ] `aws ec2 describe-security-group-rules` for the connector group: the seven outbound rules to `0.0.0.0/0`, the member rules (TCP 22 in and out, source and destination the group itself), no every-protocol (`-1`) egress rule, no inbound rule from `0.0.0.0/0` or `::/0`; when `metrics_source_security_group_id` is set, one more inbound rule per enabled metrics port whose source is that group and nothing else. The baseline group: five outbound rules, no inbound. Repeat after any manual console change (drift in a rule added outside the code is not detected).
 - [ ] The egress rules exist before the instances boot (the declared ordering is UNVERIFIED).
 
 From the `twingate-connector` module:

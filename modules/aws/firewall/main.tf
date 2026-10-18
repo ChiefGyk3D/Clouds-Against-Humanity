@@ -28,6 +28,16 @@ locals {
       to       = r.port_range == "all" ? 65535 : tonumber(reverse(split("-", r.port_range))[0])
     }
   }
+  # Keyed by protocol, ports and source group so a reorder changes nothing.
+  # The ports are already validated as a number or an ascending range.
+  other_group_ingress_rules = {
+    for r in var.inbound_from_other_groups : "${r.protocol}-${r.port_range}-${r.security_group_id}" => {
+      protocol = r.protocol
+      from     = tonumber(split("-", r.port_range)[0])
+      to       = tonumber(reverse(split("-", r.port_range))[0])
+      source   = r.security_group_id
+    }
+  }
   member_egress_rules = {
     for r in var.outbound_to_member_rules : "${r.protocol}-${r.port_range}" => {
       protocol = r.protocol
@@ -67,6 +77,21 @@ resource "aws_vpc_security_group_ingress_rule" "member" {
   from_port                    = each.value.from
   to_port                      = each.value.to
   description                  = "from members of this group, ${each.key}"
+}
+
+# Inbound from ANOTHER security group (the telemetry source group, for the
+# metrics ports). The source is always referenced_security_group_id; the
+# resource sets no cidr_ipv4, cidr_ipv6 or prefix_list_id, and no input of this
+# module feeds one, so a rule from an address cannot be written here.
+resource "aws_vpc_security_group_ingress_rule" "other_group" {
+  for_each = local.other_group_ingress_rules
+
+  security_group_id            = aws_security_group.this.id
+  referenced_security_group_id = each.value.source
+  ip_protocol                  = each.value.protocol
+  from_port                    = each.value.from
+  to_port                      = each.value.to
+  description                  = "from members of ${each.value.source}, ${each.value.protocol} ${each.value.from}-${each.value.to}"
 }
 
 # Trivy AWS-0104 flags egress to any address. It is accepted here for the same

@@ -433,3 +433,87 @@ run "host_firewall_sources_reach_the_instance_user_data" {
     error_message = "host_firewall_ssh_sources must flow through the module into the instance's user_data."
   }
 }
+
+# Golden hashes: with the node exporter at its default the boot data is
+# byte-identical to what main rendered before the node_exporter input existed,
+# so merging the pass-through plans no change to a live connector. The tokens
+# are fixed so the hash is stable.
+run "node_exporter_default_user_data_is_the_main_user_data_a" {
+  command = plan
+  override_resource {
+    target = module.bootstrap.twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  assert {
+    condition     = sha256(aws_instance.connector.user_data) == "59cc1dfc0a31f5fdec5c03be38420340325ec5ad6570ebe062cf75b1ff78af06"
+    error_message = "With node_exporter unset the user_data must be exactly what main rendered (connector a)."
+  }
+}
+
+run "node_exporter_explicitly_off_is_the_main_user_data_a" {
+  command = plan
+  override_resource {
+    target = module.bootstrap.twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    node_exporter = { enabled = false, port = 9101 }
+  }
+  assert {
+    condition     = sha256(aws_instance.connector.user_data) == "59cc1dfc0a31f5fdec5c03be38420340325ec5ad6570ebe062cf75b1ff78af06"
+    error_message = "node_exporter disabled (whatever its port) must render exactly what main rendered."
+  }
+}
+
+run "node_exporter_enabled_reaches_the_instance_user_data" {
+  command = plan
+  variables {
+    node_exporter = { enabled = true }
+  }
+  assert {
+    condition     = strcontains(aws_instance.connector.user_data, "prometheus-node-exporter") && strcontains(aws_instance.connector.user_data, "cah-node-exporter-run")
+    error_message = "node_exporter.enabled must flow through the module into the instance's user_data."
+  }
+  assert {
+    condition     = aws_instance.connector.user_data == module.bootstrap.user_data && aws_instance.connector.user_data_replace_on_change == true
+    error_message = "Enabling the exporter changes user_data, which replaces the instance (user_data_replace_on_change)."
+  }
+}
+
+run "node_exporter_port_reaches_the_instance_user_data" {
+  command = plan
+  variables {
+    node_exporter = { enabled = true, port = 9123 }
+    host_firewall = true
+  }
+  assert {
+    condition     = strcontains(aws_instance.connector.user_data, "9123")
+    error_message = "node_exporter.port must flow through the module into the instance's user_data."
+  }
+}
+
+run "node_exporter_default_user_data_is_the_main_user_data_b_with_host_firewall" {
+  command = plan
+  override_resource {
+    target = module.bootstrap.twingate_connector_tokens.this
+    values = {
+      access_token  = "fixed-access-token"
+      refresh_token = "fixed-refresh-token"
+    }
+  }
+  variables {
+    instance      = "b"
+    reboot_time   = "05:00"
+    host_firewall = true
+  }
+  assert {
+    condition     = sha256(aws_instance.connector.user_data) == "bdd9be07d3ea61f47d8f5ed4da066840142341e3d98eabd9436a00950a4f7332"
+    error_message = "With node_exporter unset the user_data must be exactly what main rendered (connector b, host firewall on)."
+  }
+}

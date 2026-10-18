@@ -2,6 +2,28 @@ locals {
   cost        = jsondecode(file("${path.module}/cost.json"))
   connector_a = one([for r in local.cost.resources : r if r.name == "connector-a"])
   connector_b = one([for r in local.cost.resources : r if r.name == "connector-b"])
+
+  # Metrics ports the connector security group admits, each from
+  # var.metrics_source_security_group_id only. The node exporter port (when
+  # enabled) and the connector metrics port (this rollout's value and the
+  # previous one, so a connector that still runs the old port stays reachable
+  # during a one-at-a-time rollout). distinct() keeps a repeated port to one rule.
+  metrics_ports = distinct(concat(
+    var.node_exporter.enabled ? [var.node_exporter.port] : [],
+    var.connector_telemetry.metrics_port == null ? [] : [var.connector_telemetry.metrics_port],
+    var.connector_telemetry_previous.metrics_port == null ? [] : [var.connector_telemetry_previous.metrics_port],
+  ))
+
+  # Empty unless the source group is set AND a metrics source is on, so with the
+  # defaults the firewall renders exactly what it did before. Security-group
+  # sourced only: the firewall module has no input that can admit an address.
+  metrics_inbound_rules = var.metrics_source_security_group_id == "" ? [] : [
+    for p in local.metrics_ports : {
+      protocol          = "tcp"
+      port_range        = tostring(p)
+      security_group_id = var.metrics_source_security_group_id
+    }
+  ]
 }
 
 # One site for every connector, so the connectors are redundant members of the
@@ -35,6 +57,10 @@ module "connector_firewall" {
   outbound_to_member_rules = [
     { protocol = "tcp", port_range = "22" },
   ]
+  # The metrics ports (issue #99): the node exporter and the connector's own
+  # metrics endpoint, admitted from the telemetry source security group only,
+  # never an address. Empty by default.
+  inbound_from_other_groups = local.metrics_inbound_rules
   extra_outbound_rules = [
     { protocol = "tcp", port_range = "30000-31000" },
     { protocol = "udp", port_range = "1-65535" },
@@ -61,6 +87,8 @@ module "connector_a" {
 
   metadata_lock = var.metadata_lock && contains(var.metadata_lock_instances, "a")
 
+  node_exporter = { enabled = var.node_exporter.enabled && contains(var.node_exporter_instances, "a"), port = var.node_exporter.port }
+
   host_firewall             = var.host_firewall && contains(var.host_firewall_instances, "a")
   host_firewall_ssh_sources = var.host_firewall_ssh_sources
 
@@ -86,6 +114,8 @@ module "connector_b" {
   connector_telemetry = contains(var.connector_telemetry_instances, "b") ? var.connector_telemetry : var.connector_telemetry_previous
 
   metadata_lock = var.metadata_lock && contains(var.metadata_lock_instances, "b")
+
+  node_exporter = { enabled = var.node_exporter.enabled && contains(var.node_exporter_instances, "b"), port = var.node_exporter.port }
 
   host_firewall             = var.host_firewall && contains(var.host_firewall_instances, "b")
   host_firewall_ssh_sources = var.host_firewall_ssh_sources
