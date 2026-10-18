@@ -19,7 +19,7 @@ Doppler sponsored content I made years ago, and that is how I found it. They did
 | DigitalOcean | Cheap, with a straightforward price list. I ran email, WordPress and whole client environments on it at an MSP, and most of what I know about cloud and running servers started there. | Personal and small business |
 | Twingate | I wanted Zscaler in the lab and could not afford it, and Twingate does the access part well enough that it has served me well. | Personal and small business |
 | Wazuh | Open source, free, and I already ran it at home. | Personal, labs and small shops |
-| Grafana | It takes almost any data and makes it readable, and I use it at home and would use it in a business. | Personal and enterprise |
+| Grafana | It makes data from many sources readable, and I use it at home and would use it in a business. | Personal and enterprise |
 
 ## What Twingate does not do
 
@@ -33,7 +33,7 @@ In the businesses I have dealt with it was not Wazuh. It was more likely Splunk,
 
 ## Grafana
 
-Grafana is the one on this list I think is most underrated, and I wish more businesses used it. It will read from Prometheus, OpenSearch, SQL databases and a long list of other data sources, and then it turns whatever you point it at into something people can actually look at, so the same tool covers a homelab and a company. It is also open source, so you can start free and decide later whether you want anything from the company behind it. I run it at home on top of the SIEM data, and this project will ship dashboards of its own, which are tracked in [issue 149](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues/149).
+Grafana is the one on this list I think is most underrated, and I wish more businesses used it. It connects to a wide range of data sources, including Prometheus, SQL databases and OpenSearch (through a plugin), and it turns what it reads into something people can actually look at, so the same tool works for a homelab and for a company. Grafana OSS is open source, so you can start free and decide later whether you want anything from the company behind it, because some features are paid. I run it at home on top of the SIEM data, and this project will ship dashboards of its own, which are tracked in [issue 149](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues/149).
 
 ## Clouds
 
