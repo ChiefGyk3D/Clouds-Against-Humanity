@@ -7,6 +7,7 @@ crash.log
 *.auto.tfvars.json
 *.tfplan
 tfplan
+plan.json
 !*.tftest.hcl
 __pycache__/
 .pytest_cache/

@@ -181,6 +181,7 @@ Everything follows `<layer>-<region>-<role>`, for example `access-tor1-connector
 stacks/00-foundation/      project, tag, VPC, baseline firewall        (Spacelift stack cah-00-foundation)
 stacks/10-access/          site, connectors, connector firewall,       (Spacelift stack cah-10-access)
                            admin group, SSH resources
+stacks/20-telemetry/      stage 2 Twingate objects for logs and metrics, all flags off (skeleton, never applied)
 modules/vpc/               one VPC per region
 modules/firewall/          tag-attached, deny-inbound firewall
 modules/twingate-bootstrap/  connector tokens + cloud-init (same on every cloud)
@@ -190,6 +191,8 @@ scripts/spacelift/         Doppler hook for Spacelift runs
 docs/stages/               one guide per stage: decisions, verify, rollback
 docs/wiki/                 these pages
 ```
+
+Stage 2 (logs and metrics home) is not in the diagrams above because none of it is applied: the telemetry stack is a skeleton that plans zero resources until a flag is set, and the home side is the operator's. Its data flow and prerequisites are in the [stage 2 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/02-telemetry.md), [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) and the [home-side runbook](Stage-2-Home-Side-Runbook.md).
 
 Modules are reusable building blocks; stacks are what actually gets applied. More on that split on [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md).
 

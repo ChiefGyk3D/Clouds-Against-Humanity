@@ -55,3 +55,128 @@ Set the flags back to false and apply: the Twingate objects are destroyed and no
 - No resource name or output holds the private logging address; the connector addresses appear only in the sensitive `scrape_targets`.
 - Each validation rejects its bad input (duplicate or address-shaped names, public addresses, bad ports, protocols and purposes, unknown label keys, and so on), and each precondition stops a flag that is missing its inputs.
 - A source test pins the resource list, so a new resource without a flag gate fails.
+
+## 7. Verification after an apply (every item is "not run yet")
+
+Nothing in stage 2 is applied, so **every check below is marked `not run yet`**. Change a mark to a dated result only when you have run the command and read the output. All checks are read-only: none changes a stack, a firewall, an agent or a rule. Addresses and names are placeholders from the documentation ranges (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`) and `example.com`; replace them with your own, and keep your real values out of this file, issues and pull requests.
+
+Three facts are **UNVERIFIED** and change what a pass looks like, so settle them first. The connector's metrics bind address is not documented: test it on one connector before relying on the metrics checks. Whether the Wazuh agent can read journald on the version your manager runs is not known: if it cannot, the log checks pass only for file sources such as `/var/log/auth.log`. The Twingate plan limit for services is not documented either (section 3, step 1).
+
+Order matters. The home side must be in place first: [the home-side runbook](../wiki/Stage-2-Home-Side-Runbook.md) holds the firewall prerequisite, and the log checks do not start until its negative reachability record exists (design section 4.1).
+
+### 7.1 Metrics
+
+| # | Check | Status |
+|---|---|---|
+| M1 | Prometheus lists every expected target as up | not run yet |
+| M2 | The up count per site equals the expected-target inventory | not run yet |
+| M3 | A node exporter and a connector metrics sample are readable through Twingate | not run yet |
+
+**M1. Prometheus lists the targets up.** Run from any machine that can reach the home Prometheus:
+
+```
+curl -fsS 'http://prometheus.example.com:9090/api/v1/targets?state=active' | jq -r '.data.activeTargets[] | select(.labels.site == "site-tor1") | [.labels.site, .labels.instance, .scrapeUrl, .health] | @tsv'
+```
+
+Pass: one line per expected target, each ending in `up`. For one site with two connectors and two exporters per connector (node exporter and connector metrics) that is **four lines**. A `down` line with a timeout in `lastError` points at the firewall pair (design section 4.2), the Twingate resource or the home headless client, in that order. Fewer lines than expected means the target file is missing an entry.
+
+**M2. The count matches the inventory.** The inventory is a recorded metric (`cah_expected_targets`), so one query compares both sides:
+
+```
+curl -fsS --get 'http://prometheus.example.com:9090/api/v1/query' --data-urlencode 'query=cah_expected_targets{site="site-tor1"} - on(site) count by (site) (up{site="site-tor1"} == 1)' | jq -r '.data.result[] | [.metric.site, .value[1]] | @tsv'
+```
+
+Pass: the value is `0` for each site. A positive number is how many targets are missing; no row at all means the inventory has no entry for that site, or no target is up (the inventory is only as current as its last generation, design section 3.5).
+
+**M3. Samples are readable.** From a machine with a Twingate client that holds the scrape resources (the home Prometheus host's headless client, or an operator allowed to see them):
+
+```
+curl -fsS http://192.0.2.21:9100/metrics | head -n 5
+```
+
+Pass: lines beginning `# HELP` from the node exporter. Repeat with the connector metrics port you set in `metrics_port_connector` (plain HTTP at `/metrics`), for both connectors. The endpoints are unauthenticated (UNVERIFIED), so the exposure is bounded only by the resource list: a port that is not in `scrape_allowlist` must not answer.
+
+### 7.2 Logs
+
+| # | Check | Status |
+|---|---|---|
+| L1 | The agent service is active on the host | not run yet |
+| L2 | The manager lists the agent as Active | not run yet |
+| L3 | A test event produces an alert, recorded with identifiers removed | not run yet |
+
+**L1. The agent is active on the host.** Through Twingate, using the SSH resource:
+
+```
+ssh operator@192.0.2.21 'systemctl is-active wazuh-agent'
+```
+
+Pass: the single word `active`.
+
+**L2. The manager lists it.** On the manager (the docker form is shown; use your own container name, or run the binary directly on a package install):
+
+```
+docker exec wazuh-manager /var/ossec/bin/agent_control -l
+```
+
+Pass: one line per cloud host with status `Active`, named `<site_name>-<role>-<a or b>` (for example `site-tor1-connector-a`). Run it again a minute later: a status that flips to `Disconnected` is not a pass. The agent group is the primary grouping; whether labels are searchable in the indexer is UNVERIFIED.
+
+**L3. A test event and its alert.** Create one harmless authentication failure on a connector from the operator machine (an invalid user over SSH, through Twingate):
+
+```
+ssh -o BatchMode=yes -o ConnectTimeout=10 no-such-user@192.0.2.21 true
+```
+
+Then read the newest alert for that agent on the manager:
+
+```
+docker exec wazuh-manager sh -c "grep 'site-tor1-connector-a' /var/ossec/logs/alerts/alerts.json | tail -n 1" | jq '{rule: .rule.id, level: .rule.level, description: .rule.description, agent: .agent.name}'
+```
+
+Pass: an alert exists with a timestamp after the test, from the agent you tested. Record **the alert's text with identifiers removed**: replace addresses, user names, host names and the agent name with placeholders before pasting it anywhere. If no alert arrives, check the source first: the invalid-user line is in `/var/log/auth.log` and in journald, and the agent reads journald only if it supports it (UNVERIFIED). The rule ids are the manager's stock rules until the journald rule file exists in the home repository.
+
+### 7.3 From outside, and for the live stacks
+
+| # | Check | Status |
+|---|---|---|
+| X1 | No inbound rule has an address source | not run yet |
+| X2 | Zero open ports on each connector's public address, from outside | not run yet |
+| X3 | The plan is a no-op for stacks 00 and 10 | not run yet |
+| X4 | The plan for stack 20 matches its flags | not run yet |
+
+**X1. No inbound rule has an address source.** Read-only, with `doctl` authenticated by a read-only token:
+
+```
+doctl compute firewall list --output json | jq '[.[].inbound_rules[]? | select((.sources.addresses // []) | length > 0)] | length'
+```
+
+Pass: `0`. After the metrics step the firewalls do carry inbound rules, sourced only from tags (design section 4.2); an address source of any kind, including `0.0.0.0/0` or `::/0`, fails. The field names are written from the shape of `doctl`'s JSON and are not checked against any installed version.
+
+**X2. Zero open ports from outside.** From a machine that is not in the VPC, scan **only a connector you own**, at the public address `doctl` shows for it. Do not point a scanner at anything else. Until the read-only check in the [zero-open-ports design](../superpowers/specs/2026-10-17-zero-open-ports-check-design.md) is built (issue 91), this is the manual form:
+
+```
+nmap -Pn -p- --max-retries 1 --host-timeout 30m 203.0.113.10
+```
+
+Pass: every port is `filtered` (no answer), none `open` and none `closed`. A `closed` port means something answered with a reset, which that design counts as a failure of the silence criterion. A scan from a network that drops outbound probes proves nothing, so repeat it from a second network.
+
+**X3. The plan is a no-op for stacks 00 and 10.** Stage 2 adds no resource to either stack, so a saved plan of each must change nothing. The plan reads live state, so use the credentials the tracked run uses. In `stacks/00-foundation`:
+
+```
+tofu plan -out=plan.tfplan && tofu show -json plan.tfplan > plan.json && python3 -I ../../scripts/plan_noop_check.py --plan plan.json --golden ../../docs/golden-addresses/00-foundation.json
+```
+
+And in `stacks/10-access`:
+
+```
+tofu plan -out=plan.tfplan && tofu show -json plan.tfplan > plan.json && python3 -I ../../scripts/plan_noop_check.py --plan plan.json --golden ../../docs/golden-addresses/10-access.json
+```
+
+Pass: the checker exits 0 and `tofu plan` reported no changes. Delete `plan.json` afterwards, because it holds `user_data` with connector tokens (`*.tfplan` and `plan.json` are git-ignored). In Spacelift the same check is the tracked-run plan: anything but "no changes" for these stacks is discarded.
+
+**X4. Stack 20 matches its flags.** In `stacks/20-telemetry`:
+
+```
+tofu plan -detailed-exitcode
+```
+
+Pass with both flags false: exit code `0` (nothing to do). With one flag on and not yet applied: exit code `2`, and the plan lists exactly the objects in the table in section 1. After that flag is applied, a second plan returns `0`.
