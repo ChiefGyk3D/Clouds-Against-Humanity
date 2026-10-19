@@ -10,10 +10,10 @@ This is the first of five pages that take one question as far as it will go: **h
 
 | Word | What it is | Shape | Good at | Bad at | In this project |
 |---|---|---|---|---|---|
-| **Log** | One event, written when something happens | A line of text or a record with a time stamp | Answering "what exactly happened" | Cheap summaries; volume grows with activity | The connector's journal, `sshd` and `sudo` lines. Planned: a Wazuh agent reads them |
-| **Metric** | A number sampled over time | A name, labels, a value, a time | Answering "how much" and "since when" cheaply; volume grows with the number of series, not with activity | Saying *why* | CPU, memory, bytes in and out, whether a target answered. Planned: Prometheus scrapes them |
+| **Log** | One event, written when something happens | A line of text or a record with a time stamp | Answering "what exactly happened" | Cheap summaries; volume grows with activity | The connector's journal, `sshd` and `sudo` lines. Built, opt-in and off: a Wazuh agent reads them (not applied) |
+| **Metric** | A number sampled over time | A name, labels, a value, a time | Answering "how much" and "since when" cheaply; volume grows with the number of series, not with activity | Saying *why* | CPU, memory, bytes in and out (the node exporter, built, opt-in and off), and whether a target answered (the `up` series Prometheus writes itself on every scrape, not an exporter metric). The Prometheus scrape at home is not built |
 | **Trace** | The path of one request through several services, with the time spent in each | A tree of timed spans | Answering "where did this request spend 4 seconds" | Anything that is not a request | **None.** Two connectors and a few daemons do not have a request that crosses services. Stage 3 may |
-| **Alert** | A decision made from logs or metrics: "this needs a person" | A rule that fired, a message, a recipient | Turning data into attention | It is *derived*: an alert on bad data is a bad alert | Planned: rules in Prometheus and Wazuh |
+| **Alert** | A decision made from logs or metrics: "this needs a person" | A rule that fired, a message, a recipient | Turning data into attention | It is *derived*: an alert on bad data is a bad alert | Two Prometheus rules exist in the synthetic lab; no Wazuh rule is written |
 
 An alert is the odd one out. Logs, metrics and traces are raw material; an alert is what a rule makes of them. That is why "we have monitoring" and "someone would find out" are different sentences: the first is about collecting, the second is about the alert, the recipient and the five minutes after.
 

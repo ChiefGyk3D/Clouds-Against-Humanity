@@ -1,6 +1,6 @@
 """Checks for the five telemetry lesson pages in docs/wiki/.
 
-The pages are unverified drafts (two describe merged but unapplied code), so these tests keep three things
+The pages are unverified drafts (four describe merged but unapplied code), so these tests keep three things
 honest: each page says it is a draft and links its neighbours, nothing on them
 looks like a real address, and every figure in the mini SOC cost tables is
 recomputed here from docs/cost-prices.json rather than trusted.
@@ -26,7 +26,7 @@ LESSONS = [
     "Build-Your-Own-Mini-SOC",
 ]
 DESIGN_BANNER = "Unverified draft: written from the design, none of stage 2 has been built or applied"
-# Stage 2 telemetry is merged but nothing has been applied or run, so the two
+# Stage 2 telemetry is merged but nothing has been applied or run, so the four
 # pages that describe it say exactly that. The draft label stays.
 MERGED_BANNER = (
     "Unverified draft: the stage 2 telemetry pieces this page describes are built and merged "
@@ -43,6 +43,8 @@ LAB_BANNER = (
 BANNERS = {name: DESIGN_BANNER for name in LESSONS}
 BANNERS["Reading-a-Dashboard-as-an-Operator"] = LAB_BANNER
 BANNERS["Cloud-Telemetry-What-and-Why"] = MERGED_BANNER
+BANNERS["Multiple-Sites-and-Identity"] = MERGED_BANNER
+BANNERS["Telemetry-Crosses-the-Trust-Boundary"] = MERGED_BANNER
 BANNERS["Build-Your-Own-Mini-SOC"] = MERGED_BANNER
 
 

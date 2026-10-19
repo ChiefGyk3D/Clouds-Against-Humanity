@@ -1,6 +1,6 @@
 # Multiple sites and identity: one codebase, many sets of values
 
-> **Unverified draft: written from the design, none of stage 2 has been built or applied.** Sources: the [settings and mini SOC design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-stage2-settings-and-mini-soc-design.md) section 3 (2026-10-16), `docs/cost.md` (the stack-instance section, read 2026-10-16), and the merged settings layer described in [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md). Only the settings layer and the cost gate's stack instances exist as code. No second site exists, and no telemetry stack exists. Statements about Twingate's behaviour that are marked UNVERIFIED were not checked.
+> **Unverified draft: the stage 2 telemetry pieces this page describes are built and merged (opt-in node exporter, Wazuh agent with auditd, metrics firewall rules, Grafana dashboards), but none of it has been applied or run against real infrastructure, and nothing has been measured.** Sources: the [settings and mini SOC design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-stage2-settings-and-mini-soc-design.md) section 3 (2026-10-16), `docs/cost.md` (the stack-instance section, read 2026-10-16), and the merged settings layer described in [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md). The settings layer, the cost gate's stack instances, the telemetry stack (stack 20, everything off by default) and the site-aware dashboards exist as code. No second site is deployed, and none of it is applied. Statements about Twingate's behaviour that are marked UNVERIFIED were not checked.
 
 **Prerequisites:** [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md), [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) and [Twingate](Twingate.md).
 
@@ -21,9 +21,9 @@ Two settings carry that identity, and they must never be confused. This is the m
 | Setting | Goes into | Default | Can it change on a live stack? |
 |---|---|---|---|
 | `resource_key` | **Names and tags** of cloud and Twingate objects: `access-tor1`, `cah-connector-tor1`, droplet `access-tor1-connector-a` | The `region`, so every existing name is unchanged | **Never.** A new name is a replace, and several replaces force a new machine |
-| `site_name` | **Telemetry only**: metric labels, agent names and groups, dashboard variables | Empty, meaning `site-<region>` | Yes. It renames nothing in the cloud; it changes the identity under which history is recorded |
+| `site_name` | **Telemetry only**: metric labels, the `site_identity` output (including the agent group) and dashboard variables. Agent names take their prefix from a separate stack 10 input, `log_shipping.agent_name_prefix`, which you keep equal to it by hand | Empty, meaning `site-<region>` | Yes. It renames nothing in the cloud; it changes the identity under which history is recorded |
 
-Why two? Because the obvious design uses one value for both, and that renames live infrastructure the day someone decides a label should be friendlier. [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md#resource_key-and-site_name-one-is-immutable-and-why) walks through the plan you would see. Both settings exist in the code today (step 2 of the build order); the telemetry that would read `site_name` does not.
+Why two? Because the obvious design uses one value for both, and that renames live infrastructure the day someone decides a label should be friendlier. [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md#resource_key-and-site_name-one-is-immutable-and-why) walks through the plan you would see. Both settings exist in the code (step 2 of the build order), and stack 20 reads `site_name` into its `site_identity` and `scrape_targets` outputs (`stacks/20-telemetry/site.tf`). No telemetry carries the label yet, because nothing is applied.
 
 ## Labels: the shape of "which one"
 
@@ -43,7 +43,7 @@ One label per question, one name per label. The design found a mistake of the op
 
 ### Cardinality: the cost of labels
 
-Every distinct combination of label values is a separate time series, stored and indexed on its own. Labels that take few values (site, role) are cheap. A label that takes a new value for every event (a request id, a user name, a timestamp) turns one metric into millions of series and brings the server down. The design limits free-form labels to an allow-list (`env`, `role`, `owner_team`) with values no longer than 32 characters, and a test of the target generator rejects other keys.
+Every distinct combination of label values is a separate time series, stored and indexed on its own. Labels that take few values (site, role) are cheap. A label that takes a new value for every event (a request id, a user name, a timestamp) turns one metric into millions of series and brings the server down. The design limits free-form labels to an allow-list (`env`, `role`, `owner_team`) with values no longer than 32 characters, and stack 20's `labels` variable refuses any other key and any value over 32 characters (`stacks/20-telemetry/variables.tf`). The home-side generator that writes the Prometheus target file is not built.
 
 Worked scale: two sites with two connectors each is four targets. One metric on those four targets is four series. Add a label `env` with the value `lab` everywhere, and it is still four, because every series has the same value. Add a label with a different value per scrape, and the number of series grows with time. The first is a label; the second is a mistake.
 
@@ -55,7 +55,7 @@ Worked scale: two sites with two connectors each is four targets. One metric on 
 | Names collide | Every name embeds the region; two stacks in one region produce equal names | A distinct `resource_key` on the **new** stack | Whether Twingate or DigitalOcean refuses duplicates is UNVERIFIED |
 | One stolen key reaches too much | A Twingate service key authorizes access to all resources assigned to its service (Twingate documentation, https://www.twingate.com/docs/services/ , fetched 2026-10-16, quoted in the design) | One service per site per role; one key per host; each service granted only that role's resources | Key facts from one page. The page does not document limits on services per plan, which is not the same as "no limit" |
 | Label cardinality | See above | The label allow-list and the generator test | General Prometheus behaviour |
-| Agent name reuse | A rebuilt droplet enrolls again under the same name | The `<site_name>-` prefix in agent names | From the stage 2 design |
+| Agent name reuse | A rebuilt droplet enrolls again under the same name | A site prefix in agent names, set through the separate `log_shipping.agent_name_prefix` input (the access stack never reads `site_name`), which you set to the same value by hand | Built as the opt-in `log_shipping.agent_name_prefix` in stack 10 (`<prefix>-connector-<a or b>`), not applied |
 | Dashboards show only some sites | The existing Twingate dashboard at home has variables for exactly two named connectors; a third host shows nothing | `site` and `instance` variables | Read from the home stack on 2026-10-16, by role only |
 | A whole site goes silent and nothing alerts | `absent()` cannot say which site is gone | An expected-target inventory | See [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) |
 | The home logging connector is a single point | Every site's telemetry uses the same home-side path | Two connectors at home; the inventory alert runs at home | From the design |
@@ -69,7 +69,7 @@ Here is what the design says adding `site-tor2` takes. Every step is data.
 2. **Stacks.** New Spacelift stacks pointing at the same code, with their own state, environment and Doppler config. A new stack starts from nothing, so its names can use the new key and nothing existing is renamed.
 3. **`.spacelift/config.yml` entries** for the new stack ids. The entry tells the hook which Doppler secrets to fetch for that stack (see [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipeline.md)). It is not what attaches credentials: in `docs/spacelift-secrets.md` (sections 4 and 8, read for this page) the `cah-doppler` context attaches to any stack carrying the `cah` label and supplies `DOPPLER_TOKEN` to every run type, independently of `config.yml`. So a new stack's label, context attachments and run policies are Spacelift settings you must control by hand.
 4. **A cost approval.** A second site is a deliberate decision, not a side effect.
-5. **A scrape inventory** for the home Prometheus, generated from the new stack's outputs. This step belongs to the telemetry stack, which does not exist yet.
+5. **A scrape inventory** for the home Prometheus, generated from the new stack's outputs. The data side exists: stack 20 emits a sensitive `scrape_targets` output per site. The generator that turns it into a target file and an expected-target inventory is not built, and the inventory in the synthetic lab is written by hand.
 
 The lesson is the shape: **code is the thing that does not change per site; values are the thing that does.** If adding a site needs a code change, the code has a hard-coded value that belongs in a setting.
 
