@@ -85,14 +85,18 @@ def test_unknown_size_fails_closed(tmp_path):
 
 
 def test_backups_refused_while_fraction_unverified(tmp_path):
-    root = make_repo(tmp_path, [droplet(backups=True)])
+    res = droplet(backups=True)
+    res["backup_plan"] = "weekly"
+    root = make_repo(tmp_path, [res])
     with pytest.raises(ValueError, match="unverified"):
         cost_check.total_cost(root, PRICES)
 
 
 def test_backups_priced_once_verified(tmp_path):
     prices = {**PRICES, "backups_fraction_verified": True}
-    root = make_repo(tmp_path, [droplet(backups=True)], prices=prices)
+    res = droplet(backups=True)
+    res["backup_plan"] = "weekly"
+    root = make_repo(tmp_path, [res], prices=prices)
     assert cost_check.total_cost(root, prices) == 7.2
 
 
@@ -342,3 +346,153 @@ def test_committed_backups_fraction_is_verified_with_its_source():
     assert table["backups_fraction_verified"] is True
     assert table["backups_source"].startswith("https://docs.digitalocean.com/products/backups/")
     assert table["backups_retrieved"] == "2026-10-19"
+
+
+# ---- backup plans the gate cannot price -------------------------------------
+
+VERIFIED = {**PRICES, "backups_fraction_verified": True}
+
+
+def planned(plan="weekly", **extra):
+    res = droplet(backups=True)
+    if plan is not None:
+        res["backup_plan"] = plan
+    res.update(extra)
+    return res
+
+
+def test_weekly_backups_still_price_at_twenty_percent(tmp_path):
+    root = make_repo(tmp_path, [planned("weekly")], prices=VERIFIED)
+    assert cost_check.total_cost(root, VERIFIED) == 7.2
+
+
+def test_daily_backups_are_refused(tmp_path):
+    root = make_repo(tmp_path, [planned("daily")], prices=VERIFIED)
+    with pytest.raises(ValueError, match="daily"):
+        cost_check.total_cost(root, VERIFIED)
+
+
+@pytest.mark.parametrize(
+    "plan", [None, "", "hourly", "usage", "usage-based", "Weekly", 7, True, ["weekly"]]
+)
+def test_missing_or_unknown_backup_plan_is_refused(tmp_path, plan):
+    # With backups on, DigitalOcean defaults to daily when no plan is stated,
+    # so a missing plan is never read as weekly.
+    root = make_repo(tmp_path, [planned(plan)], prices=VERIFIED)
+    with pytest.raises(ValueError, match="backup_plan"):
+        cost_check.total_cost(root, VERIFIED)
+
+
+@pytest.mark.parametrize(
+    "extra",
+    [
+        {"backup_policy": {"plan": "weekly"}},
+        {"backup_usage": {"gib": 10}},
+        {"backup_hours": 12},
+    ],
+)
+def test_usage_based_or_unknown_backup_shapes_are_refused(tmp_path, extra):
+    root = make_repo(tmp_path, [planned("weekly", **extra)], prices=VERIFIED)
+    with pytest.raises(ValueError, match="backup"):
+        cost_check.total_cost(root, VERIFIED)
+
+
+@pytest.mark.parametrize("flag", ["true", "yes", 1, None, "false"])
+def test_backups_flag_must_be_a_boolean(tmp_path, flag):
+    res = droplet()
+    res["backups"] = flag
+    root = make_repo(tmp_path, [res], prices=VERIFIED)
+    with pytest.raises(ValueError, match="backups"):
+        cost_check.total_cost(root, VERIFIED)
+
+
+def test_backup_plan_with_backups_off_is_refused(tmp_path):
+    res = droplet()
+    res["backup_plan"] = "daily"
+    root = make_repo(tmp_path, [res], prices=VERIFIED)
+    with pytest.raises(ValueError, match="backup"):
+        cost_check.total_cost(root, VERIFIED)
+
+
+def droplet_tf(body):
+    return {
+        "modules/twingate-connector/main.tf": 'resource "digitalocean_droplet" "connector" {\n'
+        + body
+        + "}\n"
+    }
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        "  backups = true\n",
+        "  backups = var.backups\n",
+        '  backup_policy {\n    plan = "daily"\n  }\n',
+        '  backups = false\n  backup_policy {\n    plan = "weekly"\n  }\n',
+    ],
+)
+def test_source_enabling_backups_is_refused(tmp_path, body):
+    root = make_repo(tmp_path, [droplet()], tf_files=droplet_tf(body))
+    found = cost_check.block_problems(root)
+    assert any("backup" in p for p in found), found
+
+
+@pytest.mark.parametrize("body", ["  backups = false\n", '  size = "s-1vcpu-1gb"\n'])
+def test_source_with_backups_off_or_unset_is_not_flagged(tmp_path, body):
+    root = make_repo(tmp_path, [droplet()], tf_files=droplet_tf(body))
+    assert [p for p in cost_check.block_problems(root) if "backup" in p] == []
+
+
+# ---- source scan matches HCL syntax, not text -------------------------------
+
+HEREDOC_WORD = '  user_data = <<-EOT\n    backup_policy {\n    backups = true\n  EOT\n'
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        '  tags = ["backup_policy"]\n  backups = false\n',
+        '  name = "backup_policy"\n',
+        '  description = "uses backup_policy { plan = daily } and backups = true"\n',
+        '  name = "x-${var.backup_policy}"\n',
+        HEREDOC_WORD,
+        "  # backup_policy { plan = \"daily\" }\n  // backups = true\n  /* backup_policy */\n",
+        "  backups_enabled = true\n  backups = false\n",
+        '  tags = { backups = "true", backup_policy = "x" }\n',
+        '  tags = [\n    "backup_policy",\n  ]\n',
+    ],
+)
+def test_backup_words_in_strings_comments_heredocs_are_not_flagged(tmp_path, body):
+    root = make_repo(tmp_path, [droplet()], tf_files=droplet_tf(body))
+    assert [p for p in cost_check.block_problems(root) if "backup" in p] == []
+
+
+def test_backup_names_in_a_non_droplet_block_are_not_flagged(tmp_path):
+    files = droplet_tf("  backups = false\n")
+    files["modules/other/main.tf"] = (
+        'resource "twingate_resource" "r" {\n  backups = true\n'
+        "  backup_policy {\n    plan = \"daily\"\n  }\n}\n"
+    )
+    root = make_repo(tmp_path, [droplet()], tf_files=files)
+    assert [p for p in cost_check.block_problems(root) if "backup" in p] == []
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        '  backup_policy {\n    plan = "weekly"\n  }\n',
+        '  backup_policy{\n    plan = "weekly"\n  }\n',
+        '  tags = ["a"]\n\n    backup_policy   {\n    plan = "daily"\n  }\n',
+        '  backup_policy = { plan = "daily" }\n',
+        '  backup_policy   =   {}\n',
+        "  backups   =   true\n",
+        "  backups=true\n",
+        "  backups = (\n    true\n  )\n",
+        "  backups = var.x\n",
+        "  backups = \"true\"\n",
+    ],
+)
+def test_real_backup_syntax_is_still_refused(tmp_path, body):
+    root = make_repo(tmp_path, [droplet()], tf_files=droplet_tf(body))
+    found = cost_check.block_problems(root)
+    assert any("backup" in p for p in found), found
