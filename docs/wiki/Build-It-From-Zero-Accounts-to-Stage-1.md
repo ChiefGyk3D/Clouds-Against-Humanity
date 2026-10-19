@@ -18,7 +18,7 @@ Before you create any cloud account, do what you can to bound your downside.
 2. **A hardware security key, and I mean two.** I highly recommend [YubiKeys](https://www.yubico.com/products/security-key/) (this one is a plain recommendation, not an affiliate link). Buy at least two, register both on every account that allows it, and keep one somewhere other than your keyring, because a single key you lose is a lockout you built yourself. Put the recovery codes for each account in the password manager as well. Hardware keys resist phishing in a way a six-digit code does not, which matters because every account in this build can create or destroy something that costs money.
 3. **Decide your numbers.** Choose the most you are willing to spend in a month and two alert levels below it (the author used $10 and $25 under a $30 ceiling). You cannot set the alert yet, because the provider account does not exist; you will set it as the first thing you do after creating that account, in step 4, **before you create a token or any resource**. See [How money works in the cloud](How-Money-Works-in-the-Cloud.md) for why the alert comes first, not last.
 
-*Checkpoint: you have a password manager with MFA, two security keys (or a written plan to get them), and your budget numbers are written down.*
+*Checkpoint: you have a password manager with MFA, two security keys (or a written plan to get them) for the services that support them, and your budget numbers are written down.*
 
 ## Step 1: run the free labs first
 
@@ -30,7 +30,7 @@ Before any cloud account, spend an hour proving to yourself you understand what 
 
 ## Step 2: the accounts you need, in order
 
-You need accounts at five services for stage 0 and 1. Create each one only when its step arrives, and turn on two-factor authentication the moment you do. Register both security keys on each account right then, not later.
+You need accounts at five services for stage 0 and 1. Create each one only when its step arrives, and turn on two-factor authentication the moment you do. Where the service supports security keys, register both of them right then, not later. Where it does not, use the strongest option it offers, an authenticator app, and say so in your notes.
 
 | Order | Service | Needed for | Reached at |
 |---|---|---|---|
@@ -60,7 +60,7 @@ Follow [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipel
 
 ## Step 4: DigitalOcean
 
-1. Create the account, enable two-factor authentication (register both security keys now), and **set the billing alerts you decided on in step 0 before you do anything else**. The exact place in the console changes, so look for the billing or alerts settings in the live console. Take a screenshot you do not publish; an alert you cannot point at is not an alert.
+1. Create the account, enable two-factor authentication (register both security keys now if the console supports them, otherwise use an authenticator app and note that), and **set the billing alerts you decided on in step 0 before you do anything else**. The exact place in the console changes, so look for the billing or alerts settings in the live console. Take a screenshot you do not publish; an alert you cannot point at is not an alert.
 2. Create the API tokens described in the secrets runbook's [token scope table](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#4a-digitalocean-token-scopes): one write token for Spacelift to use, and optionally a read-only one for your own tooling. Give them a 90-day expiry and write the rotation date in your password manager.
 3. Register your SSH public key on the account and note its **name**. Stage 1 looks the key up by name and does not create it. See [Lessons learned, "The SSH key that already existed"](Lessons-Learned.md#3-the-ssh-key-that-already-existed).
 
@@ -113,7 +113,7 @@ You now have a private network and a default-deny firewall, for free, and you un
 
 ## Step 9: Twingate, then stage 1
 
-1. Create the Twingate account and connect your identity provider (the free social login is fine). Turn on two-factor authentication on the identity provider's account, with your security keys, and consider Twingate's own 2FA on top. **Sign in as a normal user once** to confirm it works.
+1. Create the Twingate account and connect your identity provider (the free social login is fine). Turn on two-factor authentication on the identity provider's account, with your security keys where it supports them (otherwise an authenticator app), and consider Twingate's own 2FA on top. **Sign in as a normal user once** to confirm it works.
 2. Create a Twingate API key and add the stage 1 secrets to Doppler as listed in the stage 1 guide, section 5: `TWINGATE_API_TOKEN`, `TWINGATE_NETWORK`, `ADMIN_SSH_PUBLIC_KEY`, `ADMIN_SSH_KEY_NAME`, `ADMIN_USER_IDS`.
 3. Check that no Twingate site named `access-<region>` already exists. The code creates it, and a hand-made one with the same name collides. See [Lessons learned](Lessons-Learned.md#4-a-hand-made-twingate-site-collides-with-the-code).
 4. Create the stack `cah-10-access` rooted at `stacks/10-access`, with a dependency on `cah-00-foundation` and the output mapping in the stage 1 guide. **Give it the same settings as stage 0:** the `cah` label (the Doppler context attaches to stacks carrying it, and without it the run has no Doppler token and fails), **autodeploy off** (this is what makes a human confirm every paid apply), and deletion protection on.
