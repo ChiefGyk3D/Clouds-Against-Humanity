@@ -121,6 +121,7 @@ Besides the cost gate and the identifier check, the `pytest tests` step covers t
 - **Examples and unused variables.** Each live stack's `terraform.tfvars.example` is complete and valid, and an unused variable must be on a short documented list.
 - **Wiki and threat model files.** Sidebar, reading order and `Next:` lines stay consistent; the Threat Dragon model parses; the telemetry lesson pages carry their draft banner and their cost tables are recomputed.
 - **The plan no-op check.** `scripts/plan_noop_check.py` is not run in CI (it needs a real plan). It is the acceptance test for editing a live stack: with default values the saved plan must change nothing, compared with the golden address lists in `docs/golden-addresses/`.
+- **The zero-ports check.** `scripts/zero_ports_check.py` is not run in CI either (it needs live addresses and a read-only token). `tests/test_zero_ports_check.py` proves its logic offline: discovery failures open no socket, redirects and proxies are refused through the real `urllib` against a local server, every port is accounted for exactly once on a fake clock, and no option can name an address. See [Droplet hardening](Droplet-Hardening.md).
 
 ## The identifier check
 

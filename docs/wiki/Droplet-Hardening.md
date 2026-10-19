@@ -105,6 +105,14 @@ Ubuntu's `nftables.service` loads a file that begins with `flush ruleset` on sta
 
 "Zero inbound" is only true if IPv6 is closed as well, so `tests/test_ipv6_closed.py` fails the build if a droplet does not state `ipv6 = false`, if a firewall or security group inbound rule has an IPv6 source such as `::/0`, if a VPC or subnet is given IPv6 settings, if an instance asks for IPv6 addresses, or if an IPv6 association or egress-only gateway resource appears. It reads the resource blocks in `modules/` and `stacks/` offline, so it proves what the repository declares, not what a cloud account shows. Outbound rules that list `::/0` as a destination are not flagged; the droplets have no IPv6 address to send from. The by-hand check is in the [stage 1 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md).
 
+## The outside check: zero open ports
+
+Every other check on this page reads the repository or the inside of a droplet. `scripts/zero_ports_check.py` looks from the outside: from a machine that is not in the VPC, it tries a TCP connect to every port (1 to 65535) of each connector's public address, once each, and passes only if every attempt timed out. A reset counts as an answer, because a blocked packet on DigitalOcean should get no reply. You run it by hand after a firewall or droplet change; CI cannot, because it needs live addresses and a read-only API token.
+
+It has no way to be given an address. Targets come only from the DigitalOcean API: a droplet must carry the baseline tag, belong to the project, and match the count you state with `--expect-connectors`. The inventory is re-read between batches, so a connector replaced mid-scan discards the result. The full runbook, the exit codes and the token steps are in the [stage 1 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md).
+
+What it does not prove: UDP (no reply there only means "open or filtered", so spot-check with `nmap -sU` by hand), anything beyond the one network it ran from (a clean result is claimed only after a second run from a different network), anything after the moment it ran, and anything if the DigitalOcean API lies. Its logic is tested against fakes and loopback; it has not been run against real infrastructure yet.
+
 ## Not done yet
 
 - **Audit logging** (auditd, and shipping auth logs off the box). Planned for stage 2 alongside the SIEM link.

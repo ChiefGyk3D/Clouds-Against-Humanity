@@ -204,6 +204,48 @@ Known note (corrected 2026-10-17): the `access_group` block on `twingate_resourc
 
    Then open the droplet in the DigitalOcean panel: the Networking tab should show no IPv6 address and the "Enable IPv6" option should be off. Not yet run: this hand check has not been run against a real droplet.
 
+## 6b. External zero-open-ports check (run by hand)
+
+The firewall rules, the host firewall and the plan policy say from the inside that the connectors have no public inbound path. `scripts/zero_ports_check.py` says it from the outside: from a machine that is not in the VPC, every TCP port (1 to 65535) on every connector's public address gives no answer at all. It is not run in CI, because it needs live addresses and a credential. It was designed (see `docs/superpowers/specs/2026-10-17-zero-open-ports-check-design.md`) and its logic is tested against fakes and loopback only. It has not been run against real infrastructure yet.
+
+**When to run it.** After any change to a cloud firewall, the host firewall, or a droplet (create, replace, resize, a reserved IP), and once as the proof that stage 1 is closed.
+
+**The command**, from a checkout, on the machine you scan from:
+
+```
+doppler run -- python3 -I scripts/zero_ports_check.py --expect-connectors 2
+```
+
+Optional: `--region tor1` (the default; it builds the baseline tag `cah-baseline-<region>`) and `--out PATH` (see below). There is no argument, file or environment variable that supplies an address, on purpose: a port scanner that takes an address is a tool that can be pointed at anyone. The script finds its own targets from the DigitalOcean API, read-only, and a droplet is a target only if it carries the baseline tag **and** belongs to the project `clouds-against-humanity`, and the number found equals `--expect-connectors`. Anything else (a count mismatch, a project droplet without the tag, a public IPv6 address on a droplet, an address that is not a public IPv4 address) stops the run before any port is touched. Reserved IPs assigned to a connector are scanned too.
+
+**The token (the maintainer's step).** The check uses its own read-only DigitalOcean token in its own Doppler config, not the Spacelift token. Create it in the DigitalOcean control panel with these scopes: `droplet:read`, `tag:read`, `project:read`, `reserved_ip:read`, plus the reserved IPv6 read scope (confirm in the token form: the exact name is not verified). Confirm all scope names in the token form when you create it, and correct this page if any differ. If a listing is refused for scope, the run ends as "cannot tell" (exit 2) and no port is touched. The script reads it from `DIGITALOCEAN_TOKEN` only, never prints it, never writes it to a file, and never passes it to a child process (it starts none).
+
+**Run it from a network you trust to be neutral.** A middlebox that swallows SYN packets would make an exposed port look silent. So a clean result is claimed only after a **second network** run (a phone hotspot is enough): run the same command from there too, and treat the change as verified only when both runs exit 0. The output prints "observed from this network only" as a reminder.
+
+**Time and budget.** Defaults: 512 attempts in flight, a 2.0 second timeout that starts when each attempt begins, at most 1,500 attempts per second. An all-silent connector takes roughly 4.3 minutes, so about 10 minutes for two connectors, plus a little for re-reading the inventory after every batch of 4,096 attempts. The script checks the open-file limit first and says "cannot tell" instead of failing halfway.
+
+**Do not destroy, replace or reassign a connector while the check runs.** DigitalOcean returns a destroyed droplet's address to its pool. The script re-reads the inventory between batches and at the end, and any change in the droplet ids or addresses discards the results (exit 2). That narrows the race; it cannot remove it without coordinating with the lifecycle, so do not start a change during a scan.
+
+**Exit codes.**
+
+- exit 0: every expected address and every port was attempted exactly once, and every attempt timed out (no answer).
+- exit 1: something answered. An open port is an answer. A refusal (a reset came back) is an answer too: on DigitalOcean a blocked packet is expected to get no reply, so a reset or an ICMP error means something answered. It may be the droplet or a device on the path, so the output says "an answer was received", not "the droplet replied". If a run has both an answer and an error it exits 1 and lists both.
+- exit 2: cannot tell. Discovery problems, a local error (too many open files, no local addresses, no buffer space, a worker failure), network or host unreachable, a failed positive control, an inventory change, an interruption, or a report that could not be written when the verdict would have been a pass. An error is never counted as a timeout, and a run never exits 0 with any attempt unaccounted for.
+
+**Positive control.** Before the sweep the script makes one TCP connection to the DigitalOcean API on port 443. If that fails, the local path is not trustworthy and the run is "cannot tell". The control's round-trip time is printed so a slow path that could turn answers into timeouts is visible.
+
+**Output and report.** The console prints connector labels (`connector-1`), never an address; counts of attempts, timeouts, answers and errors; the numbers of any answering ports (a port number is not an identifier); the timeout and concurrency used; and the verdict. `--out PATH` also writes that text to a file with mode 0600. It refuses to overwrite an existing file, refuses a path inside the repository or any directory on the way to it that is a symlink (the path is walked one component at a time without following links, so a home directory reached through a link is refused too; the parent is then opened once and checked by its real location, so a swap after the check cannot redirect the write), and a failed write is reported (exit 2 when the verdict would have been a pass).
+
+**Where the report goes, and the threat model.** The report directory is chosen by the operator, on the operator's own machine. The script defends against mistakes (a path inside the repository, a symlinked parent) and against a casual swap: it opens the directory once, checks its real location, checks again just before creating the file and again after writing, and removes the file and exits 2 if the directory has been moved into the repository in between. It does not defend against another local process with rename rights acting during the run (a descriptor pins a directory object, not its place in the tree), and a bind mount of a repository subdirectory elsewhere is not detected. The report holds connector labels, counts and port numbers only, never an address or the token, so the consequence of a mis-placed report is a file of counts in an untracked or ignored location, not a secret leak.
+
+**If a socket cannot be closed after an answer** the answer still counts (exit 1) and the output adds a line `cleanup problems: N`; after a timeout a failed close is a local error (exit 2). **Interrupting** the run (Ctrl-C) discards the results and exits 2, but shutdown waits for workers that are still running or sleeping for the rate limit, so it can take a few seconds to return.
+
+**What it does not prove.**
+
+- **UDP.** TCP only. For UDP the absence of a reply means "open or filtered". A manual extra: `nmap -Pn -sU -p 53,123,500,4500,51820 <connector public IP>` against a few ports you care about, from the second network too.
+- **One vantage point and one moment.** It is an observation from your network at one time. The standing guards are the plan policy, the host firewall and the tests; this is the occasional proof.
+- **A lying API.** Targets come from the DigitalOcean API, so a compromised or lying API response defeats the ownership check. An attacker who can add tags and project membership in this account is already inside the trust boundary, and anyone who edits the script can point it elsewhere. The rails make the intended use the only easy one; they are not a guarantee against misuse.
+
 ## 6a. If a connector shows offline
 
 SSH to a connector goes through Twingate, so it is impossible while that connector is the only path in. Try the other connector first: if `access-tor1-connector-b` is online, SSH to connector a's private IP through it as `cah-admin`, then:
