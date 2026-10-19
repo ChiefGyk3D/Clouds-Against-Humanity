@@ -14,10 +14,11 @@ The stage guides ([stage 0](https://github.com/ChiefGyk3D/Clouds-Against-Humanit
 
 Before you create any cloud account, do what you can to bound your downside.
 
-1. **A password manager, and two-factor authentication on every account you are about to create.** Store recovery codes in the password manager, not in a note.
-2. **Decide your numbers.** Choose the most you are willing to spend in a month and two alert levels below it (the author used $10 and $25 under a $30 ceiling). You cannot set the alert yet, because the provider account does not exist; you will set it as the first thing you do after creating that account, in step 4, **before you create a token or any resource**. See [How money works in the cloud](How-Money-Works-in-the-Cloud.md) for why the alert comes first, not last.
+1. **A password manager, and two-factor authentication on every account you are about to create.** Store recovery codes in the password manager, not in a note. I use and recommend [Proton Pass](https://proton.me/pass). The free plan covers unlimited logins and passkeys, and the built-in 2FA authenticator is part of the paid Pass Plus plan (the free plan has no built-in one, but Proton ships a separate Proton Authenticator app). Proton also sells mail, a VPN and drive storage, which you do not need for this project. A disclosure: if you sign up through [my links page](https://links.chiefgyk3d.com), I earn a commission, it costs you nothing, and this project does not depend on it. Any password manager that stores TOTP secrets or passkeys works the same way.
+2. **A hardware security key, and I mean two.** I highly recommend [YubiKeys](https://www.yubico.com/products/security-key/) (this one is a plain recommendation, not an affiliate link). Buy at least two, register both on every account that allows it, and keep one somewhere other than your keyring, because a single key you lose is a lockout you built yourself. Put the recovery codes for each account in the password manager as well. Hardware keys resist phishing in a way a six-digit code does not, which matters because every account in this build can create or destroy something that costs money.
+3. **Decide your numbers.** Choose the most you are willing to spend in a month and two alert levels below it (the author used $10 and $25 under a $30 ceiling). You cannot set the alert yet, because the provider account does not exist; you will set it as the first thing you do after creating that account, in step 4, **before you create a token or any resource**. See [How money works in the cloud](How-Money-Works-in-the-Cloud.md) for why the alert comes first, not last.
 
-*Checkpoint: you have a password manager with MFA, and your budget numbers are written down.*
+*Checkpoint: you have a password manager with MFA, two security keys (or a written plan to get them) for the services that support them, and your budget numbers are written down.*
 
 ## Step 1: run the free labs first
 
@@ -29,7 +30,7 @@ Before any cloud account, spend an hour proving to yourself you understand what 
 
 ## Step 2: the accounts you need, in order
 
-You need accounts at five services for stage 0 and 1. Create each one only when its step arrives, and turn on two-factor authentication the moment you do.
+You need accounts at five services for stage 0 and 1. Create each one only when its step arrives, and turn on two-factor authentication the moment you do. Where the service supports security keys, register both of them right then, not later. Where it does not, use the strongest option it offers, an authenticator app, and say so in your notes.
 
 | Order | Service | Needed for | Reached at |
 |---|---|---|---|
@@ -41,6 +42,14 @@ You need accounts at five services for stage 0 and 1. Create each one only when 
 
 The identity provider is the one nobody mentions: Twingate decides *who* you are by trusting a sign-in service, such as a Google or Microsoft account, a GitHub login, or a company directory. Pick one and confirm it works with Twingate before step 9, because it is the first thing that would otherwise block you with money already spent. The [identity primer](Identity-Secrets-and-Zero-Trust-Basics.md) explains the idea.
 
+**What Twingate can use, and what it costs.** Twingate's free Starter plan (up to 5 users) signs people in with a social login: Google, Microsoft, GitHub or LinkedIn, matched on the email address you invite. That is the zero-cost baseline and it is enough for this project. Directory integrations, meaning Microsoft Entra ID, JumpCloud, Okta, OneLogin and Keycloak, are listed as Business and Enterprise plan features, so using one of them with Twingate means a paid Twingate plan. Google Workspace is the exception Twingate lists for all plans. Twingate lets you connect more than one provider at once, so you can start on a social login and add a directory later.
+
+**The one I actually recommend: a Microsoft 365 account with Microsoft Entra.** It is not the cheapest path and Twingate's free plan will not use it. I recommend it anyway because it gets you hands-on with Entra and IAM administration (users, groups, sign-in logs), which is outside this project's scope and a strong springboard into identity work. Entra ID Free is included with Microsoft cloud subscriptions such as Azure and Microsoft 365. The Microsoft 365 Developer Program is limited to Visual Studio Professional or Enterprise subscribers, ISV Success and Microsoft AI Cloud Partner Program members, and Premier or Unified Support customers, so do not count on it as a learner. An Azure free account, which Microsoft's own tenant documentation points to, is the route I would check first. Look at Microsoft's current offers on the day, because they move.
+
+**JumpCloud** is a real directory and SSO product and a good one to try. Its pricing page shows a 30-day free trial and paid packages, with no permanent free tier that I could verify, and Twingate needs its Business plan to use it. Treat it as a trial, not a free home. **Keycloak** is open source and self-hosted, so the software costs nothing, but you run and patch it yourself, and Twingate lists its Keycloak integration as Business and Enterprise only. Pick it for the learning, not for the budget.
+
+*Checked on 2026-10-19. Sources: [Twingate identity providers](https://www.twingate.com/docs/identity-providers), [Twingate social logins](https://www.twingate.com/docs/social-logins), [Twingate pricing](https://www.twingate.com/pricing), the Twingate setup pages for [Entra ID](https://www.twingate.com/docs/entra-id-configuration), [JumpCloud](https://www.twingate.com/docs/jumpcloud-configuration) and [Keycloak](https://www.twingate.com/docs/keycloak-configuration), [Microsoft Entra licensing](https://learn.microsoft.com/en-us/entra/fundamentals/licensing), [creating a Microsoft Entra tenant](https://learn.microsoft.com/en-us/entra/fundamentals/create-new-tenant), [the Microsoft 365 Developer Program FAQ](https://learn.microsoft.com/en-us/office/developer-program/microsoft-365-developer-program-faq), [JumpCloud pricing](https://jumpcloud.com/pricing), [Proton Pass](https://proton.me/pass). Plan limits and eligibility change, so check each pricing page on the day; I have left the prices out on purpose.*
+
 ## Step 3: your private copy
 
 Follow [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipeline.md): the mirror steps, the demo-values table, and what a mirror does not copy. Choose your region and VPC range now. Stage 0's guide explains why a VPC range that overlaps another one in the account is rejected.
@@ -51,7 +60,7 @@ Follow [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipel
 
 ## Step 4: DigitalOcean
 
-1. Create the account, enable two-factor authentication, and **set the billing alerts you decided on in step 0 before you do anything else**. The exact place in the console changes, so look for the billing or alerts settings in the live console. Take a screenshot you do not publish; an alert you cannot point at is not an alert.
+1. Create the account, enable two-factor authentication (register both security keys now if the console supports them, otherwise use an authenticator app and note that), and **set the billing alerts you decided on in step 0 before you do anything else**. The exact place in the console changes, so look for the billing or alerts settings in the live console. Take a screenshot you do not publish; an alert you cannot point at is not an alert.
 2. Create the API tokens described in the secrets runbook's [token scope table](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#4a-digitalocean-token-scopes): one write token for Spacelift to use, and optionally a read-only one for your own tooling. Give them a 90-day expiry and write the rotation date in your password manager.
 3. Register your SSH public key on the account and note its **name**. Stage 1 looks the key up by name and does not create it. See [Lessons learned, "The SSH key that already existed"](Lessons-Learned.md#3-the-ssh-key-that-already-existed).
 
@@ -104,13 +113,25 @@ You now have a private network and a default-deny firewall, for free, and you un
 
 ## Step 9: Twingate, then stage 1
 
-1. Create the Twingate account and connect your identity provider. **Sign in as a normal user once** to confirm it works.
+1. Create the Twingate account and connect your identity provider (the free social login is fine). Turn on two-factor authentication on the identity provider's account, with your security keys where it supports them (otherwise an authenticator app), and consider Twingate's own 2FA on top. **Sign in as a normal user once** to confirm it works.
 2. Create a Twingate API key and add the stage 1 secrets to Doppler as listed in the stage 1 guide, section 5: `TWINGATE_API_TOKEN`, `TWINGATE_NETWORK`, `ADMIN_SSH_PUBLIC_KEY`, `ADMIN_SSH_KEY_NAME`, `ADMIN_USER_IDS`.
 3. Check that no Twingate site named `access-<region>` already exists. The code creates it, and a hand-made one with the same name collides. See [Lessons learned](Lessons-Learned.md#4-a-hand-made-twingate-site-collides-with-the-code).
 4. Create the stack `cah-10-access` rooted at `stacks/10-access`, with a dependency on `cah-00-foundation` and the output mapping in the stage 1 guide. **Give it the same settings as stage 0:** the `cah` label (the Doppler context attaches to stacks carrying it, and without it the run has no Doppler token and fails), **autodeploy off** (this is what makes a human confirm every paid apply), and deletion protection on.
 5. **Before you apply, check the price yourself.** The cost gate proves your code is consistent with the repository's approved model: run it and expect `$12.00`. It does not prove your invoice, because it reads a price table fixed on 2026-10-10. Look up the current price and availability of the droplet size in your region in the DigitalOcean console or its sizes API, and confirm it matches. This is the first step that bills.
 
 **You should see in the plan:** **13 resources to add**: a tag, a site, two connectors, two token sets, two droplets, a firewall, a project attachment, a group and two SSH resources. Read it, then confirm.
+
+## Springboards
+
+I want you to think past this page, not just follow it. Too much learning is spoon-fed, and the useful habit is asking what else you could try. For this stage, a few ideas, none of them required:
+
+- Make a throwaway account and break its MFA recovery on purpose: lose the phone, lose one key, and see what actually gets you back in. Do it before it happens to an account you need.
+- Read the identity provider's sign-in logs after you log in. Find your own sign-in, and then work out what a failed or odd one would look like.
+- Run the same Twingate flow with a second identity provider and compare what each one asks you to set up.
+- Map what the identity provider can see about you, and what Twingate can see that it cannot.
+- Pick one thing here that you would do differently and write down why, then find a tool that does it that way.
+
+Recommending other springboards is welcome throughout this project, so if you find a better one, open a pull request.
 
 ## Step 10: verify, as a visitor would
 

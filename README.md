@@ -4,6 +4,8 @@ A small, cheap, locked-down DigitalOcean environment built with OpenTofu, applie
 
 It is a cloud extension of a homelab and a teaching repository at the same time: every stage is costed and approved before it runs, and every decision is written down with the reason for it, including the ones that were wrong the first time.
 
+Recommending other springboards is encouraged throughout this project. The point is to get you thinking in different ways and outside the box, not to hand you one path to copy, so expect pages to point at things to try beyond what they cover.
+
 **[Read the wiki](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki)** for flowcharts and the what and why of every component. The same pages live in [`docs/wiki/`](docs/wiki/Home.md) if you prefer reading them in the repo.
 
 ## How it fits together
