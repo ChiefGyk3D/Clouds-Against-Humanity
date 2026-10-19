@@ -33,14 +33,22 @@ MERGED_BANNER = (
     "(opt-in node exporter, Wazuh agent with auditd, metrics firewall rules, Grafana dashboards), "
     "but none of it has been applied or run against real infrastructure, and nothing has been measured"
 )
+# The operator page also points at the synthetic lab, where the inventory, the
+# two alert rules and the promtool fixtures are committed. Still a draft.
+LAB_BANNER = (
+    "Unverified draft: the inventory, alert rules and promtool fixtures this page describes are built "
+    "and merged in a synthetic monitoring lab, but nothing here has been applied or run against real "
+    "infrastructure, and nothing has been measured"
+)
 BANNERS = {name: DESIGN_BANNER for name in LESSONS}
+BANNERS["Reading-a-Dashboard-as-an-Operator"] = LAB_BANNER
 BANNERS["Cloud-Telemetry-What-and-Why"] = MERGED_BANNER
 BANNERS["Build-Your-Own-Mini-SOC"] = MERGED_BANNER
 
 
 def banner_is_honest(banner: str) -> bool:
     """Only an approved banner passes: the draft label stays and no extra claim may trail it."""
-    return banner.startswith("Unverified draft") and banner.rstrip(".") in {DESIGN_BANNER, MERGED_BANNER}
+    return banner.startswith("Unverified draft") and banner.rstrip(".") in {DESIGN_BANNER, MERGED_BANNER, LAB_BANNER}
 LINK = re.compile(r"\]\(([A-Za-z0-9_-]+)\.md(?:#([^)]*))?\)")
 
 
@@ -100,6 +108,7 @@ def test_banner_guard_rejects_a_verified_looking_banner():
         MERGED_BANNER + " and applied",
         MERGED_BANNER + ", and verified.",
         DESIGN_BANNER + " and verified",
+        LAB_BANNER + " and verified",
     ):
         assert not banner_is_honest(bad), bad
 

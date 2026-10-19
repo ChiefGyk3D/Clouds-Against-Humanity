@@ -1,6 +1,6 @@
 # Grafana dashboards: the three this repository ships
 
-> **Unverified draft: written from the design, none of these dashboards has been imported into a live Grafana or run against real data.** The files are checked for structure by `tests/test_dashboards.py` (valid JSON, allowed panel types, a grid position, a ref id and a query on every panel, data sources as variables, no real address or host name, a `site` variable on each) and for nothing else: that test cannot show a file imports into Grafana or that a query returns data. Metric names for the Twingate connector come from [Twingate's connector metrics page](https://www.twingate.com/docs/connector-metrics) as read on 2026-10-17; node exporter names are the standard ones; Wazuh field names are marked UNVERIFIED panel by panel. Sources: the [settings and mini SOC design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-stage2-settings-and-mini-soc-design.md) sections 3.2 and 5, and the [connector telemetry findings](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-17-twingate-connector-telemetry-findings.md).
+> **Partly verified against a synthetic lab only: the two Prometheus dashboards have been loaded into a Grafana with invented data, and none of the three has been imported into a real home Grafana or run against real data.** `tests/test_dashboards.py` checks structure (valid JSON, allowed panel types, a grid position, a ref id and a query on every panel, data sources as variables, no real address or host name, a `site` variable on each). The [synthetic monitoring lab](Lab-Demo-Monitoring-Stack.md) adds two sites with two connectors each, and `tests/test_demo_monitoring.py` asserts that every Prometheus panel query uses only metrics the lab's generator exports. The Wazuh dashboard is not in the lab and stays unverified. Metric names for the Twingate connector come from [Twingate's connector metrics page](https://www.twingate.com/docs/connector-metrics) as read on 2026-10-17; node exporter names are the standard ones; Wazuh field names are marked UNVERIFIED panel by panel. Sources: the [settings and mini SOC design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-stage2-settings-and-mini-soc-design.md) sections 3.2 and 5, and the [connector telemetry findings](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-17-twingate-connector-telemetry-findings.md).
 
 **Prerequisites:** [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) and [Multiple sites and identity](Multiple-Sites-and-Identity.md).
 
@@ -68,8 +68,8 @@ Every panel here says UNVERIFIED in its description, and this section says what 
 
 ## What is NOT verified
 
-- Nothing was imported into a live Grafana, so the panel layout, colours and units have never been seen rendered. Expect to nudge them.
-- No query was run against a Prometheus or OpenSearch. Syntax was reasoned, not executed. `promtool` and a fixture of two sites with two hosts each (design section 3.2) are the right next check and are not written.
+- **Nothing was imported into a real home Grafana.** The Sites overview and Droplet health dashboards are mounted into the [lab's](Lab-Demo-Monitoring-Stack.md) Grafana 12.1.0 and the lab page carries screenshots of them rendered with invented data, so the layout has been seen there. Colours, units and behaviour against your own Prometheus and data are unchecked; expect to nudge them.
+- **Queries have run only in the lab.** The lab's tests check that each Prometheus panel query names only metrics the generator exports; the committed `promtool` fixtures (2 sites x 2 hosts x 2 endpoints, `labs/demo-monitoring/prometheus/tests/`) test the two alert rules and the inventory, not the dashboard panels. That the panel PromQL returns correct numbers was judged from the lab's screenshots, not asserted by a test, and no query was run against a real Prometheus. No OpenSearch query of any kind was run, and the Wazuh dashboard is not in the lab.
 - `schemaVersion` is 41, believed to be what Grafana 12.0 writes (not checked against a live install). The test treats 41 only as a structural floor, not as proof that a file imports; Grafana migrates older versions on import, and whether a later 12.x writes a higher number was not checked.
 - The offline test checks panel types against an allowlist, grid positions, ref ids, and that every query uses a variable. It does not parse PromQL or Lucene.
 - The Twingate metric names and the `transport` label values are from Twingate's own page. Whether connector labels reach Prometheus is not documented, which is why `site` and `instance` come from the target file, not from the connector.
@@ -80,12 +80,7 @@ Every panel here says UNVERIFIED in its description, and this section says what 
 
 ## Screenshots
 
-No picture is committed. The [screenshots policy](Screenshots-Policy.md) allows synthetic demo dashboards only, and the synthetic two-site demo lab does not exist yet.
-
-> **Screenshot to take yourself:** the Sites overview dashboard in your own Grafana, with two sites selected.
-> Capture: the top of the dashboard with the site and instance dropdowns open and the three status panels in frame, from a demo Prometheus you fed with made-up series.
-> Look for: one number per site in the up and down panels, and the red bars in the state timeline lining up with a target you stopped on purpose.
-> Redact: the Grafana address and tab strip, your user name and avatar, real site, host and instance names, and any address that is not in a documentation range.
+Pictures of the Sites overview dashboard (healthy, and with one site silenced) are on the [synthetic monitoring lab](Lab-Demo-Monitoring-Stack.md) page and in [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md); they come from the lab's invented data, as the [screenshots policy](Screenshots-Policy.md) requires. No picture of the Wazuh dashboard is committed.
 
 > **Screenshot to take yourself:** the Wazuh agents dashboard in your own Grafana after you set the site label on a test agent.
 > Capture: the failed logins panel and the file integrity panel after you caused one failed login and touched a file under the watched path on a test machine.
@@ -95,7 +90,7 @@ No picture is committed. The [screenshots policy](Screenshots-Policy.md) allows 
 ## Try it yourself
 
 - Before importing, predict what the "Targets down per site" panel shows for a site with two healthy targets, then for one whose scrapes all fail, then for one that has been removed from the target file.
-- Import Sites overview against a Prometheus with a fake `twingate-ztna` job and add a second site by editing the target file only. Did the dashboard need a change?
+- Run the [synthetic monitoring lab](Lab-Demo-Monitoring-Stack.md), add a third site to `labs/demo-monitoring/prometheus/targets.json` (Prometheus re-reads that file by itself) and a matching entry to `labs/demo-monitoring/prometheus/inventory.rules.yml`, then run `scripts/demo_monitoring.sh restart-prometheus`, which restarts only the Prometheus container so it re-reads the rule file (the lab has no reload endpoint). The generator answers for its four built-in hosts only, so the new site's targets will read as down. Did the dashboard need a change?
 - Change one panel's data source variable to a name that does not exist and read the error. Then run `python -I -m pytest tests/test_dashboards.py` and find which rule would catch it.
 
 Next: [Roadmap](Roadmap.md). Back to the [Reading order](Reading-Order.md).
