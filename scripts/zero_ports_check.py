@@ -17,7 +17,7 @@ this script defeats it too. The rails make the intended use the only easy one.
 
 Usage (the token comes from Doppler, in its own read-only config):
 
-  doppler run -- python3 -I scripts/zero_ports_check.py --expect-connectors 2 [--region tor1] [--out PATH]
+  doppler run -- python3 -I scripts/zero_ports_check.py --expect-connectors 2 [--region tor1] [--resource-key KEY] [--out PATH]
 
 Exit codes: 0 only if every expected address and every port was attempted
 exactly once and every attempt timed out; 1 if any port answered (a connection,
@@ -85,6 +85,8 @@ OUTCOMES = frozenset({OPEN, REFUSED, TIMEOUT, UNREACHABLE, LOCAL, ERROR, OPEN_CL
 _SAFE_ID = re.compile(r"[A-Za-z0-9-]{1,64}")
 _DROPLET_URN = re.compile(r"do:droplet:([0-9]{1,18})")
 _REGION = re.compile(r"[a-z0-9]{2,16}")
+# The same format stacks/00-foundation allows for resource_key.
+_RESOURCE_KEY = re.compile(r"[a-z][a-z0-9-]{1,23}")
 _TOKEN = re.compile(r"[\x21-\x7e]{8,256}")
 
 
@@ -341,13 +343,19 @@ def discover(
     expected: int,
     region: str = "tor1",
     address_ok: Callable[[ipaddress.IPv4Address], bool] = default_address_ok,
+    resource_key: str = "",
 ) -> Inventory:
     """All API reads, strict parsing and the intersection. Raises CheckError; opens no socket."""
     if not _is_int(expected) or expected < 1:
         raise CheckError("--expect-connectors must be at least 1")
     if not isinstance(region, str) or not _REGION.fullmatch(region):
         raise CheckError("the region is malformed")
-    tag = TAG_PREFIX + region
+    if not isinstance(resource_key, str) or (
+        resource_key != "" and not _RESOURCE_KEY.fullmatch(resource_key)
+    ):
+        raise CheckError("the resource key is malformed")
+    # The stack names the tag from resource_key when set, else from the region.
+    tag = TAG_PREFIX + (resource_key or region)
 
     projects = _fetch_all(transport, "/v2/projects", {}, "projects", "id")
     named = [p for p in projects if p.get("name") == PROJECT_NAME]
@@ -955,6 +963,13 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--region", default="tor1", help="region of the baseline tag (default tor1)")
     parser.add_argument(
+        "--resource-key",
+        default="",
+        metavar="KEY",
+        help="the stack's resource_key, if it sets one (baseline tag cah-baseline-KEY); "
+        "default: the tag is built from --region",
+    )
+    parser.add_argument(
         "--out",
         default=None,
         metavar="PATH",
@@ -1008,7 +1023,7 @@ def _run_checked(args, env, hooks: Hooks, out, out_target) -> int:
         transport = ApiTransport(token, hooks.base_url)
 
     def fresh() -> Inventory:
-        return discover(transport, expected, args.region, hooks.address_ok)
+        return discover(transport, expected, args.region, hooks.address_ok, args.resource_key)
 
     inventory = fresh()
     control_ms = positive_control(hooks)

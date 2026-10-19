@@ -110,7 +110,8 @@ class FakeAPI:
     """The DigitalOcean listings the script reads, with knobs for the hostile cases."""
 
     def __init__(self, *, tagged=None, project_droplets=None, projects=None,
-                 reserved4=(), reserved6=(), page_size=200):
+                 reserved4=(), reserved6=(), page_size=200, tag=BASELINE_TAG):
+        self.tag = tag
         self.tagged = [droplet(1001, A), droplet(1002, B)] if tagged is None else tagged
         ids = [d["id"] for d in self.tagged] if project_droplets is None else project_droplets
         self.projects = [{"id": PROJ, "name": zpc.PROJECT_NAME}] if projects is None else projects
@@ -143,7 +144,7 @@ class FakeAPI:
         if path.startswith("/v2/projects/") and path.endswith("/resources"):
             return self._list("resources", self.resources, params)
         if path == "/v2/droplets":
-            assert params["tag_name"] == "cah-baseline-tor1"
+            assert params["tag_name"] == self.tag
             if self.endless:
                 page = int(params["page"])
                 return {"droplets": [droplet(50000 + page, A)], "meta": {"total": 10**6},
@@ -1041,7 +1042,7 @@ def forbidden_options(parser):
 def test_no_option_can_name_a_host_address_target_or_file():
     parser = zpc.build_parser()
     assert forbidden_options(parser) == []
-    allowed = {"-h", "--help", "--expect-connectors", "--region", "--out"}
+    allowed = {"-h", "--help", "--expect-connectors", "--region", "--resource-key", "--out"}
     assert {o for a in parser._actions for o in a.option_strings} == allowed
 
 
@@ -2119,3 +2120,68 @@ def test_a_relative_path_is_walked_too(tmp_path, monkeypatch):
         zpc.check_out_path("link/r.txt")
     target = zpc.check_out_path("real/r.txt")
     zpc.close_report_target(target)
+
+
+# Round 5: the baseline tag follows the stack's resource_key when one is set.
+
+KEY = "tor1-b"
+KEY_TAG = "cah-baseline-tor1-b"
+
+
+def _keyed(n=1):
+    return [droplet(1000 + i, f"198.51.100.{10 + i}", tags=[KEY_TAG]) for i in range(1, n + 1)]
+
+
+def test_resource_key_builds_the_tag_the_stack_publishes():
+    api = FakeAPI(tagged=_keyed(), tag=KEY_TAG)
+    inv = zpc.discover(api, 1, "tor1", OK, KEY)
+    assert inv.labels == ("connector-1",)
+
+
+def test_without_a_resource_key_the_region_tag_is_used():
+    api = FakeAPI(tagged=[droplet(1001, A)])
+    assert zpc.discover(api, 1, "tor1", OK, "").labels == ("connector-1",)
+
+
+def test_region_only_query_misses_a_keyed_stack_and_stops():
+    # the failure the option exists to fix: the stack tagged cah-baseline-tor1-b
+    api = FakeAPI(tagged=_keyed(), tag=BASELINE_TAG)
+    with pytest.raises(zpc.CheckError):
+        zpc.discover(api, 1, "tor1", OK, "")
+
+
+def test_a_droplet_with_only_the_region_tag_is_refused_when_a_key_is_given():
+    api = FakeAPI(tagged=[droplet(1001, A)], tag=KEY_TAG)
+    with pytest.raises(zpc.CheckError):
+        zpc.discover(api, 1, "tor1", OK, KEY)
+
+
+def test_main_accepts_resource_key_and_scans():
+    api = FakeAPI(tagged=_keyed(), tag=KEY_TAG)
+    code, out, counters = run_main(api, expected=1, argv=["--resource-key", KEY])
+    assert code == 0 and counters.scan == 3 and "198.51.100" not in out
+
+
+@pytest.mark.parametrize(
+    "key",
+    ["tor1-b\n", "Tor1", "TOR1-B", "a", "1abc", "-abc", "a" * 25, "a;rm", "a b", "a$(x)", "a`x`",
+     "a|b", "a&b", "a/../b", "a_b", "a.b", "tor1-b ", " tor1-b", "tör1"],
+)
+def test_a_hostile_resource_key_is_refused_before_any_request(key):
+    api = FakeAPI()
+    with pytest.raises(zpc.CheckError):
+        zpc.discover(api, 1, "tor1", OK, key)
+    assert api.calls == []
+
+
+@pytest.mark.parametrize("key", ["ab", "a" * 24, "tor1-b", "x-1-2"])
+def test_boundary_resource_keys_are_accepted(key):
+    tag = "cah-baseline-" + key
+    api = FakeAPI(tagged=[droplet(1001, A, tags=[tag])], tag=tag)
+    assert zpc.discover(api, 1, "tor1", OK, key).labels == ("connector-1",)
+
+
+def test_main_refuses_a_hostile_resource_key_with_no_socket():
+    counters = Counters()
+    code, _out, _ = run_main(FakeAPI(), expected=1, counters=counters, argv=["--resource-key", "BAD\n"])
+    assert code == 2 and counters.scan == 0 and counters.control == 0
