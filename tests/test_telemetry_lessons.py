@@ -39,12 +39,8 @@ BANNERS["Build-Your-Own-Mini-SOC"] = MERGED_BANNER
 
 
 def banner_is_honest(banner: str) -> bool:
-    """A banner must keep the draft label and never claim an applied or measured result."""
-    low = banner.lower()
-    return banner.startswith("Unverified draft") and (
-        "none of stage 2 has been built or applied" in low
-        or ("none of it has been applied" in low and "nothing has been measured" in low)
-    )
+    """Only an approved banner passes: the draft label stays and no extra claim may trail it."""
+    return banner.startswith("Unverified draft") and banner.rstrip(".") in {DESIGN_BANNER, MERGED_BANNER}
 LINK = re.compile(r"\]\(([A-Za-z0-9_-]+)\.md(?:#([^)]*))?\)")
 
 
@@ -72,15 +68,28 @@ def anchors(name: str) -> set[str]:
 def test_page_has_status_banner_prerequisites_and_next(name):
     body = text(name)
     head = "\n".join(body.splitlines()[:4])
-    assert BANNERS[name] in head, f"{name}: status banner missing from the top"
+    assert f"**{BANNERS[name]}.**" in head, f"{name}: status banner missing from the top"
     assert re.search(r"^\*\*Prerequisites:\*\* .*\]\(", body, re.MULTILINE), f"{name}: no Prerequisites line"
     assert re.search(r"^Next: .*\]\(", body, re.MULTILINE), f"{name}: no Next line"
 
 
-def test_every_banner_keeps_the_draft_label_and_claims_no_run():
+def page_banner(name: str) -> str:
+    """The first bold banner in a page's first lines, as written on the page."""
+    head = "\n".join(text(name).splitlines()[:4])
+    m = re.search(r"^> \*\*(Unverified draft.*?)\*\*", head, re.MULTILINE)
+    assert m, f"{name}: no bold Unverified draft banner at the top"
+    return m.group(1)
+
+
+@pytest.mark.parametrize("name", LESSONS)
+def test_every_page_banner_keeps_the_draft_label_and_claims_no_run(name):
+    banner = page_banner(name)
+    assert banner_is_honest(banner), f"{name}: {banner}"
+    assert banner == BANNERS[name] + ".", f"{name}: banner differs from the pinned text"
+
+
+def test_pinned_banners_cover_every_lesson():
     assert set(BANNERS) == set(LESSONS)
-    for name, banner in BANNERS.items():
-        assert banner_is_honest(banner), name
 
 
 def test_banner_guard_rejects_a_verified_looking_banner():
@@ -88,6 +97,9 @@ def test_banner_guard_rejects_a_verified_looking_banner():
         "Verified: stage 2 telemetry is built and applied",
         "Unverified draft: the stage 2 telemetry is built and merged",
         "Draft: built and merged, none of it has been applied and nothing has been measured",
+        MERGED_BANNER + " and applied",
+        MERGED_BANNER + ", and verified.",
+        DESIGN_BANNER + " and verified",
     ):
         assert not banner_is_honest(bad), bad
 
