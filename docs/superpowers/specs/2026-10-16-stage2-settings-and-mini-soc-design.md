@@ -64,7 +64,7 @@ Totals for the optional cloud mini SOC, with **one SOC droplet in total** (not o
 | 3. NOC + lab-scale Wazuh manager (no indexer) | Option 2 plus a Wazuh manager | `s-2vcpu-2gb` to `s-2vcpu-4gb` (est.) | $18 to $24 | $30 to $36 | $42 to $48 | $47 to $53 | One site only with `s-2vcpu-2gb`, nothing left; **no** for the rest |
 | 4. Full Wazuh all-in-one | Manager, indexer, dashboard | `s-4vcpu-8gb` or larger (Wazuh's published sizing is **UNVERIFIED** here) | $48+ | $60+ | $72+ | $77+ | **No.** |
 | 5. A volume for retention | Block storage for a store | volume | **UNVERIFIED** (not in `cost-prices.json`) | n/a | n/a | n/a | Added on top of any row |
-| 6. Droplet backups | Snapshots of the SOC droplet | +20 percent of the droplet (the gate treats this as unverified, `backups_fraction_verified: false`) | est. $1 to $5 | n/a | n/a | n/a | Prefer config in git plus a data copy home (section 5.5) |
+| 6. Droplet backups | Snapshots of the SOC droplet | +20 percent of the droplet (weekly fraction verified 2026-10-19, `backups_fraction_verified: true`) | est. $1 to $5 | n/a | n/a | n/a | Prefer config in git plus a data copy home (section 5.5) |
 
 Said plainly:
 
