@@ -160,7 +160,7 @@ With a map present: every instance's `resource_key` must be in it; each site's p
 
 These are not priced, or not confirmed against the vendor's current page. Check them before relying on them:
 
-- Droplet backups. The table assumes a fraction of the droplet price (`backups_fraction`), and `backups_fraction_verified` is `false`, so the gate refuses any backup-enabled droplet until someone verifies it. DigitalOcean's backups pricing page, read 2026-10-11, states 20 percent of the droplet price for weekly and 30 percent for daily backups, so the flag can be flipped in the pull request that first turns backups on.
+- Droplet backups are verified (issue 117) for the basic weekly plan only: `backups_fraction` is 0.2 and `backups_fraction_verified` is `true`. DigitalOcean's backups pricing page (https://docs.digitalocean.com/products/backups/details/pricing/), read 2026-10-19, lists basic plans at 20.0 percent (weekly) and 30.0 percent (daily) of the Droplet's cost per month. The table prices only that weekly fraction; daily backups and the per-GiB usage-based plans on the same page are not modelled.
 - Bandwidth overage.
 - Snapshots.
 - Free-tier limits of Spacelift, Doppler and Twingate.
