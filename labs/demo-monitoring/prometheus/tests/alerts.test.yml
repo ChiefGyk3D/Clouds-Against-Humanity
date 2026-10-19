@@ -1,0 +1,192 @@
+# Run: scripts/demo_monitoring.sh test   (promtool via the pinned Prometheus image)
+# 2 sites x 2 hosts x 2 endpoints (node-exporter, connector-metrics), design section 3.5. Instances use documentation addresses.
+# Scenario 4 (a site removed from the inventory) is alerts-site-removed.test.yml.
+rule_files:
+  - ../inventory.rules.yml
+  - ../alerts.rules.yml
+
+evaluation_interval: 15s
+
+tests:
+  # 1. All healthy: nothing fires
+  - interval: 15s
+    input_series:
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.11", endpoint="node-exporter"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.11", endpoint="connector-metrics"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.12", endpoint="node-exporter"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.12", endpoint="connector-metrics"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.11", endpoint="node-exporter"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.11", endpoint="connector-metrics"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.12", endpoint="node-exporter"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.12", endpoint="connector-metrics"}'
+        values: "1x40"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: CloudSiteSilent
+        exp_alerts: []
+      - eval_time: 10m
+        alertname: CloudSiteDegraded
+        exp_alerts: []
+  # 2. One host down at site-tor1: Degraded for site-tor1 only
+  - interval: 15s
+    input_series:
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.11", endpoint="node-exporter"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.11", endpoint="connector-metrics"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.12", endpoint="node-exporter"}'
+        values: "0x40"
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.12", endpoint="connector-metrics"}'
+        values: "0x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.11", endpoint="node-exporter"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.11", endpoint="connector-metrics"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.12", endpoint="node-exporter"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.12", endpoint="connector-metrics"}'
+        values: "1x40"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: CloudSiteSilent
+        exp_alerts: []
+      - eval_time: 10m
+        alertname: CloudSiteDegraded
+        exp_alerts:
+          - exp_labels:
+              severity: warn
+              site: site-tor1
+            exp_annotations:
+              summary: "Fewer healthy targets than expected at site-tor1"
+  # 3. All of site-tor1's series missing while site-tor2 stays healthy: Silent for site-tor1 only
+  - interval: 15s
+    input_series:
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.11", endpoint="node-exporter"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.11", endpoint="connector-metrics"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.12", endpoint="node-exporter"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.12", endpoint="connector-metrics"}'
+        values: "1x40"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: CloudSiteSilent
+        exp_alerts:
+          - exp_labels:
+              severity: page
+              site: site-tor1
+              job: twingate-ztna
+            exp_annotations:
+              summary: "No healthy twingate-ztna target at site-tor1"
+      - eval_time: 10m
+        alertname: CloudSiteDegraded
+        exp_alerts: []
+  # 5. Every target of site-tor1 at up == 0 (scrapes fail, series still exist): Silent for site-tor1 only
+  - interval: 15s
+    input_series:
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.11", endpoint="node-exporter"}'
+        values: "0x40"
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.11", endpoint="connector-metrics"}'
+        values: "0x40"
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.12", endpoint="node-exporter"}'
+        values: "0x40"
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.12", endpoint="connector-metrics"}'
+        values: "0x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.11", endpoint="node-exporter"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.11", endpoint="connector-metrics"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.12", endpoint="node-exporter"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.12", endpoint="connector-metrics"}'
+        values: "1x40"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: CloudSiteSilent
+        exp_alerts:
+          - exp_labels:
+              severity: page
+              site: site-tor1
+              job: twingate-ztna
+            exp_annotations:
+              summary: "No healthy twingate-ztna target at site-tor1"
+      - eval_time: 10m
+        alertname: CloudSiteDegraded
+        exp_alerts: []
+  # 6. Every target of every site at up == 0: Silent for both sites
+  - interval: 15s
+    input_series:
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.11", endpoint="node-exporter"}'
+        values: "0x40"
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.11", endpoint="connector-metrics"}'
+        values: "0x40"
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.12", endpoint="node-exporter"}'
+        values: "0x40"
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.12", endpoint="connector-metrics"}'
+        values: "0x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.11", endpoint="node-exporter"}'
+        values: "0x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.11", endpoint="connector-metrics"}'
+        values: "0x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.12", endpoint="node-exporter"}'
+        values: "0x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.12", endpoint="connector-metrics"}'
+        values: "0x40"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: CloudSiteSilent
+        exp_alerts:
+          - exp_labels:
+              severity: page
+              site: site-tor1
+              job: twingate-ztna
+            exp_annotations:
+              summary: "No healthy twingate-ztna target at site-tor1"
+          - exp_labels:
+              severity: page
+              site: site-tor2
+              job: twingate-ztna
+            exp_annotations:
+              summary: "No healthy twingate-ztna target at site-tor2"
+      - eval_time: 10m
+        alertname: CloudSiteDegraded
+        exp_alerts: []
+  # 7. Only the connector-metrics endpoint of one host is down (its node exporter still answers): Degraded for that site only
+  - interval: 15s
+    input_series:
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.11", endpoint="node-exporter"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.11", endpoint="connector-metrics"}'
+        values: "0x40"
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.12", endpoint="node-exporter"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor1", instance="192.0.2.12", endpoint="connector-metrics"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.11", endpoint="node-exporter"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.11", endpoint="connector-metrics"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.12", endpoint="node-exporter"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.12", endpoint="connector-metrics"}'
+        values: "1x40"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: CloudSiteSilent
+        exp_alerts: []
+      - eval_time: 10m
+        alertname: CloudSiteDegraded
+        exp_alerts:
+          - exp_labels:
+              severity: warn
+              site: site-tor1
+            exp_annotations:
+              summary: "Fewer healthy targets than expected at site-tor1"

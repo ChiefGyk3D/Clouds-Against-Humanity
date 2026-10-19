@@ -1,0 +1,23 @@
+# Design section 3.5. No rule uses absent() on the job: with two sites, one
+# healthy site keeps the job alive, and a failed scrape keeps its series at 0.
+# The design waits 5 minutes before firing; this demo waits 1 so a lesson fits
+# in a sitting. Change both `for` lines to 5m to match the design.
+groups:
+  - name: cah_sites
+    rules:
+      - alert: CloudSiteSilent
+        # A site with an expected count but no healthy target at all.
+        expr: cah_expected_targets unless on(site) count by (site) (up{job="twingate-ztna"} == 1)
+        for: 1m
+        labels:
+          severity: page
+        annotations:
+          summary: "No healthy twingate-ztna target at {{ $labels.site }}"
+      - alert: CloudSiteDegraded
+        # A site with fewer healthy targets than expected.
+        expr: cah_expected_targets > on(site) count by (site) (up{job="twingate-ztna"} == 1)
+        for: 1m
+        labels:
+          severity: warn
+        annotations:
+          summary: "Fewer healthy targets than expected at {{ $labels.site }}"

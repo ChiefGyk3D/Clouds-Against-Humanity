@@ -73,6 +73,7 @@ The [Threat model](Threat-Model.md) is core step 19.
 - [Build your own mini SOC (unverified draft)](Build-Your-Own-Mini-SOC.md)
 - [Stage 2 home-side runbook (unverified draft)](Stage-2-Home-Side-Runbook.md)
 - [Grafana dashboards (unverified draft)](Grafana-Dashboards.md)
+- [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md)
 
 </details>
 

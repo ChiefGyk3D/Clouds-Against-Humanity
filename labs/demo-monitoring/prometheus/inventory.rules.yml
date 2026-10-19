@@ -1,0 +1,12 @@
+# The expected-target inventory (design section 3.5). In the real design a
+# generator writes this from stack 20's output, one entry per configured site.
+# Here it is written by hand: two sites, two connectors each, two scrape endpoints per connector (4 per site).
+groups:
+  - name: cah_inventory
+    rules:
+      - record: cah_expected_targets
+        expr: vector(4)
+        labels: { site: "site-tor1", job: "twingate-ztna" }
+      - record: cah_expected_targets
+        expr: vector(4)
+        labels: { site: "site-tor2", job: "twingate-ztna" }

@@ -102,11 +102,13 @@ Clouds-Against-Humanity/
   scripts/render_diagrams.py               renders every Mermaid diagram to a dark-mode PNG with its source kept underneath (--check fails when a picture is stale)
   scripts/gen-wiki.sh                      writes the wiki pages and copies docs/wiki/images from docs/wiki (the Wiki workflow publishes them)
   scripts/strip_png_metadata.py            removes text, EXIF and time chunks from wiki screenshots (--check fails when any remain)
+  scripts/demo_monitoring.sh               runs the synthetic multi-site monitoring demo in labs/demo-monitoring (up, down, silent-site, test, screenshots)
   tests/                                   pytest for the cost gate, settings, module policy, secret separation, the hook, the wiki and more
   .spacelift/config.yml                    which secrets each stack loads
   .github/workflows/ci.yml                 GYST callers only (tofu, python, security) + CI green
   .github/workflows/wiki.yml               publishes docs/wiki through GYST's wiki-publish.yml
   .spacelift/policies/                     Spacelift push and plan policies and their OPA tests
+  labs/demo-monitoring/                    synthetic Prometheus + Grafana demo: two sites, dashboards, alert rules and their promtool tests (no real hosts)
   docs/wiki/                               the wiki pages (source of truth)
   docs/stages/                             operator guides: decisions, verify, rollback, per stage  (00-foundation, 01-access, 02-telemetry, aws-access)
   docs/cost.md                             cost gate explained

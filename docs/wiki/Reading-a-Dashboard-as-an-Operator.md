@@ -56,7 +56,7 @@ Written down as a limitation: the inventory is only as current as the last time 
 
 ## The fixture, described
 
-`promtool test rules` reads a YAML file of synthetic time series and a list of expected alerts, and checks a rules file against them without a running Prometheus. The design's fixture is **2 sites x 2 hosts**, with these scenarios. No such file exists yet.
+`promtool test rules` reads a YAML file of synthetic time series and a list of expected alerts, and checks a rules file against them without a running Prometheus. The design's fixture is **2 sites x 2 hosts**, with these scenarios. The runnable version is in `labs/demo-monitoring/prometheus/tests/` (see the [synthetic monitoring lab](Lab-Demo-Monitoring-Stack.md)).
 
 | # | Scenario | Series for `site-a` | Series for `site-b` | Expected |
 |---|---|---|---|---|
@@ -119,5 +119,11 @@ The lesson is the one the detection page ends on: the number nobody has is how l
 - Open any Grafana dashboard you have access to and, for three panels, write what the panel would show if its data source died.
 - Decide which "last seen" age would worry you for a connector, and write the alert in words: threshold, who is told, what they do first.
 - When the telemetry step exists in your copy, write the fixture file for the five scenarios and make the rule file pass it. Then delete the rule's `== 1` and watch scenario 5 fail.
+
+- **Run it.** The [synthetic monitoring lab](Lab-Demo-Monitoring-Stack.md) runs the repository's Grafana dashboards, both alert rules and the fixtures below on your laptop, with a `silent-site` command that does scenario 5 to a live Grafana.
+
+![The sites overview with site-tor2 silent: a red 0 up and 4 down for site-tor2, a table listing its four endpoints and target-state bars that turned red](images/demo-sites-overview-silent.png)
+
+*A silent site on the lab's synthetic dashboard, a few minutes after `silent-site site-tor2`. Grafana 12.1.0 and Prometheus 3.5.0 from the lab's own containers, captured 2026-10-19. All data is the lab's synthetic generator output; nothing in it is real.*
 
 Next: [Build your own mini SOC](Build-Your-Own-Mini-SOC.md). Back to the [Reading order](Reading-Order.md).

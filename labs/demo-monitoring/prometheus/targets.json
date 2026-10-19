@@ -1,0 +1,10 @@
+[
+  {"targets": ["generator:9101"], "labels": {"__metrics_path__": "/node", "site": "site-tor1", "region": "tor1", "provider": "digitalocean", "role": "connector", "instance": "192.0.2.11", "endpoint": "node-exporter"}},
+  {"targets": ["generator:9101"], "labels": {"__metrics_path__": "/connector", "site": "site-tor1", "region": "tor1", "provider": "digitalocean", "role": "connector", "instance": "192.0.2.11", "endpoint": "connector-metrics"}},
+  {"targets": ["generator:9102"], "labels": {"__metrics_path__": "/node", "site": "site-tor1", "region": "tor1", "provider": "digitalocean", "role": "connector", "instance": "192.0.2.12", "endpoint": "node-exporter"}},
+  {"targets": ["generator:9102"], "labels": {"__metrics_path__": "/connector", "site": "site-tor1", "region": "tor1", "provider": "digitalocean", "role": "connector", "instance": "192.0.2.12", "endpoint": "connector-metrics"}},
+  {"targets": ["generator:9103"], "labels": {"__metrics_path__": "/node", "site": "site-tor2", "region": "tor2", "provider": "aws", "role": "connector", "instance": "198.51.100.11", "endpoint": "node-exporter"}},
+  {"targets": ["generator:9103"], "labels": {"__metrics_path__": "/connector", "site": "site-tor2", "region": "tor2", "provider": "aws", "role": "connector", "instance": "198.51.100.11", "endpoint": "connector-metrics"}},
+  {"targets": ["generator:9104"], "labels": {"__metrics_path__": "/node", "site": "site-tor2", "region": "tor2", "provider": "aws", "role": "connector", "instance": "198.51.100.12", "endpoint": "node-exporter"}},
+  {"targets": ["generator:9104"], "labels": {"__metrics_path__": "/connector", "site": "site-tor2", "region": "tor2", "provider": "aws", "role": "connector", "instance": "198.51.100.12", "endpoint": "connector-metrics"}}
+]
