@@ -38,6 +38,7 @@ output "user_data" {
     log_shipping_manager_port    = tostring(var.log_shipping.manager_port)
     log_shipping_enroll_port     = tostring(var.log_shipping.enroll_port)
     log_shipping_agent_name      = var.log_shipping.enabled ? var.log_shipping.agent_name : ""
+    log_shipping_site            = var.log_shipping.enabled ? trimsuffix(var.log_shipping.agent_name, "-connector-${var.instance}") : ""
     log_shipping_agent_group     = var.log_shipping.enabled ? var.log_shipping.agent_group : ""
     log_shipping_key_fingerprint = var.log_shipping.enabled ? var.log_shipping.apt_key_fingerprint : ""
     log_shipping_agent_package   = var.log_shipping.agent_version == "" ? "wazuh-agent" : "wazuh-agent=${var.log_shipping.agent_version}"

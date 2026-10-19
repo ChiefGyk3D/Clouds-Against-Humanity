@@ -2415,3 +2415,24 @@ run "log_shipping_on_is_valid_cloud_config_yaml_with_every_feature_on" {
     error_message = "The cloud-init must still decode with every feature on."
   }
 }
+
+# The Wazuh agent labels every event with its site (agent.labels.site), which is
+# the field the Grafana Wazuh dashboard filters on. The site is the part of the
+# agent name before -connector-<instance>.
+run "log_shipping_on_labels_the_agent_with_its_site" {
+  command = plan
+  variables {
+    instance = "b"
+    log_shipping = {
+      enabled             = true
+      manager_address     = "siem.example.com"
+      agent_name          = "site-tor2-connector-b"
+      apt_key_fingerprint = join("", ["0123456789", "ABCDEF0123", "456789ABCD", "EF01234567"])
+    }
+    log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
+  }
+  assert {
+    condition     = strcontains(one([for f in yamldecode(output.user_data).write_files : f.content if f.path == "/etc/cah/wazuh-localfile.xml"]), "<label key=\"site\">site-tor2</label>")
+    error_message = "The agent must carry the label site=<site part of the agent name>."
+  }
+}

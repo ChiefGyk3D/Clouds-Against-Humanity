@@ -90,6 +90,8 @@ An opt-in Wazuh agent and a short auditd rule set on each connector, in stack 10
 
 **Enabling it REPLACES the droplet.** `user_data` changes, and a DigitalOcean droplet is replaced when it does. Each connector in `log_shipping_instances` is rebuilt. Roll out one at a time: `log_shipping_instances = ["a"]`, apply, check SSH through Twingate and the memory headroom, then `["a", "b"]`.
 
+The agent also carries a `site` label (a `<labels>` block in `ossec.conf`, the site part of `agent_name_prefix`), which is what the Grafana Wazuh dashboard's site filter reads (`agent.labels.site`). It is part of the same opt-in `user_data`: nothing changes while `log_shipping` is off, and a stack that already enabled `log_shipping` before this label existed will see its droplets replaced on the next apply for it, so treat it like any other change to that block.
+
 | Setting (stack 10) | What it does |
 |---|---|
 | `log_shipping = { enabled = true, manager_address, agent_name_prefix, apt_key_fingerprint, ... }` | Installs `auditd` from the distro archive and the `wazuh-agent` package from Wazuh's apt repository. The repository key is checked against `apt_key_fingerprint` before it is trusted (the same pattern as the Twingate repository in the template). The fingerprint is a **required input with no default**: this repository does not carry one, because a wrong value written from memory would be worse than none. Read the 40 hex digits from Wazuh's documentation and compare them yourself |
