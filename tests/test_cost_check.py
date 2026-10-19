@@ -332,3 +332,13 @@ def test_venv_directories_are_skipped(tmp_path):
         tf_files={".venv/lib/x.tf": 'resource "digitalocean_app" "a" {}\n'},
     )
     assert cost_check.uncosted_sources(root, {}) == []
+
+
+def test_committed_backups_fraction_is_verified_with_its_source():
+    # Issue 117: the committed table carries the DigitalOcean basic weekly
+    # backup fraction as verified, with a source URL and a retrieval date.
+    table = json.loads((Path(__file__).resolve().parents[1] / "docs/cost-prices.json").read_text())
+    assert table["backups_fraction"] == 0.2
+    assert table["backups_fraction_verified"] is True
+    assert table["backups_source"].startswith("https://docs.digitalocean.com/products/backups/")
+    assert table["backups_retrieved"] == "2026-10-19"

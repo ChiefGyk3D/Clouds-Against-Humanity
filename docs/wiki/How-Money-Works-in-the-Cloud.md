@@ -52,7 +52,7 @@ The **cost gate** is a small program, `scripts/cost_check.py`, that runs on ever
 - reads a manifest in each stack listing the paid resources it will create (`cost.json`), looks each one up in the price table, and adds them up;
 - fails if the total is above the approved amount in `docs/stages/approved.json`;
 - refuses any DigitalOcean resource type that is not on its list of known-free types, unless it is the one paid type (a droplet) in the one file where it is allowed. A pull request that adds a managed database fails by name, before anyone has to notice it in review;
-- refuses a few things it cannot price safely, such as backups while the backup price is marked unverified.
+- refuses a few things it cannot price safely, such as backups while the backup price is marked unverified. The committed table marks the basic weekly backup plan (20 percent of the droplet) verified as of 2026-10-19; daily and usage-based backup plans, bandwidth overage, snapshots and block storage stay unverified.
 
 Raising the budget is a visible change: you edit `approved.json`, the diff shows the old number and the new one, and that is reviewed like any code. [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) has the full logic and, just as importantly, what the gate cannot see.
 
