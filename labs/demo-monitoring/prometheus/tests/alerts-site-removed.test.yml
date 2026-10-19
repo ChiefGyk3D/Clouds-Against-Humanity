@@ -1,0 +1,26 @@
+# Scenario 4: a site removed from the inventory. Nothing fires for it, which
+# is why removing a site is a reviewed change to generated data.
+rule_files:
+  - inventory-without-tor1.rules.yml
+  - ../alerts.rules.yml
+
+evaluation_interval: 15s
+
+tests:
+  - interval: 15s
+    input_series:
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.11", endpoint="node-exporter"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.11", endpoint="connector-metrics"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.12", endpoint="node-exporter"}'
+        values: "1x40"
+      - series: 'up{job="twingate-ztna", site="site-tor2", instance="198.51.100.12", endpoint="connector-metrics"}'
+        values: "1x40"
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: CloudSiteSilent
+        exp_alerts: []
+      - eval_time: 10m
+        alertname: CloudSiteDegraded
+        exp_alerts: []

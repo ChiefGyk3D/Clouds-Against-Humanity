@@ -1,0 +1,7 @@
+# Test fixture only: the inventory after site-tor1 was removed from it.
+groups:
+  - name: cah_inventory
+    rules:
+      - record: cah_expected_targets
+        expr: vector(4)
+        labels: { site: "site-tor2", job: "twingate-ztna" }

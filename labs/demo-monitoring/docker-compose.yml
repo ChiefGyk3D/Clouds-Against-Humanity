@@ -1,0 +1,70 @@
+# Synthetic multi-site monitoring demo. Every number is invented by the
+# generator container. Nothing here talks to a real host or a real cloud.
+# Run it with scripts/demo_monitoring.sh up (it writes .env for you).
+name: cah-demo-monitoring
+
+services:
+  generator:
+    # python:3.12.11-slim, created 2025-08-08, verified to exist 2026-10-16
+    image: docker.io/library/python:3.12.11-slim
+    command: ["python", "-u", "/app/generator.py"]
+    user: "65534:65534"
+    read_only: true
+    environment:
+      DEMO_SILENT_SITE: ${DEMO_SILENT_SITE:-}
+      DEMO_SILENT_FILE: /state/silent
+    volumes:
+      - ./generator/generator.py:/app/generator.py:ro
+      - ./state:/state:ro
+    restart: unless-stopped
+
+  prometheus:
+    # prom/prometheus v3.5.0, created 2025-07-14, verified to exist 2026-10-16
+    image: docker.io/prom/prometheus:v3.5.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=2d
+    ports:
+      - "127.0.0.1:${DEMO_PROMETHEUS_PORT:-9190}:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/targets.json:/etc/prometheus/targets.json:ro
+      - ./prometheus/inventory.rules.yml:/etc/prometheus/inventory.rules.yml:ro
+      - ./prometheus/alerts.rules.yml:/etc/prometheus/alerts.rules.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      - generator
+    restart: unless-stopped
+
+  grafana:
+    # grafana/grafana 12.1.0, created 2025-07-18, verified to exist 2026-10-16
+    image: docker.io/grafana/grafana:12.1.0
+    ports:
+      - "127.0.0.1:${DEMO_GRAFANA_PORT:-3300}:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      # Required: read from the environment or from the untracked .env file.
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD, see env.example}
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_USERS_DEFAULT_THEME: light
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/cah_sites_overview.json
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      # The repository's own importable dashboards, mounted read-only and not
+      # copied, so the lab always shows what a reader would import.
+      - ../../dashboards/cah_sites_overview.json:/var/lib/grafana/dashboards/cah_sites_overview.json:ro
+      - ../../dashboards/cah_droplet_health.json:/var/lib/grafana/dashboards/cah_droplet_health.json:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  prometheus-data:
+  grafana-data:
