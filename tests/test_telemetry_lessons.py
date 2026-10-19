@@ -1,6 +1,6 @@
 """Checks for the five telemetry lesson pages in docs/wiki/.
 
-The pages are drafts written from a design, so these tests keep three things
+The pages are unverified drafts (two describe merged but unapplied code), so these tests keep three things
 honest: each page says it is a draft and links its neighbours, nothing on them
 looks like a real address, and every figure in the mini SOC cost tables is
 recomputed here from docs/cost-prices.json rather than trusted.
@@ -25,7 +25,22 @@ LESSONS = [
     "Reading-a-Dashboard-as-an-Operator",
     "Build-Your-Own-Mini-SOC",
 ]
-BANNER = "Unverified draft: written from the design, none of stage 2 has been built or applied"
+DESIGN_BANNER = "Unverified draft: written from the design, none of stage 2 has been built or applied"
+# Stage 2 telemetry is merged but nothing has been applied or run, so the two
+# pages that describe it say exactly that. The draft label stays.
+MERGED_BANNER = (
+    "Unverified draft: the stage 2 telemetry pieces this page describes are built and merged "
+    "(opt-in node exporter, Wazuh agent with auditd, metrics firewall rules, Grafana dashboards), "
+    "but none of it has been applied or run against real infrastructure, and nothing has been measured"
+)
+BANNERS = {name: DESIGN_BANNER for name in LESSONS}
+BANNERS["Cloud-Telemetry-What-and-Why"] = MERGED_BANNER
+BANNERS["Build-Your-Own-Mini-SOC"] = MERGED_BANNER
+
+
+def banner_is_honest(banner: str) -> bool:
+    """Only an approved banner passes: the draft label stays and no extra claim may trail it."""
+    return banner.startswith("Unverified draft") and banner.rstrip(".") in {DESIGN_BANNER, MERGED_BANNER}
 LINK = re.compile(r"\]\(([A-Za-z0-9_-]+)\.md(?:#([^)]*))?\)")
 
 
@@ -53,9 +68,40 @@ def anchors(name: str) -> set[str]:
 def test_page_has_status_banner_prerequisites_and_next(name):
     body = text(name)
     head = "\n".join(body.splitlines()[:4])
-    assert BANNER in head, f"{name}: status banner missing from the top"
+    assert f"**{BANNERS[name]}.**" in head, f"{name}: status banner missing from the top"
     assert re.search(r"^\*\*Prerequisites:\*\* .*\]\(", body, re.MULTILINE), f"{name}: no Prerequisites line"
     assert re.search(r"^Next: .*\]\(", body, re.MULTILINE), f"{name}: no Next line"
+
+
+def page_banner(name: str) -> str:
+    """The first bold banner in a page's first lines, as written on the page."""
+    head = "\n".join(text(name).splitlines()[:4])
+    m = re.search(r"^> \*\*(Unverified draft.*?)\*\*", head, re.MULTILINE)
+    assert m, f"{name}: no bold Unverified draft banner at the top"
+    return m.group(1)
+
+
+@pytest.mark.parametrize("name", LESSONS)
+def test_every_page_banner_keeps_the_draft_label_and_claims_no_run(name):
+    banner = page_banner(name)
+    assert banner_is_honest(banner), f"{name}: {banner}"
+    assert banner == BANNERS[name] + ".", f"{name}: banner differs from the pinned text"
+
+
+def test_pinned_banners_cover_every_lesson():
+    assert set(BANNERS) == set(LESSONS)
+
+
+def test_banner_guard_rejects_a_verified_looking_banner():
+    for bad in (
+        "Verified: stage 2 telemetry is built and applied",
+        "Unverified draft: the stage 2 telemetry is built and merged",
+        "Draft: built and merged, none of it has been applied and nothing has been measured",
+        MERGED_BANNER + " and applied",
+        MERGED_BANNER + ", and verified.",
+        DESIGN_BANNER + " and verified",
+    ):
+        assert not banner_is_honest(bad), bad
 
 
 @pytest.mark.parametrize("name", LESSONS)
