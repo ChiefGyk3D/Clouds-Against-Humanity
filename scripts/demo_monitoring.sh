@@ -6,6 +6,7 @@
 #   scripts/demo_monitoring.sh up                 start Prometheus, Grafana and the generator
 #   scripts/demo_monitoring.sh silent-site [S]    make site S (default site-tor2) stop answering
 #   scripts/demo_monitoring.sh restore-site       let every site answer again
+#   scripts/demo_monitoring.sh restart-prometheus apply an edit to a rule file (only the target file is watched)
 #   scripts/demo_monitoring.sh test               promtool: check config, run the alert unit tests
 #   scripts/demo_monitoring.sh screenshots        print the capture plan (viewport, URLs, file names)
 #   scripts/demo_monitoring.sh status             show the containers and the alert state
@@ -89,6 +90,16 @@ cmd_down() {
   rm -f "$LAB/state/silent"
 }
 
+cmd_restart_prometheus() {
+  need_docker
+  ensure_env
+  load_ports
+  # Rule files are read at start; the lab has no lifecycle reload endpoint, and
+  # only prometheus/targets.json (file service discovery) is re-read on its own.
+  compose restart prometheus
+  echo "Prometheus restarted; it re-read prometheus.yml and the rule files."
+}
+
 cmd_silent() {
   local site="${1:-site-tor2}"
   case "$site" in
@@ -148,11 +159,12 @@ main() {
     down) cmd_down ;;
     silent-site) cmd_silent "$@" ;;
     restore-site) cmd_restore ;;
+    restart-prometheus) cmd_restart_prometheus ;;
     test) cmd_test ;;
     status) cmd_status ;;
     screenshots) cmd_screenshots ;;
     *)
-      sed -n '2,13p' "${BASH_SOURCE[0]}"
+      sed -n '2,14p' "${BASH_SOURCE[0]}"
       [ -z "$sub" ] || die "unknown subcommand '$sub'"
       ;;
   esac

@@ -215,6 +215,8 @@ def test_script_exposes_the_subcommands():
     script = (ROOT / "scripts" / "demo_monitoring.sh").read_text()
     for sub in ("up)", "down)", "silent-site)", "restore-site)", "test)", "screenshots)"):
         assert sub in script
+    assert "restart-prometheus)" in script, "the supported way to apply a rule-file edit"
+    assert "compose restart prometheus" in script
     assert "set -euo pipefail" in script
     assert "sudo" not in script.replace("no sudo is used", "")
 
