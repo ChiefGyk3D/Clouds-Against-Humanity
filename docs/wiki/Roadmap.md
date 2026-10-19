@@ -97,7 +97,7 @@ Dashboards for the cloud side, running on-prem next to the SIEM rather than as a
 
 ## Public edge (DMZ) and hardening (planned, number set by its design doc)
 
-Handoff: [2026-10-12 edge DMZ handoff](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/plans/2026-10-12-edge-dmz-handoff.md). Design first, no implementation until the design and the cost decision are approved.
+Handoff: [2026-10-12 edge DMZ handoff](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/plans/2026-10-12-edge-dmz-handoff.md). Design first, no implementation until the design and the cost decision are approved. Design draft with four costed options and a recommendation: [2026-10-19 edge DMZ design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-19-edge-dmz-design.md); the maintainer has not picked yet.
 
 - A separate VPC (`rns-dmz`, no peering to core) with one immutable droplet and a reserved IP, no SSH and no connector. It would run Reticulum transport with an LXMF propagation node, i2pd, a private Meshtastic MQTT broker over TLS and an authenticated iperf3 server, behind a tag-based Cloud Firewall and host nftables.
 - iperf3 measured over two paths to the same endpoint, direct and through Twingate, cheap probes often and throughput tests rarely.
