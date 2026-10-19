@@ -2,7 +2,7 @@
 
 Pick the row that sounds like you. Every path is a numbered list: read in that order. The tables on this page are the authority. A page's **Next** line follows the core path if the page is on it, and otherwise follows the track that page belongs to (build, security, detection or other clouds); when you are on a different track from a page's Next line, follow the table instead. The first path, the core path, is the one to take if you are unsure; the other paths branch off it.
 
-> **Status honesty.** The pages for DigitalOcean, stages 0 and 1, the labs, the threat model and the settings reference describe things that are built and tested. The pages for AWS, Azure and GCP are **unverified drafts**: written from the vendors' own documentation, not applied in a real account, and labelled that way in their first lines and in the title column below. Stages 2 to 4 are planned, not built, and the five telemetry pages in the detection path are **unverified drafts** written from the stage 2 design.
+> **Status honesty.** The pages for DigitalOcean, stages 0 and 1, the labs, the threat model and the settings reference describe things that are built and tested. The pages for AWS, Azure and GCP are **unverified drafts**: written from the vendors' own documentation, not applied in a real account, and labelled that way in their first lines and in the title column below. Stages 3 and 4 are planned, not built. Stage 2 is built on the cloud side and merged but never applied, and the five telemetry pages in the detection path are **unverified drafts**: written from the stage 2 design, and none checked against a real deployment.
 
 ## Which path is for me
 
@@ -47,7 +47,7 @@ Pick the row that sounds like you. Every path is a numbered list: read in that o
 | 18 | [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) | 10 min | You can say which gate stops a bad change at each of: pull request, merge, plan, apply. |
 | 19 | [Threat model](Threat-Model.md) | 10 min | You can point at one accepted risk and say why it was accepted. |
 | 20 | [Lessons learned](Lessons-Learned.md) | 10 min |  |
-| 21 | [Roadmap](Roadmap.md) | 10 min | You know what is built (stages 0 and 1) and what is only planned. |
+| 21 | [Roadmap](Roadmap.md) | 10 min | You know what is built and applied (stages 0 and 1), what is built but unapplied (the stage 2 cloud side) and what is only planned. |
 
 ## Build it yourself
 
@@ -104,7 +104,7 @@ The exercise page tells you to stop after step 3 and read the threat model only 
 
 ## Detection and monitoring
 
-**Who it is for.** Someone asking how a company would watch this, what the lab does and does not detect today, and how to build a small cloud version of the watching. Rows 3 to 9 are unverified drafts: written from the design, with none of stage 2 built or applied.
+**Who it is for.** Someone asking how a company would watch this, what the lab does and does not detect today, and how to build a small cloud version of the watching. Rows 3 to 9 are unverified drafts: written from the design, with the cloud-side stage 2 pieces built and merged but none of it applied or run.
 
 **Before you start.** The Threat model (core step 19), because the detection page starts from its residual-risk column. Rows 3 to 7 also lean on Twingate (core step 12) and, for the last one, the cost gate (core step 18).
 

@@ -256,7 +256,7 @@ doctl compute firewall list --output json | jq '[.[].inbound_rules[]? | select((
 
 Pass: `0`. After the metrics step the firewalls do carry inbound rules, sourced only from tags (design section 4.2); an address source of any kind, including `0.0.0.0/0` or `::/0`, fails. The field names are written from the shape of `doctl`'s JSON and are not checked against any installed version.
 
-**X2. Zero open ports from outside.** From a machine that is not in the VPC, scan **only a connector you own**, at the public address `doctl` shows for it. Do not point a scanner at anything else. Until the read-only check in the [zero-open-ports design](../superpowers/specs/2026-10-17-zero-open-ports-check-design.md) is built (issue 91), this is the manual form:
+**X2. Zero open ports from outside.** From a machine that is not in the VPC, scan **only a connector you own**, at the public address `doctl` shows for it. Do not point a scanner at anything else. The read-only check in the [zero-open-ports design](../superpowers/specs/2026-10-17-zero-open-ports-check-design.md) is built (`scripts/zero_ports_check.py`, issue 91, [stage 1 guide section 6b](01-access.md)) and has not run against real infrastructure. This is the manual form:
 
 ```
 nmap -Pn -p- --max-retries 1 --host-timeout 30m 203.0.113.10
