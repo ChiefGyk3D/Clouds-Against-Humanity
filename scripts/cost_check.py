@@ -238,7 +238,37 @@ def droplet_cost(res, prices):
     if size not in table:
         raise ValueError(f"no price for size {size!r} ({res['name']})")
     cost = num(table[size], f"price of {size}")
-    if res.get("backups"):
+    backups = res.get("backups", False)
+    if type(backups) is not bool:
+        raise ValueError(
+            f"{res['name']}: backups must be true or false, not {backups!r}"
+        )
+    extras = sorted(k for k in res if k.startswith("backup") and k != "backups")
+    if not backups:
+        if extras:
+            raise ValueError(
+                f"{res['name']}: {', '.join(extras)} stated while backups is false; "
+                "the gate refuses a backup setting it cannot reconcile"
+            )
+    else:
+        plan = res.get("backup_plan")
+        if plan == "daily":
+            raise ValueError(
+                f"{res['name']}: daily backups are not priced or verified (the gate "
+                "prices the basic weekly plan only); refused"
+            )
+        if plan != "weekly":
+            raise ValueError(
+                f'{res["name"]}: backups need backup_plan "weekly" (the only plan '
+                f"the gate prices); got {plan!r}. DigitalOcean defaults to daily "
+                "when no plan is stated, so a missing plan is refused"
+            )
+        other = [k for k in extras if k != "backup_plan"]
+        if other:
+            raise ValueError(
+                f"{res['name']}: backup setting(s) {', '.join(other)} are not "
+                "priced (usage-based and other plans are refused)"
+            )
         if not prices.get("backups_fraction_verified"):
             raise ValueError(
                 "backups requested but the backup price fraction is unverified"
@@ -1091,6 +1121,29 @@ def module_problems(root):
     return problems, connectors
 
 
+BACKUP_POLICY_RE = re.compile(r"(?<![A-Za-z0-9_])backup_policy(?![A-Za-z0-9_])")
+
+
+def droplet_backup_problems(rel, block):
+    """The source must leave droplet backups off. With backups on, DigitalOcean
+    defaults to the daily plan, and backup_policy selects daily or weekly; the
+    gate prices neither from source, so any way of turning them on is refused
+    (the manifest path prices the weekly plan; see droplet_cost)."""
+    where = f"{rel}:{block.line}: digitalocean_droplet {block.labels[1]!r}"
+    found = []
+    if BACKUP_POLICY_RE.search(block.body):
+        found.append(
+            f"{where} sets backup_policy; backup plans are not priced from source, refused"
+        )
+    for key, value in block.attrs():
+        if key == "backups" and value.strip() != "false":
+            found.append(
+                f"{where} sets backups to {value.strip()!r}; it must be the literal false "
+                "(backups default to the unpriced daily plan)"
+            )
+    return found
+
+
 def block_problems(root):
     """Everything wrong with how the files themselves read: unreadable HCL,
     escapes in labels, headers the scanner does not understand, and count or
@@ -1111,6 +1164,8 @@ def block_problems(root):
             if block.problem:
                 problems.append(f"{rel}:{block.line}: {block.problem}")
             elif block.kind == "resource" and block.labels[0] in costed:
+                if block.labels[0] == "digitalocean_droplet":
+                    problems += droplet_backup_problems(rel, block)
                 for key, _ in block.attrs():
                     if key in ("count", "for_each"):
                         problems.append(
