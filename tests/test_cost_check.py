@@ -441,3 +441,58 @@ def test_source_enabling_backups_is_refused(tmp_path, body):
 def test_source_with_backups_off_or_unset_is_not_flagged(tmp_path, body):
     root = make_repo(tmp_path, [droplet()], tf_files=droplet_tf(body))
     assert [p for p in cost_check.block_problems(root) if "backup" in p] == []
+
+
+# ---- source scan matches HCL syntax, not text -------------------------------
+
+HEREDOC_WORD = '  user_data = <<-EOT\n    backup_policy {\n    backups = true\n  EOT\n'
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        '  tags = ["backup_policy"]\n  backups = false\n',
+        '  name = "backup_policy"\n',
+        '  description = "uses backup_policy { plan = daily } and backups = true"\n',
+        '  name = "x-${var.backup_policy}"\n',
+        HEREDOC_WORD,
+        "  # backup_policy { plan = \"daily\" }\n  // backups = true\n  /* backup_policy */\n",
+        "  backups_enabled = true\n  backups = false\n",
+        '  tags = { backups = "true", backup_policy = "x" }\n',
+        '  tags = [\n    "backup_policy",\n  ]\n',
+    ],
+)
+def test_backup_words_in_strings_comments_heredocs_are_not_flagged(tmp_path, body):
+    root = make_repo(tmp_path, [droplet()], tf_files=droplet_tf(body))
+    assert [p for p in cost_check.block_problems(root) if "backup" in p] == []
+
+
+def test_backup_names_in_a_non_droplet_block_are_not_flagged(tmp_path):
+    files = droplet_tf("  backups = false\n")
+    files["modules/other/main.tf"] = (
+        'resource "twingate_resource" "r" {\n  backups = true\n'
+        "  backup_policy {\n    plan = \"daily\"\n  }\n}\n"
+    )
+    root = make_repo(tmp_path, [droplet()], tf_files=files)
+    assert [p for p in cost_check.block_problems(root) if "backup" in p] == []
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        '  backup_policy {\n    plan = "weekly"\n  }\n',
+        '  backup_policy{\n    plan = "weekly"\n  }\n',
+        '  tags = ["a"]\n\n    backup_policy   {\n    plan = "daily"\n  }\n',
+        '  backup_policy = { plan = "daily" }\n',
+        '  backup_policy   =   {}\n',
+        "  backups   =   true\n",
+        "  backups=true\n",
+        "  backups = (\n    true\n  )\n",
+        "  backups = var.x\n",
+        "  backups = \"true\"\n",
+    ],
+)
+def test_real_backup_syntax_is_still_refused(tmp_path, body):
+    root = make_repo(tmp_path, [droplet()], tf_files=droplet_tf(body))
+    found = cost_check.block_problems(root)
+    assert any("backup" in p for p in found), found

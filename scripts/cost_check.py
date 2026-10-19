@@ -1121,7 +1121,34 @@ def module_problems(root):
     return problems, connectors
 
 
-BACKUP_POLICY_RE = re.compile(r"(?<![A-Za-z0-9_])backup_policy(?![A-Za-z0-9_])")
+STATEMENT_START_RE = re.compile(r"\s*(?P<name>[A-Za-z_][A-Za-z0-9_-]*)\s*(?P<next>[={]?)")
+
+
+def top_level_statement_names(body):
+    """[(name, next char)] for each statement written directly in a block body:
+    the leading identifier and the `{` (nested block) or `=` (attribute) after it.
+
+    Words inside quoted strings, interpolations, brackets or nested blocks are
+    not statements of this block; comments and heredocs are already stripped."""
+    found, depth, i, n, at_start = [], 0, 0, len(body), True
+    while i < n:
+        if at_start and depth == 0:
+            match = STATEMENT_START_RE.match(body, i)
+            if match:
+                found.append((match.group("name"), match.group("next")))
+            at_start = False
+        c = body[i]
+        if c == '"':
+            i = skip_string(body, i)
+            continue
+        if c in "{[(":
+            depth += 1
+        elif c in "}])":
+            depth = max(depth - 1, 0)
+        elif c == "\n" and depth == 0:
+            at_start = True
+        i += 1
+    return found
 
 
 def droplet_backup_problems(rel, block):
@@ -1131,7 +1158,7 @@ def droplet_backup_problems(rel, block):
     (the manifest path prices the weekly plan; see droplet_cost)."""
     where = f"{rel}:{block.line}: digitalocean_droplet {block.labels[1]!r}"
     found = []
-    if BACKUP_POLICY_RE.search(block.body):
+    if any(name == "backup_policy" for name, _ in top_level_statement_names(block.body)):
         found.append(
             f"{where} sets backup_policy; backup plans are not priced from source, refused"
         )
