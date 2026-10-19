@@ -47,6 +47,7 @@ After those, continue with step 10 of the core path below.
 - Flowcharts for the network path, the deploy pipeline, the secrets path and the trust boundaries.
 - The threat model, written out, including the risks that were accepted on purpose.
 - The things that broke during the build and what fixed them, so you do not have to rediscover them.
+- Springboards: pointers to other things worth trying, because I want you thinking outside the box instead of only following steps. Suggestions for more are welcome anywhere in the project.
 
 ## The core path
 
