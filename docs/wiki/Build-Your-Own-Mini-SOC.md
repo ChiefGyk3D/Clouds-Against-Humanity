@@ -183,4 +183,4 @@ The stages end, but the learning does not. Each of these is a project:
 
 Next: the [Roadmap](Roadmap.md), which says what is built and what is planned. Back to the [Reading order](Reading-Order.md).
 
-Build status: the first piece, the telemetry stack skeleton with every flag off, is described in the [stage 2 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/02-telemetry.md). Nothing in it is applied.
+Build status: the cloud-side pieces (the telemetry stack with every flag off, the opt-in node exporter, the Wazuh agent and auditd) are written and described in the [stage 2 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/02-telemetry.md). Nothing in them is applied.

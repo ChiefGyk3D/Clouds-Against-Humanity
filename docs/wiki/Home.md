@@ -110,7 +110,7 @@ The droplets dial out. You dial out. Twingate introduces the two of you, checks 
 |---|---|---|
 | 0: foundation (project, VPC, baseline firewall) | Built | $0 |
 | 1: access (two Twingate connectors) | Built | $12 |
-| 2: logging back to the on-prem SIEM | Design merged, cloud side in progress, not applied (the settings layer, the cost gate's stack instances and a telemetry stack skeleton with everything off are merged; no agent, exporter or home-side change exists yet; see the [home-side runbook](Stage-2-Home-Side-Runbook.md)) | $0 for the reference environment, not yet approved |
+| 2: logging back to the on-prem SIEM | Design merged, cloud side in progress, not applied (the settings layer, the cost gate's stack instances, the telemetry stack, the opt-in node exporter and metrics firewall rules, the opt-in Wazuh agent with auditd and the Grafana dashboards are merged, all off by default and never applied; the home side is not done; see the [home-side runbook](Stage-2-Home-Side-Runbook.md)) | $0 for the reference environment, not yet approved |
 | 3: workload host (Portainer, five daemons, Discord-to-Matrix bridge), Spaces bucket, Functions | Planned | est. $17, not yet approved |
 | 4: Grafana (home Grafana in the reference environment) | Planned | $0 in the reference environment; a cloud copy is a learner option, see [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) |
 | Public edge (DMZ) and hardening | Planned, design first, no number yet | lands past the ceiling, so it needs a decision before any approval |

@@ -192,7 +192,7 @@ docs/stages/               one guide per stage: decisions, verify, rollback
 docs/wiki/                 these pages
 ```
 
-Stage 2 (logs and metrics home) is not in the diagrams above because none of it is applied: the telemetry stack is a skeleton that plans zero resources until a flag is set, and the home side is the operator's. Its data flow and prerequisites are in the [stage 2 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/02-telemetry.md), [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) and the [home-side runbook](Stage-2-Home-Side-Runbook.md).
+Stage 2 (logs and metrics home) is not in the diagrams above because none of it is applied: the telemetry stack plans zero resources until a flag is set, the opt-in exporter and agent on the connectors are merged but off and never applied, and the home side is the operator's. Its data flow and prerequisites are in the [stage 2 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/02-telemetry.md), [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) and the [home-side runbook](Stage-2-Home-Side-Runbook.md).
 
 Modules are reusable building blocks; stacks are what actually gets applied. More on that split on [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md).
 
