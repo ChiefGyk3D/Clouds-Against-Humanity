@@ -103,6 +103,6 @@ This stops the containers and deletes their volumes. Delete `labs/demo-monitorin
 | `alerts.rules.yml`, one-minute wait | The same two rules, five-minute wait in the design |
 | Grafana in a container on your laptop | The home Grafana, or the learner's own cloud mini SOC ([Build your own mini SOC](Build-Your-Own-Mini-SOC.md)) |
 
-What the lab does not show: the Twingate path between Prometheus and the connectors, Wazuh, or logs. It teaches the reading of a multi-site dashboard and the inventory alert, not the data's journey.
+What the lab does not show: the Twingate path between Prometheus and the connectors, Wazuh, or logs. The Wazuh agents dashboard is not rendered here (an OpenSearch and a Wazuh manager would be heavier than everything else in the lab); a separate offline test, `tests/test_wazuh_dashboard_synthetic.py`, runs its queries and site filter against invented alert documents for the same two sites. That checks field names and the site filter, not what Grafana draws; see [Grafana dashboards](Grafana-Dashboards.md). It teaches the reading of a multi-site dashboard and the inventory alert, not the data's journey.
 
 Next: [Build your own mini SOC](Build-Your-Own-Mini-SOC.md). Back to the [Reading order](Reading-Order.md).

@@ -145,7 +145,7 @@
       "id": 2,
       "type": "stat",
       "title": "Agents reporting",
-      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; no agent configuration in this repository does yet. How many different agents produced at least one alert in the chosen time range. It counts agents that spoke, so an agent that is connected but quiet is not counted; use the status table to see connected agents.",
+      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; the cloud connectors' agent configuration does when log_shipping is enabled (the site part of the agent name), but that has not run on a real machine. How many different agents produced at least one alert in the chosen time range. It counts agents that spoke, so an agent that is connected but quiet is not counted; use the status table to see connected agents.",
       "datasource": {
         "type": "grafana-opensearch-datasource",
         "uid": "${DS_OPENSEARCH}"
@@ -258,7 +258,7 @@
       "id": 4,
       "type": "table",
       "title": "Last alert seen per agent",
-      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; no agent configuration in this repository does yet. The time of the newest alert from each agent. It is a stand-in for a keepalive: an agent with no alerts for a long time is either very quiet or not sending. It cannot tell those apart, which is why the status table above exists.",
+      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; the cloud connectors' agent configuration does when log_shipping is enabled (the site part of the agent name), but that has not run on a real machine. The time of the newest alert from each agent. It is a stand-in for a keepalive: an agent with no alerts for a long time is either very quiet or not sending. It cannot tell those apart, which is why the status table above exists.",
       "datasource": {
         "type": "grafana-opensearch-datasource",
         "uid": "${DS_OPENSEARCH}"
@@ -324,7 +324,7 @@
       "id": 6,
       "type": "timeseries",
       "title": "SSH events",
-      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; no agent configuration in this repository does yet. All alerts from the stock SSH rules (group sshd), per agent. Connectors are reached by SSH through Twingate only, so any burst here that you did not cause deserves a look. Whether login lines reach these rules depends on the agent reading the journal, which the design marks UNVERIFIED.",
+      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; the cloud connectors' agent configuration does when log_shipping is enabled (the site part of the agent name), but that has not run on a real machine. All alerts from the stock SSH rules (group sshd), per agent. Connectors are reached by SSH through Twingate only, so any burst here that you did not cause deserves a look. Whether login lines reach these rules depends on the agent reading the journal, which the design marks UNVERIFIED.",
       "datasource": {
         "type": "grafana-opensearch-datasource",
         "uid": "${DS_OPENSEARCH}"
@@ -393,7 +393,7 @@
       "id": 7,
       "type": "timeseries",
       "title": "Failed logins",
-      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; no agent configuration in this repository does yet. Alerts in the stock group authentication_failed (wrong password, unknown user, refused key), per agent. On a droplet with password login off and no public SSH, this should be near zero; a steady stream means something is reaching port 22.",
+      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; the cloud connectors' agent configuration does when log_shipping is enabled (the site part of the agent name), but that has not run on a real machine. Alerts in the stock group authentication_failed (wrong password, unknown user, refused key), per agent. On a droplet with password login off and no public SSH, this should be near zero; a steady stream means something is reaching port 22.",
       "datasource": {
         "type": "grafana-opensearch-datasource",
         "uid": "${DS_OPENSEARCH}"
@@ -462,7 +462,7 @@
       "id": 8,
       "type": "timeseries",
       "title": "Sudo events",
-      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; no agent configuration in this repository does yet. Alerts from the stock sudo rules (group sudo), per agent: someone ran a command with elevated rights. The design expects this to be rare because the one admin is the only user.",
+      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; the cloud connectors' agent configuration does when log_shipping is enabled (the site part of the agent name), but that has not run on a real machine. Alerts from the stock sudo rules (group sudo), per agent: someone ran a command with elevated rights. The design expects this to be rare because the one admin is the only user.",
       "datasource": {
         "type": "grafana-opensearch-datasource",
         "uid": "${DS_OPENSEARCH}"
@@ -531,7 +531,7 @@
       "id": 9,
       "type": "table",
       "title": "Recent login and sudo alerts",
-      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; no agent configuration in this repository does yet. The newest individual alerts from the SSH, failed-login and sudo groups: time, agent, rule level and the rule's description. Read the description first; the full log line is in the alert itself and may carry user names or addresses, so do not paste it anywhere public.",
+      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; the cloud connectors' agent configuration does when log_shipping is enabled (the site part of the agent name), but that has not run on a real machine. The newest individual alerts from the SSH, failed-login and sudo groups: time, agent, rule level and the rule's description. Read the description first; the full log line is in the alert itself and may carry user names or addresses, so do not paste it anywhere public.",
       "datasource": {
         "type": "grafana-opensearch-datasource",
         "uid": "${DS_OPENSEARCH}"
@@ -599,7 +599,7 @@
       "id": 11,
       "type": "timeseries",
       "title": "File integrity events under /etc/twingate",
-      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; no agent configuration in this repository does yet. Alerts from Wazuh file integrity monitoring (group syscheck) for paths under /etc/twingate, where the connector keeps its configuration and tokens, per agent. A change here that you did not make is the clearest sign a connector was tampered with. Which directories are watched is set in the agent configuration, and the design lists /etc/twingate as one; that configuration is not built yet.",
+      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; the cloud connectors' agent configuration does when log_shipping is enabled (the site part of the agent name), but that has not run on a real machine. Alerts from Wazuh file integrity monitoring (group syscheck) for paths under /etc/twingate, where the connector keeps its configuration and tokens, per agent. A change here that you did not make is the clearest sign a connector was tampered with. Which directories are watched is set in the agent configuration, and the design lists /etc/twingate as one; that configuration is not built yet.",
       "datasource": {
         "type": "grafana-opensearch-datasource",
         "uid": "${DS_OPENSEARCH}"
@@ -668,7 +668,7 @@
       "id": 12,
       "type": "table",
       "title": "Recent file integrity events",
-      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; no agent configuration in this repository does yet. The newest individual file integrity alerts for /etc/twingate: time, agent, event (added, modified, deleted) and path. The path and event fields are the ones the Wazuh syscheck module writes into alerts.",
+      "description": "UNVERIFIED: this panel filters on agent.labels.site, which only exists if the Wazuh agent configuration sets a label named site; the cloud connectors' agent configuration does when log_shipping is enabled (the site part of the agent name), but that has not run on a real machine. The newest individual file integrity alerts for /etc/twingate: time, agent, event (added, modified, deleted) and path. The path and event fields are the ones the Wazuh syscheck module writes into alerts.",
       "datasource": {
         "type": "grafana-opensearch-datasource",
         "uid": "${DS_OPENSEARCH}"

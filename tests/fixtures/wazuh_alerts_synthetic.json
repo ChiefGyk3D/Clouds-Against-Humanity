@@ -1,0 +1,535 @@
+{
+ "_comment": "Synthetic Wazuh data in the shape of the alert and monitoring indexes. Invented: no real agent, site or manager.",
+ "alerts": [
+  {
+   "@timestamp": "2026-10-19T01:05:00.000Z",
+   "agent": {
+    "id": "001",
+    "name": "site-tor1-connector-a",
+    "labels": {
+     "site": "site-tor1"
+    }
+   },
+   "rule": {
+    "level": 3,
+    "description": "sshd: authentication success.",
+    "groups": [
+     "syslog",
+     "sshd",
+     "authentication_success"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.1"
+  },
+  {
+   "@timestamp": "2026-10-19T01:10:00.000Z",
+   "agent": {
+    "id": "001",
+    "name": "site-tor1-connector-a",
+    "labels": {
+     "site": "site-tor1"
+    }
+   },
+   "rule": {
+    "level": 5,
+    "description": "sshd: authentication failed.",
+    "groups": [
+     "syslog",
+     "sshd",
+     "authentication_failed"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.1"
+  },
+  {
+   "@timestamp": "2026-10-19T01:15:00.000Z",
+   "agent": {
+    "id": "001",
+    "name": "site-tor1-connector-a",
+    "labels": {
+     "site": "site-tor1"
+    }
+   },
+   "rule": {
+    "level": 3,
+    "description": "Successful sudo to ROOT executed.",
+    "groups": [
+     "syslog",
+     "sudo"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.1"
+  },
+  {
+   "@timestamp": "2026-10-19T01:20:00.000Z",
+   "agent": {
+    "id": "001",
+    "name": "site-tor1-connector-a",
+    "labels": {
+     "site": "site-tor1"
+    }
+   },
+   "rule": {
+    "level": 7,
+    "description": "Integrity checksum changed.",
+    "groups": [
+     "ossec",
+     "syscheck",
+     "syscheck_entry_modified"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.1",
+   "syscheck": {
+    "path": "/etc/twingate/connector.conf",
+    "event": "modified"
+   }
+  },
+  {
+   "@timestamp": "2026-10-19T01:25:00.000Z",
+   "agent": {
+    "id": "001",
+    "name": "site-tor1-connector-a",
+    "labels": {
+     "site": "site-tor1"
+    }
+   },
+   "rule": {
+    "level": 7,
+    "description": "Integrity checksum changed.",
+    "groups": [
+     "ossec",
+     "syscheck",
+     "syscheck_entry_modified"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.1",
+   "syscheck": {
+    "path": "/etc/hosts",
+    "event": "modified"
+   }
+  },
+  {
+   "@timestamp": "2026-10-19T02:05:00.000Z",
+   "agent": {
+    "id": "002",
+    "name": "site-tor1-connector-b",
+    "labels": {
+     "site": "site-tor1"
+    }
+   },
+   "rule": {
+    "level": 3,
+    "description": "sshd: authentication success.",
+    "groups": [
+     "syslog",
+     "sshd",
+     "authentication_success"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.2"
+  },
+  {
+   "@timestamp": "2026-10-19T02:10:00.000Z",
+   "agent": {
+    "id": "002",
+    "name": "site-tor1-connector-b",
+    "labels": {
+     "site": "site-tor1"
+    }
+   },
+   "rule": {
+    "level": 5,
+    "description": "sshd: authentication failed.",
+    "groups": [
+     "syslog",
+     "sshd",
+     "authentication_failed"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.2"
+  },
+  {
+   "@timestamp": "2026-10-19T02:15:00.000Z",
+   "agent": {
+    "id": "002",
+    "name": "site-tor1-connector-b",
+    "labels": {
+     "site": "site-tor1"
+    }
+   },
+   "rule": {
+    "level": 3,
+    "description": "Successful sudo to ROOT executed.",
+    "groups": [
+     "syslog",
+     "sudo"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.2"
+  },
+  {
+   "@timestamp": "2026-10-19T02:20:00.000Z",
+   "agent": {
+    "id": "002",
+    "name": "site-tor1-connector-b",
+    "labels": {
+     "site": "site-tor1"
+    }
+   },
+   "rule": {
+    "level": 7,
+    "description": "Integrity checksum changed.",
+    "groups": [
+     "ossec",
+     "syscheck",
+     "syscheck_entry_modified"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.2",
+   "syscheck": {
+    "path": "/etc/twingate/connector.conf",
+    "event": "modified"
+   }
+  },
+  {
+   "@timestamp": "2026-10-19T02:25:00.000Z",
+   "agent": {
+    "id": "002",
+    "name": "site-tor1-connector-b",
+    "labels": {
+     "site": "site-tor1"
+    }
+   },
+   "rule": {
+    "level": 7,
+    "description": "Integrity checksum changed.",
+    "groups": [
+     "ossec",
+     "syscheck",
+     "syscheck_entry_modified"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.2",
+   "syscheck": {
+    "path": "/etc/hosts",
+    "event": "modified"
+   }
+  },
+  {
+   "@timestamp": "2026-10-19T03:05:00.000Z",
+   "agent": {
+    "id": "003",
+    "name": "site-tor2-connector-a",
+    "labels": {
+     "site": "site-tor2"
+    }
+   },
+   "rule": {
+    "level": 3,
+    "description": "sshd: authentication success.",
+    "groups": [
+     "syslog",
+     "sshd",
+     "authentication_success"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.3"
+  },
+  {
+   "@timestamp": "2026-10-19T03:10:00.000Z",
+   "agent": {
+    "id": "003",
+    "name": "site-tor2-connector-a",
+    "labels": {
+     "site": "site-tor2"
+    }
+   },
+   "rule": {
+    "level": 5,
+    "description": "sshd: authentication failed.",
+    "groups": [
+     "syslog",
+     "sshd",
+     "authentication_failed"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.3"
+  },
+  {
+   "@timestamp": "2026-10-19T03:15:00.000Z",
+   "agent": {
+    "id": "003",
+    "name": "site-tor2-connector-a",
+    "labels": {
+     "site": "site-tor2"
+    }
+   },
+   "rule": {
+    "level": 3,
+    "description": "Successful sudo to ROOT executed.",
+    "groups": [
+     "syslog",
+     "sudo"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.3"
+  },
+  {
+   "@timestamp": "2026-10-19T03:20:00.000Z",
+   "agent": {
+    "id": "003",
+    "name": "site-tor2-connector-a",
+    "labels": {
+     "site": "site-tor2"
+    }
+   },
+   "rule": {
+    "level": 7,
+    "description": "Integrity checksum changed.",
+    "groups": [
+     "ossec",
+     "syscheck",
+     "syscheck_entry_modified"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.3",
+   "syscheck": {
+    "path": "/etc/twingate/connector.conf",
+    "event": "modified"
+   }
+  },
+  {
+   "@timestamp": "2026-10-19T03:25:00.000Z",
+   "agent": {
+    "id": "003",
+    "name": "site-tor2-connector-a",
+    "labels": {
+     "site": "site-tor2"
+    }
+   },
+   "rule": {
+    "level": 7,
+    "description": "Integrity checksum changed.",
+    "groups": [
+     "ossec",
+     "syscheck",
+     "syscheck_entry_modified"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.3",
+   "syscheck": {
+    "path": "/etc/hosts",
+    "event": "modified"
+   }
+  },
+  {
+   "@timestamp": "2026-10-19T04:05:00.000Z",
+   "agent": {
+    "id": "004",
+    "name": "site-tor2-connector-b",
+    "labels": {
+     "site": "site-tor2"
+    }
+   },
+   "rule": {
+    "level": 3,
+    "description": "sshd: authentication success.",
+    "groups": [
+     "syslog",
+     "sshd",
+     "authentication_success"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.4"
+  },
+  {
+   "@timestamp": "2026-10-19T04:10:00.000Z",
+   "agent": {
+    "id": "004",
+    "name": "site-tor2-connector-b",
+    "labels": {
+     "site": "site-tor2"
+    }
+   },
+   "rule": {
+    "level": 5,
+    "description": "sshd: authentication failed.",
+    "groups": [
+     "syslog",
+     "sshd",
+     "authentication_failed"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.4"
+  },
+  {
+   "@timestamp": "2026-10-19T04:15:00.000Z",
+   "agent": {
+    "id": "004",
+    "name": "site-tor2-connector-b",
+    "labels": {
+     "site": "site-tor2"
+    }
+   },
+   "rule": {
+    "level": 3,
+    "description": "Successful sudo to ROOT executed.",
+    "groups": [
+     "syslog",
+     "sudo"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.4"
+  },
+  {
+   "@timestamp": "2026-10-19T04:20:00.000Z",
+   "agent": {
+    "id": "004",
+    "name": "site-tor2-connector-b",
+    "labels": {
+     "site": "site-tor2"
+    }
+   },
+   "rule": {
+    "level": 7,
+    "description": "Integrity checksum changed.",
+    "groups": [
+     "ossec",
+     "syscheck",
+     "syscheck_entry_modified"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.4",
+   "syscheck": {
+    "path": "/etc/twingate/connector.conf",
+    "event": "modified"
+   }
+  },
+  {
+   "@timestamp": "2026-10-19T04:25:00.000Z",
+   "agent": {
+    "id": "004",
+    "name": "site-tor2-connector-b",
+    "labels": {
+     "site": "site-tor2"
+    }
+   },
+   "rule": {
+    "level": 7,
+    "description": "Integrity checksum changed.",
+    "groups": [
+     "ossec",
+     "syscheck",
+     "syscheck_entry_modified"
+    ]
+   },
+   "manager": {
+    "name": "wazuh-manager-fixture"
+   },
+   "id": "1700000000.4",
+   "syscheck": {
+    "path": "/etc/hosts",
+    "event": "modified"
+   }
+  }
+ ],
+ "monitoring": [
+  {
+   "@timestamp": "2026-10-19T06:00:00.000Z",
+   "id": "001",
+   "name": "site-tor1-connector-a",
+   "status": "active",
+   "lastKeepAlive": "2026-10-19T05:59:30.000Z",
+   "group": [
+    "site-tor1"
+   ]
+  },
+  {
+   "@timestamp": "2026-10-19T06:00:00.000Z",
+   "id": "002",
+   "name": "site-tor1-connector-b",
+   "status": "active",
+   "lastKeepAlive": "2026-10-19T05:59:30.000Z",
+   "group": [
+    "site-tor1"
+   ]
+  },
+  {
+   "@timestamp": "2026-10-19T06:00:00.000Z",
+   "id": "003",
+   "name": "site-tor2-connector-a",
+   "status": "active",
+   "lastKeepAlive": "2026-10-19T05:59:30.000Z",
+   "group": [
+    "site-tor2"
+   ]
+  },
+  {
+   "@timestamp": "2026-10-19T06:00:00.000Z",
+   "id": "004",
+   "name": "site-tor2-connector-b",
+   "status": "disconnected",
+   "lastKeepAlive": "2026-10-19T05:59:30.000Z",
+   "group": [
+    "site-tor2"
+   ]
+  }
+ ]
+}
