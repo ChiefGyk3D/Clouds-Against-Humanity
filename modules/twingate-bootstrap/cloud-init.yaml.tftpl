@@ -345,7 +345,9 @@ ${telemetry_conf}%{ if metadata_lock ~}
       systemctl is-active --quiet wazuh-agent || fail "wazuh-agent is not active after start"
       log "agent $agent_name enrolled with $manager and started"
   # Log sources, inserted inside the agent's existing <ossec_config> element by
-  # the script above (a fragment of <localfile> blocks, not a document). The
+  # the script above (a fragment of <localfile> blocks and one <labels> block,
+  # not a document). The site label is what the Grafana Wazuh dashboard filters
+  # on (agent.labels.site); it is the site part of the agent name. The
   # journald log format and its filter fields are UNVERIFIED against the agent
   # version your manager runs (design section 6.1); if the agent rejects them,
   # remove the journald blocks and use the documented syslog fallback.
@@ -354,6 +356,9 @@ ${telemetry_conf}%{ if metadata_lock ~}
     owner: root:root
     content: |
       <!-- cah-log-shipping-localfiles -->
+      <labels>
+        <label key="site">${log_shipping_site}</label>
+      </labels>
       <localfile>
         <log_format>journald</log_format>
         <location>journald</location>

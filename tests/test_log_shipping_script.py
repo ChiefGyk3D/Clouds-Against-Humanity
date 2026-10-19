@@ -52,6 +52,7 @@ SUBS = {
     "log_shipping_enroll_port": "1515",
     "log_shipping_agent_name": "site-tor1-connector-a",
     "log_shipping_agent_group": "site-tor1",
+    "log_shipping_site": "site-tor1",
     "log_shipping_hostboot_config": "cah-tor1-hostboot",
 }
 
@@ -77,8 +78,8 @@ def extract(**over: str) -> str:
     return extract_file(TEMPLATE.read_text(encoding="utf-8"), SCRIPT_PATH, subs)
 
 
-def extract_localfile_text() -> str:
-    return extract_file(TEMPLATE.read_text(encoding="utf-8"), LOCALFILE_PATH)
+def extract_localfile_text(**over: str) -> str:
+    return extract_file(TEMPLATE.read_text(encoding="utf-8"), LOCALFILE_PATH, dict(SUBS, **over))
 
 
 class Box:
@@ -488,6 +489,23 @@ def test_localfile_block_is_well_formed_and_collects_the_named_sources():
     ]
     assert "/var/log/auth.log" in files
     assert "cah-log-shipping-localfiles" in text
+
+
+def test_localfile_fragment_sets_the_site_label_the_wazuh_dashboard_filters_on():
+    # The dashboard filters on agent.labels.site; Wazuh writes that field from a
+    # <labels><label key="site"> block in the agent's ossec.conf.
+    for site in ("site-tor1", "site-tor2"):
+        root = ET.fromstring(f"<root>{extract_localfile_text(log_shipping_site=site)}</root>")
+        labels = root.findall("labels/label")
+        assert [(lb.get("key"), lb.text) for lb in labels] == [("site", site)]
+
+
+def test_the_site_label_is_inserted_inside_the_single_root_element(tmp_path):
+    box = Box(tmp_path)
+    assert box.run().returncode == 0
+    root = ET.fromstring(box.conf)
+    assert [(lb.get("key"), lb.text) for lb in root.findall("labels/label")] == [("site", "site-tor1")]
+    assert box.conf.count("<ossec_config>") == 1
 
 
 def test_audit_rules_cover_identity_sudo_and_twingate_and_never_execve():
