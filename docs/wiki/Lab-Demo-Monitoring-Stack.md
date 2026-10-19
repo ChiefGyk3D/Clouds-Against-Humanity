@@ -24,7 +24,7 @@ Grafana and Prometheus listen on `127.0.0.1` only. Anonymous viewing is off. The
 scripts/demo_monitoring.sh up
 ```
 
-Open `http://127.0.0.1:3300`, log in as `admin` with the password in `labs/demo-monitoring/.env`, and open **CAH: Sites overview**. Give it two minutes: rates need a few scrapes. `scripts/demo_monitoring.sh test` runs the alert rules' unit tests with `promtool` (no stack needed), and `scripts/demo_monitoring.sh status` shows the containers and any firing alert.
+Open `http://127.0.0.1:3300`, log in as `admin`. The password is the `GRAFANA_ADMIN_PASSWORD` in your shell if you set one, otherwise the one `up` wrote to `labs/demo-monitoring/.env` (the command prints which), and open **CAH: Sites overview**. Give it two minutes: rates need a few scrapes. `scripts/demo_monitoring.sh test` runs the alert rules' unit tests with `promtool` (no stack needed), and `scripts/demo_monitoring.sh status` shows the containers and any firing alert.
 
 The scrapes and panels are the lesson, so open Prometheus too (`http://127.0.0.1:9190`) and look at **Status, Target health**: eight targets in the `twingate-ztna` job, all `UP`, two per host and four per site.
 

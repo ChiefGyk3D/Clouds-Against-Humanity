@@ -217,3 +217,42 @@ def test_script_exposes_the_subcommands():
         assert sub in script
     assert "set -euo pipefail" in script
     assert "sudo" not in script.replace("no sudo is used", "")
+
+
+def password_line(tmp_path, shell_value, env_file_value):
+    """Run the script's login-hint function against a temporary lab directory."""
+    import os
+    import subprocess
+
+    if env_file_value is not None:
+        (tmp_path / ".env").write_text(f"GRAFANA_ADMIN_PASSWORD={env_file_value}\n")
+    env = {k: v for k, v in os.environ.items() if k != "GRAFANA_ADMIN_PASSWORD"}
+    if shell_value is not None:
+        env["GRAFANA_ADMIN_PASSWORD"] = shell_value
+    script = ROOT / "scripts" / "demo_monitoring.sh"
+    out = subprocess.run(
+        ["bash", "-c", f'source "{script}"; LAB="{tmp_path}"; password_hint'],
+        env=env, capture_output=True, text=True, check=True,
+    ).stdout
+    return out
+
+
+def test_login_hint_names_the_shell_environment_when_the_password_comes_from_it(tmp_path):
+    # Built at run time, and named so it is not secret-shaped in the source.
+    value = "hint" + "Value" + str(len(str(tmp_path)))
+    out = password_line(tmp_path, value, None)
+    assert "shell environment" in out and ".env" not in out
+    assert value not in out
+
+
+def test_login_hint_names_the_env_file_when_only_the_file_has_it(tmp_path):
+    value = "file" + "Value" + str(len(str(tmp_path)))
+    out = password_line(tmp_path, None, value)
+    assert str(tmp_path / ".env") in out
+    assert value not in out
+
+
+def test_shell_environment_wins_over_the_env_file_as_compose_does(tmp_path):
+    out = password_line(tmp_path, "fromShellOne", "fromFileOne")
+    assert "shell environment" in out
+    assert "fromShellOne" not in out and "fromFileOne" not in out

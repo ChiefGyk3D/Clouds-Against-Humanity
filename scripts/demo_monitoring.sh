@@ -61,13 +61,23 @@ ensure_env() {
   echo "Wrote $LAB/.env (untracked) with a random Grafana admin password."
 }
 
+# Say where the Grafana admin password comes from, never what it is. Compose
+# gives the shell environment precedence over the .env file, so check it first.
+password_hint() {
+  if [ -n "${GRAFANA_ADMIN_PASSWORD:-}" ]; then
+    echo "password: your shell environment (GRAFANA_ADMIN_PASSWORD)"
+  else
+    echo "password: in $LAB/.env (GRAFANA_ADMIN_PASSWORD)"
+  fi
+}
+
 cmd_up() {
   need_docker
   ensure_env
   load_ports
   compose up -d
   echo
-  echo "Grafana     http://127.0.0.1:${GRAFANA_PORT}   user: admin   password: in $LAB/.env (GRAFANA_ADMIN_PASSWORD)"
+  echo "Grafana     http://127.0.0.1:${GRAFANA_PORT}   user: admin   $(password_hint)"
   echo "Prometheus  http://127.0.0.1:${PROM_PORT}"
   echo "Give it two minutes to collect a few scrapes, then open the dashboard CAH: Sites overview."
 }
@@ -148,4 +158,7 @@ main() {
   esac
 }
 
-main "$@"
+# Run only when executed, so the tests can source the functions.
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then
+  main "$@"
+fi
