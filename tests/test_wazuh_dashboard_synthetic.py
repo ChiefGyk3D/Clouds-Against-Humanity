@@ -269,23 +269,61 @@ def test_the_site_variable_lists_both_sites_and_the_instance_variable_follows_it
     )
 
 
-def test_every_alert_panel_returns_data_for_each_site_and_only_that_site():
-    dash, fx = load_dashboard(), load_fixture()
+def isolation_problems(dash, fx, instance_for):
+    """Why a panel does not stay inside the chosen site, as a list of messages."""
     alerts, mon = fx["alerts"], fx["monitoring"]
     allsel = all_selected(dash, alerts, mon)
-    checked = 0
+    out = []
     for p, t in panel_targets(dash):
         if monitoring_panel(p):
             continue
         for site in SITES:
-            sel = dict(allsel, site=[site], instance=terms(alerts, "agent.name", f"{SITE_FIELD}:{lucene([site])}"))
+            sel = dict(allsel, site=[site], instance=instance_for(alerts, site))
             rows = run_query(expand(t["query"], sel), alerts)
-            assert rows, f"panel {p['id']} ({p['title']}) returns nothing for {site}"
-            assert {values_at(r, SITE_FIELD)[0] for r in rows} == {site}, f"panel {p['id']} leaks another site"
-            checked += 1
+            if not rows:
+                out.append(f"panel {p['id']} ({p['title']}) returns nothing for {site}")
+            elif {values_at(r, SITE_FIELD)[0] for r in rows} != {site}:
+                out.append(f"panel {p['id']} ({p['title']}) leaks another site when {site} is chosen")
         both = run_query(expand(t["query"], allsel), alerts)
-        assert {values_at(r, SITE_FIELD)[0] for r in both} == set(SITES), f"panel {p['id']}: All misses a site"
-    assert checked >= 16, f"only {checked} panel/site checks ran"
+        if {values_at(r, SITE_FIELD)[0] for r in both} != set(SITES):
+            out.append(f"panel {p['id']}: All misses a site")
+    return out
+
+
+def instance_of_site(alerts, site):
+    """Every agent name of BOTH sites, whatever the site: the instance filter
+    must not be what keeps the sites apart, so the site clause alone has to."""
+    return terms(alerts, "agent.name")
+
+
+def test_every_alert_panel_names_the_site_field_in_its_query():
+    dash = load_dashboard()
+    panels = [(p, t) for p, t in panel_targets(dash) if not monitoring_panel(p)]
+    assert len(panels) >= 7
+    for p, t in panels:
+        assert f"{SITE_FIELD}:${{site:lucene}}" in t["query"], f"panel {p['id']} ({p['title']}) has no site clause"
+
+
+def test_every_alert_panel_returns_data_for_each_site_and_only_that_site():
+    assert isolation_problems(load_dashboard(), load_fixture(), instance_of_site) == []
+
+
+def mutate_drop_site_clause(dash, panel_id):
+    m = copy.deepcopy(dash)
+    for p, t in panel_targets(m):
+        if p["id"] == panel_id:
+            t["query"] = t["query"].replace(f"{SITE_FIELD}:${{site:lucene}} AND ", "")
+            assert SITE_FIELD not in t["query"]
+    return m
+
+
+def test_mutation_dropping_the_site_clause_from_any_alert_panel_is_caught():
+    dash, fx = load_dashboard(), load_fixture()
+    ids = [p["id"] for p, t in panel_targets(dash) if not monitoring_panel(p)]
+    assert len(ids) >= 7
+    for pid in ids:
+        problems = isolation_problems(mutate_drop_site_clause(dash, pid), fx, instance_of_site)
+        assert any(f"panel {pid} " in x for x in problems), f"dropping the site clause from panel {pid} went unnoticed"
 
 
 def test_a_site_filter_with_an_instance_of_another_site_returns_nothing():
@@ -325,7 +363,9 @@ def test_negative_alerts_without_the_site_label_are_reported_and_return_nothing(
         del a["agent"]["labels"]
     assert any("agent.labels.site" in p for p in field_problems(dash, bare, fx["monitoring"]))
     t = next(t for p, t in panel_targets(dash) if p["id"] == 2)
-    assert run_query(expand(t["query"], {"site": SITES, "instance": ["x"]}), bare) == []
+    # The same selection finds rows while the label exists, so the empty result below is the missing field.
+    assert run_query(expand(t["query"], {"site": SITES, "instance": ["site-tor1-connector-a"]}), fx["alerts"])
+    assert run_query(expand(t["query"], {"site": SITES, "instance": ["site-tor1-connector-a"]}), bare) == []
 
 
 def test_negative_a_panel_on_a_renamed_field_is_reported():
