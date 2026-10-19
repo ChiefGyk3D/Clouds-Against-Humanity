@@ -89,4 +89,4 @@ Write your answers before opening the reference.
 
 Next: [Multiple sites and identity](Multiple-Sites-and-Identity.md). Back to the [Reading order](Reading-Order.md).
 
-Where this is built: the [stage 2 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/02-telemetry.md) describes the telemetry stack skeleton (everything off, nothing applied).
+Where this is built: the [stage 2 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/02-telemetry.md) describes the telemetry stack and the opt-in exporter and agent on the connectors (everything off by default, nothing applied).

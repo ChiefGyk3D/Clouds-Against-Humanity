@@ -4,7 +4,7 @@
 
 The environment grows one stage at a time. Each stage gets its own design, its own cost approval and its own guide before it costs anything. Working ceiling in the current phase: $30 per month. Every phase carries its own ceiling in `docs/stages/approved.json`, with a reason and a decision date, and a later phase can raise it on purpose (see the [per-phase cost table](#cost-per-phase) below).
 
-![Diagram, Roadmap: Stage 0 Foundation $0 BUILT; Stage 1 Access: 2 Twingate connectors $12 BUILT; Stage 2 Logs to the on-prem SIEM, cloud-to-home access PLANNED; Stage 3 Workload host: Portainer, five daemons, Discord brid](images/roadmap-diagram-1.png)
+![Diagram, Roadmap: Stage 0 Foundation $0 BUILT; Stage 1 Access: 2 Twingate connectors $12 BUILT; Stage 2 Logs to the on-prem SIEM, cloud-to-home access IN PROGRESS, not applied; Stage 3 Workload host: Portainer, five daemons, Discord brid](images/roadmap-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>
@@ -13,12 +13,13 @@ The environment grows one stage at a time. Each stage gets its own design, its o
 flowchart LR
     s0["Stage 0<br/>Foundation<br/>$0<br/>BUILT"]:::done
     s1["Stage 1<br/>Access: 2 Twingate connectors<br/>$12<br/>BUILT"]:::done
-    s2["Stage 2<br/>Logs to the on-prem SIEM,<br/>cloud-to-home access<br/>PLANNED"]:::plan
+    s2["Stage 2<br/>Logs to the on-prem SIEM,<br/>cloud-to-home access<br/>IN PROGRESS, not applied"]:::wip
     s3["Stage 3<br/>Workload host: Portainer,<br/>five daemons,<br/>Discord bridge, Spaces bucket, Functions<br/>est. $17<br/>PLANNED"]:::plan
     s4["Stage 4<br/>Grafana, runs on-prem<br/>PLANNED"]:::plan
     s0 --> s1 --> s2 --> s3 --> s4
 
     classDef done fill:#132a1f,stroke:#4ade80,color:#dcfce7
+    classDef wip fill:#3a2a0f,stroke:#fbbf24,color:#fef3c7
     classDef plan fill:#1e1b3a,stroke:#a78bfa,color:#ede9fe
 ```
 
@@ -54,20 +55,22 @@ Open follow-ups from this stage:
 
 - Roll out the droplet metadata endpoint lock (`metadata_lock`, built and off by default, not yet tested on a real droplet).
 - Roll out the default-drop host firewall (`host_firewall`, built and off by default, not yet tested on a real droplet; stage it one connector at a time).
-- Audit logging on the droplets.
+- Audit logging on the droplets (written under stage 2, below; not applied).
 - Optional: upgrade the Twingate provider from 3.x to 4.x or 5.x (issue #93). The `access_group` block is not deprecated, so nothing is overdue; the 3.x line has had no release since 3.8.0.
 - Attach the Spacelift push policy. It is written and tested (`.spacelift/policies/push.rego`): it never proposes a run, so pull requests from forks or from this repository never run in Spacelift, and docs-only merges no longer start tracked runs. It takes effect only once created in Spacelift, and push policies need a paid Spacelift plan. On the free plan, narrow each stack's project root and globs instead. Both routes are in the secrets runbook, section 9.
 - First-run checks: log masking and the runner image.
 
 ## Stage 2: logging and the link home (design merged, cloud side in progress, not applied)
 
-Design draft: [2026-10-11 stage 2 logging](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-11-stage-2-logging-design.md). Prometheus pulls the cloud connectors over a Twingate headless client; one home connector per VLAN (logging, AI), with Twingate groups carrying identity-level segmentation and pfSense as a connector-level backstop; Wazuh agents push logs home over a second service account; both paths are single-port resources. Cloud cost $0 for the reference environment (home Grafana, nothing new in the cloud). The [2026-10-16 settings and mini SOC design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-stage2-settings-and-mini-soc-design.md) first adds a settings layer (variables, example values, `resource_key`, `site_name`, a timezone variable) and stack instances for a second site in the cost gate; those are merged, while no telemetry stack exists yet.
+Design draft: [2026-10-11 stage 2 logging](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-11-stage-2-logging-design.md). Prometheus pulls the cloud connectors over a Twingate headless client; one home connector per VLAN (logging, AI), with Twingate groups carrying identity-level segmentation and pfSense as a connector-level backstop; Wazuh agents push logs home over a second service account; both paths are single-port resources. Cloud cost $0 for the reference environment (home Grafana, nothing new in the cloud). The [2026-10-16 settings and mini SOC design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-stage2-settings-and-mini-soc-design.md) first adds a settings layer (variables, example values, `resource_key`, `site_name`, a timezone variable) and stack instances for a second site in the cost gate; those are merged, and so is the cloud-side telemetry code that builds on them (below).
 
-Build status: **design merged, cloud side in progress, not applied.** On main today: the settings layer, the cost gate's stack instances, the connector telemetry options in the access stack (all off by default) and the telemetry stack skeleton, which creates Twingate objects only behind two flags that default to false ([stage 2 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/02-telemetry.md)). Not built: the node exporter and log agent on the droplets, the connector firewall changes for metrics, and everything at home. The guide's verification section lists the read-only checks to run after an apply, each marked not run yet, and the [home-side runbook](Stage-2-Home-Side-Runbook.md) is the operator's side (VLAN, firewall allow-list, recorded negative tests, headless client, target file). Nothing is applied.
+Build status: **design merged, cloud side written and mock-tested, not applied.** On main today: the settings layer, the cost gate's stack instances and the telemetry stack, which creates Twingate objects only behind two flags that default to false ([stage 2 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/02-telemetry.md)). On the connectors, all opt-in and off by default: the node exporter with metrics firewall rules (tag-sourced on DigitalOcean, security-group-sourced on AWS), connector telemetry options, and a Wazuh agent with auditd that pulls its enrollment secret from Doppler on first boot. The repository also ships site-aware Grafana dashboards ([Grafana dashboards](Grafana-Dashboards.md)).
+
+Still open, and the guide says so itself: nothing is applied, so none of this has run on a real machine. The Twingate headless client that would carry agent traffic home is not built. The home side (VLAN, firewall allow-list, headless client, target file) is not done, and no event has been seen in the SIEM. The memory the agent and exporter take on the 1 GB droplets is unmeasured, and the connector's metrics bind address is unverified. The guide's verification section lists the read-only checks to run after an apply, each marked not run yet, and the [home-side runbook](Stage-2-Home-Side-Runbook.md) is the operator's side.
 
 - Ship connector and access logs to the existing on-prem OpenSearch and Wazuh SIEM ([siem-docker-stack](https://github.com/ChiefGyk3D/siem-docker-stack)). No new log service in the cloud.
 - Cloud-to-home access through a home-side Twingate connector, a headless client and a service account, with its own group. The home connector sits on a VLAN that reaches only what it needs.
-- Audit logging on the droplets lands here.
+- Audit logging on the droplets: auditd and the Wazuh agent are written (opt-in, not applied); this closes when they run on a real connector.
 
 ## Stage 3: workloads (planned)
 
