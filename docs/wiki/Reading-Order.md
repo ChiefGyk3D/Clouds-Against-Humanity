@@ -120,7 +120,7 @@ The exercise page tells you to stop after step 3 and read the threat model only 
 | 8 | [Stage 2 home-side runbook (unverified draft)](Stage-2-Home-Side-Runbook.md) | 15 min | You can say what must exist at home, with a recorded negative test, before any cloud host sends a log. |
 | 9 | [Grafana dashboards (unverified draft)](Grafana-Dashboards.md) | 10 min | You can say which of the three dashboards answers "is a site up", "is a droplet healthy" and "did anyone log in", and which panels' field names are still UNVERIFIED. |
 | 10 | [Lab: a synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) | 30 min, hands on | You predicted what a silent site does to each panel, then ran `silent-site` and compared. |
-| 11 | [Roadmap](Roadmap.md) | 10 min | You know stage 2 is a design with the cloud side in progress, not applied. |
+| 11 | [Roadmap](Roadmap.md) | 10 min | You know stage 2 is merged on the cloud side and not applied, and that the home side is not done. |
 
 Nothing on these pages is deployed. The cloud hosts do not ship logs anywhere yet; the detection page says so at the top. Doing, not just reading: each telemetry page ends with a predict-then-check set; the times above are reading only.
 
