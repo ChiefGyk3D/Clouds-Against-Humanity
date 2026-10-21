@@ -4,7 +4,7 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-**Prerequisites:** [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md), [Doppler and secrets](Doppler-and-Secrets.md) and [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md).
+**Prerequisites:** [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md), [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md) (if SSO, SAML or OIDC are only words to you), [Doppler and secrets](Doppler-and-Secrets.md) and [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md).
 
 In this project, identity is one administrator and secrets are a handful of tokens that expire every 90 days. In a company, identity is thousands of people, tens of thousands of devices and many more **non-human** identities (services, pipelines, scripts), and the number of secrets grows with the number of systems. The questions are the same four you already know: who is it, can they prove it, what may they do, and what did they do. The rest of this page is how those questions are answered at scale.
 
@@ -12,7 +12,7 @@ In this project, identity is one administrator and secrets are a handful of toke
 
 | Question | In this project | In an enterprise |
 |---|---|---|
-| Who are the people? | One administrator, sign-in through Twingate | A workforce identity provider (IdP) holding every employee, contractor and group |
+| Who are the people? | One administrator, sign-in through Twingate | A workforce directory holding every employee, contractor and group, with an identity provider (IdP) in front of it |
 | How do they sign in? | One identity, MFA on each account | Single sign-on to hundreds of applications, MFA enforced centrally |
 | How are accounts created and removed? | By hand, once | Automatically, driven by HR events (joiner, mover, leaver) |
 | What may people do? | Everything the one admin may do | Roles and attributes, reviewed regularly |
@@ -23,7 +23,7 @@ In this project, identity is one administrator and secrets are a handful of toke
 
 ## People: IdP, SSO, MFA and conditional access
 
-An **identity provider** is the system of record for who works here. **Single sign-on (SSO)** lets a person sign in once to the IdP and reach many applications through a standard protocol, usually SAML or OpenID Connect. **MFA** is enforced there once instead of per application, and the strongest forms (hardware security keys, passkeys) resist phishing. **Conditional access** makes the decision depend on context: managed device or not, risky location, sensitive application, unusual behavior. A single policy can say "an unmanaged device may read email but not the admin console".
+A **directory** is the system of record for who works here: the people, their groups and their attributes. An **identity provider** (IdP) reads the directory (or contains one), authenticates a person, and tells applications who they are. **Single sign-on (SSO)** lets a person sign in once to the IdP and reach many applications through a standard protocol, usually SAML or OpenID Connect (the [foundations page](Enterprise-Identity-SSO-SAML-OIDC.md#saml-step-by-step) walks through both, message by message). **MFA** is enforced there once instead of per application, and the strongest forms (hardware security keys, passkeys) resist phishing. **Conditional access** makes the decision depend on context: managed device or not, risky location, sensitive application, unusual behavior. A single policy can say "an unmanaged device may read email but not the admin console".
 
 SSO is also a security argument for IT: when a person leaves, disabling one account blocks new sign-ins everywhere that trusts the IdP. That is not the same as complete offboarding: sessions and tokens already issued may stay valid until they expire or are revoked, accounts and credentials that are independent of the IdP (local accounts, API keys, SSH keys) are untouched, and SCIM alone does not guarantee revocation, so downstream deprovisioning and session or token revocation have to be handled too. It is also a single point of failure and a high-value target, which is why IdP administrators are among the most protected people in a company.
 
