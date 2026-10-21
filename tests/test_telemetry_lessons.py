@@ -241,3 +241,24 @@ def test_ceiling_36_reference_answer_matches_the_arithmetic():
     two = [t[1] for t in totals if t[1] <= 36]
     three = [t[2] for t in totals if t[2] <= 36]
     assert (len(one), len(two), len(three)) == (6, 3, 2)
+
+
+def test_stage2_checklist_covers_every_verification_id():
+    """The 7.0 checklist must mention every M/L/X check, and none may claim a result."""
+    guide = (ROOT / "docs" / "stages" / "02-telemetry.md").read_text()
+    head, _, rest = guide.partition("### 7.0 The checklist at a glance")
+    assert rest, "section 7.0 is missing"
+    checklist, _, detail = rest.partition("### 7.1 Metrics")
+    ids = set(re.findall(r"^\| ([MLX]\d) \|", detail, re.M))
+    assert len(ids) >= 10, "collected too few check ids"
+    for cid in sorted(ids):
+        letter, num = cid[0], int(cid[1])
+        assert re.search(rf"\b{cid}\b|{letter}\d to {letter}{num}\b|{letter}1 to {letter}\d\b", checklist), cid
+    assert "not run yet" in checklist
+    assert not re.search(r"\bpassed on 20\d\d", checklist)
+
+
+def test_stage2_checklist_guard_bites():
+    """Negative case: a checklist missing an id is detected by the same matcher."""
+    checklist = "M1 to M3, L1 to L3, X1, X2"
+    assert not re.search(r"\bX3\b|X\d to X3\b|X1 to X\d\b", checklist)
