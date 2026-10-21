@@ -12,7 +12,7 @@ A honeypot is a system whose only job is to be attacked and to record how. For a
 
 Goals:
 
-- A single low-interaction honeypot host in a cloud account that is not this project's, exposing the lure ports (SSH and telnet) and nothing else.
+- A single honeypot host running an emulated shell (Cowrie's default "medium interaction" mode; section 5.1 explains the label and why it is the honest one) in a cloud account that is not this project's, exposing the lure ports (SSH and telnet) and nothing else.
 - Egress closed by default, so a compromised honeypot cannot be used to attack anyone (section 6).
 - No route to any other environment and no credential, state, Doppler config, Twingate network or VPC shared with the core environment (section 3).
 - Logs leave one way, as structured text, into a store the learner reads from (section 9).
@@ -23,7 +23,7 @@ Non-goals:
 
 - Not part of this project's apply path, ever. No stack for it under `stacks/`, no module, no Spacelift project and no `cost.json` here.
 - Not a production sensor, a threat-intelligence feed or a research platform. It is an exercise.
-- Not a high-interaction honeypot: no real shell for an attacker, no QEMU backend pool, no proxy mode into another system, no LLM backend (section 5.4).
+- Not a high-interaction honeypot: no real shell for an attacker (the attacker gets an emulated one), no QEMU backend pool, no proxy mode into another system, no LLM backend (section 5.4).
 - No active response, no hack-back, no scanning of attacker addresses. The honeypot is passive.
 - No publication of raw logs (section 7).
 - No claim that it is safe to run without the provider's consent. Section 7.4 says what the two providers' own policies require, and it is a condition, not a footnote.
@@ -93,7 +93,7 @@ Untrusted data is evidence, never instruction. That covers everything the honeyp
 | Boundary | Rule |
 |---|---|
 | Internet to honeypot | Only the lure ports are open. Everything else is dropped by the cloud firewall and again by host nftables |
-| Honeypot to internet | Closed. Only the log store endpoint on 443, time sync and (during build only) the package source. Section 6.2 |
+| Honeypot to internet | Closed. Only a pinned log destination on 443 (section 6.2.1), time sync and (during build only) the package source. Section 6.2 |
 | Honeypot to anything else of the learner's | There is no path. No peering, no tunnel, no shared network |
 | Honeypot to log store | One write-only credential, one prefix. The store is in the honeypot's own account |
 | Log store to learner | The learner pulls, over outbound HTTPS, with a read-only credential kept at the learner's side. Nothing connects in |
@@ -121,14 +121,14 @@ Ranked by impact times how easy the first step is.
 
 | # | Risk | Mitigation | Verification |
 |---|---|---|---|
-| 1 | The honeypot attacks others (abuse cases 1, 2) | Egress default-drop at the cloud firewall and at host nftables, for both address families; the service runs as an unprivileged user; the emulated shell is not a real shell (section 5); no proxy mode; telnet and SSH lures only | A test that renders the firewall and nftables rules and fails on any outbound allow beyond the list in section 6.2. Live: from the host, outbound connects to a test target in the learner's own other account all fail. A flow log or a counter of denied egress is read weekly |
+| 1 | The honeypot attacks others (abuse cases 1, 2) | Egress default-drop at the cloud firewall and at host nftables, for both address families; the service runs as an unprivileged user; the emulated shell is not a real shell (section 5); no proxy mode; telnet and SSH lures only | A test that renders the firewall and nftables rules and fails on any outbound allow beyond the list in section 6.2. Live: from the host, outbound connects to a test target in the learner's own other account all fail, including a second storage bucket on 443. Residual: a pinned shared storage address (6.2.1, option 2) still admits every bucket behind it. A flow log or a counter of denied egress is read weekly |
 | 2 | Account suspended after an abuse report (abuse case 6) | Separate account holding nothing else (section 3); written consent from the provider before running (section 7.4); the abuse contact is read; a short, time-boxed run; a kill switch (section 10) | Not testable in advance. Calendar item: read the abuse inbox daily while it runs. Residual risk accepted until decided |
 | 3 | Pivot to the learner's other resources (abuse case 4) | Separate account, separate login, no peering, no shared secret; the host holds only the write key | A checklist run at build: the account has no resource other than the honeypot stack and the store; the write key's policy is shown and has one action. A repository guard is a follow-up (section 13) |
 | 4 | Log write key abused (abuse case 3) | Write-only, one prefix, no list, no delete, no read; object names carry a random component so one object cannot overwrite another; versioning or object lock on the store if the provider offers it (UNVERIFIED, section 9.2); a size cap and a request alarm | Attempt each forbidden action with the key from outside the honeypot, against the learner's own store, and expect a denial |
 | 5 | Hostile string reaches the collector or SIEM (abuse case 7) | Collector treats logs as untrusted: parse as JSON, size-limit every field, drop control and escape characters, never evaluate, never pass to a model as an instruction, escape on display in Grafana and any web view | A collector test with an oversized line, a line with terminal escapes, a line with markup and a line with a Wazuh-rule-shaped payload; each must be stored inert |
 | 6 | Malware samples mishandled (abuse case 5) | Captured files go to a non-executable, size-capped directory, are hashed and are not served, executed or copied into backups; by default nothing is fetched at all (section 6.3); the hash, not the file, goes to the store | A build check that the capture directory is mounted `noexec` and capped; a log check that no object in the store is larger than the field cap |
 | 7 | Personal data in the logs leaks (abuse case 8) | Retention limits, redaction of passwords, no raw-log publication, aggregates only (section 7) | Review of anything proposed for publication against section 7.3 before it leaves the learner's machine |
-| 8 | Cost runaway (abuse case 9) | A billing alert set before the first apply; a time limit on the run; the kill switch; closed egress keeps transfer small (inbound is not billed by DigitalOcean, section 8.1) | The usage page after week one against section 8's arithmetic |
+| 8 | Cost runaway (abuse case 9) | A spend alert threshold set before the first apply, with a named operator action when it fires (section 8.3); a time limit on the run; the kill switch; closed egress keeps transfer small (inbound is not billed by DigitalOcean, section 8.1) | The usage page after week one against section 8's arithmetic |
 | 9 | Fingerprinting the owner (abuse case 10) | The host's metadata, banners and the account name reveal nothing about the learner or the project; no reuse of keys, names or tags from other work | A read of the rendered cloud-init and the host banners before the first apply |
 | 10 | Supply chain (abuse case 11) | Pin the package version and checksum, current releases only, rebuild instead of patching in place | A test that fails on an unpinned package name in the build template |
 | 11 | IPv6 left open (abuse case 12) | Either disable IPv6 on the host or write every rule for both families | The existing `test_ipv6_closed.py` pattern extended to the honeypot; the external check runs against the v6 address too if it has one |
@@ -150,6 +150,8 @@ Facts read on 2026-10-21 from each project's current README (default branch) and
 Reading the table:
 
 ### 5.1 Cowrie, the main candidate
+
+Classification, so that what is disclosed to a provider matches what runs: Cowrie's README calls it a "medium to high interaction" honeypot, and the default emulated shell is the medium mode. It is not low-interaction in the sense of a port listener that only logs connections; it accepts logins, runs an emulated shell and keeps session recordings. This document therefore calls the design a medium-interaction honeypot everywhere and the provider request (section 7.4) says exactly that, including that it records commands and attempted file transfers. A genuinely low-interaction candidate would be OpenCanary alone, which emulates services and alerts on connections and logins; it is weaker as a lesson and is listed in section 12, item 3.
 
 It listens on SSH and telnet, records login attempts, shell commands, uploaded and downloaded files and sessions, and writes JSON for log tooling. It defaults to port 2222 and the install page documents moving traffic from 22 and 23 to it by firewall redirect, authbind or setcap. The page says "It is strongly recommended to run Cowrie as a dedicated non-root user" and "Cowrie refuses to start as root". Both fit the unprivileged-service rule. Because the lure takes port 22, the host has no real SSH: administration is by rebuild (section 10), the same stance as the edge host.
 
@@ -181,12 +183,22 @@ Outbound, default drop at both layers (cloud firewall outbound rules, then host 
 
 | Allowed | Why |
 |---|---|
-| TCP 443 to the log store's endpoint in the same account | Log shipping |
+| TCP 443 to the concrete address or addresses of the log store's endpoint in the same account, as set by the mechanism in section 6.2.1 (never "any address on 443") | Log shipping |
 | UDP 123 to the provider's time source | Clocks; logs without time are useless |
 | DNS to the provider's resolver, only if the shipper needs a name | Could be avoided by pinning the store's address in the build; a decision for the implementation |
 | During build only: the package source | First-boot install. After the build finishes the rule is removed, and the host is never patched in place: an update is a rebuild |
 
 Nothing else leaves: no SMTP (25 and the submission ports are the spam risk), no arbitrary TCP, no UDP, no ICMP to third parties. Both address families are written; IPv6 is simplest turned off, with a test that says so. The DigitalOcean firewall page of this repository ([DigitalOcean network and firewalls](../../wiki/DigitalOcean-Network-and-Firewalls.md)) covers how rules attach by tag and the AWS equivalent is a security group with explicit egress; both are existing project knowledge and are not re-verified here against the vendor pages.
+
+#### 6.2.1 Pinning the log destination
+
+A rule that allows TCP 443 to anywhere is not an egress restriction: a compromised host could reach any server on 443 for command and control or exfiltration. This repository's own firewall module uses broad 443 rules for services without fixed addresses; that is acceptable for a connector and is not acceptable here. Both layers must name concrete destinations. Mechanisms, in order of preference:
+
+1. A forward relay in the honeypot's own account. A small second host (or the provider's equivalent) that accepts one connection type from the honeypot's private address and forwards only to the one store. The honeypot's firewall and nftables allow exactly one destination, the relay's private address and port, and the relay has no inbound path from the honeypot's service user beyond that port. Costs a second small host (est. $4 to $6 a month; not priced into section 8.1) and the relay is itself a thing to harden. Residual risk: a compromised honeypot can push anything through the relay to the store, so the store key and caps still matter.
+2. Resolved fixed addresses refreshed by a controlled job. A job outside the honeypot's service user (root-owned, a systemd timer) resolves the store hostname, rewrites an nftables set, and the cloud firewall carries the same addresses through the provider API. Residual risk: object-store endpoints are shared, multi-tenant addresses, so "the store's address" admits every bucket behind it, including an attacker-owned one. The address pin narrows the destination to the provider's storage front end, not to the learner's bucket. This is the weakest option for exfiltration and is acceptable only with the write key as the real control.
+3. A write-only push to a single endpoint that the learner controls, such as a small ingest endpoint in the honeypot's own account that accepts signed batches and writes to the store, so the honeypot never talks to the shared front end. Residual risk: it is code to write and defend.
+
+Whether the cloud firewall can express the destinations (DigitalOcean's outbound rules accept addresses; whether a hostname or a managed prefix list is accepted is UNVERIFIED, as is the AWS equivalent for the S3 prefix list, which I did not read) decides which mechanism is buildable. Whichever is chosen, the test is the same: from the honeypot's service user, a connection to any other address on 443, including a second bucket in a throwaway account, must fail. Because pinning to a shared front end is imperfect, option 1 is recommended and option 2 is a fallback with the exfiltration residual stated; this is also a decision (section 12, item 7). The risk table (section 4.5, risk 1) carries the residual.
 
 ### 6.3 Captured files and the egress trade-off
 
@@ -245,7 +257,7 @@ AWS, Penetration Testing (https://aws.amazon.com/security/penetration-testing/, 
 
 What this means before running one, on either provider:
 
-1. Ask in writing. Open a support request that describes the exercise in plain words: a passive low-interaction SSH and telnet honeypot, closed egress, one host, a stated duration, a named contact. Keep the answer. Do not infer permission from the silence of the policy.
+1. Ask in writing. Open a support request that describes the exercise in plain words: a passive SSH and telnet honeypot with an emulated shell (Cowrie's medium-interaction mode, which records what attackers type and the files they try to upload or fetch), closed egress, one host, a stated duration, a named contact. Keep the answer. Do not infer permission from the silence of the policy.
 2. DigitalOcean's wording makes written consent a requirement; AWS's makes it a prudent step that shows the policies and processes it says it will weigh.
 3. Have the abuse-response text ready before the first apply, and a named person who reads the inbox.
 4. Do not scan, probe or test anything you do not own from the honeypot, and do not run live verification against the honeypot until the consent covers it (DigitalOcean's clause names probing and testing; scanning your own droplet from outside is probably fine but is a question for the same request).
@@ -281,10 +293,15 @@ The cheapest DigitalOcean plan in the price table that has 8 GB of RAM is `s-4vc
 The honeypot's monthly figure is not a stage and not a phase, and it does not appear in `docs/stages/approved.json`, `docs/cost-prices*.json` or any `cost.json`. Reasons:
 
 - The cost gate sums stacks under `stacks/`. A honeypot has no stack here, so the gate neither counts nor can count it. That is correct: counting it would imply it shares the account and the apply path.
-- It does not sit under the $30 working ceiling and does not raise it, the way `edge` ($35), `second-site` ($41) and `learner-soc` ($53) are phases that do. It has its own cap, in its own account, with its own billing alert.
+- It does not sit under the $30 working ceiling and does not raise it, the way `edge` ($35), `second-site` ($41) and `learner-soc` ($53) are phases that do. It has its own alert threshold and enforcement action, in its own account (section 8.3 below).
 - It is shown in one place in this repository: this design, with a row in the Roadmap's edge section pointing here. If the maintainer wants a standing line in `docs/cost.md` ("honeypot, separate account, not in the ceiling: $11"), that is an edit he decides (section 12, item 4). I did not make it.
 
-Proposed figure and cap, both "est." until a decision: figure $11 a month while it runs (option A); a hard cap in the honeypot account's own billing alert of $20 a month, about twice the figure, so a surprise shows up before it hurts. The alert mechanism for each provider was not verified for this design.
+Proposed figure and alert threshold, both "est." until a decision: figure $11 a month while it runs (option A); an alert threshold at $20 a month, about twice the figure, so a surprise shows up before it hurts. An alert is a notification, not a cap. What each provider documents, read 2026-10-21:
+
+- DigitalOcean (https://docs.digitalocean.com/products/billing/): spend alerts send "email notifications when your monthly spending crosses percentage thresholds of a budget you define". The page describes a pause-at-100% option only for Serverless Inference model access keys; I found no documented spending control that stops droplets or buckets. So on DigitalOcean the threshold is a notification only.
+- AWS (https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-controls.html): AWS Budgets can "configure a budget action to run either automatically or after your manual approval" when a cost or usage threshold is reached. Which actions can stop an EC2 instance or restrict the account's permissions, and the role they need, I did not read in detail and are UNVERIFIED.
+
+Enforcement is therefore an operator action wired to the kill switch in section 10: when the alert fires the operator runs layer 2 and layer 4 there (remove the inbound rules, delete the host) within a stated time, and the learner checks the usage page on a schedule (daily while it runs) because an email can be missed. On AWS an automatic budget action may replace the manual step once its exact behaviour is verified. The hard stop that always works is the time limit: the exercise's end date (section 10) bounds the spend even if every alert fails. The threshold, the response time and who acts are decisions (section 12, item 4).
 
 ## 9. Feeding the learner mini SOC and Wazuh
 
@@ -343,7 +360,7 @@ The honeypot is disposable by design and its recovery is deletion.
 | 4. Delete the host | Delete the droplet or terminate the instance in the console; do not rely on a power-off, since a stopped host can still be billed (est., not re-read today) | No |
 | 5. Delete the account | If a provider has acted or the learner is unsure, close the account. It holds nothing else | No |
 
-Triggers to use the kill switch at once, without waiting: an abuse report or a provider message; a single outbound connection not on the allow list; any sign of a path to another resource; a bill over the cap; the end of the planned window; a published vulnerability in the honeypot software with a working exploit.
+Triggers to use the kill switch at once, without waiting: an abuse report or a provider message; a single outbound connection not on the allow list; any sign of a path to another resource; a spend alert at the threshold or a bill above the figure; the end of the planned window; a published vulnerability in the honeypot software with a working exploit.
 
 A time-to-live is part of the design: the exercise has an end date written before it starts, and the date is a calendar item with an alarm. An automated destroy at that date is a decision (section 12, item 12). The honeypot lives in an account the repository cannot reach, so it cannot be torn down by this repository's pipeline, and that is intended.
 
@@ -363,11 +380,11 @@ If the maintainer wants no pipeline at all for a first look, option E is the che
 
 1. Provider and account: DigitalOcean, AWS or another (Oracle's free tier and Hetzner are unpriced and unread here). Whose account, with what login identity and payment method.
 2. Who contacts the provider for written consent, with what text, and what happens if there is no answer.
-3. Option: A, A-small, B, C, C-nano, D or E (section 8.1). Whether OpenCanary is included at all.
-4. Where the honeypot figure is recorded: this design only, or a standing line in `docs/cost.md`. And the cap ($20 proposed, est.).
+3. Option: A, A-small, B, C, C-nano, D or E (section 8.1). Whether OpenCanary is included at all, or is the only sensor (the genuinely low-interaction choice, section 5.1).
+4. Where the honeypot figure is recorded: this design only, or a standing line in `docs/cost.md`. And the alert threshold ($20 proposed, est.), the enforcement action when it fires and the response time.
 5. Where the code lives: no code in this repository (assumed), a separate private or public repository of the learner's, or only a documented lesson in the wiki. If a repository, its name, after checking what already exists.
 6. Egress and malware capture: closed with no downloads (recommended), or a restricted fetch path with caps (section 6.3). Whether the VirusTotal integration stays off.
-7. The log store and credential: provider, prefix layout, write-only policy, versioning or lock, and the size caps (section 9.2).
+7. The log store and credential: provider, prefix layout, write-only policy, versioning or lock, the size caps (section 9.2), and the egress pinning mechanism (relay, refreshed addresses or an ingest endpoint, section 6.2.1).
 8. Retention numbers (section 7.2) and password handling (hash, truncate or keep locally).
 9. Publication policy for any lesson, blog or class material (aggregates only is proposed).
 10. Whether the learner sends outbound abuse reports about attacker addresses (not recommended by default: many are victims; a human reviews each one).
