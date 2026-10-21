@@ -156,7 +156,7 @@ The distinction people miss: an **ID token says who you are; an access token say
 
 ### What is inside a JWT (and why base64 is not encryption)
 
-A **JWT** (JSON Web Token, said "jot") is three chunks of text joined by dots:
+A **JWT** (JSON Web Token, said "jot") is a *format for a set of claims*. It is carried in one of two wrappers. The common one, and the one OIDC ID tokens use, is a **signed** token (a JWS, JSON Web Signature) made of three chunks of text joined by dots. The other is an **encrypted** token (a JWE, JSON Web Encryption) with five chunks, whose payload is *not* readable by everyone who holds it. The rest of this section is about the signed, three-part kind, because it is the one you will meet most:
 
 ```text
 <header>.<payload>.<signature>
@@ -164,15 +164,15 @@ A **JWT** (JSON Web Token, said "jot") is three chunks of text joined by dots:
 
 - The **header** says how it was signed (JSON).
 - The **payload** holds the **claims**: facts such as who it is about (`sub`, the subject), who issued it (`iss`), when it expires (`exp`, a Unix time, meaning seconds since 1 January 1970) and often a list of `scope` values.
-- The **signature** is a cryptographic seal made with a key only the issuer holds, so the receiver can tell nobody altered the first two parts.
+- The **signature** is a cryptographic seal over the first two parts, so the receiver can tell nobody altered them. Who can make and check it depends on the algorithm named in the header. With an **asymmetric** algorithm (names starting `RS` or `ES`) only the issuer holds the private key that signs, and anyone with the matching public key can verify: the receiver needs no secret. With a **symmetric** one (names starting `HS`) a single shared secret both signs and verifies, so anyone who can verify can also forge, and both sides must guard that secret.
 
 Each of the first two chunks is **base64url-encoded** JSON. **Base64** is a way of writing arbitrary bytes using only letters, digits and a few symbols so they survive being pasted into a header. It is **encoding, not encryption**: anyone can reverse it with no key, and you are about to do it yourself in the exercise. So:
 
-- Anything inside a JWT's payload can be read by anyone who holds the token. Never put a secret in a claim.
+- In a signed (three-part) JWT the payload can be read by anyone who holds the token. Never put a secret in a claim. (An encrypted five-part one hides its payload from holders without the key, but you cannot assume which kind you have been given, so treat any token as a credential.)
 - The signature stops *changes*, not *reading*.
 - **A real JWT is a credential. Never paste one into a website that "decodes JWTs", a chat, a ticket, a screenshot or an issue.** The decoder site is a stranger who now holds your token. Decode locally, as the exercise shows, or not at all.
 
-This is why a JWT can be checked without calling the issuer: the receiver verifies the signature and reads `exp`. It is also why one cannot easily be taken back before it expires, which is the point of short lifetimes.
+This is why a JWT can be checked without calling the issuer: the receiver verifies the signature (with the public key, or the shared secret) and reads `exp`. It is also why one cannot easily be taken back before it expires, which is the point of short lifetimes.
 
 ## Scopes and least privilege
 
@@ -197,13 +197,13 @@ A **personal token** (often called a personal access token or PAT) acts as *you*
 
 Why the difference matters: if a program uses your personal token, then when you leave, change your password or lose a laptop, the program breaks, and anything it does in the logs looks like you did it. If the program has its own narrow token, you can see in the audit log which thing acted, and you can revoke only that.
 
-How the four tokens in this project line up (no value is ever shown anywhere; each lives in [Doppler](Doppler-and-Secrets.md), never in a file):
+How the four tokens in this project line up (no value is ever shown anywhere, and none is in a file). Three of them are held in [Doppler](Doppler-and-Secrets.md) or a Spacelift context. The Twingate connector keys are the exception: per the [Twingate page](Twingate.md#accepted-risk-the-connector-tokens), they end up in OpenTofu state (held by Spacelift) and in the droplet's cloud-init user-data, marked sensitive, each revocable, and the project lists that as an accepted risk:
 
 | Token | Held by | Acts for | Scope and lifetime | Where explained |
 |---|---|---|---|---|
 | DigitalOcean API token | Doppler, fetched by the run | OpenTofu creating cloud resources | Custom write scopes, 90 days | [Doppler and secrets](Doppler-and-Secrets.md) |
 | Twingate API token | Doppler | OpenTofu creating the access network | 90 days | [Twingate](Twingate.md) |
-| Twingate connector keys | The droplet that runs the connector | That one connector, proving itself to Twingate | Per connector; rotation steps on the Twingate page | [Twingate: rotating a connector token](Twingate.md#rotating-a-connector-token) |
+| Twingate connector keys | OpenTofu state (Spacelift) and the droplet's user-data | That one connector, proving itself to Twingate | Per connector; rotation steps on the Twingate page | [Twingate: rotating a connector token](Twingate.md#rotating-a-connector-token) |
 | Doppler service token | A Spacelift context (a named bundle of variables that stacks can attach) | Spacelift, fetching secrets by name | Read-only, one config, 90 days | [Spacelift](Spacelift.md) |
 
 ## Where a secret must never live
@@ -235,12 +235,12 @@ A **rate limit** is the number of requests a service lets you make in a time win
 
 Every exercise below follows four steps: **predict** (write down what you expect before you run anything; guessing wrong is how you learn), **do**, **check**, **undo**.
 
-All commands use only public services that need no account and no payment: [JSONPlaceholder](https://jsonplaceholder.typicode.com/) (a free fake API for practice, whose writes are pretended and never saved) and the unauthenticated root of [GitHub's REST API](https://docs.github.com/en/rest) (`https://api.github.com/`). Both were checked with read-only `curl` on **2026-10-21**. Treat them as shared: do not run loops or send large amounts of traffic at them.
+All commands use only public services that need no account and no payment: [JSONPlaceholder](https://jsonplaceholder.typicode.com/) (a free fake API for practice, whose writes are pretended and never saved) and the unauthenticated root of [GitHub's REST API](https://docs.github.com/en/rest) (`https://api.github.com/`). Both were checked with `curl` on **2026-10-21**: every request was a `GET` except Exercise 5, a `POST` to JSONPlaceholder that the service only simulates and never saves. Treat them as shared: do not run loops or send large amounts of traffic at them.
 
 You need `curl` and `python3`, both present on most Linux and macOS machines; Windows users can use WSL or Git Bash (see [Git from zero](Git-From-Zero.md)). `jq` is an optional nicer JSON viewer; the exercises use `python3 -m json.tool` so you need nothing extra.
 
 > **Screenshot to take yourself:** your terminal after Exercise 1.
-> Capture: the command, the first lines of output including the `HTTP/2 200` status line, and a few header lines.
+> Capture: the command, the first lines of output including the status line (`200`), and a few header lines.
 > Look for: the status line, the `content-type: application/json` header, and the JSON body.
 > Redact: your username, hostname and the prompt path if they identify you. None of the output of these public endpoints is secret.
 
@@ -256,7 +256,7 @@ curl -i https://jsonplaceholder.typicode.com/todos/1
 
 `-i` means "include the response headers in the output".
 
-**Check.** The first line should be the status line, `HTTP/2 200`. Then a block of headers (one of them `content-type: application/json; charset=utf-8`), a blank line, and a body like this (retrieved 2026-10-21):
+**Check.** The first line is the status line; the code is `200`. (It may read `HTTP/2 200` or `HTTP/1.1 200 OK`, depending on your `curl` and the server; the number is what matters. To print only the number: `curl -s -o /dev/null -w '%{http_code}\n' <url>`.) Then a block of headers (one of them `content-type: application/json; charset=utf-8`), a blank line, and a body like this (retrieved 2026-10-21):
 
 ```json
 {
@@ -297,7 +297,7 @@ curl -s 'https://jsonplaceholder.typicode.com/todos?_limit=2' | python3 -m json.
 curl -i https://jsonplaceholder.typicode.com/this-path-does-not-exist
 ```
 
-**Check.** The status line is `HTTP/2 404` and the body is an empty object, `{}` (retrieved 2026-10-21). 4xx means the mistake is in the request. Now change one letter in `todos/1` from Exercise 1 (try `todo/1`) and watch it turn from `200` to `404`: a typo in a URL is an ordinary cause of a failing run.
+**Check.** The status code is `404` and the body is an empty object, `{}` (retrieved 2026-10-21). 4xx means the mistake is in the request. Now change one letter in `todos/1` from Exercise 1 (try `todo/1`) and watch it turn from `200` to `404`: a typo in a URL is an ordinary cause of a failing run.
 
 **Undo.** Nothing.
 
@@ -311,7 +311,7 @@ curl -i https://jsonplaceholder.typicode.com/this-path-does-not-exist
 curl -i https://api.github.com/user
 ```
 
-**Check.** `HTTP/2 401`, with a JSON body whose `message` is `Requires authentication` (retrieved 2026-10-21). That is the server saying: *I do not know who you are.* You sent no `Authorization` header. Compare with the unauthenticated root, which answers `200` because it is public:
+**Check.** Status code `401`, with a JSON body whose `message` is `Requires authentication` (retrieved 2026-10-21). That is the server saying: *I do not know who you are.* You sent no `Authorization` header. Compare with the unauthenticated root, which answers `200` because it is public:
 
 ```bash
 curl -s https://api.github.com/ | python3 -m json.tool | head -8
@@ -335,7 +335,7 @@ curl -i -X POST -H 'Content-Type: application/json' \
 
 `-X POST` sets the method, `-H` adds a header, `-d` supplies the body.
 
-**Check.** `HTTP/2 201` and a body that echoes your field with an `id` added (retrieved 2026-10-21). Ask for it back with `GET /posts/101` and you get a `404`: the service acknowledged the write but, by design, saved nothing. Note this for later: a `201` means the server *says* it created the thing; always read the thing back.
+**Check.** Status code `201` and a body that echoes your field with an `id` added (retrieved 2026-10-21). Ask for it back with `GET /posts/101` and you get a `404`: the service acknowledged the write but, by design, saved nothing. Note this for later: a `201` means the server *says* it created the thing; always read the thing back.
 
 **Undo.** Nothing was saved, so nothing to undo. (Against a real service you would `DELETE` what you created.)
 
@@ -388,15 +388,16 @@ This uses an account you already have. Free GitHub accounts work and nothing her
 
 ```bash
 read -rs GH_TOKEN      # paste the token, press Enter; nothing is echoed
-export GH_TOKEN
-curl -i -H "Authorization: Bearer $GH_TOKEN" https://api.github.com/user
+curl -i -H @- https://api.github.com/user <<<"Authorization: Bearer $GH_TOKEN"
 ```
 
-**Check.** You expect `HTTP/2 200` and a JSON body about *your* account (that proves the credential works). Then try a change, which the token should not be allowed to make:
+Why `-H @-` and a here-string instead of `-H "Authorization: ..."`: the arguments of a command are visible to other users and programs on the machine (for example in the process list) while it runs, and may be recorded by auditing tools. Headers read from standard input never appear in the arguments. (`read -rs` and the here-string are bash/zsh features; the variable is not exported, so child programs do not inherit it.)
+
+**Check.** You expect status `200` and a JSON body about *your* account (that proves the credential works). Then try a change, which the token should not be allowed to make:
 
 ```bash
-curl -i -X PATCH -H "Authorization: Bearer $GH_TOKEN" \
-  -H 'Content-Type: application/json' -d '{"bio":"test"}' https://api.github.com/user
+curl -i -X PATCH -H @- -H 'Content-Type: application/json' \
+  -d '{"bio":"test"}' https://api.github.com/user <<<"Authorization: Bearer $GH_TOKEN"
 ```
 
 Expect a `403` (est.: the exact message varies; it should say the token cannot access this resource). This is authorization failing while authentication succeeds: the server knows who you are and says no. Look also for response headers that list the token's permissions (names vary by token type).
@@ -404,7 +405,7 @@ Expect a `403` (est.: the exact message varies; it should say the token cannot a
 **Undo.** Revoke it, then prove it is dead:
 
 1. Settings, Developer settings, Personal access tokens, Fine-grained tokens, find `learning-readonly-delete-me`, **Delete** (menu names as read on 2026-10-21).
-2. Re-run the first `curl` command above. It should now answer `HTTP/2 401` (est.), with the same "bad credentials" style of message. A revoked token fails as an unknown credential.
+2. Re-run the first `curl` command above (the one with `-H @-`). It should now answer with status `401`. A made-up token sent to the same address on 2026-10-21 got `401` with the message `Bad credentials`; a real revoked one should look the same (est., I did not revoke a real one). A revoked token fails as an unknown credential.
 3. Clear it from your shell: `unset GH_TOKEN`.
 
 > **Screenshot to take yourself:** the fine-grained token creation page.
