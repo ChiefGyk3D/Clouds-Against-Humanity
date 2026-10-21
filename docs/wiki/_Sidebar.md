@@ -7,6 +7,7 @@
 2. [What is the cloud](What-Is-the-Cloud.md)
 3. [Networking basics](Networking-Basics-for-This-Project.md)
     - Side page: [How a web request works](How-a-Web-Request-Works.md)
+    - Foundations side page: [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md)
 4. [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
     - Side page: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md)
     - Side page: [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md)

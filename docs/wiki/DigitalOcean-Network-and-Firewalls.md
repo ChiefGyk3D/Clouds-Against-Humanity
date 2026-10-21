@@ -1,6 +1,6 @@
 # DigitalOcean network and firewalls
 
-> Before this page: [Networking basics](Networking-Basics-for-This-Project.md) covers addresses, CIDR, ports, inbound versus outbound and what a stateful firewall is. Everything below builds on those.
+> Before this page: [Networking basics](Networking-Basics-for-This-Project.md) covers addresses, CIDR, ports, inbound versus outbound and what a stateful firewall is. Everything below builds on those. If you want to do the subnet arithmetic and watch a rule drop a packet before you read this page, [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) is the side page for that.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
