@@ -12,6 +12,7 @@
     - Side page: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md)
     - Side page: [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md)
 5. [Infrastructure as code](What-Is-Infrastructure-as-Code.md)
+    - Foundations side page: [Data formats and config files: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md)
 6. [Git and pull requests](Git-GitHub-and-Pull-Requests.md)
     - Side page: [Git from zero: your first change](Git-From-Zero.md)
     - Foundations side page: [The terminal and your first script](Terminal-and-Your-First-Script.md)

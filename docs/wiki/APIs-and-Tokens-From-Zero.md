@@ -116,7 +116,7 @@ The pair to burn in: **`401` is about who you are, `403` is about what you may d
 - Nesting is normal. Read it like a tree: `owner` is a field whose value is an object with its own fields.
 - Mistakes that break it: single quotes, a trailing comma, a missing quote. A `400` from an API is very often one of these.
 
-This repository uses it too: the settings manifest behind the [Settings reference](Settings-Reference.md) is JSON.
+This repository uses it too: the settings manifest behind the [Settings reference](Settings-Reference.md) is JSON. [Data formats and config files](Data-Formats-JSON-YAML-HCL.md#json-in-this-repository) shows JSON as configuration and how to validate it.
 
 ## REST, and "just an API"
 

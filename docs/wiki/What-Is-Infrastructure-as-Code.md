@@ -48,7 +48,7 @@ resource "digitalocean_vpc" "this" {
 }
 ```
 
-Read it as: "there should be a DigitalOcean VPC, which I will refer to as `this`, named from the layer and region, in that region, with that address range." `var.region` means "the value of the input variable called region". That is most of HCL: blocks, names, and values.
+Read it as: "there should be a DigitalOcean VPC, which I will refer to as `this`, named from the layer and region, in that region, with that address range." `var.region` means "the value of the input variable called region". That is most of HCL: blocks, names, and values. [Data formats and config files](Data-Formats-JSON-YAML-HCL.md#hcl-and-opentofu-syntax) reads a `variable` block line by line.
 
 ### Plan and apply
 
