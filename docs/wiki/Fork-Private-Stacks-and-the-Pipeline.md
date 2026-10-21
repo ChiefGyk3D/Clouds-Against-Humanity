@@ -9,10 +9,30 @@ Build track, step 1. Prerequisites: the eight primers and the core path through 
 Everything in this repository is a **demo**. The values were chosen so the project is cheap, safe to publish and easy to read, not because they are right for anyone's real environment. This page does three jobs:
 
 1. It shows how to turn the public repository into **your own private copy** that you can safely put real values in.
-2. It sorts every setting into "demo value", "yours to change" and "keep as is", with the reason for each.
+2. It sorts every setting into "demo value", "yours to change" and "keep as is", with the reason for each, and lists every demo-grade design choice in [Demo settings versus your production](#demo-settings-versus-your-production).
 3. It follows one change from a commit to a running droplet, so you can see where DevOps and DevSecOps actually start: in git, before any tool runs.
 
 If you copy-paste your way through the steps you will end up with a working copy and no understanding of it. Each section ends with a short "predict, then check" exercise. Do those. They are the part that teaches.
+
+## Before you start
+
+You need three things, and none of them is expensive.
+
+- **A GitHub account**, and the ability to tell a clone from a fork. If `git clone`, `git remote` or "push to a branch" are new words, read [Git from zero](Git-From-Zero.md) first. It shows each step twice, once with a graphical client and once on the command line, and this page assumes its vocabulary.
+- **Git installed** on your computer, so that `git --version` prints a version number. The commands below are the command-line route; the graphical route is in Git from zero.
+- **About an hour** the first time, and no cloud account. Nothing on this page creates a droplet or spends money. Building the real thing starts at [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md).
+
+The steps in order, so you can see the whole shape before you start:
+
+1. **Fork** the public repository, only if you want to send a correction back.
+2. **Create a private repository** of your own, empty, for your real environment.
+3. **Copy** this project into it.
+4. **Clone** your private repository to your computer.
+5. **Add the `upstream` remote**, which is the link back to the public project.
+6. **Keep it in sync** by pulling upstream changes through a pull request.
+7. **Know where secrets live**, and where they never go.
+
+Screenshots of GitHub's pages are not included, because they change and would show an account. Where a picture would help, the page says what to capture yourself, following the [Screenshots policy](Screenshots-Policy.md).
 
 ## Why the public repo is not where your stacks live
 
@@ -29,7 +49,7 @@ The common professional pattern has two layers:
 
 The README says the same thing in one sentence: if a piece cannot follow the "everything personal is a Doppler variable" rule, "it moves to a separate private repository and this one calls it." This page is what that sentence looks like in practice.
 
-## Before you start: what your GitHub plan allows
+## What your GitHub plan allows
 
 Two things this page relies on are plan features, and plan features change, so check GitHub's current plan documentation instead of trusting this page:
 
@@ -51,27 +71,94 @@ So you keep two separate things, each with a job:
 | **A fork** (public) | The Fork button | Proposing changes back to this project. Never put real values in it. |
 | **A private repository** (yours) | Create a new empty private repository, then push a copy of this one into it | Your real environment. This is the one Spacelift reads. |
 
-To make the private copy, create an empty private repository on your own account with no README or license, then from a terminal:
+### 1a. Fork the public repository (optional)
+
+Do this only if you plan to send a fix back. Open the public repository on GitHub, press **Fork**, and accept the defaults. You now have `<you>/Clouds-Against-Humanity`, a public copy. It exists so that a pull request can travel from your account to the project's. Do not put a token, an address range or an account name in it, ever: it is public the moment you save.
+
+> **Screenshot to take yourself:** the Fork page of the public repository, before you press the button.
+> Capture: the "Create a new fork" form with the owner and repository name fields visible.
+> Look for: the owner dropdown set to your own account (not an organisation), and the "Copy the main branch only" checkbox.
+> Redact: your username if you publish the capture, the address bar, and any other repository names in the owner dropdown.
+
+### 1b. Create the private repository, and why it must be private
+
+On GitHub press **New repository**. Set the owner to your own account, give it a name of your choosing, choose **Private**, and leave "Add a README", ".gitignore" and "license" all **off**.
+
+Private matters even though real secrets never go in either repository. It matters because of everything else. Your address ranges, region choices, stack names, firewall comments and the reason each rule exists describe your environment, and an attacker mapping a target reads exactly that. The public repository is for what is safe to teach with; the private one is for what is true about you. Empty matters because the next step overwrites whatever is there.
+
+> **Screenshot to take yourself:** the New repository form with Private selected.
+> Capture: the visibility choice (Public or Private) and the three initialise-with options, all unticked.
+> Look for: "Private" selected, and no README, `.gitignore` or license added.
+> Redact: your username, the repository name if it reveals your employer or location, and the address bar.
+
+### 1c. Copy this project into it
+
+From a terminal, in a folder where you keep projects:
 
 ```bash
 git clone --bare https://github.com/ChiefGyk3D/Clouds-Against-Humanity.git
 cd Clouds-Against-Humanity.git
 git push --mirror https://github.com/<you>/<your-private-repo>.git
 cd .. && rm -rf Clouds-Against-Humanity.git
-
-git clone https://github.com/<you>/<your-private-repo>.git
-cd <your-private-repo>
-git remote add upstream https://github.com/ChiefGyk3D/Clouds-Against-Humanity.git
 ```
 
-What each part is for:
+`<you>` is your GitHub username and `<your-private-repo>` is the name you chose. GitHub asks you to sign in the first time; follow the prompt, and never paste a token into a command line, where it lands in your shell history.
+
+### 1d. Clone your private repository
+
+```bash
+git clone https://github.com/<you>/<your-private-repo>.git
+cd <your-private-repo>
+```
+
+This is the folder you will work in from now on. If you prefer a graphical client, [Git from zero](Git-From-Zero.md) shows the same clone with buttons.
+
+### 1e. Add the `upstream` remote
+
+```bash
+git remote add upstream https://github.com/ChiefGyk3D/Clouds-Against-Humanity.git
+git remote -v
+```
+
+A **remote** is a named address for another copy of the repository. `origin` is where you cloned from (your private repository). `upstream` is the public project, which is where improvements arrive.
+
+What each part of 1c to 1e is for:
 
 - The private repository must already exist and be empty before you push. `git push --mirror` does not create it; it fills it. That is why the page asks for no README or license: a mirror push overwrites the target's branches and tags to match the source, so anything already there is discarded, and it is better to start with nothing to lose.
 - A **bare** clone has the history and no working files. `--mirror` pushes every branch and tag in it. Together they make an exact copy of the repository's contents, which an ordinary clone and push would not.
 - `--bare` and `--mirror` copy the whole history, not just the latest files, so you can see how the project got here. That history is part of the lesson.
-- The `upstream` remote is how you pull in later improvements: `git fetch upstream`, then merge or rebase what you want. It is also the reason to keep your changes **small and in clearly separate commits**. A copy that has been edited everywhere cannot take upstream changes without a fight.
+- The `upstream` remote is how you pull in later improvements. It is also the reason to keep your changes **small and in clearly separate commits**. A copy that has been edited everywhere cannot take upstream changes without a fight.
 
 **Predict, then check.** Before you run `git remote -v`, write down what you expect it to list. Then run it. You should see two remotes with different names and different URLs. If you can say which one `git push` writes to by default and why, you understand the setup. (Answer: `origin`, your private repository. You never push to `upstream`; you do not have the right to.)
+
+### 1f. Keep your copy in sync
+
+Your private repository is a copy, not a fork, so GitHub's "Sync fork" button is not offered for it. You pull upstream changes in yourself, and you do it through a pull request, so your own checks judge them like any other change:
+
+```bash
+git fetch upstream
+git switch main
+git pull origin main
+git switch -c sync-upstream
+git merge upstream/main
+git push -u origin sync-upstream
+```
+
+Then open a pull request from `sync-upstream` to `main` in your private repository, read the diff, wait for CI, and merge. If git reports a **conflict**, you and the project changed the same lines. Open the named files, choose which text to keep, stage them with `git add`, and finish the merge with a commit. The fewer files you edited in your copy, the fewer conflicts you meet, which is the second reason to keep your edits small.
+
+Do this regularly. A copy that has not synced for a year has missed every fix, including security fixes.
+
+### 1g. Where your secrets live, and where they never go
+
+| Where | May it hold a secret? |
+|---|---|
+| [Doppler](Doppler-and-Secrets.md), delivered to a run as an environment variable | **Yes.** This is the one home for tokens, tenant names, user ids and SSH key names. |
+| The Spacelift context | Only the one read-only Doppler token that lets a run reach Doppler. |
+| A file such as `terraform.tfvars` | **No.** The repository's `.gitignore` ignores `*.tfvars`, as a backstop. It is a safety net, not the plan. |
+| Any file in your private repository | **No.** A private repository is still a repository: it gets cloned to laptops, forked by collaborators and leaked by mistake. |
+| The public fork, a pull request description, an issue, a chat message, a screenshot | **Never.** |
+
+The decision table for every value is on [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md). If you ever commit a secret by accident, assume it is leaked: rotate it at its source first (the steps are in [Doppler and secrets](Doppler-and-Secrets.md#rotation-in-short)), and only then clean the history. Removing it from the next commit does not remove it from the one before.
 
 ## Step 2: which values are demo values
 
@@ -143,6 +230,32 @@ The reason the order matters: moving a check to the right makes it more expensiv
 
 **Predict, then check.** Pick a real pull request in this repository's history. For each of the seven boxes, write one sentence about what it did for that change, or "nothing" if it did nothing. A box that did nothing for most changes is either a gate that is working (it only matters when something is wrong) or a gate that is decoration. Telling the two apart is a DevSecOps skill, and the only way to learn it is to look at real changes.
 
+## Demo settings versus your production
+
+> **Demo grade.** Everything in the middle column below is a choice made to keep this project cheap, small and publishable. None of it is advice for a real environment. The right-hand columns say what to change, and why, using only what this repository's own pages state. Where a row says "general practice", it is a common professional habit, not something this project measured.
+
+Step 2 sorted individual values. This table sorts the *design choices* the whole project makes, because a beginner copying a demo tends to copy the compromises along with the good parts.
+
+| Demo-grade choice in this project | Where it is stated | In production | Why |
+|---|---|---|---|
+| **Spacelift on the free plan.** No push policy, no plan policy attached, no OIDC identity token. | [Spacelift](Spacelift.md#push-policies-paid-plan-versus-free-plan), [No OIDC on this plan](Spacelift.md#no-oidc-on-this-plan) | Decide whether the paid features are worth it. They close the gaps the free plan leaves: a pull request that changes a stack still gets a proposed run; the plan policy is written but not attached; a long-lived secret stands where a short-lived identity token could. Whether the plan policy type is available on a given plan is unconfirmed in this repository, so check it before you plan around it. | A control that exists only in a file protects nothing until it is attached. The repository says so itself. |
+| **Stacks created locked, autodeploy off, a human confirms every apply.** | [Why autodeploy is off](Spacelift.md#why-autodeploy-is-off); the stage 2 guide creates the stack locked; the [Roadmap](Roadmap.md) sprint S1 has the maintainer unlock stacks and read the first plans | Keep autodeploy off for anything that costs money or controls access. Change *who* confirms: more than one person able to, and a rule about who may. Unlock a stack on purpose, once its first plan has been read. | The plan is the review. A single person who both writes and confirms is the weakness to design out, not the setting. |
+| **One cloud region**, `tor1`, chosen because a cheap droplet size was not available elsewhere on a new account. | [Cost](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md) | Choose by where your users and data are, and check which sizes the region offers *for your account*. For resilience, a second region. | The demo region was picked for price and availability. Multi-region "doubles a lot of what this project calls its cost" ([Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md#high-availability-disaster-recovery-and-backups)). |
+| **No high availability.** Two connectors in one region; recovery is "an evening". Droplet backups are off. | [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md#high-availability-disaster-recovery-and-backups) | Write down a recovery time and a data-loss tolerance first, then buy only what they require. Test a restore. | Two connectors survive one failing; they cannot promise a quick recovery from a regional or account-level failure. Backups are only real once restored in a test. |
+| **Doppler on a free tier**, one project, one `prd` config, one read-only service token with a 90-day expiry. | [Doppler and secrets](Doppler-and-Secrets.md) | Separate `dev` and `prd` configs, a token per consumer, and a calendar for each expiry. Check the vendor's current limits: this repository lists the free-tier limits of Spacelift, Doppler and Twingate as not verified. | One config means one leaked token reaches everything in it. A free tier can end. |
+| **A $30 monthly ceiling**, with `hard_max` $60 and billing alerts at $10 and $25. | [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md#the-cost-gate), [docs/cost.md](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md#ceilings-per-phase) | Set your own number per phase, from your budget. Keep the shape (an approved total under a ceiling under a hard maximum), change the figures. | The figures fit a one-person lab. The gate cannot see bandwidth overage or a resource made outside the repository; the billing alerts are the backstop. |
+| **Small connector droplets:** two `s-1vcpu-1gb`, $6 each, about $12 a month. | `stacks/10-access/cost.json`; [docs/cost.md](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md) | Size up only when you can show the small size is the problem. Keep two so one can fail. | They carry Twingate's outbound connections and little else; the cheapest size that works is the right size for a demo. |
+| **State lives inside Spacelift**, with no separate backend you control. The state backend is planned work (a bucket, stage 3). | [Threat model](Threat-Model.md) (T6), [Roadmap](Roadmap.md) sprint S3 | Decide where state lives, who can read it, and how it is backed up. Connector tokens are in state, marked sensitive. | Anyone who can read stack state sees what is in it. The threat model accepts that for one person; a team cannot. |
+| **One writer, and branch protection that does not stop a solo owner.** Protection requires a pull request and `CI green`, but it is a repository setting, not a file, and the repository's docs do not record whether its owner can bypass it. | [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md#branch-protection-and-one-writer), [Threat model](Threat-Model.md) | Check your own settings: whether administrators can bypass, and whether force pushes are blocked. Require a second reviewer before a second person gets write access. | The automated checks guard against honest mistakes. Someone who can push a branch can change the checks, so the real boundary is who can push. |
+| **One DigitalOcean token shared by both stacks.** | The blast-radius question in [Production is a different set of questions](#production-is-a-different-set-of-questions) below; [secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md) | Ask what each token could do in the wrong hands, and consider one per stack despite the extra rotation work. | Nothing limits the token to one stack's resources except which configuration happens to use it. |
+| **The metadata lock is off by default**, and has not been tested on a real droplet. | [Stage 1 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md) | Stage it, one connector at a time, and keep it on once tested. | The connector tokens are readable from the cloud-init data by any process on the droplet until it is closed. |
+| **CI calls shared workflows from the author's other repository**, pinned by commit. | [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md), step 3 above | Read what they do and which permissions you grant them, or fork them. | A pinned reference to code you have not read is still trust. |
+| **A public repository.** | [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md#public-by-design) | Your own stacks and settings go in a private repository, as step 1 above shows. | Public is a feature for a teaching project and a risk for a real environment. |
+
+Two rows are *not* demo choices and should survive into production: **autodeploy off with a human confirm**, and **secrets only in Doppler**. The table lists autodeploy because the question that follows it (who confirms) is a production one.
+
+**Predict, then check.** Before you open the linked pages, pick the three rows you think cost the most to fix if you get them wrong, and write down why. Then look at the pages. The expensive ones are the ones that are hard to change later; step 2 already warns that an overlapping address range is one of them.
+
 ## Production is a different set of questions
 
 Once your copy works, the demo choices stop being a good guide. Questions this project deliberately did not answer, because the answers depend on you:
@@ -161,6 +274,8 @@ Writing your own answers into your private repository, next to the code, is the 
 |---|---|
 | The two-layer split (modules public, stacks private) | `modules/` versus `stacks/`; the README's last paragraph on the private repository |
 | Settings you must choose yourself | The table in step 2 |
+| Design choices that are demo grade | [Demo settings versus your production](#demo-settings-versus-your-production) |
+| A change followed from commit to plan, with exercises | [From commit to pipeline](From-Commit-to-Pipeline.md) |
 | The pipeline gates | `.github/workflows/ci.yml`, [Spacelift](Spacelift.md), [Doppler](Doppler-and-Secrets.md) |
 | Branch protection | A repository setting, not a file; described in [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md#branch-protection-and-one-writer) |
 
