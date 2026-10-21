@@ -7,7 +7,7 @@ A common first reaction to this project's design is: "Why do the connector dropl
 ## The two designs
 
 - **What this project does:** each droplet has a public IP address (DigitalOcean gives every droplet one and you cannot remove it). The baseline Cloud Firewall attached to it has **zero inbound rules from the internet**. The connector droplets add one narrow exception, written in `stacks/10-access/main.tf`: TCP 22 between the connectors, allowed only from the connector tag, never from an address range. So the accurate wording is "zero inbound from the internet", not "zero inbound at all". Nothing on the internet can start a connection to the droplet, and the droplet itself makes outbound connections, for example to Twingate.
-- **The "private droplet" alternative:** the droplet has only a private address inside the VPC, and a **NAT gateway** (a shared exit door) lets it reach the internet outbound. In plain terms, NAT lets many private machines share one public address for outbound traffic.
+- **The "private droplet" alternative:** the droplet has only a private address inside the VPC, and a **NAT gateway** (a shared exit door) lets it reach the internet outbound. In plain terms, NAT lets many private machines share one public address for outbound traffic ([Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md#nat-and-port-forwarding) shows it working in a free lab, and why it is not a firewall).
 
 Both designs aim at the same goal: nothing from the internet can connect in. They differ in whether the machine has a public address at all.
 

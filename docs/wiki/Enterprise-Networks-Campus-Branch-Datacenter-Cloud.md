@@ -126,7 +126,7 @@ Answer these before reading the reference answers.
 
 1. An IPsec VPN tunnel from branch gateway to the data center (encrypted by design), or a carrier private circuit such as MPLS (private, but not automatically encrypted, so encryption is an add-on that depends on the contract). GRE alone is not encryption either.
 2. A full mesh of 12 networks needs 12 x 11 / 2 = 66 links; a hub needs 12 attachments, one per VPC.
-3. Routing cannot tell them apart. Options: renumber one side (the clean answer, but costly if hosts are static), or translate addresses (NAT) at the join, which works but complicates troubleshooting. Prevention is an address plan.
+3. Routing cannot tell them apart. Options: renumber one side (the clean answer, but costly if hosts are static), or translate addresses (NAT) at the join, which works but complicates troubleshooting ([Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md#nat-and-port-forwarding) shows NAT working in a free lab). Prevention is an address plan.
 4. The port allows only authentication traffic until the laptop (or the person) proves who it is to an authentication server; the result may then place it on a guest VLAN, a corporate VLAN, or nowhere.
 5. Present: micro-segmentation by tag (the firewalls attach to workload tags) and default deny. Absent on purpose: VLANs, VRFs, a DMZ, NAC, a hub; there is one network and nothing public to isolate.
 

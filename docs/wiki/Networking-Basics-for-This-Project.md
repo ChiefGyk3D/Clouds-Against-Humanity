@@ -18,7 +18,7 @@ A droplet in this project has both: a public address the whole internet can send
 
 ## CIDR, the slash notation
 
-You will see `10.78.0.0/24` throughout the repo. That is a **CIDR** block: a range of addresses written as a starting address and a slash number. The slash number says how many of the 32 bits in the address are fixed. `/24` fixes the first 24 bits (the `10.78.0` part), leaving 8 bits free, so the range is `10.78.0.0` to `10.78.0.255`: 256 addresses, of which about 250 are usable. `/16` would be `10.78.0.0` to `10.78.255.255`, 65,536 addresses. `/32` is a single address. `0.0.0.0/0` means "every address there is", and when you see it in a firewall rule you should look twice.
+You will see `10.78.0.0/24` throughout the repo. That is a **CIDR** block: a range of addresses written as a starting address and a slash number. The slash number says how many of the 32 bits in the address are fixed. `/24` fixes the first 24 bits (the `10.78.0` part), leaving 8 bits free, so the range is `10.78.0.0` to `10.78.0.255`: 256 addresses, of which about 250 are usable. `/16` would be `10.78.0.0` to `10.78.255.255`, 65,536 addresses. `/32` is a single address. `0.0.0.0/0` means "every address there is", and when you see it in a firewall rule you should look twice. [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md#addresses-and-cidr-by-hand) turns this paragraph into a repeatable method.
 
 ## Ports and listening
 
@@ -123,5 +123,6 @@ Two things about VPCs that surprise people:
 - On your own machine, run `ss -tlnp` (Linux) or `netstat -an | grep LISTEN` (macOS) to see which programs are listening on which ports. Each one is a door.
 - If you have a droplet of your own (or someone's permission), run `nmap -Pn -p 22,80,443 <its public IP>` from outside. "filtered" means a firewall is dropping packets; "closed" means the packets arrive but nothing is listening; "open" means a program answered. The connectors in this project report every port filtered. Only scan machines you own or have permission to scan.
 - Work out, with pencil and paper, how many addresses are in `10.78.0.0/26`. (Answer: 64.)
+- For the full exercise set, including a free lab where you build a router, a port forward and a default-deny firewall and then break it, see [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md).
 
 Next: [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md).
