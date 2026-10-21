@@ -15,15 +15,31 @@ A stack cannot be destroyed while another stack still uses its objects. Destroy 
 | Order | Stack | Why it goes here | What goes with it |
 |---|---|---|---|
 | 1 | `cah-20-telemetry` (only if you applied it) | It sits on top of stack 10. Its flags default to false, so an unapplied stack has nothing to destroy. | Only the Twingate objects for telemetry paths. Stacks 00 and 10 are untouched. |
-| 2 | `cah-10-access` | It uses stage 0's network, project and tag. | The two connector droplets, their tokens (they die with the connectors) and the Twingate site. This is the step that stops the bill. |
-| 3 | `cah-00-foundation` | Nothing depends on it once stack 10 is gone. | The private network, the project, the baseline firewall and the tag. |
+| 2 | `cah-10-access` | It uses stage 0's network, project and tag. | The two connector droplets, their tokens (they die with the connectors) and the Twingate site. This is the step that stops the bill. Needs the destroy allowlist (below). |
+| 3 | `cah-00-foundation` | Nothing depends on it once stack 10 is gone. | The private network, the project, the baseline firewall and the tag. Needs the destroy allowlist (below). |
 | 4 | The Spacelift stacks themselves | Deletion protection is on by design, so this is a deliberate act, last. | The stack definitions and their run history. |
 
 For another cloud, the same rule applies: its access stack first, then its foundation. The cloud-specific pages say it in their own words: [AWS](Provider-AWS-Cost-Lesson.md#prove-it-is-zero), [Azure](Provider-Azure-Cost-Lesson.md) and [GCP](Provider-GCP-Cost-Lesson.md), all unverified drafts.
 
 ### The destroy guard will object, on purpose
 
-If the Spacelift plan policy from the secrets runbook is attached, it denies any plan that deletes a protected resource: a network, a project, a firewall, a Twingate remote network, or anything tagged `protected`. Droplets are deliberately not protected. So destroying `cah-10-access` goes through, and destroying `cah-00-foundation` is refused until the exact resource addresses are added to the policy's `destroy_allowlist` in a reviewed pull request and the new policy body is pasted into Spacelift. Remove the entries afterwards so the next plan is guarded again. The details are in the [secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md). If you have not attached the policy, the guard does not apply, and the confirmation click is your only check: read the plan first.
+If the Spacelift plan policy from the secrets runbook is attached (`.spacelift/policies/plan.rego`, policy `cah-plan`), it denies any plan that deletes or replaces a protected resource. The protected types are `digitalocean_vpc`, `digitalocean_project`, `digitalocean_firewall`, `twingate_remote_network`, `aws_vpc` and `aws_security_group`, plus anything tagged `protected`. Only droplets are deliberately left unprotected. So **a full teardown is refused at both stacks** until the exact resource addresses are on the policy's `destroy_allowlist`. These are the addresses the destroy plans show:
+
+| Stack | Addresses to allow |
+|---|---|
+| `cah-10-access` | `twingate_remote_network.this` and `module.connector_firewall.digitalocean_firewall.this` |
+| `cah-00-foundation` | `module.vpc.digitalocean_vpc.this`, `digitalocean_project.this` and `module.baseline_firewall.digitalocean_firewall.this` |
+
+Stack 20 deletes only `twingate_resource` and `twingate_service_account` objects, which are not protected. Droplets, tags and the project-membership object (`digitalocean_project_resources`) are not protected either. Read the real denial message in your destroy plan and treat it as the authority, because I have not seen a real plan input yet: if it names an address not in this table, add that one.
+
+What you do, in order:
+
+1. In a pull request, add the addresses for the stack you are about to destroy to `destroy_allowlist` in `.spacelift/policies/plan.rego` (one string per address). Name each address and the reason in the pull request. You can add all five at once if you are tearing down both stacks.
+2. After review and merge, paste the new policy body into the `cah-plan` policy in Spacelift (the file in the repository is the reviewed copy, not the live one).
+3. Run the destroy for `cah-10-access`, read the plan, confirm. Then the same for `cah-00-foundation`.
+4. In a second pull request, **empty the allowlist again** and paste the body into Spacelift, so the next plan is guarded.
+
+The allowlist applies to every stack the policy is attached to, so keep it as short as the teardown needs. There is no stack setting or label that grants an exception, on purpose. If the policy is not attached to your stacks, none of this applies and the confirmation click is your only check: read the plan first. The details are in the [secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md).
 
 ## 2. What survives a destroy
 
@@ -41,7 +57,7 @@ Some things were never in the stacks, or are kept on purpose. Destroying everyth
 
 ## 3. Prove zero billable resources
 
-A destroy that reports success is a claim. These checks are the evidence. They are all read-only: they list, they do not change anything. Use a read-only API token for them if you made one (the secrets runbook's "Token B"), not the write token.
+A destroy that reports success is a claim. These checks are the evidence. They are all read-only: they list, they do not change anything. Use a read-only API token for them if you made one (the secrets runbook's "Token B"), not the write token. Token B's table in the runbook originally covered only what the stacks use; it now also lists `read` on reserved IPs, block storage volumes and snapshots, which the stacks never touch but these checks do. A Token B made before that change needs replacing (tokens cannot be edited), or those three commands fail with `403`. The exact scope names in DigitalOcean's token form may differ from the runbook's wording; the `403` message names the missing one.
 
 Cross-checking two different views is the point: the provider's console, a command-line listing, and the billing page. Billing data lags, so the last check is tomorrow.
 
@@ -95,6 +111,7 @@ Tick every line. If you cannot tick one, the cost may not have stopped.
 - [ ] `cah-20-telemetry` is destroyed, or I never applied it.
 - [ ] `cah-10-access` is destroyed and the droplet list is empty.
 - [ ] `cah-00-foundation` is destroyed, or I know why a network is left (section 2).
+- [ ] The destroy allowlist is empty again in `plan.rego` and in the live policy.
 - [ ] Reserved addresses, volumes and snapshots lists are empty.
 - [ ] Nothing I made by hand in the console is still running.
 - [ ] The billing page shows no droplet or reserved resource today.

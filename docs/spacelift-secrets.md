@@ -73,6 +73,16 @@ Create both tokens under DigitalOcean console, API, Tokens, Generate New Token, 
 
 **Token B** (read only; interactive tooling and the `do-droplets` MCP server): `read` on the same groups, nothing else. It cannot change anything, so a leak costs you visibility, not infrastructure.
 
+Token B also takes `read` on three groups the stacks never use, so the teardown checks in the wiki's [Teardown checklist](wiki/Teardown-Checklist.md) can list everything that bills:
+
+| Scope group | Actions to tick | Why |
+|---|---|---|
+| reserved IP | read | `doctl compute reserved-ip list` in the teardown check |
+| block storage (volumes) | read | `doctl compute volume list` |
+| snapshot | read | `doctl compute snapshot list` |
+
+These group names are from DigitalOcean's documentation, not from a run: the token form's wording may differ, and a `403` names the missing scope.
+
 Derived from the resources in `modules/` and the stack roots (`data "digitalocean_ssh_key"`, `digitalocean_droplet`, `digitalocean_firewall`, `digitalocean_project`, `digitalocean_project_resources`, `digitalocean_tag`, `digitalocean_vpc`). Proven by the 2026-10-11 redeploy, which ran with exactly this token: `ssh_key: read` is enough for the lookup (without it the plan fails with `403`). If a plan fails with `401` or `403`, the error names the missing scope: add that one and update this table.
 
 ## 5. Rotation
