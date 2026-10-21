@@ -83,9 +83,9 @@ A **pepper** is an extra secret, shared across all passwords and kept outside th
 
 **The lock-and-mailbox picture.** Imagine a mailbox with a slot. Anyone can drop a letter through the slot (that is the public key: everybody has it, and it only lets them put things in). Only the owner has the key to the box (the private key), so only the owner can take letters out. You never had to meet the owner or share a secret first. That is the trick: it solves the key-delivery problem.
 
-**The real thing.** Asymmetric operations are slow and handle only small amounts of data, so real systems use both: a random symmetric key encrypts the data, and the recipient's public key encrypts that small symmetric key. Only the private key holder can recover it. Tools such as `age` and TLS do this for you. Exercise 5 does a small piece of it by hand.
+**The real thing.** Asymmetric operations are slow and handle only small amounts of data, so real systems combine both (a "hybrid" design). In the key-wrapping form, a random symmetric key encrypts the data and the recipient's public key encrypts that small symmetric key, so only the private key holder can recover it. Email and file tools in the PGP style work this way (`age` encrypts to a recipient's public key too; its internals I did not read, est.), and so did older TLS versions that used RSA key exchange. Modern TLS 1.3 does not wrap a key with the certificate's public key: it derives fresh traffic keys with an ephemeral Diffie-Hellman exchange (next section) and uses the certificate's key only to sign, which authenticates the handshake. Exercise 5 does the key-wrapping building block by hand.
 
-The picture has a limit: the same pair also works the other way, as a signature. The next section explains it; the picture is one way to see it, not the whole thing.
+The picture has a limit. Encryption and signing are separate operations, and you cannot assume one key pair does both. Modern designs use separate key types for each job: Ed25519 for signatures, X25519 for key agreement. RSA is the well-known case where one key pair supports both operations (though good practice is still to use separate keys for separate purposes). The next section covers signatures.
 
 ### Key exchange in one paragraph
 
@@ -93,7 +93,7 @@ Two strangers who want to talk privately over a public line need a shared secret
 
 ## Digital signatures: proof of who and what
 
-A **digital signature** uses the key pair the other way round: you make it with your **private** key over some data, and anyone can check it with your **public** key. Three things follow if the check passes:
+A **digital signature** uses a signing key pair: you make the signature with your **private** key over some data, and anyone can check it with your **public** key. Three things follow if the check passes:
 
 - **Authenticity.** Someone holding the private key made it.
 - **Integrity.** The data has not changed since. One flipped byte and the check fails.
@@ -107,9 +107,9 @@ This is the machinery in [Identity basics: how keys work](Identity-Secrets-and-Z
 
 **An SSH key.** You make a pair with `ssh-keygen`. You put the public half on the server (in `authorized_keys`) or on GitHub; the private half stays on your machine. On connection, your client signs data tied to that session, and the server checks it with the public half. No password crosses the network, which is why this project's droplets accept keys only. The OpenSSH manual says `ssh-keygen` makes an Ed25519 key when you give it no type, which is why this project's guidance is `ssh-keygen -t ed25519`. See also [Linux for enterprise beginners: SSH keys](Linux-for-Enterprise-Beginners.md#ssh-keys-not-passwords) and [Git from zero: HTTPS or SSH](Git-From-Zero.md#https-or-ssh-and-why-start-with-gh).
 
-**The host fingerprint prompt.** The first time you connect to a server, SSH shows its **fingerprint** (a hash of the server's public key) and asks whether to trust it. This is the same problem in reverse: how do you know the public key you were handed belongs to the server you meant? SSH does not know either. It asks you, then remembers the answer in `~/.ssh/known_hosts` and warns loudly if the key later changes. If you have another trusted route (the cloud console, a colleague), compare the fingerprint with it, and treat an unexpected change as a finding, not an annoyance. You can print a fingerprint yourself with `ssh-keygen -lf <public-key-file>` (Exercise 3).
+**The host fingerprint prompt.** The first time you connect to a server, SSH shows its **fingerprint** (a hash of the server's public key) and asks whether to trust it. This is the same problem in reverse: how do you know the public key you were handed belongs to the server you meant? SSH does not know either. It asks you, then remembers the answer in `~/.ssh/known_hosts` and warns loudly if the key later changes. If you have another trusted route (the cloud console, a colleague), compare the fingerprint with it, and treat an unexpected change as a finding, not an annoyance. You can print a fingerprint yourself with `ssh-keygen -lf id_ed25519.pub` (use your own public key file name) (Exercise 3).
 
-**A TLS certificate.** The padlock on a website works on the same idea. A **certificate** is a small file saying "this public key belongs to this name", and it is **signed** by a **certificate authority** (CA) that your browser or operating system already trusts. The browser checks the signature chain, checks the name matches the site and that the certificate has not expired, and then uses the public key to set up the encrypted connection. The cryptography is the signing you already know; the hard part, as always, is who you trust to vouch for a key.
+**A TLS certificate.** The padlock on a website works on the same idea. A **certificate** is a small file saying "this public key belongs to this name", and it is **signed** by a **certificate authority** (CA) that your browser or operating system already trusts. The browser checks the signature chain, checks the name matches the site and that the certificate has not expired, and then checks a signature made during the handshake, which proves the server holds the matching private key. The traffic keys themselves come from the key exchange, not from the certificate. The cryptography is the signing you already know; the hard part, as always, is who you trust to vouch for a key.
 
 ## Keeping keys: storage, passphrases and hardware keys
 
@@ -121,7 +121,7 @@ Cryptography moves your problem from "protect the data" to "protect the key". So
 - **Keep it in the right place.** A secrets manager for machine keys and tokens ([Doppler and secrets](Doppler-and-Secrets.md)); a password manager for yours. Neither belongs in a repository.
 - **Have a way to replace it.** Know where each public key is installed, so you can remove it everywhere when the private key is lost.
 
-**Hardware keys (YubiKey and similar).** A hardware security key holds the private key inside a small device that signs on request and never lets the key out. Malware on your computer can ask it to sign while it is plugged in, but cannot copy it, and for a login a hardware key also checks it is talking to the real website, which is why it resists phishing in a way a six-digit code does not. This project's guidance is in [Build it from zero, step 0](Build-It-From-Zero-Accounts-to-Stage-1.md#step-0-make-a-mistake-impossible-to-be-expensive): buy at least two, register both on every account that allows it, keep one somewhere other than your keyring, and put the recovery codes in your password manager, because a single key you lose is a lockout you built yourself. OpenSSH also supports hardware-backed keys (`ed25519-sk` appears among the key types in its manual). One catch from the `age` README: SSH keys held on a YubiKey cannot be used to decrypt files; they can sign and authenticate.
+**Hardware keys (YubiKey and similar).** A hardware security key holds the private key inside a small device that signs on request and never lets the key out. Malware on your computer can ask it to sign while it is plugged in, but cannot copy it, and for a login with FIDO2 or WebAuthn the key signs only for the website address it was registered with (it is origin-bound), which is why that kind of login resists phishing in a way a six-digit code does not. That protection is specific to FIDO2 and WebAuthn: an SSH key on a hardware token, a smart-card (PIV) login or a one-time-code (OTP) button does not check the website, so it keeps the private key safe from theft but does not by itself stop phishing. This project's guidance is in [Build it from zero, step 0](Build-It-From-Zero-Accounts-to-Stage-1.md#step-0-make-a-mistake-impossible-to-be-expensive): buy at least two, register both on every account that allows it, keep one somewhere other than your keyring, and put the recovery codes in your password manager, because a single key you lose is a lockout you built yourself. OpenSSH also supports hardware-backed keys (`ed25519-sk` appears among the key types in its manual). One catch from the `age` README: SSH keys held on a YubiKey cannot be used to decrypt files; they can sign and authenticate.
 
 ## "Encrypted" is not "secure"
 
@@ -208,11 +208,20 @@ sha256sum -c note.sha256; echo "exit=$?"
 printf 'pay Alice 100 dollars\n' > note.txt   # put the original back
 ```
 
-PowerShell (not run): `(Get-FileHash note.txt).Hash -eq (Get-FileHash note2.txt).Hash` prints `True` or `False`; compare against the hash you saved.
+PowerShell (not run):
+
+```powershell
+$saved = (Get-FileHash note.txt -Algorithm SHA256).Hash          # save the original hash
+(Get-FileHash note.txt -Algorithm SHA256).Hash -eq $saved        # True
+Copy-Item note2.txt note.txt -Force                              # the "attacker" replaces the file
+(Get-FileHash note.txt -Algorithm SHA256).Hash -eq $saved        # False
+[IO.File]::WriteAllText("$d\note.txt", "pay Alice 100 dollars`n")  # put the original back
+(Get-FileHash note.txt -Algorithm SHA256).Hash -eq $saved        # True again
+```
 
 **Check.** The first check prints `note.txt: OK`. The second prints `note.txt: FAILED`, a warning that one computed checksum did not match, and `exit=1`. That nonzero exit code is what a script or a pipeline uses to stop. This is the whole idea behind a pinned dependency.
 
-**Undo.** The last line restores the file.
+**Undo.** The last line (in either shell) restores the file.
 
 ### Exercise 3: a throwaway key pair, a signature, and a tampered file
 
@@ -231,7 +240,20 @@ ssh-keygen -Y verify -f allowed_signers -I demo-signer -n file -s note.txt.sig <
 ssh-keygen -Y verify -f allowed_signers -I demo-signer -n other -s note.txt.sig < note.txt; echo "exit=$?"
 ```
 
-`-N ''` is an empty passphrase, acceptable only because this key is throwaway. For a key you keep, leave `-N` off and type a passphrase when asked. In Windows PowerShell 5.1 an empty argument is passed badly, and the commonly used form is `-N '""'` (est.; not run). PowerShell has no `<` operator for feeding a file to a program, and piping `Get-Content` is not byte-safe, so for the `verify` lines use `cmd /c` with the same `<` redirection, or run this exercise from WSL (est.; not run).
+PowerShell (not run; needs the OpenSSH client). PowerShell has no `<` operator, so the verify lines go through `cmd /c`:
+
+```powershell
+ssh-keygen -q -t ed25519 -N '""' -C demo-throwaway -f demo_key     # '""' is the Windows PowerShell 5.1 form of an empty passphrase (est.)
+ssh-keygen -lf demo_key.pub
+ssh-keygen -Y sign -f demo_key -n file note.txt
+$pub = (Get-Content demo_key.pub).Split(' ')[0..1] -join ' '
+"demo-signer $pub" | Set-Content -Encoding ascii allowed_signers
+cmd /c "ssh-keygen -Y verify -f allowed_signers -I demo-signer -n file -s note.txt.sig < note.txt"; "exit=$LASTEXITCODE"
+cmd /c "ssh-keygen -Y verify -f allowed_signers -I demo-signer -n file -s note.txt.sig < note2.txt"; "exit=$LASTEXITCODE"
+cmd /c "ssh-keygen -Y verify -f allowed_signers -I demo-signer -n other -s note.txt.sig < note.txt"; "exit=$LASTEXITCODE"
+```
+
+`-N ''` is an empty passphrase, acceptable only because this key is throwaway. For a key you keep, leave `-N` off and type a passphrase when asked.
 
 **Check.**
 
@@ -266,7 +288,29 @@ openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -pass env:DEMO_PASS -in tampere
 unset DEMO_PASS
 ```
 
-The `age` equivalent, from its README (not run): `age -p note.txt > note.age`, then `age -d note.age > note.out`; it asks for a passphrase, and a modified `note.age` fails with an error instead of printing altered text. For a key pair instead of a passphrase: `age-keygen -o key.txt`, then `age -r <public key printed> note.txt > note.age` and `age -d -i key.txt note.age`.
+The `age` equivalent, from its README (not run): `age -p note.txt > note.age`, then `age -d note.age > note.out`; it asks for a passphrase, and a modified `note.age` fails with an error instead of printing altered text. For a key pair instead of a passphrase (not run):
+
+```bash
+age-keygen -o key.txt                 # prints "Public key: age1..." (the public part)
+RECIPIENT='paste the printed age1... public key here'
+age -r "$RECIPIENT" note.txt > note.age
+age -d -i key.txt note.age
+```
+
+PowerShell (not run). `openssl` is not on Windows by default; if you have one (for example the copy that ships with Git for Windows, est.), the commands are the same as the Bash ones apart from these lines. `age` commands are identical in PowerShell, except that redirecting with `>` in Windows PowerShell 5.1 writes text, not bytes, so use `age -o note.age ...` instead of `> note.age`.
+
+```powershell
+$env:DEMO_PASS = (openssl rand -hex 12); $good = $env:DEMO_PASS
+openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -salt -pass env:DEMO_PASS -in note.txt -out note.enc
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -pass env:DEMO_PASS -in note.enc
+$env:DEMO_PASS = 'wrong'
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -pass env:DEMO_PASS -in note.enc; "exit=$LASTEXITCODE"
+$env:DEMO_PASS = $good
+$b = [IO.File]::ReadAllBytes("$d\note.enc"); $b[20] = 0; [IO.File]::WriteAllBytes("$d\tampered.enc", $b)
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -pass env:DEMO_PASS -in tampered.enc -out tampered.out; "exit=$LASTEXITCODE"
+Format-Hex tampered.out
+Remove-Item Env:DEMO_PASS
+```
 
 **Check.**
 
@@ -278,7 +322,7 @@ The `age` equivalent, from its README (not run): `age -p note.txt > note.age`, t
 
 ### Exercise 5: the same idea with a key pair (small message)
 
-A public key encrypts, only the private key decrypts. RSA can only encrypt a short message, which is exactly why real tools encrypt a symmetric key with it.
+A public key encrypts, only the private key decrypts. RSA can only encrypt a short message, which is why key-wrapping tools use it on a small symmetric key, not on the data.
 
 **Do.**
 
@@ -289,9 +333,24 @@ printf 'meet at noon\n' > msg.txt
 openssl pkeyutl -encrypt -pubin -inkey rsa_pub.pem -pkeyopt rsa_padding_mode:oaep -in msg.txt -out msg.rsa
 wc -c msg.rsa                          # 384 bytes, whatever the message length
 openssl pkeyutl -decrypt -inkey rsa_priv.pem -pkeyopt rsa_padding_mode:oaep -in msg.rsa
+openssl pkeyutl -encrypt -pubin -inkey rsa_pub.pem -pkeyopt rsa_padding_mode:oaep -in msg.txt -out msg2.rsa
+cmp msg.rsa msg2.rsa; echo "exit=$?"     # they differ: the padding is random
 ```
 
-**Check.** `msg.rsa` is 384 bytes (3072 bits); the last command prints `meet at noon`. Run the encrypt line twice and compare with `cmp`: the files differ, because the padding adds randomness. Try to decrypt with the *public* key and it will not work.
+PowerShell (not run; needs an `openssl`, see Exercise 4):
+
+```powershell
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -out rsa_priv.pem
+openssl pkey -in rsa_priv.pem -pubout -out rsa_pub.pem
+[IO.File]::WriteAllText("$d\msg.txt", "meet at noon`n")
+openssl pkeyutl -encrypt -pubin -inkey rsa_pub.pem -pkeyopt rsa_padding_mode:oaep -in msg.txt -out msg.rsa
+(Get-Item msg.rsa).Length
+openssl pkeyutl -decrypt -inkey rsa_priv.pem -pkeyopt rsa_padding_mode:oaep -in msg.rsa
+openssl pkeyutl -encrypt -pubin -inkey rsa_pub.pem -pkeyopt rsa_padding_mode:oaep -in msg.txt -out msg2.rsa
+(Get-FileHash msg.rsa).Hash -eq (Get-FileHash msg2.rsa).Hash        # False
+```
+
+**Check.** `msg.rsa` is 384 bytes (3072 bits); the last command prints `meet at noon`. The `cmp` line reports that the two ciphertexts differ (exit 1), because the padding adds randomness. Try to decrypt with the *public* key and it will not work.
 
 **Undo.** Delete the files later.
 
@@ -327,7 +386,7 @@ print(f"100,000 sha256 guesses: {fast:.2f} s; one scrypt guess: {slow:.3f} s")
 PY
 ```
 
-On Windows PowerShell, run the same script with `python` or `py` in place of `python3`, saved to a file (not run).
+PowerShell (not run): the Python is the same on every system. Save the lines between `python3 - <<'PY'` and `PY` (not those two lines themselves) to a file named `scrypt_demo.py` in your scratch folder, then run `python scrypt_demo.py` (or `py scrypt_demo.py`).
 
 **Check.** The two unsalted lines are identical: an attacker's table of common passwords matches both at once. The two scrypt lines differ because the salts differ. The timing line shows the cost difference (on my machine about 0.04 s for the 100,000 SHA-256 guesses against about 0.03 s for a single scrypt guess; yours will differ, but expect scrypt to cost about as much for one guess as SHA-256 does for a hundred thousand). **The parameters here are chosen for a quick demo, N=2^14, below the OWASP scrypt minimum of N=2^17 (128 MiB) with r=8 and p=1.** In real code use a maintained library (for Argon2id: OWASP's minimum is 19 MiB of memory, 2 iterations, 1 degree of parallelism) and read the cheat sheet's current numbers.
 
@@ -363,9 +422,28 @@ git config gpg.format ssh && git config user.signingkey ./fake_key.pub
 git commit --allow-empty -S -qm "a signed commit" && git cat-file -p HEAD | head -n 6
 ```
 
+PowerShell (not run; needs git and the OpenSSH client). Avoid `echo hello > README.md` in Windows PowerShell 5.1, which writes UTF-16, and piping text into `git hash-object`, which adds a carriage return:
+
+```powershell
+New-Item -ItemType Directory leak-demo | Out-Null; Set-Location leak-demo; git init -q -b main
+git config user.email demo@example.invalid; git config user.name demo
+ssh-keygen -q -t ed25519 -N '""' -C fake -f ./fake_key
+[IO.File]::WriteAllText("$PWD\README.md", "hello`n")
+git add README.md fake_key; git commit -qm "add readme (and, oops, a key)"
+git rm -q --cached fake_key; Add-Content .gitignore fake_key
+git add .gitignore; git commit -qm "remove the key"
+git log --oneline
+git show HEAD~1:fake_key | Select-Object -First 1
+git log --all --diff-filter=A --name-only --format='%h'
+git hash-object README.md
+python -c "import hashlib; print(hashlib.sha1(b'blob 6\0hello\n').hexdigest())"
+git config gpg.format ssh; git config user.signingkey ./fake_key.pub
+git commit --allow-empty -S -qm "a signed commit"; git cat-file -p HEAD | Select-Object -First 6
+```
+
 **Check.** Two commits, but `git show HEAD~1:fake_key` still prints the whole key, and the log lists `fake_key` as added in the first commit: deleting a file in a new commit never removes it from history. The two hashes in the second block match, so a commit ID is a hash of content. The signed commit's header carries a `gpgsig` block holding an SSH signature. (To check such signatures later, git needs `gpg.ssh.allowedSignersFile`, the same file format as Exercise 3.) The real lesson for a leaked key: **replace the key first** (create a new pair, install the new public key, remove the old one everywhere), and only then think about cleaning history, which does not help once someone has cloned it. The same order is on [APIs and tokens: when a secret leaks](APIs-and-Tokens-From-Zero.md#when-a-secret-leaks-revoke-then-rotate-then-clean-up). This project scans all history for key shapes, which is why no sample key is ever committed here, and why every sample on this page is made at run time.
 
-**Undo.** `cd ..` and delete `leak-demo`.
+**Undo.** `cd ..` and delete `leak-demo` (PowerShell: `Set-Location ..; Remove-Item -Recurse leak-demo`).
 
 ### Clean up
 
@@ -401,7 +479,7 @@ Read 2026-10-21 with read-only requests, or run locally as stated. "Not read" is
 | Claim | Source | Status |
 |---|---|---|
 | Passwords should be hashed with a unique salt and a slow hash such as Argon2id, bcrypt or PBKDF2; fast hashes such as SHA-256 are not suitable; use Argon2id with at least 19 MiB, 2 iterations and parallelism 1; scrypt (if Argon2id is unavailable) with N=2^17, r=8, p=1 or the listed equivalents; bcrypt only for legacy systems; passwords hashed, not encrypted; peppers are defense in depth | [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html) (source file read from the OWASP CheatSheetSeries repository) | Read |
-| NIST deprecated SHA-1 in 2011, disallowed it for digital signatures at the end of 2013, and published a plan in December 2022 to move away from its remaining limited uses; FIPS 180-4 defines SHA-1 and SHA-2, FIPS 202 defines SHA-3 | [NIST: Hash Functions](https://csrc.nist.gov/projects/hash-functions) | Read |
+| NIST deprecated SHA-1 in 2011, disallowed it for digital signatures at the end of 2013, and published a plan in December 2022 to move away from its remaining limited uses; FIPS 180-4 defines SHA-1 and SHA-2, FIPS 202 defines SHA-3 | [NIST: Hash Functions](https://csrc.nist.gov/Projects/Hash-Functions) | Read |
 | MD5 has security considerations updated for collision attacks | [RFC 6151](https://www.rfc-editor.org/rfc/rfc6151.txt) | Title and abstract read; detail not read |
 | `ssh-keygen` generates an Ed25519 key when given no arguments; lists `ed25519-sk` among key types; `-Y sign` and `-Y verify` flags, namespaces and the allowed signers file | [OpenBSD ssh-keygen(1)](https://man.openbsd.org/ssh-keygen) and the local `ssh-keygen` manual (OpenSSH 10.3) | Read, and the commands run |
 | `ssh-keygen -Y` introduced in OpenSSH 8.0 | General knowledge | Not read; **est.** |
