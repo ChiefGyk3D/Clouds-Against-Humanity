@@ -38,7 +38,7 @@ This project has cost gates. They exist and I will not pretend otherwise: a chan
 
 The model is pay to play, and I would like to be plain about it. The theory is free: every page is readable without an account. The hands-on part costs money, because real infrastructure costs money, and you decide what you can afford to run. The labs in [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) need no cloud account and cost nothing. Going further is your call and your budget.
 
-What I did not want was for you to depend on a CTF platform or some other subscription service to learn this, where the money flows to someone who is selling you access to the practice. Here you can run it yourself, in your own accounts, and tear it down when you are done, with a [checklist](Teardown-Checklist.md) to prove the bill is zero.
+What I did not want was for you to depend on a CTF platform or some other subscription service to learn this, where the money flows to someone who is selling you access to the practice. Here you can run it yourself, in your own accounts, and tear it down when you are done, with a [checklist](Teardown-Checklist.md) that helps you verify no billable resources remain. Billing data lags, so the checklist has you look again the next day, and it does not promise a final bill of zero.
 
 ## Who it is for
 
@@ -64,11 +64,11 @@ The order below is the order I would do them in: build first, and only then swit
 
 | Step of the loop | Where to do it here | How much is there |
 |---|---|---|
-| 1. Build it | [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md), [Droplet hardening](Droplet-Hardening.md) | Built and applied for stages 0 and 1. This comes first on purpose. |
-| 2. Break it | [Labs: break it on purpose](Labs-Break-It-on-Purpose.md), [Threat model exercise](Threat-Model-Exercise.md) | Five labs that weaken a safety property on your own computer, and a what-if exercise. You break what you just built. |
-| 3. Detect it | [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md), [Lab: a synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) | The detection page maps each threat to the log line that would show it. The telemetry pages are unverified drafts and nothing is deployed. |
-| 4. Evade it | [Threat frameworks: STRIDE, ATT&CK and ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md), [Threat model](Threat-Model.md) | Thin. These name how an attacker would think and what the accepted risks are. There is no red team exercise here yet. |
-| 5. Defend it | [Build your own mini SOC](Build-Your-Own-Mini-SOC.md), [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) | The gates are real. The mini SOC is an unverified draft. |
-| 6. Flip the board, again | [Trace one change end to end](Trace-One-Change-End-to-End.md) | Follow one real change through every gate, then change something and watch a different gate object. |
+| 1. Build it | [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md), [Droplet hardening](Droplet-Hardening.md) | The page is the replication path, ending in a teardown. Stages 0 and 1 are built and applied in the reference environment; you apply them in your own accounts. This comes first on purpose. |
+| 2. Break it | [Labs: break it on purpose](Labs-Break-It-on-Purpose.md), [Threat model exercise](Threat-Model-Exercise.md) | Five labs that weaken a safety property on your own computer (no cloud account), and a threat model exercise you do on paper. The labs run against the repository's code, not against a live copy you just built. |
+| 3. Detect it | [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md), [Lab: a synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) | The detection page asks you to write, for each of T1 to T14, the log line or event that would show it, and then compare with the stage 2 design; it is not a finished mapping. The Wazuh it describes is the maintainer's existing home setup, and the cloud hosts ship no logs yet. The monitoring lab runs locally with invented numbers. The telemetry pages are unverified drafts. |
+| 4. Evade it | [Threat frameworks: STRIDE, ATT&CK and ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md), [Threat model](Threat-Model.md) | Thin. These give you frameworks for thinking like an attacker and list the accepted risks. There is no hands-on evasion exercise here. |
+| 5. Defend it | [Build your own mini SOC](Build-Your-Own-Mini-SOC.md), [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) | The CI and cost gates are built and tested. The mini SOC is a springboard for you to build, written as an unverified draft; nothing in it has been run. |
+| 6. Flip the board, again | [Trace one change end to end](Trace-One-Change-End-to-End.md) | Follow one real pull request through every gate, read three bad variants and which gate would stop each, then trace a different change yourself. |
 
 I have not measured what anyone gets out of this, and I am not claiming a result. If a page is wrong, or the board needs flipping somewhere I have not thought of, say so; suggestions are welcome anywhere in the project.
