@@ -72,7 +72,7 @@ The thing to notice: **CI here never has a cloud credential and never changes an
 
 ## GitHub Actions and the supply chain problem
 
-**GitHub Actions** is GitHub's CI service. A workflow is a YAML file in `.github/workflows/` that says "on a pull request, run these steps". Steps often reuse **actions** published by other people, the way code reuses libraries.
+**GitHub Actions** is GitHub's CI service. A workflow is a YAML file ([how YAML works, and why it breaks on one space](Data-Formats-JSON-YAML-HCL.md#why-yaml-in-ci-breaks-on-one-space)) in `.github/workflows/` that says "on a pull request, run these steps". Steps often reuse **actions** published by other people, the way code reuses libraries.
 
 That reuse is a risk. If you reference an action by a version tag like `@v1`, and the author's account is compromised, the attacker can move the tag to malicious code and your pipeline runs it next time. This has happened to widely used actions. The defense is to reference the exact **commit hash** (a 40-character fingerprint of the exact code) instead of a tag, with the version in a comment so humans can still read it. Every action in this repo is pinned that way, and the workflow starts with no permissions at all and grants each job only what it needs.
 
