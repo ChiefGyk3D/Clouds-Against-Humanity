@@ -1,5 +1,7 @@
 # What is infrastructure as code
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Start-from-zero page 4 of 8. Previous: [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md). Next: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md).
 
 If you have ever rebuilt a Raspberry Pi from scratch and tried to remember every package you installed and every config file you edited, you already understand the problem that infrastructure as code solves.
@@ -56,7 +58,7 @@ Read it as: "there should be a DigitalOcean VPC, which I will refer to as `this`
 
 The plan is the most important artifact in the whole workflow. It is where a human catches "wait, why does changing a comment destroy a droplet?" before it happens. In this project the plan is read on Spacelift by a human before every apply, and the [Terraform reference](Terraform-Reference.md) ends with a checklist of what to look for in one.
 
-![Diagram, Plan and apply: Your .tf files (what should exist); State file (what the tool made last time); Provider API (what actually exists); Plan + create ~ change - destroy; Apply](images/what-is-infrastructure-as-code-diagram-1.png)
+![Diagram, Plan and apply: Your .tf files (what should exist); State file (what the tool made last time); and more in the source below](images/what-is-infrastructure-as-code-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>

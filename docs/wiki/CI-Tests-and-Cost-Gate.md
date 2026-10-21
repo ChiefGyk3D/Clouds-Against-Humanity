@@ -2,11 +2,13 @@
 
 > Before this page: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) explains what CI is and why pinning actions by commit matters, and [How money works in the cloud](How-Money-Works-in-the-Cloud.md) explains what the cost gate is protecting against.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Every pull request runs the same set of checks, and the merge button stays disabled until a single job called `CI green` passes. CI never holds a cloud credential and never applies anything; applying is [Spacelift](Spacelift.md)'s job.
 
 ## What runs
 
-![Diagram, What runs: Push or pull request; Shared workflows from git-your-ship-together (pinned by commit); tofu-ci fmt -check, validate, tflint, Trivy, tofu test (mocked providers), opa test (Spacelift push policy); pyth](images/ci-tests-and-cost-gate-diagram-1.png)
+![Diagram, What runs: Push or pull request; Shared workflows from git-your-ship-together (pinned by commit); and more in the source below](images/ci-tests-and-cost-gate-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>
@@ -59,7 +61,7 @@ The repository was public from its first commit. Free code scanning and dependen
 
 A per-month ceiling (today $30, set per phase) is easy to blow past by accident: one wrong droplet size, one managed database, one load balancer. The cost gate makes the bill a reviewed number.
 
-![Diagram, The cost gate: scripts/cost_check.py; Read every cost.json under stacks/ (base stacks per cloud, and stack instances under stacks/sites/ via instance_of); Price each machine from that cloud's table docs/cost-pri](images/ci-tests-and-cost-gate-diagram-2.png)
+![Diagram, The cost gate: scripts/cost_check.py; and more in the source below](images/ci-tests-and-cost-gate-diagram-2.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>

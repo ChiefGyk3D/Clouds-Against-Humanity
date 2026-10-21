@@ -2,6 +2,8 @@
 
 > Before this page: [Networking basics](Networking-Basics-for-This-Project.md) explains why an outbound-only connector can still be reached, and [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) explains groups, identity providers and per-resource access.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Twingate is the only way to reach a droplet in this project. This page covers the moving parts, how they are wired up in `stacks/10-access`, and why each choice was made. For the "why not a VPN" argument itself, see [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md).
 
 ## The four pieces
@@ -17,7 +19,7 @@ Source: [How Twingate works](https://www.twingate.com/docs/how-twingate-works).
 
 ## What `stacks/10-access` builds
 
-![Diagram, What `stacks/10-access` builds: Twingate (managed as code); Remote network (site) access-tor1; Group cah-tor1-admins; Resource cah-tor1-connector-a-ssh connector a private IP, TCP 22 only; Resource cah-tor1-conn](images/twingate-diagram-1.png)
+![Diagram, What stacks/10-access builds: Twingate (managed as code); Remote network (site) access-tor1; and more in the source below](images/twingate-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>

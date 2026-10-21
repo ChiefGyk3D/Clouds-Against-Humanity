@@ -2,13 +2,15 @@
 
 > **Unverified draft: the inventory, alert rules and promtool fixtures this page describes are built and merged in a synthetic monitoring lab, but nothing here has been applied or run against real infrastructure, and nothing has been measured.** Sources: the [settings and mini SOC design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-stage2-settings-and-mini-soc-design.md) sections 3.2 and 3.5 (2026-10-16). There is no cloud dashboard, no real target inventory and no production alert rule file in this repository. The synthetic [monitoring lab](Lab-Demo-Monitoring-Stack.md) does carry an inventory, two alert rules and the `promtool` fixtures this page describes, in `labs/demo-monitoring/`; they are checked against invented data only, not against a real deployment. Metric names marked "Prometheus convention" are general Prometheus knowledge and were not checked against this project's exporters.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 **Prerequisites:** [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) and [Multiple sites and identity](Multiple-Sites-and-Identity.md).
 
 A dashboard is a set of answers to questions somebody thought of in advance. Reading one as an operator means asking the opposite: **what question is this panel actually answering, and what would it look like if the answer were bad?** Most bad dashboards fail quietly. They look fine because the thing that would have made them look bad is missing.
 
 ## Overview panels and per-instance panels
 
-| | Overview | Per instance |
+| Aspect | Overview | Per instance |
 |---|---|---|
 | Question | "Is any site in trouble?" | "Which machine, and what is it doing?" |
 | Grouping | `by (site)` | `by (site, instance)` |
@@ -122,7 +124,7 @@ The lesson is the one the detection page ends on: the number nobody has is how l
 
 - **Run it.** The [synthetic monitoring lab](Lab-Demo-Monitoring-Stack.md) runs the repository's Grafana dashboards, both alert rules on your laptop (the fixtures above run with `scripts/demo_monitoring.sh test`), with a `silent-site` command that does scenario 5 to a live Grafana.
 
-![The sites overview with site-tor2 silent: a red 0 up and 4 down for site-tor2, a table listing its four endpoints and target-state bars that turned red](images/demo-sites-overview-silent.png)
+![The sites overview with site-tor2 silent: 0 up and 4 down for site-tor2, a table of its four endpoints, and red state bars](images/demo-sites-overview-silent.png)
 
 *A silent site on the lab's synthetic dashboard, a few minutes after `silent-site site-tor2`. Grafana 12.1.0 and Prometheus 3.5.0 from the lab's own containers, captured 2026-10-19. All data is the lab's synthetic generator output; nothing in it is real.*
 

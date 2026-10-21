@@ -2,9 +2,11 @@
 
 > Prerequisites: the [Architecture overview](Architecture-Overview.md) and the [How money works in the cloud](How-Money-Works-in-the-Cloud.md) primer, because every stage here is a cost decision.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 The environment grows one stage at a time. Each stage gets its own design, its own cost approval and its own guide before it costs anything. Working ceiling in the current phase: $30 per month. Every phase carries its own ceiling in `docs/stages/approved.json`, with a reason and a decision date, and a later phase can raise it on purpose (see the [per-phase cost table](#cost-per-phase) below).
 
-![Diagram, Roadmap: Stage 0 Foundation $0 BUILT; Stage 1 Access: 2 Twingate connectors $12 BUILT; Stage 2 Logs to the on-prem SIEM, cloud-to-home access IN PROGRESS, not applied; Stage 3 Workload host: Portainer, five daemons, Discord brid](images/roadmap-diagram-1.png)
+![Diagram, Roadmap: Stage 0 Foundation $0 BUILT; Stage 1 Access: 2 Twingate connectors $12 BUILT; and more in the source below](images/roadmap-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>

@@ -1,5 +1,7 @@
 # Screenshots policy: what may be pictured and how
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 This page is for anyone adding a picture to the wiki. Pictures help a learner see what a page describes, and they are the easiest way to leak something by accident. The rules below are checked by tests where a test can check them (`tests/test_wiki_images.py`), and by the reviewer where it cannot.
 
 ## What may be screenshotted

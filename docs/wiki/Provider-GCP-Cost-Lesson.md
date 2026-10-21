@@ -2,6 +2,8 @@
 
 > **Status: unverified draft.** Network prices were read from Google's own pricing pages on 2026-10-16 (sources in the [phase 0 evidence](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-multicloud-phase0-evidence-azure-gcp.md)) and will change. **The machine prices are NOT verified:** Google's VM price page renders its numbers with JavaScript and the figures here are working estimates to be confirmed in Google's pricing calculator. Nothing was applied in a real project, so every figure is a list price, not an invoice. Not reviewed by anyone who runs GCP; corrections welcome on [issue #22](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues/22). Read [How money works in the cloud](How-Money-Works-in-the-Cloud.md) first.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 GCP is the one cloud of the three where the textbook design, machines with no public address behind a NAT service, can be the cheaper one. This page shows the arithmetic, shows where that stops being true, and ends with how to prove the bill is back to zero.
 
 All figures: `us-central1` where a region matters, on-demand list prices in US dollars, 730 hours in a month, as of 2026-10-16.

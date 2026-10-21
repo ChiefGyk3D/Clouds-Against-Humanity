@@ -2,6 +2,8 @@
 
 > **Status: unverified draft.** Written 2026-10-16 from Google's own documentation (sources and dates in the [phase 0 evidence](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-multicloud-phase0-evidence-azure-gcp.md)). Never applied in a real project and not reviewed by anyone who runs Google Cloud for a living. Google changes its console and its free offers often: treat each step as a goal, and check the live console. If you run GCP and see an error, please say so on [issue #22](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues/22).
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 This is the page before any infrastructure. You will finish it with a Google Cloud project that is protected, empty and watched, and with no Terraform, no Spacelift and no resources. That is the point. [Why the clouds differ](Why-the-Clouds-Differ.md) explains why the starting point on GCP is so different from AWS and DigitalOcean.
 
 **What this costs:** nothing, if you stop here. **What it does not do:** build anything. No GCP code exists in this repository yet: there is no GCP module or stack, and the build is not yet written (see [issue #22](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues/22)). Only AWS has code, and that is mocked-tested and never applied.

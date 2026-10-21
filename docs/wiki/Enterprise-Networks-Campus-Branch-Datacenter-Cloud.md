@@ -2,6 +2,8 @@
 
 > **Orientation, not a design guide: verified claims dated.** Claims checked against a vendor or standards page carry the date they were checked (2026-10-16) and the source in the claims register at the bottom. Everything else is general industry knowledge or marked UNVERIFIED. Nothing here has been built in this repository; the enterprise side of every table is a description, not a deployment.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 **Prerequisites:** [Networking basics for this project](Networking-Basics-for-This-Project.md) (addresses, CIDR, ports, stateful firewalls), [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) and [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md).
 
 This repository has one network: a VPC with a range of 256 addresses, two small machines in it, and a firewall that lets nothing in. A company has hundreds of networks of several different kinds, and most of the work of a network engineer is deciding how those networks join, what may cross between them, and how anyone can tell. This page names the shapes and the vocabulary. It is the page to read before a job interview that says "hybrid network" in the description.

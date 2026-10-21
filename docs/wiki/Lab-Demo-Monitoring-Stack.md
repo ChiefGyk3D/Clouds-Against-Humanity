@@ -2,6 +2,8 @@
 
 > Needs no cloud account and costs nothing. You need Docker with Compose (Podman with its Docker-compatible socket also works), a clone of the repository, an internet connection to pull three container images once, and about 30 minutes. **Every number on every panel is invented by a small generator script.** No real host, connector, address or cloud account is involved. The lab is in `labs/demo-monitoring/` and is driven by `scripts/demo_monitoring.sh`.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 **Prerequisites:** [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) (the predict-then-check page this lab makes runnable), [Multiple sites and identity](Multiple-Sites-and-Identity.md).
 
 Reading about a silent site is not the same as watching one. This lab runs the part of the stage 2 design that can run on a laptop: a Prometheus, a Grafana and a generator that pretends to be **two sites with two connectors each**. You look at dashboards that work for any number of sites, make one site go silent on command, and watch the alert and the dashboard say so.
@@ -28,9 +30,9 @@ Open `http://127.0.0.1:3300`, log in as `admin`. The password is the `GRAFANA_AD
 
 The scrapes and panels are the lesson, so open Prometheus too (`http://127.0.0.1:9190`) and look at **Status, Target health**: eight targets in the `twingate-ztna` job, all `UP`, two per host and four per site.
 
-![The Prometheus target health page: the twingate-ztna job with eight targets, each labelled with an endpoint (node-exporter or connector-metrics), site, region, provider, role and a documentation-range instance, all in state UP](images/demo-prometheus-targets.png)
+![The Prometheus target health page: the eight targets of the twingate-ztna job, all in state UP](images/demo-prometheus-targets.png)
 
-*Eight targets, all up, before any site is silenced. Grafana 12.1.0 and Prometheus 3.5.0 from the lab's own containers, captured 2026-10-19. All data is the lab's synthetic generator output; nothing in it is real.*
+*Eight targets, all up, before any site is silenced. Grafana 12.1.0 and Prometheus 3.5.0 from the lab's own containers, captured 2026-10-19. All data is the lab's synthetic generator output; nothing in it is real. Each target carries labels for its endpoint (node-exporter or connector-metrics), site, region, provider, role and a documentation-range instance.*
 
 ## What each panel teaches
 
@@ -41,7 +43,7 @@ The lab reuses the two Prometheus dashboards in `dashboards/`; [Grafana dashboar
 | Targets up per site | healthy targets, `or` a zero for each site in `cah_expected_targets` | The inventory supplies the site, so a silent site reads **0**, not "no data". |
 | Targets down per site | expected minus healthy, never below zero | The comparison the alert rules make, shown as a number. |
 | Targets that are not up | `up == 0` as a table | Lists the endpoint, instance and provider that stopped. |
-| Target state per instance | `up` per `(site, instance, endpoint)` | A silent site goes red on all four of its rows at once. |
+| Target state per instance | `up` per `(site, instance, endpoint)` | A silent site goes red (down) on all four of its rows at once. |
 | Scrape duration, samples scraped | Prometheus's own `scrape_*` series | Collection health, separate from whether the host is healthy. |
 | Connector inbound and outbound traffic by path | `rate()` of the connector counters, `sum by (site, instance, endpoint, transport)` | Counters are rate()d, never graphed raw. Direct versus relay is the connector's own split. |
 | Share of traffic through a relay | relay rate over total rate, per site | A rising relay share means tunnels stopped going direct. |
@@ -50,13 +52,13 @@ The lab reuses the two Prometheus dashboards in `dashboards/`; [Grafana dashboar
 
 Both dashboards take their data source and their `site` and `instance` variables from the same place, so adding a third site to `targets.json` and the inventory makes it appear with no dashboard change.
 
-![The CAH: Droplet health dashboard for one instance of site-tor1: uptime of three days, memory and disk gauges at about 40 percent, then CPU, memory, swap and disk graphs](images/demo-droplet-health.png)
+![The CAH: Droplet health dashboard for one site-tor1 instance: uptime, memory and disk gauges, then CPU, memory, swap and disk graphs](images/demo-droplet-health.png)
 
-*Droplet health for one instance of site-tor1. Grafana 12.1.0 and Prometheus 3.5.0 from the lab's own containers, captured 2026-10-19. All data is the lab's synthetic generator output; nothing in it is real.*
+*Droplet health for one instance of site-tor1. Grafana 12.1.0 and Prometheus 3.5.0 from the lab's own containers, captured 2026-10-19. All data is the lab's synthetic generator output; nothing in it is real. The uptime is three days and the memory and disk gauges read about 40 percent.*
 
-![The CAH sites overview dashboard with both sites healthy: four targets up and zero down for each site, no targets that are not up, and all eight target-state bars green](images/demo-sites-overview-healthy.png)
+![The CAH sites overview dashboard with both sites healthy: four targets up and none down for each, and all state bars green](images/demo-sites-overview-healthy.png)
 
-*The sites overview with every target up, top of the page. Grafana 12.1.0 and Prometheus 3.5.0 from the lab's own containers, captured 2026-10-19. All data is the lab's synthetic generator output; nothing in it is real.*
+*The sites overview with every target up, top of the page. Grafana 12.1.0 and Prometheus 3.5.0 from the lab's own containers, captured 2026-10-19. All data is the lab's synthetic generator output; nothing in it is real. The not-up table is empty and all eight target-state bars are green.*
 
 ## Exercise: predict, then silence a site
 
@@ -71,9 +73,9 @@ Both dashboards take their data source and their `site` and `instance` variables
 4. Compare with your prediction. Which line stopped, which went to 0, and which kept looking healthy?
 5. Bring it back with `scripts/demo_monitoring.sh restore-site` and watch the alert resolve.
 
-![The same overview after site-tor2 went silent: site-tor2 shows 0 up and 4 down in red, the not-up table lists its four endpoints, and its target-state bars have turned red while site-tor1's stay green](images/demo-sites-overview-silent.png)
+![The same overview after site-tor2 went silent: 0 up and 4 down for site-tor2, its endpoints listed, and its state bars red](images/demo-sites-overview-silent.png)
 
-*The overview about three minutes after `silent-site site-tor2`. Grafana 12.1.0 and Prometheus 3.5.0 from the lab's own containers, captured 2026-10-19. All data is the lab's synthetic generator output; nothing in it is real.*
+*The overview about three minutes after `silent-site site-tor2`. Grafana 12.1.0 and Prometheus 3.5.0 from the lab's own containers, captured 2026-10-19. All data is the lab's synthetic generator output; nothing in it is real. The not-up table lists the four endpoints of site-tor2; the target-state bars of site-tor1 stay green.*
 
 ![The Prometheus alerts page filtered to CloudSiteSilent, one alert firing for the site that was silenced](images/demo-prometheus-alerts-firing.png)
 

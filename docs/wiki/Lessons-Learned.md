@@ -2,6 +2,8 @@
 
 > Prerequisites: none strictly. The stories make more sense after [Spacelift](Spacelift.md) and [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md), which is where the core path puts this page.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Things that broke during the build (and a few traps the guides warn about), what was really going on, and what fixed it. These are the parts most tutorials leave out, and the parts most likely to save you an evening.
 
 ## 1. `curl | bash` reported success and installed nothing useful

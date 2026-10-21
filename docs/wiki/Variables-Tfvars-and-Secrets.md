@@ -2,6 +2,8 @@
 
 > Before this page: [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) explains plan and apply, and [Doppler and secrets](Doppler-and-Secrets.md) explains how a secret reaches a run. This page is the decision table that sits between them.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 The stage 2 settings work started with one question: where does `region` live, and where does the VPC range that must not collide with a homelab live? Every value in this repository has exactly one correct home. Put it in the wrong one and the cost is either a leaked identifier in a public repository or a plan that quietly renames live machines.
 
 ## The decision table

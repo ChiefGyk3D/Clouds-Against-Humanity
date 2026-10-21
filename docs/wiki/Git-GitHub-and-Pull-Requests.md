@@ -18,9 +18,9 @@ A **repository** (repo) is the folder plus its whole history. The one you are re
 
 ## The pull request: how a change is proposed
 
-A **pull request** (PR) says "I have changes on this branch; please review them and merge them into main". It shows the exact difference (the **diff**: lines removed in red, lines added in green), lets people comment on specific lines, and runs the automated checks.
+A **pull request** (PR) says "I have changes on this branch; please review them and merge them into main". It shows the exact difference (the **diff**: lines removed in red and marked with a minus sign, lines added in green and marked with a plus sign), lets people comment on specific lines, and runs the automated checks.
 
-![Diagram, The pull request: how a change is proposed: Change a file on a branch; Open a pull request; Robots run checks (CI); A human reads the diff; Merge to main; Spacelift plans the change, a human confirms, it applies](images/git-github-and-pull-requests-diagram-1.png)
+![Diagram, The pull request: how a change is proposed: Change a file on a branch; Open a pull request; and more in the source below](images/git-github-and-pull-requests-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>

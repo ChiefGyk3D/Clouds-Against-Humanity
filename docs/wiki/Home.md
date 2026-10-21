@@ -72,7 +72,7 @@ Then pick a track on [Reading order](Reading-Order.md): [build it yourself](Read
 
 ## The short version
 
-![Diagram, The short version: You, with the Twingate client; Public internet; Twingate control plane + relays; DigitalOcean VPC; connector a; connector b; private hosts (stage 3)](images/home-diagram-1.png)
+![Diagram, The short version: You, with the Twingate client; Public internet; Twingate control plane + relays; and more in the source below](images/home-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>
@@ -134,7 +134,7 @@ If Clouds Against Humanity is useful to you, consider supporting continued devel
 
 **Cryptocurrency tips**
 
-| | Coin | Address |
+| Logo | Coin | Address |
 |:---:|---|---|
 | ![Bitcoin logo icon](images/support-icon-bitcoin.png) | Bitcoin | `bc1qztdzcy2wyavj2tsuandu4p0tcklzttvdnzalla` |
 | ![Monero logo icon](images/support-icon-monero.png) | Monero | `84Y34QubRwQYK2HNviezeH9r6aRcPvgWmKtDkN3EwiuVbp6sNLhm9ffRgs6BA9X1n9jY7wEN16ZEpiEngZbecXseUrW8SeQ` |

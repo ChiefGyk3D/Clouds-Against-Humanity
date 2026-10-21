@@ -2,6 +2,8 @@
 
 > **Unverified draft: the stage 2 telemetry pieces this page describes are built and merged (opt-in node exporter, Wazuh agent with auditd, metrics firewall rules, Grafana dashboards), but none of it has been applied or run against real infrastructure, and nothing has been measured.** Sources: the [settings and mini SOC design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-stage2-settings-and-mini-soc-design.md) section 3 (2026-10-16), `docs/cost.md` (the stack-instance section, read 2026-10-16), and the merged settings layer described in [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md). The settings layer, the cost gate's stack instances, the telemetry stack (stack 20, everything off by default) and the site-aware dashboards exist as code. No second site is deployed, and none of it is applied. Stack 20 also has a `sites` map that creates a separate logging service and scrape service per site (issue #104, mock-tested only). Statements about Twingate's behaviour that are marked UNVERIFIED were not checked.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 **Prerequisites:** [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md), [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) and [Twingate](Twingate.md).
 
 One site is easy to name: it is "the cloud". The moment a second one exists (another region, another account, another cloud), every telemetry question gets a second answer, and "which one?" becomes part of every query. This page is about what a site *is*, what breaks at two, and why adding one should be a new settings file and not new code.

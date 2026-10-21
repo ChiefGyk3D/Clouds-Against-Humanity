@@ -2,6 +2,8 @@
 
 > If "port", "firewall", "inbound" or "MFA" are new words, read [Networking basics](Networking-Basics-for-This-Project.md) and [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) first. This page is the argument; those pages are the vocabulary.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 The obvious way to reach a few cloud droplets from home is a VPN: stand up WireGuard or OpenVPN, open one UDP port, done in an afternoon. This project does not do that, on purpose. This page explains why, where that reasoning holds, and where it does not, because "VPNs bad, zero trust good" is a slogan, and slogans are how people end up buying a zero trust sticker for their old VPN appliance.
 
 ## TL;DR
@@ -14,7 +16,7 @@ The obvious way to reach a few cloud droplets from home is a VPN: stand up WireG
 
 ## First, two different things are both called "VPN"
 
-| | Remote-access VPN | Commercial "privacy" VPN |
+| Aspect | Remote-access VPN | Commercial "privacy" VPN |
 |---|---|---|
 | Examples | WireGuard, OpenVPN, IPsec, Cisco AnyConnect, GlobalProtect, Ivanti/Pulse, FortiGate SSL VPN | The ones that sponsor every YouTube video |
 | Job | Put your device on a private network | Make your traffic exit from someone else's IP address |
@@ -25,7 +27,7 @@ Most of this page is about the first kind.
 
 ## What a remote-access VPN actually does
 
-![Diagram, What a remote-access VPN actually does: Anyone on the internet; Your laptop; Network edge; VPN concentrator listening on a public port; Private network, now reachable as a whole; web host; database; admin panel](images/why-ztna-not-a-vpn-diagram-1.png)
+![Diagram, What a remote-access VPN actually does: Anyone on the internet; Your laptop; Network edge; and more in the source below](images/why-ztna-not-a-vpn-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>
@@ -62,7 +64,7 @@ Two properties of that picture cause almost every problem below:
 
 ## What ZTNA does instead
 
-![Diagram, What ZTNA does instead: Anyone on the internet; Your laptop Twingate client; Controller identity, MFA, signed ACLs; Private network; Connector dials out, listens on nothing public; web host; database; admin pane](images/why-ztna-not-a-vpn-diagram-2.png)
+![Diagram, What ZTNA does instead: Anyone on the internet; Your laptop Twingate client; and more in the source below](images/why-ztna-not-a-vpn-diagram-2.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>
@@ -172,7 +174,7 @@ The free and paid tier limits of Twingate (and Spacelift and Doppler) are listed
 
 I used to run a VPN for everything. Here is where each of those uses went.
 
-![Diagram, Why I stopped using a VPN (except for geo-blocks): Reach my own services from outside; Be safe on hotel or coffee-shop Wi-Fi; Hide browsing from my ISP; Watch something that is only licensed in another country; ](images/why-ztna-not-a-vpn-diagram-3.png)
+![Diagram, Why I stopped using a VPN (except for geo-blocks): Reach my own services from outside; and more in the source below](images/why-ztna-not-a-vpn-diagram-3.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>

@@ -2,11 +2,13 @@
 
 > Before this page: [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) explains what a secret is, how secrets leak, and what a secrets manager is for.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 The rule is simple: **nothing in this repository is a credential**, and nothing that identifies the operator's account is in a file either. Every real value lives in Doppler. This page explains where each one lives, how it reaches a run, and how to rotate it.
 
 ## Who holds what
 
-![Diagram, Who holds what: Doppler: clouds-against-humanity / prd; DIGITALOCEAN_TOKEN custom write scopes, 90 days; TWINGATE_API_TOKEN 90 days; TWINGATE_NETWORK tenant name, not a credential; ADMIN_SSH_PUBLIC_KEY ADMIN_SSH](images/doppler-and-secrets-diagram-1.png)
+![Diagram, Who holds what: Doppler: clouds-against-humanity / prd; DIGITALOCEAN_TOKEN custom write scopes, 90 days; and more in the source below](images/doppler-and-secrets-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>

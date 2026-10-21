@@ -2,6 +2,8 @@
 
 > **Orientation, not a design guide: verified claims dated.** Claims checked against a vendor or standards page carry the date they were checked (2026-10-16) and the source in the claims register at the bottom. Everything else is general industry knowledge or marked UNVERIFIED. Vendor features and plan tiers change; check the vendor's current documentation before relying on any of it.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 **Prerequisites:** [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md), [Doppler and secrets](Doppler-and-Secrets.md) and [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md).
 
 In this project, identity is one administrator and secrets are a handful of tokens that expire every 90 days. In a company, identity is thousands of people, tens of thousands of devices and many more **non-human** identities (services, pipelines, scripts), and the number of secrets grows with the number of systems. The questions are the same four you already know: who is it, can they prove it, what may they do, and what did they do. The rest of this page is how those questions are answered at scale.

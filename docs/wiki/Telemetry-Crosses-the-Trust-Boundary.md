@@ -2,13 +2,15 @@
 
 > **Unverified draft: the stage 2 telemetry pieces this page describes are built and merged (opt-in node exporter, Wazuh agent with auditd, metrics firewall rules, Grafana dashboards), but none of it has been applied or run against real infrastructure, and nothing has been measured.** Sources: the [stage 2 logging design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-11-stage-2-logging-design.md) (2026-10-11) and the [settings and mini SOC design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-stage2-settings-and-mini-soc-design.md) sections 2.8, 4 and 5.3 (2026-10-16). Stack 20, the node exporter, the metrics firewall rules and the Wazuh agent are merged but off by default and unapplied; the home side and the Twingate headless client are not built, so the ports and rules below are plans until the home side exists. Facts about Twingate and Wazuh that the design marks UNVERIFIED are marked here too. All addresses are from documentation ranges.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 **Prerequisites:** [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md), [Twingate](Twingate.md), [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) and the [Threat model](Threat-Model.md).
 
 The repository's central promise is that nothing on the cloud side listens to the Internet. Telemetry needs data to move between the cloud and the home SIEM. This page is about how that happens without breaking the promise, and about the places where it still costs something.
 
 ## The picture
 
-![Diagram, The picture: Cloud site (no public inbound); Connector droplets a and b metrics exporter log agent; Twingate connectors cloud remote network; Twingate identity and policy one resource, one port; Home site; Home-](images/telemetry-crosses-the-trust-boundary-diagram-1.png)
+![Diagram, The picture: Cloud site (no public inbound); Connector droplets a and b metrics exporter log agent; and more in the source below](images/telemetry-crosses-the-trust-boundary-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>
@@ -43,7 +45,7 @@ flowchart LR
 
 ## Pull for metrics, push for logs
 
-| | Metrics | Logs |
+| Aspect | Metrics | Logs |
 |---|---|---|
 | Who starts the request | Prometheus at home asks each cloud endpoint | The agent on each cloud host connects out to the manager |
 | Why | Prometheus pulls by design. Keeping that means no push gateway and no change to the dashboards and alert rules that already select on the job | Wazuh agents push by design, the same direction the on-prem hosts use |

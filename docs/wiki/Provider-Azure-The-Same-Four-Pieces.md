@@ -2,6 +2,8 @@
 
 > **Status: unverified draft.** Written 2026-10-16 from Microsoft's documentation and public price API (sources in the [phase 0 evidence](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-multicloud-phase0-evidence-azure-gcp.md); most claims were read again on the same day, and what is still unconfirmed is marked UNVERIFIED). **No Azure version of this project has been built yet.** The resource lists below are a teaching map of what such a build would need, not code in this repository, and the real build may differ. Resource type names are the usual OpenTofu `azurerm` names from memory of that provider, not checked against its current documentation. Never applied, and not reviewed by anyone who runs Azure: corrections are welcome on [issue #22](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues/22).
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Read [Why the clouds differ](Why-the-Clouds-Differ.md) and [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) first, and skim [the AWS version of this page](Provider-AWS-The-Same-Four-Pieces.md) if you want the comparison. This page walks the four pieces that this project builds on DigitalOcean (a private network, a firewall, a machine, an identity for the machine), points at the DigitalOcean file where each lives, and says what you would build on Azure instead and why it is not a one-line rename.
 
 The method is the exercise: for each piece, **read the DigitalOcean file, predict the Azure resources, then check your list against the reference at the bottom of the piece.**

@@ -2,6 +2,8 @@
 
 > **Status: design merged, cloud side in progress, nothing applied.** This page is an operator runbook written from the [settings and mini SOC design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-stage2-settings-and-mini-soc-design.md) (sections 3.5, 4 and 4.1) and the [stage 2 logging design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-11-stage-2-logging-design.md) (section 4). Everything here happens on **your** network, in **your** firewall and in **your** Prometheus. Nothing in this repository can check it for you, so the page asks you to write the evidence down. Every address below is from a documentation range (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`); replace them with yours and keep your real values out of the repository, issues and pull requests.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 **Prerequisites:** [Twingate](Twingate.md), [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) and [Networking basics for this project](Networking-Basics-for-This-Project.md).
 
 The cloud half is the [stage 2 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/02-telemetry.md). It builds Twingate objects only, behind two flags that default to off. The home half is this page. The order is fixed: **the firewall and its recorded negative tests come first.** No logging resource is applied until the record in section 3 exists (design section 4.1).

@@ -2,6 +2,8 @@
 
 > **Status: unverified draft.** Prices were read from AWS's own price-list files and documentation on 2026-10-16 (sources in the [phase 0 evidence](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-multicloud-phase0-evidence-aws.md)) and will change. Nothing was applied in a real account, so every figure is a list price, not an invoice. Not yet reviewed by the maintainer. Read [How money works in the cloud](How-Money-Works-in-the-Cloud.md) first.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 The most common way a learner is surprised by AWS is not an attack or a mistake in the code. It is a charge for something they did not know was billed. This page names the charges that matter for a project like this one, shows the arithmetic, and ends with how to prove the bill is back to zero.
 
 All figures: US East (N. Virginia), on-demand list prices, 730 hours in a month, as of 2026-10-16.

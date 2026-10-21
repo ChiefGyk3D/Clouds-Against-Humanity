@@ -2,6 +2,8 @@
 
 > Needs a clone of the repository, an hour, and Threat Dragon (the desktop app, the hosted web app's Local Session, or Docker; see [Threat Dragon exercise](Threat-Dragon-Exercise.md#install-and-run)). No cloud account, no cost. Read [Threat model](Threat-Model.md) and do [Threat Dragon exercise](Threat-Dragon-Exercise.md) first: this page reuses the same diagram, the same T1 to T14 threats and the same trust boundaries.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 You have one model of this pipeline, written with STRIDE. This page adds two more views of the same project and the files to open them: the pipeline mapped to MITRE ATT&CK, and the AI tools that touch this repository mapped to MITRE ATLAS. The point is not that three frameworks are better than one. The point is that each answers a different question, that you should recognise all three when a job or a report uses them, and that this repository is a springboard: the models are small enough to read in an evening and wrong enough in places to be worth fixing.
 
 The format is the usual one: **predict, then check**. Write your answer down first.
@@ -29,7 +31,7 @@ If a technique ID in this repository is not in the reference file `docs/threat-m
 
 ## Three frameworks, three questions
 
-| | STRIDE | MITRE ATT&CK | MITRE ATLAS |
+| Aspect | STRIDE | MITRE ATT&CK | MITRE ATLAS |
 |---|---|---|---|
 | **What it is** | Six categories of design flaw: Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege | A knowledge base of adversary tactics and techniques seen in real intrusions, grouped by the attacker's goal (tactic) | An ATT&CK-style knowledge base for attacks on AI and machine-learning systems, with its own tactics and techniques and case studies |
 | **Question it answers** | What can go wrong with this element of my design? | How would a real attacker do this, and could I see it? | How can an AI system, or a system that uses one, be attacked or abused? |
@@ -49,11 +51,11 @@ One mistake to avoid: ATT&CK and ATLAS are not threat models. They are vocabular
 
 Here is that picture for this repository: every technique the models cite, coloured in the ATT&CK Navigator. Colour means only "this repository names the technique in a threat". It does not mean the technique is detected or mitigated.
 
-![The ATT&CK Navigator enterprise matrix with the techniques this repository cites coloured orange, spread across the Reconnaissance, Initial Access, Persistence, Credential Access and Impact tactic columns](images/attack-navigator-cited-techniques.png)
+![The ATT&CK Navigator enterprise matrix with the techniques this repository cites highlighted in orange across five tactic columns](images/attack-navigator-cited-techniques.png)
 
-![A close-up of the left of the Navigator matrix: Reconnaissance, Resource Development, Initial Access, Execution and Persistence columns, with the cited techniques such as Scanning IP Blocks, Exploit Public-Facing Application, Supply Chain Compromise and Cloud Accounts coloured orange](images/attack-navigator-cited-closeup.png)
+![A close-up of the left of the Navigator matrix, from Reconnaissance to Persistence, with the cited techniques highlighted in orange](images/attack-navigator-cited-closeup.png)
 
-*MITRE ATT&CK Navigator v5.3.2 (hosted at `https://mitre-attack.github.io/attack-navigator/`), captured 2026-10-16, ATT&CK v20.0 data. The layer is `docs/threat-model/attack-navigator-layer.json`, the repository's own synthetic coverage layer. To reproduce: Open Existing Layer, Upload from local, pick that file.*
+*MITRE ATT&CK Navigator v5.3.2 (hosted at `https://mitre-attack.github.io/attack-navigator/`), captured 2026-10-16, ATT&CK v20.0 data. The layer is `docs/threat-model/attack-navigator-layer.json`, the repository's own synthetic coverage layer. To reproduce: Open Existing Layer, Upload from local, pick that file. The cited techniques fall under Reconnaissance, Initial Access, Persistence, Credential Access and Impact; the close-up shows, among others, Scanning IP Blocks, Exploit Public-Facing Application, Supply Chain Compromise and Cloud Accounts.*
 
 STRIDE letters in the two new models are kept because Threat Dragon needs a native type to hold, and because the combination is the lesson: a threat has a category (what kind of flaw) and a technique (how someone would use it).
 
@@ -61,9 +63,9 @@ STRIDE letters in the two new models are kept because Threat Dragon needs a nati
 
 File: `docs/threat-model/clouds-against-humanity.attack.threat-dragon.json`. It has the same elements, flows and boundaries as the STRIDE model, 41 threats (the STRIDE model's other six are Repudiation or design-only threats with no adversary technique), and 29 distinct techniques. Matrix: Enterprise, with the IaaS platform in mind. Where a technique's platform list does not include IaaS (for example T1677 Poisoned Pipeline Execution is listed for SaaS) the CI service is the thing it applies to, and I say so rather than hiding it.
 
-![The Edit Threat dialog for threat 13 in the ATT&CK model: the title starts with technique T1555.006 Cloud Secrets Management Stores and the description names T1528 Steal Application Access Token](images/threat-dragon-attack-threat-edit.png)
+![The Edit Threat dialog for threat 13 in the ATT&CK model, with technique IDs in its title and description](images/threat-dragon-attack-threat-edit.png)
 
-*What a threat reads like in the ATT&CK model: a STRIDE type (Elevation of privilege) plus the technique IDs in the title and description. Threat Dragon v2.6.2 hosted app, Local Session, captured 2026-10-16; the repository's own synthetic model.*
+*What a threat reads like in the ATT&CK model: a STRIDE type (Elevation of privilege) plus the technique IDs in the title and description. Threat Dragon v2.6.2 hosted app, Local Session, captured 2026-10-16; the repository's own synthetic model. Here the title starts with T1555.006 Cloud Secrets Management Stores and the description names T1528 Steal Application Access Token.*
 
 
 | Threat | What it is | ATT&CK technique and its tactics (v20.0) |
@@ -93,9 +95,9 @@ Things to argue with:
 
 File: `docs/threat-model/clouds-against-humanity.atlas.threat-dragon.json`. It models how AI tools touch this public repository: a coding agent with tools, a hosted review assistant, a hosted model provider, a local model, the text strangers can put in pull requests, the plans and handoff prompts the agents read, and the secrets that should stay out of reach. It has 12 threats, 20 distinct ATLAS techniques, and five boundaries named AB1 to AB5 (the pipeline model's B1 to B8 are a different set).
 
-![The AI-assisted workflow data flow diagram in Threat Dragon: a coding agent session, a hosted AI reviewer, a hosted model provider, a local LLM, repository content and secrets, grouped into five dashed boundary boxes AB1 to AB5](images/threat-dragon-atlas-diagram.png)
+![The AI-assisted workflow data flow diagram in Threat Dragon, grouped into five dashed boundary boxes AB1 to AB5](images/threat-dragon-atlas-diagram.png)
 
-*The ATLAS model's diagram, exported from Threat Dragon v2.6.2 hosted app, Local Session, captured 2026-10-16. The repository's own synthetic model.*
+*The ATLAS model's diagram, exported from Threat Dragon v2.6.2 hosted app, Local Session, captured 2026-10-16. The repository's own synthetic model. It shows a coding agent session, a hosted AI reviewer, a hosted model provider, a local LLM, and repository content and secrets.*
 
 **What is true of this repository, and where it is written.** The tiering of AI tools (a local model first for drafts and summaries, a coding model for implementation, a second model for security review at stage gates, a larger model only with approval) is in `docs/superpowers/specs/2026-10-10-foundation-access-design.md`, section 8. The repository's plans and handoff prompts are instructions written for agents (`docs/superpowers/plans/`). The edge handoff states the rule "never run `tofu apply` or trigger a tracked Spacelift run; pull requests only". Commits made with an AI's help carry a `Co-Authored-By` trailer. The evidence files behind the provider pages say they were collected by a research agent from vendor documentation. Nothing in this repository configures an agent's tool permissions, and the model says so. That configuration lives on the machine that runs the agent, which is why it cannot be verified from here.
 

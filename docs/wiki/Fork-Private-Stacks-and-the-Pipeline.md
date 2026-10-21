@@ -1,5 +1,7 @@
 # Fork, private stacks, and where the pipeline starts
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Build track, step 1. Prerequisites: the eight primers and the core path through [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md), because this page leans on [Spacelift](Spacelift.md) and [Doppler](Doppler-and-Secrets.md). Next: [Labs: break it on purpose](Labs-Break-It-on-Purpose.md).
 
 > Before this page: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) explains what a pull request and a CI check are. This page assumes you have read it, and that you have skimmed [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md).
@@ -105,7 +107,7 @@ A mirror copies files, not connections. Four things still point at the author's 
 
 DevOps is often drawn as a loop of tools. The more useful way to see it is as a chain of **gates**, where the first gate is in git and everything after it is automation that only runs because the earlier gates passed.
 
-![Diagram, Where the pipeline actually starts: 1. Commit on a branch; 2. Pull request description + diff; 3. CI checks tests, cost gate, scanners. No credentials; 4. Review and merge CI green required; 5. Spacelift tracked](images/fork-private-stacks-and-the-pipeline-diagram-1.png)
+![Diagram, Where the pipeline actually starts: 1. Commit on a branch; 2. Pull request description + diff; and more in the source below](images/fork-private-stacks-and-the-pipeline-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>

@@ -2,6 +2,8 @@
 
 > Read [Threat model](Threat-Model.md) first. Its right-hand column, "residual risk", is a list of things this project's controls do **not** stop. This page is about the control that covers them: noticing.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Most of this wiki is about **prevention**: no open ports, narrow tokens, reviewed changes. Prevention fails eventually, through a bug nobody knew about, a stolen credential, or a mistake. The question that decides how bad that day is: **would you know, and how fast?** That is detection, and it needs data (telemetry), a place that collects it, rules that say what is suspicious, and a person who gets the alert.
 
 This page teaches those four pieces using Wazuh, which this project plans to use, and then places the commercial products you will meet at work (CrowdStrike, SentinelOne, Bitdefender GravityZone, Datadog, Wiz and others) on the same map.

@@ -2,6 +2,8 @@
 
 > Before this page: [Networking basics](Networking-Basics-for-This-Project.md) covers addresses, CIDR, ports, inbound versus outbound and what a stateful firewall is. Everything below builds on those.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Every DigitalOcean droplet gets a public IP address, and you cannot remove it. So the question is not "how do we keep it off the internet" but "how do we make sure nothing on that address answers". The answer is a cloud firewall that is attached by tag and in force from the first boot.
 
 ## The pieces
@@ -17,7 +19,7 @@ Every DigitalOcean droplet gets a public IP address, and you cannot remove it. S
 
 ## Two firewalls, layered by tag
 
-![Diagram, Two firewalls, layered by tag: Public internet; Connector droplet tags: cah-baseline-tor1, cah-connector-tor1; Ubuntu 24.04 sshd allows only cah-admin, keys only; Baseline firewall (stage 0); Inbound: none; Outb](images/digitalocean-network-and-firewalls-diagram-1.png)
+![Diagram, Two firewalls, layered by tag: Public internet; Connector droplet tags: cah-baseline-tor1, cah-connector-tor1; and more in the source below](images/digitalocean-network-and-firewalls-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>

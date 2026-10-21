@@ -2,6 +2,8 @@
 
 > Before this page: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) explains what a pull request and a CI check are, and [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipeline.md) draws the seven gates this page walks through. Needs a clone of the repository and the `gh` command-line tool, signed in, to look at the real pull request. Read-only; nothing here changes anything.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 The capstone page shows the pipeline as seven boxes. Boxes are easy to agree with and hard to believe. This page follows **one real, small change** through every box, using the pull request's actual files, and then asks what would have stopped three worse versions of it.
 
 The change is pull request **#8, "fix: let each connector open SSH to the other (outbound rule)"**. It was chosen because it is small (one module, one stack, tests), it touched a module rather than only documentation, and it is the second half of a bug whose story is already told in [Lessons learned, "Connector-to-connector SSH timed out, twice"](Lessons-Learned.md#2-connector-to-connector-ssh-timed-out-twice). Pull request #7, "fix: let the connectors reach each other's SSH inside the VPC", was the first half.
@@ -16,7 +18,7 @@ gh pr checks 8 --repo ChiefGyk3D/Clouds-Against-Humanity
 
 ## The whole path on one page
 
-![Diagram, The whole path on one page: 1. Branch + commit connector-peer-ssh-outbound; 2. Pull request #8 why / change / testing / not verified; 3. CI tofu, python + cost gate, security, then CI green; 4. Review and merge ](images/trace-one-change-end-to-end-diagram-1.png)
+![Diagram, The whole path on one page: 1. Branch + commit connector-peer-ssh-outbound; and more in the source below](images/trace-one-change-end-to-end-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>

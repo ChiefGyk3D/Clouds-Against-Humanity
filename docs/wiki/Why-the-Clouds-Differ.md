@@ -2,6 +2,8 @@
 
 > **Status: unverified draft.** Written 2026-10-16 from the vendors' own documentation and price lists (sources and dates in the [phase 0 evidence](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-multicloud-phase0-findings.md)). Nothing here has been applied in a real account, and no one who runs these clouds professionally has reviewed it yet. Vendor facts go stale; every figure carries its date. If you run AWS, Azure or GCP and find an error, please say so on [issue #22](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues/22).
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Read [What is the cloud](What-Is-the-Cloud.md) and [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) first. This page is the comparison: it does not teach any one cloud. The pages that do are [AWS account preparation](Provider-AWS-Account-Preparation.md), [the same four pieces on AWS](Provider-AWS-The-Same-Four-Pieces.md), and [the AWS cost lesson](Provider-AWS-Cost-Lesson.md).
 
 Every large cloud sells the same few things: a private network, a way to filter traffic, a machine, and an identity for the machine. They differ in how those are shaped, and the shapes are where jobs and bills go wrong. This project already built the four pieces on DigitalOcean. The point of this page is to give you the questions to ask of any cloud, so that a fifth one is not a surprise.
@@ -10,7 +12,7 @@ Every large cloud sells the same few things: a private network, a way to filter 
 
 ### 1. What is the boundary of "my stuff"?
 
-| | DigitalOcean (built) | AWS | Azure | GCP |
+| Concept | DigitalOcean (built) | AWS | Azure | GCP |
 |---|---|---|---|---|
 | The top | A team | An account | A tenant (the identity directory) | An organization, if you have one |
 | The box things live in | A project | The account, often one of many under an organization | A subscription, then a resource group | A project |
@@ -22,7 +24,7 @@ Why it matters: the boundary decides where you put an expensive mistake. Separat
 
 This is the question that surprises people most. In this project the machines need to reach out to the internet (the Twingate relays, package mirrors) and nothing must reach in.
 
-| | A public address on each machine | A NAT service so machines can stay address-less |
+| Cloud | A public address on each machine | A NAT service so machines can stay address-less |
 |---|---|---|
 | DigitalOcean | Free, built into the droplet | Not part of this project |
 | AWS | $0.005/hour each, about $3.65 a month, **including** addresses assigned automatically | At least about $36.50 a month for one NAT gateway with its address, plus a per-gigabyte charge |
@@ -40,7 +42,7 @@ Two lessons sit in this table.
 
 A firewall rule answers three questions: which machines does this set of rules apply to (the **target**), who may reach them (the **source**), and what may they reach (the **destination**). DigitalOcean answers all three with one thing, a tag. The others split them:
 
-| | Target | Source or destination |
+| Cloud | Target | Source or destination |
 |---|---|---|
 | DigitalOcean | The firewall applies to droplets with a tag | A tag (so "only droplets with this tag") or an address range |
 | AWS | A security group is attached to a machine's network interface | A range, **or another security group**. Works through private addresses, within the same VPC or a peered one (and, for inbound rules only, across a transit gateway) |
@@ -53,7 +55,7 @@ Why it matters: the module in this repository takes a single `tag`. That is a Di
 
 The machine itself needs an identity when it calls the cloud's own APIs. In this project the droplets do not, so the question has not come up yet. It will the moment a workload reads a secret or writes to a bucket.
 
-| | The machine's identity |
+| Cloud | The machine's identity |
 |---|---|
 | DigitalOcean | None needed here |
 | AWS | An *instance profile*, which attaches an IAM role to the machine |

@@ -2,6 +2,8 @@
 
 > Read this after [Architecture overview](Architecture-Overview.md). It assumes you know what this project builds. It is about what this project is **not**.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Everything in this repository is a deliberately small example: two $6 machines, one person, one cloud account, a handful of tools chosen because they are cheap, have a free or small tier, and are easy to see all at once. That is what makes it a good place to learn. It is also not what you will find at a company.
 
 An enterprise answers the same questions this project answers, usually with different products, often several at once, because it has thousands of people, hundreds of offices and applications, auditors, contracts, and a decade of decisions it cannot undo. If you leave this wiki thinking "the cloud security stack is Twingate, Doppler, Spacelift and DigitalOcean," you have learned the example, not the field.
