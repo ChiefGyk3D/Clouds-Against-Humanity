@@ -97,7 +97,7 @@ Dashboards for the cloud side, running on-prem next to the SIEM rather than as a
 
 ## Public edge (DMZ) and hardening (planned, number set by its design doc)
 
-Handoff: [2026-10-12 edge DMZ handoff](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/plans/2026-10-12-edge-dmz-handoff.md). Design first, no implementation until the design and the cost decision are approved. Design draft with four costed options and a recommendation: [2026-10-19 edge DMZ design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-19-edge-dmz-design.md); the maintainer has not picked yet.
+Handoff: [2026-10-12 edge DMZ handoff](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/plans/2026-10-12-edge-dmz-handoff.md). Design first, no implementation until the design and the cost decision are approved. Design draft with four costed options and a recommendation: [2026-10-19 edge DMZ design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-19-edge-dmz-design.md); the maintainer ruled on its decisions on 2026-10-19: option A (a 1 GiB droplet plus a reserved IP, memory measured first), a $35 ceiling (the $41 variant only if the memory measurement fails), stack name `50-edge`, a private MQTT broker, and waiting for the earlier phases before touching tooling or ceilings. The separate-team question is still PROVISIONAL (same DigitalOcean team for now) and the ingest protocol is not ruled. Nothing is approved to build or spend yet.
 
 - A separate VPC (`rns-dmz`, no peering to core) with one immutable droplet and a reserved IP, no SSH and no connector. It would run Reticulum transport with an LXMF propagation node, i2pd, a private Meshtastic MQTT broker over TLS and an authenticated iperf3 server, behind a tag-based Cloud Firewall and host nftables.
 - iperf3 measured over two paths to the same endpoint, direct and through Twingate, cheap probes often and throughput tests rarely.
@@ -109,7 +109,7 @@ Handoff: [2026-10-12 edge DMZ handoff](https://github.com/ChiefGyk3D/Clouds-Agai
 
 ## Private droplets: later, not never
 
-Rejected for now: a VPC NAT gateway is about $40 a month, which exceeds the whole ceiling, and it removes the Droplet Console. Revisit when the ceiling passes roughly $75 to $80, a static egress IP is needed, or a compliance reason appears. A page, "Why Not Private Droplets (Yet)", comes with the edge wiki PR.
+Rejected for now: a VPC NAT gateway is about $40 a month, which exceeds the whole ceiling, and it removes the Droplet Console. Revisit when the ceiling passes roughly $75 to $80, a static egress IP is needed, or a compliance reason appears. The reasoning is on the page [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md).
 
 ## Explicitly not planned (yet)
 

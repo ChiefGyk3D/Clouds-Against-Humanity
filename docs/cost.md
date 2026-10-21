@@ -9,7 +9,7 @@ Working ceiling: $30 per month in the current phase (`stage-1`). The ceiling is 
 
 The region is `tor1` (Toronto), chosen on 2026-10-11 after a new account got `422 Size is not available in this region` for the $6 `s-1vcpu-1gb` in nyc3. Check `GET /v2/sizes` and `GET /v2/regions` for your own account before picking a region: availability of the cheap legacy sizes differs by region and by account, and the newer US sites (Atlanta, Richmond, Kansas City, Memphis) start at about $18 for 1 GB.
 
-Source of prices: `docs/cost-prices.json`, retrieved 2026-10-10 from the DigitalOcean sizes API.
+Source of prices: `docs/cost-prices.json`, retrieved 2026-10-21 from the DigitalOcean sizes API (five sizes re-read live for tor1, table below; the file's prices were first read 2026-10-10 and none changed).
 
 ## Stage 3 estimate (not approved)
 
@@ -23,6 +23,18 @@ Stage 3 adds one Docker host running Portainer CE, five small daemons, an S3-com
 | C + bucket | `s-2vcpu-4gb`, $24 | $5 | $0 | $41 | Needs a $45 ceiling |
 
 Prices read 2026-10-11: Spaces is $5 per month for 250 GiB stored and 1 TiB outbound transfer per account, then $0.02 per GiB stored and $0.01 per GiB out. Functions have a free allowance of 90,000 GiB-seconds per month per team, then $0.0000185 per GiB-second; the stage's expected use is near the allowance and an overage month would cost cents. Functions are deployed with `doctl`, not OpenTofu, so the gate cannot see them: their spend is a line someone checks on the usage page.
+
+Droplet sizes verified available in tor1 on 2026-10-21 (read live from the DigitalOcean sizes API, regular `s-` family) and matching `docs/cost-prices.json`:
+
+| Size | Memory | Disk | Transfer | Per month |
+|---|---|---|---|---|
+| `s-1vcpu-1gb` | 1 GiB | 25 GB | 1 TB | $6 |
+| `s-1vcpu-2gb` | 2 GiB | 50 GB | 2 TB | $12 |
+| `s-2vcpu-2gb` | 2 GiB | 60 GB | 3 TB | $18 |
+| `s-2vcpu-4gb` | 4 GiB | 80 GB | 4 TB | $24 |
+| `s-4vcpu-8gb` | 8 GiB | 160 GB | 5 TB | $48 |
+
+The stage 3 pick, `s-1vcpu-2gb` at $12, is verified available in tor1 on 2026-10-21 and stays valid.
 
 The stage 3 phase exists in `approved.json` as a planned entry with a $30 placeholder ceiling, but nothing about it is approved. Droplet backups are off in every row; the bucket's versioning and a nightly copy off the account are the backups. Block storage is not needed. Approving the stage means picking one row, raising `approved_monthly_total` to its running total on purpose, adding the new module and the bucket's file to `allowed_sources`, and teaching the gate to price a `spaces` manifest entry as a flat amount.
 
