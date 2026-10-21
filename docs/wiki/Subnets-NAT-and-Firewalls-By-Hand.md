@@ -18,7 +18,7 @@ Side page to the start-from-zero pages. Read it after [Networking basics](Networ
 - Say what NAT does (translates addresses so many private machines share one public one), what port forwarding adds, what NAT hides, and what it does **not** protect.
 - Explain stateful versus stateless filtering, default deny, and write allow rules by source, port and protocol.
 - Read a real rule set, including this repository's `modules/firewall` and its host firewall, and say what each line allows.
-- Run Build, Break, Detect, Evade, Defend on a firewall: write a default-deny rule set, break it with an over-permissive rule, find the hole with a port check and with the firewall's own counters, and fix it.
+- Run Build, Break, Detect, Evade, Defend on a firewall: write a default-deny rule set, break it with an over-permissive rule, find the hole with a port check, see that it is being used with the firewall's counters, learn who is using it from a source-specific rule or a log, and fix it.
 - Place a VPN and zero trust network access on one diagram and say what each assumes.
 
 ## What the wiki already says (and the gap)
@@ -147,7 +147,7 @@ table inet cah_host {
 }
 ```
 
-Line by line. `table inet cah_host` is the project's own table, so it is designed not to touch anyone else's rules (`inet` means it covers IPv4 and IPv6). `hook input` means this chain sees packets addressed **to this machine** (not packets passing through, and not packets it sends). `policy drop` is default deny. `iifname "lo"` is the machine talking to itself. `ct state established,related` is the stateful line. `ct state invalid drop` drops packets that fit no connection. The ICMP lines allow ping and error messages (ICMP is the small control protocol that `ping` and error messages such as "destination unreachable" use, separate from TCP and UDP); the ICMPv6 line includes the neighbor discovery IPv6 needs to find other machines; `udp sport 67 udp dport 68` is the reply from the DHCP server that renews the machine's address. The last line is the only way in from the network: TCP port 22, from the three private blocks, and nothing else. The module's own variable description says the default is wide on purpose because the module "does not know the VPC CIDR", and tells you to narrow it ([`host_firewall_ssh_sources`](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/modules/twingate-bootstrap/variables.tf)).
+Line by line. `table inet cah_host` is the project's own table, so it is designed not to touch anyone else's rules (`inet` means it covers IPv4 and IPv6). `hook input` means this chain sees packets addressed **to this machine** (not packets passing through, and not packets it sends). `policy drop` is default deny. `iifname "lo"` is the machine talking to itself. `ct state established,related` is the stateful line. `ct state invalid drop` drops packets that fit no connection. The ICMP lines allow ping and error messages (ICMP is the small control protocol that `ping` and error messages such as "destination unreachable" use, separate from TCP and UDP); the ICMPv6 line includes the neighbor discovery IPv6 needs to find other machines; `udp sport 67 udp dport 68` is the reply from the DHCP server that renews the machine's address. The last line is the only rule that admits a new TCP connection from the network: port 22, from the three private blocks. (The ICMP and DHCP lines above it also let some non-TCP packets in: ping and error messages from any source, and DHCP replies.) The module's own variable description says the default is wide on purpose because the module "does not know the VPC CIDR", and tells you to narrow it ([`host_firewall_ssh_sources`](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/modules/twingate-bootstrap/variables.tf)).
 
 ### A rule set from this repository: the cloud firewalls
 
@@ -851,7 +851,7 @@ ip netns exec srv nft insert rule inet lab input tcp dport 8080 counter accept
 ip netns exec oth python3 portcheck.py 10.78.0.10 22 80 8080 8443
 ```
 
-**Detect.** Two views. The scan shows 8080 open from a machine that should have no access: that is the second-host scan of the cloud path. The firewall's own memory shows who is using the hole:
+**Detect.** Two views. The scan shows the hole: 8080 open to a machine that should have no access (the second-host scan of the cloud path). The firewall's counter shows that the hole is being hit:
 
 ```bash
 ip netns exec srv nft -a list chain inet lab input
@@ -872,7 +872,7 @@ table inet lab {
 }
 ```
 
-The new rule's counter has packets on it from a machine that is not in `admins`: that is a detection. `-a` shows each rule's **handle**, the number you use to delete it. The packet counts are small because the check sends few packets; yours will differ. A `log` rule loads in the lab without error, but I did not find a way to read its output from inside the lab (est. reason: the kernel log belongs to the real machine, not to a pretend one), so the counters stand in for the log here; the cloud path shows a `log` rule on a real server.
+The new rule's counter has packets on it, so something is using a rule you did not mean to have. A counter holds packet and byte totals only: it does **not** record who sent them, so on its own it cannot say whether the packets came from `oth`, from `cli` or from a stranger. Attribution needs one of two things. In the lab, a source-specific rule: add `ip saddr 10.78.0.30 tcp dport 8080 counter` above the broad one and run the check again; only that counter moves for `oth`. On a real machine, a `log` rule with a prefix, which writes the source address of each matching packet to the kernel log (read it with `journalctl -k` or `dmesg`; the cloud path below does exactly this). `-a` shows each rule's **handle**, the number you use to delete it. The packet counts are small because the check sends few packets; yours will differ. A `log` rule loads in the lab without error, but I did not find a way to read its output from inside the lab (est. reason: the kernel log belongs to the real machine, not to a pretend one), so the counters stand in for the log here; the cloud path shows a `log` rule on a real server.
 
 **Evade (in words, then one run).** An administrator who is told "that port is exposed" might "hide" it instead of fixing it: move a service to port 20222 and open that port to anyone. Run exactly that and then do what an attacker's tool does, check a whole range:
 
