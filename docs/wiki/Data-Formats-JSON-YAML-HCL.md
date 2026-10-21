@@ -170,7 +170,7 @@ variable "region" {
 
 Read it top to bottom. `type = string` says the value is text. `default` is used when nobody supplies one. `description` is for people. The nested `validation` block is a rule that runs before anything is built: `condition` must come out true, or OpenTofu stops and prints `error_message`. Here `regex(...)` tests the value against a pattern and `can(...)` turns "the test raised an error" into plain false. A value that fails, such as `TORONTO`, stops the run **before** it touches a cloud. That is the cheapest place to catch a typo.
 
-Values come from several places, in this order of convenience: a default, a `terraform.tfvars` file, `-var region=x` on the command line, and an environment variable named `TF_VAR_region` ([OpenTofu variables](https://opentofu.org/docs/language/values/variables/), read 2026-10-21). The `.tfvars` file is also HCL, but values only: a bare `region = "tor1"` per line. A `.tf.json` file is the JSON spelling of the same language ([OpenTofu JSON syntax](https://opentofu.org/docs/language/syntax/json/)). [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) says which values must never be committed.
+A value can come from several places. If none supplies one, the `default` is used. Otherwise OpenTofu uses the **last** value it finds in this order, from weakest to strongest: environment variables (`TF_VAR_region`), then `terraform.tfvars`, then `terraform.tfvars.json`, then `*.auto.tfvars` and `*.auto.tfvars.json` files, then `-var` and `-var-file` on the command line ([OpenTofu variables: precedence](https://opentofu.org/docs/language/values/variables/), read 2026-10-21). So an environment variable is the **weakest** source: a `-var` or a tfvars file overrides it (you will see that in Exercise 8). The `.tfvars` file is also HCL, but values only: a bare `region = "tor1"` per line. A `.tf.json` file is the JSON spelling of the same language ([OpenTofu JSON syntax](https://opentofu.org/docs/language/syntax/json/)). [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) says which values must never be committed.
 
 ## TOML, INI, CSV and XML, a paragraph each
 
@@ -420,7 +420,7 @@ def problems(data):
     out = []
     if not isinstance(data, dict):
         return ["top level must be an object"]
-    if not isinstance(data.get("stage"), int):
+    if type(data.get("stage")) is not int:  # bool is a subclass of int, so isinstance would accept true
         out.append("stage must be a whole number")
     resources = data.get("resources")
     if not isinstance(resources, list):
@@ -429,11 +429,11 @@ def problems(data):
         if not isinstance(res, dict):
             out.append(f"resources[{i}] must be an object")
             continue
-        if not isinstance(res.get("name"), str) or not res["name"]:
+        if not isinstance(res.get("name"), str) or res["name"] == "":
             out.append(f"resources[{i}].name must be a non-empty string")
         if res.get("kind") != "droplet":
             out.append(f"resources[{i}].kind must be 'droplet' here")
-        if not isinstance(res.get("backups"), bool):
+        if type(res.get("backups")) is not bool:
             out.append(f"resources[{i}].backups must be true or false")
     return out
 
@@ -488,6 +488,9 @@ foreach ($f in 'stacks\10-access\cost.json','.github\workflows\ci.yml','.spaceli
 python3 -m json.tool good.json | head -n 8; echo "exit=${PIPESTATUS[0]}"
 python3 -I checkcost.py good.json; echo "exit=$?"
 jq '.resources | length' good.json          # optional: needs jq
+sed 's/"stage": 1/"stage": true/' good.json > stagebool.json
+python3 -m json.tool stagebool.json > /dev/null; echo "syntax exit=$?"
+python3 -I checkcost.py stagebool.json; echo "exit=$?"
 ```
 
 **Do (PowerShell).**
@@ -497,9 +500,12 @@ python -m json.tool good.json | Select-Object -First 8; "exit=$LASTEXITCODE"
 python -I checkcost.py good.json; "exit=$LASTEXITCODE"
 Get-Content good.json -Raw | ConvertFrom-Json | ConvertTo-Json -Depth 5      # est.
 (Get-Content good.json -Raw | ConvertFrom-Json).resources.Count             # est.
+(Get-Content good.json -Raw) -replace '"stage": 1','"stage": true' | Set-Content -Encoding ascii stagebool.json
+python -m json.tool stagebool.json > $null; "syntax exit=$LASTEXITCODE"
+python -I checkcost.py stagebool.json; "exit=$LASTEXITCODE"      # est.
 ```
 
-**Check.** The first command prints the file re-indented with four spaces (`"stage": 1,` then `"resources": [` ...) and the exit code is `0`: valid JSON. (Reading `$LASTEXITCODE` after a pipe to `Select-Object` is **est.**; if it prints nothing useful, run the `json.tool` line without the pipe.) `checkcost.py` prints `ok`. `jq` prints `2`: two resources. In PowerShell, `ConvertFrom-Json` returns an object you can walk with dots (`.resources`), which is the same tree from the HCL and JSON sections ([ConvertFrom-Json](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/convertfrom-json), read 2026-10-21). The exit code is the part CI reads, as in [exit codes](Terminal-and-Your-First-Script.md#exit-codes-and-why-ci-lives-on-them).
+**Check.** The first command prints the file re-indented with four spaces (`"stage": 1,` then `"resources": [` ...) and the exit code is `0`: valid JSON. (Reading `$LASTEXITCODE` after a pipe to `Select-Object` is **est.**; if it prints nothing useful, run the `json.tool` line without the pipe.) `checkcost.py` prints `ok`. `jq` prints `2`: two resources. The `stagebool.json` file, with `"stage": true`, is valid JSON (syntax exit `0`) but `checkcost.py` prints `FAIL: stage must be a whole number` and exits `1`: in Python `True` is a kind of integer (`bool` is a subclass of `int`), so the check uses an exact type test, `type(x) is int`, and not `isinstance`. In PowerShell, `ConvertFrom-Json` returns an object you can walk with dots (`.resources`), which is the same tree from the HCL and JSON sections ([ConvertFrom-Json](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/convertfrom-json), read 2026-10-21). The exit code is the part CI reads, as in [exit codes](Terminal-and-Your-First-Script.md#exit-codes-and-why-ci-lives-on-them).
 
 **Undo.** Nothing.
 
@@ -679,6 +685,7 @@ tofu validate; echo "validate exit=$?"
 tofu plan -no-color
 tofu plan -no-color -var region=TORONTO; echo "exit=$?"
 TF_VAR_region=nyc3 tofu plan -no-color
+TF_VAR_region=TORONTO tofu plan -no-color -var region=nyc3    # -var beats the environment
 cd ..
 ```
 
@@ -716,7 +723,8 @@ tofu fmt -check -diff; "fmt exit=$LASTEXITCODE"
 tofu validate; "validate exit=$LASTEXITCODE"
 tofu plan -no-color
 tofu plan -no-color -var region=TORONTO; "exit=$LASTEXITCODE"
-$env:TF_VAR_region = "nyc3"; tofu plan -no-color; Remove-Item Env:TF_VAR_region
+$env:TF_VAR_region = "nyc3"; tofu plan -no-color
+$env:TF_VAR_region = "TORONTO"; tofu plan -no-color -var region=nyc3; Remove-Item Env:TF_VAR_region      # -var beats the environment
 Set-Location ..
 ```
 
@@ -740,7 +748,7 @@ Error: Invalid value for variable
 region must be three lowercase letters and a digit.
 ```
 
-and `TF_VAR_region=nyc3` produced `shout = "NYC3"`, the environment variable reaching the variable. To see `fmt` bite, add a badly spaced block and re-run `tofu fmt -check -diff`: it prints a diff and exits `3`. To see a syntax error, delete the last `}` of the `variable` block and run `tofu validate`: it reports `Unclosed configuration block` with the file and line, and exits `1`. Put the brace back.
+and `TF_VAR_region=nyc3` produced `shout = "NYC3"`, the environment variable reaching the variable. The last command set the environment to the invalid `TORONTO` and `-var region=nyc3` on the command line: the plan succeeded with `NYC3`, because `-var` overrides the environment. To see `fmt` bite, add a badly spaced block and re-run `tofu fmt -check -diff`: it prints a diff and exits `3`. To see a syntax error, delete the last `}` of the `variable` block and run `tofu validate`: it reports `Unclosed configuration block` with the file and line, and exits `1`. Put the brace back.
 
 **Undo.** Delete the folder: `rm -rf ~/formats-lab/tf` (Bash) or `Remove-Item -Recurse -Force $HOME\formats-lab\tf` (PowerShell). The run created no state file and no `.terraform` folder.
 
@@ -911,7 +919,7 @@ All read-only requests, retrieved 2026-10-21. The commands were run on the autho
 | `python -m json.tool` validates and pretty-prints; Python's `json` module documents a "Repeated Names Within an Object" section and an option `--json-lines` | [Python json module](https://docs.python.org/3/library/json.html) | Read; behavior also run on Python 3.13.5 |
 | `ConvertFrom-Json`, `ConvertTo-Json`, `Import-Csv` behavior and options | Microsoft Learn: [ConvertFrom-Json](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/convertfrom-json), [ConvertTo-Json](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/convertto-json), [Import-Csv](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/import-csv) | Cmdlet names and syntax read; **never run** |
 | That PowerShell's JSON parser accepts or rejects a trailing comma or single quotes | General knowledge | Not verified: **est.** |
-| OpenTofu comments (`#`, `//`, `/* */`), `tofu fmt -check`, `tofu validate`, `TF_VAR_` variables, `.tf.json` syntax | [syntax](https://opentofu.org/docs/language/syntax/configuration/), [fmt](https://opentofu.org/docs/cli/commands/fmt/), [validate](https://opentofu.org/docs/cli/commands/validate/), [variables](https://opentofu.org/docs/language/values/variables/), [JSON syntax](https://opentofu.org/docs/language/syntax/json/) | Read; behavior run on OpenTofu 1.12.6 |
+| OpenTofu comments (`#`, `//`, `/* */`), `tofu fmt -check`, `tofu validate`, `TF_VAR_` variables and variable precedence (environment weakest, `-var` strongest), `.tf.json` syntax | [syntax](https://opentofu.org/docs/language/syntax/configuration/), [fmt](https://opentofu.org/docs/cli/commands/fmt/), [validate](https://opentofu.org/docs/cli/commands/validate/), [variables](https://opentofu.org/docs/language/values/variables/), [JSON syntax](https://opentofu.org/docs/language/syntax/json/) | Read; behavior run on OpenTofu 1.12.6 |
 | `cost.json` is read by `main.tf` through `jsondecode`; the loader refuses duplicate keys; the Spacelift config loader refuses anchors and duplicate keys; CI installs `pyyaml==6.0.2` and runs the settings generator with `--check` | `stacks/10-access/main.tf`, `scripts/cost_check.py`, `tests/test_secret_separation.py`, `.github/workflows/ci.yml` | Read in this repository |
 | Aliases can expand a small file into a large one; XXE; catastrophic backtracking; `-w` on a pull request; arguments visible to other users; YAML 1.2's JSON-as-subset goal; JSON Schema; `yamllint`; `tomllib` first version | General knowledge | Not verified: **est.** |
 | The Bash outputs on this page | Run on Linux, 2026-10-21 | Observed; they change with versions |
