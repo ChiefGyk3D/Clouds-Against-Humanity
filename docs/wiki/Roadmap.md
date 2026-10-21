@@ -27,6 +27,21 @@ flowchart LR
 
 </details>
 
+## Schedule
+
+Work runs in two-week sprints, S1 to S8, from 2026-10-20 to 2027-02-08. The board is [project 4](https://github.com/users/ChiefGyk3D/projects/4) and its definition is `board.yaml`; [How this project is planned](How-This-Project-Is-Planned.md) explains the method. Agent-built work is planned ahead of the maintainer's hours: designs, flag-off code and mocked tests land early, and every apply stays gated on the maintainer. Dates after S2 are indicative and move with what the maintainer decides.
+
+| Sprint | Dates | Planned |
+|---|---|---|
+| S1 | 2026-10-20 to 2026-11-02 | Maintainer: AWS integration check, unlock stacks and read the first plans, secret-expiry calendar. Review on 2026-11-02. |
+| S2 | 2026-11-03 to 2026-11-16 | Twingate 5.x plan read, per-site telemetry accounts, edge, honeypot and PeerTube designs approved or sent back, stage 2 guide. |
+| S3 | 2026-11-17 to 2026-11-30 | Stage 3 start: Spaces bucket and state backend, audit logging, cross-site dashboards, stack factory, stage 3 cost approval. |
+| S4 | 2026-12-01 to 2026-12-14 | Workload stack (flag off), Portainer hardening, headless client, Discord bridge decision. |
+| S5 | 2026-12-15 to 2026-12-28 | Cloud-optimized daemon install, Functions for timer jobs, throwaway AWS account. |
+| S6 | 2026-12-29 to 2027-01-11 | Discord bridge build, DMZ stack (flag off), cloud reviewer recruiting, Spacelift push policy if the plan allows it. |
+| S7 | 2027-01-12 to 2027-01-25 | Azure and AWS Lambda work, Twingate apt key rotation, the cloud lessons. |
+| S8 | 2027-01-26 to 2027-02-08 | GCP modules with mocked tests, buffer and retro. |
+
 ## Cost per phase
 
 The gate enforces the ceiling of the current phase (`stage-1`, $30). The other rows are proposals from the stage designs; none is approved until its phase becomes current. "Reference spend" is what the reference environment adds to the cloud bill; "extras" are optional builds for a learner or a later decision. Prices are in `docs/cost-prices.json` (DigitalOcean, retrieved 2026-10-10), `docs/cost-prices/aws.json` (retrieved 2026-10-16) and the Spaces price read 2026-10-11 in `docs/cost.md`.
