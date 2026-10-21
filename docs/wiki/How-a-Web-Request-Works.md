@@ -84,11 +84,15 @@ The fields worth knowing:
 
 | Field | What it says | Where you will see it |
 |---|---|---|
-| Subject | Who the certificate is for. Older certificates put the name here. | `subject=` in `openssl` and `curl -v` |
+| Subject | A distinguished name such as `CN=example.com` (the CN is the common name). Older clients matched the URL against the CN; current ones use the SAN and ignore the CN when a SAN is present (est.; see [RFC 9525](https://www.rfc-editor.org/rfc/rfc9525)). | `subject=` in `openssl` and `curl -v` |
 | Subject Alternative Name (SAN) | The names (and IP addresses) the certificate is valid for. **This is the field a client matches your URL against.** | `X509v3 Subject Alternative Name` |
 | Issuer | Who signed it. | `issuer=` |
 | Not before / not after | The validity window. | `notBefore=`, `notAfter=` |
 | Public key and signature algorithm | The key the server proves it holds, and how the issuer signed. | `openssl x509 -text` |
+| `basicConstraints` | Whether this certificate is a CA (`CA:TRUE`, allowed to sign other certificates) or an end-entity certificate (`CA:FALSE`). | `X509v3 Basic Constraints` |
+| `keyUsage` | What the *key* may be used for, such as `digitalSignature` or `keyCertSign` (signing certificates, so a CA needs it). | `X509v3 Key Usage` |
+| `extendedKeyUsage` | The *purposes* the certificate is meant for, such as `serverAuth` (a TLS server) or `clientAuth`. A separate extension from `keyUsage`. | `X509v3 Extended Key Usage` |
+| `nameConstraints` | Only on a CA certificate: the names (DNS or IP) the CA may issue for. | `X509v3 Name Constraints` |
 
 ### Who vouches for the issuer: the chain of trust
 
@@ -100,7 +104,7 @@ A signature only helps if you trust the signer. So the client builds a **chain**
 
 A **certificate authority (CA)** is an organization that signs certificates after checking that the requester controls the name. Roots are used rarely and kept very safe; intermediates do the daily signing, so a leaked intermediate can be revoked without replacing every root. The standard for all of this is X.509, profiled in [RFC 5280](https://www.rfc-editor.org/rfc/rfc5280).
 
-When the client verifies a server, it checks, at least: every signature in the chain is good and ends at a trusted root; **every** certificate in the chain is inside its validity dates **according to the client's own clock**; the name in the URL matches a name in the leaf's SAN; and the certificate is allowed to be used for a server (a key-usage field). It may also check whether a certificate has been revoked (est.; revocation checking differs a lot between clients, so do not assume it).
+When the client verifies a server, it checks, at least: every signature in the chain is good and ends at a trusted root; **every** certificate in the chain is inside its validity dates **according to the client's own clock**; the name in the URL matches a name in the leaf's SAN; and the certificate is meant for a TLS server (the `extendedKeyUsage` extension lists `serverAuth`; `keyUsage` is a separate extension about what the key may do, for example `digitalSignature`), and, for the CAs in the chain, that `basicConstraints` says `CA:TRUE`. It may also check whether a certificate has been revoked (est.; revocation checking differs a lot between clients, so do not assume it).
 
 Two consequences that surprise people:
 
@@ -397,7 +401,7 @@ openssl verify -CAfile ca.crt srv.crt
 openssl x509 -in srv.crt -noout -subject -issuer -dates -ext subjectAltName
 ```
 
-The subject is `CN=localhost`, the issuer is `CN=Throwaway Test CA`, the window is one day, and the SAN is `DNS:localhost`. Three details to notice. The CA's `nameConstraints` extension limits it to `localhost` ([RFC 5280, section 4.2.1.10](https://www.rfc-editor.org/rfc/rfc5280)): even if someone stole `ca.key`, certificates for other names would fail verification on a client that trusts this CA. (Try it if you like: sign a certificate whose SAN is `DNS:example.com`; `openssl verify` reports `permitted subtree violation`.) The CA is valid for only two days, so it expires by itself. And the server's private key `srv.key` never left your folder, which is how real issuing works: only the signing request travels.
+The subject is `CN=localhost`, the issuer is `CN=Throwaway Test CA`, the window is one day, and the SAN is `DNS:localhost` (the SAN, not the CN, is what the client matches). `openssl x509 -in srv.crt -noout -ext extendedKeyUsage,basicConstraints` shows the purpose `TLS Web Server Authentication` (that is `serverAuth`) and `CA:FALSE`, from `srv.ext`; `-in ca.crt -noout -ext keyUsage,basicConstraints,nameConstraints` shows the CA side. Three details to notice. The CA's `nameConstraints` extension limits it to `localhost` ([RFC 5280, section 4.2.1.10](https://www.rfc-editor.org/rfc/rfc5280)): even if someone stole `ca.key`, certificates for other names would fail verification on a client that trusts this CA. (Try it if you like: sign a certificate whose SAN is `DNS:example.com`; `openssl verify` reports `permitted subtree violation`.) The CA is valid for only two days, so it expires by itself. And the server's private key `srv.key` never left your folder, which is how real issuing works: only the signing request travels.
 
 **Undo.** Nothing to undo yet; the whole lab is removed at the end.
 
