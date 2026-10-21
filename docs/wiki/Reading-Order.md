@@ -176,6 +176,7 @@ Not a path. Open these when you need them; every one is linked from the sidebar.
 | [Lessons learned](Lessons-Learned.md) | You want the things that broke during the build, and what fixed them. |
 | [Roadmap](Roadmap.md) | You want to know what is built and what is only planned. |
 | [Git from zero: your first change](Git-From-Zero.md) | You have never used git, a terminal or GitHub Desktop. A side page to [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md); read it first if those are new. About 90 minutes with the exercise; not counted in the path totals. |
+| [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) | The words API, token, HTTP, JSON, scope or JWT are new or fuzzy. A foundations side page to [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md); read it before that page if those words are new. About 60 minutes with the free exercises (est.); not counted in the path totals. |
 | [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) | You wonder why the droplets have public addresses and no NAT gateway. A side page to [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md); not counted in the path totals. |
 | [How this project is planned](How-This-Project-Is-Planned.md) | You want to know how the work is organised: the board, sprints, sizes, definition of done. |
 | [Screenshots policy](Screenshots-Policy.md) | You are adding a picture to a page, or want to know why a console is described but not shown. |

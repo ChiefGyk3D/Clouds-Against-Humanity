@@ -16,7 +16,7 @@ A system can get the first right and the second badly wrong. The classic VPN fai
 
 ## What a secret is
 
-A **secret** is any string that lets its holder do something: log in, call an API, decrypt data. The common kinds:
+A **secret** is any string that lets its holder do something: log in, call an [API](APIs-and-Tokens-From-Zero.md), decrypt data. If API, token, scope or JWT are new words, read [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) first. The common kinds:
 
 | Kind | What it is | Looks like | In this project |
 |---|---|---|---|
