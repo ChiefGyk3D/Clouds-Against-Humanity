@@ -108,7 +108,7 @@ Sprints use the [Roadmap schedule](../../wiki/Roadmap.md#schedule). S1 is the ma
 - **For:** someone who can read a sentence but has never opened a config file; everyone who reaches core step 6 (workflows in YAML) or step 12 (a JSON log line).
 - **Learning goals:** read and write YAML, JSON and HCL and say which one a given file in this repo is; spot the three classic syntax mistakes (indentation, quotes, trailing commas); say what an environment variable is, how a program reads one, why a token must not be in the command line; read a short regular expression and write two.
 - **Prerequisite:** core step 5 (What is infrastructure as code).
-- **Theory path (free):** the lesson plus ten predict-then-check exercises on the repo's own files (`.github/workflows`, `stacks/*/cost.json`, a `.tf` file). Validate with the free tools already on a laptop (`python3 -m json.tool`, a YAML linter if installed).
+- **Theory path (free):** the lesson plus ten predict-then-check exercises on the repo's own files (`.github/workflows`, `stacks/*/cost.json`, a `.tf` file). Validate with the free tools already on a laptop (`python3 -m json.tool`, or `python -m json.tool` on Windows; `ConvertFrom-Json` in PowerShell; a YAML linter if installed).
 - **Hands-on path (optional paid):** none needed; every exercise runs locally. Cost $0.
 - **Mini-loop:** Build a valid workflow file. Break it with a tab character. Detect the error from the linter's message. Evade: show how a value that parses as a number or a boolean (the "Norway problem") silently changes meaning. Defend: schema validation in CI. (Local only.)
 - **Size:** M.
@@ -122,7 +122,7 @@ Sprints use the [Roadmap schedule](../../wiki/Roadmap.md#schedule). S1 is the ma
 - **Prerequisite:** the sibling `Linux-for-Enterprise-Beginners` page (files, permissions, sudo) and F1. This lesson must not repeat the Linux lesson; it starts where that one ends.
 - **Theory path (free):** a local shell on Linux, macOS (Terminal) or Windows (WSL or PowerShell); exercises on the repo's `scripts/` directory read-only.
 - **Hands-on path (optional paid):** none needed. Cost $0.
-- **Mini-loop:** Build a script that lists the open ports on the learner's own machine. Break it by running it with a space in a filename. Detect with `shellcheck` (free). Evade: show an unquoted-variable injection with a harmless filename. Defend: quote everything, `set -euo pipefail`, and read-only by default. (Local only.)
+- **Mini-loop:** Build a script that lists the open ports on the learner's own machine. Break it by running it with a space in a filename. Detect with a linter. Evade: show an unquoted-variable injection with a harmless filename. Defend: quote everything and fail on the first error. The lesson teaches one supported shell per track and names it at the top: **bash** on Linux, macOS or WSL (linter `shellcheck`; defence `set -euo pipefail`; listing with `ss -tln`) and **PowerShell** on Windows (linter PSScriptAnalyzer; defence `Set-StrictMode -Version Latest` and `$ErrorActionPreference = 'Stop'`; listing with `Get-NetTCPConnection -State Listen`). Each step has both forms or says it is track-specific. Read-only by default. (Local only.)
 - **Size:** L.
 - **Suggested sprint:** S4.
 - **Links into:** [Git from zero](../../wiki/Git-From-Zero.md), [Doppler and secrets](../../wiki/Doppler-and-Secrets.md) (the doppler-env script), [CI, tests and the cost gate](../../wiki/CI-Tests-and-Cost-Gate.md).
@@ -132,9 +132,9 @@ Sprints use the [Roadmap schedule](../../wiki/Roadmap.md#schedule). S1 is the ma
 - **For:** anyone who types a URL and wants to know what happens next; essential before the Twingate and ZTNA pages (core steps 11 and 12).
 - **Learning goals:** follow one HTTPS request from the name to the page: DNS, TCP handshake, TLS handshake, HTTP request and response; read a certificate's subject, issuer and expiry; say what a reverse proxy, load balancer and CDN each add; tell a client error (4xx) from a server error (5xx).
 - **Prerequisite:** core step 3 (Networking basics for this project).
-- **Theory path (free):** `dig`, `curl -v` and the browser's certificate viewer against a public site the learner does not own, read-only and one request each. Worked traces of the repo's connector setup (outbound TLS only).
-- **Hands-on path (optional paid):** a $4 or $6 droplet with a self-signed certificate and a small web server on a private-only firewall rule; destroy after. Cost up to $6 a month while it exists.
-- **Mini-loop:** Build a self-signed certificate on a lab web server. Break it by setting the lab clock past its expiry. Detect: `openssl s_client` shows the expiry and the browser warns. Evade: show why clicking through a warning defeats the check. Defend: automated renewal and an expiry alert (links to the secret-expiry calendar in the Roadmap).
+- **Theory path (free):** `dig` (or `Resolve-DnsName` in PowerShell), `curl -v` (`curl.exe` on Windows) and the browser's certificate viewer against a public site the learner does not own, read-only and one request each. Worked traces of the repo's connector setup (outbound TLS only).
+- **Hands-on path (optional paid):** two droplets in the learner's own account and one private VPC: a web server with no public inbound rule, and a small client droplet that runs `openssl s_client` and `curl` against the server's private address. The learner reaches the client droplet over SSH with a firewall rule scoped to the learner's own current address only (a /32, removed at teardown), never `0.0.0.0/0`. A browser is not needed; the browser warning is shown in the theory path against a local test server on the laptop. Cost up to $12 a month while both exist (est.; two `s-1vcpu-1gb`, or $8 with two `s-1vcpu-512mb-10gb`); destroy both after, using the teardown checklist pattern.
+- **Mini-loop:** Build a throwaway test certificate authority and a short-lived server certificate signed by it, and add that test CA (only) to the client's trust store, so the only fault left to see is expiry (a bare self-signed certificate warns anyway, which would hide the lesson). Break: issue a second certificate that has already expired (a start and end date in the past), rather than moving any clock; the lesson says which clock matters: certificate validity is checked against the **client's** clock, so changing the server's clock changes nothing, and `openssl verify -attime <time>` or `s_client -verify_return_error` shows the verifier-time check without touching a system clock. Detect: `openssl s_client` reports the verify error and the `notAfter` date. Evade: show why clicking through a warning defeats the check. Defend: automated renewal and an expiry alert (links to the secret-expiry calendar in the Roadmap).
 - **Size:** L.
 - **Suggested sprint:** S3.
 - **Links into:** [Networking basics](../../wiki/Networking-Basics-for-This-Project.md), [Why ZTNA and not a VPN](../../wiki/Why-ZTNA-Not-a-VPN.md), [Enterprise identity and secrets at scale](../../wiki/Enterprise-Identity-and-Secrets-at-Scale.md) (certificates).
@@ -144,9 +144,9 @@ Sprints use the [Roadmap schedule](../../wiki/Roadmap.md#schedule). S1 is the ma
 - **For:** anyone who has said "it's encrypted" or "it's hashed" without being sure which, or who needs core step 4 and step 6 to make sense.
 - **Learning goals:** state in one sentence what encoding, hashing, encryption (symmetric and asymmetric) and signing each give you and what they do not; explain why a password is hashed with a salt and a slow hash while a file is encrypted; explain why a commit hash and a pinned action hash detect tampering; explain the key pair and the SSH host fingerprint prompt.
 - **Prerequisite:** core step 4 (Identity, secrets and zero trust basics).
-- **Theory path (free):** `sha256sum`, `openssl enc` and `ssh-keygen` on the learner's own machine, exercises with deliberately wrong guesses.
+- **Theory path (free):** `sha256sum` (or `shasum -a 256` on macOS, `Get-FileHash` in PowerShell), `openssl enc` and `ssh-keygen` on the learner's own machine, exercises with deliberately wrong guesses.
 - **Hands-on path (optional paid):** none needed. Cost $0.
-- **Mini-loop:** Build a hash of a file and a signature of that hash. Break: change one byte. Detect: the hash and signature check fail. Evade: show a length-extension or an unsalted-hash lookup in words only, no tooling against anything real. Defend: salted slow hashes, signed commits, pinned dependencies.
+- **Mini-loop:** Build a hash of a file (`sha256sum` on Linux, `shasum -a 256` on macOS, `Get-FileHash` in PowerShell) and a signature of that hash (`openssl` or `ssh-keygen -Y sign`). Break: change one byte. Detect: the hash and signature check fail. Evade: show a length-extension or an unsalted-hash lookup in words only, no tooling against anything real. Defend: salted slow hashes, signed commits, pinned dependencies.
 - **Size:** M.
 - **Suggested sprint:** S3.
 - **Links into:** [Identity, secrets and zero trust basics](../../wiki/Identity-Secrets-and-Zero-Trust-Basics.md), [Git, GitHub and pull requests](../../wiki/Git-GitHub-and-Pull-Requests.md) (pinned hashes).
@@ -158,7 +158,7 @@ Sprints use the [Roadmap schedule](../../wiki/Roadmap.md#schedule). S1 is the ma
 - **Prerequisite:** core step 3, and F3 for the packet walk.
 - **Theory path (free):** a subnet worksheet, and a firewall rule-reading exercise on this repo's `DigitalOcean-Network-and-Firewalls` page. Optionally a free local VM with `nft` or `ufw`.
 - **Hands-on path (optional paid):** two $4 or $6 droplets in one VPC with a deliberately wrong firewall rule, destroyed after. Cost up to $12 a month while they exist (est.; two `s-1vcpu-1gb`). Use only the learner's own account.
-- **Mini-loop:** Build a default-deny rule set. Break: add `0.0.0.0/0` on one port. Detect: the learner's own port scan from another lab host shows it. Evade: show why moving SSH to another port hides nothing. Defend: close it and verify with the same scan.
+- **Mini-loop:** Build a default-deny rule set. Break: add `0.0.0.0/0` on one port. Detect: a port scan run from the second droplet against the first one's private address (both in the learner's own account, no other target) shows it. Evade: show why moving SSH to another port hides nothing. Defend: close it and verify with the same scan.
 - **Size:** L.
 - **Suggested sprint:** S3.
 - **Links into:** [Networking basics](../../wiki/Networking-Basics-for-This-Project.md), [DigitalOcean network and firewalls](../../wiki/DigitalOcean-Network-and-Firewalls.md), [Enterprise networks](../../wiki/Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md), [Why not private droplets (yet)](../../wiki/Why-Not-Private-Droplets-Yet.md) (NAT).
@@ -168,9 +168,9 @@ Sprints use the [Roadmap schedule](../../wiki/Roadmap.md#schedule). S1 is the ma
 - **For:** anyone who read core step 2 and 7 and still blurs a VM, a container and a managed service.
 - **Learning goals:** draw the stack for a VM and a container and say what is shared; explain IaaS, PaaS and SaaS by who patches what; place Kubernetes, a load balancer and a managed database on that map; say what the shared responsibility model leaves to you; list what is needed to restore a lost machine.
 - **Prerequisite:** core steps 2 and 7.
-- **Theory path (free):** the lesson plus a table-filling exercise using the three vendor pages already linked in the provider pages. Optionally Docker on the learner's laptop (free).
+- **Theory path (free):** the lesson plus a table-filling exercise using the three vendor pages already linked in the provider pages. Optionally Docker on the learner's laptop (free), but only for the safe steps below; the socket-mount step is not run on a laptop.
 - **Hands-on path (optional paid):** none beyond a laptop. Cost $0.
-- **Mini-loop:** Build a container from a pinned image. Break: run it as root with the host's Docker socket mounted. Detect: inspect the container and see the mount. Evade: describe a container escape in words only. Defend: non-root, read-only filesystem, no socket mount.
+- **Mini-loop:** Build a container from a pinned image. Break: show a container run as root, then show the Docker-socket mount **without executing it**: read the command and the daemon's documentation, and inspect a pre-made `docker inspect` output that includes the mount. Mounting the host's Docker socket gives the container root-equivalent control of the host, so it is run, if at all, only inside a disposable, isolated VM or sandbox with nothing on it (no shared folders, no credentials, no network to the learner's other machines), destroyed afterwards; never on the learner's laptop or on any machine they care about. Detect: inspect the container and see the mount. Evade: describe a container escape in words only. Defend: non-root, read-only filesystem, no socket mount.
 - **Size:** M.
 - **Suggested sprint:** S4.
 - **Links into:** [What is the cloud](../../wiki/What-Is-the-Cloud.md), [Containers and Docker basics](../../wiki/Containers-and-Docker-Basics.md), [Enterprise infrastructure differences](../../wiki/Enterprise-Infrastructure-Differences.md) (shared responsibility).
@@ -206,7 +206,7 @@ Sprints use the [Roadmap schedule](../../wiki/Roadmap.md#schedule). S1 is the ma
 - **Prerequisite:** F1 (regular expressions), F2, and core step 14.
 - **Theory path (free):** sample log files built at run time; read-only exercises.
 - **Hands-on path (optional paid):** the existing [Lab: a synthetic multi-site monitoring stack](../../wiki/Lab-Demo-Monitoring-Stack.md) runs locally (free). A cloud mini SOC is already costed on [Build your own mini SOC](../../wiki/Build-Your-Own-Mini-SOC.md) ($35 to $53 total with the reference environment, per the Roadmap cost table).
-- **Mini-loop:** Build a rule that fires on five failed logins in a minute. Break: send four. Detect: no alert, and the lesson says why. Evade: describe slow-and-low guessing. Defend: tune the window and add a second rule.
+- **Mini-loop:** Build a rule that fires on five failed logins in a minute, tested only against a synthetic log file the lesson generates (no real login attempts against any host). Break: add four fake failure lines. Detect: no alert, and the lesson says why. Evade: describe slow-and-low guessing. Defend: tune the window and add a second rule.
 - **Size:** M.
 - **Suggested sprint:** S6.
 - **Links into:** [Cloud telemetry: what and why](../../wiki/Cloud-Telemetry-What-and-Why.md), [Detection, Wazuh and the landscape](../../wiki/Detection-and-Monitoring-Wazuh-and-the-Landscape.md), [Build your own mini SOC](../../wiki/Build-Your-Own-Mini-SOC.md).
@@ -253,7 +253,7 @@ Sprints use the [Roadmap schedule](../../wiki/Roadmap.md#schedule). S1 is the ma
 |---|---|---|---|---|---|
 | F1 | Configuration files and data formats | M | S2 | Core 5 | $0 |
 | F12 | Working in a company (practicum) | S | S2 | Core 9, Enterprise change mgmt | $0 |
-| F3 | How a web request works | L | S3 | Core 3 | up to $6 a month |
+| F3 | How a web request works | L | S3 | Core 3 | up to $12 a month (est.) |
 | F4 | Hashing, encryption and keys | M | S3 | Core 4 | $0 |
 | F5 | Subnets, routing, NAT, firewall by hand | L | S3 | Core 3, F3 | up to $12 a month (est.) |
 | F2 | The terminal and a first script | L | S4 | Linux sibling lesson, F1 | $0 |
@@ -275,7 +275,7 @@ Gaps this set does not cover, on purpose: Linux (sibling lesson), APIs and token
 3. **Mini-loops are local or in the learner's own account.** No lesson tells a learner to scan, attack or probe a host they do not own. "Evade" is taught as a concept and a defensive lesson, in words, not as a working evasion for a real target. Synthetic data only; any sample token or key is built at run time and never committed.
 4. **Costs follow the project's cost gate and price files:** cite the file and retrieval date; mark anything unread as est.; a hands-on path that spends money says the cost and the teardown step first.
 5. **Screenshots:** none of a real vendor console; use the "Screenshot to take yourself" placeholder from the [Screenshots policy](../../wiki/Screenshots-Policy.md).
-6. **No lesson is on a reading path until the page exists, and the lesson is added to the sidebar and Reading order in the same pull request.** `tests/test_wiki_navigation.py` enforces it.
+6. **A lesson is added to the sidebar and to a Reading order path in the same pull request that adds the page (proposed convention).** `tests/test_wiki_navigation.py` checks only that each page appears in the sidebar **or** in Reading order (an OR, not both), that sidebar and Next-line targets exist, and that no page repeats within one path. It does not check that a lesson is added in the same pull request, or that it is in both places. Doing both in one pull request is therefore a convention this plan proposes; making it a rule would need a test change (require every non-lookup page in both), which is proposed here and not made.
 
 ## 6. Recommended Foundations reading track for Reading order
 
