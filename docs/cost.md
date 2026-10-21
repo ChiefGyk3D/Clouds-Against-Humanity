@@ -9,7 +9,7 @@ Working ceiling: $30 per month in the current phase (`stage-1`). The ceiling is 
 
 The region is `tor1` (Toronto), chosen on 2026-10-11 after a new account got `422 Size is not available in this region` for the $6 `s-1vcpu-1gb` in nyc3. Check `GET /v2/sizes` and `GET /v2/regions` for your own account before picking a region: availability of the cheap legacy sizes differs by region and by account, and the newer US sites (Atlanta, Richmond, Kansas City, Memphis) start at about $18 for 1 GB.
 
-Source of prices: `docs/cost-prices.json`, retrieved 2026-10-10 from the DigitalOcean sizes API.
+Source of prices: `docs/cost-prices.json`, retrieved 2026-10-21 from the DigitalOcean sizes API (five sizes re-read live for tor1, table below; the file's prices were first read 2026-10-10 and none changed).
 
 ## Stage 3 estimate (not approved)
 

@@ -1,6 +1,6 @@
 {
-  "retrieved": "2026-10-10",
-  "source": "DigitalOcean sizes API, regular (non-s5) droplets",
+  "retrieved": "2026-10-21",
+  "source": "DigitalOcean sizes API, regular (non-s5) droplets; the five sizes in docs/cost.md re-read live for tor1 on 2026-10-21",
   "backups_fraction": 0.2,
   "backups_fraction_verified": true,
   "backups_source": "https://docs.digitalocean.com/products/backups/details/pricing/ (basic plans: weekly 20.0 percent, daily 30.0 percent of the Droplet cost per month)",

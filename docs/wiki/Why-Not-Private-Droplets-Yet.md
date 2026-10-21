@@ -6,10 +6,10 @@ A common first reaction to this project's design is: "Why do the connector dropl
 
 ## The two designs
 
-- **What this project does:** each droplet has a public IP address (DigitalOcean gives every droplet one and you cannot remove it), and the Cloud Firewall attached to it has **zero inbound rules**. Nothing on the internet can start a connection to the droplet. The droplet only makes outbound connections, for example to Twingate.
+- **What this project does:** each droplet has a public IP address (DigitalOcean gives every droplet one and you cannot remove it). The baseline Cloud Firewall attached to it has **zero inbound rules from the internet**. The connector droplets add one narrow exception, written in `stacks/10-access/main.tf`: TCP 22 between the connectors, allowed only from the connector tag, never from an address range. So the accurate wording is "zero inbound from the internet", not "zero inbound at all". Nothing on the internet can start a connection to the droplet, and the droplet itself makes outbound connections, for example to Twingate.
 - **The "private droplet" alternative:** the droplet has only a private address inside the VPC, and a **NAT gateway** (a shared exit door) lets it reach the internet outbound. In plain terms, NAT lets many private machines share one public address for outbound traffic.
 
-Both designs aim at the same goal: nothing can connect in. They differ in whether the machine has a public address at all.
+Both designs aim at the same goal: nothing from the internet can connect in. They differ in whether the machine has a public address at all.
 
 ## Cost: the NAT gateway costs more than the whole budget
 
@@ -17,20 +17,20 @@ This project has a hard monthly ceiling of $30 (see [How this project is planned
 
 | Option | What it costs | Source |
 |---|---|---|
-| Public IP on each droplet, firewall with zero inbound rules | No separate charge in this project's price notes (est.; the address comes with the droplet) | DigitalOcean network and firewalls page |
+| Public IP on each droplet, firewall with no inbound rules from the internet | Not priced in this project's notes. Whether the plan carries a separately billed public IPv4 is UNVERIFIED (edge design, section 9); no number is given | Edge design, section 9 |
 | DigitalOcean NAT gateway | $40.00 per increment, 100 GiB included | Edge design, section 9, DigitalOcean VPC pricing page read 2026-10-19 |
 | AWS NAT gateway, for comparison | $0.045/h = $32.85 a month, plus $3.65 for its address, plus $0.045/GB: at least $36.50 a month | Phase 0 findings, section 4, list prices read 2026-10-16 |
 | AWS public address per VM, for comparison | $0.005/h each, $3.65 a month | Phase 0 findings, section 4 |
 
-A NAT gateway at $40 a month is more than the entire $30 ceiling, so it cannot fit at all. On AWS and Azure the findings say the same thing: the cheapest zero-inbound design is a public address with no inbound rules, "because a NAT gateway costs more than the whole ceiling".
+A NAT gateway at $40 a month is more than the entire $30 ceiling, so it cannot fit at all. On AWS and Azure the findings say the same thing: the cheapest design with no inbound from the internet is a public address with no inbound rules, "because a NAT gateway costs more than the whole ceiling".
 
 One cloud is the exception: on GCP, Cloud NAT is cheaper than external addresses at low traffic (about $5.69 a month for two VMs, against $3.65 each for addresses), until roughly 36 GiB a month of processed traffic. That is why the answer is "it depends on the cloud", not "NAT is always bad".
 
 ## Exposure: the firewall gives the same result
 
-People worry that a public address means a public target. What matters is whether anything answers. A stateful firewall with no inbound rules drops every unsolicited packet before it reaches the machine. The droplet's own connections, such as the one to Twingate, are allowed back in as replies, because the firewall remembers that the droplet started them. Seen from the internet, the public address and a private address behave the same way: nothing opens a connection to it.
+People worry that a public address means a public target. What matters is whether anything answers. A stateful firewall with no inbound rules from the internet drops every unsolicited packet before it reaches the machine. The droplet's own connections, such as the one to Twingate, are allowed back in as replies, because the firewall remembers that the droplet started them. Seen from the internet, the public address and a private address behave the same way: nothing opens a connection to it.
 
-This is also why the project checks it from the outside: an external zero-open-ports check, and a plan policy that denies inbound rules on core tags. The design relies on the firewall being right, so it tests the firewall.
+This is also why the project checks it from the outside: an external zero-open-ports check, and a plan policy (`.spacelift/policies/plan.rego`) that allows inbound rules on core tags only when they are scoped to a tag, and denies any rule that is open to the whole internet or not scoped to a tag. The design relies on the firewall being right, so it tests the firewall.
 
 ## The honest tradeoffs
 
@@ -40,19 +40,19 @@ A public address is not identical to a private one. What you give up:
 - **The address is visible.** Scanners will find the address and see that it answers nothing. That is noise, not an attack, but it shows up in logs.
 - **IPv6 needs checking too.** An open IPv6 rule is the classic way to undo a "no inbound" design; the Stage 1 hardening list includes an IPv6 check.
 - **No stable outbound address.** NAT would give a single, fixed outbound address you could allow-list elsewhere. Without it, outbound traffic comes from each droplet's own address, which changes when a droplet is rebuilt.
-- **Droplet Console.** The Roadmap notes a NAT gateway design "removes the Droplet Console"; the project would lose that emergency way in.
+- **Droplet Console (open question).** The Roadmap says a NAT gateway design removes the Droplet Console, but the edge design records that as unverified for private droplets ("I did not verify those three"). Whether private droplets keep console access is therefore an open question, not a settled loss.
 - **Compliance.** Some rules say workloads must not have public addresses at all. This project has no such rule, but a company copying it might.
 
 ## What would change the answer
 
 The Roadmap already names when to revisit this: when the ceiling passes roughly $75 to $80, when a static egress IP is needed, or when a compliance reason appears. Two parts of the plan bear on it directly:
 
-- **The edge (DMZ) phase.** It adds a deliberately public host in a VPC of its own, with inbound ports open on purpose. That host is a different case from the connectors, which have zero inbound; the edge design keeps the connectors at zero inbound and puts the public services somewhere separate. Note the edge phase's ceiling is $35 (ruled 2026-10-19, nothing approved to spend yet), which still does not buy a $40 NAT gateway. The design's own NAT figure is the same $40 increment.
+- **The edge (DMZ) phase.** It adds a deliberately public host in a VPC of its own, with inbound ports open on purpose. That host is a different case from the connectors, which take no inbound from the internet; the edge design keeps the connectors that way and puts the public services somewhere separate. Note the edge phase's ceiling is $35 (ruled 2026-10-19, nothing approved to spend yet), which still does not buy a $40 NAT gateway. The design's own NAT figure is the same $40 increment.
 - **A ceiling raise.** The ceiling can only rise on purpose, in a reviewed change. If it passed the roughly $75 to $80 range the Roadmap names, private-only droplets behind NAT become affordable and worth another look.
 
 ## What to take away
 
-- Public address plus a firewall with zero inbound rules gives the same "nothing connects in" result as a private droplet, with no separate address charge in the project's price notes (est.).
+- A public address plus a firewall with no inbound rules from the internet gives the same "nothing connects in" result as a private droplet. Whether the public IPv4 carries its own charge is UNVERIFIED, so no figure is claimed.
 - A NAT gateway ($40 a month on DigitalOcean) costs more than this project's whole $30 ceiling.
 - The tradeoff is real: you rely on the firewall staying correct, so the project tests it from the outside.
 
