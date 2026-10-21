@@ -20,6 +20,8 @@ Prices below are DigitalOcean's at the time this project's price table was fetch
 | **Load balancers, managed databases, Kubernetes nodes** | Each starts around the price of a droplet or more | Not used here, on purpose |
 | **Projects, VPCs, firewalls, tags, SSH keys** | **Free** | Which is why stage 0 of this project costs $0 |
 
+On DigitalOcean specifically: This is my DigitalOcean referral link ([https://m.do.co/c/e3aaa65aed6b](https://m.do.co/c/e3aaa65aed6b)). DigitalOcean's referral program page (https://www.digitalocean.com/referral-program, read 2026-10-22) says the person who refers gets $25 after the new account spends its first $25, and I would rather you read DigitalOcean's referral terms than take my summary for what you get. It helps me fund more open-source cloud projects like this one. Using it is optional, the project works exactly the same without it, and nothing here is gated behind it.
+
 The other services in this project (Spacelift, Doppler, Twingate, GitHub) have free tiers that cover a one-person lab at the time of writing. The project's [cost page](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md) deliberately lists those limits as "not yet verified", because a wiki that promises a free tier is wrong the day the vendor changes it. Check the pricing page yourself before you depend on it.
 
 ## How bills get out of hand

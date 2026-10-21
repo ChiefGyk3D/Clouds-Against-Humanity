@@ -1,4 +1,4 @@
-**[Home](Home.md)** | **[Reading order](Reading-Order.md)**
+**[Home](Home.md)** | **[Reading order](Reading-Order.md)** | **[Why this exists](Why-This-Exists.md)**
 
 <details open>
 <summary><b>Core path: read in this order</b></summary>
@@ -7,6 +7,7 @@
 2. [What is the cloud](What-Is-the-Cloud.md)
 3. [Networking basics](Networking-Basics-for-This-Project.md)
 4. [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
+    - Side page: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md)
 5. [Infrastructure as code](What-Is-Infrastructure-as-Code.md)
 6. [Git and pull requests](Git-GitHub-and-Pull-Requests.md)
     - Side page: [Git from zero: your first change](Git-From-Zero.md)
