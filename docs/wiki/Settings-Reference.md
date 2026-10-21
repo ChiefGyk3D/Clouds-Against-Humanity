@@ -254,6 +254,27 @@ Stack variables are the settings you set per site. Module variables are filled i
 | `metadata_lock`<br>Lock the metadata endpoint (169.254.169.254) to root and the do-agent user. Default false changes nothing: user_data is byte-identical (golden hashes in the tests). true adds an nftables table, a script, a systemd unit and the nftables package to user_data, which replaces the instance. | `bool` | `false` | none; non-nullable (null means false) | the calling stack | `true` | public | exists |
 | `node_exporter`<br>Opt-in node exporter bound to the private address, passed to the bootstrap module, which validates it. Default {} changes nothing (user_data is byte-identical, golden hashes in the tests). enabled = true changes user_data and replaces the instance. | `object({enabled = optional(bool, false), port = optional(number, 9100)})` | `{}` | none (validated in modules/twingate-bootstrap); node_exporter is non-nullable (null means {}) | the calling stack | `{ enabled = true, port = 9100 }` | public | exists |
 
+### stacks/30-state
+
+| Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
+|---|---|---|---|---|---|---|---|
+| `state_bucket_enabled`<br>Create the private, versioned Spaces bucket for the daemons' state. Off by default: with it off the stack plans zero resources. Turning it on is a maintainer decision (stage 3 is not approved) and needs the cost gate to price the bucket first. Never applied. | `bool` | `false` | none | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `false` | public | exists |
+| `region`<br>DigitalOcean region slug the bucket is created in. Whether Spaces is offered there is not checked. | `string` | `"tor1"` | ^[a-z]{3}[0-9]\$ (three lowercase letters and a digit) | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `tor1` | public | exists |
+| `resource_key`<br>Key used in the bucket name (cah-&lt;key&gt;-state). Empty means region. Immutable for the life of the bucket: a different name is a different, empty bucket. | `string` | `""` | empty, or 2 to 24 characters: a lowercase letter, then lowercase letters, digits or hyphens | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `tor1-b` | public | exists |
+| `noncurrent_version_days`<br>Days a replaced or deleted version is kept before it expires; the restore window. | `number` | `90` | whole number from 1 to 3650 | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `90` | public | exists |
+| `abort_incomplete_upload_days`<br>Days after which an unfinished multipart upload is aborted. | `number` | `7` | whole number from 1 to 365 | tfvars (local plans) or Spacelift stack environment (TF_VAR_*) | `7` | public | exists |
+
+### modules/spaces-bucket
+
+| Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
+|---|---|---|---|---|---|---|---|
+| `layer`<br>Stack layer, used in the bucket name (for example cah). | `string` | required | 2 to 16 lowercase letters or digits, starting with a letter | set by the calling stack (not a user setting) | `cah` | public | exists |
+| `purpose`<br>Last part of the bucket name (&lt;layer&gt;-&lt;region or resource_key&gt;-&lt;purpose&gt;). | `string` | `"state"` | 2 to 16 lowercase letters or digits, starting with a letter | set by the calling stack (not a user setting) | `state` | public | exists |
+| `region`<br>DigitalOcean region slug. | `string` | required | ^[a-z]{3}[0-9]\$ (three lowercase letters and a digit) | set by the calling stack (not a user setting) | `tor1` | public | exists |
+| `resource_key`<br>Key used in the bucket name in place of region. Empty means region. Immutable for the life of a bucket. | `string` | `""` | empty, or 2 to 24 characters: a lowercase letter, then lowercase letters, digits or hyphens | set by the calling stack (not a user setting) | `tor1-b` | public | exists |
+| `noncurrent_version_days`<br>Days a replaced or deleted version is kept before it expires. | `number` | `90` | whole number from 1 to 3650 | set by the calling stack (not a user setting) | `90` | public | exists |
+| `abort_incomplete_upload_days`<br>Days after which an unfinished multipart upload is aborted. | `number` | `7` | whole number from 1 to 365 | set by the calling stack (not a user setting) | `7` | public | exists |
+
 ## Values read from `cost.json`, `approved.json` and the price table
 
 These are not OpenTofu variables. The cost gate (`scripts/cost_check.py`) reads them, and stack 10 reads its droplet sizes from `cost.json`, so there is one source of truth for money. To change a size you edit `cost.json` and `docs/stages/approved.json` together; that is the lesson.
@@ -302,6 +323,8 @@ This table lists names and where they live. It never holds a value. See [Doppler
 | `Doppler hostboot bootstrap token` | secret | Doppler service token for the config cah-&lt;resource_key&gt;-hostboot, created out of band; handed to the stack as TF_VAR_log_shipping_bootstrap_token | stacks/10-access (user_data of each connector with log_shipping.enabled) | sensitive stack variable log_shipping_bootstrap_token; the first-boot script deletes the token file | UNVERIFIED: must expire on its own within a day; revoke after the first boot if Doppler's minimum is longer | create a new token for each rebuild; revoke the old one | planned |
 | `Wazuh enrollment password` | secret | Doppler hostboot config (one per site) | each connector with log_shipping.enabled, pulled at first boot as WAZUH_ENROLLMENT_PASSWORD | first-boot pull, never a variable | rotated after each enrollment window | rotate on the manager | planned |
 | `Grafana admin password` | secret | Doppler hostboot config (one per site) | optional NOC host | first-boot pull, never a variable | none | rotate in Doppler and on the host | planned |
+| `SPACES_ACCESS_KEY_ID` | secret | Doppler config prd | stacks/30-state | SPACES_ACCESS_KEY_ID | UNVERIFIED: set when the key is made | docs/stages/03-state-bucket.md | planned |
+| `SPACES_SECRET_ACCESS_KEY` | secret | Doppler config prd | stacks/30-state | SPACES_SECRET_ACCESS_KEY | UNVERIFIED: set when the key is made | docs/stages/03-state-bucket.md | planned |
 
 ## Settings that live somewhere else
 

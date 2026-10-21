@@ -44,6 +44,7 @@ mock_provider "digitalocean" {
 mock_provider "twingate" {}
 """,
     "stacks/20-telemetry": 'mock_provider "twingate" {}\n',
+    "stacks/30-state": 'mock_provider "digitalocean" {}\n',
 }
 
 RUN = """\

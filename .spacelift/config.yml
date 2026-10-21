@@ -30,3 +30,14 @@ stacks:
     before_apply:
       - . /mnt/workspace/source/scripts/spacelift/doppler-env.sh
       - cah_doppler_env TWINGATE_API_TOKEN TWINGATE_NETWORK
+
+  # Not created in Spacelift yet (stage 3 is unapproved). The two SPACES_ names
+  # are the Spaces admin key the DigitalOcean provider reads to manage a bucket;
+  # they are not the daemons' keys (docs/stages/03-state-bucket.md).
+  cah-30-state:
+    before_init:
+      - . /mnt/workspace/source/scripts/spacelift/doppler-env.sh
+      - cah_doppler_env DIGITALOCEAN_TOKEN SPACES_ACCESS_KEY_ID SPACES_SECRET_ACCESS_KEY
+    before_apply:
+      - . /mnt/workspace/source/scripts/spacelift/doppler-env.sh
+      - cah_doppler_env DIGITALOCEAN_TOKEN SPACES_ACCESS_KEY_ID SPACES_SECRET_ACCESS_KEY

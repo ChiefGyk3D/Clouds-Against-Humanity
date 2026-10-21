@@ -1,0 +1,13 @@
+{
+  "stack": "stacks/30-state",
+  "note": "The one resource address stack 30 plans with state_bucket_enabled true and the defaults (region tor1, resource_key empty). With the flag false (the default) the stack plans nothing, so a plan of the live, unapplied stack has no resources at all. scripts/plan_noop_check.py applies this list only to a stack that has been applied; nothing has been. tests/test_golden_state_bucket.py ties this file to the sources. A pull request that adds a resource updates this file on purpose.",
+  "addresses": {
+    "module.state_bucket[0].digitalocean_spaces_bucket.this": {
+      "type": "digitalocean_spaces_bucket",
+      "force_new": {
+        "name": "cah-tor1-state",
+        "region": "tor1"
+      }
+    }
+  }
+}

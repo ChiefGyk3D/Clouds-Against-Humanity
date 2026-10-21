@@ -2154,6 +2154,151 @@
         "sensitive_in_code": false,
         "status": "exists"
       }
+    ],
+    "stacks/30-state": [
+      {
+        "name": "state_bucket_enabled",
+        "type": "bool",
+        "description": "Create the private, versioned Spaces bucket for the daemons' state. Off by default: with it off the stack plans zero resources. Turning it on is a maintainer decision (stage 3 is not approved) and needs the cost gate to price the bucket first. Never applied.",
+        "required": false,
+        "default": false,
+        "validation": "none",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "false",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "region",
+        "type": "string",
+        "description": "DigitalOcean region slug the bucket is created in. Whether Spaces is offered there is not checked.",
+        "required": false,
+        "default": "tor1",
+        "validation": "^[a-z]{3}[0-9]$ (three lowercase letters and a digit)",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "resource_key",
+        "type": "string",
+        "description": "Key used in the bucket name (cah-<key>-state). Empty means region. Immutable for the life of the bucket: a different name is a different, empty bucket.",
+        "required": false,
+        "default": "",
+        "validation": "empty, or 2 to 24 characters: a lowercase letter, then lowercase letters, digits or hyphens",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "tor1-b",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "noncurrent_version_days",
+        "type": "number",
+        "description": "Days a replaced or deleted version is kept before it expires; the restore window.",
+        "required": false,
+        "default": 90,
+        "validation": "whole number from 1 to 3650",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "90",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "abort_incomplete_upload_days",
+        "type": "number",
+        "description": "Days after which an unfinished multipart upload is aborted.",
+        "required": false,
+        "default": 7,
+        "validation": "whole number from 1 to 365",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "7",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      }
+    ],
+    "modules/spaces-bucket": [
+      {
+        "name": "layer",
+        "type": "string",
+        "description": "Stack layer, used in the bucket name (for example cah).",
+        "required": true,
+        "validation": "2 to 16 lowercase letters or digits, starting with a letter",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "cah",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "purpose",
+        "type": "string",
+        "description": "Last part of the bucket name (<layer>-<region or resource_key>-<purpose>).",
+        "required": false,
+        "default": "state",
+        "validation": "2 to 16 lowercase letters or digits, starting with a letter",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "state",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "region",
+        "type": "string",
+        "description": "DigitalOcean region slug.",
+        "required": true,
+        "validation": "^[a-z]{3}[0-9]$ (three lowercase letters and a digit)",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "resource_key",
+        "type": "string",
+        "description": "Key used in the bucket name in place of region. Empty means region. Immutable for the life of a bucket.",
+        "required": false,
+        "default": "",
+        "validation": "empty, or 2 to 24 characters: a lowercase letter, then lowercase letters, digits or hyphens",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "tor1-b",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "noncurrent_version_days",
+        "type": "number",
+        "description": "Days a replaced or deleted version is kept before it expires.",
+        "required": false,
+        "default": 90,
+        "validation": "whole number from 1 to 3650",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "90",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "abort_incomplete_upload_days",
+        "type": "number",
+        "description": "Days after which an unfinished multipart upload is aborted.",
+        "required": false,
+        "default": 7,
+        "validation": "whole number from 1 to 365",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "7",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      }
     ]
   },
   "manifests": [
@@ -2460,6 +2605,32 @@
       "delivered_as": "first-boot pull, never a variable",
       "expiry": "none",
       "rotation": "rotate in Doppler and on the host",
+      "sensitivity": "secret",
+      "status": "planned"
+    },
+    {
+      "name": "SPACES_ACCESS_KEY_ID",
+      "class": "secret",
+      "store": "Doppler config prd",
+      "used_by": [
+        "stacks/30-state"
+      ],
+      "delivered_as": "SPACES_ACCESS_KEY_ID",
+      "expiry": "UNVERIFIED: set when the key is made",
+      "rotation": "docs/stages/03-state-bucket.md",
+      "sensitivity": "secret",
+      "status": "planned"
+    },
+    {
+      "name": "SPACES_SECRET_ACCESS_KEY",
+      "class": "secret",
+      "store": "Doppler config prd",
+      "used_by": [
+        "stacks/30-state"
+      ],
+      "delivered_as": "SPACES_SECRET_ACCESS_KEY",
+      "expiry": "UNVERIFIED: set when the key is made",
+      "rotation": "docs/stages/03-state-bucket.md",
       "sensitivity": "secret",
       "status": "planned"
     }

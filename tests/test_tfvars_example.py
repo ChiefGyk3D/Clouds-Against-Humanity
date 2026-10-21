@@ -33,7 +33,7 @@ import gen_example_tests
 import hcl_variables
 import identifier_check
 
-STACKS = ("stacks/00-foundation", "stacks/10-access", "stacks/20-telemetry")
+STACKS = ("stacks/00-foundation", "stacks/10-access", "stacks/20-telemetry", "stacks/30-state")
 EXAMPLE = "terraform.tfvars.example"
 
 DOC_NETS = [
