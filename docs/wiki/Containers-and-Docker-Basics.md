@@ -2,6 +2,8 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+> Containers run on a Linux kernel. If distros, package managers or `systemctl` are new, [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) is the side page for them.
+
 Start-from-zero page 6 of 8. Previous: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md). Next: [How money works in the cloud](How-Money-Works-in-the-Cloud.md).
 
 If you run Docker on a Pi you already know the commands. This page is about the ideas underneath them, because stage 3 of this project moves Pi-shaped containers to the cloud, and the move exposes assumptions that never mattered at home.

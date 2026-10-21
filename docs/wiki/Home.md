@@ -4,6 +4,8 @@ A small, cheap, locked-down DigitalOcean environment built with OpenTofu, applie
 
 ## Pick a path
 
+Wondering why this exists, who it is for and where I am coming from? Read [Why this exists](Why-This-Exists.md) first; it is a short side page, not part of the core path.
+
 The full tables, with page order, time estimates and checkpoints, are on **[Reading order](Reading-Order.md)**. The short version:
 
 | You are... | Start with | Then |
