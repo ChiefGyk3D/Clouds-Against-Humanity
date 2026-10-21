@@ -34,7 +34,7 @@ This is the maintainer's own home lab, described in general terms. It is a small
 
 - Two small single-board computers (Raspberry Pi 4 boards with 4 GB of memory) each run one Twingate **connector** in a container. The two are **active peers** in one remote network: either one can carry a new connection, so losing one is survivable (high availability, with failover to whichever is still up). There is no "primary" and "standby".
 - Both sit on **their own VLAN**. A VLAN is a way to split one physical network into separate virtual ones, so the connector hosts are not on the same network as laptops, phones or smart devices.
-- In his lab, pfSense firewall rules let him reach different subnets depending on his role in his identity provider. That is how he described it; the exact mechanism is not described here (see the note in the VLAN section).
+- In his lab, different roles and individuals get access to different resources, scoped at the network level in different ways: some to a single device and port, some to a whole subnet. The pfSense firewall rules limit what the connector hosts themselves can reach. Per-role and per-person scoping is where a ZTNA product beats a VPN; the section below spells it out.
 - The connector hosts are patched automatically with his own project, [Patch Gremlin](https://github.com/ChiefGyk3D/Patch-Gremlin).
 
 No diagram image is used here: the repository renders diagrams with `scripts/render_diagrams.py`, which needs Mermaid CLI and a browser, and neither is available in the sandbox this page was written in. A text diagram follows; every box and arrow is invented-for-teaching and carries no real address.
@@ -84,7 +84,7 @@ The cloud stage-1 design is the same pattern with droplets instead of Pis. See [
 | Connectors only dial out | Zero inbound ports on every droplet; the firewall allows only outbound | No listener to scan or attack |
 | Own VLAN for the connector hosts | Own firewall, attached by tag, and a VPC | Connector hosts get stricter rules than the things they reach |
 | Role in the identity provider decides reach | A Twingate **group** (`cah-tor1-admins`) is granted **resources** | Identity picks the resources, not the network |
-| Reach different subnets by role (mechanism: see the note in the VLAN section) | One resource per host and port, never "the whole VPC" | Least privilege, one resource at a time |
+| Different roles and individuals reach different resources, some one device and port, some a whole subnet | One resource per host and port, never "the whole VPC" | Least privilege, one resource at a time |
 | Patching with Patch Gremlin | Staggered reboots and updates, 04:00 and 05:00 Eastern | Never restart both at once |
 
 One difference to state plainly: at home the connector hosts can reach whole subnets because the firewall allows it. In this repository each Twingate resource is a single address and port. Prefer the narrow form wherever you can; subnet-wide access is the thing that rebuilds a VPN.
@@ -131,9 +131,8 @@ Generic examples, using documentation-only addresses ([RFC 5737](https://www.rfc
 
 A caution that matters: a firewall such as pfSense does not see which identity-provider role started a request. What it sees is a packet from the connector host's address on the connector VLAN. So the firewall limits what the **connector hosts** can reach, which is the **union** of every role any user may hold. The decision "this role may use that resource" is made by Twingate groups and resources, before the traffic reaches the connector. The firewall is the coarse outer wall; the identity-based policy is the inner one. Do both.
 
-**Design option, not a claim about any particular lab.** If you want the firewall itself to differ by role, give different roles' resources different connectors, ideally in different remote networks, on different source addresses or VLANs, and write one firewall rule set per connector. The firewall then sees different sources and can treat them differently. The cost is more connectors to run and patch.
+**Design option.** If you want the firewall itself to differ by role, give different roles' resources different connectors, ideally in different remote networks, on different source addresses or VLANs, and write one firewall rule set per connector. The firewall then sees different sources and can treat them differently. The cost is more connectors to run and patch.
 
-> **Maintainer to confirm: how roles map to firewall rules in his lab.** He described pfSense rules that let him reach different subnets by his identity-provider role. The mechanism (separate connectors per role, Twingate groups and resources, or something else) was not stated, so this page does not assert one. To be resolved before merge.
 
 ## Patching the connectors safely
 
@@ -145,6 +144,22 @@ The software that provides access to everything is the most important thing to k
 - **Watch the outcome**: an update that silently fails is the same as no update.
 
 Patch Gremlin is the maintainer's public project for this. What its README says (read 2026-10-21, read-only): it provides automated system update notifications for Debian and RHEL-based systems, integrating with `unattended-upgrades` (Debian, Ubuntu) or `dnf-automatic` (RHEL, Fedora, Amazon Linux); it fires when the upgrade run finishes so the report describes that run; its setup asks for update type, schedule and whether to auto-reboot; it lists Raspberry Pi OS among supported systems; and it sends to Discord, Teams, Slack, Matrix, ntfy, Gotify and generic webhooks. The README does not mention Docker or container images, so this page makes no claim about how a connector container is updated; plan and check that separately.
+
+## ZTNA versus a VPN: flexibility of access
+
+The firewall is a coarse outer wall; the real policy lives in the ZTNA product. There, access is granted per **role or individual**, per **resource**, and each resource can be drawn as narrowly or as widely as you need: one device and one port, or a whole subnet.
+
+| Who | Resource they are granted | Granularity | What a traditional VPN would typically do |
+|---|---|---|---|
+| Role A (a lab tinkerer) | One lab device, SSH only (`192.0.2.10`, TCP 22) | Single device and port | Put them on the network; the whole lab subnet is reachable |
+| Role B (an administrator) | The whole admin subnet `198.51.100.0/24` | Subnet-wide | Same network-wide reach, same as everyone else |
+| Role C (a guest or an unassigned person) | Nothing | None | Anyone with a VPN login gets on the network |
+
+With a VPN the usual unit of access is "the network the tunnel joins", and per-user limits mean separate VPN profiles or firewall rules keyed on each user's tunnel address, which is hard to keep right. With ZTNA the unit is the resource, and moving a person between roles is an identity change, not a firewall change.
+
+What the firewall still does: it only sees packets from the connector hosts, so it cannot tell which role started a request and does not need to. It limits what the connectors can reach (the union of all roles), which caps the damage if a connector is compromised.
+
+**Honest limit.** The finer the policy, the more you rely on product features: how granular a resource can be, and whether roles come from your identity provider's groups, depend on the plan. I have not verified which tier offers what; confirm on the vendor's pricing and documentation pages (see Honest limits below).
 
 ## VPN versus ZTNA under real residential conditions
 
