@@ -93,8 +93,7 @@ def heading_problems(page: str, text: str) -> list[str]:
 def split_row(line: str) -> list[str]:
     """Cells of one table row, ignoring the outer pipes and any escaped pipe."""
     body = line.strip().replace("\\|", "\0")
-    body = body[1:] if body.startswith("|") else body
-    body = body[:-1] if body.endswith("|") else body
+    body = body.removeprefix("|").removesuffix("|")
     return [c.strip().replace("\0", "|") for c in body.split("|")]
 
 
