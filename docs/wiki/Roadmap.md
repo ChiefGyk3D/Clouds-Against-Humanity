@@ -105,7 +105,7 @@ Handoff: [2026-10-12 edge DMZ handoff](https://github.com/ChiefGyk3D/Clouds-Agai
 - Stage 3 amendments: a cloud Uptime Kuma, the LLM contract through a LiteLLM proxy, the Discord bridge decision order, and webhook receivers on DigitalOcean Functions writing to the bucket so the workload host keeps zero inbound.
 - Cost: this lands past the $30 ceiling (stage 3 is already at $29). The design must lay out raising it, deferring something or moving pieces; the ceiling is not raised by default. The `edge` phase holds a $35 placeholder (stage 3's $29 plus one $6 droplet) that the design replaces with a costed number.
 - Honeypot: a design doc only, on a separate account or provider, never in this project's apply path.
-- PeerTube is a DMZ-class workload and needs its own costed stage. Not designed yet.
+- PeerTube is a DMZ-class workload with its own costed stage. Design draft: [2026-10-21 PeerTube stage design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-21-peertube-stage-design.md); it recommends teaching it as a learner lesson and running nothing (+$0), and the maintainer has not decided.
 
 ## Private droplets: later, not never
 
