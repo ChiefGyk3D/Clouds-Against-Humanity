@@ -18,10 +18,30 @@ ALLOWLIST = ROOT / "docs" / "american-english-allowlist.txt"
 # Only words that are British and nothing else; "dialogue", "cancelled" (a GitHub result
 # value) and "towards" are left out on purpose. ISE_STEMS take the endings prose uses, so
 # "realistic" or "analysis" cannot match.
-ISE_STEMS = (
-    "organis recognis authoris minimis optimis standardis summaris centralis serialis normalis finalis "
-    "customis utilis prioritis categoris virtualis synchronis initialis sanitis generalis visualis characteris"
-).split()
+ISE_STEMS = [
+    "organis",
+    "recognis",
+    "authoris",
+    "minimis",
+    "optimis",
+    "standardis",
+    "summaris",
+    "centralis",
+    "serialis",
+    "normalis",
+    "finalis",
+    "customis",
+    "utilis",
+    "prioritis",
+    "categoris",
+    "virtualis",
+    "synchronis",
+    "initialis",
+    "sanitis",
+    "generalis",
+    "visualis",
+    "characteris",
+]
 ISE_ENDINGS = r"(?:e|es|ed|ing|er|ers|ation|ations|able)"
 BRITISH = re.compile(
     r"\b(?:"
