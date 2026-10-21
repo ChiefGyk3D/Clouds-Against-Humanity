@@ -49,7 +49,7 @@ Some of these are not secrets in the "attacker can log in with it" sense (the te
 ## Why Doppler
 
 - **One place to rotate.** Change the value in Doppler and the next run picks it up. No hunting through CI settings and stack variables.
-- **Spacelift holds exactly one secret**: a read-only service token scoped to this project's `prd` config. If it leaks, it reads these values and nothing else, and it cannot write.
+- **Spacelift holds exactly one secret**: a read-only [service token](APIs-and-Tokens-From-Zero.md#service-accounts-and-personal-tokens) scoped to this project's `prd` config. If it leaks, it reads these values and nothing else, and it cannot write.
 - **Consistency across projects.** The same pattern is used across the author's other repositories, where GitHub Actions fetches from Doppler over OIDC and holds no stored Actions secrets at all.
 
 > **Screenshot to take yourself:** the Doppler config screen and the service token screen.
