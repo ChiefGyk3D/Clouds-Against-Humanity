@@ -218,6 +218,8 @@ flowchart LR
 
 </details>
 
+**Where box 3 comes from.** The CI checks are not written out in your copy's `ci.yml`. It has three jobs that each say `uses: ChiefGyk3D/git-your-ship-together/.github/workflows/<name>.yml@<full commit hash>`: a **reusable workflow** kept in a separate public project by the same maintainer, which your private copy only calls. So your copy needs read access to that public repository and nothing else from it, and a fix made there reaches you when you move the hash. Nothing about your own stacks leaves your repository. The details, and an exercise that follows one `uses:` line to the called file, are in [From commit to pipeline: reusable workflows and Git Your Ship Together](From-Commit-to-Pipeline.md#reusable-workflows-and-git-your-ship-together).
+
 Read it left to right and ask of each box: *what mistake does this one catch that the others cannot?*
 
 - **Commit and pull request** are where a change gets a name and a reason. This is where you decide what you are doing, in a unit small enough for someone else to understand. DevSecOps starts here: "shift left" means finding problems at boxes 1 to 3, where a fix costs a minute, instead of at box 7, where it costs an outage.

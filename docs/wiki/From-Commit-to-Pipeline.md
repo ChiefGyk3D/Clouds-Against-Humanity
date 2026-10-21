@@ -111,6 +111,57 @@ This is also where [policy as code](#policy-as-code-rules-a-machine-can-enforce-
 
 Only now does `tofu apply` run, against the real cloud. Everything before this box was cheap and reversible. This one is not, which is why every earlier box exists.
 
+## Reusable workflows and Git Your Ship Together
+
+**Git Your Ship Together (GYST)** is a separate project by the same maintainer: [github.com/ChiefGyk3D/git-your-ship-together](https://github.com/ChiefGyk3D/git-your-ship-together). This repository is only a user of it, and its docs live in that repository, not here. It is on this page because the idea behind it applies to any organisation with several repositories, whatever language or tools they use, and because it explains why `ci.yml` is so short.
+
+**Sources.** The GYST README (read 2026-10-22) and the called workflow files `tofu-ci.yml`, `python-ci.yml` and `security.yml` at the commit this repository pins, all on that repository; GitHub's [Reuse workflows](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows) page (read 2026-10-22). Anything not read there is marked est.
+
+### What a reusable workflow is
+
+A normal workflow starts on an event such as a push. A **reusable workflow** is an ordinary workflow file that also lists `workflow_call` under `on:`, which means "another workflow may start me, and hand me inputs". The caller does it with a job that has `uses:` in place of `steps:`:
+
+```yaml
+jobs:
+  tofu:
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/tofu-ci.yml@8fdb8d1... # the full 40-character commit
+    permissions:
+      contents: read
+    with:
+      test: true
+```
+
+Read the `uses:` value left to right: the owner and repository, the path of the file inside it (it must be under `.github/workflows/`), then `@` and the version to run. The `with:` block sets the called workflow's **inputs**; each input is declared in the called file, with a description and a default, so a caller only writes the values that differ. The called workflow's own jobs then run as part of your run and show up in your checks list.
+
+### Why pin by full commit SHA, with a version comment
+
+The part after `@` can be a branch, a tag or a commit. GitHub's documentation calls the commit SHA the safest option for stability and security. A branch moves every time someone pushes to it, and a tag can be moved too; a full commit hash names one exact set of files forever. Pinning means the code that runs in your pipeline changes only when you change the line, in a pull request someone can read. The comment after the hash says which version the hash is, because a human cannot read a hash. GYST's README states the same rule for itself (every third-party action pinned to a commit SHA with a version comment, and callers do the same), and says Dependabot moves the hash and the comment together.
+
+**This repository's pin is not a release.** All three `uses:` lines in `.github/workflows/ci.yml` end in the same commit, and the comment says so: "git-your-ship-together main at PR 151 (untagged; next release)". It is a commit on GYST's `main` that has no version tag yet, taken because it carries the `tofu test` and policy-test legs this repository needed (see [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md#call-shared-workflows-do-not-copy-them)). That is allowed, and the full hash is what makes it safe; the comment is honest about it. When GYST tags the release, the pin should move to the tagged commit (the tagged version is est., not yet read).
+
+### Why one shared repository of CI beats copying YAML
+
+Copy the same workflow into ten repositories and you have ten places to fix the next bug, and they drift: one gets the new scanner flag and nine do not. With a shared repository you fix or improve it once, tag it, and each caller moves its pin in a pull request when it is ready. The per-repository file shrinks to the facts only that repository knows, which here are the directory list, the test command and the Python versions. GYST's README says each of its caller repositories needs only three short YAML files that state what is specific to that project (read; not checked here). The cost is real: a caller depends on another repository, so a bad change there reaches every caller that adopts it, which is exactly why callers pin and move deliberately.
+
+### What this repository takes from GYST, and what stays local
+
+| Job in `ci.yml` | Where it comes from | What this repository sets |
+|---|---|---|
+| `tofu` | GYST `tofu-ci.yml` | The list of stack and module directories, `test: true` (`tofu test` with mocked providers), and `policy-directories: .spacelift/policies` for the OPA checks on the Spacelift push policy. |
+| `python` | GYST `python-ci.yml` | Python 3.12 and 3.13, the install command, the lint command (`ruff`), and a `test-command` that runs this repository's own scripts: the cost gate, the settings page check, `pytest`, the identifier check and the Threat Dragon layout check. `workflow-lint` and `docker-build` are switched off. |
+| `security` | GYST `security.yml` | `codeql-languages: actions` (CodeQL over the workflow files; this repository has no other language CodeQL would scan) and an empty `pip-audit-requirements`. |
+| `ci-green` | Local, defined in `ci.yml` | A plain shell loop over `needs`; it is the only job this repository writes itself. |
+
+The cost gate, the identifier check and the settings check are scripts under `scripts/` in this repository. They stay local because their rules (the approved figures, what counts as an account id here) belong to this project; they run inside the `python` job's `test-command`, so they needed no job of their own. What GYST runs inside each called workflow beyond the inputs above (fmt, validate, tflint, Trivy, gitleaks and so on) is listed in its README and in each file; this page does not repeat it.
+
+### The `CI green` gate convention
+
+Each GYST CI workflow ends with its own job named `CI green` that needs the others (read in `tofu-ci.yml` and `python-ci.yml`; not checked in `security.yml`). A caller usually points branch protection at that one name per language. This repository calls three workflows, so it adds a local `CI green` that needs `tofu`, `python` and `security` and fails unless each finished `success`, with `if: always()` so a skipped job cannot slip through ([step 4](#4-the-merge-gate-ci-green)). One required name per repository, whatever the number of jobs behind it, is the convention. GYST's README describes it the same way and says a repository with several languages requires each language's gate (the audit derives that set from the caller's files). How this repository's branch protection is configured is a repository setting you cannot read from a file, so this page does not claim it.
+
+### How permissions pass between caller and called workflow
+
+`ci.yml` starts with `permissions: {}`, which gives the workflow's token nothing. Each caller job then grants exactly what the called workflow's jobs may use, for example `contents: read` for the checkout, `security-events: write` for CodeQL results and `pull-requests: write` on the `security` call. The rule from GitHub's docs, stated for chains of reusable workflows, is that permissions can be maintained or reduced down the chain, never raised. So the caller is the ceiling: a called job cannot end up with more than the caller granted (what GitHub does when one asks for more is not something this page tested). Two consequences for a reader. First, to see what a pipeline can do, read the caller's `permissions:` lines before the called file. Second, the caller grants the maximum; the called file narrows it per job. The `tofu` and `python` calls also grant `id-token: write`. GYST's README says it uses that for short-lived logins to Doppler and Codecov, and this call sets no Doppler or Codecov input, so here the grant most likely just covers what the called jobs may request (est.; not traced job by job). Secrets are passed by name, never with `secrets: inherit`, according to the README; this repository passes none.
+
 ## Policy as code: rules a machine can enforce on every plan
 
 A **policy** is a rule such as "no firewall may accept the whole internet". **Policy as code** means the rule is written in a file, in the repository, with tests, and a machine applies it every time, instead of a person remembering. This project has three kinds, and they sit at different points on the chain:
@@ -250,6 +301,18 @@ If your plan cannot enforce branch protection, the merge button stays available 
 **Undo.** Close the pull request without merging, and delete the branch. Check `main` is untouched.
 
 **Take away:** a test is only a gate when merging depends on it.
+
+### Exercise 4: follow a `uses:` line to the code it runs
+
+Read-only, so there is nothing to undo and no branch is needed. It uses the section [Reusable workflows and Git Your Ship Together](#reusable-workflows-and-git-your-ship-together) above. Do it in the browser or a local clone of your private repository.
+
+1. Open `.github/workflows/ci.yml`. Find the three `uses:` lines. Write down the owner, the repository, the file name and the hash for each. Are the three hashes the same?
+2. Open the GYST repository at that hash: open `https://github.com/ChiefGyk3D/git-your-ship-together/blob/<hash>/.github/workflows/tofu-ci.yml`, putting the hash from your file in place of `<hash>`. Find `workflow_call:` near the top.
+3. List the inputs the called file declares under `workflow_call:`. Mark the ones your `with:` block sets, and for two you did not set, read the default.
+4. Pick one input your caller sets, such as `test: true`, and find where the called workflow uses it (look for `inputs.test`). What would the pipeline skip if the input were left at its default?
+5. Compare the called file's `permissions:` with what your caller grants. Is the caller's grant narrower than, equal to, or wider than what the called jobs declare?
+
+**Take away:** a pipeline is the caller plus the file it points at, and the `@<hash>` tells you precisely which version. If you cannot answer step 4 from the file, you do not yet know what your gate checks.
 
 ## Where this shows up in the repo
 
