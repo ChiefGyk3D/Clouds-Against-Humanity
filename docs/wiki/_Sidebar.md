@@ -76,6 +76,12 @@ The [Threat model](Threat-Model.md) is core step 19.
 
 - [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md)
 - [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md)
+    - Side page: [Deception and honeypots: start here](Deception-and-Honeypots-Start-Here.md)
+        - [What deception is](Deception-and-Honeypots-What-Deception-Is.md)
+        - [Deception safety and law](Deception-and-Honeypots-Safety-and-Law.md)
+        - [Plant a canary token](Deception-and-Honeypots-Plant-a-Canary.md)
+        - [Honeyfiles on a host you own](Deception-and-Honeypots-Honeyfiles-on-Your-Host.md)
+        - [Deception alerts in the SIEM](Deception-and-Honeypots-Alerts-in-the-SIEM.md)
 - [Cloud telemetry: what and why (unverified draft)](Cloud-Telemetry-What-and-Why.md)
 - [Multiple sites and identity (unverified draft)](Multiple-Sites-and-Identity.md)
 - [Telemetry crosses the trust boundary (unverified draft)](Telemetry-Crosses-the-Trust-Boundary.md)
