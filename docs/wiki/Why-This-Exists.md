@@ -2,15 +2,19 @@
 
 > Nothing to read first. This page is opinion, my own, and it says so. If a word is new, the [Glossary](Glossary.md) defines it. For the tool choices specifically, [Why I picked these tools](Why-I-Picked-These-Tools.md) goes piece by piece.
 
-I built this because I was sick of zero trust knowledge being locked behind the companies that sell it, where you can only find out how a ZTNA platform really works by paying for the platform, and then listening to a sales pitch while you do. Every vendor says they are the right answer, and Zero Trust is still poorly understood until you are inside an enterprise, so the people who most need to learn it (the ones who are not inside one yet) get the marketing version.
+Consider this my manifesto. The ramblings of a mad man.
 
-This is me distilling and condensing what I learned over almost four years of working with zero trust network access and enterprise networks, into something you can read for free and try for a price you choose.
+I built this because I was sick of zero trust knowledge being locked behind the companies that sell it, where you can only find out how a ZTNA platform really works by paying for the platform and then sitting through a sales pitch while you do. Every vendor says they are the right answer, and Zero Trust is still poorly understood until you are inside an enterprise, so the people who most need to learn it (the ones who are not inside one yet) get the marketing version.
+
+This is me distilling and condensing what I learned over almost four years of working with zero trust network access and enterprise networks, into something you can read for free and try in your own accounts.
 
 ## Where I am coming from
 
-It took me around six months to learn this, and that was with the advantage of administering Zscaler at work. I had architects whiteboard it for me and spend hours with me, and I went through a lot of documentation. If that is what it took with the real platform in front of me, a team around me and a job that required it, I do not think it is reasonable to expect anyone to piece it together alone from vendor pages.
+Zero trust took me around six months to learn, and that was with the advantage of administering Zscaler at work, with architects whiteboarding it for me and spending hours with me, plus a lot of documentation. But zero trust was only one piece. It took me around three years to get comfortable with Terraform, with the ways around an enterprise, with infrastructure as code, and with shifting everything left the way I do, which is pretty much everything this project talks about. I am not saying that was three years of full-time study, only that this is how long it took before it felt like mine.
 
-So the lessons here are my attempt to remove the part that cost me the most, which was the head bashing, and keep the part that taught me something. I would rather you spend your time on the second one.
+If that is what it took with the real platform in front of me, a team around me and a job that required it, I do not think it is reasonable to expect anyone to piece it together alone from vendor pages.
+
+So the point of this project is to let you shortcut years of head bashing. I will not promise you a timeline, because I do not know yours and I have not measured anyone's. What I can say is that the lessons are the part that cost me the most to find, written down so you can spend your time on the parts that teach you something instead of the walls.
 
 I am not going to say more about my job than that. What I know about enterprise networks I know from doing it, and where I only know something from reading, the pages say so.
 
