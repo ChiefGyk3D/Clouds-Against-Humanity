@@ -98,7 +98,7 @@ ev(60, "cowrie.command.input", "192.0.2.67", "eeee0005", input="A" * 20000)
 print("\n".join(lines))
 ```
 
-`detect.py` implements the two rules with a loop and a counter. It parses each line as JSON, compares fields for equality, and never runs, formats or substitutes anything from a line. Lines over 4,096 bytes, lines that are not JSON, and lines with the wrong shape are counted and dropped.
+`detect.py` implements the two rules with a loop and a counter. It parses each line as JSON, compares fields for equality, and never runs, formats or substitutes anything from a line. It reads the file as bytes, at most 4,097 bytes at a time, so a huge line is never held in memory: a line longer than 4,096 bytes is counted, and the rest of it is thrown away unread. Lines that are not JSON (or are nested too deeply to parse) and lines with the wrong shape or an unreadable timestamp are counted and dropped. The success rule only counts a login that comes **after** the alert, at most 120 seconds later; a success stamped before it does not match.
 
 ```python
 # A toy detector with the same logic as the Wazuh rules drafted on the page.
@@ -123,34 +123,40 @@ def when(text):
 def alert(rule, level, mitre, src_ip, t):
     print(json.dumps({"rule": rule, "level": level, "mitre": mitre, "src_ip": src_ip, "at": t}))
 
-for raw in open(sys.argv[1], encoding="utf-8", errors="replace"):
-    if len(raw) > MAX_LINE:
-        dropped["too_long"] += 1
-        continue
-    try:
-        e = json.loads(raw)
-    except ValueError:
-        dropped["not_json"] += 1
-        continue
-    if not isinstance(e, dict) or not all(isinstance(e.get(k), str) for k in ("eventid", "src_ip", "timestamp")):
-        dropped["bad_shape"] += 1
-        continue
-    try:
-        t = when(e["timestamp"])
-    except ValueError:                      # a timestamp we cannot read is a bad line, not a crash
-        dropped["bad_shape"] += 1
-        continue
-    ip = e["src_ip"]
-    if e["eventid"] == "cowrie.login.failed":
-        q = fails[ip]
-        q.append(t)
-        while q and t - q[0] > 60:
-            q.popleft()
-        if len(q) >= 5 and t - tripped.get(ip, -1e9) > 60:
-            tripped[ip] = t
-            alert("brute_force", 10, "T1110 Brute Force", ip, e["timestamp"])
-    elif e["eventid"] == "cowrie.login.success" and t - tripped.get(ip, -1e9) <= 120:
-        alert("success_after_brute_force", 12, "none (honeypot-specific)", ip, e["timestamp"])
+with open(sys.argv[1], "rb") as f:                # bytes, so the limit counts bytes, not characters
+    while True:
+        raw = f.readline(MAX_LINE + 1)             # never reads more than 4,097 bytes at once
+        if not raw:
+            break
+        if len(raw) > MAX_LINE and not raw.endswith(b"\n"):
+            dropped["too_long"] += 1
+            while raw and not raw.endswith(b"\n"):  # throw away the rest of the long line
+                raw = f.readline(MAX_LINE + 1)
+            continue
+        try:
+            e = json.loads(raw.decode("utf-8", errors="replace"))
+        except (ValueError, RecursionError):       # not JSON, or nested too deeply to parse
+            dropped["not_json"] += 1
+            continue
+        if not isinstance(e, dict) or not all(isinstance(e.get(k), str) for k in ("eventid", "src_ip", "timestamp")):
+            dropped["bad_shape"] += 1
+            continue
+        try:
+            t = when(e["timestamp"])
+        except (ValueError, OverflowError, OSError):  # a timestamp we cannot read is a bad line, not a crash
+            dropped["bad_shape"] += 1
+            continue
+        ip = e["src_ip"]
+        if e["eventid"] == "cowrie.login.failed":
+            q = fails[ip]
+            q.append(t)
+            while q and t - q[0] > 60:
+                q.popleft()
+            if len(q) >= 5 and t - tripped.get(ip, -1e9) > 60:
+                tripped[ip] = t
+                alert("brute_force", 10, "T1110 Brute Force", ip, e["timestamp"])
+        elif e["eventid"] == "cowrie.login.success" and 0 <= t - tripped.get(ip, -1e9) <= 120:
+            alert("success_after_brute_force", 12, "none (honeypot-specific)", ip, e["timestamp"])
 
 print("dropped:", json.dumps(dropped), file=sys.stderr)
 ```

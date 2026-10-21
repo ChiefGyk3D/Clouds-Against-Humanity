@@ -80,7 +80,7 @@ with open("bait/vpn-notes-OLD.txt", "w") as f:
 print("built bait/vpn-notes-OLD.txt and tripwire.json")
 ```
 
-`tripwire.py` is the listener. It does three things: it answers the planted link, it answers a fake login page, and it writes a line to `alerts.jsonl` only for those two. It never records the password, and every field goes through `json.dumps`, which escapes quotes and control characters so a hostile client name stays inert data:
+`tripwire.py` is the listener. It does three things: it answers the planted link, it answers a fake login page, and it writes a line to `alerts.jsonl` only for those two. It reads at most 1,024 bytes of a login body, refuses a `Content-Length` that is not a number, and gives up on a slow client after five seconds. It never records the password, and every field goes through `json.dumps`, which escapes quotes and control characters so a hostile client name stays inert data:
 
 ```python
 # A local tripwire. It listens on 127.0.0.1 only. Two things are decoys:
@@ -106,6 +106,8 @@ def alert(eventid, handler, **extra):
     print("ALERT", line, flush=True)
 
 class Handler(http.server.BaseHTTPRequestHandler):
+    timeout = 5  # a client that promises more bytes than it sends cannot hold a thread forever
+
     def log_message(self, *args):  # keep the console quiet; alerts.jsonl is the record
         pass
 
@@ -125,7 +127,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def do_POST(self):
         if self.path != "/login":
             return self.reply(404)
-        n = min(int(self.headers.get("Content-Length", "0") or 0), 1000)
+        try:
+            n = int(self.headers.get("Content-Length", "0"))
+        except ValueError:                    # not a number: refuse, do not guess
+            return self.reply(400)
+        n = max(0, min(n, 1024))              # negative and huge values are clamped before reading
         body = self.rfile.read(n).decode("utf-8", "replace")
         fields = urllib.parse.parse_qs(body)
         user = fields.get("user", [""])[0]
@@ -179,7 +185,8 @@ If the port is taken, set `TRIPWIRE_PORT` to another number and run `build_bait.
 ```bash
 URL=$(sed -n 's/^details: //p' bait/vpn-notes-OLD.txt)
 curl -s -o /dev/null -w 'status=%{http_code}\n' "$URL"
-curl -s -o /dev/null -w 'status=%{http_code}\n' http://127.0.0.1:8099/index.html
+BASE=${URL%/t/*}   # the address and port from the bait file, whatever port you chose
+curl -s -o /dev/null -w 'status=%{http_code}\n' "$BASE/index.html"
 ```
 
 **Do (PowerShell, est.).**
@@ -187,7 +194,8 @@ curl -s -o /dev/null -w 'status=%{http_code}\n' http://127.0.0.1:8099/index.html
 ```powershell
 $url = ((Get-Content bait\vpn-notes-OLD.txt) | Where-Object { $_ -like 'details: *' }) -replace '^details: ',''
 (Invoke-WebRequest -UseBasicParsing $url).StatusCode
-try { Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8099/index.html } catch { $_.Exception.Response.StatusCode.value__ }
+$base = ([Uri]$url).GetLeftPart('Authority')   # the address and port from the bait file
+try { Invoke-WebRequest -UseBasicParsing "$base/index.html" } catch { $_.Exception.Response.StatusCode.value__ }
 ```
 
 **Check.** The first request returns `status=200` and the second terminal prints an `ALERT` line. The second request returns `status=404` and prints **nothing**: a visit to a page that is not the token is ordinary noise. Trimmed from the run:
@@ -209,20 +217,22 @@ The decoy file also holds an invented login. A *fake credential* is the most com
 **Do (Bash).**
 
 ```bash
+BASE=$(sed -n 's/^details: //p' bait/vpn-notes-OLD.txt); BASE=${BASE%/t/*}
 U=$(sed -n 's/^user: //p' bait/vpn-notes-OLD.txt)
 P=$(sed -n 's/^password: //p' bait/vpn-notes-OLD.txt)
-curl -s -o /dev/null -w 'other user: %{http_code}\n' --data-urlencode "user=admin" --data-urlencode "password=x" http://127.0.0.1:8099/login
-curl -s -o /dev/null -w 'decoy user: %{http_code}\n' --data-urlencode "user=$U" --data-urlencode "password=$P" http://127.0.0.1:8099/login
+curl -s -o /dev/null -w 'other user: %{http_code}\n' --data-urlencode "user=admin" --data-urlencode "password=x" "$BASE/login"
+curl -s -o /dev/null -w 'decoy user: %{http_code}\n' --data-urlencode "user=$U" --data-urlencode "password=$P" "$BASE/login"
 ```
 
 **Do (PowerShell, est.).**
 
 ```powershell
 $b = Get-Content bait\vpn-notes-OLD.txt
+$base = ([Uri](($b | Where-Object { $_ -like 'details: *' }) -replace '^details: ','')).GetLeftPart('Authority')
 $u = ($b | Where-Object { $_ -like 'user: *' }) -replace '^user: ',''
 $p = ($b | Where-Object { $_ -like 'password: *' }) -replace '^password: ',''
 foreach ($body in @{user='admin';password='x'}, @{user=$u;password=$p}) {
-  try { Invoke-WebRequest -UseBasicParsing -Method Post -Uri http://127.0.0.1:8099/login -Body $body } catch { $_.Exception.Response.StatusCode.value__ }
+  try { Invoke-WebRequest -UseBasicParsing -Method Post -Uri "$base/login" -Body $body } catch { $_.Exception.Response.StatusCode.value__ }
 }
 ```
 

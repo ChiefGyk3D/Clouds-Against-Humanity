@@ -49,23 +49,33 @@ Save this as `watch.sh` in `~/deception-lab/honeyfile` and make it executable:
 set -u
 dir=${1:?folder to watch}
 log=${2:-alerts.log}
-stamp='^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{4}$'
-inotifywait -m -q -e open,access,modify,attrib,moved_from,moved_to,delete,create \
-  --timefmt '%Y-%m-%dT%H:%M:%S%z' --format '%T|%e|%f' "$dir" |
-while IFS='|' read -r ts events name; do
-  # A file name is data an attacker can choose (it may hold a newline). Only a line that
-  # starts with a real timestamp is an event; anything else is dropped, never echoed.
-  [[ $ts =~ $stamp ]] || { echo "NOTE: dropped a line that is not an event" >&2; continue; }
-  case $events in *ISDIR*) continue ;; esac   # listing the folder is not touching a file
-  printf 'ALERT time=%s event=%s file=%q\n' "$ts" "$events" "$name" | tee -a "$log"
-done
+# --csv quotes a file name that holds a newline, a quote or a comma, so one event is
+# one CSV record even when the name is hostile. A CSV reader (not `read`) splits it.
+inotifywait -m -q -e open,access,modify,attrib,moved_from,moved_to,delete,create --csv "$dir" |
+python3 -I -c '
+import csv, json, sys, time
+sys.stdin.reconfigure(errors="backslashreplace")   # a name that is not valid UTF-8 still prints
+log = sys.argv[1]
+for row in csv.reader(sys.stdin):
+    if len(row) != 3:
+        print("NOTE: dropped a row that is not an event", file=sys.stderr)
+        continue
+    _, events, name = row
+    if "ISDIR" in events.split(","):               # listing the folder is not touching a file
+        continue
+    # json.dumps writes the name on one line with quotes, newlines and control characters escaped
+    line = "ALERT time=%s event=%s file=%s" % (time.strftime("%Y-%m-%dT%H:%M:%S%z"), events, json.dumps(name))
+    print(line, flush=True)
+    with open(log, "a") as f:
+        f.write(line + "\n")
+' "$log"
 ```
 
 ```bash
 chmod +x watch.sh
 ```
 
-What it does, line by line. `-m` keeps watching instead of stopping at the first event. `-q` hides the tool's own chatter. `-e` lists the events to report. `--format` prints a timestamp, the event names and the file name separated by `|`. The `while read` loop turns each into an `ALERT` line and appends it to `alerts.log`. `%q` prints the file name in a form that cannot contain a raw newline.
+What it does. `-m` keeps watching instead of stopping at the first event. `-q` hides the tool's own chatter. `-e` lists the events to report. `--csv` prints each event as one CSV record: the watched folder, the event names and the file name, with the name in quotes when it holds a comma, a quote or a newline. The small Python reader at the end of the pipe splits records with a real CSV parser (not line by line), skips events on the folder itself, stamps the time, and writes the name with `json.dumps`, which puts it on one line with quotes, newlines and control characters escaped. Python 3 is already needed for the other lessons.
 
 Start it in a **second terminal**, in the same folder, and leave it running:
 
@@ -91,7 +101,7 @@ Start it in a **second terminal**, in the same folder, and leave it running:
 
 | # | Action | What the watcher printed |
 |---|---|---|
-| 1 | `ls bait` | nothing (the folder's own events are skipped by the `ISDIR` line) |
+| 1 | `ls bait` | nothing (the folder's own events are skipped by the `ISDIR` test in the reader) |
 | 2 | `ls -l` of the file, and `stat` | nothing |
 | 3 | `cat` | `OPEN` then `ACCESS` |
 | 4 | `cp` out of the folder | `OPEN` then `ACCESS`, **the same two lines as `cat`** |
@@ -116,44 +126,37 @@ ALERT time=2026-10-21T18:52:28-0400 event=OPEN file=passwords-backup-OLD.txt
 
 ### Exercise 2: a file name that forges an alert
 
-**Predict.** A file name can contain a newline. If someone creates a file in the watched folder whose name contains `ALERT fake`, what will the log contain?
+**Predict.** A file name on Linux can contain a newline. If someone creates a file in the watched folder whose name holds a newline and then text that looks like another event, what will a log written line by line contain?
 
-**Do.** The first version of the watcher, before the two guard lines were added, printed the name as it came. Its loop was only:
-
-```bash
-while IFS='|' read -r ts events name; do
-  printf 'ALERT time=%s event=%s file=%s\n' "$ts" "$events" "$name"
-done
-```
-
-With that loop, creating a file whose name holds a newline (`touch $'bait/line1\nALERT fake'`) produced extra lines. From the 2026-10-21 run of the unguarded version:
+**Do.** First see the problem. A first version of the watcher read `inotifywait` output line by line (`--format '%T|%e|%f'` and a `while IFS='|' read -r ts events name` loop that printed `ALERT ...`). Creating a file whose name holds a newline (`touch $'bait/line1\nALERT fake'`) produced, in the 2026-10-21 run:
 
 ```text
 ALERT time=2026-10-21T18:52:42-0400 event=CREATE file=line1
 ALERT time=ALERT fake event= file=
 ```
 
-The second line was never an event: it is the file's name, and it forged an `ALERT` line in the log. Now try the guarded `watch.sh` from above (start it again if you stopped it):
+The second line was never an event: it is the rest of the file's name, and it forged an `ALERT` line. A tempting fix is to accept only lines that start with a real timestamp. That is **not enough**: a name such as `x`, a newline and then a complete, valid-looking record (`2026-01-01T00:00:00+0000|DELETE|forged`) passes that check, because the forged half looks exactly like an event. Any fix that reads one line at a time has the same hole.
+
+Now try the `watch.sh` above, which parses CSV records instead. Start it again if you stopped it, then in the first terminal:
 
 ```bash
-touch 'bait/a|b'
-touch $'bait/line1\nALERT fake'
+touch 'bait/a|b"c,d'
+touch $'bait/line1\nbait,DELETE,forged'
 ```
 
-**Check.** The guarded watcher prints the file with a `|` in its name safely (`file=a\|b`) and drops the stray line:
+**Check.** Each file is reported on one line, with its name escaped, and nothing forged appears. Trimmed from the run (events for the same name repeat: `CREATE`, `OPEN`, `ATTRIB`):
 
 ```text
-ALERT time=2026-10-21T18:52:55-0400 event=CREATE file=a\|b
-ALERT time=2026-10-21T18:52:55-0400 event=CREATE file=line1
-NOTE: dropped a line that is not an event
+ALERT time=2026-10-21T19:31:45-0400 event=CREATE file="a|b\"c,d"
+ALERT time=2026-10-21T19:31:51-0400 event=CREATE file="line1\nbait,DELETE,forged"
 ```
 
-Two guards did it. The timestamp pattern accepts only lines that start with a real timestamp, so a name that spills onto a second line is dropped without being echoed. `%q` prints names so a stray newline cannot start a new line. The first line shows the truncated name `line1`; that is the cost, and an alert is still raised. The lesson, which comes back in lesson 5: **text a stranger can choose is data. Never treat it as part of your own log format.**
+What `inotifywait` printed for the second name was a single quoted CSV record spanning two lines; the CSV reader keeps it whole. The lesson, which comes back in lesson 5: **text a stranger can choose is data. Parse it with a real parser and print it escaped; never splice it into your own log format.**
 
 **Undo.** Delete the test files:
 
 ```bash
-rm -f ~/deception-lab/honeyfile/bait/'a|b' ~/deception-lab/honeyfile/bait/line1*
+rm -f ~/deception-lab/honeyfile/bait/'a|b"c,d' ~/deception-lab/honeyfile/bait/line1*
 ```
 
 ### Exercise 3: who tripped it, and when it is a false alarm
@@ -191,7 +194,7 @@ $w.NotifyFilter = [System.IO.NotifyFilters]'FileName, LastWrite, LastAccess, Att
 $w.EnableRaisingEvents = $true
 $action = {
   $e = $Event.SourceEventArgs
-  $name = $e.Name -replace '[\r\n]', '?'    # a file name is data a stranger can choose
+  $name = $e.Name | ConvertTo-Json -Compress   # a file name is data: print it quoted and escaped
   $line = 'ALERT time={0} event={1} file={2}' -f (Get-Date -Format o), $e.ChangeType, $name
   Write-Host $line
   Add-Content -Path (Join-Path $Event.MessageData 'alerts.log') -Value $line
@@ -202,6 +205,8 @@ foreach ($kind in 'Changed', 'Created', 'Deleted', 'Renamed') {
 ```
 
 To stop it and clean up: `Get-EventSubscriber | Unregister-Event; $w.Dispose()`.
+
+**File names on Windows.** Windows does not allow control characters such as a newline in a file name (est.), so the line-splitting trick from exercise 2 does not apply to this watcher. The name is still written quoted and escaped, because the habit costs nothing and a different file system may allow what this one does not.
 
 **Limits, honestly.** The watcher reports changes, creations, deletions and renames. It **does not reliably report a plain read**: the "last access" notification depends on whether Windows is updating last-access times on that disk, which can be switched off or delayed (est.). So the PowerShell watcher cannot repeat exercise 1 for `cat`. Windows has a built-in way to audit reads on a file (an audit policy and an entry on the file that asks for it, which write events to the Security log), but the author did not read or run it; it is the Windows equivalent of the `auditd` section above and is **est.** here.
 
@@ -219,7 +224,7 @@ To stop it and clean up: `Get-EventSubscriber | Unregister-Event; $w.Dispose()`.
 | Mistake | Why it hurts | Better |
 |---|---|---|
 | Putting the decoy in a backed-up or scanned folder. | The alert fires every night. | Keep it out, or allow-list by program. |
-| Echoing a file name into the log as-is. | A stranger can forge log lines. | Check the line's shape and quote the name (`%q`). |
+| Echoing a file name into the log as-is, or checking only the shape of each line. | A stranger can forge log lines, even valid-looking ones. | Parse records with a real parser (CSV) and print the name escaped. |
 | Watching only the file's contents. | `ls -l` and `stat` reveal it for free. | Accept that names are the bait; do not rely on the contents. |
 | Believing a read and a copy are different events. | They look the same here. | Watch where copies land, or use the audit framework. |
 | Running the watcher with no one to read the log. | A baseline of zero and a value of zero. | Send it somewhere a person reads, or to the SIEM in lesson 5. |

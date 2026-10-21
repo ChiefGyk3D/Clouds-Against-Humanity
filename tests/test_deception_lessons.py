@@ -136,6 +136,34 @@ def test_the_detector_survives_odd_shapes(siem_lab):
     assert '"not_json": 0' in proc.stderr and '"bad_shape": 8' in proc.stderr
 
 
+def test_a_success_stamped_before_the_alert_does_not_match(siem_lab):
+    early = json.dumps({"eventid": "cowrie.login.success", "src_ip": "203.0.113.7", "session": "z",
+                        "timestamp": "2026-01-01T11:59:00.000000Z"})
+    late = json.dumps({"eventid": "cowrie.login.success", "src_ip": "203.0.113.7", "session": "z",
+                       "timestamp": "2026-01-01T12:05:00.000000Z"})
+    base = (siem_lab / "events.jsonl").read_text()
+    (siem_lab / "early.jsonl").write_text(base + early + "\n" + late + "\n")
+    got = alerts(run_py(siem_lab, "detect.py", "early.jsonl"))
+    # only the original success (8 s after the alert) matches; 60 s before and 288 s after do not
+    assert [a["at"] for a in got if a["rule"] == "success_after_brute_force"] == ["2026-01-01T12:00:20.000000Z"]
+
+
+def test_long_lines_are_counted_in_bytes_and_never_read_whole(siem_lab):
+    ok = json.dumps({"eventid": "x", "src_ip": "192.0.2.1", "timestamp": "2026-01-01T00:00:00Z", "pad": ""})
+    pad = "é" * ((4096 - len(ok.encode())) // 2)       # 2 bytes each: under 4,096 characters, near the byte limit
+    just_under = ok.replace('"pad": ""', f'"pad": "{pad}"')
+    assert len(just_under.encode()) <= 4096
+    over = ok.replace('"pad": ""', f'"pad": "{pad}éé"')   # 4 bytes more: over the byte limit
+    assert len(over.encode()) > 4096 and len(over) < 4096          # fewer than 4,096 characters, too many bytes
+    huge = "A" * 5_000_000                                            # one 5 MB line, no newline until the end
+    (siem_lab / "long.jsonl").write_bytes(
+        (just_under + "\n" + over + "\n" + huge + "\n" + just_under + "\n").encode()
+    )
+    proc = run_py(siem_lab, "detect.py", "long.jsonl")
+    assert proc.returncode == 0, proc.stderr
+    assert '"too_long": 2' in proc.stderr and '"bad_shape": 0' in proc.stderr and '"not_json": 0' in proc.stderr
+
+
 def test_the_draft_rules_are_well_formed_and_reference_only_their_own_ids():
     xml = one_block(SIEM, "xml", "<group")
     root = ET.fromstring(xml)
@@ -232,6 +260,39 @@ def test_only_the_token_and_the_decoy_user_raise_an_alert(tripwire):
     assert pwd not in log.read_text(), "the password must never be logged"
 
 
+def post(port: int, length: str, body: bytes) -> bytes:
+    return raw_request(port, b"POST /login HTTP/1.0\r\nContent-Length: %s\r\n\r\n%s" % (length.encode(), body))
+
+
+def wait_for_lines(log: Path, n: int) -> list[dict]:
+    for _ in range(100):
+        if log.exists() and len(log.read_text().splitlines()) >= n:
+            break
+        time.sleep(0.05)
+    return [json.loads(x) for x in log.read_text().splitlines()] if log.exists() else []
+
+
+def test_a_bad_content_length_is_refused_or_clamped_and_the_server_lives(tripwire):
+    folder, port = tripwire
+    bait = bait_fields(folder)
+    log = folder / "alerts.jsonl"
+    decoy = f"user={bait['user']}&password=x".encode()
+
+    assert b" 400 " in post(port, "abc", decoy).split(b"\r\n")[0] + b" "      # not a number: refused
+    assert b" 400 " in post(port, "", decoy).split(b"\r\n")[0] + b" "         # empty: refused
+    assert b" 401 " in post(port, "-5", decoy).split(b"\r\n")[0] + b" "       # negative: clamped to 0
+    assert not log.exists(), "none of those may alert"
+
+    padding = b"a=" + b"x" * 1100 + b"&"
+    post(port, "99999", padding + decoy)                    # the decoy user sits past the 1,024-byte clamp
+    assert not log.exists(), "bytes past the clamp must not be read"
+
+    post(port, "99999999999999999999", decoy)               # huge length, short body: read what is there
+    records = wait_for_lines(log, 1)
+    assert [r["eventid"] for r in records] == ["decoy.credential.used"]
+    assert b" 401 " in post(port, "5", b"user=").split(b"\r\n")[0] + b" "      # still serving
+
+
 def test_the_bait_is_built_at_run_time_and_differs_each_time(tmp_path):
     script = one_block(CANARY, "python", "Builds the decoy document")
     seen = set()
@@ -247,11 +308,11 @@ def test_the_bait_is_built_at_run_time_and_differs_each_time(tmp_path):
 # --- lesson 4: the watcher's guard against forged lines ----------------------------
 
 FAKE_TOOL = """#!/usr/bin/env bash
-# stands in for inotifywait: prints events, one with a newline in the file name
-printf '2026-01-01T00:00:00+0000|OPEN|bait.txt\\n'
-printf '2026-01-01T00:00:01+0000|CREATE|line1\\nALERT forged|\\n'
-printf '2026-01-01T00:00:02+0000|OPEN,ISDIR|\\n'
-printf '2026-01-01T00:00:03+0000|DELETE|a|b\\n'
+# stands in for inotifywait --csv: one CSV record per event; a name with a newline is quoted
+printf 'bait/,OPEN,bait.txt\\n'
+printf 'bait/,CREATE,"line1\\nbait/,DELETE,forged"\\n'
+printf 'bait/,"OPEN,ISDIR",\\n'
+printf 'bait/,DELETE,"a|b""c,d"\\n'
 """
 
 
@@ -273,20 +334,31 @@ def run_watch(tmp_path: Path, script: str) -> str:
     return (tmp_path / "alerts.log").read_text()
 
 
-def test_the_watcher_drops_forged_lines_and_quotes_names(tmp_path):
+def test_the_watcher_keeps_a_hostile_name_on_one_line_and_forges_nothing(tmp_path):
     script = one_block(HONEY, "bash", "inotifywait -m")
     log = run_watch(tmp_path, script)
-    assert "forged" not in log                                   # the second line of the name never became an alert
-    assert "ISDIR" not in log                                    # listing the folder is not a touch
-    assert log.count("ALERT time=") == 3                         # OPEN, CREATE (name truncated), DELETE
-    assert "file=a\\|b" in log                                   # %q quotes the bar
+    lines = log.splitlines()
+    assert len(lines) == 3, log                                      # OPEN, CREATE, DELETE; the folder event is skipped
+    assert all(line.startswith("ALERT time=") for line in lines)
+    assert 'file="line1\\nbait/,DELETE,forged"' in lines[1]            # the newline is escaped, still one event
+    assert sum("event=DELETE" in line for line in lines) == 1        # the forged DELETE is not an event
+    assert 'file="a|b\\"c,d"' in lines[2]
+    assert "ISDIR" not in log
 
 
-def test_without_the_guard_the_same_input_forges_an_alert(tmp_path):
-    script = one_block(HONEY, "bash", "inotifywait -m")
-    unguarded = "\n".join(
-        line for line in script.splitlines() if "stamp" not in line and "dropped a line" not in line
-    ).replace("file=%q", "file=%s")
-    assert "stamp" not in unguarded and "%q" not in unguarded
-    log = run_watch(tmp_path, unguarded)
-    assert "ALERT forged" in log
+def test_a_line_by_line_reader_is_forged_by_the_same_input(tmp_path):
+    naive = FAKE_TOOL.split("\n", 1)[0] + "\n"                      # keep the shebang only
+    script = (
+        "#!/usr/bin/env bash\n"
+        "inotifywait -m -q --csv \"$1\" | while IFS=, read -r d events name; do\n"
+        "  printf 'ALERT event=%s file=%s\\n' \"$events\" \"$name\" >> \"$2\"\n"
+        "done\n"
+    )
+    assert naive.startswith("#!")
+    log = run_watch(tmp_path, script)
+    assert log.count("event=DELETE") == 2, log                       # one real, one forged out of a hostile name
+
+
+@pytest.mark.parametrize("marker", ["Register-ObjectEvent", "ConvertTo-Json"])
+def test_the_powershell_watcher_escapes_names(marker):
+    assert marker in one_block(HONEY, "powershell", "FileSystemWatcher")
