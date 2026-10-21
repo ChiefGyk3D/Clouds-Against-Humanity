@@ -78,7 +78,7 @@ PowerShell has short aliases (`ls`, `cd`, `cat`) so the names feel familiar, but
 1. **List before you delete.** Run `ls` with the exact same pattern first and read what it would match. `rm *.log` deletes every `.log` file in the current folder, so check where you are with `pwd`.
 2. **Ask first while you learn.** `rm -i file` asks for each file. In PowerShell, `Remove-Item file -WhatIf` prints what would be deleted and deletes nothing (documented option; est.).
 3. **Be wary of `-r` and `-f`.** `-r` means "and everything inside", `-f` means "do not ask, ignore errors". `rm -rf` together, aimed at the wrong place, is how people lose a machine. Never paste one you do not understand, and never put `sudo` in front of it to make an error go away.
-4. **Quote variables and never let one be empty.** `rm -rf "$DIR"/*` where `DIR` is unset expands to `rm -rf /*`. Strict mode (below) refuses to run with an unset variable, which is one reason to use it.
+4. **Quote variables, and never let one be unset or empty.** `rm -rf "$DIR"/*` becomes `rm -rf /*` when `DIR` is unset *or* set to an empty string (`DIR=''`). Strict mode (below) catches only the **unset** case; an empty value sails through, so state the rule in the script: `rm -rf -- "${DIR:?DIR must be set and non-empty}"/*` stops with an error for both (the `:?` form is documented Bash parameter expansion; the `--` ends option parsing). That still does not make the command safe: read the final path with `echo` or `ls` before you run anything destructive.
 
 All the exercises here delete only a practice folder you create yourself.
 
@@ -232,6 +232,8 @@ Set-Location "$HOME\terminal-practice"
 # checkup.sh: a read-only report about this machine. It changes nothing.
 #
 # Usage: ./checkup.sh [MAX_DISK_PERCENT] [COMMAND ...]
+#   MAX_DISK_PERCENT: a whole number from 1 to 100 (default 90)
+#   COMMAND: program names that must be on PATH (default: git)
 # Example: ./checkup.sh 80 git curl
 # Exit code: 0 if every check passed, 1 if any failed, 2 if used wrongly.
 set -euo pipefail
@@ -239,7 +241,7 @@ set -euo pipefail
 failures=0
 
 usage() {
-  echo "usage: $0 [MAX_DISK_PERCENT] [COMMAND ...]" >&2
+  echo "usage: $0 [MAX_DISK_PERCENT (1-100)] [COMMAND ...]" >&2
 }
 
 # Print one report line. Arguments: status, name, detail.
@@ -290,12 +292,17 @@ main() {
   if [ "$#" -gt 0 ]; then
     shift
   fi
+  # The contract, same as the PowerShell version: a whole number from 1 to 100.
   case $limit in
-    '' | *[!0-9]*)
+    '' | *[!0-9]* | ????*)
       usage
       return 2
       ;;
   esac
+  if [ "$limit" -lt 1 ] || [ "$limit" -gt 100 ]; then
+    usage
+    return 2
+  fi
 
   check_disk "$limit"
   local name
@@ -317,7 +324,7 @@ main "$@"
 What each part is doing:
 
 - `#!/usr/bin/env bash` (the "shebang") tells the system which program runs the file.
-- `set -euo pipefail` is **strict mode**: `-e` stop at the first failing command, `-u` treat an unset variable as an error, `-o pipefail` make a pipeline fail if any part failed. It is the first line after the comments in the repo's own scripts, such as `scripts/ci_cost_gate.sh`.
+- `set -euo pipefail` is **strict mode**: `-e` stop at the first failing command, `-u` treat an unset variable (not an empty one) as an error, `-o pipefail` make a pipeline fail if any part failed. It is the first line after the comments in the repo's own scripts, such as `scripts/ci_cost_gate.sh`.
 - `local` keeps a variable inside its function. `"$1"` is the first argument to the function; `"$@"` is all the arguments, kept separate. `${1:-90}` means "the first argument, or 90 if there is none".
 - `if ... then ... else ... fi` and `for ... in ... do ... done` are the decision and the loop. `[ "$used" -lt "$limit" ]` compares numbers.
 - `df -P /` reports the disk, `command -v` asks whether a program is on `PATH`, and `ss -tln` lists listening TCP sockets, one per line after a header line (hence `tail -n +2`).
@@ -341,23 +348,23 @@ RESULT: all checks passed
 exit=0
 ```
 
-Now make it fail on purpose, with a limit nothing can meet and a command that does not exist:
+Now make it fail on purpose, with a command that cannot exist. This failure is the same on every machine, unlike a disk limit (the contract allows 1 to 100, and a nearly empty disk would pass even a limit of 1):
 
 ```bash
-./checkup.sh 1 git nosuchtool
+./checkup.sh 90 git nosuchtool
 echo "exit=$?"
 ```
 
 ```text
-FAIL  disk               / is 49% used (limit 1%)
+PASS  disk               / is 49% used (limit 90%)
 PASS  command:git        found at /usr/bin/git
 FAIL  command:nosuchtool not found in PATH
 INFO  listeners          11 TCP sockets listening (ss -tln)
-RESULT: 2 check(s) failed
+RESULT: 1 check(s) failed
 exit=1
 ```
 
-And misuse it: `./checkup.sh abc` prints the usage line and exits `2`. A name with a space, `./checkup.sh 90 git "my tool"`, is reported as one command and fails cleanly, because every variable is quoted.
+And misuse it: `./checkup.sh abc`, `./checkup.sh 0` and `./checkup.sh 101` each print the usage line and exit `2`. (The PowerShell version rejects the same values through `[ValidateRange(1, 100)]`, but as a parameter error, which exits `1`: the two shells agree on what is refused, not on that one exit number.) A name with a space, `./checkup.sh 90 git "my tool"`, is reported as one command and fails cleanly, because every variable is quoted.
 
 ### The PowerShell script: checkup.ps1
 
@@ -478,13 +485,17 @@ In PowerShell the equivalents are "is not recognized as the name of a cmdlet", "
 1. **Use strict mode, always.** Bash: `set -euo pipefail` at the top. PowerShell: `Set-StrictMode -Version Latest` and `$ErrorActionPreference = 'Stop'`. Real output when a variable is never set:
 
    ```text
-   $ bash -c 'set -u; echo "limit is $LIMIT"'
-   bash: line 1: LIMIT: unbound variable
+   $ printf 'set -u\necho "limit is $LIMIT"\n' > unset.sh
+   $ bash unset.sh; echo "exit=$?"
+   unset.sh: line 2: LIMIT: unbound variable
+   exit=1
    $ bash -c 'echo "limit is [$LIMIT]"'
    limit is []
    ```
 
-   The second one carried on with an empty value. Imagine that value was a folder name in an `rm`.
+   The second one, without `set -u`, carried on with an empty value. Imagine that value was a folder name in an `rm`. (When I ran the same check as a one-liner with `bash -c 'set -u; ...'`, bash 5.2 exited `127` instead of `1`. Bash treats an expansion error inside a `-c` string differently from one in a script file; a script file gives `1`, which is what you will run. Either way the exit is non-zero, and that is the part that matters.)
+
+   Strict mode does not catch a variable that is *set to an empty string*. Guard the ones that matter with `"${NAME:?message}"`, as in the `rm` note above.
 2. **Quote every expansion** (`"$var"`, `"$@"`). In PowerShell, pass values as parameters, not by gluing strings into a command.
 3. **Know what strict mode does not do.** `set -e` has holes: commands in an `if` test, and the left side of `&&` and `||`, do not stop the script. And `((n++))` returns 1 when `n` was 0, so under `set -e` it kills a correct script (real run: exit 1 before "reached" printed). That is why `checkup.sh` uses `failures=$((failures + 1))`.
 4. **Never run `curl ... | sh`, or `irm ... | iex`, without reading it first.** Those commands download a script and run it as you in one step, with nothing between the internet and your machine. Download it to a file instead, read it, and run it only if you understand what it does and trust the source:
@@ -525,6 +536,15 @@ ShellCheck's documentation names the warning for an unquoted variable **SC2086**
 Install-Module -Name PSScriptAnalyzer -Scope CurrentUser
 Invoke-ScriptAnalyzer -Path .\checkup.ps1
 ```
+
+Running it prints findings but does **not** by itself make the shell exit non-zero, so a CI step that only calls it would go green over a finding. In CI, add `-EnableExit` (documented above: the exit code equals the number of error records) and run it in a child process so the exit ends that process, not your session:
+
+```powershell
+pwsh -NoProfile -Command "Invoke-ScriptAnalyzer -Path .\checkup.ps1 -Severity Error,Warning -EnableExit"
+"exit=$LASTEXITCODE"
+```
+
+`-EnableExit` counts error records, so warnings alone may still exit `0`; the `-Severity` list only chooses what is reported, so decide on purpose what level should fail the build (est.: not run here; use `powershell.exe` instead of `pwsh` on Windows PowerShell 5.1).
 
 Expect nothing printed when the script is clean (est.; not run). If you replace `Write-Output` with `Write-Host` it should flag `PSAvoidUsingWriteHost` (est.: a built-in rule I know of, not run here).
 
@@ -625,11 +645,11 @@ $null -eq $m
 
 ### Exercise 3: run the checkup and read the failure
 
-**Predict.** Running `checkup` with a disk limit of `1`: which lines turn FAIL, and what is the exit code?
+**Predict.** Running `checkup` with a command that does not exist: which lines turn FAIL, and what is the exit code?
 
-**Do.** Create the script from this page, then run it twice with the arguments shown above (the Bash `./checkup.sh 1 git nosuchtool`, or the PowerShell `powershell.exe -NoProfile -File .\checkup.ps1 -MaxDiskPercent 1 -Command git,nosuchtool`), each followed by printing the exit code.
+**Do.** Create the script from this page, then run it twice with the arguments shown above (the Bash `./checkup.sh 90 git nosuchtool`, or the PowerShell `powershell.exe -NoProfile -File .\checkup.ps1 -MaxDiskPercent 90 -Command git,nosuchtool`), each followed by printing the exit code.
 
-**Check.** FAIL on `disk` and on `nosuchtool` and exit `1`. The report lines name what failed; the exit code is for machines. The words are for you and the number is for the machine.
+**Check.** FAIL on `nosuchtool` only, and exit `1`. The report lines name what failed; the exit code is for machines. The words are for you and the number is for the machine.
 
 **Undo.** Nothing was changed. The script is read-only.
 
