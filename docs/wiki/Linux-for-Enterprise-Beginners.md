@@ -4,7 +4,7 @@ Side page to the start-from-zero pages. Read it before [Droplet hardening](Dropl
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-> **Status: vendor facts checked against vendor pages on 2026-10-22; commands not run by the author.** Every lifecycle date, default and maintainer below was read from the vendor page named next to it, on **2026-10-22**. Where a vendor site blocked automated reads, lifecycle dates come from endoflife.date, a secondary community-maintained aggregator (also read 2026-10-22) and say so; confirm them on the vendor page before a real decision. Anything else I could not read is marked **est.** (estimate) and is a guess to check. No price appears anywhere on this page: prices change, so go to the vendor. The commands are standard and stable but I did not run them in a container for this page, so run the lab, and trust what your terminal prints over what this page says.
+> **Status: vendor facts checked against vendor pages on 2026-10-22; commands not run by the author.** Each lifecycle date, default and maintainer below was read on **2026-10-22** from the page named next to it, which is a vendor page unless the text says otherwise. Where a vendor site blocked automated reads, lifecycle dates come from endoflife.date, a secondary community-maintained aggregator (also read 2026-10-22) and say so; confirm them on the vendor page before a real decision. Anything else I could not read is marked **est.** (estimate) and is a guess to check. No price appears anywhere on this page: prices change, so go to the vendor. The commands are standard and stable but I did not run them in a container for this page, so run the lab, and trust what your terminal prints over what this page says.
 
 > **Prerequisites.** You can open a terminal and type a command ([Git from zero](Git-From-Zero.md) has a gentle first look) and you know what an SSH key is ([Networking basics](Networking-Basics-for-This-Project.md#ssh-in-one-paragraph)). Nothing about Linux itself. About three hours for the reading and the free lab.
 
@@ -30,7 +30,7 @@ Most servers, and most cloud workloads, run Linux. When you rent a small virtual
 | Defaults | What is on or off out of the box | Firewall, SELinux or AppArmor, which services start |
 | Support | Who patches it, for how long, and at what cost model | A vendor subscription or a community |
 
-Two distros of the same **family** share the package format, most commands and a lot of configuration. Learn one family well and the next one in it takes an afternoon. A different family takes a few days of "where did they put it". The commands in the survival section differ almost only in the package manager.
+Two distros of the same **family** share the package format, most commands and a lot of configuration. Learn one family well and the next one in it often takes an afternoon. A different family can take a few days of "where did they put it". The commands in the survival section differ almost only in the package manager.
 
 ## The families you will meet
 
@@ -76,7 +76,7 @@ Commands that differ by family are shown for **dnf** (RHEL, Rocky, Alma, Amazon 
 
 ### Find out what you are on
 
-Do this first, every time, on every machine. Tips found online are written for one family.
+Do this first on any machine you have not used before. Tips found online are written for one family.
 
 ```text
 $ cat /etc/os-release       # distro name, version, and ID= / ID_LIKE= (the family)
@@ -103,7 +103,7 @@ One trap: on Debian and Ubuntu `apt update` only refreshes the list; `apt upgrad
 
 ### Services with systemd
 
-Every family above uses **systemd** (**est.** for the cases not named in the table; the commands below are the same everywhere). A **service** is a program that runs in the background; systemd starts, stops and watches them.
+Almost every distro above uses **systemd**; the exception in this page's table is Alpine, which uses OpenRC (**est.**), and minimal container images usually run no init system at all. On a systemd machine, the commands below are the same across families. A **service** is a program that runs in the background; systemd starts, stops and watches them. On a non-systemd system, use that system's own service tool (on Alpine, `rc-service`, **est.**).
 
 ```text
 $ systemctl status sshd          # is it running? last log lines (Ubuntu names it ssh)
@@ -128,11 +128,11 @@ The SSH service is called `sshd` on the Red Hat and SUSE families and `ssh` on U
 | `/home` | Each person's files. |
 | `/opt` | Add-on software installed outside the package manager. |
 | `/proc` | Not real files: a live view of the kernel and running processes. `cat /proc/cpuinfo`. |
-| `/tmp` | Scratch space anyone can write to. Cleared at reboot or on a timer. Never keep anything in it. |
+| `/tmp` | Scratch space anyone can write to. Cleared at reboot or on a timer. Do not keep anything you need in it. |
 
 ### Users, groups and sudo
 
-Every program runs as a **user**. **root** (user ID 0) can do anything and bypasses every permission check, so a mistake or a stolen session as root has no brakes. The habit: log in as a normal user and use **sudo** to run one command with root's power. sudo logs who ran what, which is the point ([least privilege](Identity-Secrets-and-Zero-Trust-Basics.md)).
+Every program runs as a **user**. **root** (user ID 0) bypasses the ordinary file-permission checks, so a mistake or a stolen session as root can change almost anything. (Root is not unlimited: the mandatory access control layer below, and kernel capabilities, can still restrict it. That is a reason to keep them on, not a reason to log in as root.) The habit: log in as a normal user and use **sudo** to run one command with root's power. sudo logs who ran what, which is the point ([least privilege](Identity-Secrets-and-Zero-Trust-Basics.md)).
 
 A **group** is a named set of users. Who may use sudo is decided by a group, and the name differs by family:
 
@@ -163,7 +163,7 @@ $ ls -l /etc/ssh/sshd_config
 
 Read the first ten characters as one type character plus three triples. `-` means a plain file (`d` is a directory). Then the owner `rw-`, the group `r--`, everyone else `r--`. `r` read, `w` write, `x` run (or enter a directory). The next two words are the owner (`root`) and the group (`root`).
 
-Numbers are the same thing added up: read 4, write 2, execute 1. `rw-r--r--` is 6, 4, 4, so `644`; `0600` means "owner reads and writes, nobody else can touch it" (the connector's config file in this project uses it).
+Numbers are the same thing added up: read 4, write 2, execute 1. `rw-r--r--` is 6, 4, 4, so `644`; `0600` means "owner reads and writes; no other ordinary user can touch it" (root still can) (the connector's config file in this project uses it).
 
 ```text
 $ chmod 600 secret.txt          # owner only
@@ -175,9 +175,9 @@ $ sudo chown alice:alice file   # change owner and group
 
 ### SSH keys, not passwords
 
-SSH with a **key pair** replaces typing a password with proof that you hold a private key; the server stores only the public half in `~/.ssh/authorized_keys`. A key cannot be guessed or phished the way a password can. The server-side switches are `PasswordAuthentication no` and `PermitRootLogin no` in `/etc/ssh/sshd_config` or a drop-in file under `/etc/ssh/sshd_config.d/`. Always run `sudo sshd -t` before restarting so a typo cannot lock you out.
+SSH with a **key pair** replaces typing a password with proof that you hold a private key; the server stores only the public half in `~/.ssh/authorized_keys`. A key cannot be guessed the way a weak password can, and there is no password to type into a fake login page. Keys are not magic: a stolen private key works for the thief, and a user can be tricked into connecting to, or forwarding their key agent to, an attacker's machine. Protect the private key with a passphrase and keep it off shared machines. The server-side switches are `PasswordAuthentication no` and `PermitRootLogin no` in `/etc/ssh/sshd_config` or a drop-in file under `/etc/ssh/sshd_config.d/`. Run `sudo sshd -t` before restarting so a typo in the config is caught before it can lock you out.
 
-This project goes further: the droplets accept **no inbound connections at all**, and SSH is reached only through the Twingate connector model, so an SSH port is never exposed to the internet ([Twingate](Twingate.md), [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md)). The host-level settings are in [Droplet hardening](Droplet-Hardening.md#sshd-drop-in-etcsshsshd_configd99-cah-hardeningconf). The key idea is layers: a network control, then the host control.
+This project goes further. By default the droplets have **no public inbound** at all: the baseline cloud firewall is deny-all inbound. The connector firewall adds one inbound rule, TCP 22 from droplets carrying the connector tag (connector to connector), and, only if a telemetry tag is set, the metrics ports from that tag. The optional host firewall admits TCP 22 from private address blocks, and the metrics port if telemetry sets one ([Droplet hardening](Droplet-Hardening.md#host-firewall-built-off-by-default)). None of those is open to the internet, and SSH is reached through the Twingate connector model, so the design does not expose an SSH port to the internet ([Twingate](Twingate.md), [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md)). The host-level settings are in [Droplet hardening](Droplet-Hardening.md#sshd-drop-in-etcsshsshd_configd99-cah-hardeningconf). The key idea is layers: a network control, then the host control.
 
 ### Firewalls
 
@@ -231,7 +231,7 @@ Clocks drift, and TLS, tokens and log correlation all fail when they do. The Red
 
 ### Patching, and why lifecycle dates matter
 
-A distro is supported for a stated period. After the date, the vendor stops publishing security fixes for it, and every new vulnerability stays open on that machine forever. So an **end-of-life date is a security date**. Ask of every machine: what release is it, when does support end, who is going to move it before that date? Amazon Linux 2 reached its end on 2026-06-30; Ubuntu 22.04 LTS reaches the end of standard security maintenance in May 2027 (read on the Ubuntu release page).
+A distro is supported for a stated period. After the date, the vendor stops publishing security fixes for it, and new vulnerabilities are no longer promised a fix on that release (some vendors sell extended support, and a few fixes may still be backported, but you can no longer count on them). So an **end-of-life date is a security date**. Ask of every machine: what release is it, when does support end, who is going to move it before that date? Amazon Linux 2 reached its end on 2026-06-30; Ubuntu 22.04 LTS reaches the end of standard security maintenance in May 2027 (read on the Ubuntu release page).
 
 **Two examples already in the past** (from the aggregator described below, read 2026-10-22, today being 2026-10-22): Debian 11 reached its end of support on **2026-08-31**, and SLES 15 SP6 reached its general-support end on **2025-12-31**. A machine still on either today gets no new security fixes from the vendor's normal channel. Older still: RHEL 7 ended maintenance on 2024-06-30.
 
@@ -249,19 +249,19 @@ I read the repository's modules for this section on 2026-10-22.
 
 - **DigitalOcean droplets:** the image is `ubuntu-24-04-x64` (Ubuntu 24.04 LTS), set in `modules/twingate-connector/main.tf`.
 - **AWS (the optional second cloud):** Ubuntu 24.04 LTS from the parameter Canonical publishes (`modules/aws/twingate-connector/main.tf`).
-- **First boot:** `modules/twingate-bootstrap/cloud-init.yaml.tftpl` creates one admin user in the `sudo` group with a key and no password, disables root login and password SSH, installs `unattended-upgrades` and `chrony`, and the cloud firewall allows no inbound traffic.
+- **First boot:** `modules/twingate-bootstrap/cloud-init.yaml.tftpl` creates one admin user in the `sudo` group with a key and no password, disables root login and password SSH, installs `unattended-upgrades` and `chrony`, and the cloud firewall has no public inbound rules (see [SSH keys, not passwords](#ssh-keys-not-passwords) for the private and connector-tag exceptions; checked in `modules/firewall/` and `stacks/10-access/main.tf`).
 
-So this project is a Debian-family, `apt`, `ufw`-available, AppArmor-on, systemd system. Its hardening is explained line by line in [Droplet hardening](Droplet-Hardening.md); the cloud-init idea is in [What is infrastructure as code](What-Is-Infrastructure-as-Code.md). The same ideas apply on RHEL, Amazon Linux or SUSE, with the commands changed using the tables above.
+So this project is a Debian-family, `apt`, systemd system. Ubuntu images ship `ufw` (disabled until enabled) and AppArmor as the image default, but this repository does not configure or verify AppArmor or `ufw`: it selects the image, installs `chrony` and `unattended-upgrades`, and adds the hardening in Droplet hardening. Check `sudo aa-status` on a real machine rather than assuming. Its hardening is explained line by line in [Droplet hardening](Droplet-Hardening.md); the cloud-init idea is in [What is infrastructure as code](What-Is-Infrastructure-as-Code.md). The same ideas apply on RHEL, Amazon Linux or SUSE, with the commands changed using the tables above.
 
 ## Hands-on, free path: two families in throwaway containers
 
-You will run the same tasks on two families. A container shares your computer's kernel, so it is a quick way to see the userland difference, but it is not a full machine (no systemd by default, no real firewall). That is why the service exercise says what to expect.
+You will run the same tasks on two families. A container shares a Linux kernel with its host (on a Linux computer, your own; on Docker Desktop or Podman for macOS or Windows, the kernel of the small Linux virtual machine those tools run), so it is a quick way to see the userland difference, but it is not a full machine (no systemd by default, no real firewall). That is why the service exercise says what to expect.
 
-**Install a runtime.** Either [Podman](https://podman.io/docs/installation) or [Docker Engine](https://docs.docker.com/engine/install/). On Windows and macOS, the container tools run a small Linux virtual machine for you. If you would rather have a full virtual machine (needed for the service and firewall tasks), use a VM manager such as VirtualBox, Multipass or GNOME Boxes with an Ubuntu Server or AlmaLinux ISO; the exercises below work in one the same way.
+**Install a runtime.** Either [Podman](https://podman.io/docs/installation) or [Docker Engine](https://docs.docker.com/engine/install/). On Windows and macOS, the container tools run a small Linux virtual machine for you. If you would rather have a full virtual machine (needed for the service and firewall tasks), use a VM manager such as VirtualBox, Multipass or GNOME Boxes with an Ubuntu Server or AlmaLinux ISO; the exercises below work the same way inside a VM.
 
 **Images, checked 2026-10-22 on Docker Hub (the official images exist, and each tag below existed):** `docker.io/library/ubuntu:24.04`, `docker.io/library/almalinux:9`, `docker.io/library/rockylinux:9`, `docker.io/library/amazonlinux:2023`. SUSE publishes its images on `registry.suse.com` (reachable 2026-10-22; I did not check a specific tag). Replace `podman` with `docker` if that is what you installed.
 
-> **Throwaway means throwaway.** `--rm` deletes the container when you exit. Nothing you do inside survives and nothing leaves your computer except the package downloads.
+> **Throwaway means throwaway.** `--rm` deletes the container when you exit. Nothing you do inside survives, and as long as you do not mount a folder from your computer into it (these commands do not), nothing is written outside the container except package downloads.
 
 ### Exercise 1: identify, install, read permissions in two families
 
@@ -274,21 +274,21 @@ You will run the same tasks on two families. A container shares your computer's 
    ```
 
    In each: `cat /etc/os-release`, then install a small tool (`apt update && apt install -y dnsutils` in Ubuntu; `dnf install -y bind-utils` in Alma). In a container you are root, so no `sudo` is needed. Then run `dig` or `command -v dig`, and `ls -l /etc/shadow`.
-3. **Check.** Ubuntu says `ID=ubuntu`, `ID_LIKE=debian`; Alma says `ID_LIKE="rhel centos fedora"` (**est.** for the exact wording; read yours). `/etc/shadow` should be readable by root only, with no access for others.
+3. **Check.** Ubuntu says `ID=ubuntu`, `ID_LIKE=debian`; Alma says `ID_LIKE="rhel centos fedora"` (**est.** for the exact wording; read yours). `/etc/shadow` should give no access to ordinary users. On Ubuntu it is typically `0640 root:shadow` (readable by root and the protected `shadow` group); on Alma it is typically mode `000`. Either is fine; read your own output.
 4. **Undo.** Type `exit`. The `--rm` removes the container. Check with `podman ps -a`.
 
 ### Exercise 2: which package owns a file, and what is on the kernel
 
-1. **Predict.** Will `uname -r` be the same in both containers? (Hint: containers use the host's kernel.)
+1. **Predict.** Will `uname -r` be the same in both containers? (Hint: containers share the kernel of their host, which on macOS or Windows is the runtime's Linux virtual machine.)
 2. **Do.** In each container, find the owner of a file: `dnf provides /usr/bin/dig` in Alma; `dpkg -S /usr/bin/dig` in Ubuntu. Run `uname -r` in both and on your own computer.
-3. **Check.** The kernel numbers match your host and each other: the container has its own userland but not its own kernel. This is the central fact of [Containers and Docker basics](Containers-and-Docker-Basics.md).
+3. **Check.** On Linux the kernel numbers match your host and each other; on macOS or Windows they match each other and the runtime's Linux VM, not your host OS. Either way, the container has its own userland but not its own kernel. This is the central fact of [Containers and Docker basics](Containers-and-Docker-Basics.md).
 4. **Undo.** `exit` both.
 
 ### Exercise 3: a user, a group, and `sudo`
 
 1. **Predict.** In a minimal image `sudo` may not be installed. What will `sudo -l` print?
-2. **Do.** Install it (`apt install -y sudo` or `dnf install -y sudo`). Create `alice` (`useradd -m alice`), then add her to the admin group (Ubuntu `sudo`, Alma `wheel`), switch to her with `su - alice`, run `id` and `sudo -l`.
-3. **Check.** `sudo -l` works for her only in the right group, and the group name differs. Try the wrong group name; the command fails.
+2. **Do.** Install it (`apt update && apt install -y sudo` on Ubuntu, `dnf install -y sudo` on Alma). Create `alice` and give her a throwaway password: `useradd -m -s /bin/bash alice && passwd alice` (use a made-up password; the container is deleted afterwards). First run `su - alice -c 'sudo -l'` and note that she is refused, since she is in no admin group. Then add her to the admin group: `usermod -aG sudo alice` on Ubuntu or `usermod -aG wheel alice` on Alma. Switch to her with `su - alice`, then run `id` and `sudo -l` (it asks for her password).
+3. **Check.** Before the group change, `sudo -l` refuses her; after it, `sudo -l` lists what she may run, and `id` shows the group. The group name differs by family: try the Ubuntu name on Alma (`usermod -aG sudo alice` fails there if no `sudo` group exists) to see the difference.
 4. **Undo.** `exit`. The container goes away with the user.
 
 ### Exercise 4: read the end-of-life date of the OS you just ran
@@ -315,21 +315,22 @@ For a real machine with systemd, a firewall and SELinux or AppArmor, rent a smal
 
 A small loop in a throwaway Ubuntu or Alma container (or a VM, if you want the service steps).
 
-**Build.** Create a service user and a file only it should read. In the container:
+**Build.** Create a service user and a file only it should read, in a folder others can enter (home folders are often closed to other users, which would hide the problem). In the container:
 
 ```text
 $ useradd -m svcdemo
-$ echo "demo-not-a-real-secret" > /home/svcdemo/config.txt
-$ chown svcdemo:svcdemo /home/svcdemo/config.txt
-$ chmod 600 /home/svcdemo/config.txt
-$ ls -l /home/svcdemo/config.txt
+$ mkdir -p /srv/svcdemo && chmod 755 /srv/svcdemo
+$ echo "demo-not-a-real-secret" > /srv/svcdemo/config.txt
+$ chown svcdemo:svcdemo /srv/svcdemo/config.txt
+$ chmod 600 /srv/svcdemo/config.txt
+$ ls -l /srv/svcdemo/config.txt
 ```
 
-The value is a made-up string; never type a real secret into an exercise. In a VM, also write a tiny systemd service that runs as `svcdemo` (a unit file in `/etc/systemd/system/` with `User=svcdemo`), enable it, and confirm with `systemctl status`.
+The value is a made-up string; do not type a real secret into an exercise. In a VM, also write a tiny systemd service that runs as `svcdemo` (a unit file in `/etc/systemd/system/` with `User=svcdemo`), enable it, and confirm with `systemctl status`.
 
-**Break.** Misconfigure it the way people do under pressure: `chmod 777 /home/svcdemo/config.txt` (anyone can read and write), or `chmod 777 /etc/passwd`-style shortcuts on a file that matters. Now create a second user `bob` and read the file as him: `su - bob -c 'cat /home/svcdemo/config.txt'`. It works, which is the problem.
+**Break.** Misconfigure it the way people do under pressure: `chmod 777 /srv/svcdemo/config.txt` (anyone can read and write). First create a second user `useradd -m bob` and try `su - bob -c 'cat /srv/svcdemo/config.txt'`: it is refused. Now run the chmod and repeat; it works, which is the problem.
 
-**Detect.** `ls -l` shows `-rwxrwxrwx`. A one-line sweep finds every world-writable file in a folder: `find /home -type f -perm -0002`. On a VM with journald, `journalctl -p warning -b` and `journalctl -u <service>` show what the service reported. This is the beginner version of what a SIEM does at scale ([Detection and monitoring](Detection-and-Monitoring-Wazuh-and-the-Landscape.md)).
+**Detect.** `ls -l` shows `-rwxrwxrwx`. A one-line sweep finds every world-writable file in a folder: `find /srv /home -type f -perm -0002`. On a VM with journald, `journalctl -p warning -b` and `journalctl -u <service>` show what the service reported. This is the beginner version of what a SIEM does at scale ([Detection and monitoring](Detection-and-Monitoring-Wazuh-and-the-Landscape.md)).
 
 **Defend.** Put it right and add layers: `chmod 600`, the least-privilege user, and the MAC layer left **on**. On a VM with SELinux or AppArmor, check `getenforce` or `sudo aa-status` before and after; it should still say Enforcing, or show profiles in enforce mode. If a legitimate step is blocked, read the denial and fix that one thing; do not turn the layer off. Close by listing what you would alert on in production: new world-writable files, new setuid files, changes in `/etc/sudoers`.
 
