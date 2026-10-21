@@ -209,6 +209,8 @@ flowchart TD
 
 **Geo-blocks** are the one place a commercial VPN does exactly what it says on the box: it makes my traffic come out of another country. No security claim attached. That is the only reason one is still installed.
 
+**A home lab, and what happens when the internet fails over to cellular.** The same argument applied at home, with two connectors on separate small computers, is on [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md).
+
 ## Further reading
 
 - [How Twingate works](https://www.twingate.com/docs/how-twingate-works) and [Understanding relays](https://twingate.com/docs/understanding-relays), Twingate docs
