@@ -4,7 +4,7 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-> New to Linux commands, users, `sudo` or file permissions? Read [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) first; it also compares Ubuntu with RHEL, Amazon Linux and SUSE.
+> New to the terminal itself (pipes, exit codes, `PATH`)? Start with [The terminal and your first script](Terminal-and-Your-First-Script.md). New to Linux commands, users, `sudo` or file permissions? Read [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) first; it also compares Ubuntu with RHEL, Amazon Linux and SUSE.
 
 The firewall is the outer wall. This page is about the house: what `modules/twingate-bootstrap/cloud-init.yaml.tftpl` does to a connector droplet on its first boot, before any human could log in.
 

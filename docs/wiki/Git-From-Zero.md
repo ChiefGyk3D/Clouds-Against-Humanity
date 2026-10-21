@@ -132,7 +132,7 @@ Sources, all retrieved 2026-10-21: GitHub Docs, "Installing GitHub Desktop" (htt
 
 ### What a terminal is
 
-A **terminal** is a window where you type a command and the computer types the answer back. The program inside it, the **shell**, reads what you typed. A **command** is one instruction, for example `git status`. Opening a terminal is harmless. Nothing happens until you press Enter.
+A **terminal** is a window where you type a command and the computer types the answer back. The program inside it, the **shell**, reads what you typed. A **command** is one instruction, for example `git status`. Opening a terminal is harmless. Nothing happens until you press Enter. For more than git needs (moving around, pipes, exit codes, a first script), see [The terminal and your first script](Terminal-and-Your-First-Script.md).
 
 How to open one:
 

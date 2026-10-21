@@ -6,7 +6,7 @@ Side page to the start-from-zero pages. Read it before [Droplet hardening](Dropl
 
 > **Status: vendor facts checked against vendor pages on 2026-10-22; commands not run by the author.** Each lifecycle date, default and maintainer below was read on **2026-10-22** from the page named next to it, which is a vendor page unless the text says otherwise. Where a vendor site blocked automated reads, lifecycle dates come from endoflife.date, a secondary community-maintained aggregator (also read 2026-10-22) and say so; confirm them on the vendor page before a real decision. Anything else I could not read is marked **est.** (estimate) and is a guess to check. No price appears anywhere on this page: prices change, so go to the vendor. The commands are standard and stable but I did not run them in a container for this page, so run the lab, and trust what your terminal prints over what this page says.
 
-> **Prerequisites.** You can open a terminal and type a command ([Git from zero](Git-From-Zero.md) has a gentle first look) and you know what an SSH key is ([Networking basics](Networking-Basics-for-This-Project.md#ssh-in-one-paragraph)). Nothing about Linux itself. About three hours for the reading and the free lab.
+> **Prerequisites.** You can open a terminal and type a command ([Git from zero](Git-From-Zero.md) has a gentle first look, and [The terminal and your first script](Terminal-and-Your-First-Script.md) goes deeper) and you know what an SSH key is ([Networking basics](Networking-Basics-for-This-Project.md#ssh-in-one-paragraph)). Nothing about Linux itself. About three hours for the reading and the free lab.
 
 ## What you will be able to do
 

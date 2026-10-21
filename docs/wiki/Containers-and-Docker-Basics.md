@@ -2,7 +2,7 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-> Containers run on a Linux kernel. If distros, package managers or `systemctl` are new, [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) is the side page for them.
+> New to typing commands, pipes or exit codes? Start with [The terminal and your first script](Terminal-and-Your-First-Script.md). Containers run on a Linux kernel. If distros, package managers or `systemctl` are new, [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) is the side page for them.
 
 Start-from-zero page 6 of 8. Previous: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md). Next: [How money works in the cloud](How-Money-Works-in-the-Cloud.md).
 
