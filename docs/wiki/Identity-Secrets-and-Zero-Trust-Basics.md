@@ -81,7 +81,7 @@ In this project: the DigitalOcean token used to build the environment has a cust
 
 **MFA** (multi-factor authentication) means a second proof beyond the password: a code from an app, a hardware key, a prompt on your phone. It turns "I found your password" into "I found your password and it is useless". Turn it on for every cloud account before you do anything else. Prefer an authenticator app or a hardware key over SMS.
 
-An **identity provider** (IdP) is the one service that does your logins for everything else. Google, Microsoft, Okta and others play this role; "Sign in with Google" is an IdP at work. The value is that MFA policy, password policy and "this person has left" live in one place. Twingate in this project does not have its own passwords; it hands sign-in to an identity provider, so MFA is enforced there, once.
+An **identity provider** (IdP) is the one service that does your logins for everything else. Google, Microsoft, Okta and others play this role; "Sign in with Google" is an IdP at work. The value is that MFA policy, password policy and "this person has left" live in one place. Twingate in this project does not have its own passwords; it hands sign-in to an identity provider, so MFA is enforced there, once. [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md) shows the messages a sign-in is made of and lets you read them.
 
 ## Zero trust, with the marketing removed
 
