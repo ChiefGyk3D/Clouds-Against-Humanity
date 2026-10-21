@@ -143,7 +143,7 @@ Do all three. The third is the one that proves the design.
 
 1. Both connectors show **online** in the Twingate admin console, under one site.
 2. From a machine running the Twingate client, `ssh cah-admin@<connector private IP>` works for each connector. The user is `cah-admin` (the stage 1 guide explains why not root), and the private addresses are the `connector_private_ips` output of the `cah-10-access` stack.
-3. From a machine **not** running the client: `nmap -Pn -p 22,80,443 <connector public IP>` shows the ports **filtered** on both droplets. The stack does not output public addresses; read each droplet's public IP from the DigitalOcean console. Scanning your own droplet is authorised; do not scan anyone else's.
+3. From a machine **not** running the client: `nmap -Pn -p 22,80,443 <connector public IP>` shows the ports **filtered** on both droplets. The stack does not output public addresses; read each droplet's public IP from the DigitalOcean console. Scanning your own droplet is authorized; do not scan anyone else's.
 
 *Checkpoint: you can reach the machines from inside and you cannot from outside, and you know why.* If a connector shows offline, the stage 1 guide's section 6a is the troubleshooting path.
 

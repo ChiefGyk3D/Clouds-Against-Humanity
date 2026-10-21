@@ -91,7 +91,7 @@ When you publish a container's port (`-p 8080:80`), Docker edits the host's own 
 
 ## Where this shows up in the repo
 
-Nothing yet: stage 3 is designed, not built. The design is in `docs/superpowers/specs/2026-10-11-stage-3-workloads-design.md`, and the [Roadmap](Roadmap.md) summarises it. When it is built, expect a `modules/docker-host` module whose cloud-init installs Docker Engine from Docker's signed package repository (with the key's fingerprint pinned, the same way the Twingate key is) and starts Portainer, and a `stacks/30-workloads` stack with the droplet, its firewall and the bucket.
+Nothing yet: stage 3 is designed, not built. The design is in `docs/superpowers/specs/2026-10-11-stage-3-workloads-design.md`, and the [Roadmap](Roadmap.md) summarizes it. When it is built, expect a `modules/docker-host` module whose cloud-init installs Docker Engine from Docker's signed package repository (with the key's fingerprint pinned, the same way the Twingate key is) and starts Portainer, and a `stacks/30-workloads` stack with the droplet, its firewall and the bucket.
 
 ## Try it yourself
 

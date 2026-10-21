@@ -33,7 +33,7 @@ The other services in this project (Spacelift, Doppler, Twingate, GitHub) have f
 - **A leaked token.** The classic: a cloud token committed to a public repository, found by a bot within minutes, used to spin up dozens of large machines to mine cryptocurrency. The bill can reach thousands before you notice. This is a security problem and a money problem, and it is why every page on this wiki about secrets is also about money.
 - **Bandwidth or API loops.** A bug that downloads the same file every second, or a function that triggers itself.
 
-## The defences, in order of how early they act
+## The defenses, in order of how early they act
 
 ### 1. A billing alert, before anything else
 

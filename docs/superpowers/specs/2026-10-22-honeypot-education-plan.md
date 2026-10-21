@@ -8,7 +8,7 @@ Facts carry a URL and the date they were read (2026-10-22). Anything I could not
 
 ## 1. Purpose and the principle
 
-Issue #178 asks for lessons on honeypots modelled on Zscaler Deception, an on-premises path with T-Pot CE once the maintainer's malware network exists in the homelab, and a route back into the SIEM.
+Issue #178 asks for lessons on honeypots modeled on Zscaler Deception, an on-premises path with T-Pot CE once the maintainer's malware network exists in the homelab, and a route back into the SIEM.
 
 The maintainer's principle, stated here so every lesson and every cost line follows it:
 
@@ -56,12 +56,12 @@ Active Directory decoys and deceptive credentials: the article mentions Active D
 
 ### 3.2 T-Pot CE
 
-Sources: the project README at the default branch (https://raw.githubusercontent.com/telekom-security/tpotce/HEAD/README.md), the README at tag 24.04.1 (same path with the tag), the licence file and the GitHub API for tags and licence (https://api.github.com/repos/telekom-security/tpotce), all read 2026-10-22.
+Sources: the project README at the default branch (https://raw.githubusercontent.com/telekom-security/tpotce/HEAD/README.md), the README at tag 24.04.1 (same path with the tag), the license file and the GitHub API for tags and license (https://api.github.com/repos/telekom-security/tpotce), all read 2026-10-22.
 
 | Fact | Value |
 |---|---|
 | Latest tagged release | 24.04.1, dated 2024-12-11 (tags list: 24.04.1, 24.04.0, ...). The default branch has a commit dated 2026-10-17 and is ahead of the tag |
-| Licence | GNU GPL v3 (licence file and API); bundled honeypots carry their own licences |
+| License | GNU GPL v3 (license file and API); bundled honeypots carry their own licenses |
 | Hardware (README, both tag and default branch) | Hive: 16 GB RAM, 256 GB SSD. Sensor: 8 GB RAM, 128 GB SSD. "The more honeypots, sensors & data, the more RAM and storage is needed" |
 | Network need | An IPv4 address (DHCP or static) and "a working, non-proxied, internet connection" |
 | Install types | Standard / Hive (everything on one host, also a Hive endpoint) and Distributed (a Hive plus one or more Sensors that ship data to it). Runs on bare metal, in a VM (UTM, VirtualBox, VMware and KVM reported working), and on a Raspberry Pi 4 (8 GB) per the README. Never with a desktop environment installed |
@@ -94,7 +94,7 @@ README warnings a learner must hear before touching it (my paraphrase of its Dis
 
 ### 3.4 Legal and safety minimums for a learner at home
 
-Not legal advice. I read no statute or ISP contract. What I did read: the cloud providers' policies (summarised in the design, section 7.4), and the T-Pot README's disclaimer. The ISP terms point is **est.**: residential ISP terms vary and many restrict running servers or inbound services; the learner must read their own contract.
+Not legal advice. I read no statute or ISP contract. What I did read: the cloud providers' policies (summarized in the design, section 7.4), and the T-Pot README's disclaimer. The ISP terms point is **est.**: residential ISP terms vary and many restrict running servers or inbound services; the learner must read their own contract.
 
 The minimums, which every hands-on path repeats:
 
@@ -121,7 +121,7 @@ Everything in Track 1 is free and safe. Theory path = Lessons 1, 2, 6. Hands-on 
 | 2 | Why a decoy alert is different | The zero-activity baseline; why deception alerts are high-signal inside a network and noisy on the open internet; what a vendor claim ("near-zero false positives") needs to be true; how to read vendor deception material critically | Lesson 1 | Sort 20 synthetic event descriptions into "decoy touched" versus "ordinary noise"; for each, say which alert type would fire and whether a person must look | 1 h | None |
 | 3 | Plant a canarytoken | A token is a tripwire you place and watch; what a trip reveals and what it cannot (a source address, a time, not the person); that the hosted service sees your email and memo | Lesson 1; a throwaway mailbox with no link to your identity | FIRST read the hosted service's terms and privacy policy and write down what it keeps (email, memo, trip source addresses). Only then create one token using **synthetic data only**: a throwaway address, a memo that names no person, host, project or real identifier, and a decoy file with invented content. Place it in a folder you own, trip it yourself, read the alert, note the fields. Self-hosting is the alternative for a learner who accepts no third party; I found no self-host instructions in the pages read, so the lesson author must verify whether and how it is offered | 1 h | Free service (terms unread); no hardware |
 | 4 | Honeyfiles on a host you own | A decoy file plus a watch rule; the difference between "someone read it" and "someone copied it"; why names matter | Lesson 3; a Linux machine you own | Create a decoy file in a test directory and an audit watch on it; open it; find the audit record. Optional: have the Wazuh agent from the mini SOC report it | 2 h | None beyond a Linux box; optional uses the mini SOC (cost per [Build your own mini SOC](../../wiki/Build-Your-Own-Mini-SOC.md)) |
-| 5 | Deception in the SIEM: write the rule | Turn a structured honeypot event into an alert; count by source; map the repeated-login-failure rule to ATT&CK T1110 (brute force); treat a login "success" on an emulated honeypot as a honeypot-specific detection (the account is not real, so it is not T1078 valid accounts, and the lesson says why); keep hostile strings inert | Lessons 1 and 4; the Wazuh basics page | Using **synthetic** JSON lines in Cowrie's documented shape (`eventid`, `session`, `src_ip`, `timestamp`, built by the lesson's own script at run time, labelled synthetic), write a rule for repeated failures from one source and one for a success after failures. Feed it a hostile-looking line and show it stays data. Re-do with real lines if the learner runs Track 2 or 3 | 2 to 3 h | None; runs on a laptop with a Wazuh test install |
+| 5 | Deception in the SIEM: write the rule | Turn a structured honeypot event into an alert; count by source; map the repeated-login-failure rule to ATT&CK T1110 (brute force); treat a login "success" on an emulated honeypot as a honeypot-specific detection (the account is not real, so it is not T1078 valid accounts, and the lesson says why); keep hostile strings inert | Lessons 1 and 4; the Wazuh basics page | Using **synthetic** JSON lines in Cowrie's documented shape (`eventid`, `session`, `src_ip`, `timestamp`, built by the lesson's own script at run time, labeled synthetic), write a rule for repeated failures from one source and one for a success after failures. Feed it a hostile-looking line and show it stays data. Re-do with real lines if the learner runs Track 2 or 3 | 2 to 3 h | None; runs on a laptop with a Wazuh test install |
 | 6 | Should you run one? Safety and law minimums | The eight minimums in section 3.4; provider policy basics; the ethics of recording people who did not agree; a decision tree from "I'm curious" to "I run a sensor" | Lesson 1 | Write your own one-page plan: where, whose account or hardware, which network, which end date, who reads the abuse inbox. A reviewer (the maintainer or a peer) answers "would you run this?" | 1 h | None |
 
 Lesson 5 depends on what real Cowrie lines look like; with synthetic lines it teaches the shape and states that real rules are written from captured lines (design section 9.3). Flag: rule file format and Wazuh syntax are not verified in this plan; the lesson author reads the Wazuh rules documentation and runs the rule in a test manager.
@@ -204,7 +204,7 @@ No line goes in `docs/cost.md`, `docs/stages/approved.json` or the cost gate. Th
 | Risk | Mitigation |
 |---|---|
 | A lesson teaches a learner to expose a vulnerable machine to the internet | Track 3 is internal-only first; exposure is a separate decision; the safety lesson (6) is a prerequisite of every hands-on lesson |
-| Vendor claims are repeated as facts | Zscaler material is cited as one vendor's glossary article; product behaviour unread; Lesson 2 teaches the condition under which "near-zero false positives" holds |
+| Vendor claims are repeated as facts | Zscaler material is cited as one vendor's glossary article; product behavior unread; Lesson 2 teaches the condition under which "near-zero false positives" holds |
 | T-Pot data leaves by default | Lesson 11 removes community submission first |
 | Dated or wrong instructions (T-Pot tag versus default branch differ) | Pin a release; re-read that tag's README at write time; unverified-draft banner until run |
 | Hostile strings in logs reach the SIEM | Hostile-line test in Lessons 5 and 9 (design 4.5 risk 5) |

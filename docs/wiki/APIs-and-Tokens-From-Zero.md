@@ -110,7 +110,7 @@ The pair to burn in: **`401` is about who you are, `403` is about what you may d
 }
 ```
 
-- `{ ... }` is an **object**: a set of `"name": value` pairs, like a form with labelled fields. Names are always in double quotes.
+- `{ ... }` is an **object**: a set of `"name": value` pairs, like a form with labeled fields. Names are always in double quotes.
 - `[ ... ]` is an **array**: an ordered list. Items are separated by commas.
 - A value is a double-quoted **string**, a **number** (no quotes), `true` or `false`, `null` (nothing), or another object or array.
 - Nesting is normal. Read it like a tree: `owner` is a field whose value is an object with its own fields.
@@ -283,7 +283,7 @@ curl -s 'https://jsonplaceholder.typicode.com/todos?_limit=2' | python3 -m json.
 
 `-s` is "silent" (no progress meter). The `|` hands curl's output to the pretty-printer. The `?_limit=2` is a query string.
 
-**Check.** The output starts with `[` and holds two `{ ... }` objects: an **array of objects**. Each item has the same fields as Exercise 1. Spotting that "shape" (list of records) is the whole skill. If you installed `jq`, `curl -s ... | jq .` gives the same, coloured.
+**Check.** The output starts with `[` and holds two `{ ... }` objects: an **array of objects**. Each item has the same fields as Exercise 1. Spotting that "shape" (list of records) is the whole skill. If you installed `jq`, `curl -s ... | jq .` gives the same, colored.
 
 **Undo.** Nothing.
 
@@ -419,7 +419,7 @@ The same four-step loop the [labs](Labs-Break-It-on-Purpose.md) use, applied to 
 
 - **Build.** Make a token with one narrow scope, a short expiry and a name that says what it is for (what you just did, minus the revoking).
 - **Break.** Ask what a leaked token with *broad* scopes and *no* expiry could do. For a cloud API token with write scopes: create machines that mine cryptocurrency on your bill, read data, delete the environment. That is the case for narrow scopes, written down as a risk in the [Threat model](Threat-Model.md). Do not try this on a real token; reason it through on paper, or in a throwaway account of your own.
-- **Detect.** Find where a *use* of the token shows. Most services keep an audit log or a token "last used" field in their settings (est.: it varies by vendor). Cloud logs record the caller's identity and source address; look for use from a place or at a time you do not recognise. This project's detection ideas are in [Detection and monitoring](Detection-and-Monitoring-Wazuh-and-the-Landscape.md).
+- **Detect.** Find where a *use* of the token shows. Most services keep an audit log or a token "last used" field in their settings (est.: it varies by vendor). Cloud logs record the caller's identity and source address; look for use from a place or at a time you do not recognize. This project's detection ideas are in [Detection and monitoring](Detection-and-Monitoring-Wazuh-and-the-Landscape.md).
 - **Defend.** Expiry limits the window, revocation ends it, scopes limit the damage, and a secrets manager keeps the value out of files, chat and history in the first place. The [Doppler and secrets](Doppler-and-Secrets.md) page is the project's version of all four.
 
 ## Checkpoint

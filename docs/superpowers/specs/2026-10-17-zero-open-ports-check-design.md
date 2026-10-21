@@ -24,7 +24,7 @@ It scans only machines the maintainer owns. A port scanner that takes an address
 
 A **separate read-only token**, in its own Doppler config (maintainer's decision, 2026-10-17), not the Spacelift token. Scopes, from DigitalOcean's API documentation: `droplet:read` and `tag:read` for listing droplets by tag; the project, reserved-IP and reserved-IPv6 listings need their own read scopes (`project:read`, `reserved_ip:read`, and the reserved IPv6 equivalent). The exact names are confirmed in the token form when it is created and written here before the tool ships. Creating the token is the maintainer's step.
 
-Handling: read from `DIGITALOCEAN_TOKEN` (or Doppler); never written to a file, never printed, never in a child process's environment. The HTTP client is `urllib` with proxies explicitly disabled (`ProxyHandler({})`; urllib detects proxies from the environment by default), verified TLS, an exact origin check, and every redirect refused. Errors are fixed sanitised strings: no response body, URL or traceback is ever printed.
+Handling: read from `DIGITALOCEAN_TOKEN` (or Doppler); never written to a file, never printed, never in a child process's environment. The HTTP client is `urllib` with proxies explicitly disabled (`ProxyHandler({})`; urllib detects proxies from the environment by default), verified TLS, an exact origin check, and every redirect refused. Errors are fixed sanitized strings: no response body, URL or traceback is ever printed.
 
 ## How it decides
 

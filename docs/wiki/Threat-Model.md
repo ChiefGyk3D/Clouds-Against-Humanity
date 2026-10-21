@@ -1,6 +1,6 @@
 # Threat model
 
-> New to threat modelling? [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) covers the vocabulary (tokens, least privilege, lateral movement), and [Enterprise engineering habits](Enterprise-Engineering-Habits.md) explains why a hobby lab writes one of these at all.
+> New to threat modeling? [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) covers the vocabulary (tokens, least privilege, lateral movement), and [Enterprise engineering habits](Enterprise-Engineering-Habits.md) explains why a hobby lab writes one of these at all.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 

@@ -15,7 +15,7 @@ If you take a job at a company of any size, someone will say "that needs a chang
 Two pressures create it.
 
 1. **Changes cause outages.** Most unplanned downtime starts with someone changing something. The people who made the change often cannot see what else depends on it. A firewall rule that looks tidy to the network team can cut off a payroll batch job that another team owns. Change management is mostly a way of making sure the people who would be hurt find out *before* the change, not after.
-2. **Auditors and regulators ask for proof.** A company that handles payments, health data, or financial reporting is expected to show that changes to its systems were authorised, tested, and traceable to a person. "We just do it carefully" is not evidence. A ticket with an approver, a test result and a timestamp is.
+2. **Auditors and regulators ask for proof.** A company that handles payments, health data, or financial reporting is expected to show that changes to its systems were authorized, tested, and traceable to a person. "We just do it carefully" is not evidence. A ticket with an approver, a test result and a timestamp is.
 
 A third reason is human: when something breaks at 2 a.m., the first question is "what changed?". A reliable record of changes answers it in minutes instead of hours.
 
@@ -43,7 +43,7 @@ The honest counterweight, which engineers raise often and which the research bel
 
 ## How it connects to incident, problem and release management
 
-These are neighbouring practices in the ITIL family of IT service management ideas, and the same event often touches several of them.
+These are neighboring practices in the ITIL family of IT service management ideas, and the same event often touches several of them.
 
 - **Incident management** restores service when something is broken *now*. An incident is often caused by a change, and fixing it may itself be an emergency change.
 - **Problem management** finds and removes the underlying cause of repeated or serious incidents. A problem record often ends in a normal change ("fix the root cause"). This is the formal ancestor of the wiki's [Lessons learned](Lessons-Learned.md).
@@ -54,13 +54,13 @@ ITIL is a widely used set of IT service management practices, published by Peopl
 
 ## Tooling
 
-Change records live in a tracking system, usually the company's IT service management (ITSM) platform. Examples you may meet: ServiceNow, Jira Service Management, BMC Helix, Freshservice. They are named only so you recognise them in a job description; this page does not rank or recommend any of them, and the author has not operated them. What they have in common: a form for the request, a workflow that routes it to approvers, a calendar, links to inventory, and an audit trail of who did what and when. Many companies also connect the pipeline to the ticket so that a deployment can only start if an approved change record exists.
+Change records live in a tracking system, usually the company's IT service management (ITSM) platform. Examples you may meet: ServiceNow, Jira Service Management, BMC Helix, Freshservice. They are named only so you recognize them in a job description; this page does not rank or recommend any of them, and the author has not operated them. What they have in common: a form for the request, a workflow that routes it to approvers, a calendar, links to inventory, and an audit trail of who did what and when. Many companies also connect the pipeline to the ticket so that a deployment can only start if an approved change record exists.
 
 ## What auditors look for
 
 Auditors do not care which tool you use. They sample changes and ask whether the *control* worked. Three frameworks you will hear named, described only in general terms:
 
-- **SOC 2** (an attestation report on a service organisation's controls, from the AICPA, covering "trust services criteria"). It includes criteria about how changes to infrastructure and software are authorised, tested, approved and implemented. **UNVERIFIED:** the exact criterion wording and numbering were not retrieved for this page.
+- **SOC 2** (an attestation report on a service organization's controls, from the AICPA, covering "trust services criteria"). It includes criteria about how changes to infrastructure and software are authorized, tested, approved and implemented. **UNVERIFIED:** the exact criterion wording and numbering were not retrieved for this page.
 - **ISO/IEC 27001** (an information security management standard). Its controls list includes a change management control, and its management-system clauses expect changes to the system itself to be planned. **UNVERIFIED:** the control number and wording in the current edition were not retrieved for this page.
 - **SOX IT general controls (ITGC)** (for companies subject to the US Sarbanes-Oxley Act: controls over the systems that produce financial reports). "Program change management" is a conventional ITGC area. **UNVERIFIED:** how any given auditor words the test is not sourced here.
 
@@ -75,11 +75,11 @@ Teams that deploy many times a day cannot hold a meeting per deployment. They ke
 - **Branch protection and required checks** make the control something you cannot skip rather than something you promise to follow.
 - **Feature flags** separate *deploying* code from *turning it on*. The code ships dark and is enabled for a few users, then more, then all, and switched off in seconds if it misbehaves.
 - **Canary and blue-green releases** limit the blast radius. A canary sends a small share of traffic to the new version first. Blue-green keeps the old version running beside the new one so traffic can be switched back.
-- **Change approval by automation** (sometimes called a "pipeline-approved standard change"): the organisation approves the *pipeline* once, with its tests, scans and policy checks, and then every change that passes through it counts as a pre-approved standard change. Humans are pulled in by exception: a high-risk change type, a failing policy, a production-data migration.
+- **Change approval by automation** (sometimes called a "pipeline-approved standard change"): the organization approves the *pipeline* once, with its tests, scans and policy checks, and then every change that passes through it counts as a pre-approved standard change. Humans are pulled in by exception: a high-risk change type, a failing policy, a production-data migration.
 
 ### DORA metrics
 
-DORA (the DevOps Research and Assessment programme, now part of Google Cloud) publishes research on which delivery practices go with better outcomes. Its current guide, **retrieved 2026-10-16 from dora.dev/guides/dora-metrics/ (page marked "Last updated: January 5, 2026")**, lists five software delivery performance metrics. Four are the ones people usually quote; the wording below is the guide's, shortened:
+DORA (the DevOps Research and Assessment program, now part of Google Cloud) publishes research on which delivery practices go with better outcomes. Its current guide, **retrieved 2026-10-16 from dora.dev/guides/dora-metrics/ (page marked "Last updated: January 5, 2026")**, lists five software delivery performance metrics. Four are the ones people usually quote; the wording below is the guide's, shortened:
 
 | Metric (guide's name) | Definition |
 |---|---|
@@ -111,7 +111,7 @@ The failure mode to watch for: if the emergency path is faster than the normal o
 
 ## Is any of this used in this project?
 
-**No.** This repository does not use formal change management. There is no change ticket system, no CAB, no change calendar and no freeze. This is not an oversight and it is not a recommendation to copy: it is what a one-maintainer, two-machine teaching project can honestly do. The sections above are here so you can recognise the machinery at work, and see what the project does *instead*.
+**No.** This repository does not use formal change management. There is no change ticket system, no CAB, no change calendar and no freeze. This is not an oversight and it is not a recommendation to copy: it is what a one-maintainer, two-machine teaching project can honestly do. The sections above are here so you can recognize the machinery at work, and see what the project does *instead*.
 
 ### What the project has instead
 
@@ -156,7 +156,7 @@ Take pull request #8, "fix: let each connector open SSH to the other (outbound r
 | **Risk assessment** | Likelihood of harm: low. The rule is scoped to one tag and one port, default off. Main residual risk: opening more than intended. |
 | **Impact assessment** | If wrong: peer SSH between connectors stays broken (annoying) or is opened wider than intended (a security regression). SSH through Twingate can take this path: a session targeting one connector can be routed through the other, which must then open TCP 22 to its peer (the cause of the user-visible timeouts this change fixed; see [Lessons learned, number 2](Lessons-Learned.md#2-connector-to-connector-ssh-timed-out-twice)). Other Twingate access does not depend on it. No customer-facing service. |
 | **Test evidence** | CI green: `tofu` tests (the connector firewall has exactly one inbound and exactly one tag-scoped outbound rule), cost gate unchanged at the approved total, code and secret scans passing. Author also broke each safety property on purpose and saw a test fail. |
-| **Not verified before approval** | Mocked providers only: the real provider behaviour is proved only by the apply. |
+| **Not verified before approval** | Mocked providers only: the real provider behavior is proved only by the apply. |
 | **Implementation plan** | Merge. Spacelift tracked run on the access stack and the foundation stack. Read the plan: access stack shows one in-place update to one firewall; foundation shows no changes. Confirm. |
 | **Verification plan** | From one connector, open TCP to the other on port 22 (expect open). SSH through Twingate to both, several times, because the symptom was intermittent. From outside the VPC, confirm connectors still look filtered. |
 | **Back-out plan** | Revert the pull request, let the pipeline plan, read it (expect one in-place update removing the rule), confirm. Trigger: any external scan shows an unexpected open port after the apply. If the plan shows an unexpected droplet replace, do not roll back: discard the pending run before confirming, because nothing has been applied yet. Rollback time: one pipeline run. |
@@ -222,7 +222,7 @@ What is the change failure rate for the four weeks? Is week 2 or week 4 worse? W
 
 Suppose an engineer at a company wants to make the same kind of change as pull request #8 (one tag-scoped TCP 22 rule on a firewall). Would an enterprise treat it as standard or normal, and why? Could it ever be standard?
 
-**Reference answer.** **Normal** by default, because a firewall rule changes a security boundary and the approver must see this specific rule, its scope and its reason. The qualities of the change are good: narrow, tag-scoped, tested, easy to revert. But a standard change is pre-approved *as a type* before any instance exists, and "any firewall rule" is far too broad a type. It could become standard only if the organisation defined a narrow type in advance, for example "add or remove a rule on the internal connector tier, tag-to-tag, one port from a pre-approved list, no address ranges", with a pipeline that enforces those limits, and the security owner approved that type once. That is exactly the "approve the pipeline, not each change" idea. Anything outside the type (an address range, the internet, a new port) falls back to normal.
+**Reference answer.** **Normal** by default, because a firewall rule changes a security boundary and the approver must see this specific rule, its scope and its reason. The qualities of the change are good: narrow, tag-scoped, tested, easy to revert. But a standard change is pre-approved *as a type* before any instance exists, and "any firewall rule" is far too broad a type. It could become standard only if the organization defined a narrow type in advance, for example "add or remove a rule on the internal connector tier, tag-to-tag, one port from a pre-approved list, no address ranges", with a pipeline that enforces those limits, and the security owner approved that type once. That is exactly the "approve the pipeline, not each change" idea. Anything outside the type (an address range, the internet, a new port) falls back to normal.
 
 ### Exercise 5: find the control that is not there
 

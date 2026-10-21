@@ -218,7 +218,7 @@ def test_the_unit_is_a_oneshot_ordered_after_cloud_final():
         assert needle in unit
 
 
-# --- behaviour ---------------------------------------------------------------
+# --- behavior ---------------------------------------------------------------
 
 
 def test_success_applies_in_order_check_apply_verify(tmp_path):

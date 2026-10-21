@@ -39,7 +39,7 @@ Record the real expiry dates in your password manager, not in this repository. A
 
 `scripts/spacelift/doppler-env.sh` is the only code that sees the token. It fails closed and does this:
 
-- **Only tracked and destroy runs, only on `main`.** A pull request produces a proposed run, and planning executes code from the pull request. This repository is public, so the script fetches no secret for a proposed run. That is not the same as the run holding no credential: the `cah-doppler` context is attached to every run type, so `DOPPLER_TOKEN` is present, and branch-controlled hook code could read it (section 8). The cost is that a pull request plan cannot talk to DigitalOcean; CI covers it with `tofu test` and mocked providers, and the real plan happens on `main` before you confirm. Once the push policy in section 9 is attached, Spacelift does not start a proposed run at all, so this rule becomes the second line of defence rather than the only one.
+- **Only tracked and destroy runs, only on `main`.** A pull request produces a proposed run, and planning executes code from the pull request. This repository is public, so the script fetches no secret for a proposed run. That is not the same as the run holding no credential: the `cah-doppler` context is attached to every run type, so `DOPPLER_TOKEN` is present, and branch-controlled hook code could read it (section 8). The cost is that a pull request plan cannot talk to DigitalOcean; CI covers it with `tofu test` and mocked providers, and the real plan happens on `main` before you confirm. Once the push policy in section 9 is attached, Spacelift does not start a proposed run at all, so this rule becomes the second line of defense rather than the only one.
 - **Task runs get nothing.** A task runs an arbitrary command. If you need a task to hold a credential, add that deliberately and write it down here.
 - **Named secrets only.** Each stack lists the exact names it needs in `.spacelift/config.yml`. A name must be a plain identifier.
 - **Verified download.** The Doppler CLI is fetched from the official release over HTTPS and checked against the SHA-256 pinned in the script. A mismatch deletes the file and stops the run.
@@ -235,7 +235,7 @@ Why it exists: on 2026-10-12 a pull request that changed only `docs/wiki/` and t
 
 ### Free plan: narrow each stack's project root and globs
 
-Without a push policy, Spacelift's built-in behaviour starts a stack's runs only when a push or pull request changes a file inside the stack's **project root** or matching one of its **project globs**. A docs-only pull request reaching `cah-10-access` means that stack's root or globs cover more than the stack. For each stack, open it, then **Settings**, and set:
+Without a push policy, Spacelift's built-in behavior starts a stack's runs only when a push or pull request changes a file inside the stack's **project root** or matching one of its **project globs**. A docs-only pull request reaching `cah-10-access` means that stack's root or globs cover more than the stack. For each stack, open it, then **Settings**, and set:
 
 | Stack | Project root | Project globs |
 |---|---|---|
@@ -248,7 +248,7 @@ Remove any other glob, such as `**`, `*` or one that covers `docs/`. Then a docs
 
 1. In Spacelift, open **Enforce Guardrails > Policies**, choose **Create policy**, name it `cah-push`, and pick the type **Git push**.
 2. Paste the contents of `.spacelift/policies/push.rego` as the body. Do not paste `push_test.rego`; it is only for CI.
-3. Add the label `autoattach:cah`, so it attaches to every stack labelled `cah`, the same way the Doppler context does. Or attach it by hand to `cah-00-foundation` and `cah-10-access`.
+3. Add the label `autoattach:cah`, so it attaches to every stack labeled `cah`, the same way the Doppler context does. Or attach it by hand to `cah-00-foundation` and `cah-10-access`.
 4. Detach any other Git push policy from those stacks. With more than one attached, the outcome is a combination of both and is no longer what the tests describe.
 5. When the policy changes in a pull request, paste the new body into the same policy after the merge. The file in the repository is the reviewed copy, not the live one; a check on the next tracked run is the only proof they match.
 
@@ -298,7 +298,7 @@ Each message names the resource address (or the stack) and says what a human mus
 
 1. In Spacelift, open **Enforce Guardrails > Policies**, choose **Create policy**, name it `cah-plan`, and pick the type **Plan**.
 2. Paste the contents of `.spacelift/policies/plan.rego` as the body. Do not paste `plan_test.rego`.
-3. Add the label `autoattach:cah`, so it attaches to every stack labelled `cah`, or attach it by hand to each stack.
+3. Add the label `autoattach:cah`, so it attaches to every stack labeled `cah`, or attach it by hand to each stack.
 4. When the policy changes in a pull request, paste the new body into the same policy after the merge. The file in the repository is the reviewed copy, not the live one.
 
 ### A deliberate exception

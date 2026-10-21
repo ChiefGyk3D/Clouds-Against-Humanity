@@ -165,13 +165,13 @@ By default the provider's `approved_monthly_total` covers everything of that pro
   "sites": { "tor2": { "approved_monthly_total": 12.0 } } }
 ```
 
-With a map present: every instance's `resource_key` must be in it; each site's planned total must be within its own figure; the sites' figures must add up to no more than the provider figure; and the base stacks (everything not under `stacks/sites`) must fit in the provider figure minus the sites' figures. So the provider figure is the base stack plus its sites. The shared-ceiling check still sums the provider figures of the `active` providers, never the sites (they are already inside it). Site, base and sum comparisons are made at cent precision (full precision is kept while adding up), as the provider total already is. With no map, behaviour is unchanged.
+With a map present: every instance's `resource_key` must be in it; each site's planned total must be within its own figure; the sites' figures must add up to no more than the provider figure; and the base stacks (everything not under `stacks/sites`) must fit in the provider figure minus the sites' figures. So the provider figure is the base stack plus its sites. The shared-ceiling check still sums the provider figures of the `active` providers, never the sites (they are already inside it). Site, base and sum comparisons are made at cent precision (full precision is kept while adding up), as the provider total already is. With no map, behavior is unchanged.
 
 `--plan` accepts an instance path (`--stack stacks/sites/east/aws/10-access`): the provider comes from `instance_of` and the plan is compared with that instance's manifest.
 
 ## Verified
 
-- Droplet backups are verified (issue 117) for the basic weekly plan only: `backups_fraction` is 0.2 and `backups_fraction_verified` is `true`. DigitalOcean's backups pricing page (https://docs.digitalocean.com/products/backups/details/pricing/), read 2026-10-19, lists basic plans at 20.0 percent (weekly) and 30.0 percent (daily) of the Droplet's cost per month. The table prices only that weekly fraction. The gate refuses daily backups and the per-GiB usage-based plans (public preview, weekly, daily, 12, 6 or 4 hour) on the same page, and any backup shape it does not recognise, until someone prices and verifies them.
+- Droplet backups are verified (issue 117) for the basic weekly plan only: `backups_fraction` is 0.2 and `backups_fraction_verified` is `true`. DigitalOcean's backups pricing page (https://docs.digitalocean.com/products/backups/details/pricing/), read 2026-10-19, lists basic plans at 20.0 percent (weekly) and 30.0 percent (daily) of the Droplet's cost per month. The table prices only that weekly fraction. The gate refuses daily backups and the per-GiB usage-based plans (public preview, weekly, daily, 12, 6 or 4 hour) on the same page, and any backup shape it does not recognize, until someone prices and verifies them.
 
 ## Not yet verified
 

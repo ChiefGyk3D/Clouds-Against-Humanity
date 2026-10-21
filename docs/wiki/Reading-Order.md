@@ -2,7 +2,7 @@
 
 Pick the row that sounds like you. Every path is a numbered list: read in that order. The tables on this page are the authority. A page's **Next** line follows the core path if the page is on it, and otherwise follows the track that page belongs to (build, security, detection or other clouds); when you are on a different track from a page's Next line, follow the table instead. The first path, the core path, is the one to take if you are unsure; the other paths branch off it.
 
-> **Status honesty.** The pages for DigitalOcean, stages 0 and 1, the labs, the threat model and the settings reference describe things that are built and tested. The pages for AWS, Azure and GCP are **unverified drafts**: written from the vendors' own documentation, not applied in a real account, and labelled that way in their first lines and in the title column below. Stages 3 and 4 are planned, not built. Stage 2 is built on the cloud side and merged but never applied, and the five telemetry pages in the detection path are **unverified drafts**: written from the stage 2 design, and none checked against a real deployment.
+> **Status honesty.** The pages for DigitalOcean, stages 0 and 1, the labs, the threat model and the settings reference describe things that are built and tested. The pages for AWS, Azure and GCP are **unverified drafts**: written from the vendors' own documentation, not applied in a real account, and labeled that way in their first lines and in the title column below. Stages 3 and 4 are planned, not built. Stage 2 is built on the cloud side and merged but never applied, and the five telemetry pages in the detection path are **unverified drafts**: written from the stage 2 design, and none checked against a real deployment.
 
 ## Which path is for me
 
@@ -11,7 +11,7 @@ Pick the row that sounds like you. Every path is a numbered list: read in that o
 | [The core path](#the-core-path) | Everyone, and anyone unsure where to start. | 21 | about 3 h 15 min of reading |
 | [Build it yourself](#build-it-yourself) | A learner replicating the build in their own accounts. | 6 | about 1 h 20 min of reading |
 | [Understand the design](#understand-the-design) | An engineer who wants the design without the primers. | 13 | about 1 h 55 min of reading |
-| [Security and threat modelling](#security-and-threat-modelling) | A security-minded reader. | 5 | about 1 h 15 min of reading |
+| [Security and threat modeling](#security-and-threat-modeling) | A security-minded reader. | 5 | about 1 h 15 min of reading |
 | [Detection and monitoring](#detection-and-monitoring) | Someone asking how it would be watched, and who wants to build a small version. | 9 | about 2 h 10 min of reading |
 | [Enterprise context](#enterprise-context) | A reader who wants to see how companies build networks, run infrastructure and handle identity, how they run changes, and what roles and skills surround that work. | 5 | about 1 h 30 min of reading |
 | [Other clouds (unverified drafts)](#other-clouds-unverified-drafts) | A multi-cloud reader (unverified drafts). | 10 | about 2 h 15 min of reading |
@@ -88,9 +88,9 @@ The settings reference is a lookup page: it is generated from one manifest and m
 | 12 | [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) | 5 min |  |
 | 13 | [Droplet hardening](Droplet-Hardening.md) | 5 min |  |
 
-## Security and threat modelling
+## Security and threat modeling
 
-**Who it is for.** A security-minded reader, or anyone who wants to practise threat modelling on a real, small system.
+**Who it is for.** A security-minded reader, or anyone who wants to practice threat modeling on a real, small system.
 
 **Before you start.** The core path through step 17 (Doppler and secrets), plus the Identity primer.
 
@@ -181,7 +181,7 @@ Not a path. Open these when you need them; every one is linked from the sidebar.
 | [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) | The words API, token, HTTP, JSON, scope or JWT are new or fuzzy. A foundations side page to [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md); read it before that page if those words are new. About 60 minutes with the free exercises (est.); not counted in the path totals. |
 | [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) | You want zero trust shown in a real home lab, and the contrast with a traditional VPN when the home connection fails over to cellular. A side page to [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md). About 45 minutes of reading and 60 minutes for the free exercises (est.); not counted in the path totals. |
 | [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) | You wonder why the droplets have public addresses and no NAT gateway. A side page to [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md); not counted in the path totals. |
-| [How this project is planned](How-This-Project-Is-Planned.md) | You want to know how the work is organised: the board, sprints, sizes, definition of done. |
+| [How this project is planned](How-This-Project-Is-Planned.md) | You want to know how the work is organized: the board, sprints, sizes, definition of done. |
 | [Screenshots policy](Screenshots-Policy.md) | You are adding a picture to a page, or want to know why a console is described but not shown. |
 | [Home](Home.md) | You want the short version, the diagram and the current state. |
 

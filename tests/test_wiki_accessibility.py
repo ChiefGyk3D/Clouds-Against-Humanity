@@ -10,7 +10,7 @@ machine can hold are held here so the pass does not decay:
 - heading levels never skip (an H2 is followed by an H2 or H3, never an H4);
 - every table has a header row with a name in every cell.
 
-The judgement parts (colour used as the only signal, jargon expanded on first
+The judgment parts (color used as the only signal, jargon expanded on first
 use or linked to the Glossary, emoji used as the only meaning) stay a manual
 review at each wiki pull request; a regular expression cannot decide them.
 Each rule is a function, and the tests also feed it bad text to prove it bites.

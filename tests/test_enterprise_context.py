@@ -2,7 +2,7 @@
 
 These pages mix verified vendor claims with general industry knowledge, so the
 tests keep the mix honest: each page carries the orientation banner, links its
-neighbours, has a contrast table and a predict-then-check exercise, and every
+neighbors, has a contrast table and a predict-then-check exercise, and every
 row of its claims register is either dated and sourced, general knowledge, or
 marked UNVERIFIED. The landscape page's Doppler section is held to the same rule.
 """

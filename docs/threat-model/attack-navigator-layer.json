@@ -6,7 +6,7 @@
     "layer": "4.5"
   },
   "domain": "enterprise-attack",
-  "description": "Coverage layer for the ATT&CK techniques the Clouds Against Humanity threat model cites (ATT&CK v20.0, retrieved 2026-10-16). Colour means the repository names the technique in a threat; it does not mean the technique is detected or mitigated. Generated from docs/threat-model/framework-reference.json.",
+  "description": "Coverage layer for the ATT&CK techniques the Clouds Against Humanity threat model cites (ATT&CK v20.0, retrieved 2026-10-16). Color means the repository names the technique in a threat; it does not mean the technique is detected or mitigated. Generated from docs/threat-model/framework-reference.json.",
   "sorting": 0,
   "layout": {
     "layout": "side",

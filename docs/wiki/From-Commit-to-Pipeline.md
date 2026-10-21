@@ -113,7 +113,7 @@ Only now does `tofu apply` run, against the real cloud. Everything before this b
 
 ## Reusable workflows and Git Your Ship Together
 
-**Git Your Ship Together (GYST)** is a separate project by the same maintainer: [github.com/ChiefGyk3D/git-your-ship-together](https://github.com/ChiefGyk3D/git-your-ship-together). This repository is only a user of it, and its docs live in that repository, not here. It is on this page because the idea behind it applies to any organisation with several repositories, whatever language or tools they use, and because it explains why `ci.yml` is so short.
+**Git Your Ship Together (GYST)** is a separate project by the same maintainer: [github.com/ChiefGyk3D/git-your-ship-together](https://github.com/ChiefGyk3D/git-your-ship-together). This repository is only a user of it, and its docs live in that repository, not here. It is on this page because the idea behind it applies to any organization with several repositories, whatever language or tools they use, and because it explains why `ci.yml` is so short.
 
 **Sources.** The GYST README (read 2026-10-22) and the called workflow files `tofu-ci.yml`, `python-ci.yml` and `security.yml` at the commit this repository pins, all on that repository; GitHub's [Reuse workflows](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows) page (read 2026-10-22). Anything not read there is marked est.
 

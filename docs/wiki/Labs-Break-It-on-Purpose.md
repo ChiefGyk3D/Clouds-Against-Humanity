@@ -1,6 +1,6 @@
 # Labs: break it on purpose
 
-> Needs no cloud account and costs nothing. You need Git, a clone of the repository, an internet connection (OpenTofu downloads provider plugins when you initialise, and lab 4 downloads a tool), OpenTofu 1.8 or newer for the first two labs, `curl` and `sha256sum` for lab 4, Python 3.12 or newer with `pytest` installed for the last, and about 15 minutes per lab. Read [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) first if `tofu test` is new to you.
+> Needs no cloud account and costs nothing. You need Git, a clone of the repository, an internet connection (OpenTofu downloads provider plugins when you initialize, and lab 4 downloads a tool), OpenTofu 1.8 or newer for the first two labs, `curl` and `sha256sum` for lab 4, Python 3.12 or newer with `pytest` installed for the last, and about 15 minutes per lab. Read [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) first if `tofu test` is new to you.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
@@ -122,7 +122,7 @@ Notice the wording. Nothing failed in the module; a test that *expects* a failur
 
 ## Lab 3: sneak in something that costs money
 
-**What it teaches:** a cost gate that fails closed. Anything it does not recognise is refused.
+**What it teaches:** a cost gate that fails closed. Anything it does not recognize is refused.
 
 **Setup.** From the repository root, `python -I scripts/cost_check.py --root .` should print `cost-check: digitalocean: planned $12.00/mo, approved $12.00, active` followed by `cost-check: phase stage-1 ceiling $30.00 (reason: ...)` and exit 0.
 
@@ -185,7 +185,7 @@ propose if {
 }
 ```
 
-How many of the 16 tests do you expect to fail, and which behaviours do they describe?
+How many of the 16 tests do you expect to fail, and which behaviors do they describe?
 
 **Run it** with `./opa test .spacelift/policies -v` and compare.
 
@@ -201,7 +201,7 @@ The third is the interesting one. You added a rule about pull requests and a tes
 
 **What to take away.**
 
-- The tests state the policy in plain language. If a future change makes one fail, the name of the test says what behaviour was lost.
+- The tests state the policy in plain language. If a future change makes one fail, the name of the test says what behavior was lost.
 - The policy's own header explains why leaving `propose` out is the protection: with it, a pull request's code would run in Spacelift beside the secrets context. Read [Push policies: paid plan versus free plan](Spacelift.md#push-policies-paid-plan-versus-free-plan) and the runbook's section 9 for what happens on a plan without push policies, and whether this lab's protection even applies to you.
 
 **Restore:** `git restore .spacelift/policies/push.rego`.

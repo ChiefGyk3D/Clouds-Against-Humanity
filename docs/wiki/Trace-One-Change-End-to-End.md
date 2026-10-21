@@ -66,8 +66,8 @@ For each box: what it did *for this change*, which page explains it, and what it
 | # | Gate | What it did for #8 | Explained on | What it could not tell you |
 |---|---|---|---|---|
 | 1 | **Branch and commit** | The change lived on a branch named `connector-peer-ssh-outbound`, not on `main`. Nothing it contained was live. | [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) | Whether the idea was right |
-| 2 | **Pull request** | The description has four headings: *Why* (the measured cause), *Change*, *Testing*, and *Not verified*. The last one says: "Mock providers only; the real behaviour needs the apply." That sentence is a gate: it tells the reviewer what green does not prove. | [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md#the-pull-request-how-a-change-is-proposed) | Nothing. It is a statement, not a check |
-| 3 | **CI** | See below. | [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) | Whether DigitalOcean actually honours the rule |
+| 2 | **Pull request** | The description has four headings: *Why* (the measured cause), *Change*, *Testing*, and *Not verified*. The last one says: "Mock providers only; the real behavior needs the apply." That sentence is a gate: it tells the reviewer what green does not prove. | [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md#the-pull-request-how-a-change-is-proposed) | Nothing. It is a statement, not a check |
+| 3 | **CI** | See below. | [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) | Whether DigitalOcean actually honors the rule |
 | 4 | **Review and merge** | `CI green` required, one writer. The reviewer reads the file list and the "Not verified" paragraph. | [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md#branch-protection-and-one-writer) | A rule that is wrong in a way every test agrees with |
 | 5 | **Spacelift tracked run** | See below. | [Spacelift](Spacelift.md) | |
 | 6 | **Human reads the plan** | The expected plan is one in-place update to one firewall. | [Why autodeploy is off](Spacelift.md#why-autodeploy-is-off) | Whether the change fixes the SSH timeout |

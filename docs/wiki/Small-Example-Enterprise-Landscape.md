@@ -14,7 +14,7 @@ The better thing to take away is the **list of questions**. Each section below n
 
 Two honest limits first:
 
-- **This page is a map, not a buyer's guide.** It names products so you recognise them in a job description, not to recommend or rank them. No vendor paid for placement on this page, and vendors change what their products do and what they are called. Treat anything product-specific here as the shape of the category, and check the vendor's own documentation for specifics.
+- **This page is a map, not a buyer's guide.** It names products so you recognize them in a job description, not to recommend or rank them. No vendor paid for placement on this page, and vendors change what their products do and what they are called. Treat anything product-specific here as the shape of the category, and check the vendor's own documentation for specifics.
 - **It is not exhaustive.** The lists are examples. A real environment has more, and the author has not run every product named here.
 
 ## The questions, and who answers them
@@ -45,7 +45,7 @@ What differs in practice: enterprises have **many** apps and **many** teams, so 
 
 Everything in this repository is about reaching *a resource* as *a person*. A different, older problem is connecting *a whole network* to another one: a branch office to a data center, a data center to a cloud account.
 
-- **GRE** (generic routing encapsulation) is a simple way to wrap packets from one network inside packets travelling across another, which makes a point-to-point link between two routers or firewalls that behaves like a cable. GRE by itself does **not** encrypt. It is commonly paired with IPsec when the path is the internet.
+- **GRE** (generic routing encapsulation) is a simple way to wrap packets from one network inside packets traveling across another, which makes a point-to-point link between two routers or firewalls that behaves like a cable. GRE by itself does **not** encrypt. It is commonly paired with IPsec when the path is the internet.
 - **IPsec** is a family of protocols. In the usual tunnel it uses ESP to provide encryption and authentication.
 - Organizations often use tunnels like these to steer branch-office traffic to a cloud security service, so that traffic leaving that office is inspected without installing anything on each laptop in it. (People working from elsewhere still usually need a client.)
 - Cloud providers sell two related things. A **managed site-to-site VPN** is an encrypted IPsec tunnel over the internet. A **dedicated private link** is a direct circuit to the provider. A private circuit is not automatically encrypted: if the traffic needs encryption, you add it, for example by running IPsec over the link. Check each provider's documentation for what its offering does and does not protect.
@@ -119,7 +119,7 @@ Be honest with yourself about what this project does not teach, because it is ea
 
 - Pick one row of the first table. Read the vendor's public documentation for two products in that category and write down, in your own words, which part of the question each answers differently from the tool used here. Do not look at a comparison article first; form your own view, then compare.
 - Take the [threat model](Threat-Model.md) and pick a risk that was accepted on purpose. Which product from this page would you add to reduce it, and what would it cost in money, effort and new things that can break?
-- Look at a job description for a cloud or security engineer. Highlight every product name. For each, find which row or rows of the table it answers, and which of its capabilities are separate products or licences. Many will not fit one row, which is the point: products are portfolios and the questions are what stay put.
+- Look at a job description for a cloud or security engineer. Highlight every product name. For each, find which row or rows of the table it answers, and which of its capabilities are separate products or licenses. Many will not fit one row, which is the point: products are portfolios and the questions are what stay put.
 - If you work somewhere that uses several of these, ask the person who runs one how it ended up there. The history is usually more instructive than the feature list.
 
 Next: [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md), step 2 of the detection track. For the enterprise context track, continue with [Enterprise networks](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md). Back to the [Reading order](Reading-Order.md).

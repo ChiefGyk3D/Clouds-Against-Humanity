@@ -1310,7 +1310,7 @@ def assert_chain_is_clean(exc, *secrets):
         for text in (str(e), repr(e), repr(e.args)):
             for secret in secrets:
                 assert secret not in text, f"{type(e).__name__} carries a secret"
-    assert exc.__cause__ is None and exc.__context__ is None, "a sanitised error keeps no chain"
+    assert exc.__cause__ is None and exc.__context__ is None, "a sanitized error keeps no chain"
 
 
 @pytest.mark.parametrize("token", [CRED + "\n", CRED + " ", "\t" + CRED, CRED + "\r\n", CRED + "\x00"])
@@ -1845,7 +1845,7 @@ def test_limiter_grants_are_spaced_from_the_actual_grant_time():
     assert all(b - a >= 0.1 - 1e-9 for a, b in itertools.pairwise(grants)), grants
 
 
-# Finding 2: cleanup inside an error handler must not escape sanitisation.
+# Finding 2: cleanup inside an error handler must not escape sanitization.
 
 
 class RaisingBody:

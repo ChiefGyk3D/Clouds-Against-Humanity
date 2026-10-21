@@ -28,10 +28,10 @@ These three get mixed up because they share data. They are not the same kind of 
 
 | Aspect | NOC | SOC | SIEM |
 |---|---|---|---|
-| Stands for | Network operations centre | Security operations centre | Security information and event management |
+| Stands for | Network operations center | Security operations center | Security information and event management |
 | It is a... | Function, usually a team | Function, usually a team | **Tool** (a product or a stack) |
 | Its question | "Is it up, and is it fast enough?" | "Is anything here hostile, and what do we do?" | "Can I search and correlate what every source said?" |
-| Main data | Metrics, uptime checks, a few logs | Logs, endpoint and identity events, threat intelligence | Logs from everywhere, normalised |
+| Main data | Metrics, uptime checks, a few logs | Logs, endpoint and identity events, threat intelligence | Logs from everywhere, normalized |
 | Paged for | A connector is down; the link is saturated | A login from a new place; a changed config file | Nothing by itself: it feeds the other two |
 | Clock | Minutes to restore service | Minutes to hours to contain, days to investigate | Retention measured in months |
 
@@ -55,7 +55,7 @@ The [stage 2 design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/
 | **New code as root** | A Wazuh agent and a metrics exporter run on a machine you wanted to keep small | Stage 2 design, section 6 |
 | **A new secret per host** | Each agent has an enrollment key; each host has a Twingate service key | Settings design, section 2.8 |
 | **A new path** | A compromised droplet can reach the logging ports of the SIEM, and nothing else if the design holds | [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) |
-| **Memory** | The two connector droplets are `s-1vcpu-1gb`. The stage 2 design guesses the agent at 50 to 100 MB and the exporter at about 20 MB, labelled estimates, and says to measure on one connector first | Stage 2 design, section 8 |
+| **Memory** | The two connector droplets are `s-1vcpu-1gb`. The stage 2 design guesses the agent at 50 to 100 MB and the exporter at about 20 MB, labeled estimates, and says to measure on one connector first | Stage 2 design, section 8 |
 | **Bandwidth** | Metered use that the cost gate does not see (`docs/cost.md`, "Not yet verified": bandwidth overage). Small is an assumption until measured | Settings design, section 8 item 15 |
 | **Logs hold secrets** | If a service logs a token or a command line, the SIEM becomes a place to find it | [Detection page](Detection-and-Monitoring-Wazuh-and-the-Landscape.md#things-this-project-should-say-out-loud) |
 | **Silence** | A dead collector produces no alerts. Absence of alerts looks the same as health | [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) |

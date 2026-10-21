@@ -70,7 +70,7 @@ Written down as a limitation: the inventory is only as current as the last time 
 
 Scenario 5 is the one that surprises people: the series still exist, so the failure is not "absent", and the rule has to test for healthy targets rather than for the presence of any series.
 
-You do not need Prometheus to practise this. Draw the table on paper, write the expected count per site, and for each scenario count the healthy targets per site by hand. If expected minus healthy is zero for a site, nothing fires; if healthy is zero (including "there is no row"), it is silent; otherwise degraded.
+You do not need Prometheus to practice this. Draw the table on paper, write the expected count per site, and for each scenario count the healthy targets per site by hand. If expected minus healthy is zero for a site, nothing fires; if healthy is zero (including "there is no row"), it is silent; otherwise degraded.
 
 ## Reading rates and latency
 

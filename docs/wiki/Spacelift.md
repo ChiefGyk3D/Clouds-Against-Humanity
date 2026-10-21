@@ -51,8 +51,8 @@ flowchart TD
 
 > **Screenshot to take yourself:** the run view of a stack in the Spacelift console, once for a proposed run and once for a tracked run.
 > Capture: the stack's run page for a tracked run that is waiting at the confirm step (the plan finished, the Confirm button visible), then a proposed run's page if your plan has one, with the run type and the plan summary in frame.
-> Look for: the run labelled tracked or proposed, the plan summary (resources to add, change, destroy), and the Confirm and Discard buttons that exist only because autodeploy is off.
-> Redact: the account or organisation name in the address bar and header, the stack and space names if they are yours, commit authors, email addresses, and any resource id in the plan output.
+> Look for: the run labeled tracked or proposed, the plan summary (resources to add, change, destroy), and the Confirm and Discard buttons that exist only because autodeploy is off.
+> Redact: the account or organization name in the address bar and header, the stack and space names if they are yours, commit authors, email addresses, and any resource id in the plan output.
 
 ## Decisions and why
 
@@ -85,7 +85,7 @@ The policy is written in Rego, the language of [Open Policy Agent](https://www.o
 
 This is the one place this wiki states the caveat in full; other pages link here.
 
-**Push policies are a paid Spacelift feature.** On the free plan the same effect is only half available. Spacelift's built-in behaviour already ignores changes outside a stack's project root and project globs, so setting those narrowly (the stack's own directory plus `modules/**`, `scripts/spacelift/**` and `.spacelift/**`) stops docs-only pull requests and merges from starting anything. A pull request that changes a stack still gets a proposed run that fails without credentials. That is a real limit of the free plan, written down rather than hidden. The steps are in [section 9 of the secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#9-the-push-policy). [Lessons learned, "A red check from a run that could never pass"](Lessons-Learned.md#10-a-red-check-from-a-run-that-could-never-pass) is the story of the red check that prompted it.
+**Push policies are a paid Spacelift feature.** On the free plan the same effect is only half available. Spacelift's built-in behavior already ignores changes outside a stack's project root and project globs, so setting those narrowly (the stack's own directory plus `modules/**`, `scripts/spacelift/**` and `.spacelift/**`) stops docs-only pull requests and merges from starting anything. A pull request that changes a stack still gets a proposed run that fails without credentials. That is a real limit of the free plan, written down rather than hidden. The steps are in [section 9 of the secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#9-the-push-policy). [Lessons learned, "A red check from a run that could never pass"](Lessons-Learned.md#10-a-red-check-from-a-run-that-could-never-pass) is the story of the red check that prompted it.
 
 ### The plan policy: no open ports in a plan
 

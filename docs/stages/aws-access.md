@@ -59,8 +59,8 @@ The gate for each state, run on copies of the repository with only the flags cha
 
 ## 4. Bootstrap (when the check has passed)
 
-1. Create `cah-aws-00-foundation` rooted at `stacks/aws/00-foundation`, labelled `cah-aws` (not `cah`), with the push policy attached first, then the AWS integration and the `cah-doppler-aws` context, and `TF_VAR_region` set.
-2. Create `cah-aws-10-access` rooted at `stacks/aws/10-access`, labelled `cah-aws`, push policy first, then **the same AWS integration and the `cah-doppler-aws` context attached to this stack too** (a stack dependency passes the mapped outputs, not credentials, so the access stack gets none from the foundation stack). It depends on the foundation stack, with this mapping:
+1. Create `cah-aws-00-foundation` rooted at `stacks/aws/00-foundation`, labeled `cah-aws` (not `cah`), with the push policy attached first, then the AWS integration and the `cah-doppler-aws` context, and `TF_VAR_region` set.
+2. Create `cah-aws-10-access` rooted at `stacks/aws/10-access`, labeled `cah-aws`, push policy first, then **the same AWS integration and the `cah-doppler-aws` context attached to this stack too** (a stack dependency passes the mapped outputs, not credentials, so the access stack gets none from the foundation stack). It depends on the foundation stack, with this mapping:
 
    | Foundation output | Environment variable |
    |---|---|
@@ -88,7 +88,7 @@ If a connector is offline, use the other one for SSH, then `sudo systemctl statu
 
 ## 7. Phase 4 acceptance checklist (the first real apply must record all of these)
 
-Mocked tests show the shape of the code, not AWS's behaviour. Keep the command output with the apply notes. Everything below is **UNVERIFIED** until then.
+Mocked tests show the shape of the code, not AWS's behavior. Keep the command output with the apply notes. Everything below is **UNVERIFIED** until then.
 
 From the `vpc` module:
 

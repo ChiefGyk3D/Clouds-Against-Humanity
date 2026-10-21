@@ -17,7 +17,7 @@ A caption under each picture says the tool, its version, the date, and that the 
 
 ## What must never be screenshotted
 
-- A real console (a cloud provider, Spacelift, Doppler, Twingate, GitHub settings) showing a tenant or organisation name, an account id, an IP address, an email address, a token, a secret value, a recovery code or a billing figure.
+- A real console (a cloud provider, Spacelift, Doppler, Twingate, GitHub settings) showing a tenant or organization name, an account id, an IP address, an email address, a token, a secret value, a recovery code or a billing figure.
 - Anything from a maintainer's or contributor's home or lab network: hostnames, addresses, dashboards, device lists.
 - A browser window with other tabs, bookmarks, profile pictures or extensions visible.
 - Terminal output you have not read line by line. Prompts, paths and environment dumps carry usernames and machine names.
@@ -48,24 +48,24 @@ Describe what a learner should see, not "screenshot". At least 10 characters, an
 
 ### Keep files small
 
-At most 600 KB each and at most 2400 pixels wide. Crop to the part that teaches. For flat user-interface pictures, reduce to a palette (64 to 128 colours) with an image tool; a diagram that was 350 KB as a full-colour PNG is about 80 KB as a palette PNG with no visible change.
+At most 600 KB each and at most 2400 pixels wide. Crop to the part that teaches. For flat user-interface pictures, reduce to a palette (64 to 128 colors) with an image tool; a diagram that was 350 KB as a full-color PNG is about 80 KB as a palette PNG with no visible change.
 
 ### Strip metadata
 
-Screenshots can carry text chunks, EXIF data, timestamps and colour-profile text. Strip them before committing:
+Screenshots can carry text chunks, EXIF data, timestamps and color-profile text. Strip them before committing:
 
 ```bash
 python3 scripts/strip_png_metadata.py docs/wiki/images/NAME.png
 ```
 
-The stripper uses an allowlist, not a blocklist: only `IHDR`, `PLTE`, `IDAT`, `IEND`, `tRNS` (transparency) and the colour chunks `gAMA`, `cHRM` and `sRGB` survive, and a test fails the build if a committed PNG has any other chunk, a bad checksum, bytes after the end marker, a missing end marker, or is animated (APNG, which is refused rather than flattened). The embedded colour profile (`iCCP`) is removed on purpose: a profile carries free text such as device and software names, and a browser screenshot is plain sRGB. Metadata stripping removes nothing that is drawn in the pixels, so it does not replace the review below.
+The stripper uses an allowlist, not a blocklist: only `IHDR`, `PLTE`, `IDAT`, `IEND`, `tRNS` (transparency) and the color chunks `gAMA`, `cHRM` and `sRGB` survive, and a test fails the build if a committed PNG has any other chunk, a bad checksum, bytes after the end marker, a missing end marker, or is animated (APNG, which is refused rather than flattened). The embedded color profile (`iCCP`) is removed on purpose: a profile carries free text such as device and software names, and a browser screenshot is plain sRGB. Metadata stripping removes nothing that is drawn in the pixels, so it does not replace the review below.
 
 ## Manual review checklist (required for every screenshot)
 
 No test can read pixels. Every pull request that adds or changes a picture must state in its description that the author opened the final stripped file at full size and checked each item, and the reviewer repeats it:
 
 - [ ] Browser address bar and tab strip are cropped out or clean: no address, **query string**, session or tenant name, no other **tabs**, no **bookmarks** bar, no **extensions** icons.
-- [ ] No **tenant**, organisation, **project name**, team or workspace name.
+- [ ] No **tenant**, organization, **project name**, team or workspace name.
 - [ ] No **username**, display name, **avatar** or profile control.
 - [ ] No **local path**, home directory, **hostname**, machine name or serial.
 - [ ] No **account id**, subscription id, billing figure or card detail.
