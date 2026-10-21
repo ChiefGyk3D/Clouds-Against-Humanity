@@ -69,7 +69,7 @@ Metrics are **pulled**: your Prometheus scrapes the cloud connectors through Twi
 
 - The client belongs to the **scrape** service that stack 20 creates when `metrics_enabled` is on (`telemetry-<resource_key>-scrape`). That service sees only the scrape resources, one per `scrape_allowlist` entry per connector. It must not be the service used for logs.
 - The key is issued in the Twingate console, once per host, and shown once. It is **never in the repository, in a tfvars file or in OpenTofu state**. Keep it in your secrets manager and rotate it on the same cadence as the connector tokens.
-- Whether your Twingate plan allows the number of services this design needs (two per site, one per role) is **UNVERIFIED**: check it before creating anything (stage 2 guide, section 3, step 1).
+- Whether your Twingate plan allows the number of services this design needs (two per site, one per role) is **not published** (Twingate pricing and Services pages read 2026-10-21): read the limit in the Twingate console (Settings, Billing) before creating anything (stage 2 guide, section 3, step 1).
 - The connector's metrics bind address and the metrics endpoint's lack of authentication are **UNVERIFIED**. Test one connector first, and read the unauthenticated endpoint as open to anything that can reach the resource.
 - Check from the Prometheus host that the client can fetch a sample from a connector (the first check in the stage 2 guide's verification section) before writing any target file.
 

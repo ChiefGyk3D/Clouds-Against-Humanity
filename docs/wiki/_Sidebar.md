@@ -16,6 +16,7 @@
 11. [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md)
 12. [Twingate](Twingate.md)
 13. [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md)
+    - Side page: [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md)
 14. [Droplet hardening](Droplet-Hardening.md)
 15. [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
 16. [Spacelift](Spacelift.md)

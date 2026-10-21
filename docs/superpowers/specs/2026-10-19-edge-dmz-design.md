@@ -1,6 +1,6 @@
 # Clouds Against Humanity: Public Edge (DMZ)
 
-Status: DRAFT for review. Date: 2026-10-19. Issue: #118 (epic #72). Source brief: [the 2026-10-12 edge handoff](../plans/2026-10-12-edge-dmz-handoff.md), sections 3 and 4.
+Status: DRAFT for review; the section 9 decisions were ruled on 2026-10-19 (decision 4 still PROVISIONAL, decision 9 not ruled), nothing is approved to build or spend yet. Date: 2026-10-19. Issue: #118 (epic #72). Source brief: [the 2026-10-12 edge handoff](../plans/2026-10-12-edge-dmz-handoff.md), sections 3 and 4.
 Tooling: OpenTofu throughout.
 Scope: the public edge only: one internet-facing host in its own VPC, how it is hardened, how it logs home, and what it costs under four different shapes. This is a design, not an approval. Nothing here costs money, changes a stack or moves a ceiling until the maintainer picks an option in section 5 and approves it. The handoff says the edge lands past the $30 ceiling and the ceiling is not raised by default, so this document lays out options and recommends one; it does not choose for him.
 
@@ -427,20 +427,20 @@ Facts verified today (2026-10-19), with where:
 
 Not verified, and given no number: the included transfer per droplet plan; whether the `s-1vcpu-1gb` plan carries the separately billed public IPv4 the pricing page mentions for "v5 configurations"; load balancer forwarding-rule limits and TLS passthrough for the network type; AWS outbound transfer pricing and instance memory; whether public-IP traffic between two droplets counts against the pool; the Twingate headless client running unattended with no admin path; the iperf3 package's OpenSSL auth support; current Reticulum, lxmd and i2pd option names; what source address a Twingate-forwarded connection presents to a public resource, and UDP resources; Droplet Console availability (not relied on); memory fit of five daemons on 1 GiB; whether a separate DigitalOcean team is free and how its pooled allowance, credentials and Spacelift wiring would work; the Reticulum and lxmd rate-cap mechanism; `-n` semantics for the pinned iperf3 version; the shortest Doppler service token lifetime.
 
-Decisions the maintainer owes (my pick in the right-hand column):
+Decisions the maintainer owed (my pick in the third column, his ruling in the fourth; rulings recorded 2026-10-21 from his 2026-10-19 decisions):
 
-| # | Question | My recommendation |
-|---|---|---|
-| 1 | Which option: A, A2, B, C or D | A at 1 GiB, ceiling $35, memory measured first |
-| 2 | The `edge` ceiling number: $35, $41 (room for A2), or other | $35; raise to $41 only if the measurement fails |
-| 3 | Wait for the phases before `edge` to be done, or hand-move `edge` up and, in the same reviewed diff, raise `stage-2`, `stage-3` and `stage-4` to $35 and either raise `aws-twin` to $35 or mark it `lowers` with its intended state written down (section 5.5) | Wait. No tooling change, no ceilings raised ahead of need |
-| 4 | Same DigitalOcean team as core, a separate team, or another cloud, for the abuse-report risk | PROVISIONAL: same team for now, and not decided until the list after this table is answered. I do not call Reticulum, LXMF or I2P low-abuse: a private MQTT broker does not change what open transport, propagation storage and I2P transit can be used for. This is a judgment on risk appetite that the code and docs I read cannot settle |
-| 5 | Logging: option A (scoped Twingate headless client) or B (none at first) | A, but only once the headless-client question is answered and the relay prerequisites in section 4.6.1 each have an owner |
-| 6 | MQTT broker: private or public | Private, per the handoff default |
-| 7 | Stack name and number (`50-edge` is mine) | Accept or rename |
-| 8 | Transfer: accept it as a watched usage line, with a billing alert before the first apply | Accept, once Reticulum has a stated rate cap (section 5.7) |
-| 9 | Ingest protocol and relay controls (section 4.6.1) | Not mine to pick; the home-side design owns them, and approval waits for it |
-| 10 | The core connector firewall gets TCP 5201 outbound for the ZTNA path (section 4.3) | Accept in the implementation PR, with the ZTNA path conditional on the two checks there |
+| # | Question | My recommendation | Ruling |
+|---|---|---|---|
+| 1 | Which option: A, A2, B, C or D | A at 1 GiB, ceiling $35, memory measured first | DECIDED 2026-10-19: option A, a 1 GiB droplet plus a reserved IP, memory measured first |
+| 2 | The `edge` ceiling number: $35, $41 (room for A2), or other | $35; raise to $41 only if the measurement fails | DECIDED 2026-10-19: ceiling $35; the A2/$41 variant only if the memory measurement fails |
+| 3 | Wait for the phases before `edge` to be done, or hand-move `edge` up and, in the same reviewed diff, raise `stage-2`, `stage-3` and `stage-4` to $35 and either raise `aws-twin` to $35 or mark it `lowers` with its intended state written down (section 5.5) | Wait. No tooling change, no ceilings raised ahead of need | DECIDED 2026-10-19: wait for the earlier phases; no tooling change and no ceiling raise now |
+| 4 | Same DigitalOcean team as core, a separate team, or another cloud, for the abuse-report risk | PROVISIONAL: same team for now, and not decided until the list after this table is answered. I do not call Reticulum, LXMF or I2P low-abuse: a private MQTT broker does not change what open transport, propagation storage and I2P transit can be used for. This is a judgment on risk appetite that the code and docs I read cannot settle | PROVISIONAL (ruled 2026-10-19): same DigitalOcean team, until the separate-team facts listed below are verified |
+| 5 | Logging: option A (scoped Twingate headless client) or B (none at first) | A, but only once the headless-client question is answered and the relay prerequisites in section 4.6.1 each have an owner | DECIDED 2026-10-19: Twingate headless log shipping only once the headless-client question is answered and each section 4.6.1 relay prerequisite has a named owner |
+| 6 | MQTT broker: private or public | Private, per the handoff default | DECIDED 2026-10-19: private MQTT |
+| 7 | Stack name and number (`50-edge` is mine) | Accept or rename | DECIDED 2026-10-19: stack name `50-edge` |
+| 8 | Transfer: accept it as a watched usage line, with a billing alert before the first apply | Accept, once Reticulum has a stated rate cap (section 5.7) | DECIDED 2026-10-19: tracked as a watched usage line plus a billing alert, once Reticulum has a rate cap |
+| 9 | Ingest protocol and relay controls (section 4.6.1) | Not mine to pick; the home-side design owns them, and approval waits for it | NOT ruled: owned by the home-side relay/ingest design |
+| 10 | The core connector firewall gets TCP 5201 outbound for the ZTNA path (section 4.3) | Accept in the implementation PR, with the ZTNA path conditional on the two checks there | DECIDED 2026-10-19: TCP 5201 outbound rule on the core connector firewall, added in the implementation PR |
 
 Before decision 4 can be anything but provisional, these have to be confirmed: the price and limits of a separate DigitalOcean team; whether credentials and Spacelift contexts can be isolated per team; how transfer pooling works across teams; how DigitalOcean's abuse handling treats a team and what it can suspend; and how teardown of the edge team works. And an abuse-response runbook has to exist, with measurable thresholds. Proposed starting values, mine, not measured, for the maintainer to set: alert at 80 percent of the monthly transfer cap; alert if two consecutive days each exceed twice the daily share of that cap; alert at 80 percent of the `lxmd` storage cap; any provider abuse notice answered, and the named service switched off by a pull request and a rebuild, within a target of 24 hours (the provider's own response window is UNVERIFIED).
 

@@ -97,7 +97,7 @@ Dashboards for the cloud side, running on-prem next to the SIEM rather than as a
 
 ## Public edge (DMZ) and hardening (planned, number set by its design doc)
 
-Handoff: [2026-10-12 edge DMZ handoff](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/plans/2026-10-12-edge-dmz-handoff.md). Design first, no implementation until the design and the cost decision are approved. Design draft with four costed options and a recommendation: [2026-10-19 edge DMZ design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-19-edge-dmz-design.md); the maintainer has not picked yet.
+Handoff: [2026-10-12 edge DMZ handoff](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/plans/2026-10-12-edge-dmz-handoff.md). Design first, no implementation until the design and the cost decision are approved. Design draft with four costed options and a recommendation: [2026-10-19 edge DMZ design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-19-edge-dmz-design.md); the maintainer ruled on its decisions on 2026-10-19: option A (a 1 GiB droplet plus a reserved IP, memory measured first), a $35 ceiling (the $41 variant only if the memory measurement fails), stack name `50-edge`, a private MQTT broker, and waiting for the earlier phases before touching tooling or ceilings. The separate-team question is still PROVISIONAL (same DigitalOcean team for now) and the ingest protocol is not ruled. Nothing is approved to build or spend yet.
 
 - A separate VPC (`rns-dmz`, no peering to core) with one immutable droplet and a reserved IP, no SSH and no connector. It would run Reticulum transport with an LXMF propagation node, i2pd, a private Meshtastic MQTT broker over TLS and an authenticated iperf3 server, behind a tag-based Cloud Firewall and host nftables.
 - iperf3 measured over two paths to the same endpoint, direct and through Twingate, cheap probes often and throughput tests rarely.
@@ -105,11 +105,11 @@ Handoff: [2026-10-12 edge DMZ handoff](https://github.com/ChiefGyk3D/Clouds-Agai
 - Stage 3 amendments: a cloud Uptime Kuma, the LLM contract through a LiteLLM proxy, the Discord bridge decision order, and webhook receivers on DigitalOcean Functions writing to the bucket so the workload host keeps zero inbound.
 - Cost: this lands past the $30 ceiling (stage 3 is already at $29). The design must lay out raising it, deferring something or moving pieces; the ceiling is not raised by default. The `edge` phase holds a $35 placeholder (stage 3's $29 plus one $6 droplet) that the design replaces with a costed number.
 - Honeypot: a design doc only, on a separate account or provider, never in this project's apply path. Design draft (nothing built, own cost figure outside the ceiling, decisions owed): [2026-10-21 honeypot design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-21-honeypot-design.md).
-- PeerTube is a DMZ-class workload and needs its own costed stage. Not designed yet.
+- PeerTube is a DMZ-class workload with its own costed stage. Design draft: [2026-10-21 PeerTube stage design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-21-peertube-stage-design.md); it recommends teaching it as a learner lesson and running nothing (+$0), and the maintainer has not decided.
 
 ## Private droplets: later, not never
 
-Rejected for now: a VPC NAT gateway is about $40 a month, which exceeds the whole ceiling, and it removes the Droplet Console. Revisit when the ceiling passes roughly $75 to $80, a static egress IP is needed, or a compliance reason appears. A page, "Why Not Private Droplets (Yet)", comes with the edge wiki PR.
+Rejected for now: a VPC NAT gateway is about $40 a month, which exceeds the whole ceiling, and it removes the Droplet Console. Revisit when the ceiling passes roughly $75 to $80, a static egress IP is needed, or a compliance reason appears. The reasoning is on the page [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md).
 
 ## Explicitly not planned (yet)
 
