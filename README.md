@@ -14,7 +14,7 @@ It is a cloud extension of a homelab, and it exists to teach: this repository is
 > - **[Reading order](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Reading-Order)**: the paths, with time estimates.
 > - **[Git from zero](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Git-From-Zero)**: if you have never used git.
 >
-> **Cost:** the theory is free. The hands-on part costs money because real infrastructure does, and you choose what you can afford to run. The cost gates are explained in [docs/cost.md](docs/cost.md). The same pages are in [`docs/wiki/`](docs/wiki/Home.md) if you prefer reading them in the repo.
+> **Cost:** the reading and the exercises are free and always will be, and nothing here is sold. Hands-on work uses your own accounts and your provider's bill, nothing you spend goes to the maintainer, and you choose what you can afford to run. The cost gates are explained in [docs/cost.md](docs/cost.md). The same pages are in [`docs/wiki/`](docs/wiki/Home.md) if you prefer reading them in the repo.
 
 Recommending other springboards is encouraged throughout this project. The point is to get you thinking in different ways and outside the box, not to hand you one path to copy, so expect pages to point at things to try beyond what they cover.
 

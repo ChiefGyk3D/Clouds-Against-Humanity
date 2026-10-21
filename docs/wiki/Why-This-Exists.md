@@ -8,7 +8,7 @@ This is me distilling and condensing what I learned over almost four years of wo
 
 ## Where I am coming from
 
-It took me around six months to learn this, and that was with the advantage of administering Zscaler at work. I had architects whiteboard it for me and spend hours with me, and I went through a lot of documentation. If that is what it took with a paid platform, a team around me and a job that required it, I do not think it is reasonable to expect anyone to piece it together alone from vendor pages.
+It took me around six months to learn this, and that was with the advantage of administering Zscaler at work. I had architects whiteboard it for me and spend hours with me, and I went through a lot of documentation. If that is what it took with the real platform in front of me, a team around me and a job that required it, I do not think it is reasonable to expect anyone to piece it together alone from vendor pages.
 
 So the lessons here are my attempt to remove the part that cost me the most, which was the head bashing, and keep the part that taught me something. I would rather you spend your time on the second one.
 
@@ -36,9 +36,17 @@ Sources, retrieved 2026-10-22: Twingate, [Connectors](https://www.twingate.com/d
 
 This project has cost gates. They exist and I will not pretend otherwise: a change that would push the planned monthly bill past the ceiling is refused. The ceiling for the current phase and the per-phase table are on the [Roadmap](Roadmap.md#cost-per-phase), and the arithmetic and how to raise it are in [docs/cost.md](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md).
 
-The model is pay to play, and I would like to be plain about it. The theory is free: every page is readable without an account. The hands-on part costs money, because real infrastructure costs money, and you decide what you can afford to run. The labs in [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) need no cloud account and cost nothing. Going further is your call and your budget.
+I would like to be plain about what that means, because it is not a paywall. The reading and the exercises are free and always will be, and every page is readable without an account. Hands-on work uses your own accounts and your own provider's bill (or hardware you already own or choose to buy), and nothing you spend goes to me. You decide what you can afford to run. The labs in [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) need no cloud account and cost nothing. Going further is your call and your budget.
 
 What I did not want was for you to depend on a CTF platform or some other subscription service to learn this, where the money flows to someone who is selling you access to the practice. Here you can run it yourself, in your own accounts, and tear it down when you are done, with a [checklist](Teardown-Checklist.md) that helps you verify no billable resources remain. Billing data lags, so the checklist has you look again the next day, and it does not promise a final bill of zero.
+
+## Free, and staying free
+
+There is no paywall here, nothing is sold, and nothing in this project pays me. The lessons, the code and the wiki are free and stay free, under the Apache-2.0 licence in the repository, and I refuse to gatekeep knowledge, which is half of why this exists.
+
+On disclosures, I can only point at what the wiki already says. [Why I picked these tools](Why-I-Picked-These-Tools.md) discloses that Doppler sponsored content I made years ago, that they did not sponsor this project, and that I am not a neutral reviewer of it. The YubiKey recommendation in [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) says it is a plain recommendation and not an affiliate link. I have not audited every link in the wiki for referral tracking beyond searching for the usual markers (such as `ref=` and `utm_` in the URLs) and finding none, so do not read this as a promise about every external link.
+
+There are optional support links in the [Home](Home.md#support-this-project) page and the wiki footer, for people who want to support continued development. They are optional, and nothing in the wiki or the repository is gated behind them.
 
 ## Who it is for
 
