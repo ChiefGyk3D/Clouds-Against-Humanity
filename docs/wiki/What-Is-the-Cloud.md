@@ -47,7 +47,7 @@ flowchart TB
 
 </details>
 
-Your neighbours on the physical server are strangers. The hypervisor keeps you apart, and that separation is a large part of what you pay the provider to get right. It is also why "a droplet" is cheap: the machine is shared.
+Your neighbors on the physical server are strangers. The hypervisor keeps you apart, and that separation is a large part of what you pay the provider to get right. It is also why "a droplet" is cheap: the machine is shared.
 
 ## The three differences from a Pi at home that change everything
 

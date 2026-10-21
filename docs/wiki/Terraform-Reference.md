@@ -251,7 +251,7 @@ Variables: `layer`, `region`, `ip_range` (private range, network address, prefix
 | `aws_vpc_security_group_egress_rule.internet` | One rule per outbound port, to `0.0.0.0/0`: tcp 443, 80, 53 and udp 53, 123, plus `extra_outbound_rules`. `for_each` over a map keyed by protocol and port. |
 | `aws_vpc_security_group_ingress_rule.member`, `aws_vpc_security_group_egress_rule.member` | Only when `inbound_from_member_rules` or `outbound_to_member_rules` ask: the source or destination is the group itself (`referenced_security_group_id`), never an address. |
 
-There is no inbound rule unless a member rule asks for one. The contract outputs map to AWS like this: `rule_targets` is the group id, `source_members` and `destination_members` are the groups named in member rules. Rule protocols are limited to `tcp` and `udp`, so the every-protocol rule that would re-create AWS's default allow-all cannot be written through the module. Whether AWS really drops that default egress rule when the provider creates the group is documented provider behaviour but **unverified in a live account**.
+There is no inbound rule unless a member rule asks for one. The contract outputs map to AWS like this: `rule_targets` is the group id, `source_members` and `destination_members` are the groups named in member rules. Rule protocols are limited to `tcp` and `udp`, so the every-protocol rule that would re-create AWS's default allow-all cannot be written through the module. Whether AWS really drops that default egress rule when the provider creates the group is documented provider behavior but **unverified in a live account**.
 
 ### modules/aws/twingate-connector
 
@@ -296,7 +296,7 @@ The layer everything else stands on. It costs nothing.
 
 | Declaration | Why |
 |---|---|
-| `digitalocean_project.this` | A console folder. Purely organisational, but it keeps cost and resources of this environment together. |
+| `digitalocean_project.this` | A console folder. Purely organizational, but it keeps cost and resources of this environment together. |
 | `digitalocean_tag.baseline` | The tag `cah-baseline-<region>`. Every droplet in this environment must carry it. |
 | `module "vpc"` | Calls `modules/vpc` with layer `foundation`. |
 | `module "baseline_firewall"` | Calls `modules/firewall` with purpose `baseline` and the baseline tag, and no extra rules. Result: zero inbound, five default outbound rules, on every tagged droplet. |

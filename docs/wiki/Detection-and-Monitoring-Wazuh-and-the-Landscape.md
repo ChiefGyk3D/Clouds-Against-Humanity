@@ -16,7 +16,7 @@ This page teaches those four pieces using Wazuh, which this project plans to use
 |---|---|---|
 | **Collect** | What is happening on this machine? | Logs (events written by software), metrics (numbers over time), file and process activity, cloud audit logs |
 | **Store and search** | Can I look back and find it? | A log store or index; a SIEM |
-| **Detect** | Is any of it suspicious? | Rules, baselines, threat intelligence, behaviour analytics |
+| **Detect** | Is any of it suspicious? | Rules, baselines, threat intelligence, behavior analytics |
 | **Respond** | Who is told, and what happens? | Alerts, tickets, paging, blocking, isolating a machine |
 
 The product categories you will hear are different mixes of those four jobs, aimed at different places:
@@ -78,7 +78,7 @@ The useful distinction is **agent versus agentless, and host versus cloud contro
 ## How an enterprise differs
 
 - **Volume and cost.** Telemetry is priced and stored by the gigabyte. Deciding what *not* to collect, and for how long to keep it, is a budget and compliance decision as much as a technical one.
-- **People.** A security operations centre (SOC), a managed provider (MDR) or an on-call engineer reads the alerts. The product is the smaller half of the capability.
+- **People.** A security operations center (SOC), a managed provider (MDR) or an on-call engineer reads the alerts. The product is the smaller half of the capability.
 - **Alert fatigue.** A system that raises a thousand low-value alerts a day teaches people to ignore it. Tuning rules, and deleting the ones that never matter, is the unglamorous main task.
 - **Overlap and sprawl.** Several tools see the same machine, disagree, and each has its own console. Consolidation projects are common.
 - **Retention and evidence.** Auditors and incident responders need logs that were kept, were not altered, and can be produced. Where the logs live matters as much as having them.

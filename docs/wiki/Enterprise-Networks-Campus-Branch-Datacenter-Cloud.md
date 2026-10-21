@@ -64,7 +64,7 @@ Two of these are worth a closer look because you have already met their cousins.
 
 ## North-south and east-west
 
-**North-south** traffic crosses the boundary of a network: in from the internet, or out to it. **East-west** traffic stays inside, between servers or services. Old security spent its effort on north-south (a strong perimeter), and the common finding in incident reports is that once something is inside, east-west is wide open. Zero trust architecture, as the NIST publication describes it, moves the defences from the perimeter toward users, assets and resources, and says that location on a network does not by itself grant trust (see the register). That is the reasoning behind [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md).
+**North-south** traffic crosses the boundary of a network: in from the internet, or out to it. **East-west** traffic stays inside, between servers or services. Old security spent its effort on north-south (a strong perimeter), and the common finding in incident reports is that once something is inside, east-west is wide open. Zero trust architecture, as the NIST publication describes it, moves the defenses from the perimeter toward users, assets and resources, and says that location on a network does not by itself grant trust (see the register). That is the reasoning behind [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md).
 
 Here, north-south inbound traffic is zero by design. East-west is two connectors that may SSH to each other, and nothing else.
 
@@ -107,7 +107,7 @@ Segmentation is not magic either. Each boundary is a rule set someone must own, 
 | Shared services | Provider DNS and NTP, nothing else | Central DNS resolvers, a directory, PKI, logging and monitoring in a shared-services spoke |
 | Outbound to the internet | Baseline: five narrow rules. The connectors also carry the connector firewall, which allows outbound TCP 30000 to 31000 and UDP on any port to any destination (Twingate needs it for peer-to-peer), so their effective outbound is broader than the baseline. Direct, no proxy | Through a proxy or SWG, often via the hub |
 | Change | A pull request, plan, human confirm | The same, often plus a change ticket, a network team's review and a maintenance window |
-| Cost | About 12 dollars a month for the connectors | Link fees, hub data-processing charges and licences are a real budget line |
+| Cost | About 12 dollars a month for the connectors | Link fees, hub data-processing charges and licenses are a real budget line |
 | What breaks first | An expired token or a rule too narrow | Overlapping ranges, an asymmetric route, a rule nobody can explain, a certificate nobody renewed |
 
 A hub-and-spoke landing zone is the **same four ideas** as this repository, repeated: a boundary around each workload, default deny, a way in that is not an open port, and everything described as code. It adds two: a place where policy is centralized, and an address plan so that joining stays possible. If this project grew a second region, the first step would be the same modules again (see [Multiple sites and identity](Multiple-Sites-and-Identity.md)); the hub only appears when the number of networks makes pairwise links impractical.
@@ -134,7 +134,7 @@ Answer these before reading the reference answers.
 
 - Draw this project's network the way an enterprise diagram would: a spoke with a firewall zone, an "internet" cloud, and a Twingate controller outside. Mark every arrow north-south or east-west.
 - Pick a private range for a pretend second region and write down the rule that would stop you picking an overlapping one.
-- Look up the "landing zone" or "hub and spoke" reference architecture on one cloud provider's own architecture centre. List what it has that the diagram above does not, and decide which items would still be overkill at two machines.
+- Look up the "landing zone" or "hub and spoke" reference architecture on one cloud provider's own architecture center. List what it has that the diagram above does not, and decide which items would still be overkill at two machines.
 - Read the glossary entries for the terms in the segmentation table and write one sentence for each in your own words.
 
 ## Claims register
@@ -143,9 +143,9 @@ Status is one of: `Verified <date>` (checked against the named source on that da
 
 | Claim | Status | Source |
 |---|---|---|
-| AWS Direct Connect links your network to a Direct Connect location over Ethernet fibre, with virtual interfaces to public services or to a VPC, bypassing internet service providers in the path | Verified 2026-10-16 | https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html |
+| AWS Direct Connect links your network to a Direct Connect location over Ethernet fiber, with virtual interfaces to public services or to a VPC, bypassing internet service providers in the path | Verified 2026-10-16 | https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html |
 | Direct Connect has private, public and transit virtual interface types, and requires BGP on the customer device | Verified 2026-10-16 | https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html |
-| NIST SP 800-207 (August 2020) describes zero trust as moving defences from fixed network perimeters toward users, assets and resources, and says network location does not by itself grant trust | Verified 2026-10-16 | https://csrc.nist.gov/pubs/sp/800/207/final |
+| NIST SP 800-207 (August 2020) describes zero trust as moving defenses from fixed network perimeters toward users, assets and resources, and says network location does not by itself grant trust | Verified 2026-10-16 | https://csrc.nist.gov/pubs/sp/800/207/final |
 | Azure ExpressRoute and Google Cloud Interconnect are the Azure and Google equivalents of a dedicated cloud link | General knowledge | not checked |
 | A private circuit is not automatically encrypted | General knowledge | not checked; the landscape page makes the same point |
 | Campus access/distribution/core and data center spine-and-leaf descriptions | General knowledge | not checked |

@@ -30,7 +30,7 @@ Usage, from anywhere inside a clone:
 
 --write needs Mermaid CLI (`mmdc`) on PATH and a Chromium; set PUPPETEER_EXECUTABLE_PATH to the browser if
 Puppeteer does not find one.
-Pillow shrinks the pictures (at most 2400 px wide, a 128-colour palette).
+Pillow shrinks the pictures (at most 2400 px wide, a 128-color palette).
 """
 
 from __future__ import annotations

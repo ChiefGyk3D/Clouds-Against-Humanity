@@ -97,7 +97,7 @@ Three things to take from the drawing:
 
 **What it looks like in a tool.** The same boundaries drawn as a data flow diagram in Threat Dragon (the dashed boxes are B1 to B8; the [Threat Dragon exercise](Threat-Dragon-Exercise.md) walks through it). Do your own drawing first and look at this only to compare.
 
-![The pipeline data flow diagram in Threat Dragon with eight trust boundary boxes B1 to B8 and labelled arrows between its parts](images/threat-dragon-stride-diagram.png)
+![The pipeline data flow diagram in Threat Dragon with eight trust boundary boxes B1 to B8 and labeled arrows between its parts](images/threat-dragon-stride-diagram.png)
 
 *Threat Dragon v2.6.2 hosted app, Local Session, captured 2026-10-16. The repository's own synthetic model, exported with the app's Export, PNG command. The dashed boxes are the trust boundaries; they enclose the processes and data stores.*
 
@@ -196,7 +196,7 @@ A threat model that does not say what it left out is selling comfort. This one, 
 - **Anyone with write access to `main` other than the maintainer.** The whole design assumes one writer. A second writer changes scenarios 2 and 3 from "unlikely" to "possible" and needs required reviews first (see [Threat model, "What would change the model"](Threat-Model.md#what-would-change-the-model)).
 - **The maintainer's own accounts being taken over.** The model says "anyone who can push to `main` is trusted"; it has no numbered threat for the one person who can. MFA on GitHub, Spacelift, Doppler, DigitalOcean and the identity provider is the control, and none of that is visible in this repository.
 - **Anything configured outside the repository.** Branch protection, the Spacelift push policy, autodeploy off, deletion protection, state access, Doppler token scopes: all settings in vendor consoles. This exercise cannot verify them, and a diff cannot show a change to them.
-- **Live state.** Nothing here ran against a real environment. The answer key cites files, not observed behaviour; where a claim needs a real run (masking, the metadata endpoint) it says so.
+- **Live state.** Nothing here ran against a real environment. The answer key cites files, not observed behavior; where a claim needs a real run (masking, the metadata endpoint) it says so.
 - **Vendor compromise.** Accepted as T10, not mitigated.
 - **Stage 2 and stage 3.** Logging, the link home, workloads, Portainer, the Matrix bridge and daemon tokens do not exist yet. The worked example lists how each would widen the model; do not treat the current answer key as covering them.
 - **Physical, legal and availability risks** beyond the lockout in T13, and **targeted attackers with real resources**, which the worked example puts out of scope on purpose.

@@ -122,7 +122,7 @@ Sprints use the [Roadmap schedule](../../wiki/Roadmap.md#schedule). S1 is the ma
 - **Prerequisite:** the sibling `Linux-for-Enterprise-Beginners` page (files, permissions, sudo) and F1. This lesson must not repeat the Linux lesson; it starts where that one ends.
 - **Theory path (free):** a local shell on Linux, macOS (Terminal) or Windows (WSL or PowerShell); exercises on the repo's `scripts/` directory read-only.
 - **Hands-on path (optional paid):** none needed. Cost $0.
-- **Mini-loop:** Build a script that lists the open ports on the learner's own machine. Break it by running it with a space in a filename. Detect with a linter. Evade: show an unquoted-variable injection with a harmless filename. Defend: quote everything and fail on the first error. The lesson teaches one supported shell per track and names it at the top: **bash** on Linux, macOS or WSL (linter `shellcheck`; defence `set -euo pipefail`; listing with `ss -tln`) and **PowerShell** on Windows (linter PSScriptAnalyzer; defence `Set-StrictMode -Version Latest` and `$ErrorActionPreference = 'Stop'`; listing with `Get-NetTCPConnection -State Listen`). Each step has both forms or says it is track-specific. Read-only by default. (Local only.)
+- **Mini-loop:** Build a script that lists the open ports on the learner's own machine. Break it by running it with a space in a filename. Detect with a linter. Evade: show an unquoted-variable injection with a harmless filename. Defend: quote everything and fail on the first error. The lesson teaches one supported shell per track and names it at the top: **bash** on Linux, macOS or WSL (linter `shellcheck`; defense `set -euo pipefail`; listing with `ss -tln`) and **PowerShell** on Windows (linter PSScriptAnalyzer; defense `Set-StrictMode -Version Latest` and `$ErrorActionPreference = 'Stop'`; listing with `Get-NetTCPConnection -State Listen`). Each step has both forms or says it is track-specific. Read-only by default. (Local only.)
 - **Size:** L.
 - **Suggested sprint:** S4.
 - **Links into:** [Git from zero](../../wiki/Git-From-Zero.md), [Doppler and secrets](../../wiki/Doppler-and-Secrets.md) (the doppler-env script), [CI, tests and the cost gate](../../wiki/CI-Tests-and-Cost-Gate.md).
@@ -190,7 +190,7 @@ Sprints use the [Roadmap schedule](../../wiki/Roadmap.md#schedule). S1 is the ma
 ### F8. Windows, Active Directory and macOS for the helpdesk and the sysadmin
 
 - **For:** the many learners whose first job manages Windows laptops and a domain, not Linux droplets. The wiki has no page on this at all.
-- **Learning goals:** explain domain, domain controller, user, group, OU and group policy in plain words; say what Active Directory and Microsoft Entra ID each are and how they differ; do five PowerShell actions (list users, check a service, read the event log, check the firewall, find a hash of a file); say what a Mac does for device management (profiles, enrolment) and where it differs; explain why a local admin account is a risk.
+- **Learning goals:** explain domain, domain controller, user, group, OU and group policy in plain words; say what Active Directory and Microsoft Entra ID each are and how they differ; do five PowerShell actions (list users, check a service, read the event log, check the firewall, find a hash of a file); say what a Mac does for device management (profiles, enrollment) and where it differs; explain why a local admin account is a risk.
 - **Prerequisite:** F2 (shell) and F7 (identity).
 - **Theory path (free):** a read-only tour using screenshots to take yourself (see the Screenshots policy: no vendor console shots committed) and Microsoft's own documentation (cite and date each page when the lesson is written).
 - **Hands-on path (optional paid):** a Windows Server evaluation VM on the learner's own machine. Whether Microsoft's evaluation edition is free, and for how long, was not read for this plan: UNVERIFIED, and the lesson must check it. No cloud cost.
@@ -259,14 +259,14 @@ Sprints use the [Roadmap schedule](../../wiki/Roadmap.md#schedule). S1 is the ma
 | F2 | The terminal and a first script | L | S4 | Linux sibling lesson, F1 | $0 |
 | F6 | VMs, containers, cloud service models | M | S4 | Core 2, 7 | $0 |
 | F7 | Enterprise identity (SSO, SAML, OAuth, OIDC) | L | S5 | Core 4, F4, APIs sibling lesson | $0 to est. (vendor check) |
-| F8 | Windows, Active Directory, macOS | L | S5 | F2, F7 | $0 (evaluation licence UNVERIFIED) |
+| F8 | Windows, Active Directory, macOS | L | S5 | F2, F7 | $0 (evaluation license UNVERIFIED) |
 | F9 | Logs, alerts and detection | M | S6 | F1, F2, Core 14 | $0 to $53 total (mini SOC) |
 | F10 | Backups, recovery and patching | M | S7 | Core 8, F2 | up to about $7.20 (est.) |
 | F11 | Threats in plain words | M | S7 | Core 11, F9 | $0 |
 
 Total: 1 S, 6 M, 5 L = about 2 + 30 + 60 = 92 hours by the planning page's conversion, across S2 to S7 (S8 left as buffer). A lesson page is not an XL, so none needs splitting, but F2, F3, F5, F7 and F8 are the largest and may be split in half if a sprint runs hot. S3 carries three lessons (5 + 12 + 12 = about 29 h by that conversion) and is the one to rebalance first, probably by moving F4 to S4. The plan does not claim the maintainer's reviewing capacity; that is his call.
 
-Gaps this set does not cover, on purpose: Linux (sibling lesson), APIs and tokens (sibling lesson), git (already two pages), threat modelling (already five), and cryptographic protocol detail beyond F4.
+Gaps this set does not cover, on purpose: Linux (sibling lesson), APIs and tokens (sibling lesson), git (already two pages), threat modeling (already five), and cryptographic protocol detail beyond F4.
 
 ## 5. Rules every foundations lesson follows
 
@@ -320,7 +320,7 @@ One thing the audit could not find on any page: **the first-week reality of work
 
 1. Approve the set as written, trim it, or reorder it. F12, F1 and F4 are the cheapest and the most visibly missing.
 2. Should the Foundations track be its own path in Reading order (this plan's recommendation), or folded into the core path as extra steps? Folding would break the "21 pages, about 3 h 15 min" figures and the "Next" lines in every start-from-zero page.
-3. Is F8 (Windows and Active Directory) wanted at all? It has no Linux or cloud-project hook, and it needs a vendor licence check that this plan could not do. It is the most useful lesson for an enterprise reader and the one least tied to this repository.
+3. Is F8 (Windows and Active Directory) wanted at all? It has no Linux or cloud-project hook, and it needs a vendor license check that this plan could not do. It is the most useful lesson for an enterprise reader and the one least tied to this repository.
 4. Do the sibling lessons (Linux, APIs and tokens) count as Foundations rows 1 and 2, or stay separate?
 5. Whether to commit the counting script. It is a scratch file now; adding it would be a code change under `scripts/` and a test, and the audit would then rerun on every wiki change.
 
@@ -328,6 +328,6 @@ One thing the audit could not find on any page: **the first-week reality of work
 
 - No lesson was written and no page was changed; every proposal is a proposal.
 - Counts are regular-expression counts over text (section 2 limits). Definition judgments were read from the first use and the likely defining page, not from a full reread.
-- No vendor page was read for this plan. The only prices used are in `docs/cost-prices.json`. The Windows evaluation licence terms, identity-provider free tiers and the hourly droplet rate were not read: marked UNVERIFIED or est.
+- No vendor page was read for this plan. The only prices used are in `docs/cost-prices.json`. The Windows evaluation license terms, identity-provider free tiers and the hourly droplet rate were not read: marked UNVERIFIED or est.
 - The sprint assignment follows the Roadmap table and the planning page's size hours; the maintainer's availability is not assumed.
 - The sibling lessons were not read (they were not on main when this audit ran), so overlaps with them are guesses.

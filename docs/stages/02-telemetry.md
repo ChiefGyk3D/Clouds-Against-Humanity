@@ -159,7 +159,7 @@ The `sites` variable adds sites to this stack without touching the first one. It
 
 ### 2.6 TLS decision record: Prometheus scrape and Wazuh agent traffic over Twingate
 
-**Status: a decision record, not a build. Nothing in it was applied or measured. Every statement about a vendor's behaviour below is UNVERIFIED: this change was written without fetching any vendor page, so no page was read for it, and each claim is from the maintainer-side design documents or from memory. Check each against the cited vendor page before relying on it.** Pages to read: Twingate security and encryption documentation (twingate.com/docs), Prometheus configuration (`tls_config`, `--web.config.file`) at prometheus.io/docs, and the Wazuh manual sections on agent enrollment and agent-manager communication at documentation.wazuh.com.
+**Status: a decision record, not a build. Nothing in it was applied or measured. Every statement about a vendor's behavior below is UNVERIFIED: this change was written without fetching any vendor page, so no page was read for it, and each claim is from the maintainer-side design documents or from memory. Check each against the cited vendor page before relying on it.** Pages to read: Twingate security and encryption documentation (twingate.com/docs), Prometheus configuration (`tls_config`, `--web.config.file`) at prometheus.io/docs, and the Wazuh manual sections on agent enrollment and agent-manager communication at documentation.wazuh.com.
 
 **Decision to make:** where, if anywhere, TLS is terminated for (a) the home Prometheus scraping the connectors' node exporter and connector metrics (plain HTTP today, design section 4.2 and open question 7) and (b) Wazuh agents reaching the manager on 1514 and 1515, both across a Twingate resource.
 

@@ -48,7 +48,7 @@ What I did not want was for you to depend on a CTF platform or some other subscr
 
 ## Free, and staying free
 
-There is no paywall here, nothing is sold, and nothing in this project pays me. The lessons, the code and the wiki are free and stay free, under the Apache-2.0 licence in the repository, and I refuse to gatekeep knowledge, which is half of why this exists.
+There is no paywall here, nothing is sold, and nothing in this project pays me. The lessons, the code and the wiki are free and stay free, under the Apache-2.0 license in the repository, and I refuse to gatekeep knowledge, which is half of why this exists.
 
 My standing promise is that if I ever have an affiliation or sponsorship with something I recommend, I will disclose it as it appears, the way I did for Doppler. The disclosures that exist today are in [Why I picked these tools](Why-I-Picked-These-Tools.md): Doppler sponsored content I made years ago, Twingate gave me a plan for free in exchange for a review, and I have a DigitalOcean referral link that earns me credit if you use it and spend (it is optional, and the project is identical without it). Where the link appears the page says so.
 

@@ -53,7 +53,7 @@ Source: GitHub Docs, "Configuring two-factor authentication" (https://docs.githu
 
 ## Step 2: make your own copy (a fork)
 
-You will practise on a copy, never on the original, so you cannot break anything.
+You will practice on a copy, never on the original, so you cannot break anything.
 
 1. Sign in to GitHub and open this repository's page (https://github.com/ChiefGyk3D/Clouds-Against-Humanity).
 2. In the top-right corner of the page, click **Fork**. Leave "Owner" as your own account, leave the name as it is, and click **Create fork**. Optionally tick "Copy the DEFAULT branch only"; that is enough here.
@@ -73,7 +73,7 @@ There are two ways. Both do exactly the same thing underneath. Pick one and do t
 | Question | GUI path: GitHub Desktop | Command-line path: git and `gh` |
 |---|---|---|
 | What you do | Click buttons | Type commands |
-| Good for | Your first hour; seeing changes as colours | Everything later; copy-pasting from guides; servers, which have no mouse |
+| Good for | Your first hour; seeing changes as colors | Everything later; copy-pasting from guides; servers, which have no mouse |
 | Install | One installer (Windows 10 64-bit or later, macOS 12.0 or later) | git, plus the GitHub CLI (`gh`) |
 | Linux | Not supported ("Linux is not yet supported" on the vendor's install page); use the command line | Fully supported |
 
@@ -343,7 +343,7 @@ Expected: a web address ending `/pull/NUMBER`, where `NUMBER` is the pull reques
 - **`error:` and `fatal:`** are failures. Read the line after it; git usually says what to do.
 - **`hint:`** lines are advice, not errors.
 - **`warning:`** lines mean it worked, but look.
-- **Colours** help but do not carry meaning alone: removed lines begin with `-`, added lines begin with `+`. The sign is the reliable part.
+- **Colors** help but do not carry meaning alone: removed lines begin with `-`, added lines begin with `+`. The sign is the reliable part.
 - **A pager** (the `:` or `(END)` at the bottom) shows long output one screen at a time. Press `q` to leave, Space for the next page.
 - **Never paste a terminal's output into a public place without reading it.** It can contain your computer's username and paths.
 

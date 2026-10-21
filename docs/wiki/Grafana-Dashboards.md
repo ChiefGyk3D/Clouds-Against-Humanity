@@ -6,7 +6,7 @@
 
 **Prerequisites:** [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) and [Multiple sites and identity](Multiple-Sites-and-Identity.md).
 
-The repository keeps its own dashboards as JSON files in [`dashboards/`](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/tree/main/dashboards). They are modelled on the maintainer's home SIEM dashboards in layout and panel style only; no query, data source or label value was copied from them. Dashboards that are files in git can be reviewed, tested and rebuilt, which is the same reason the infrastructure is code.
+The repository keeps its own dashboards as JSON files in [`dashboards/`](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/tree/main/dashboards). They are modeled on the maintainer's home SIEM dashboards in layout and panel style only; no query, data source or label value was copied from them. Dashboards that are files in git can be reviewed, tested and rebuilt, which is the same reason the infrastructure is code.
 
 ## What is in the box
 
@@ -70,7 +70,7 @@ Every panel here says UNVERIFIED in its description, and this section says what 
 
 ## What is NOT verified
 
-- **Nothing was imported into a real home Grafana.** The Sites overview and Droplet health dashboards are mounted into the [lab's](Lab-Demo-Monitoring-Stack.md) Grafana 12.1.0 and the lab page carries screenshots of them rendered with invented data, so the layout has been seen there. Colours, units and behaviour against your own Prometheus and data are unchecked; expect to nudge them.
+- **Nothing was imported into a real home Grafana.** The Sites overview and Droplet health dashboards are mounted into the [lab's](Lab-Demo-Monitoring-Stack.md) Grafana 12.1.0 and the lab page carries screenshots of them rendered with invented data, so the layout has been seen there. Colors, units and behavior against your own Prometheus and data are unchecked; expect to nudge them.
 - **Queries have run only in the lab.** The lab's tests check that each Prometheus panel query names only metrics the generator exports; the committed `promtool` fixtures (2 sites x 2 hosts x 2 endpoints, `labs/demo-monitoring/prometheus/tests/`) test the two alert rules and the inventory, not the dashboard panels. That the panel PromQL returns correct numbers was judged from the lab's screenshots, not asserted by a test, and no query was run against a real Prometheus. No OpenSearch query of any kind was run; the Wazuh dashboard is not in the lab's Grafana and is checked only by the offline synthetic test described below.
 - `schemaVersion` is 41, believed to be what Grafana 12.0 writes (not checked against a live install). The test treats 41 only as a structural floor, not as proof that a file imports; Grafana migrates older versions on import, and whether a later 12.x writes a higher number was not checked.
 - The offline test checks panel types against an allowlist, grid positions, ref ids, and that every query uses a variable. It does not parse PromQL or Lucene.
@@ -87,7 +87,7 @@ Pictures of the Sites overview dashboard (healthy, and with one site silenced) a
 
 > **Screenshot to take yourself:** the Wazuh agents dashboard in your own Grafana after your agents report with the site label (set by `log_shipping`, or by hand on a test agent).
 > Capture: the failed logins panel and the file integrity panel after you caused one failed login and touched a file under the watched path on a test machine.
-> Look for: a bar in each panel at the time of your test, labelled with your test agent's name.
+> Look for: a bar in each panel at the time of your test, labeled with your test agent's name.
 > Redact: the Grafana address and tab strip, your user name, real agent names and addresses, and any user name that appears in a recent-alerts table.
 
 ## Try it yourself

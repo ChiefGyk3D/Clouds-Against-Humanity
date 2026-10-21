@@ -107,7 +107,7 @@ def test_the_current_status_must_be_the_current_phase():
 )
 def test_a_bad_ceiling_is_refused(bad):
     doc = approved()
-    doc["phases"]["stage-0"]["ceiling"] = bad  # first phase: no neighbour rule applies
+    doc["phases"]["stage-0"]["ceiling"] = bad  # first phase: no neighbor rule applies
     assert any("stage-0" in p and "must be a finite number" in p for p in problems(doc))
 
 

@@ -2073,7 +2073,7 @@
             "connector": "normal",
             "data": {
               "name": "Relayed session",
-              "description": "Full label: Relayed session (user traffic). Authorised user traffic, carried to the connector over the link the connector opened. One direction in the diagram: Twingate to the droplet.",
+              "description": "Full label: Relayed session (user traffic). Authorized user traffic, carried to the connector over the link the connector opened. One direction in the diagram: Twingate to the droplet.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,

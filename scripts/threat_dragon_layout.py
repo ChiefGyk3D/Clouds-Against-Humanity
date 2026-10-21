@@ -77,7 +77,7 @@ NODE_NAME_MAX = 24
 
 
 def at(col: float, row: float) -> tuple[float, float]:
-    """Centre of a grid cell."""
+    """Center of a grid cell."""
     return (X0 + COL_PITCH * col, Y0 + ROW_PITCH * row)
 
 

@@ -294,7 +294,7 @@
                   "title": "AML.T0051.001 Indirect: Pull request text steers the local model's summary",
                   "type": "Tampering",
                   "modelType": "STRIDE",
-                  "description": "The local model summarises pull request text, logs and drafts. Injected text can change the summary. Because the model is used text in, text out, with no tools and no credentials, a bad summary is the whole impact. ATLAS 2026.09: AML.T0051.001 Indirect [AML.TA0005 Execution].",
+                  "description": "The local model summarizes pull request text, logs and drafts. Injected text can change the summary. Because the model is used text in, text out, with no tools and no credentials, a bad summary is the whole impact. ATLAS 2026.09: AML.T0051.001 Indirect [AML.TA0005 Execution].",
                   "mitigation": "Keep it tool-less. Counting, cost math and checks are done by code, not by the model. Read the diff itself before acting on a summary."
                 },
                 {

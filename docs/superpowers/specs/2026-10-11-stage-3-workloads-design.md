@@ -181,7 +181,7 @@ What was read on 2026-10-11 from etke.cc's own pages (https://etke.cc/bridges/ a
 - Their guide uses a **bot token** (`login-token bot <token>`) and bridges a guild with `guilds bridge GUILD_ID --entire`. It warns that QR-code login is a self-bot, which Discord forbids. This corrects the first draft of section 9, which said `mautrix/discord` works only by signing in as a user account.
 - Messages from Matrix users who have not logged in to the bridge go out through a **relay** login (`bridge.relay.enabled` in the bridge config, then `set-relay` per room; `admin_only` defaults to true). Per the mautrix general relay documentation, relayed users' messages get a display-name prefix and their reactions are not bridged. Whether etke.cc enables or lets the customer configure relay mode was not found and has to be asked.
 
-It is therefore two-way, but not the same behaviour as `matrix-appservice-discord`:
+It is therefore two-way, but not the same behavior as `matrix-appservice-discord`:
 
 | Aspect | matrix-appservice-discord (the old bridge) | mautrix-discord from etke.cc |
 |---|---|---|

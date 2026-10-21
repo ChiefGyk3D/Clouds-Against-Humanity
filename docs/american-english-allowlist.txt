@@ -1,0 +1,5 @@
+# Exceptions to tests/test_american_english.py.
+# One per line: <path relative to the repository root>:<word> | <reason>
+# The reason is required. Lines starting with # and blank lines are ignored.
+# Today there are none: every British spelling in the README and the wiki was
+# corrected, and the only literal kept (`cancelled`, a GitHub job result) is not on the word list.

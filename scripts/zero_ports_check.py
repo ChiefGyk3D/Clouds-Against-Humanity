@@ -181,7 +181,7 @@ class ApiTransport:
         req = urllib.request.Request(url, method="GET")  # fixed origin, checked above
         req.add_unredirected_header("Authorization", "Bearer " + self._token.reveal())
         req.add_unredirected_header("Accept", "application/json")
-        # A sanitised error is raised only AFTER the except block has ended, so it carries
+        # A sanitized error is raised only AFTER the except block has ended, so it carries
         # no __context__ or __cause__ that could still hold the request, the header or the body.
         failure = None
         raw = b""
@@ -198,7 +198,7 @@ class ApiTransport:
             try:
                 exc.close()
             except _INTERNAL_ERRORS:
-                pass  # cleanup trouble must not replace the sanitised error raised below
+                pass  # cleanup trouble must not replace the sanitized error raised below
             if 300 <= code < 400:
                 failure = "the API tried to redirect; redirects are refused"
             elif code in (401, 403):

@@ -4,8 +4,8 @@
 Allowlist, not blocklist: only these chunks survive.
 
   IHDR PLTE IDAT IEND   the image itself
-  tRNS                  transparency (palette or colour-key alpha)
-  gAMA cHRM sRGB        the colour description a browser screenshot carries
+  tRNS                  transparency (palette or color-key alpha)
+  gAMA cHRM sRGB        the color description a browser screenshot carries
 
 Everything else is dropped: text (tEXt, zTXt, iTXt), EXIF (eXIf), timestamps
 (tIME), physical size (pHYs), background (bKGD), histogram, suggested palette,
@@ -13,7 +13,7 @@ private chunks, and the embedded ICC profile (iCCP). iCCP is removed on
 purpose: a profile carries free text (description, copyright, device and
 software names) that can identify a machine, and sRGB plus gAMA/cHRM describe
 what a browser screenshot needs; a viewer with no profile assumes sRGB. If a
-picture's colours matter beyond that, check it by eye after stripping.
+picture's colors matter beyond that, check it by eye after stripping.
 
 The file is validated as it is read: a good signature, an IHDR first, every
 CRC correct, exactly one IEND which is the last chunk with nothing after it,

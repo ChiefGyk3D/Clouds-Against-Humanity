@@ -3,7 +3,7 @@
   "summary": {
     "title": "Clouds Against Humanity: pipeline mapped to MITRE ATT&CK",
     "owner": "Clouds Against Humanity maintainers",
-    "description": "Same data flow diagram and trust boundaries as the STRIDE model (clouds-against-humanity.threat-dragon.json), with each threat re-written to cite MITRE ATT&CK techniques (Enterprise matrix, IaaS platform, v20.0). Threat Dragon has no ATT&CK threat type: the technique is in the threat title and description, and the STRIDE category in the type field is kept. Only threats that describe adversary behaviour are kept; the Repudiation threats have no ATT&CK technique and are left out. T-numbers match docs/wiki/Threat-Model.md. A model records what someone believes; it does not verify the system. Generic names only.",
+    "description": "Same data flow diagram and trust boundaries as the STRIDE model (clouds-against-humanity.threat-dragon.json), with each threat re-written to cite MITRE ATT&CK techniques (Enterprise matrix, IaaS platform, v20.0). Threat Dragon has no ATT&CK threat type: the technique is in the threat title and description, and the STRIDE category in the type field is kept. Only threats that describe adversary behavior are kept; the Repudiation threats have no ATT&CK technique and are left out. T-numbers match docs/wiki/Threat-Model.md. A model records what someone believes; it does not verify the system. Generic names only.",
     "id": 0
   },
   "detail": {
@@ -2003,7 +2003,7 @@
             "connector": "normal",
             "data": {
               "name": "Relayed session",
-              "description": "Full label: Relayed session (user traffic). Authorised user traffic, carried to the connector over the link the connector opened. One direction in the diagram: Twingate to the droplet.",
+              "description": "Full label: Relayed session (user traffic). Authorized user traffic, carried to the connector over the link the connector opened. One direction in the diagram: Twingate to the droplet.",
               "type": "tm.Flow",
               "isTrustBoundary": false,
               "outOfScope": false,

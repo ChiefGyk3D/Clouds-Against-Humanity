@@ -41,7 +41,7 @@ The heavy lifting comes from [git-your-ship-together](https://github.com/ChiefGy
 
 That rule was tested on 2026-10-12. This repository used to carry its own job that looped `tofu test` over the modules and stacks, because GYST had none, and it needed somewhere to test a Spacelift push policy written in Rego. Both are the same job in any repository with OpenTofu tests or policies, so both went into GYST's `tofu-ci.yml` as opt-in legs (`test: true` and `policy-directories`), with their own fixture and contract tests there, and this repository now just switches them on. The one thing that stayed here is the cost gate script itself, because its rules are this repository's; it runs as the first step of the `python-ci` test command, so it needs no job of its own either. The `python-ci` test command, in order, is: the cost gate, the settings page check (`scripts/gen_settings_doc.py --check`), `pytest tests`, then the identifier check.
 
-Short version of the idea, in case it is new: a **reusable workflow** is a workflow file with `workflow_call` under `on:`, and a caller runs it with `uses: owner/repo/.github/workflows/file.yml@<full commit hash>`. GYST is a separate project by the same maintainer and this repository is only a user of it; the technique applies to any organisation with several repositories. Which jobs here come from it and which stay local, how the permissions pass down, and an exercise are in [From commit to pipeline: reusable workflows and Git Your Ship Together](From-Commit-to-Pipeline.md#reusable-workflows-and-git-your-ship-together). One fact worth knowing before you read `ci.yml`: all three calls are pinned to an untagged commit on GYST's `main`, not to a release.
+Short version of the idea, in case it is new: a **reusable workflow** is a workflow file with `workflow_call` under `on:`, and a caller runs it with `uses: owner/repo/.github/workflows/file.yml@<full commit hash>`. GYST is a separate project by the same maintainer and this repository is only a user of it; the technique applies to any organization with several repositories. Which jobs here come from it and which stay local, how the permissions pass down, and an exercise are in [From commit to pipeline: reusable workflows and Git Your Ship Together](From-Commit-to-Pipeline.md#reusable-workflows-and-git-your-ship-together). One fact worth knowing before you read `ci.yml`: all three calls are pinned to an untagged commit on GYST's `main`, not to a release.
 
 ### Pin every action by commit SHA
 
@@ -129,7 +129,7 @@ Besides the cost gate and the identifier check, the `pytest tests` step covers t
 
 ## The identifier check
 
-A public repository should not publish which cloud account it deploys into. `scripts/identifier_check.py` scans every tracked text file and fails when it finds a cloud identifier written in a recognisable form:
+A public repository should not publish which cloud account it deploys into. `scripts/identifier_check.py` scans every tracked text file and fails when it finds a cloud identifier written in a recognizable form:
 
 - an AWS ARN that carries a 12-digit account id, or a 12-digit number next to the word `account` (`account_id`, `aws_account`, `Account ID`);
 - an AWS access key id (`AKIA` or `ASIA` followed by 16 characters);

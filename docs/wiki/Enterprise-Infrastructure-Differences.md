@@ -6,7 +6,7 @@
 
 **Prerequisites:** [Enterprise engineering habits](Enterprise-Engineering-Habits.md), [Architecture overview](Architecture-Overview.md) and [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md). [Enterprise networks](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md) is a useful companion for the network sections.
 
-This project is one account, one environment, one operator and two machines. The habits it practises are the right ones. What changes at a company is **how many of everything there is** and **how many people must agree**. Almost every practice below exists because something went wrong when there were too many accounts, too many engineers or too many years for informal agreement to work.
+This project is one account, one environment, one operator and two machines. The habits it practices are the right ones. What changes at a company is **how many of everything there is** and **how many people must agree**. Almost every practice below exists because something went wrong when there were too many accounts, too many engineers or too many years for informal agreement to work.
 
 Each section ends with what this project does instead and why that is fine at its size.
 
@@ -45,7 +45,7 @@ All three can stop a change that CI would have approved, because the guardrail s
 
 ## Tagging, cost allocation and FinOps
 
-At scale the bill is split among teams, and nobody can split what is not labelled. Organizations enforce tags (owner, cost centre, environment, application) with the guardrails above, set budgets with alerts, and have a **FinOps** practice: engineers, finance and product reviewing spend together, rightsizing, buying commitments and removing waste. The FinOps Foundation publishes a framework; this page has not checked its current text, so treat the name as a pointer.
+At scale the bill is split among teams, and nobody can split what is not labeled. Organizations enforce tags (owner, cost center, environment, application) with the guardrails above, set budgets with alerts, and have a **FinOps** practice: engineers, finance and product reviewing spend together, rightsizing, buying commitments and removing waste. The FinOps Foundation publishes a framework; this page has not checked its current text, so treat the name as a pointer.
 
 **What this project does instead.** One bill, one owner, and a [cost gate](CI-Tests-and-Cost-Gate.md) that refuses a pull request whose monthly estimate exceeds the approved ceiling. It is fine because the gate answers the question FinOps answers, "should this be allowed to cost that?", before the money is spent, for the one stakeholder who exists.
 
@@ -127,7 +127,7 @@ Few large organizations are cloud-only. They run data centers, colocation space 
 ### Reference answers
 
 1. An organization-level guardrail: an SCP, Azure Policy or Organization Policy constraint, depending on cloud. It lives in the cloud provider's organization layer, outside the repository, so it applies however the change was made. (Which exact policy type depends on the cloud; the register has the sources.)
-2. Cost allocation: required tags (owner, cost centre) and budgets per team. A policy that denies or flags resource creation without the tags enforces it.
+2. Cost allocation: required tags (owner, cost center) and budgets per team. A policy that denies or flags resource creation without the tags enforces it.
 3. The CMDB or asset inventory (no owner recorded) and the golden-image or patch process (no accountable owner for exceptions).
 4. Locking and speed: every change by every team queues behind one lock. Blast radius and secrets: anyone with access to read it reads everything, and one corruption affects everything. Split by environment and component.
 5. Two connectors in one region cannot promise a 15-minute RTO against a regional or account-level failure. It needs a second region or a tested automated rebuild and a clear statement of which failures it covers.

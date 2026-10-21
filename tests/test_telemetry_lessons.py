@@ -1,7 +1,7 @@
 """Checks for the five telemetry lesson pages in docs/wiki/.
 
 The pages are unverified drafts (four describe merged but unapplied code), so these tests keep three things
-honest: each page says it is a draft and links its neighbours, nothing on them
+honest: each page says it is a draft and links its neighbors, nothing on them
 looks like a real address, and every figure in the mini SOC cost tables is
 recomputed here from docs/cost-prices.json rather than trusted.
 """

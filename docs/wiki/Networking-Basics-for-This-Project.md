@@ -95,7 +95,7 @@ A **VPC** (virtual private cloud) is a private network that only your machines a
 
 Two things about VPCs that surprise people:
 
-- **The provider's firewall applies inside the VPC too.** On DigitalOcean, two droplets on the same VPC still cannot talk to each other unless a firewall rule allows it. That is a feature: a compromised machine cannot wander over to its neighbours. It is also why this project had to add explicit rules for the two connectors to reach each other's SSH port.
+- **The provider's firewall applies inside the VPC too.** On DigitalOcean, two droplets on the same VPC still cannot talk to each other unless a firewall rule allows it. That is a feature: a compromised machine cannot wander over to its neighbors. It is also why this project had to add explicit rules for the two connectors to reach each other's SSH port.
 - **Ranges must not overlap with anything you will connect to.** Stage 2 of this project connects the cloud network back to the homelab. If the VPC used `192.168.1.0/24` and so did the house, packets would not know which way to go. Pick a range nobody else in your life uses. This repo uses `10.78.0.0/24` and asks you to confirm "no overlap" without writing down your home ranges, because the repo is public.
 
 **North-south** traffic is between your network and the internet. **East-west** traffic is between machines inside your network. Home routers only filter north-south. A good cloud design filters both, and this one does.

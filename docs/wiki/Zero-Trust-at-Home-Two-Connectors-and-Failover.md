@@ -242,7 +242,7 @@ sleep 8; docker logs --tail 4 zt-hub
 - **Check.** The first log shows both `from=a` and `from=b`. After the stop, new lines show only `from=b`. Also confirm nothing was published: `docker port zt-hub` prints nothing. If your output differs, say so on the pull request; I could not run this.
 - **Undo.** `docker rm -f zt-hub zt-conn-a zt-conn-b; docker network rm zt-lab`
 
-Honest limit: this does not test Twingate's sessions, relays or client behaviour, only the outbound-only and redundant shape.
+Honest limit: this does not test Twingate's sessions, relays or client behavior, only the outbound-only and redundant shape.
 
 ### Exercise 3: two Pis or two virtual machines (optional, own hardware)
 

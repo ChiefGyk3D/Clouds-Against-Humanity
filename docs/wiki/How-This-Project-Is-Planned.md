@@ -1,6 +1,6 @@
 # How this project is planned
 
-> Prerequisites: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) and the [Roadmap](Roadmap.md). This page is about how the work is organised, not what the stages are.
+> Prerequisites: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) and the [Roadmap](Roadmap.md). This page is about how the work is organized, not what the stages are.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
@@ -14,7 +14,7 @@ The work is planned the way a small team plans software: a written backlog, a si
 
 | Level | What it is | Where |
 |---|---|---|
-| Epic | One theme, such as stage 2 telemetry. Labelled `epic`, with sub-issues. Has a start and a target date that draw its bar on the Roadmap view | Issue |
+| Epic | One theme, such as stage 2 telemetry. Labeled `epic`, with sub-issues. Has a start and a target date that draw its bar on the Roadmap view | Issue |
 | Milestone | The same theme as a release gate, with a due date | Milestone |
 | Issue | One piece of work with a reason, a "done when" list and, where it applies, a gate | Issue, sub-issue of an epic |
 | Sprint | A two-week slice, Tuesday to Monday | Board field |
@@ -82,6 +82,23 @@ The Agent field on the board names the intended owner. The maintainer-only steps
 - **During:** one branch per issue, one pull request per change, small enough to review.
 - **Review** (the last day): post a project status update (`safo status --post` builds it from the board, counted in code), note what slipped and why, and re-order the next sprint. The first review is scheduled as an issue so the habit exists from day one.
 - **Keeping the board current:** a user-owned GitHub Project cannot be written by an App, so the maintainer runs `safo --board board.yaml reconcile` from his own login on a timer. It adds new issues, marks closed ones Done and fills the area. No token is stored in CI.
+
+## Writing style: American English
+
+American English spelling is the standard for everything written in this repository: the README, the wiki, the docs, comments and commit text. The maintainer is American, and one spelling keeps search and review simple.
+
+| Write | Not |
+|---|---|
+| defense, behavior, color, favor | `defence`, `behaviour`, `colour`, `favour` |
+| organize, recognize, analyze, authorize | `organise`, `recognise`, `analyse`, `authorise` |
+| center, meter, fiber | `centre`, `metre`, `fibre` |
+| license (noun and verb), catalog, gray, program | `licence`, `catalogue`, `grey`, `programme` |
+| labeled, canceled, modeling, traveling | `labelled`, `cancelled`, `modelling`, `travelling` |
+| while, among, practice (noun and verb) | `whilst`, `amongst`, `practise` |
+
+Exceptions, kept exactly as written: direct quotes and vendor text, code and configuration (identifiers, keys, command and file names, URLs), and product or proper names. A status value that a tool returns, such as the `cancelled` result of a GitHub job, is a literal, not prose. Inside code fences and inline code the spelling is left alone.
+
+`tests/test_american_english.py` fails when a clear British spelling appears in the README or the wiki pages outside code. If a page must keep one on purpose, add a line to `docs/american-english-allowlist.txt` with the page, the word and the reason.
 
 ## Changing the plan
 

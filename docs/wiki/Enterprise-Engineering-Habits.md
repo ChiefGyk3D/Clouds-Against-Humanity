@@ -80,7 +80,7 @@ That reaction is correct, and the ceremony is the point. These are the habits th
 
 ## Default to the boring, open, replaceable choice
 
-**The habit.** OpenTofu over Terraform for the license. DigitalOcean over AWS for the one-page price list. Twingate because it mirrors how real organisations do access, with the self-hosted alternatives named for anyone who does not want the vendor dependency. Nothing exotic, nothing you could not swap.
+**The habit.** OpenTofu over Terraform for the license. DigitalOcean over AWS for the one-page price list. Twingate because it mirrors how real organizations do access, with the self-hosted alternatives named for anyone who does not want the vendor dependency. Nothing exotic, nothing you could not swap.
 
 **What it is for.** A teaching repository, and most production systems, are better served by tools whose failure modes are well known than by clever ones. Every vendor dependency is listed as a trust decision, which makes replacing one a known amount of work rather than a surprise.
 

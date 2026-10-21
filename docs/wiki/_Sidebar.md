@@ -57,7 +57,7 @@ The rest of this track is on the core path; see [Reading order](Reading-Order.md
 </details>
 
 <details>
-<summary><b>Track: security and threat modelling</b></summary>
+<summary><b>Track: security and threat modeling</b></summary>
 
 - [Threat model exercise](Threat-Model-Exercise.md)
 - [Threat Dragon exercise](Threat-Dragon-Exercise.md)

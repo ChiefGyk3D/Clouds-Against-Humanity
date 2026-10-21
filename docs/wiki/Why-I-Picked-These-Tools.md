@@ -22,7 +22,7 @@ If I ever have an affiliation or sponsorship with something I recommend, I will 
 |---|---|---|
 | GitHub | Where everything lives, and the pull request is the unit of change. | Personal and enterprise |
 | Spacelift | I learned infrastructure pipelines on it, so it is the one I can teach honestly. | Personal and enterprise |
-| OpenTofu | I started on Terraform and moved when HashiCorp changed the licence to the Business Source License. A broadly compatible language and provider ecosystem, `tofu` instead of `terraform`. | Anywhere |
+| OpenTofu | I started on Terraform and moved when HashiCorp changed the license to the Business Source License. A broadly compatible language and provider ecosystem, `tofu` instead of `terraform`. | Anywhere |
 | Doppler | One place for secrets, handed to the pipeline as a read-only token, and the easiest secrets tool I have used. | Personal and enterprise |
 | DigitalOcean | Cheap, with a straightforward price list. I ran email, WordPress and whole client environments on it at an MSP, and most of what I know about cloud and running servers started there. | Personal and small business |
 | Twingate | I wanted Zscaler in the lab and could not afford it, and Twingate does the access part well enough that it has served me well. | Personal and small business |

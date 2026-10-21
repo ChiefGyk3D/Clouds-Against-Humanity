@@ -1,6 +1,6 @@
 """Tests for the OWASP Threat Dragon model that goes with the wiki exercise.
 
-The model is a teaching artefact: it records the data flow diagram of this
+The model is a teaching artifact: it records the data flow diagram of this
 repository, with the trust boundaries B1 to B8 from Threat-Model-Exercise.md
 and the T-numbers from Threat-Model.md. These checks keep the three in step.
 They cannot show that the model is true of the running system.
@@ -214,7 +214,7 @@ def test_wiki_pages_link_the_exercise():
 def test_flow_count_matches_exercise_page(cells):
     page = (WIKI / "Threat-Dragon-Exercise.md").read_text(encoding="utf-8")
     flows = [c for c in cells if c["shape"] == "flow"]
-    assert f"{len(flows)} labelled flows" in page
+    assert f"{len(flows)} labeled flows" in page
 
 
 def test_flows_are_unidirectional_and_connector_link_is_split(cells):

@@ -77,7 +77,7 @@ Do this only if you plan to send a fix back. Open the public repository on GitHu
 
 > **Screenshot to take yourself:** the Fork page of the public repository, before you press the button.
 > Capture: the "Create a new fork" form with the owner and repository name fields visible.
-> Look for: the owner dropdown set to your own account (not an organisation), and the "Copy the main branch only" checkbox.
+> Look for: the owner dropdown set to your own account (not an organization), and the "Copy the main branch only" checkbox.
 > Redact: your username if you publish the capture, the address bar, and any other repository names in the owner dropdown.
 
 ### 1b. Create the private repository, and why it must be private
@@ -87,7 +87,7 @@ On GitHub press **New repository**. Set the owner to your own account, give it a
 Private matters even though real secrets never go in either repository. It matters because of everything else. Your address ranges, region choices, stack names, firewall comments and the reason each rule exists describe your environment, and an attacker mapping a target reads exactly that. The public repository is for what is safe to teach with; the private one is for what is true about you. Empty matters because the next step overwrites whatever is there.
 
 > **Screenshot to take yourself:** the New repository form with Private selected.
-> Capture: the visibility choice (Public or Private) and the three initialise-with options, all unticked.
+> Capture: the visibility choice (Public or Private) and the three initialize-with options, all unticked.
 > Look for: "Private" selected, and no README, `.gitignore` or license added.
 > Redact: your username, the repository name if it reveals your employer or location, and the address bar.
 
