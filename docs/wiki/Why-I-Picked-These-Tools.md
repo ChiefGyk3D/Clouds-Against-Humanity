@@ -12,6 +12,8 @@ Doppler sponsored content I made years ago, and that is how I found it. They did
 
 Twingate gave me a plan for free in exchange for a review. Nothing I do in this project needs more than the free plan, with one exception: my lab has an identity provider and uses SAML authentication, which the free plan does not include (Twingate's [pricing page](https://www.twingate.com/pricing), read 2026-10-22, lists single sign-on under paid plans). If you are on the free plan, use social login through a provider you already have, and see [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md#mfa-and-identity-providers) for why MFA belongs at that provider. Which social providers the free plan offers I did not read, so check the console (est.).
 
+I also have a DigitalOcean referral link ([https://m.do.co/c/e3aaa65aed6b](https://m.do.co/c/e3aaa65aed6b)). If you sign up through it and spend, DigitalOcean credits me; the program is described on its [referral page](https://www.digitalocean.com/referral-program) (read 2026-10-22). It is optional and the project works the same without it.
+
 If I ever have an affiliation or sponsorship with something I recommend, I will say so here and on the page, the way I did for Doppler and Twingate.
 
 ## Where each piece came from

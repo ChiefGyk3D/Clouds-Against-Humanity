@@ -62,6 +62,8 @@ Follow [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipel
 
 ## Step 4: DigitalOcean
 
+> **Disclosure.** This is my DigitalOcean referral link ([https://m.do.co/c/e3aaa65aed6b](https://m.do.co/c/e3aaa65aed6b)). DigitalOcean's referral program page (https://www.digitalocean.com/referral-program, read 2026-10-22) says the person who refers gets $25 after the new account spends its first $25, and I would rather you read DigitalOcean's referral terms than take my summary for what you get. It helps me fund more open-source cloud projects like this one. Using it is optional, the project works exactly the same without it, and nothing here is gated behind it.
+
 1. Create the account, enable two-factor authentication (register both security keys now if the console supports them, otherwise use an authenticator app and note that), and **set the billing alerts you decided on in step 0 before you do anything else**. The exact place in the console changes, so look for the billing or alerts settings in the live console. Take a screenshot you do not publish; an alert you cannot point at is not an alert.
 2. Create the API tokens described in the secrets runbook's [token scope table](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#4a-digitalocean-token-scopes): one write token for Spacelift to use, and optionally a read-only one for your own tooling. Give them a 90-day expiry and write the rotation date in your password manager.
 3. Register your SSH public key on the account and note its **name**. Stage 1 looks the key up by name and does not create it. See [Lessons learned, "The SSH key that already existed"](Lessons-Learned.md#3-the-ssh-key-that-already-existed).
