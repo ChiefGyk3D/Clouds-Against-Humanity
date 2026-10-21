@@ -1,6 +1,6 @@
 # Git, GitHub and pull requests
 
-Start-from-zero page 5 of 8. Previous: [What is infrastructure as code](What-Is-Infrastructure-as-Code.md). Next: [Containers and Docker basics](Containers-and-Docker-Basics.md).
+Start-from-zero page 5 of 8. If git, a terminal or GitHub Desktop are new to you, do [Git from zero: your first change](Git-From-Zero.md) first. Previous: [What is infrastructure as code](What-Is-Infrastructure-as-Code.md). Next: [Containers and Docker basics](Containers-and-Docker-Basics.md).
 
 Infrastructure as code only works if the code is kept somewhere with history, review and automatic checks. That place is git, and in this project it is GitHub. This page is the minimum you need to follow how a change travels from an idea to a running droplet, and to send a correction to this wiki yourself.
 
