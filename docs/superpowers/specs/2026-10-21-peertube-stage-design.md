@@ -70,7 +70,7 @@ Untrusted data is evidence, never instruction. That covers uploads, video titles
 | PeerTube to core | No path. Own VPC (or an explicit, written reason to share `rns-dmz`), no peering, no shared tag, no shared secret, no shared Doppler config. Never on a connector droplet |
 | PeerTube to the edge host | Default-deny DMZ-to-DMZ. The two public hosts do not talk |
 | PeerTube to its bucket | One access key scoped to its own buckets, in Doppler, never in user-data beyond the bootstrap pattern the edge design uses |
-| PeerTube to home | Only if remote runners are chosen (option P1): a runner at home dials out to the public site. Home never accepts an inbound connection from it |
+| PeerTube to home | Only if remote runners are chosen (option P1). The runner processes hostile uploaded files, so it is the exposed parser moved, not removed. Outbound-only connectivity gives no process or network isolation, so P1 requires a disposable, isolated runner: a VM or container rebuilt from code on a schedule, on its own VLAN or host with no route to the LAN, no home credentials, no Twingate or Doppler identity, no mounted shares, and egress limited to the PeerTube site and the bucket. Its only secret is a revocable runner registration token. A compromised runner can still alter video content (docs warning), so its output is not trusted more than an upload. Without that isolation, P1 is dropped and only P2 or L remain (risk 11) |
 | Uploads to the host | Untrusted files reach ffmpeg. The transcoder is the most exposed parser (risk 3) |
 
 ### 3.4 Abuse cases
@@ -103,6 +103,7 @@ Ranked by impact times how easy the first step is.
 | 8 | IPv6 left open (case 10) | Cloud Firewall and nftables written for both families | The existing `test_ipv6_closed.py` pattern extended to this stack |
 | 9 | Supply chain or unpinned software | Pin by version and checksum; five components, each with its own pin | A test that fails on an unpinned package or image in the template |
 | 10 | Pivot to core | Section 3.3; plan policy denying peering and core tags on these resources | Plan policy tests, as for the edge |
+| 11 | Compromised home runner (hostile upload exploits ffmpeg there) | The isolated, disposable runner above; revoke the registration token; rebuild | A network test from the runner host that LAN and credential stores are unreachable; a token revocation drill |
 
 ### 3.6 Residual risk
 
@@ -131,7 +132,7 @@ Sizing: this is where the docs are thin, and I will not invent a minimum.
 - On transcoding: "a transcoding job takes a lot of CPU, requires time and create an additional video file stored on your disk storage" for each resolution (https://docs.joinpeertube.org/admin/configuration, VOD transcoding, 2026-10-21). For many uploads the docs recommend object storage and remote runners to offload transcoding (maintain/configuration, "Many videos").
 - So I cannot say a 1 or 2 GiB droplet is unrealistic, and I cannot say it works. Five processes share it (Node, PostgreSQL, Redis, nginx and ffmpeg while a job runs). It is a measurement to make before the cost is final, as the edge design requires for its droplet. Until measured, treat the 1 GiB droplet as not credible for this and the 2 GiB droplet as a hypothesis that holds only if transcoding is offloaded.
 
-Remote runners (https://docs.joinpeertube.org/admin/remote-runners, 2026-10-21): PeerTube can hand VOD transcoding, studio transcoding, live transcoding, transcription and storyboard generation to a runner that requests, accepts and processes jobs and posts the result back. The runner pulls; PeerTube does not call it. The docs warn that registered runners can alter video content, so the runner's operator must be trusted. A runner at home is mine, which is the point: transcoding CPU is free there, and home makes only outbound connections. This keeps the exposed parser off the public host. Whether the runner can reach files on a Spaces-backed instance with the exact bucket setup is UNVERIFIED.
+Remote runners (https://docs.joinpeertube.org/admin/remote-runners, 2026-10-21): PeerTube can hand VOD transcoding, studio transcoding, live transcoding, transcription and storyboard generation to a runner that requests, accepts and processes jobs and posts the result back. The runner pulls; PeerTube does not call it. The docs warn that registered runners can alter video content, so the runner's operator must be trusted. A runner at home makes transcoding CPU free and takes the parser off the public host, but it does not remove the risk: the runner still opens hostile uploads, and outbound-only connections give no isolation. It must therefore be a disposable, isolated runner with no home credentials and no LAN routes (section 3.3, risk 11), or P1 is not chosen. Whether the runner can reach files on a Spaces-backed instance with the exact bucket setup is UNVERIFIED.
 
 Email: sign-up verification needs mail. DigitalOcean blocks SMTP ports 25, 465 and 587 on all droplets by default (https://docs.digitalocean.com/support/why-is-smtp-blocked/, 2026-10-21). The mail provider must be one with an HTTPS API or an alternate port; I did not select or price one.
 
@@ -174,7 +175,7 @@ Run nothing. A lesson, issue and wiki page teach how to run PeerTube on the lear
 | Droplet `s-1vcpu-2gb` | `docs/cost-prices.json` | $12.00 |
 | Reserved IP, assigned | free when assigned (pricing page above) | $0.00 |
 | Own VPC, Cloud Firewall, DDoS protection (L3 and L4) | free types in the gate / no additional charge (edge design, 5.1) | $0.00 |
-| Spaces buckets | share the stage 3 subscription, within 250 GiB and 1 TiB | $0.00 |
+| Spaces buckets | share the stage 3 subscription, within 250 GiB and 1 TiB; same account only (see 6.5) | $0.00 |
 | Transcoding | a remote runner on a home machine | $0.00 |
 | Added | | $12.00 |
 | Running with stage 3 | $29 + $12 | $41.00 |
@@ -192,7 +193,7 @@ Postgres and Redis share the droplet. Whether 2 GiB holds Node, PostgreSQL, Redi
 | Running with stage 3 | $29 + $24 | $53.00 |
 | Running with stage 3 and edge | $29 + $6 + $24 | $59.00 |
 
-This is the smallest shape that has two vCPUs and 4 GiB, and it matches the docs' "4GB of RAM" scale figure on memory but not on cores (the docs say 4). It leaves $1 under the $60 `hard_max` with the edge. Backups at 20 percent would be 0.2 x $24 = $4.80, which would pass `hard_max` ($63.80) if added to the edge row. Transcoding of a long upload still takes time on 2 vCPUs; the docs give no figure and I give none.
+This is the smallest shape that has two vCPUs and 4 GiB, and it matches the docs' "4GB of RAM" scale figure on memory but not on cores (the docs say 4). It leaves $1 under the $60 `hard_max` with the edge. Backups at 20 percent would be 0.2 x $24 = $4.80; added to the edge row that is $59 + $4.80 = $63.80, which is $3.80 OVER the $60 `hard_max` and does not fit. Transcoding of a long upload still takes time on 2 vCPUs; the docs give no figure and I give none.
 
 ### 6.4 Rejected or priced for completeness
 
@@ -201,17 +202,28 @@ This is the smallest shape that has two vCPUs and 4 GiB, and it matches the docs
 - A block volume for the database: $0.10 per GiB per month (https://docs.digitalocean.com/products/volumes/details/pricing/, 2026-10-21), so 20 GiB is $2.00. It is billed attached or not. It keeps the database across a rebuild but adds another stateful thing to clean up.
 - A bigger droplet (`s-4vcpu-8gb`, $48): $29 + $48 = $77, over `hard_max` $60. Not available without raising `hard_max`.
 
-### 6.5 Side by side, against `approved.json`
+### 6.5 Same account or separate account
+
+The $0 bucket line holds only if PeerTube runs in the same DigitalOcean account as stage 3, because the $5 subscription is per account. Decision 4 recommends against the same account for a public video host. In a separate account the base is not shared and PeerTube pays its own $5.00 subscription. Both pricings (the project total is what the ceilings count; I assume stage 3 and the edge are built either way):
+
+| Option | Same account: added | + stage 3 + edge | Separate account: added | + stage 3 + edge | Over `hard_max` $60? |
+|---|---|---|---|---|---|
+| P1 | $12 | $29 + $6 + $12 = $47 | $12 + $5 = $17 | $29 + $6 + $17 = $52 | no either way ($13 and $8 left) |
+| P2 | $24 | $29 + $6 + $24 = $59 | $24 + $5 = $29 | $29 + $6 + $29 = $64 | separate: $64 is $4 OVER; same: $1 left |
+
+Without the edge: P1 is $41 same or $29 + $17 = $46 separate; P2 is $53 same or $29 + $29 = $58 separate. So P2 in a separate account does not fit the hard maximum if the edge is built, and the reference environment would need `hard_max` raised first. Whether a second account's costs count against one project ceiling is not settled by the repo's gate, which prices manifests; that is another reason this is a decision. The tables in 6.2, 6.3 and 6.6 below show the same-account numbers unless stated.
+
+### 6.6 Side by side, against `approved.json`
 
 I ran `scripts/cost_raise.py --phase peertube --ceiling N` as a dry run on 2026-10-21 for each value; nothing was written.
 
 | Option | Added | Running (stage 3) | Running (stage 3 + edge) | Phase ceiling needed | What the gate said, appended at the end of the phases | `hard_max` $60 |
 |---|---|---|---|---|---|---|
 | L | $0 | $29 | $35 | none | no new phase | fits |
-| P1 | $12 | $41 | $47 | $47 | fails: "ceiling $47.00 is below learner-soc $53.00; a lower ceiling needs lowers: true and a reason" | fits |
-| P2 | $24 | $53 | $59 | $59 | passes, since $59 is not below `learner-soc` $53 | fits, $1 left |
+| P1 | $12 (sep. $17) | $41 (sep. $46) | $47 (sep. $52) | $47 (sep. $52) | fails: "ceiling $47.00 is below learner-soc $53.00; a lower ceiling needs lowers: true and a reason" | fits |
+| P2 | $24 (sep. $29) | $53 (sep. $58) | $59 (sep. $64) | $59 (sep. $64) | passes at $59, since $59 is not below `learner-soc` $53; at $64 it is over `hard_max` | same account: fits, $1 left; separate account: $64 is $4 over, does not fit |
 
-Placing the phase `--after edge` fails for both: `second-site` ($41) would then be below the PeerTube phase ($47 or $59). `second-site` and `learner-soc` are alternatives that sit on stage 3 and are not stacked on the edge, so the existing phase list does not describe "stage 3 plus edge plus PeerTube". For P1 the honest edit is either `"lowers": true` on a new `peertube` phase with the reason written down, or raising the ceiling to $53 and accepting $6 of unexplained headroom; I would not choose the second. This is the same phase-order problem the edge design describes (its section 5.5), and decision 3 of that design applies here too: do this when the phases before it are done.
+Placing the phase `--after edge` fails for both: `second-site` ($41) would then be below the PeerTube phase ($47 or $59; $52 or $64 in a separate account). `second-site` and `learner-soc` are alternatives that sit on stage 3 and are not stacked on the edge, so the existing phase list does not describe "stage 3 plus edge plus PeerTube". For P1 the honest edit is either `"lowers": true` on a new `peertube` phase with the reason written down, or raising the ceiling to $53 and accepting $6 of unexplained headroom; I would not choose the second. This is the same phase-order problem the edge design describes (its section 5.5), and decision 3 of that design applies here too: do this when the phases before it are done.
 
 ## 7. Storage, transfer and the watched usage line
 
@@ -276,7 +288,7 @@ Yes, and for most learners that is the right answer. Reasons, with the other sid
 
 - For a lesson: the interesting parts (sizing, S3 storage, a public listener next to a zero-inbound core, moderation and legal duties, transfer cost) can be taught from this document and a learner's own throwaway account. Nothing about teaching them requires the reference environment to host user videos.
 - For a lesson: a public UGC host exposes the maintainer, not the learner. The reference environment is a published example that bears the maintainer's name and one DigitalOcean team. A learner who runs their own carries their own duties and bill.
-- For a lesson: it uses up most of the remaining `hard_max` headroom ($47 or $59 of $60 with the edge) for a workload outside the project's point, which is the cloud and zero-trust access.
+- For a lesson: it uses up most of the remaining `hard_max` headroom ($47 or $59 of $60 with the edge in the same account; $52 or $64 in a separate one, and $64 does not fit) for a workload outside the project's point, which is the cloud and zero-trust access.
 - Against: a lesson with no running reference can drift from the real software. The mitigation is cheap: the lesson names the PeerTube version it was written against and the date, and a learner's first step is to check the dependencies page.
 - Against: running it would produce real measurements for sizing and cost. A time-boxed run on a scratch account (for example a week on `s-2vcpu-4gb`, which is $24 / 30 days x 7 days = about $5.60 at the hourly proration, est.) gets those numbers without a standing public service. I do not recommend it as part of the project's accounts; it is an option for the maintainer's own scratch account.
 
@@ -291,10 +303,10 @@ Reasons:
 - The legal and moderation duties (section 8) are the largest cost and no dollar figure covers them. One maintainer answering notices on a public video host is a different job from running the edge's transport daemons.
 - Sizing is unmeasured. The docs I read state no minimum for a small instance, and the only hardware figure (4 cores and 4 GB) is for 1,000 concurrent viewers. I cannot honestly approve a droplet.
 - The transfer bill has no cap the gate can see: each TiB of viewing over the allowance costs $10.24 (section 7).
-- Either running option lands at $47 or $59 with the edge, within $13 or $1 of the absolute limit, for a workload that is not why the project exists. P2 would leave $1.
+- Either running option lands at $47 or $59 with the edge in the same account (within $13 or $1 of the absolute limit), or $52 or $64 in a separate account, where P2 is $4 over and does not fit. All of that is for a workload that is not why the project exists.
 - The edge and stage 3 have not been built or approved, and the phase order means a PeerTube phase waits for them anyway.
 
-If the maintainer wants it running anyway, choose P1: `s-1vcpu-2gb` ($12) with transcoding on a home runner, buckets on the shared subscription, a new `peertube` phase at $47 with `"lowers": true` and its reason written down, registration closed or approval-only, quarantine on, a lawyer's answer in writing first, and a measurement on the 2 GiB droplet that must pass before the number is final. If the measurement fails, the move is to P2 and $59 in a new reviewed diff, and then the project is $1 under its hard maximum, which is the signal to stop. P0 and the managed-database variants should not be chosen.
+If the maintainer wants it running anyway, choose P1: `s-1vcpu-2gb` with transcoding on a disposable, isolated home runner (section 3.3; without that isolation, P1 is dropped), priced as in 6.5: $12 added with buckets on the stage 3 subscription (same account, an explicit prerequisite for that price) or $17 added in a separate account (which decision 4 favours); a new `peertube` phase at $47 (same account) or $52 (separate), each below `learner-soc` $53, with `"lowers": true` and its reason written down, registration closed or approval-only, quarantine on, a lawyer's answer in writing first, and a measurement on the 2 GiB droplet that must pass before the number is final. If the measurement fails, the move is to P2 and $59 in a new reviewed diff (same account only; $64 in a separate account is over `hard_max` and not available), and then the project is $1 under its hard maximum, which is the signal to stop. P0 and the managed-database variants should not be chosen.
 
 ## 12. Known risks and decisions
 
@@ -322,7 +334,7 @@ Decisions the maintainer owes (my pick in the right-hand column):
 | # | Question | My recommendation |
 |---|---|---|
 | 1 | Which option: L, P1, P2 | L, the learner lesson only, $0 added |
-| 2 | If run anyway: the `peertube` phase ceiling: $47 (P1, `lowers`) or $59 (P2) | $47, measured first |
+| 2 | If run anyway: the `peertube` phase ceiling: P1 $47 same account or $52 separate (both $47 and $52 are below `learner-soc` $53, so each needs `lowers`), or P2 $59 same account (separate $64 does not fit) | P1, measured first, with the account answer from decision 4 |
 | 3 | When: wait for the phases before `edge`, and the edge, to be done | Wait. Same rule as the edge design |
 | 4 | Same DigitalOcean team as core, a separate team, or another provider, given a public video host's abuse exposure | Not the same team. A separate team or account for anything that hosts strangers' content, if it runs at all. This depends on facts the edge design lists as open (price and limits of a team, isolated credentials, pooled transfer) |
 | 5 | Certificate method: open port 80, or 443 only with a DNS challenge and one more credential | 443 only, if it runs |
