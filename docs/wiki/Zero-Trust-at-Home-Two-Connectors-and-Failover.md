@@ -4,7 +4,7 @@ Side page to [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md). Read that page and
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-> **Status: written from the maintainer's own description of his home lab, from this repository's design, and from vendor pages; nothing here was applied or tested for this page.** The home setup is described only as he described it to me, in general terms: no addresses, VLAN numbers, host names or product models appear, on purpose. The two free exercises (1 and 4) need only paper. Exercise 2 is a small container model of the idea; **its commands were not run for this page** (marked est.). Vendor facts were read on **2026-10-21** and are cited where used.
+> **Status: written from the maintainer's own description of his home lab, from this repository's design, and from vendor pages; nothing here was applied or tested for this page.** The home setup is described only as he described it to me, in general terms: no addresses, VLAN numbers, host names or product models appear, on purpose. The two free exercises (1 and 4) need only paper. Exercise 2 is a small container model of the idea; **its commands were not run for this page** (marked est.; the digests were read, the images were not pulled). Vendor facts were read on **2026-10-21** and are cited where used.
 
 > **Prerequisites.** [Networking basics](Networking-Basics-for-This-Project.md) (inbound, outbound, ports, firewalls) and [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md). About 45 minutes of reading and about 60 minutes for the free exercises (est.). Cost: theory is free. The hands-on part uses your own hardware or a provider bill, see [cost](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md); nothing here is sold.
 
@@ -32,9 +32,9 @@ Being on the home LAN, or having a working tunnel, grants nothing by itself. The
 
 This is the maintainer's own home lab, described in general terms. It is a small version of what an enterprise does with larger equipment.
 
-- Two small single-board computers (Raspberry Pi 4 boards with 4 GB of memory) each run one Twingate **connector** in a container. One is for high availability, the other is the failover.
+- Two small single-board computers (Raspberry Pi 4 boards with 4 GB of memory) each run one Twingate **connector** in a container. The two are **active peers** in one remote network: either one can carry a new connection, so losing one is survivable (high availability, with failover to whichever is still up). There is no "primary" and "standby".
 - Both sit on **their own VLAN**. A VLAN is a way to split one physical network into separate virtual ones, so the connector hosts are not on the same network as laptops, phones or smart devices.
-- The firewall (pfSense) has rules that decide which subnets he can reach **depending on his role** in his identity provider. Different role, different reach.
+- In his lab, pfSense firewall rules let him reach different subnets depending on his role in his identity provider. That is how he described it; the exact mechanism is not described here (see the note in the VLAN section).
 - The connector hosts are patched automatically with his own project, [Patch Gremlin](https://github.com/ChiefGyk3D/Patch-Gremlin).
 
 No diagram image is used here: the repository renders diagrams with `scripts/render_diagrams.py`, which needs Mermaid CLI and a browser, and neither is available in the sandbox this page was written in. A text diagram follows; every box and arrow is invented-for-teaching and carries no real address.
@@ -57,7 +57,8 @@ No diagram image is used here: the repository renders diagrams with `scripts/ren
   |   one     |              |   two     |           (own network,
   +-----------+              +-----------+            tight rules)
         \                          /
-         \   firewall rules by role  /
+         \  firewall limits what the  /
+          \   connector hosts reach  /
           v                        v
    +---------------+ +----------------+ +---------------+
    | Lab subnet    | | Admin subnet   | | IoT subnet    |
@@ -83,21 +84,21 @@ The cloud stage-1 design is the same pattern with droplets instead of Pis. See [
 | Connectors only dial out | Zero inbound ports on every droplet; the firewall allows only outbound | No listener to scan or attack |
 | Own VLAN for the connector hosts | Own firewall, attached by tag, and a VPC | Connector hosts get stricter rules than the things they reach |
 | Role in the identity provider decides reach | A Twingate **group** (`cah-tor1-admins`) is granted **resources** | Identity picks the resources, not the network |
-| Reach different subnets by role | One resource per host and port, never "the whole VPC" | Least privilege, one resource at a time |
+| Reach different subnets by role (mechanism: see the note in the VLAN section) | One resource per host and port, never "the whole VPC" | Least privilege, one resource at a time |
 | Patching with Patch Gremlin | Staggered reboots and updates, 04:00 and 05:00 Eastern | Never restart both at once |
 
 One difference to state plainly: at home the connector hosts can reach whole subnets because the firewall allows it. In this repository each Twingate resource is a single address and port. Prefer the narrow form wherever you can; subnet-wide access is the thing that rebuilds a VPN.
 
 ## Why two connectors
 
-A single connector is a single point of failure. Two give you **high availability** (HA: the service keeps working if one part fails) and **failover** (traffic moves to the survivor).
+A single connector is a single point of failure. Two give you **high availability** (HA: the service keeps working if one part fails) and **failover** (new connections use whichever connector is still up). Connectors in one remote network are active peers, not primary and standby: both are live, and either can carry a new connection. Failover does not rescue a session already in flight: a long SSH session that was going through the connector that died will probably drop (est.) and you reconnect through the other.
 
 | What fails | What you see | What still works |
 |---|---|---|
-| One connector's host loses power or crashes | One connector shows offline in the admin console | Access, through the other connector |
-| One connector's software is updating or restarting | Same, for a few minutes | Access, through the other |
+| One connector's host loses power or crashes | One connector shows offline in the admin console | New connections, through the other connector; sessions that used the failed one may drop |
+| One connector's software is updating or restarting | Same, for a few minutes | New connections, through the other |
 | The home broadband link goes down, router fails over to cellular | Both connectors lose their path, redial over cellular | Access, once they reconnect (seconds to a minute, est.) |
-| Both connector hosts fail, or the connector VLAN breaks | Nothing reachable | Nothing, until you fix it from the console, which you cannot reach |
+| Both connector hosts fail, or the connector VLAN breaks | Nothing reachable | Nothing remote. The Twingate admin console is a cloud service and stays reachable, so it shows both connectors offline, but it cannot repair a host or a VLAN: you need local or out-of-band access (keyboard, a console cable, a second path) to restore them |
 | The identity provider is down | Nobody can sign in | Already-open sessions may continue (est.); new ones cannot start |
 
 Two connectors on two separate Pis share the same house, switch, router and power circuit. They protect against a failed board or a bad update, not against a house-wide outage. For this repository's cloud connectors the same warning applies to the shared region, noted on [Twingate](Twingate.md).
@@ -106,10 +107,10 @@ Two connectors on two separate Pis share the same house, switch, router and powe
 
 Test during a time you can walk to the equipment, with a way in that does not depend on the thing you break.
 
-1. **Predict first.** Write down what you expect to see: which connector shows offline, whether your open SSH session survives, how long a new connection takes.
+1. **Predict first.** Write down what you expect to see: which connector shows offline, whether your open SSH session drops (it may), and how long a new connection takes.
 2. Stop **one** connector (stop its container, not the host). Confirm you can still reach a harmless resource. Start it again and wait until the console shows it online.
 3. Only then, with the other connector verified healthy, repeat on the other one.
-4. Do not stop both at once unless you have console or keyboard access to the hosts.
+4. Do not stop both at once unless you have local access (keyboard or console) to the hosts: the admin console cannot restart them for you.
 5. For the cellular test, switch the router's failover manually in a maintenance window you chose, not by pulling a cable at random.
 
 ## VLAN isolation and firewall rules by role
@@ -122,15 +123,17 @@ Generic examples, using documentation-only addresses ([RFC 5737](https://www.rfc
 |---|---|---|---|---|---|
 | 1 | Connector VLAN | Internet | TCP 443 and the relay range | Allow | Connectors dial out (see below) |
 | 2 | Connector VLAN | Internet | DNS and time | Allow | Name lookup and clock |
-| 3 | Connector VLAN | Lab subnet `192.0.2.0/24` | SSH, web | Allow | Role: lab |
-| 4 | Connector VLAN | Admin subnet `198.51.100.0/24` | SSH | Allow | Role: admin |
-| 5 | Connector VLAN | IoT subnet `203.0.113.0/24` | One named port | Allow | Role: admin, agentless |
+| 3 | Connector VLAN | Lab subnet `192.0.2.0/24` | SSH, web | Allow | Needed by the lab role's resources |
+| 4 | Connector VLAN | Admin subnet `198.51.100.0/24` | SSH | Allow | Needed by the admin role's resources |
+| 5 | Connector VLAN | IoT subnet `203.0.113.0/24` | One named port | Allow | Needed by the admin role's agentless resource |
 | 6 | Anywhere | Connector VLAN | any | Deny | Nothing initiates to a connector |
 | 7 | Connector VLAN | everything else | any | Deny | Default deny |
 
-A caution that matters: the connector VLAN's reach is the **union** of every role any user may hold, because the connector is one machine. The finer split by role is enforced by Twingate resources and groups (which role may *use* the path to which subnet). The firewall is the coarse outer wall; the identity-based policy is the inner one. Do both.
+A caution that matters: a firewall such as pfSense does not see which identity-provider role started a request. What it sees is a packet from the connector host's address on the connector VLAN. So the firewall limits what the **connector hosts** can reach, which is the **union** of every role any user may hold. The decision "this role may use that resource" is made by Twingate groups and resources, before the traffic reaches the connector. The firewall is the coarse outer wall; the identity-based policy is the inner one. Do both.
 
-Where a firewall can key rules to an identity provider's role directly, that is the enterprise form of this idea. How a given product does it is outside what I read; check its docs.
+**Design option, not a claim about any particular lab.** If you want the firewall itself to differ by role, give different roles' resources different connectors, ideally in different remote networks, on different source addresses or VLANs, and write one firewall rule set per connector. The firewall then sees different sources and can treat them differently. The cost is more connectors to run and patch.
+
+> **Maintainer to confirm: how roles map to firewall rules in his lab.** He described pfSense rules that let him reach different subnets by his identity-provider role. The mechanism (separate connectors per role, Twingate groups and resources, or something else) was not stated, so this page does not assert one. To be resolved before merge.
 
 ## Patching the connectors safely
 
@@ -141,7 +144,7 @@ The software that provides access to everything is the most important thing to k
 - **Have a rollback plan**: know how to start the previous container image, or reinstall from a known-good version, before you need it. Write the commands down on paper.
 - **Watch the outcome**: an update that silently fails is the same as no update.
 
-Patch Gremlin is the maintainer's public project for this. From its README (read 2026-10-21, read-only): it sends automated system update notifications for Debian and RHEL-based systems by integrating with `unattended-upgrades` or `dnf-automatic`, tells you what an update run actually did, supports a configurable auto-reboot window, lists Raspberry Pi OS among the supported systems, and delivers notifications to chat and webhook platforms. It does not say anything about container images. I read that as: it keeps the *host's operating system* patched and tells you the result, and the connector container's own update is a separate thing to plan and check. Verify that against the README before relying on it.
+Patch Gremlin is the maintainer's public project for this. What its README says (read 2026-10-21, read-only): it provides automated system update notifications for Debian and RHEL-based systems, integrating with `unattended-upgrades` (Debian, Ubuntu) or `dnf-automatic` (RHEL, Fedora, Amazon Linux); it fires when the upgrade run finishes so the report describes that run; its setup asks for update type, schedule and whether to auto-reboot; it lists Raspberry Pi OS among supported systems; and it sends to Discord, Teams, Slack, Matrix, ntfy, Gotify and generic webhooks. The README does not mention Docker or container images, so this page makes no claim about how a connector container is updated; plan and check that separately.
 
 ## VPN versus ZTNA under real residential conditions
 
@@ -165,8 +168,11 @@ The case that prompted this page: the home connection fails over to cellular, an
 | Outbound TCP | 443 | Basic communication with the controller and relays |
 | Outbound TCP | 30000 to 31000 | Relay connections when peer-to-peer is not possible |
 | Outbound UDP | any | Peer-to-peer connections, for speed |
+| Outbound TCP | 80 | Operating-system package mirrors (not Twingate itself, per [Twingate](Twingate.md#outbound-ports-the-connector-needs); needed if the host fetches updates over plain HTTP) |
+| Outbound TCP and UDP | 53 | DNS |
+| Outbound UDP | 123 | Time (NTP) |
 
-The same article says allowlisting by address needs the fully-qualified domain names as well. This is the same table as on [Twingate](Twingate.md#outbound-ports-the-connector-needs), which adds DNS and time.
+The first three rows are from Twingate's article; the last three come from this repository's connector setup. The same article says allowlisting by address needs the fully-qualified domain names as well. **If you leave a row out:** without TCP 443 the connector cannot work at all; without the relay range it can only use direct peer-to-peer paths and some clients will fail to connect; without UDP the connection falls back to relays and is slower (est.); without TCP 80 or DNS the host cannot fetch its own updates; without NTP the clock drifts and TLS checks can start to fail.
 
 ## The agentless-device case
 
@@ -182,7 +188,7 @@ Tailscale offers a comparable feature called a **subnet router**: a machine that
 - **The identity provider is now critical.** If the IdP is down you cannot sign in; if an attacker takes it over they hold your roles. Protect it with phishing-resistant MFA, as on [Identity basics](Identity-Secrets-and-Zero-Trust-Basics.md#mfa-and-identity-providers).
 - **Role-based reach from an identity provider is a plan question.** From this repository's checked guidance (2026-10-19, see [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md)): the free Starter plan (up to 5 users) signs in with a social login (Google, Microsoft, GitHub or LinkedIn); directory integrations such as Entra ID, JumpCloud, Okta, OneLogin and Keycloak are listed as Business and Enterprise features, so they need a paid Twingate plan. The SAML requirement was not stated on the pages read there; confirm it. Check the pricing page on the day.
 - **The two Pis share a house.** Power, switch and router are single points of failure.
-- **A connector's logs show who connected.** Treat them as personal data.
+- **Connector telemetry is off by default.** If you turn on the optional connection analytics, each line names the user's email, client IP and city (see [Twingate: connector telemetry](Twingate.md#connector-telemetry-off-by-default)), and you should then treat those logs as personal data. With it off, that identifying detail is not written.
 
 ## Cost
 
@@ -201,16 +207,16 @@ Each has predict, do, check, undo.
 
 ### Exercise 2: a model of failover with two containers (free, own computer; commands not run, est.)
 
-This is a **model**, not Twingate. A "hub" waits for check-ins; two "connectors" dial out to it. It shows two ideas only: the hub listens on no published port, and the work continues when one connector stops. Needs Docker or Podman. The images are public; downloading them is an internet use on your side.
+This is a **model**, not Twingate. A "hub" waits for check-ins; two "connectors" dial out to it. It shows two ideas only: the hub listens on no published port, and the work continues when one connector stops. Needs Docker or Podman. The images are public; downloading them is an internet use on your side. **Why the images are pinned by digest:** a tag such as `3.12-slim` or `latest` is mutable, so the same name can point at different contents next week, including after a compromise of the publisher's account. A digest names exact contents. The digests above are the multi-architecture index digests of `python:3.12-slim` and `curlimages/curl:latest`, read from Docker Hub's registry API (read-only) on 2026-10-21; they go stale as the publisher releases updates, so refresh them: `docker buildx imagetools inspect python:3.12-slim` (or `skopeo inspect --raw docker://docker.io/library/python:3.12-slim | sha256sum`) prints the current one. Pin, then update on purpose.
 
 - **Predict.** After you stop connector `a`, will the hub's log still show check-ins? From which connector?
 - **Do.**
 
 ```bash
 docker network create zt-lab
-docker run -d --name zt-hub --network zt-lab python:3.12-slim python -m http.server 8000
+docker run -d --name zt-hub --network zt-lab python:3.12-slim@sha256:cb33f7f771ecec2ef1225cf39b159591a040391bd73e4c01f00fdfc4c47611d2 python -m http.server 8000
 for n in a b; do
-  docker run -d --name "zt-conn-$n" --network zt-lab --entrypoint sh curlimages/curl \
+  docker run -d --name "zt-conn-$n" --network zt-lab --entrypoint sh curlimages/curl@sha256:11e64e28c5f58c8d93ee95fcf22ac055f48b0bc440e0ce7d8013bbb5ad6aa8ac \
     -c "while true; do curl -s -o /dev/null http://zt-hub:8000/?from=$n; sleep 2; done"
 done
 sleep 6; docker logs --tail 6 zt-hub
@@ -225,9 +231,9 @@ Honest limit: this does not test Twingate's sessions, relays or client behaviour
 
 ### Exercise 3: two Pis or two virtual machines (optional, own hardware)
 
-- **Predict.** With both connectors online, what happens to your open session when you stop one?
+- **Predict.** With both connectors online, what happens to an open SSH session when the connector it uses stops? (It may drop; a new connection should work through the other.)
 - **Do.** Follow Twingate's own connector deployment documentation to install two connectors in one remote network, on separate machines. Put them on their own network segment if your gear allows it. Use a free social-login account to start. Use only a lab resource you do not mind losing.
-- **Check.** Both show online. Stop one: the other still carries a **new** connection. Start it again.
+- **Check.** Both show online. Stop the connector your session uses: the session may drop, and a **new** connection works through the other. Start it again and wait for it to show online. Then do the same to the other one.
 - **Undo.** Remove the connectors and revoke their tokens in the admin console. Check the vendor's pricing page before leaving anything running.
 
 ### Exercise 4: write the firewall rules by role (free, paper)
@@ -243,7 +249,7 @@ A mini-loop for this design.
 
 | Step | Question | Here |
 |---|---|---|
-| **Build** | What is the smallest working version? | Two connectors, own VLAN, rules by role, patches automated |
+| **Build** | What is the smallest working version? | Two connectors, own VLAN, roles in Twingate groups, firewall limits on the connectors, patches automated |
 | **Break** | What happens when a part fails? | Stop one connector, then the other; the table of failures above |
 | **Detect** | How would you know? | Connector offline in the console; patch notifications; the identity provider's sign-in log |
 | **Evade** | How would an attacker avoid being noticed? | Use a stolen identity-provider session so the traffic looks like you; stay inside the allowed resource |
