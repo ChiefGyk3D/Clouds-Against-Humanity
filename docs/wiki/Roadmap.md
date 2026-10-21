@@ -104,7 +104,7 @@ Handoff: [2026-10-12 edge DMZ handoff](https://github.com/ChiefGyk3D/Clouds-Agai
 - Stage 1 hardening first: nftables default-drop on core droplets, a plan policy denying inbound rules on core tags, destroys of protected resources and stacks with autodeploy on (written and tested in `.spacelift/policies/plan.rego`, not yet attached in Spacelift; see the secrets runbook, section 9a), an IPv6 check, an external zero-open-ports check and the metadata-endpoint restriction.
 - Stage 3 amendments: a cloud Uptime Kuma, the LLM contract through a LiteLLM proxy, the Discord bridge decision order, and webhook receivers on DigitalOcean Functions writing to the bucket so the workload host keeps zero inbound.
 - Cost: this lands past the $30 ceiling (stage 3 is already at $29). The design must lay out raising it, deferring something or moving pieces; the ceiling is not raised by default. The `edge` phase holds a $35 placeholder (stage 3's $29 plus one $6 droplet) that the design replaces with a costed number.
-- Honeypot: a design doc only, on a separate account or provider, never in this project's apply path.
+- Honeypot: a design doc only, on a separate account or provider, never in this project's apply path. Design draft (nothing built, own cost figure outside the ceiling, decisions owed): [2026-10-21 honeypot design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-21-honeypot-design.md).
 - PeerTube is a DMZ-class workload and needs its own costed stage. Not designed yet.
 
 ## Private droplets: later, not never
