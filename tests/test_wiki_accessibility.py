@@ -90,6 +90,14 @@ def heading_problems(page: str, text: str) -> list[str]:
     return problems
 
 
+def split_row(line: str) -> list[str]:
+    """Cells of one table row, ignoring the outer pipes and any escaped pipe."""
+    body = line.strip().replace("\\|", "\0")
+    body = body[1:] if body.startswith("|") else body
+    body = body[:-1] if body.endswith("|") else body
+    return [c.strip().replace("\0", "|") for c in body.split("|")]
+
+
 def table_problems(page: str, text: str) -> list[str]:
     problems = []
     lines = strip_code(text).splitlines()
@@ -98,9 +106,14 @@ def table_problems(page: str, text: str) -> list[str]:
         if not separator.match(line) or "|" not in line:
             continue
         header = lines[i - 1] if i else ""
-        cells = [c.strip() for c in header.strip().strip("|").split("|")]
+        cells = split_row(header)
         if "|" not in header or not all(cells):
             problems.append(f"{page}: table header {header.strip()[:60]!r} has no header row or an unnamed column")
+        elif len(cells) != len(split_row(line)):
+            problems.append(
+                f"{page}: table header {header.strip()[:60]!r} has {len(cells)} columns "
+                f"but its separator row has {len(split_row(line))}"
+            )
     return problems
 
 
@@ -185,3 +198,10 @@ def test_tables_without_a_named_header_are_caught():
     assert table_problems("x.md", "| Name |   |\n|---|---|\n| a | b |\n")
     assert table_problems("x.md", "just text\n|---|---|\n| a | b |\n")
     assert not table_problems("x.md", "| Name | Why |\n|---|---|\n| a |  |\n")
+
+
+def test_header_and_separator_must_have_the_same_number_of_columns():
+    assert table_problems("x.md", "| Name | Why |\n|---|---|---|\n| a | b |\n")
+    assert table_problems("x.md", "| Name | Why | Extra |\n|---|---|\n| a | b | c |\n")
+    assert not table_problems("x.md", "| Name | Why |\n|:---|---:|\n| a | b |\n")
+    assert not table_problems("x.md", "Name | Why\n---|---\n a | b\n")
