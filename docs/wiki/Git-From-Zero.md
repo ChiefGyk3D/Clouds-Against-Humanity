@@ -132,7 +132,7 @@ Sources, all retrieved 2026-10-21: GitHub Docs, "Installing GitHub Desktop" (htt
 
 ### What a terminal is
 
-A **terminal** is a window where you type a command and the computer types the answer back. The program inside it, the **shell**, reads what you typed. A **command** is one instruction, for example `git status`. Opening a terminal is harmless. Nothing happens until you press Enter.
+A **terminal** is a window where you type a command and the computer types the answer back. The program inside it, the **shell**, reads what you typed. A **command** is one instruction, for example `git status`. Opening a terminal is harmless. Nothing happens until you press Enter. For more than git needs (moving around, pipes, exit codes, a first script), see [The terminal and your first script](Terminal-and-Your-First-Script.md).
 
 How to open one:
 
@@ -207,7 +207,7 @@ Expected: lines including `user.name=YOUR NAME` and `user.email=YOUR-EMAIL`.
 To talk to GitHub, git has to prove who you are. There are two ways.
 
 - **HTTPS** uses the ordinary web address (`https://github.com/...`) and a login. Easy to start. The login is no longer a password but a **token**: a long random string that works like a password for a program.
-- **SSH** uses a pair of keys: a **private key** that stays on your computer and a **public key** you give to GitHub. It is neat once set up, but there is more to set up. [Networking basics: SSH](Networking-Basics-for-This-Project.md#ssh-in-one-paragraph) explains the idea.
+- **SSH** uses a pair of keys: a **private key** that stays on your computer and a **public key** you give to GitHub. It is neat once set up, but there is more to set up. [Networking basics: SSH](Networking-Basics-for-This-Project.md#ssh-in-one-paragraph) explains the idea. [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md#key-pairs-in-the-wild-ssh-keys-and-tls-certificates) explains what a key pair is.
 
 **The easiest start is HTTPS with the GitHub CLI.** The **GitHub CLI** (command-line interface; the program is called `gh`) signs you in through your browser, stores the credential for you and sets git up to use it (see the note after `gh auth login` below on where it is kept). You never copy a token by hand. You can move to SSH later if you want to.
 

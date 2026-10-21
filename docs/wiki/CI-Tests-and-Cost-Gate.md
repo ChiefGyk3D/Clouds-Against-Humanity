@@ -4,6 +4,8 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+> Exit codes, `&&` and pipes are how every check here passes or fails; if they are new, read [The terminal and your first script](Terminal-and-Your-First-Script.md) first.
+
 Every pull request runs the same set of checks, and the merge button stays disabled until a single job called `CI green` passes. CI never holds a cloud credential and never applies anything; applying is [Spacelift](Spacelift.md)'s job.
 
 ## What runs
