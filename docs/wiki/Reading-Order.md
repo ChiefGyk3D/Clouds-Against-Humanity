@@ -10,7 +10,7 @@ Pick the row that sounds like you. Every path is a numbered list: read in that o
 |---|---|---|---|
 | [The core path](#the-core-path) | Everyone, and anyone unsure where to start. | 21 | about 3 h 15 min of reading |
 | [Build it yourself](#build-it-yourself) | A learner replicating the build in their own accounts. | 6 | about 1 h 20 min of reading |
-| [Understand the design](#understand-the-design) | An engineer who wants the design without the primers. | 12 | about 1 h 35 min of reading |
+| [Understand the design](#understand-the-design) | An engineer who wants the design without the primers. | 13 | about 1 h 55 min of reading |
 | [Security and threat modelling](#security-and-threat-modelling) | A security-minded reader. | 5 | about 1 h 15 min of reading |
 | [Detection and monitoring](#detection-and-monitoring) | Someone asking how it would be watched, and who wants to build a small version. | 9 | about 2 h 10 min of reading |
 | [Enterprise context](#enterprise-context) | A reader who wants to see how companies build networks, run infrastructure and handle identity, how they run changes, and what roles and skills surround that work. | 5 | about 1 h 30 min of reading |
@@ -53,7 +53,7 @@ Pick the row that sounds like you. Every path is a numbered list: read in that o
 
 **Who it is for.** A learner who wants a private copy running, or who wants to see every safety check fail on purpose before trusting it.
 
-**Before you start.** The core path through step 18 (CI, tests and the cost gate). The capstone leans on Spacelift and Doppler.
+**Before you start.** The core path through step 18 (CI, tests and the cost gate). The capstone leans on Spacelift and Doppler. If git commands are new, start with the Git from zero page first; [From commit to pipeline](From-Commit-to-Pipeline.md) (in the design path below) has exercises for your private copy.
 
 | # | Page | Read | Checkpoint |
 |---|---|---|---|
@@ -81,11 +81,12 @@ The settings reference is a lookup page: it is generated from one manifest and m
 | 5 | [Spacelift](Spacelift.md) | 10 min |  |
 | 6 | [Doppler and secrets](Doppler-and-Secrets.md) | 5 min |  |
 | 7 | [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) | 10 min |  |
-| 8 | [Trace one change end to end](Trace-One-Change-End-to-End.md) | 15 min | You can name each gate one real pull request passed through, in order. |
-| 9 | [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) | 15 min | You can argue for or against the no-VPN decision with the page's evidence. |
-| 10 | [Twingate](Twingate.md) | 10 min |  |
-| 11 | [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) | 5 min |  |
-| 12 | [Droplet hardening](Droplet-Hardening.md) | 5 min |  |
+| 8 | [From commit to pipeline](From-Commit-to-Pipeline.md) | 20 min | You can say what CI, CD and shift left each mean here, and which gate stops a bad change at each step. Doing: three exercises on your own private copy. |
+| 9 | [Trace one change end to end](Trace-One-Change-End-to-End.md) | 15 min | You can name each gate one real pull request passed through, in order. |
+| 10 | [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) | 15 min | You can argue for or against the no-VPN decision with the page's evidence. |
+| 11 | [Twingate](Twingate.md) | 10 min |  |
+| 12 | [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) | 5 min |  |
+| 13 | [Droplet hardening](Droplet-Hardening.md) | 5 min |  |
 
 ## Security and threat modelling
 

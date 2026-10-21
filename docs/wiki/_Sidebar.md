@@ -45,6 +45,7 @@
 
 - [Why I picked these tools](Why-I-Picked-These-Tools.md)
 - [Terraform reference](Terraform-Reference.md)
+- [From commit to pipeline](From-Commit-to-Pipeline.md)
 - [Trace one change end to end](Trace-One-Change-End-to-End.md)
 
 The rest of this track is on the core path; see [Reading order](Reading-Order.md#understand-the-design).
