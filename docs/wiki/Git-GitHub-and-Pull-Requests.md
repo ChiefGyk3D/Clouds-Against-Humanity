@@ -76,6 +76,8 @@ The thing to notice: **CI here never has a cloud credential and never changes an
 
 That reuse is a risk. If you reference an action by a version tag like `@v1`, and the author's account is compromised, the attacker can move the tag to malicious code and your pipeline runs it next time. This has happened to widely used actions. The defense is to reference the exact **commit hash** (a 40-character fingerprint of the exact code) instead of a tag, with the version in a comment so humans can still read it. Every action in this repo is pinned that way, and the workflow starts with no permissions at all and grants each job only what it needs.
 
+A hash is what makes the pin work: different code has a different hash ([Hashing, encryption and keys](Hashing-Encryption-and-Keys.md#what-hashes-are-for)).
+
 The word for this class of risk is **supply chain**: you are only as secure as everything you pull in. The same idea shows up elsewhere in this repo: the Doppler CLI download is checked against a pinned checksum, and the Twingate package repository's signing key is checked against a pinned fingerprint before it is trusted. Different layers, same habit.
 
 ## Branch protection and "one writer"

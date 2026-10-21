@@ -172,7 +172,7 @@ Each of the first two chunks is **base64url-encoded** JSON. **Base64** is a way 
 - The signature stops *changes*, not *reading*.
 - **A real JWT is a credential. Never paste one into a website that "decodes JWTs", a chat, a ticket, a screenshot or an issue.** The decoder site is a stranger who now holds your token. Decode locally, as the exercise shows, or not at all.
 
-This is why a JWT can be checked without calling the issuer: the receiver verifies the signature (with the public key, or the shared secret) and reads `exp`. It is also why one cannot easily be taken back before it expires, which is the point of short lifetimes.
+This is why a JWT can be checked without calling the issuer: the receiver verifies the signature (with the public key, or the shared secret) and reads `exp`. It is also why one cannot easily be taken back before it expires, which is the point of short lifetimes. What a signature is, and how it differs from a hash or encryption, is on [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md#digital-signatures-proof-of-who-and-what).
 
 ## Scopes and least privilege
 
