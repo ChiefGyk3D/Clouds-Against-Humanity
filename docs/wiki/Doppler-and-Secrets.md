@@ -4,6 +4,8 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+> New to environment variables or shell scripts? [The terminal and your first script](Terminal-and-Your-First-Script.md) explains both.
+
 The rule is simple: **nothing in this repository is a credential**, and nothing that identifies the operator's account is in a file either. Every real value lives in Doppler. This page explains where each one lives, how it reaches a run, and how to rotate it.
 
 ## Who holds what
