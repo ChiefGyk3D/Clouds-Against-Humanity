@@ -175,6 +175,7 @@ Not a path. Open these when you need them; every one is linked from the sidebar.
 | [Terraform reference](Terraform-Reference.md) | You want every variable, resource and output explained line by line. |
 | [Lessons learned](Lessons-Learned.md) | You want the things that broke during the build, and what fixed them. |
 | [Roadmap](Roadmap.md) | You want to know what is built and what is only planned. |
+| [Why this exists](Why-This-Exists.md) | You want to know why the project exists, where I am coming from, why Twingate, how the cost model works, and the build, break, detect, evade, defend loop. A side page; opinion, not a lesson; about 10 minutes; not counted in the path totals. |
 | [Git from zero: your first change](Git-From-Zero.md) | You have never used git, a terminal or GitHub Desktop. A side page to [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md); read it first if those are new. About 90 minutes with the exercise; not counted in the path totals. |
 | [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) | You wonder why the droplets have public addresses and no NAT gateway. A side page to [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md); not counted in the path totals. |
 | [How this project is planned](How-This-Project-Is-Planned.md) | You want to know how the work is organised: the board, sprints, sizes, definition of done. |

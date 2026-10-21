@@ -1,4 +1,4 @@
-**[Home](Home.md)** | **[Reading order](Reading-Order.md)**
+**[Home](Home.md)** | **[Reading order](Reading-Order.md)** | **[Why this exists](Why-This-Exists.md)**
 
 <details open>
 <summary><b>Core path: read in this order</b></summary>
