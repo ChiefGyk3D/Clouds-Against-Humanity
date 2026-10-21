@@ -260,7 +260,7 @@ def test_stage2_checklist_covers_every_verification_id():
     _, _, rest = guide.partition("### 7.0 The checklist at a glance")
     assert rest, "section 7.0 is missing"
     checklist, _, detail = rest.partition("### 7.1 Metrics")
-    ids = set(re.findall(r"^\| ([MLX]\d) \|", detail, re.M))
+    ids = set(re.findall(r"^\| ([MLX]\d) \|", detail, re.MULTILINE))
     assert len(ids) >= 10, "collected too few check ids"
     for cid in sorted(ids):
         assert _covered(checklist, cid), cid
