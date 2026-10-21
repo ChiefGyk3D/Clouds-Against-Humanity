@@ -146,6 +146,8 @@ You are finished with the home side when you hold, privately:
 
 The cloud-side checks that prove the whole path (targets up, agent active, a test alert, zero open ports from outside, no-op plans for stacks 00 and 10) are in the [stage 2 guide's verification section](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/02-telemetry.md#7-verification-after-an-apply-every-item-is-not-run-yet), and each is marked `not run yet` until you run it.
 
+For the whole list in one place (who runs each check, which ones cost money, what a pass and a fail look like, and the Twingate 5.x provider refresh read), see the [checklist at a glance](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/02-telemetry.md#70-the-checklist-at-a-glance). Everything on it is `not run yet`. The theory path (reading and the offline tests) is free; the hands-on checks need running droplets and cost money.
+
 Rollback: remove the cloud entries from the target file and reload Prometheus, delete the headless client's key in the Twingate console, and restore the previous firewall rules.
 
 ## What this page does not claim

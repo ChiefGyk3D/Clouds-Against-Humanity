@@ -214,6 +214,23 @@ Three facts are **UNVERIFIED** and change what a pass looks like, so settle them
 
 Order matters. The home side must be in place first: [the home-side runbook](../wiki/Stage-2-Home-Side-Runbook.md) holds the firewall prerequisite, and the log checks do not start until its negative reachability record exists (design section 4.1).
 
+### 7.0 The checklist at a glance
+
+One page for the whole verification, so you can see what is yours and what costs money before you start. Every status is `not run yet`: nothing is applied, and this section records no measured result.
+
+**Pay-to-play.** The theory path costs nothing: read sections 1, 2 and 6, run the repository tests, and run `tofu plan` with both flags false (a no-op, $0). The hands-on path costs money and needs accounts: a Twingate plan that allows service accounts (UNVERIFIED, section 3 step 1), two connector droplets at stage 1 prices ([cost](../cost.md)), and a home SIEM you already run. The reference environment adds $0 in the cloud for stage 2, but you pay for the stage 1 droplets for as long as they exist. Tear down with the [teardown checklist](../wiki/Teardown-Checklist.md) when you finish.
+
+| Step | Who runs it | Costs money? | What a pass looks like | What a fail means |
+|---|---|---|---|---|
+| P0. Provider refresh: the first tracked plan after the Twingate provider moved to 5.x (issue 93), run on EVERY affected stack (00, 10 and 20 where they use the provider) | The maintainer (it needs the tracked run's credentials) | No, a plan only | No create, replace or destroy of Twingate resources or groups beyond a schema refresh, on every stack. Not run yet | Any create, replace or destroy of a Twingate resource or group is a stop (per issue 93): do not confirm, and compare against the golden address file |
+| Home side: VLAN, firewall allow-list, negative tests, headless client, target file | The maintainer, at home ([runbook](../wiki/Stage-2-Home-Side-Runbook.md)) | No new cloud cost | The recorded negative-reachability table has every row passing | The cloud flags stay off; do not go on |
+| X3, X4. Plans for stacks 00, 10 and 20 | You or the maintainer | No | Exit 0 for 00 and 10; stack 20 matches its flags | A diff you did not expect: discard the run and read it |
+| M1 to M3. Metrics up and readable | Needs home Prometheus and an applied flag | Yes (droplets exist) | Every expected target `up`; the missing count is `0` | A missing target: firewall pair, Twingate resource or headless client |
+| L1 to L3. Agent active, listed, one test alert | Needs the home manager and an applied flag | Yes (droplets exist) | `active`, `Active`, an alert after your test | Journald unsupported by the agent version (UNVERIFIED), or the allow-list blocks the path |
+| X1, X2. No address-sourced inbound rule; zero open ports from outside | You, against your own connectors only | Yes (droplets exist) | `0` address-sourced rules; every port `filtered` | Any address source or any `open` or `closed` port is a failure of the design |
+
+**With the `sites` map (section 2.5).** The sites map adds more sites to this one stack. Repeat M1, M2 and M3 once per site, using that site's label (`site_name`, or `site-<key>` when empty) in the `site` selector, and read `extra_site_identities` for the labels. L2 is expected to list `<site label>-<role>-<a or b>` for every site. Each site holds its own logging key and its own scrape key, so a pass for one site says nothing about another. Whether Twingate accepts several resources with the same address in one remote network is UNVERIFIED (section 2.5): a refusal appears at the first apply of a second site, not in the mock tests.
+
 ### 7.1 Metrics
 
 | # | Check | Status |

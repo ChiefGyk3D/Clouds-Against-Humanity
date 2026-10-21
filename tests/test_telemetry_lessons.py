@@ -241,3 +241,35 @@ def test_ceiling_36_reference_answer_matches_the_arithmetic():
     two = [t[1] for t in totals if t[1] <= 36]
     three = [t[2] for t in totals if t[2] <= 36]
     assert (len(one), len(two), len(three)) == (6, 3, 2)
+
+
+def _covered(checklist, cid):
+    """True if cid is named alone or inside a numeric range like 'M1 to M3'."""
+    letter, num = cid[0], int(cid[1:])
+    if re.search(rf"\b{cid}\b", checklist):
+        return True
+    for lo, hi in re.findall(rf"\b{letter}(\d+) to {letter}(\d+)\b", checklist):
+        if int(lo) <= num <= int(hi):
+            return True
+    return False
+
+
+def test_stage2_checklist_covers_every_verification_id():
+    """The 7.0 checklist must mention every M/L/X check, and none may claim a result."""
+    guide = (ROOT / "docs" / "stages" / "02-telemetry.md").read_text()
+    _, _, rest = guide.partition("### 7.0 The checklist at a glance")
+    assert rest, "section 7.0 is missing"
+    checklist, _, detail = rest.partition("### 7.1 Metrics")
+    ids = set(re.findall(r"^\| ([MLX]\d) \|", detail, re.MULTILINE))
+    assert len(ids) >= 10, "collected too few check ids"
+    for cid in sorted(ids):
+        assert _covered(checklist, cid), cid
+    assert "not run yet" in checklist
+    assert not re.search(r"\bpassed on 20\d\d", checklist)
+
+
+def test_stage2_checklist_guard_bites():
+    """Negative case: ranges are read numerically, so M1 to M2 does not cover M3."""
+    assert not _covered("M1 to M2, X1, X2", "M3")
+    assert not _covered("M1 to M3, X1, X2", "X3")
+    assert _covered("M1 to M3", "M2")
