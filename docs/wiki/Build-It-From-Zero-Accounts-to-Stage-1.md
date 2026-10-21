@@ -163,6 +163,8 @@ Billing stops when the droplets are gone, not when you stop looking at them.
 
 *Checkpoint: the console lists no droplets, and tomorrow's billing page shows no new usage.*
 
+The same steps as a tick-list, with the order of destruction, the read-only checks and the token clean-up in full, are on the [Teardown checklist](Teardown-Checklist.md).
+
 ## When it breaks
 
 The stage guides and [Lessons learned](Lessons-Learned.md) are written as symptom, cause, fix. A few of the first-timer failures, with where to look:

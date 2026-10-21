@@ -9,7 +9,7 @@ Pick the row that sounds like you. Every path is a numbered list: read in that o
 | Path | Who it is for | Pages | Reading time |
 |---|---|---|---|
 | [The core path](#the-core-path) | Everyone, and anyone unsure where to start. | 21 | about 3 h 15 min of reading |
-| [Build it yourself](#build-it-yourself) | A learner replicating the build in their own accounts. | 5 | about 1 h 10 min of reading |
+| [Build it yourself](#build-it-yourself) | A learner replicating the build in their own accounts. | 6 | about 1 h 20 min of reading |
 | [Understand the design](#understand-the-design) | An engineer who wants the design without the primers. | 12 | about 1 h 35 min of reading |
 | [Security and threat modelling](#security-and-threat-modelling) | A security-minded reader. | 5 | about 1 h 15 min of reading |
 | [Detection and monitoring](#detection-and-monitoring) | Someone asking how it would be watched, and who wants to build a small version. | 9 | about 2 h 10 min of reading |
@@ -62,6 +62,7 @@ Pick the row that sounds like you. Every path is a numbered list: read in that o
 | 3 | [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) | 15 min | Stage 0 applied, stage 1 connected, then torn down and the bill proved zero. |
 | 4 | [Settings reference](Settings-Reference.md) | lookup | You can find where any value lives (variable, tfvars, Doppler or cost.json). |
 | 5 | [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) | 20 min | You can say, for any value, whether it belongs in a variable, a tfvars file, Spacelift, Doppler or cost.json, and why `resource_key` never changes on a live stack. |
+| 6 | [Teardown checklist](Teardown-Checklist.md) | 10 min | You can name the order of destruction, what survives it, and the checks that prove the bill is zero. |
 
 The settings reference is a lookup page: it is generated from one manifest and meant to be searched, not read through. Doing, not just reading: Labs adds about 75 minutes (five labs at about 15 minutes each, as the page says).
 
