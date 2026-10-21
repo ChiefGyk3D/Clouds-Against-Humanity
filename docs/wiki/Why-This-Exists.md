@@ -50,21 +50,25 @@ A lot of what matters at work sits in places that college classes and certificat
 
 You are not dead until you stop learning.
 
-Question everything, on every piece, including these pages. I treat security like chess, and I keep playing against myself. Build it. Break it. Detect it. Evade it. Defend it. Then flip the board around and do it again. Build it. Break it. Detect it. Evade it. Defend it. Then flip the board around and do it again.
+Question everything, on every piece, including these pages. I treat security like chess, and the version I care about is playing against yourself, because you need to be able to sit on both sides of the table. In a post I wrote about this, I put it as a ladder of questions you keep climbing and then flip: how would I build this, how would I break it, how would I detect that, how would I evade that detection, how would I stop myself from doing that, and then keep switching sides.
 
-The reason to play both sides is that the defender who has never tried to get past their own control does not know whether it works, and the attacker who has never had to detect anything does not know what leaves a trace.
+I'll be blunt about why the order matters. Way too many people getting into security want to skip straight to "I want to be a pen tester", and they want to break things before they have learned how the things they are breaking actually work. Pretty much all of my pen tester friends also know how to build what they attack, which means networks, infrastructure, operating systems, applications, authentication, cloud and code, and how those pieces fit together, and that is part of why they are good at breaking it.
+
+Think about demolition. Someone who has to take a building down efficiently still needs to know a lot about construction, such as where the load-bearing walls are and what happens if you remove this piece before that one, and you can keep swinging a hammer until something falls over, but a person who knows how it was built knows exactly where to hit it. Defenders are not exempt either: if you can only build and defend something but cannot put yourself in the attacker's seat, you are missing half the board. From the post: "Cybersecurity isn't about memorizing one side of the game." (My Instagram post, October 2026.)
+
+That is why this project makes you build first. Breaking comes after you have something that you understand well enough to be worth breaking. Then the loop: Build it. Break it. Detect it. Evade it. Defend it. Then flip the board around and do it again, twice.
 
 ### How the loop maps onto this project's lessons
 
-This is a rough map, not a promise that every step is covered in depth. Some steps have a lot behind them and some have little, and the table says which.
+The order below is the order I would do them in: build first, and only then switch sides. This is a rough map, not a promise that every step is covered in depth. Some steps have a lot behind them and some have little, and the table says which.
 
 | Step of the loop | Where to do it here | How much is there |
 |---|---|---|
-| Build it | [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md), [Droplet hardening](Droplet-Hardening.md) | Built and applied for stages 0 and 1. |
-| Break it | [Labs: break it on purpose](Labs-Break-It-on-Purpose.md), [Threat model exercise](Threat-Model-Exercise.md) | Five labs that weaken a safety property on your own computer, and a what-if exercise. |
-| Detect it | [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md), [Lab: a synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) | The detection page maps each threat to the log line that would show it. The telemetry pages are unverified drafts and nothing is deployed. |
-| Evade it | [Threat frameworks: STRIDE, ATT&CK and ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md), [Threat model](Threat-Model.md) | Thin. These name how an attacker would think and what the accepted risks are. There is no red team exercise here yet. |
-| Defend it | [Build your own mini SOC](Build-Your-Own-Mini-SOC.md), [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) | The gates are real. The mini SOC is an unverified draft. |
-| Flip the board, again | [Trace one change end to end](Trace-One-Change-End-to-End.md) | Follow one real change through every gate, then change something and watch a different gate object. |
+| 1. Build it | [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md), [Droplet hardening](Droplet-Hardening.md) | Built and applied for stages 0 and 1. This comes first on purpose. |
+| 2. Break it | [Labs: break it on purpose](Labs-Break-It-on-Purpose.md), [Threat model exercise](Threat-Model-Exercise.md) | Five labs that weaken a safety property on your own computer, and a what-if exercise. You break what you just built. |
+| 3. Detect it | [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md), [Lab: a synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) | The detection page maps each threat to the log line that would show it. The telemetry pages are unverified drafts and nothing is deployed. |
+| 4. Evade it | [Threat frameworks: STRIDE, ATT&CK and ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md), [Threat model](Threat-Model.md) | Thin. These name how an attacker would think and what the accepted risks are. There is no red team exercise here yet. |
+| 5. Defend it | [Build your own mini SOC](Build-Your-Own-Mini-SOC.md), [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) | The gates are real. The mini SOC is an unverified draft. |
+| 6. Flip the board, again | [Trace one change end to end](Trace-One-Change-End-to-End.md) | Follow one real change through every gate, then change something and watch a different gate object. |
 
 I have not measured what anyone gets out of this, and I am not claiming a result. If a page is wrong, or the board needs flipping somewhere I have not thought of, say so; suggestions are welcome anywhere in the project.

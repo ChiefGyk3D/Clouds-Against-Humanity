@@ -2,11 +2,21 @@
 
 A small, cheap, locked-down DigitalOcean environment built with OpenTofu, applied by Spacelift, fed secrets by Doppler, and reachable only through Twingate. **No droplet has a single public inbound port open.** There is no VPN, no bastion host and no SSH on the internet.
 
-It is a cloud extension of a homelab and a teaching repository at the same time: every stage is costed and approved before it runs, and every decision is written down with the reason for it, including the ones that were wrong the first time.
+It is a cloud extension of a homelab, and it exists to teach: this repository is the reference environment, and the lessons that use it live in the wiki.
+
+> ### Start with the wiki
+>
+> **The wiki is the real point of this project.** Every lesson, flowchart, exercise and decision (including the ones that were wrong the first time) is written there; this repository is the environment those lessons use.
+>
+> - **[Wiki home](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki)**: the map of everything.
+> - **[Start here if you are new](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Start-Here-If-You-Are-New)**: cloud, Terraform and zero trust from zero.
+> - **[Why this exists](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Why-This-Exists)**: where this comes from and who it is for.
+> - **[Reading order](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Reading-Order)**: the paths, with time estimates.
+> - **[Git from zero](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Git-From-Zero)**: if you have never used git.
+>
+> **Cost:** the theory is free. The hands-on part costs money because real infrastructure does, and you choose what you can afford to run. The cost gates are explained in [docs/cost.md](docs/cost.md). The same pages are in [`docs/wiki/`](docs/wiki/Home.md) if you prefer reading them in the repo.
 
 Recommending other springboards is encouraged throughout this project. The point is to get you thinking in different ways and outside the box, not to hand you one path to copy, so expect pages to point at things to try beyond what they cover.
-
-**[Read the wiki](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki)** for flowcharts and the what and why of every component. The same pages live in [`docs/wiki/`](docs/wiki/Home.md) if you prefer reading them in the repo.
 
 ## How it fits together
 
