@@ -15,7 +15,7 @@ Cost: $0.00. `cost.json` lists no resources, and the cost gate requires the file
 
 What it does **not** do yet: it creates no firewall rule, no droplet, no agent, no exporter and no service key. Service keys are issued out of band, one per host, so no key is ever in state (design section 2.8). Metrics need an exporter on the connectors (step 5 of the design) and logs need an agent (step 7, section 2.4: written but not applied, and without the Twingate headless client), so enabling a flag in this stack only creates the Twingate side.
 
-Outputs: `scrape_targets` (sensitive; empty unless metrics are on) and `site_identity` (site label, region, provider, agent group, labels). The scrape targets carry private connector addresses, so the output is hidden in plan and run logs. The home logging addresses are in no output, name or tag.
+Outputs: `scrape_targets` (sensitive; empty unless metrics are on), `site_identity` and `extra_site_identities` (the `sites` map, section 2.5) (site label, region, provider, agent group, labels). The scrape targets carry private connector addresses, so the output is hidden in plan and run logs. The home logging addresses are in no output, name or tag.
 
 ## 2. Settings
 
@@ -135,6 +135,48 @@ Where the token (and so the credential) lives, written down. Copies: the Terrafo
 - No rule is written for the journald line shapes: capture real lines first (design 2026-10-11, section 6.3).
 
 What the tests prove: `tofu test` for the golden hashes, the secret-absence rule, every validation, and the wiring in the stack; `tests/test_log_shipping_script.py` renders the script from the template and runs it with fake `curl`, `systemctl` and `agent-auth` for success, a failed pull, a missing secret, a failed enrollment, a missing agent and a missing token (agent never started, token file and password file gone every time, no secret on stdout or stderr); `tests/test_log_shipping_ports.py` for the 1514 and 1515 agreement with stack 20.
+
+### 2.5 Per-site accounts: the `sites` map (issue #104)
+
+**Status: written and mock-tested only (`tofu test` with a mocked Twingate provider). Nothing here is applied.**
+
+The `sites` variable adds sites to this stack without touching the first one. It is empty by default, and the planned addresses of the single-site stack are byte-identical with it empty: the new objects are separate `site_*` resources, so no `moved` block is needed or used. `docs/golden-addresses/20-telemetry.json` pins the single-site addresses and `tests/test_golden_telemetry.py` ties them to the sources (the default plan has no objects at all while both flags are false; the golden file describes the flags-on shape).
+
+| Per `sites` entry (key = the site's `resource_key`) | Created when | Name |
+|---|---|---|
+| A logging service (`twingate_service_account.site_logging`) | `logging_enabled` | `telemetry-<key>-logging` |
+| A scrape service (`twingate_service_account.site_scrape`) | `metrics_enabled` | `telemetry-<key>-scrape` |
+| A logging resource per `logging_servers` element (`site_logging`), granted to that site's logging service only | `logging_enabled` | `logging-<key>-<server>` |
+| A scrape resource per `scrape_allowlist` entry per connector (`site_scrape`), in that site's own `cloud_remote_network_id`, granted to that site's scrape service only | `metrics_enabled` | `scrape-<key>-<entry>-<a or b>` |
+
+- One service per site per role, never shared: a stolen key reaches only its own site's resources. The home logging servers (`logging_servers`, `home_remote_network_id`) and the allowlist and ports are shared inputs; the cloud network id and connector addresses are per site.
+- The **`site_name` label** (`site_name`, empty meaning `site-<key>`) goes into the `site` and `instance` fields of the sensitive `scrape_targets` output and into the new `extra_site_identities` output. It is in no name. The services themselves carry no label (Twingate service accounts have none that this stack sets); the label lives in the outputs the home Prometheus generator reads.
+- **Service keys are NOT created here.** The existing design (section 2.8) and `tests/test_telemetry_stack.py::test_no_service_key_is_created` keep keys out of state: they are issued out of band, one per host, for each site's service. Per site that is one key for the logging service on each cloud host and one for the scrape service on the home Prometheus host.
+- Cost: $0.00. A site in this map is not a new Spacelift stack, so no `instance_of` manifest is needed and `cost.json` stays empty. A site that gets its **own** stack (separate state) uses the stack id rule and an instance manifest as in [the cost document](../cost.md).
+- **UNVERIFIED:** whether Twingate accepts several resources with the same address in the same remote network (the logging resources of every site point at the same home servers), and whether the plan allows this many service accounts (step 1 of section 3). If duplicate addresses are refused, the fallback is one shared logging resource granted to every site's logging service, which widens what a stolen key reaches back to the same home endpoints and is a design decision for the maintainer.
+- A `sites` key may not equal this stack's own `resource_key` (a precondition refuses it). Keys are immutable once applied, like every name.
+
+### 2.6 TLS decision record: Prometheus scrape and Wazuh agent traffic over Twingate
+
+**Status: a decision record, not a build. Nothing in it was applied or measured. Every statement about a vendor's behaviour below is UNVERIFIED: this change was written without fetching any vendor page, so no page was read for it, and each claim is from the maintainer-side design documents or from memory. Check each against the cited vendor page before relying on it.** Pages to read: Twingate security and encryption documentation (twingate.com/docs), Prometheus configuration (`tls_config`, `--web.config.file`) at prometheus.io/docs, and the Wazuh manual sections on agent enrollment and agent-manager communication at documentation.wazuh.com.
+
+**Decision to make:** where, if anywhere, TLS is terminated for (a) the home Prometheus scraping the connectors' node exporter and connector metrics (plain HTTP today, design section 4.2 and open question 7) and (b) Wazuh agents reaching the manager on 1514 and 1515, both across a Twingate resource.
+
+| Hop | What already protects it (UNVERIFIED) | What remains |
+|---|---|---|
+| Scrape: client to Twingate | Twingate's client-to-connector tunnel is encrypted (believed TLS-based or equivalent, possibly end-to-end through the relay; the cipher and who can read the traffic at the relay are not verified) | Nothing between the Twingate client and connector, if that holds |
+| Scrape: connector to the exporter | Plain HTTP inside the VPC, bound to the private address (stack 10), firewall admits only the telemetry tag | An on-VPC hop with no TLS and no authentication on the exporter |
+| Wazuh agent to manager | Wazuh encrypts agent-manager event traffic with its own key from enrollment, and enrollment on 1515 uses TLS (believed, not verified for the version in use) | Whether the manager certificate is validated by the agent (the default may not verify it) |
+| Wazuh across Twingate | Twingate's tunnel is a second layer around the above | Two layers, so TLS termination at a proxy is not needed for confidentiality |
+
+Options:
+
+1. **No extra TLS: rely on Twingate (scrape) and Wazuh's own channel (agents).** Cost $0, no certificates to rotate. Leaves the VPC hop to the exporter in clear and the exporter unauthenticated. Matches the design's first-build stance (open question 7).
+2. **TLS on the exporter** (`--web.config.file` with a certificate, Prometheus `tls_config` with a private CA). Protects the VPC hop and lets Prometheus check which exporter it reached. Costs a CA, certificate distribution (a secret on each droplet, so a new secret path) and rotation. The node exporter and connector metrics endpoint support for this is UNVERIFIED (the connector's metrics endpoint is documented as plain HTTP at `/metrics`, per the connector telemetry findings).
+3. **A TLS-terminating proxy on each connector in front of the exporters.** Adds a process on a 1 GB droplet (memory UNMEASURED) and a second listener to firewall. Only worth it if option 2 is impossible for the connector's own endpoint.
+4. **Enable certificate verification and manager authentication for Wazuh agents** (a private CA for the manager, `agent-auth` options to be checked in the manual, an enrollment password, which stack 10 already pulls from the host config). Cheap relative to its value because it stops an agent enrolling with a wrong server.
+
+**Recommendation:** option 1 for scrape in the first build, as the design already records, with the exposure written down: the VPC hop is plain HTTP and is protected by the private bind address and the tag-sourced firewall rule only. Do option 4 for Wazuh (verify the manager certificate and use the enrollment password) before the first live enrollment, since it costs little. Revisit option 2 when a second operator or a second site's hosts share a network with the connectors. Do not build option 3. Reconsider all of this after verifying the three vendor claims above; a different answer on any row changes the recommendation.
 
 ## 3. Your manual steps (nothing here is automatic)
 

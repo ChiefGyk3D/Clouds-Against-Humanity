@@ -4,15 +4,27 @@
 # file_sd target file and the expected-target inventory.
 output "scrape_targets" {
   sensitive = true
-  value = {
-    for k, v in local.scrape_pairs : k => {
-      site     = local.site
-      instance = "${local.site}-connector-${v.instance}"
-      address  = var.connector_private_ips[v.instance]
-      port     = v.port
-      role     = "connector"
+  value = merge(
+    {
+      for k, v in local.scrape_pairs : k => {
+        site     = local.site
+        instance = "${local.site}-connector-${v.instance}"
+        address  = var.connector_private_ips[v.instance]
+        port     = v.port
+        role     = "connector"
+      }
+    },
+    # Additional sites (var.sites): the same shape, each with its own site label.
+    {
+      for k, v in local.extra_scrape_pairs : k => {
+        site     = local.extra_site_labels[v.skey].site
+        instance = "${local.extra_site_labels[v.skey].site}-connector-${v.instance}"
+        address  = var.sites[v.skey].connector_private_ips[v.instance]
+        port     = v.port
+        role     = "connector"
+      }
     }
-  }
+  )
 }
 
 # The identity telemetry attaches to this site. No private value.
@@ -24,4 +36,10 @@ output "site_identity" {
     wazuh_agent_group = var.wazuh_agent_group
     labels            = var.labels
   }
+}
+
+# One entry per additional site (var.sites): the label and region telemetry
+# attaches to it. Empty by default. No private value.
+output "extra_site_identities" {
+  value = local.extra_site_labels
 }

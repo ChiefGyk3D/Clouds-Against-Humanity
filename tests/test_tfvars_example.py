@@ -147,6 +147,19 @@ def type_ok(type_text: str, value) -> bool:
         return isinstance(value, dict) and all(
             k in allowed and isinstance(v, allowed[k]) for k, v in value.items()
         )
+    if type_text.startswith("map(object({site_name=optional(string,"):
+        # sites (stack 20): a map of objects whose every field is optional.
+        allowed = {
+            "site_name": str,
+            "region": str,
+            "cloud_remote_network_id": str,
+            "connector_private_ips": dict,
+        }
+        return isinstance(value, dict) and all(
+            isinstance(site, dict)
+            and all(k in allowed and isinstance(v, allowed[k]) for k, v in site.items())
+            for site in value.values()
+        )
     raise AssertionError(f"the example check does not know the type {type_text}")
 
 

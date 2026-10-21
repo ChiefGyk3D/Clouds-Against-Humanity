@@ -72,6 +72,14 @@ variables {
 
   # Extra telemetry labels. Only env, role and owner_team are allowed.
   labels = { env = "example" }
+
+  # Additional sites served by this stack, keyed by each site's resource_key
+  # (IMMUTABLE once applied). Empty means one site and no change to the plan. Each
+  # entry gets its own logging and scrape Twingate service, never shared. Shape:
+  # { tor2 = { site_name = "site-tor2", cloud_remote_network_id = "...",
+  # connector_private_ips = { a = "...", b = "..." } } }. Private: the real
+  # values come from the site's Doppler config.
+  sites = {}
 }
 
 run "the_example_values_are_valid" {
