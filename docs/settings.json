@@ -893,7 +893,7 @@
       {
         "name": "logging_enabled",
         "type": "bool",
-        "description": "Create the logging Twingate service and one resource per logging_servers element. False creates nothing. Verify the Twingate plan allows the services first (UNVERIFIED).",
+        "description": "Create the logging Twingate service and one resource per logging_servers element. False creates nothing. The Twingate plan limit for services is not documented: read it in the Twingate console (Settings, Billing) before enabling.",
         "required": false,
         "default": false,
         "validation": "none",
