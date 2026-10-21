@@ -6,7 +6,7 @@ Side page to the start-from-zero pages. Read it after [Identity, secrets and zer
 
 > **Status: the free local lab was run once on Linux; everything else was not run.** On **2026-10-21** the author ran the Python scripts and the Bash commands in the free theory path on Linux (Python 3.13) and pasted trimmed output from that run. **Not run:** the PowerShell equivalents (no Windows machine; written from Microsoft's documentation and marked **est.**), and the whole optional own-account path with Keycloak in a container (no image was pulled for this page; the commands are from Keycloak's and Docker's documentation, read the same day, and the one script in it, `oidc_login.py`, was tested only against a small stand-in server the author wrote, not against Keycloak: run it expecting to fix something). Standards and vendor pages were read on **2026-10-21**; see the [claims register](#claims-register). Where a figure or a behavior is **est.**, it is general knowledge or a guess and was not checked against a source.
 
-> **Prerequisites.** [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) (authentication versus authorization, MFA, least privilege), [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) (tokens, scopes, what is inside a JWT) and, for the word "signature", [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md#digital-signatures-proof-of-who-and-what). A terminal and Python 3 for the free exercises. About two hours for the reading and the free exercises (est.); the optional local path adds about an hour (est.). Nothing needs an account for the free path. The reading and the exercises are free; the optional path runs on your own computer and uses its resources, not a cloud bill.
+> **Prerequisites.** [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) (authentication versus authorization, MFA, least privilege), [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) (tokens, scopes, what is inside a JWT) and, for the word "signature", [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md#digital-signatures-proof-of-who-and-what). A terminal and Python 3.9 or newer for the free exercises (the scripts use `ElementTree.indent`, added in 3.9). About two hours for the reading and the free exercises (est.); the optional local path adds about an hour (est.). Nothing needs an account for the free path. The reading and the exercises are free; the optional path runs on your own computer and uses its resources, not a cloud bill.
 
 ## What you will be able to do
 
@@ -103,7 +103,7 @@ What an application must check in step 7 (the field names are the ones you will 
 | It came from the expected IdP | `Issuer` | An assertion from a different IdP must not be accepted just because its signature is valid. |
 | It is meant for *this* application | `Audience` inside `Conditions` / `AudienceRestriction` | Stops an assertion issued for App A being replayed to App B. |
 | It is fresh | `NotBefore` and `NotOnOrAfter` on `Conditions` (and on `SubjectConfirmationData`) | A short window limits replay. |
-| It answers a request this application made, and arrived at the right place | `InResponseTo`, `Recipient` | Ties the answer to the question. |
+| It answers a request this application made, and arrived at the right place | `InResponseTo`, `Recipient` | Ties the answer to the question. In the lab file `InResponseTo` holds a made-up request ID (`_req-lab-1`) standing for the one the application put in its AuthnRequest; the lab has no real application to compare it with, so the exercise asks you to do that comparison by eye. |
 | It says who and what | `NameID` (who), `AttributeStatement` (email, groups) | The application's authorization starts from these. |
 
 **Metadata** is a small XML file each side publishes about itself: the IdP's name, its signing certificate and its sign-in address; the application's ACS address and its identifier. Exchanging metadata is most of what "setting up SAML" is. The standard is [SAML 2.0 Core](https://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf), with the redirect and POST ways of carrying messages defined in [SAML 2.0 Bindings](https://docs.oasis-open.org/security/saml/v2.0/saml-bindings-2.0-os.pdf).
@@ -281,6 +281,7 @@ SAML = "urn:oasis:names:tc:SAML:2.0:assertion"
 DS = "http://www.w3.org/2000/09/xmldsig#"
 ET.register_namespace("saml", SAML)
 ET.register_namespace("ds", DS)
+REQUEST_ID = "_req-lab-1"          # the ID the application put in its AuthnRequest (step 2 of the flow)
 a = ET.Element(f"{{{SAML}}}Assertion", ID="_lab1", Version="2.0", IssueInstant=iso(now))
 ET.SubElement(a, f"{{{SAML}}}Issuer").text = "https://idp.example.com/lab"
 sig = ET.SubElement(a, f"{{{DS}}}Signature")
@@ -292,7 +293,8 @@ ET.SubElement(sig, f"{{{DS}}}SignatureValue").text = "THIS-IS-A-PLACEHOLDER-NOT-
 subj = ET.SubElement(a, f"{{{SAML}}}Subject")
 ET.SubElement(subj, f"{{{SAML}}}NameID").text = "pat@example.com"
 ET.SubElement(subj, f"{{{SAML}}}SubjectConfirmationData",
-              Recipient="https://app.example.com/saml/acs", NotOnOrAfter=iso(now + 300))
+              Recipient="https://app.example.com/saml/acs", InResponseTo=REQUEST_ID,
+              NotOnOrAfter=iso(now + 300))
 cond = ET.SubElement(a, f"{{{SAML}}}Conditions", NotBefore=iso(now - 30), NotOnOrAfter=iso(now + 300))
 ET.SubElement(ET.SubElement(cond, f"{{{SAML}}}AudienceRestriction"), f"{{{SAML}}}Audience").text = "https://app.example.com/saml/metadata"
 ET.SubElement(a, f"{{{SAML}}}AuthnStatement", AuthnInstant=iso(now - 5))
@@ -358,7 +360,7 @@ cat assertion.xml
 Get-Content assertion.xml
 ```
 
-Find these with your eyes: `Issuer`, `NameID`, `Audience`, `NotBefore` / `NotOnOrAfter`, the `Attribute` named `groups`, `SignatureMethod`, `SignatureValue`. Now save and run the reader, which pulls out the same fields the way an application would:
+Find these with your eyes: `Issuer`, `NameID`, `Audience`, `InResponseTo`, `NotBefore` / `NotOnOrAfter`, the `Attribute` named `groups`, `SignatureMethod`, `SignatureValue`. Now save and run the reader, which pulls out the same fields the way an application would:
 
 ```python
 # read_samples.py: read the fake SAML assertion and the fake ID token the way an application must.
@@ -376,7 +378,9 @@ print("who (NameID) :", a.findtext(f"{SAML}Subject/{SAML}NameID"))
 c = a.find(SAML + "Conditions")
 print("valid        :", c.get("NotBefore"), "to", c.get("NotOnOrAfter"))
 print("audience     :", c.findtext(f"{SAML}AudienceRestriction/{SAML}Audience"))
-print("sent to (ACS):", a.find(f"{SAML}Subject/{SAML}SubjectConfirmationData").get("Recipient"))
+scd = a.find(f"{SAML}Subject/{SAML}SubjectConfirmationData")
+print("sent to (ACS):", scd.get("Recipient"))
+print("answers req id:", scd.get("InResponseTo"), "(the app must compare this with the id it sent)")
 for at in a.iter(SAML + "Attribute"):
     print("attribute    :", at.get("Name"), "=", [v.text for v in at])
 print("signature alg:", a.find(f"{DS}Signature/{DS}SignedInfo/{DS}SignatureMethod").get("Algorithm"))
@@ -421,6 +425,7 @@ who (NameID) : pat@example.com
 valid        : 2026-10-21T22:50:47Z to 2026-10-21T22:56:17Z
 audience     : https://app.example.com/saml/metadata
 sent to (ACS): https://app.example.com/saml/acs
+answers req id: _req-lab-1 (the app must compare this with the id it sent)
 attribute    : email = ['pat@example.com']
 attribute    : groups = ['staff', 'billing-readers']
 signature alg: http://www.w3.org/2001/04/xmldsig-more#rsa-sha256
@@ -433,21 +438,17 @@ The window is five and a half minutes long: a short window is a defense. Notice 
 
 **Predict.** The tampered token differs from the good one only in its `groups` claim, and carries the *same* signature. Will the signature check pass?
 
-**Do.** First decode the middle part with no Python at all, to see that it needs no key:
+**Do.** First decode the middle part with a few lines of the Python standard library (no extra packages, and the same on every operating system), to see that it needs no key:
 
 ```bash
-p=$(cut -d. -f2 idtoken.txt | tr '_-' '/+')
-while [ $(( ${#p} % 4 )) -ne 0 ]; do p="$p="; done
-echo "$p" | base64 -d; echo
+python3 -I -c "import base64,sys; p=open('idtoken.txt').read().split('.')[1]; print(base64.urlsafe_b64decode(p + '=' * (-len(p) % 4)).decode())"
 ```
 
 ```powershell
-$p = (Get-Content idtoken.txt).Split('.')[1].Replace('-','+').Replace('_','/')
-$p += '=' * ((4 - $p.Length % 4) % 4)
-[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($p)) | ConvertFrom-Json
+python -I -c "import base64,sys; p=open('idtoken.txt').read().split('.')[1]; print(base64.urlsafe_b64decode(p + '=' * (-len(p) % 4)).decode())"
 ```
 
-(The PowerShell lines are **est.**, not run; they use only built-in .NET calls. The two `tr`/`Replace` steps turn the URL-safe alphabet back into plain base64, and the padding loop restores the `=` signs that were removed.) The output of `read_samples.py` you already ran has a second block:
+(The `-I` flag is Python's isolated mode. The `=` padding that base64url strips is put back before decoding. A shell-only version needs `base64 -d` on Linux but `-D` on older macOS, which is why this page uses Python.) The output of `read_samples.py` you already ran has a second block:
 
 ```text
 == OIDC ID token ==
