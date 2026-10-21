@@ -6,6 +6,8 @@ The rest of the wiki was written for people who already know the vocabulary. It 
 
 ## What this project actually is, in plain words
 
+If you want the reason behind the project before the detail, [Why this exists](Why-This-Exists.md) is a short side page about that. It is not a step in the path below.
+
 The author has a homelab: computers at home that run bots, dashboards and a security monitoring stack. This project rents two small computers from a cloud company (DigitalOcean), locks them down so that nothing on the internet can connect to them, and builds a private way to reach them. Later stages will move some of the home bots onto a third rented computer.
 
 Everything about those rented computers is written down as code in this repository: what size they are, what network they sit on, which connections their firewall allows, which user may log in. A hosted service reads that code and builds the real thing. Changing the environment means changing the code, having it checked, and then approving the change. Nobody clicks around in a web console.
