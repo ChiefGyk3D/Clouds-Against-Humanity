@@ -97,6 +97,21 @@ Do these in order and never paste a token into a chat, an issue, a commit or a l
 
 Replace the value in Doppler. The next tracked run picks it up. Rotating the connector token recreates the connector droplet (see the stage 1 guide).
 
+## 5a. Short-lived Doppler tokens for Spacelift runs
+
+The run needs a Doppler credential in `DOPPLER_TOKEN` (context `cah-doppler`). This section lists the ways to make that credential short-lived and what each needs. Vendor pages were read on 2026-10-21; each quoted statement is from the cited page, and anything not on a page is marked est.
+
+| Option | What the vendor says | Plan needed | Works for this project now? |
+|---|---|---|---|
+| **Service token with an expiry** (what section 5 does: 90 days) | An "ephemeral Service Token can be created by setting an expiration time. Once the duration is reached, the token is automatically deleted." The CLI takes `--max-age`, and the page's own example uses `--max-age 1m`. [Doppler, Service Tokens](https://docs.doppler.com/docs/service-tokens), read 2026-10-21 | The page states no plan restriction for service tokens or their expiry. A missing statement is not a guarantee: if the option is missing in your dashboard, check your plan | Yes. The token is still static for its whole lifetime, and Spacelift holds one value in the context, so the practical minimum is how often you are willing to rotate by hand |
+| **Service account identity (OIDC)**: the run proves who it is with a signed token and Doppler returns a short-lived API token | "This feature is available with our Team and Enterprise plans." The returned tokens "expire quickly". [Doppler, Service Account Identities (OIDC)](https://docs.doppler.com/docs/service-account-identities), read 2026-10-21 | Doppler Team or Enterprise | Needs a paid Doppler plan **and** an OIDC token from Spacelift (next row) |
+| **Spacelift's OIDC token** (the signing side of the row above) | "This feature is only available to paid Spacelift accounts." The token "is valid for an hour and is available to every run in any paid Spacelift account", in `SPACELIFT_OIDC_TOKEN`. [Spacelift, OpenID Connect](https://docs.spacelift.io/integrations/cloud-providers/oidc/), read 2026-10-21 | Any paid Spacelift plan | No. On the free plan the variable is not provided |
+| **Rotation by hand** (section 5) | Not a vendor feature: you make a new token, replace the context value, run, delete the old one | None | Yes. This is the current method |
+
+Both facts from the 2026-10-19 check hold on 2026-10-21: Doppler OIDC identities need Team or Enterprise, and Spacelift's OIDC token needs a paid plan. One correction to that earlier note: Doppler documents expiring service tokens with no plan restriction, so "short-lived access is Team-only" is true of OIDC, not of an expiring token.
+
+**Recommendation.** Stay on a read-only service token scoped to config `prd` with a 90-day expiry, rotated with the runbook in section 5, until a paid plan exists. The OIDC route needs two paid plans, one at each vendor, to replace one value that is rotated four times a year. What would change this: a paid Spacelift plan and Doppler Team (or Enterprise) both in place; an incident in which a token is read from a run log or a leaked context (revoke first, rotate second); or the edge design's monthly rebuild path, which mints a token per build and should use `--max-age` in hours (est.: that path is not built).
+
 ## 6. Changing things
 
 ### Add a secret to a stack
