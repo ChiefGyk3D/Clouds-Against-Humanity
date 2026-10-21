@@ -11,6 +11,7 @@
 6. [Git and pull requests](Git-GitHub-and-Pull-Requests.md)
     - Side page: [Git from zero: your first change](Git-From-Zero.md)
 7. [Containers and Docker (optional)](Containers-and-Docker-Basics.md)
+    - Side page: [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md)
 8. [How money works](How-Money-Works-in-the-Cloud.md)
 9. [Enterprise habits](Enterprise-Engineering-Habits.md)
 10. [Architecture overview](Architecture-Overview.md)

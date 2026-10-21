@@ -4,6 +4,8 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+> New to Linux commands, users, `sudo` or file permissions? Read [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) first; it also compares Ubuntu with RHEL, Amazon Linux and SUSE.
+
 The firewall is the outer wall. This page is about the house: what `modules/twingate-bootstrap/cloud-init.yaml.tftpl` does to a connector droplet on its first boot, before any human could log in.
 
 The guiding idea is that the firewall should never be the only control. If a firewall rule is ever wrong, the host itself should still refuse anything it was not built to accept.
