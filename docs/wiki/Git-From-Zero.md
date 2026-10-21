@@ -209,7 +209,7 @@ To talk to GitHub, git has to prove who you are. There are two ways.
 - **HTTPS** uses the ordinary web address (`https://github.com/...`) and a login. Easy to start. The login is no longer a password but a **token**: a long random string that works like a password for a program.
 - **SSH** uses a pair of keys: a **private key** that stays on your computer and a **public key** you give to GitHub. It is neat once set up, but there is more to set up. [Networking basics: SSH](Networking-Basics-for-This-Project.md#ssh-in-one-paragraph) explains the idea.
 
-**The easiest start is HTTPS with the GitHub CLI.** The **GitHub CLI** (command-line interface; the program is called `gh`) signs you in through your browser, stores the credential safely and sets git up to use it. You never copy a token by hand. You can move to SSH later if you want to.
+**The easiest start is HTTPS with the GitHub CLI.** The **GitHub CLI** (command-line interface; the program is called `gh`) signs you in through your browser, stores the credential for you and sets git up to use it (see the note after `gh auth login` below on where it is kept). You never copy a token by hand. You can move to SSH later if you want to.
 
 ### Install the GitHub CLI
 
@@ -242,6 +242,8 @@ gh auth login
 Source for the next two commands: the `gh auth login` manual (https://cli.github.com/manual/gh_auth_login), retrieved 2026-10-21. It says the default is a web-based browser flow, that the token is then stored securely in the system credential store (falling back to a plain text file if no store is found), and that the git protocol can be chosen during the interactive prompting.
 
 Expected (est. for the exact wording of the questions): a few questions. Choose **GitHub.com**, then **HTTPS**, answer **Yes** to authenticating git with your GitHub credentials, and choose **Login with a web browser**. It prints a one-time code (eight characters), you press Enter, your browser opens, you type the code and approve. The terminal then says you are logged in as your username.
+
+**Where the token is kept.** `gh` stores the token in the system credential store when it finds one. If it cannot find one, which can happen on Linux without a desktop keyring, it falls back to writing the token to a **plain text file**, as the manual above says. Per the `gh help environment` manual page (https://cli.github.com/manual/gh_help_environment, retrieved 2026-10-21), `gh` keeps its configuration files in `$XDG_CONFIG_HOME/gh` if that is set, otherwise `$HOME/.config/gh` (on Windows, `$AppData/GitHub CLI`). The token file is in that folder (the file name `hosts.yml` is est.; the manual does not name it). Treat that folder like a password: do not copy it, do not put it in a project folder, do not back it up to a shared place, and do not paste its contents anywhere. If you suspect it leaked, revoke the token in your GitHub settings and run `gh auth login` again.
 
 Check it:
 
@@ -333,7 +335,7 @@ Important: a fork's pull request offers the original project by default. For the
 gh pr create --repo YOUR-USERNAME/Clouds-Against-Humanity --base main --head fix-readme-word --title "Fix one word in the README" --body "Practice change on my own fork."
 ```
 
-Expected: a web address ending `/pull/1`. Open it in a browser. That is your pull request.
+Expected: a web address ending `/pull/NUMBER`, where `NUMBER` is the pull request's number (it is not always 1). Open it in a browser. That is your pull request.
 
 ## How to read the output
 
@@ -393,14 +395,14 @@ the line from the other branch
 >>>>>>> main
 ```
 
-Expected: `git status` says `You have unmerged paths` and names the file. To fix it:
+Expected: `git status` says `You have unmerged paths` and lists the file under `both modified:`. That is the file to fix; below, `PATH-OF-THE-FILE` stands for the path `git status` shows. To fix it:
 
 1. Open the file. Keep the text you want, and delete the three marker lines (`<<<<<<<`, `=======`, `>>>>>>>`) and the text you do not want.
 2. Save, then tell git it is resolved:
 
 ```bash
-git add README.md
-git commit -m "Resolve merge conflict in the README"
+git add PATH-OF-THE-FILE
+git commit -m "Resolve merge conflict"
 ```
 
 Expected: a commit line like before. If you panic, you can undo the whole merge attempt:
@@ -453,14 +455,14 @@ Expected: the first command prints nothing. The second prints `HEAD is now at ..
 
 ## A first exercise on your own fork
 
-This is safe: it changes only your copy. If anything looks wrong, delete the fork on GitHub and start again. It takes about 20 minutes.
+This changes only your own fork, not the original project. **But a fork of a public repository is public.** Anyone can see your fork, your branch and your pull request, so put nothing private in it: no real names of your accounts, no addresses, no secrets. If you want a private copy to hold real values later, read [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipeline.md) first; do not make private work inside a public fork. For this exercise you change one harmless word. If anything looks wrong, delete the fork on GitHub and start again. It takes about 20 minutes.
 
 1. **Fork and clone** as above (step 2, and the clone step of your chosen path).
 2. **Branch.** Make a branch called `fix-readme-word`.
 3. **Change one word** in `README.md`, on that branch. Save.
 4. **Commit** with a message of your own.
 5. **Push** the branch.
-6. **Open a pull request on your own fork.** On the pull request page, check the line near the top that says which repository and branch the pull request merges *into*. If it shows the original project, click the **base repository** drop-down and choose *your fork* (est.). If you skip this you propose your practice edit to the real project. Nothing breaks (it is closed, not merged), but avoid it.
+6. **Open a pull request on your own fork.** On the pull request page, check the line near the top that says which repository and branch the pull request merges *into*. If it shows the original project, click the **base repository** drop-down and choose *your fork* (est.). **Set the base to your own fork before you submit.** A pull request opened against the original project is not closed automatically and the maintainer can see it. If you open one by mistake, close it at once: on its page, scroll to the comment box and click **Close pull request** (est. for the label), and do not merge anything there.
 7. **Read the page.** Open **Files changed**. You should see your one word, removed in red and added in green. Look at the checks at the bottom: your fork may run none, or some may need approval (est.).
 8. **Merge it.** Click **Merge pull request**, then **Confirm merge**. GitHub then offers a **Delete branch** button. (Button names are est.; the merge page was not read.)
 9. **Delete the branch.** Click **Delete branch** on GitHub. Then tidy up your computer. On the command line:
@@ -489,6 +491,6 @@ Expected: `Switched to branch 'main'`; `git pull` prints `Updating ...` and `Fas
 
 - Do the exercise a second time using the other path (GUI if you used the command line, or the reverse), and compare what each shows you.
 - Make a second commit on a branch, run `git log --oneline` and describe each line in your own words. Expected: one line per commit, newest first, with the short code and the message.
-- Make a merge conflict on purpose on your fork: change the same line on two branches, merge one, then the other, and resolve it. Break it where it is safe.
+- Make a merge conflict on purpose on your fork: change the same line on two branches, merge one, then the other, and resolve it. Do it on your public practice fork with harmless text only.
 
 Next: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md).
