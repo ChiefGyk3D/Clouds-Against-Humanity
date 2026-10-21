@@ -4,7 +4,7 @@ Side page to the start-from-zero pages. Read it before [Git, GitHub and pull req
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-> **Status: unverified draft for the vendor steps.** The git commands on this page are standard and stable. The vendor steps (GitHub Desktop menus, `gh` install commands, GitHub settings pages, the no-reply address format) were written from memory of the vendors' documentation and were **not** re-read for this page, because the tool to read them was not available when it was written. Every such claim is marked **est.** (estimate). Before you rely on one, open the vendor page named next to it and check it. Nothing here was run on your machine. Retrieval date for all vendor pages: **not retrieved** (page written 2026-10-21).
+> **Status: vendor steps checked against vendor documentation.** The git commands on this page are standard and stable. The vendor steps (GitHub settings pages, GitHub Desktop menus, `gh` and git install commands, the no-reply address format) were read from the vendors' own pages on **2026-10-21**; each such passage names its source URL and that date. Vendor interfaces change, so check the page if a button has moved. Anything I could not read on a vendor page is marked **est.** (estimate) and is a guess to check. Nothing here was run on your machine.
 
 > **Prerequisites.** A computer with internet access and an email address you can read. No git, no command line and no GitHub knowledge. About 90 minutes the first time, including the exercise at the end.
 
@@ -38,13 +38,13 @@ The [Glossary](Glossary.md) has all of these. The bigger picture of why this pro
 
 ## Step 1: make a GitHub account and turn on two-factor authentication
 
-1. Open the GitHub sign-up page (github.com, then **Sign up**; est.). Pick a username. Your username is public, so do not use anything you want to keep private.
+1. Open github.com and choose **Sign up** (est.; the sign-up page was not read). Pick a username. Your username is public, so do not use anything you want to keep private.
 2. Use a password that is long and used nowhere else. A password manager makes that easy. [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) says how this project thinks about password managers and security keys.
 3. Turn on **two-factor authentication** (2FA, the same idea as **MFA**: a second proof beyond your password, such as a code from an app on your phone). [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md#mfa-and-identity-providers) explains why and which kind to prefer: an authenticator app or a hardware key over SMS.
-4. In GitHub, open your profile picture menu, then **Settings**, then **Password and authentication** (est.), and follow the prompts to add an authenticator app (est.).
-5. GitHub shows **recovery codes**. Save them in your password manager. They are the way back in if you lose your phone. Never put them in a file in a project.
+4. In the upper-right corner of any GitHub page, click your profile picture, then **Settings**. In the "Access" section of the sidebar, click **Password and authentication**. Under "Two-factor authentication", click **Enable two-factor authentication**. GitHub recommends a **TOTP** app (time-based one-time password: an authenticator app on your phone or computer) over text messages. Scan the QR code with the app, type the six-digit code it shows, and continue.
+5. Under "Save your recovery codes", click **Download**, save the codes in your password manager, then click **I have saved my recovery codes**. They are the way back in if you lose your phone. Never put them in a file in a project.
 
-Vendor page to check: GitHub Docs, "Securing your account with two-factor authentication (2FA)" (https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa; est., not retrieved).
+Source: GitHub Docs, "Configuring two-factor authentication" (https://docs.github.com/en/authentication/securing-your-account-with-two-factor-authentication-2fa/configuring-two-factor-authentication), retrieved 2026-10-21.
 
 > **Screenshot to take yourself:** the GitHub page where two-factor authentication is switched on.
 > Capture: the Password and authentication settings page after 2FA is enabled, cropped to the panel.
@@ -56,8 +56,10 @@ Vendor page to check: GitHub Docs, "Securing your account with two-factor authen
 You will practise on a copy, never on the original, so you cannot break anything.
 
 1. Sign in to GitHub and open this repository's page (https://github.com/ChiefGyk3D/Clouds-Against-Humanity).
-2. Click **Fork** at the top right (est.). Accept the defaults and confirm.
+2. In the top-right corner of the page, click **Fork**. Leave "Owner" as your own account, leave the name as it is, and click **Create fork**. Optionally tick "Copy the DEFAULT branch only"; that is enough here.
 3. GitHub takes you to your copy. The address now has your username instead of the original owner's. This is your fork.
+
+Source: GitHub Docs, "Fork a repository" (https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo), retrieved 2026-10-21.
 
 > **Screenshot to take yourself:** your fork's front page right after forking.
 > Capture: the repository header showing "forked from" under the repository name.
@@ -72,8 +74,8 @@ There are two ways. Both do exactly the same thing underneath. Pick one and do t
 |---|---|---|
 | What you do | Click buttons | Type commands |
 | Good for | Your first hour; seeing changes as colours | Everything later; copy-pasting from guides; servers, which have no mouse |
-| Install | One installer (Windows or macOS) | git, plus the GitHub CLI (`gh`) |
-| Linux | No official build that I know of (est.); use the command line | Fully supported |
+| Install | One installer (Windows 10 64-bit or later, macOS 12.0 or later) | git, plus the GitHub CLI (`gh`) |
+| Linux | Not supported ("Linux is not yet supported" on the vendor's install page); use the command line | Fully supported |
 
 If you have never used a terminal, start with the GUI path. The command-line path is still worth learning, because this project's guides (and nearly every engineering team) use it.
 
@@ -81,13 +83,13 @@ If you have never used a terminal, start with the GUI path. The command-line pat
 
 **GitHub Desktop** is a free app from GitHub that wraps the git commands in buttons.
 
-Vendor pages to check: GitHub Docs, "Installing GitHub Desktop" (https://docs.github.com/en/desktop/installing-and-authenticating-to-github-desktop/installing-github-desktop; est., not retrieved) and "Cloning a repository from GitHub to GitHub Desktop" (https://docs.github.com/en/desktop/adding-and-cloning-repositories/cloning-a-repository-from-github-to-github-desktop; est., not retrieved).
+Sources, all retrieved 2026-10-21: GitHub Docs, "Installing GitHub Desktop" (https://docs.github.com/en/desktop/installing-and-authenticating-to-github-desktop/installing-github-desktop), "Authenticating to GitHub in GitHub Desktop" (https://docs.github.com/en/desktop/installing-and-authenticating-to-github-desktop/authenticating-to-github-in-github-desktop), "Cloning and forking repositories from GitHub Desktop" (https://docs.github.com/en/desktop/adding-and-cloning-repositories/cloning-and-forking-repositories-from-github-desktop), "Managing branches in GitHub Desktop" (https://docs.github.com/en/desktop/making-changes-in-a-branch/managing-branches-in-github-desktop), "Committing and reviewing changes to your project in GitHub Desktop" (https://docs.github.com/en/desktop/making-changes-in-a-branch/committing-and-reviewing-changes-to-your-project-in-github-desktop), "Pushing changes to GitHub from GitHub Desktop" (https://docs.github.com/en/desktop/making-changes-in-a-branch/pushing-changes-to-github-from-github-desktop) and "Creating an issue or pull request from GitHub Desktop" (https://docs.github.com/en/desktop/working-with-your-remote-repository-on-github-or-github-enterprise/creating-an-issue-or-pull-request-from-github-desktop).
 
 ### Install and sign in
 
-1. Download the installer from the GitHub Desktop page (desktop.github.com; est.) for Windows or macOS. Run it, as you would any installer.
-2. Open GitHub Desktop. Choose **Sign in to GitHub.com** (est.). Your browser opens, you approve the sign-in, and it hands you back to the app. Use your 2FA code if asked.
-3. When it asks for your **name and email** (est.), type your real name or your username. For the email, see "Your name and email" below: you can choose the no-reply address so your private email is not stored in your commits.
+1. Visit the GitHub Desktop download page (the install page links to it) and click **Download for Windows** or **Download for macOS**. On macOS, double-click the downloaded zip file, then double-click the **GitHub Desktop** application. On Windows, double-click the downloaded setup file. GitHub Desktop starts when the install finishes.
+2. Sign in. On macOS, choose **GitHub Desktop** in the menu bar, then **Settings**. On Windows, choose **File**, then **Options**. On the **Accounts** pane, click **Sign Into** next to GitHub.com (not the Enterprise button). Click **Continue With Browser**. Your browser opens; sign in there. If you turned on 2FA, type your code and click **Verify**. Then follow the prompts back to the app. Signing in with a username and password is not supported.
+3. Git needs your name and email for commits. GitHub Desktop has a Git settings area for this (est.; the page "Configuring Git for GitHub Desktop" was not read). For the email, see "Your name and email" below: you can use the no-reply address so your private email is not stored in your commits.
 
 > **Screenshot to take yourself:** GitHub Desktop signed in, before you open a project.
 > Capture: the Welcome window or the main window showing that you are signed in.
@@ -96,28 +98,30 @@ Vendor pages to check: GitHub Docs, "Installing GitHub Desktop" (https://docs.gi
 
 ### Clone your fork
 
-1. Choose **File**, then **Clone repository** (est.).
-2. Pick the **GitHub.com** tab, find your fork of `Clouds-Against-Humanity` in the list (est.), and select it.
-3. Choose a **local path**: the folder on your computer where it will land. Note this path. A folder named for the project inside Documents is fine.
-4. Click **Clone**. It downloads the project and its history. When asked how you plan to use the fork, choose **To contribute to the parent project** (est.).
+1. In the **File** menu, click **Clone Repository**.
+2. Click the tab for where the repository is (for example **GitHub.com**), then click your fork of `Clouds-Against-Humanity` in the list. You can also click **URL** and paste the address of your fork.
+3. Next to "Local Path", click **Choose...** and pick the folder on your computer where it will land. Note this path.
+4. At the bottom, click **Clone**. It downloads the project and its history.
+
+(Another route: on your fork's GitHub page, click **Code**, then **Open with GitHub Desktop**, then **Choose...** and **Clone**.)
 
 ### Make a branch
 
-1. Click the **Current branch** button at the top (est.), then **New branch**.
-2. Name it `fix-readme-word`. Use lowercase words joined by dashes.
-3. Make sure it says it will branch from `main`, and click **Create branch**.
+1. At the top of the app, click **Current Branch**, then **New Branch**.
+2. In the "Create a Branch" window, under "Name", type `fix-readme-word`. Use lowercase words joined by dashes.
+3. Under "Create branch based on...", choose `main`, and click **Create Branch**.
 
 ### Change a file and commit
 
 1. Open the project folder on your computer in any text editor and change one word in `README.md`. Save the file.
-2. Go back to GitHub Desktop. The **Changes** list shows `README.md` and the right-hand panel shows the difference: removed lines in red, added lines in green.
-3. At the bottom left, type a short summary such as `Fix one word in the README`. Click **Commit to fix-readme-word** (est.).
+2. Go back to GitHub Desktop. The **Changes** tab in the left sidebar lists `README.md` with a yellow icon (modified), and the diff shows the change. Keep its checkbox ticked so it is included.
+3. Type a short message such as `Fix one word in the README` in the **Summary** field. Click **Commit to fix-readme-word**.
 
 ### Push and open the pull request
 
-1. Click **Publish branch** at the top (est.). This is the **push**: it uploads your branch to your fork on GitHub.
-2. Click **Create Pull Request** (est.). Your browser opens on GitHub with the pull request form.
-3. Check that the **base repository** is your own fork, not the original (see the exercise, step 6). Write a one-line title and click **Create pull request**.
+1. Click **Publish branch**. This is the **push** for a new branch: it uploads your branch to your fork on GitHub. (Later commits on the same branch use **Push origin** in the repository bar.) If GitHub Desktop asks "How are you planning to use this fork?", choose **To contribute to the parent project**, or **For my own purposes** if you want this practice to stay inside your fork.
+2. Click **Preview Pull Request** to see the diff between your branch and the base branch, or click the dropdown icon and choose **Create Pull Request** to go straight to GitHub. In the **base:** dropdown, confirm the branch you want to merge into. Click **Create Pull Request**; your browser opens on GitHub.
+3. Check that the base repository is your own fork, not the original (see the exercise, step 6). Type a title and description and click the green button to create the pull request (est. for the exact label; that part of the vendor page was cut off).
 
 > **Screenshot to take yourself:** GitHub Desktop with one committed change on your branch.
 > Capture: the Changes view showing the diff, and the commit box.
@@ -148,26 +152,26 @@ Three habits that make it easy:
 
 ### Install git
 
-Vendor page to check: the git project's download page (https://git-scm.com/downloads; est., not retrieved).
+Sources, retrieved 2026-10-21: https://git-scm.com/install/windows, https://git-scm.com/install/mac and https://git-scm.com/install/linux.
 
-| System | Install (est.) |
+| System | Install |
 |---|---|
-| Windows | Download the installer from git-scm.com and accept the defaults, or run the PowerShell command below |
-| macOS | Run `git --version` in Terminal; if git is missing, macOS offers to install the developer tools. Or use Homebrew |
-| Debian or Ubuntu | `sudo apt install git` |
+| Windows | Download the installer from the git-scm.com Windows page, or run the winget command below. The project notes the winget package is not maintained by the Git for Windows project and may be behind the newest version |
+| macOS | `xcode-select --install` (Apple's Xcode Command Line Tools include git), or `brew install git` with Homebrew. The project notes non-source builds are provided by third parties |
+| Debian or Ubuntu | `sudo apt-get install git` (the vendor page shows the same without `sudo`, as root) |
 | Fedora | `sudo dnf install git` |
 
 ```powershell
-winget install --id Git.Git -e
+winget install --id Git.Git -e --source winget
 ```
 
-Expected: a progress bar, then a line saying the install succeeded. Close the terminal and open a new one so it finds git.
+Expected (est.): a progress bar, then a line saying the install succeeded. Close the terminal and open a new one so it finds git.
 
 ```bash
-sudo apt install git
+sudo apt-get install git
 ```
 
-Expected (Debian, Ubuntu): it asks for your password (you will not see the letters as you type), lists packages and finishes without a line starting `E:`.
+Expected (est.; Debian, Ubuntu): it asks for your password (you will not see the letters as you type), lists packages and finishes without a line starting `E:`.
 
 Now check it:
 
@@ -196,7 +200,7 @@ git config --global --list
 
 Expected: lines including `user.name=YOUR NAME` and `user.email=YOUR-EMAIL`.
 
-**A note on the email.** Your commits, and the email in them, are public once you push to a public repository. GitHub offers a **no-reply address** that hides your real one. Its format is `ID+YOUR-USERNAME@users.noreply.github.com`, where `ID` is a number GitHub gives you (est.). You find yours under **Settings**, then **Emails**, where you can also tick **Keep my email addresses private** (est.). Vendor page to check: GitHub Docs, "Setting your commit email address" (https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/setting-your-commit-email-address; est., not retrieved).
+**A note on the email.** Your commits, and the email in them, are public once you push to a public repository. GitHub offers a **no-reply address** that hides your real one. Its format is `ID+YOUR-USERNAME@users.noreply.github.com`, where `ID` is a number GitHub gives you. To find it and to hide your real address, click your profile picture, then **Settings**, then **Emails** in the "Access" section, and select **Keep my email addresses private**. Sources, retrieved 2026-10-21: GitHub Docs, "Setting your commit email address" (https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-email-preferences/setting-your-commit-email-address) and "Email addresses reference" (https://docs.github.com/en/account-and-profile/reference/email-addresses-reference), which gives the `ID+USERNAME@users.noreply.github.com` form. The "Emails" page shows the exact address to use (est.).
 
 ### HTTPS or SSH, and why start with `gh`
 
@@ -209,25 +213,25 @@ To talk to GitHub, git has to prove who you are. There are two ways.
 
 ### Install the GitHub CLI
 
-Vendor page to check: the GitHub CLI installation page (https://github.com/cli/cli#installation; est., not retrieved). It has the current commands for every system.
+Sources, retrieved 2026-10-21: the GitHub CLI README (https://github.com/cli/cli#installation) and its install pages for [Windows](https://github.com/cli/cli/blob/trunk/docs/install_windows.md), [macOS](https://github.com/cli/cli/blob/trunk/docs/install_macos.md) and [Linux](https://github.com/cli/cli/blob/trunk/docs/install_linux.md).
 
-| System | Install (est.) |
+| System | Install |
 |---|---|
-| Windows | `winget install --id GitHub.cli` |
+| Windows | `winget install --id GitHub.cli --source winget` |
 | macOS | `brew install gh` (needs Homebrew) |
-| Linux | Follow the Linux section of the vendor page. Do not rely on the distribution's own `gh` package: it can be too old for the sign-in command below |
+| Linux | Follow the Debian/Ubuntu or Fedora/RHEL section of the Linux install page. They first add GitHub's own package repository, then install `gh` with `apt` or `dnf`. Copy the current commands from that page, because the signing-key details change |
 
 ```powershell
-winget install --id GitHub.cli
+winget install --id GitHub.cli --source winget
 ```
 
-Expected: a progress bar and a success message. Open a new terminal afterwards.
+Expected (est.): a progress bar and a success message. The vendor page says to open a **new** window afterwards so the changed PATH (the list of places the system looks for programs) takes effect.
 
 ```bash
 gh --version
 ```
 
-Expected: a line starting `gh version`, then a link to the release notes.
+Expected (est.): a line starting `gh version`, then a link to the release notes.
 
 ### Sign in with `gh auth login`
 
@@ -235,7 +239,9 @@ Expected: a line starting `gh version`, then a link to the release notes.
 gh auth login
 ```
 
-Expected: a few questions. Choose **GitHub.com**, then **HTTPS**, answer **Yes** to authenticating git with your GitHub credentials, and choose **Login with a web browser** (est.). It prints a one-time code (eight characters), you press Enter, your browser opens, you type the code and approve. The terminal then says you are logged in as your username.
+Source for the next two commands: the `gh auth login` manual (https://cli.github.com/manual/gh_auth_login), retrieved 2026-10-21. It says the default is a web-based browser flow, that the token is then stored securely in the system credential store (falling back to a plain text file if no store is found), and that the git protocol can be chosen during the interactive prompting.
+
+Expected (est. for the exact wording of the questions): a few questions. Choose **GitHub.com**, then **HTTPS**, answer **Yes** to authenticating git with your GitHub credentials, and choose **Login with a web browser**. It prints a one-time code (eight characters), you press Enter, your browser opens, you type the code and approve. The terminal then says you are logged in as your username.
 
 Check it:
 
@@ -243,7 +249,7 @@ Check it:
 gh auth status
 ```
 
-Expected: a line saying you are logged in to github.com, and which protocol git uses (`https`). It does not print the token.
+Expected: a line saying you are logged in to github.com, and which protocol git uses (`https`). It does not print the token (est.).
 
 ### Clone your fork
 
@@ -456,7 +462,7 @@ This is safe: it changes only your copy. If anything looks wrong, delete the for
 5. **Push** the branch.
 6. **Open a pull request on your own fork.** On the pull request page, check the line near the top that says which repository and branch the pull request merges *into*. If it shows the original project, click the **base repository** drop-down and choose *your fork* (est.). If you skip this you propose your practice edit to the real project. Nothing breaks (it is closed, not merged), but avoid it.
 7. **Read the page.** Open **Files changed**. You should see your one word, removed in red and added in green. Look at the checks at the bottom: your fork may run none, or some may need approval (est.).
-8. **Merge it.** Click **Merge pull request**, then **Confirm merge**. GitHub then offers a **Delete branch** button.
+8. **Merge it.** Click **Merge pull request**, then **Confirm merge**. GitHub then offers a **Delete branch** button. (Button names are est.; the merge page was not read.)
 9. **Delete the branch.** Click **Delete branch** on GitHub. Then tidy up your computer. On the command line:
 
 ```bash
