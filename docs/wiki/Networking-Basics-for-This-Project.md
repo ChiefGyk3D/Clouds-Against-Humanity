@@ -102,7 +102,7 @@ Two things about VPCs that surprise people:
 
 ## DNS and NTP, briefly
 
-**DNS** turns names into addresses (`packages.twingate.com` into an IP). Every machine needs it, which is why port 53 is in the outbound rules. **NTP** keeps the clock right over UDP port 123. Clocks matter more than they seem: certificates, tokens and log timestamps all stop working or stop being trustworthy when a machine's clock drifts.
+**DNS** turns names into addresses (`packages.twingate.com` into an IP; [How a web request works](How-a-Web-Request-Works.md#step-1-dns-from-a-name-to-an-address) shows who answers and what a TTL is). Every machine needs it, which is why port 53 is in the outbound rules. **NTP** keeps the clock right over UDP port 123. Clocks matter more than they seem: certificates (a **certificate** is the signed statement a TLS connection checks; see [How a web request works](How-a-Web-Request-Works.md#certificates-and-trust-chains-in-plain-language)), tokens and log timestamps all stop working or stop being trustworthy when a machine's clock drifts.
 
 ## SSH, in one paragraph
 

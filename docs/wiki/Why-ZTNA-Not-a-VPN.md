@@ -1,6 +1,6 @@
 # Why ZTNA and not a VPN
 
-> If "port", "firewall", "inbound" or "MFA" are new words, read [Networking basics](Networking-Basics-for-This-Project.md) and [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) first. This page is the argument; those pages are the vocabulary.
+> If "port", "firewall", "inbound" or "MFA" are new words, read [Networking basics](Networking-Basics-for-This-Project.md) and [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) first. This page is the argument; those pages are the vocabulary. If "TLS" or "certificate" are only words to you, [How a web request works](How-a-Web-Request-Works.md) explains them.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 

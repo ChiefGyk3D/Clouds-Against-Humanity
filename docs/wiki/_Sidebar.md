@@ -6,6 +6,7 @@
 1. [Start here if you are new](Start-Here-If-You-Are-New.md)
 2. [What is the cloud](What-Is-the-Cloud.md)
 3. [Networking basics](Networking-Basics-for-This-Project.md)
+    - Side page: [How a web request works](How-a-Web-Request-Works.md)
 4. [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
     - Side page: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md)
 5. [Infrastructure as code](What-Is-Infrastructure-as-Code.md)
