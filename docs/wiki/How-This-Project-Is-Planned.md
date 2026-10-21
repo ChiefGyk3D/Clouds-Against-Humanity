@@ -98,7 +98,7 @@ American English spelling is the standard for everything written in this reposit
 
 Exceptions, kept exactly as written: direct quotes and vendor text, code and configuration (identifiers, keys, command and file names, URLs), and product or proper names. A status value that a tool returns, such as the `cancelled` result of a GitHub job, is a literal, not prose. Inside code fences and inline code the spelling is left alone.
 
-`tests/test_american_english.py` fails when a clear British spelling appears in the README or the wiki pages outside code. If a page must keep one on purpose, add a line to `docs/american-english-allowlist.txt` with the page, the word and the reason.
+`tests/test_american_english.py` fails when a clear British spelling appears in any Markdown page, in a Python, HCL, YAML or shell comment or docstring, or in a threat-model description, outside code fences, inline code and URLs. `tests/test_markdown_anchors.py` checks that every link to a heading still points at one. If a page must keep one on purpose, add a line to `docs/american-english-allowlist.txt` with the page, the word and the reason.
 
 ## Changing the plan
 
