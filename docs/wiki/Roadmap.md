@@ -58,7 +58,7 @@ Open follow-ups from this stage:
 - Roll out the droplet metadata endpoint lock (`metadata_lock`, built and off by default, not yet tested on a real droplet).
 - Roll out the default-drop host firewall (`host_firewall`, built and off by default, not yet tested on a real droplet; stage it one connector at a time).
 - Audit logging on the droplets (written under stage 2, below; not applied).
-- Optional: upgrade the Twingate provider from 3.x to 4.x or 5.x (issue #93). The `access_group` block is not deprecated, so nothing is overdue; the 3.x line has had no release since 3.8.0.
+- Twingate provider (issue #93): bumped to 5.x in the pull request. The maintainer reads the first tracked plan; expect no create, replace or destroy of Twingate resources beyond a schema refresh. The issue stays open until then.
 - Attach the Spacelift push policy. It is written and tested (`.spacelift/policies/push.rego`): it never proposes a run, so pull requests from forks or from this repository never run in Spacelift, and docs-only merges no longer start tracked runs. It takes effect only once created in Spacelift, and push policies need a paid Spacelift plan. On the free plan, narrow each stack's project root and globs instead. Both routes are in the secrets runbook, section 9.
 - First-run checks: log masking and the runner image.
 
