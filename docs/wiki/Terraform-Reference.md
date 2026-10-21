@@ -39,7 +39,7 @@ Every module and stack follows the same split, so you always know where to look:
 
 ### Version pinning, explained once
 
-Every `versions.tf` says `required_version = ">= 1.8"`. That means "OpenTofu 1.8 or newer", the floor this repo declares. CI pins exactly `1.12.6` so results are repeatable. Provider constraints use `~> 2.0` (the DigitalOcean provider) and `~> 3.0` (the Twingate provider). `~> 2.0` means "2.0 or newer, but never 3.0", so a major release with breaking changes cannot arrive on its own. The exact provider builds are fixed by the committed `.terraform.lock.hcl` files.
+Every `versions.tf` says `required_version = ">= 1.8"`. That means "OpenTofu 1.8 or newer", the floor this repo declares. CI pins exactly `1.12.6` so results are repeatable. Provider constraints use `~> 2.0` (the DigitalOcean provider) and `~> 5.0` (the Twingate provider). `~> 2.0` means "2.0 or newer, but never 3.0", so a major release with breaking changes cannot arrive on its own. The exact provider builds are fixed by the committed `.terraform.lock.hcl` files.
 
 ---
 
