@@ -2,6 +2,8 @@
 
 > Needs no cloud account and costs nothing. You need Git, a clone of the repository, an internet connection (OpenTofu downloads provider plugins when you initialise, and lab 4 downloads a tool), OpenTofu 1.8 or newer for the first two labs, `curl` and `sha256sum` for lab 4, Python 3.12 or newer with `pytest` installed for the last, and about 15 minutes per lab. Read [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) first if `tofu test` is new to you.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Reading that a control exists is not the same as knowing it works. The way to find out is to break the thing it protects and watch the control object. Each lab here removes or weakens one safety property of this project, on your own computer, and asks you to **predict which check will notice** before you run anything.
 
 That prediction is the lesson. If you were right, you understood the design. If you were wrong, the gap between your prediction and the output is exactly the thing you did not know, which is the most useful thing to find out while it costs nothing.

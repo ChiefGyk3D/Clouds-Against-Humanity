@@ -2,6 +2,8 @@
 
 > **Orientation: general industry practice, not used by this project; frameworks cited with retrieval dates or marked UNVERIFIED.** Everything before the section "Is any of this used in this project?" describes how companies work. It is not a description of this repository, and this repository does not do it. Where a fact comes from a source, the source and the date it was read (2026-10-16) are given; where it does not, the page says UNVERIFIED.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 **Prerequisites:** [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) (what a pull request and a CI check are) and [Trace one change end to end](Trace-One-Change-End-to-End.md) (the real change this page re-dresses as an enterprise record). Helpful, not required: [A small example: what an enterprise does differently](Small-Example-Enterprise-Landscape.md).
 
 If you take a job at a company of any size, someone will say "that needs a change ticket" or "we are in a freeze" or "bring it to CAB." This page is the decoder ring. It teaches the vocabulary and the reasoning, then shows honestly that this project uses almost none of it, and why that is fine here and would not be fine at a company.

@@ -2,6 +2,8 @@
 
 > First time reading HCL? Start with [What is infrastructure as code](What-Is-Infrastructure-as-Code.md), which introduces the four words (provider, resource, plan, state) this page uses on every line.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 This page walks through every variable, resource, data source, local, module call and output in the repository, file by file, and says why each one exists. It is written for someone learning OpenTofu who wants to read the real code next to a plain-language explanation. For the bigger picture (why layers, why stacks) see [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md).
 
 OpenTofu is the open-source fork of Terraform. The language (HCL) is identical, so everything here applies to both. The word "Terraform" in a file name, a Spacelift setting or a provider name means the same thing.
@@ -45,7 +47,7 @@ Every `versions.tf` says `required_version = ">= 1.8"`. That means "OpenTofu 1.8
 
 ## How a value travels
 
-![Diagram, How a value travels: Doppler secrets and settings; Spacelift hook exports as env vars; TF_VAR_name or provider env var; variable block (validated); resource / module; output; Spacelift stack dependency output to](images/terraform-reference-diagram-1.png)
+![Diagram, How a value travels: Doppler secrets and settings; Spacelift hook exports as env vars; and more in the source below](images/terraform-reference-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>

@@ -2,6 +2,8 @@
 
 > Needs a clone of the repository, an hour, and one of: the Threat Dragon desktop app, the hosted web app's Local Session in a browser, or the web app in Docker. No cloud account, no Threat Dragon account, no cost. Read [Threat model exercise: build your own](Threat-Model-Exercise.md) first: this page reuses its boundaries (B1 to B8), attacker positions (A1 to A4) and STRIDE key, and the model file uses the numbered threats (T1 to T14) from [Threat model](Threat-Model.md). Two more importable models of the same pipeline (MITRE ATT&CK and MITRE ATLAS views) are described in [Threat frameworks: STRIDE, ATT&CK and ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md).
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 A threat model written as prose hides what a diagram shows at once: which arrows cross a line. [OWASP Threat Dragon](https://owasp.org/www-project-threat-dragon/) is a free, open-source tool for drawing a data flow diagram, marking trust boundaries on it, and attaching threats to the elements. This page gives you a finished model of this repository's pipeline and a set of steps that make you draw, predict and then check.
 
 The format is the one from the other exercise pages: **predict, then check**. Write your answer down first. The gap between your answer and the reference answer is the lesson.
@@ -72,9 +74,9 @@ Do not use the provided model yet. Fifteen minutes.
 - **The supply chain is an actor.** Pinned actions, the Doppler CLI and the Twingate apt repository are drawn as one actor, "Upstream publishers", with three flows. [Threat model](Threat-Model.md#trust-boundaries) draws these as a box; the exercise diagram leaves them out. Threat Dragon has no box for "a thing you did not write and trust anyway", so an actor does the job.
 - **Check your labels.** An arrow labelled just "deploy" or "uses" is a finding: the label is the data, and the data decides the threat. "Merged commit" and "Service token read" lead to different threats. The flow labels in the model are short on purpose, at most four words, so they stay readable on the canvas; the full wording is in each flow's description, under "Full label".
 
-![The pipeline data flow diagram in Threat Dragon: actors on the left, eight dashed trust boundary boxes B1 to B8, processes as circles, data stores as open rectangles, labelled arrows for each flow](images/threat-dragon-stride-diagram.png)
+![The pipeline data flow diagram in Threat Dragon: actors, processes, data stores, labelled flows and eight trust boundary boxes B1 to B8](images/threat-dragon-stride-diagram.png)
 
-*The whole diagram of `clouds-against-humanity.threat-dragon.json`, exported with the app's own Export, PNG command. Threat Dragon v2.6.2 hosted app, Local Session, captured 2026-10-16. This is the repository's own synthetic model; nothing in it is real.*
+*The whole diagram of `clouds-against-humanity.threat-dragon.json`, exported with the app's own Export, PNG command. Threat Dragon v2.6.2 hosted app, Local Session, captured 2026-10-16. This is the repository's own synthetic model; nothing in it is real. Actors are on the left, trust boundaries are dashed boxes, processes are circles and data stores are open rectangles.*
 
 ## Step 2: find each trust boundary and say what crosses it
 
@@ -101,7 +103,7 @@ Notice how many boundaries sit in a vendor console. A model records them; it doe
 
 STRIDE is Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege. Click a flow in the model and open its threats to see what is attached.
 
-![Threat Dragon with the Spacelift tracked run process selected: the Properties panel on the left and a Threats list with three STRIDE threats on the right, numbered 13, 14 and 15](images/threat-dragon-stride-element-threats.png)
+![Threat Dragon with the Spacelift tracked run selected: its Properties panel and a Threats list of three STRIDE threats, 13 to 15](images/threat-dragon-stride-element-threats.png)
 
 *Selecting an element opens its Properties and its Threats list, here the Spacelift tracked run with threats 13 to 15. Threat Dragon v2.6.2 hosted app, Local Session, captured 2026-10-16. The repository's own synthetic model.*
 

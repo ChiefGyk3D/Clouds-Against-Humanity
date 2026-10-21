@@ -2,6 +2,8 @@
 
 > **Status: unverified draft.** Written 2026-10-16 from Google's documentation (sources in the [phase 0 evidence](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-multicloud-phase0-evidence-azure-gcp.md)). **No GCP version of this project has been built yet.** The resource lists below are a teaching map of what such a build would need, not code in this repository, and the actual build may differ. Not reviewed by anyone who runs GCP; please send corrections to [issue #22](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues/22).
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Read [Why the clouds differ](Why-the-Clouds-Differ.md) and [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) first. This page walks the four pieces that this project builds on DigitalOcean (a private network, a firewall, a machine, an identity for the machine), points at the DigitalOcean file where each lives, and says what you would build on GCP instead and why it is not a one-line rename.
 
 The method is the exercise: for each piece, **read the DigitalOcean file, predict the GCP resources, then check your list against the reference at the bottom of the piece.**

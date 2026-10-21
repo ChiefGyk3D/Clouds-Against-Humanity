@@ -2,6 +2,8 @@
 
 > Needs a clone of the repository and a text editor. No cloud account, no cost. Read [Threat model](Threat-Model.md) *after* you finish step 3, not before: it is the worked example you check yourself against. The vocabulary (tokens, least privilege, lateral movement, trust) is in [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md), and [Enterprise engineering habits](Enterprise-Engineering-Habits.md#write-the-threat-model-down-including-what-you-accept) says why a hobby lab writes one at all.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Reading a threat model teaches you what its author thought of. Building one teaches you how to think of things. This page walks you through making your own for this repository, then asks three "what if" questions and has you commit to an answer before you look at ours.
 
 The format is the one from the other exercise pages: **predict, then check**. Write your answer down first. If your answer differs from the reference one, that gap is the lesson, and sometimes it means your answer was better, in which case say so in a pull request.
@@ -41,7 +43,7 @@ A **trust boundary** is a line where the party on one side has different rights,
 
 **Check.** One drawing, with attacker positions marked `A1` to `A4`. A **position** is where an attacker stands, not who they are.
 
-![Diagram, Step 2: draw the trust boundaries: Untrusted; The internet A1: scanner, no account; Fork or outside pull request A2: can propose code; Third-party control planes (trusted, not controlled); GitHub + Actions CI: n](images/threat-model-exercise-diagram-1.png)
+![Diagram, Step 2: draw the trust boundaries: Untrusted; The internet A1: scanner, no account; and more in the source below](images/threat-model-exercise-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>
@@ -95,9 +97,9 @@ Three things to take from the drawing:
 
 **What it looks like in a tool.** The same boundaries drawn as a data flow diagram in Threat Dragon (the dashed boxes are B1 to B8; the [Threat Dragon exercise](Threat-Dragon-Exercise.md) walks through it). Do your own drawing first and look at this only to compare.
 
-![The pipeline data flow diagram in Threat Dragon with eight dashed trust boundary boxes B1 to B8 enclosing processes and data stores, and labelled arrows between actors, processes and stores](images/threat-dragon-stride-diagram.png)
+![The pipeline data flow diagram in Threat Dragon with eight trust boundary boxes B1 to B8 and labelled arrows between its parts](images/threat-dragon-stride-diagram.png)
 
-*Threat Dragon v2.6.2 hosted app, Local Session, captured 2026-10-16. The repository's own synthetic model, exported with the app's Export, PNG command.*
+*Threat Dragon v2.6.2 hosted app, Local Session, captured 2026-10-16. The repository's own synthetic model, exported with the app's Export, PNG command. The dashed boxes are the trust boundaries; they enclose the processes and data stores.*
 
 ## Step 3: fill in the STRIDE table
 
@@ -107,7 +109,7 @@ Three things to take from the drawing:
 
 **Check.** The answer key. Every cell names a file you can open. "Threat" is the worked example's number where one matches.
 
-| | Attack | Position | What limits it (file) | Residual |
+| STRIDE letter | Attack | Position | What limits it (file) | Residual |
 |---|---|---|---|---|
 | **S** | Log in to a connector as the admin | A4 | Sign-in is delegated to an identity provider, access is per resource (`twingate_resource` blocks in `stacks/10-access/main.tf`, TCP 22 only, a test pins it in `stacks/10-access/tests/`), and sshd allows only `cah-admin` with a key (`modules/twingate-bootstrap/cloud-init.yaml.tftpl`, [Droplet hardening](Droplet-Hardening.md)). T2 | Identity plus SSH key together still give a shell |
 | **S** | Present a stolen connector token as a connector | A4 | One token per connector; revocable. T5 | Readable by any local process on the droplet through the metadata endpoint ([Droplet hardening, "Not done yet"](Droplet-Hardening.md#not-done-yet)) |

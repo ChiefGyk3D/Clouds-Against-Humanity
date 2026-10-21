@@ -2,6 +2,8 @@
 
 > **Status: unverified draft.** Written 2026-10-16 from AWS's documentation (sources in the [phase 0 evidence](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-multicloud-phase0-evidence-aws.md)). **The three AWS modules now exist (see "Where this is built" below) and are tested with mocked providers only. Two AWS stacks (`stacks/aws/00-foundation`, `stacks/aws/10-access`) call them, with the same mocked tests. None of it has ever been applied to an AWS account.** The resource lists below are still a teaching map, and the code may differ from your answer for good reasons. Not yet reviewed by the maintainer.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Read [Why the clouds differ](Why-the-Clouds-Differ.md) and [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) first. This page walks the four pieces that this project builds on DigitalOcean (a private network, a firewall, a machine, an identity for the machine), points at the DigitalOcean file where each lives, and says what you would build on AWS instead and why it is not a one-line rename.
 
 The method is the exercise: for each piece, **read the DigitalOcean file, predict the AWS resources, then check your list against the reference at the bottom of the piece.**

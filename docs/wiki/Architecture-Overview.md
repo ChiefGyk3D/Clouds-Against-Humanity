@@ -2,6 +2,8 @@
 
 > New to cloud, networking or infrastructure as code? Read [Start here if you are new](Start-Here-If-You-Are-New.md) first; this page assumes the vocabulary those pages teach.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 There are two planes here, and keeping them separate in your head makes everything else easier.
 
 - **The data plane** is how a person (or later, a service) reaches a host. It runs through Twingate.
@@ -11,7 +13,7 @@ Neither plane needs a single inbound port open on a droplet.
 
 ## Everything on one page
 
-![Diagram, Everything on one page: Operator side; Laptop git + Twingate client; Control plane: changes to infrastructure; GitHub repo (public); GitHub Actions fmt, validate, tofu test, cost gate, scanners; Spacelift stacks](images/architecture-overview-diagram-1.png)
+![Diagram, Everything on one page: Operator side; Laptop git + Twingate client; Control plane: changes to infrastructure; and more in the source below](images/architecture-overview-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>
@@ -70,7 +72,7 @@ flowchart TB
 
 </details>
 
-Color key: green is you, purple is a hosted control service, blue is DigitalOcean, amber holds secrets, red is untrusted.
+Color key (a hint only; the label on each box says what it is): green is you, purple is a hosted control service, blue is DigitalOcean, amber holds secrets, red is untrusted.
 
 ## Component by component
 
@@ -88,7 +90,7 @@ Color key: green is you, purple is a hosted control service, blue is DigitalOcea
 
 ### Path 1: a change to infrastructure
 
-![Diagram, Path 1: a change to infrastructure: Pull request; CI green? tests, cost gate, scanners; Spacelift: no run with the push policy (paid plan; free-plan limit in Spacelift page); Merge to main; Spacelift tracked run](images/architecture-overview-diagram-2.png)
+![Diagram, Path 1: a change to infrastructure: Pull request; CI green? tests, cost gate, scanners; and more in the source below](images/architecture-overview-diagram-2.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>
@@ -118,7 +120,7 @@ Full detail on [Spacelift](Spacelift.md).
 
 ### Path 2: an SSH session to a droplet
 
-![Sequence diagram, Path 2: an SSH session to a droplet: Twingate client (laptop); Twingate controller; Relay (only if P2P fails); connector a; connector b (target)](images/architecture-overview-diagram-3.png)
+![Sequence diagram, Path 2: an SSH session to a droplet: Twingate client (laptop); Twingate controller; and more in the source below](images/architecture-overview-diagram-3.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>
@@ -146,7 +148,7 @@ Twingate may hand the session to either connector, which is why connector a need
 
 ### Path 3: a secret reaching a run
 
-![Diagram, Path 3: a secret reaching a run: Doppler prd every real secret; Spacelift context cah-doppler one read-only token, write-only variable; scripts/spacelift/doppler-env.sh tracked or destroy run on main only; Run e](images/architecture-overview-diagram-4.png)
+![Diagram, Path 3: a secret reaching a run: Doppler prd every real secret; and more in the source below](images/architecture-overview-diagram-4.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>

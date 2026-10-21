@@ -1,5 +1,7 @@
 # Identity, secrets and zero trust basics
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Start-from-zero page 3 of 8. Previous: [Networking basics](Networking-Basics-for-This-Project.md). Next: [What is infrastructure as code](What-Is-Infrastructure-as-Code.md).
 
 Most real-world breaches are not clever. Someone found a password, a token or a key that should have been private, and used it. This page is about what those things are, why they leak, and the handful of habits that stop them leaking. It ends with what "zero trust" means once you take the marketing off.

@@ -2,6 +2,8 @@
 
 > **Orientation, not a design guide: verified claims dated.** Claims checked against a vendor page carry the date they were checked (2026-10-16) and the source in the claims register at the bottom. Everything else is general industry knowledge or marked UNVERIFIED. Nothing here has been built in this repository.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 **Prerequisites:** [Enterprise engineering habits](Enterprise-Engineering-Habits.md), [Architecture overview](Architecture-Overview.md) and [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md). [Enterprise networks](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md) is a useful companion for the network sections.
 
 This project is one account, one environment, one operator and two machines. The habits it practises are the right ones. What changes at a company is **how many of everything there is** and **how many people must agree**. Almost every practice below exists because something went wrong when there were too many accounts, too many engineers or too many years for informal agreement to work.

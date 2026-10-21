@@ -1,5 +1,7 @@
 # What is the cloud
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Start-from-zero page 1 of 8. Previous: [Start here](Start-Here-If-You-Are-New.md). Next: [Networking basics for this project](Networking-Basics-for-This-Project.md).
 
 "The cloud is just someone else's computer" is true and almost useless. Yes, a cloud provider owns racks of servers in a building you will never visit. The part that matters is **how** you get to use them: by the hour, through an API, with a public internet address attached, and with a bill that follows whatever you leave running.
@@ -20,7 +22,7 @@ Everything else a provider sells (managed databases, Kubernetes, load balancers,
 
 One physical server runs a program called a **hypervisor**. It carves the hardware into slices and runs a separate operating system in each. Each slice is a virtual machine. The VM does not know it is sharing; it sees "a computer" with, say, one CPU and one gigabyte of memory. That is why the cheapest droplet here is called `s-1vcpu-1gb`: one virtual CPU, one gigabyte of RAM.
 
-![Diagram, A virtual machine, a little more precisely: One physical server in a DigitalOcean datacenter; Hypervisor; Virtual machines, each with its own OS; someone's web server; access-tor1-connector-a (this project); som](images/what-is-the-cloud-diagram-1.png)
+![Diagram, A virtual machine, a little more precisely: One physical server in a DigitalOcean datacenter; Hypervisor; and more in the source below](images/what-is-the-cloud-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>

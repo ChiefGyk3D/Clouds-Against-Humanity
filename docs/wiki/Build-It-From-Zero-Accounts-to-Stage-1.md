@@ -4,6 +4,8 @@
 
 > This is the replication path. It does not repeat the stage guides; it puts them in order, names the accounts you need before you need them, gives every step a "what you should see" check, and ends with how to take it all down and prove the bill is back to zero. Read [Start here if you are new](Start-Here-If-You-Are-New.md) first if the words are unfamiliar.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 The stage guides ([stage 0](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/00-foundation.md), [stage 1](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md)) and the [secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md) are the author's operating records. They are accurate for the author's setup and they contain items that are specific to it. This page tells you which, and in what order to use them.
 
 **Cost, so you can decide before you start.** Stage 0 creates a project, a private network and a firewall, none of which cost money on DigitalOcean at the time of writing. Stage 1 adds two small droplets: about $12 a month at the prices the repository recorded on 2026-10-10, and it is the only part that bills. Free tiers for the other services change, so check each vendor's pricing page on the day instead of trusting this one. The track is built so you can stop after any step with a working, understood environment.

@@ -1,5 +1,7 @@
 # Networking basics for this project
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Start-from-zero page 2 of 8. Previous: [What is the cloud](What-Is-the-Cloud.md). Next: [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md).
 
 This page covers exactly the networking you need to understand this repository: addresses, ports, what "listening" means, what a firewall does, and why a machine can have a public address and still be unreachable. It is not a networking course. It is the minimum, explained properly.
@@ -57,7 +59,7 @@ The [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) 
 
 ## How a machine with zero inbound rules still works
 
-![Diagram, How a machine with zero inbound rules still works: Scanners, bots, everyone on the internet; You; Twingate (a service on the internet); Droplet, zero inbound rules; connector program listens on nothing public](images/networking-basics-for-this-project-diagram-1.png)
+![Diagram, How a machine with zero inbound rules still works: Scanners, bots, everyone on the internet; You; and more in the source below](images/networking-basics-for-this-project-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>

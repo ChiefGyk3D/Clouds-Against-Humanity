@@ -64,3 +64,13 @@ def test_wrapping_adds_a_picture_above_a_bare_block_and_leaves_a_wrapped_one(tmp
     assert out.count("<details>") == 2
     assert "![Diagram, Heading: One; Two](images/p-diagram-1.png)" in out
     assert out.endswith(WRAPPED)
+
+
+def test_generated_alt_text_stays_short_and_points_to_the_source():
+    many = "flowchart LR\n" + "\n".join(f'    n{i}["A fairly long label number {i} for the box"]' for i in range(8))
+    alt = rd.alt_for(many, "A heading `with code`")
+    assert len(alt) <= rd.MAX_ALT
+    assert alt.startswith("Diagram, A heading with code: A fairly long label number 0")
+    assert alt.endswith("and more in the source below")
+    short = rd.alt_for(SRC, "Small")
+    assert short == "Diagram, Small: One; Two"

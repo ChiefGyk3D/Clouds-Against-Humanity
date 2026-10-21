@@ -2,6 +2,8 @@
 
 > Never used Terraform or OpenTofu? [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) explains providers, resources, plan, apply and state from zero, and shows how to run this repo's tests with no cloud account.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 Every resource in this project is declared in OpenTofu and nothing is clicked together in a console (the account hardening checklist in stage 0 is the one deliberate exception, because it has to happen before any automation has credentials).
 
 ## Why OpenTofu and not Terraform
@@ -14,7 +16,7 @@ For a line-by-line explanation of every variable, resource and output, read the 
 
 ## Modules versus stacks
 
-![Diagram, Modules versus stacks: modules/ (reusable building blocks, never applied alone); vpc; firewall; twingate-connector the droplet; twingate-bootstrap connector + tokens + cloud-init; stacks/ (what Spacelift actuall](images/opentofu-stacks-and-modules-diagram-1.png)
+![Diagram, Modules versus stacks: modules/ (reusable building blocks, never applied alone); vpc; firewall; and more in the source below](images/opentofu-stacks-and-modules-diagram-1.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>

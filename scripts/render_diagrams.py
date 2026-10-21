@@ -74,18 +74,35 @@ def picture_dir(page: Path) -> str:
     return "docs/images" if page.name == "README.md" else "images"
 
 
+MAX_ALT = 150  # wiki accessibility rule (tests/test_wiki_accessibility.py): alt text is read aloud, so keep it short
+MORE = "; and more in the source below"
+
+
 def alt_for(src: str, heading: str) -> str:
     labels = re.findall(r'\["([^"\n]+)"\]|\["?([^\]"\n]+)"?\]|participant \w+ as ([^\n]+)', src)
     names = []
     for group in labels:
         text = next(g for g in group if g)
         text = re.sub(r"<br\s*/?>", " ", text).strip()
+        text = re.sub(r"\s+", " ", text)
         if text and text not in names:
             names.append(text)
     kind = "Sequence diagram" if src.lstrip().startswith("sequenceDiagram") else "Diagram"
-    body = "; ".join(names[:8])
-    alt = f"{kind}, {heading}: {body}" if body else f"{kind}, {heading}"
-    return alt[:220].replace("]", ")").replace("[", "(")
+    head = re.sub(r"\s+", " ", f"{kind}, {heading}".replace("`", "")).strip()
+    chosen = []
+    for i, name in enumerate(names[:8]):
+        trial = head + ": " + "; ".join(chosen + [name])
+        # Leave room for the "and more" note unless this is the last label there is.
+        room = MAX_ALT if i == len(names) - 1 else MAX_ALT - len(MORE)
+        if len(trial) > room:
+            break
+        chosen.append(name)
+    alt = head
+    if chosen:
+        alt += ": " + "; ".join(chosen)
+    if len(chosen) < len(names):
+        alt += MORE
+    return alt[:MAX_ALT].replace("]", ")").replace("[", "(")
 
 
 def key_for(page: Path) -> str:

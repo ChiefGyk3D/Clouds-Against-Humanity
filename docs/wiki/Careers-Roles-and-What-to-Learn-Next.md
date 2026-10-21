@@ -2,13 +2,15 @@
 
 > **Orientation, not a design guide: verified claims dated.** Nothing on this page was checked against an employer, a certification body or a salary survey; job titles, duties and certification names are general industry knowledge unless the claims register says otherwise. Titles mean different things at different companies. Treat this as a map to ask questions with, not a promise about any job.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 **Prerequisites:** [Start here if you are new](Start-Here-If-You-Are-New.md) and at least the first half of the [core path](Reading-Order.md#the-core-path). The companion pages [Enterprise networks](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md), [Enterprise infrastructure](Enterprise-Infrastructure-Differences.md) and [Enterprise identity and secrets](Enterprise-Identity-and-Secrets-at-Scale.md) give the vocabulary used below.
 
 The maintainer's reason for this group of pages is simple: the field this repository lives in is wide, the small example shows one slice of it, and it is a good thing to learn for a career. This page lists the roles around the work, what each does on an ordinary day, and which pages here build which skills. It endorses no certification and no employer.
 
 ## Contrast at a glance
 
-| | In this project | In a company |
+| Topic | In this project | In a company |
 |---|---|---|
 | Who does the work | One person wearing every hat | Many roles, each owning part of what one person does here |
 | What "done" means | It applies, the checks pass, the bill is under the cap | A ticket is closed, a service-level target is met, an auditor is satisfied |

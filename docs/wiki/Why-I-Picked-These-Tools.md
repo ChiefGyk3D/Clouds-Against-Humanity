@@ -2,6 +2,8 @@
 
 > If any of the tool names below are new, [Architecture overview](Architecture-Overview.md) shows where most of them sit first. This page is opinion, my own, and it says so. [Enterprise habits](Enterprise-Engineering-Habits.md) covers the engineering side of the same choices.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 I could have built all of this on open source, and I know that, because Infisical for secrets, Keycloak or Authentik for identity, and NetBird, Headscale or OpenZiti for zero trust all exist and are good. Tailscale's core client is open source too, but its coordination server is not, and Headscale is the community's self-hosted answer to that. So the question you should be asking is why Spacelift, DigitalOcean, Doppler and Twingate, and the answer is that I wanted this to look as close as I could get it to the enterprise environments I have actually worked in.
 
 ## Disclosure first

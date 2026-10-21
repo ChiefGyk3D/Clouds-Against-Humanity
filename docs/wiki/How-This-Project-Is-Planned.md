@@ -2,6 +2,8 @@
 
 > Prerequisites: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) and the [Roadmap](Roadmap.md). This page is about how the work is organised, not what the stages are.
 
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
 The work is planned the way a small team plans software: a written backlog, a size on every item, two-week sprints, a review at the end of each, and a definition of done. The plan lives in GitHub, next to the code, so a change to the plan is as visible as a change to the code.
 
 - **The board:** the [Clouds Against Humanity project](https://github.com/users/ChiefGyk3D/projects/4) (Sprint board, Sprint plan, Roadmap, Backlog and Agents at work views).

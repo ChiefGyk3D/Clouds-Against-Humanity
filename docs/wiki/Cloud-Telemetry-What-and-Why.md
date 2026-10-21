@@ -26,7 +26,7 @@ Two quick tests that sort most confusion:
 
 These three get mixed up because they share data. They are not the same kind of thing.
 
-| | NOC | SOC | SIEM |
+| Aspect | NOC | SOC | SIEM |
 |---|---|---|---|
 | Stands for | Network operations centre | Security operations centre | Security information and event management |
 | It is a... | Function, usually a team | Function, usually a team | **Tool** (a product or a stack) |
