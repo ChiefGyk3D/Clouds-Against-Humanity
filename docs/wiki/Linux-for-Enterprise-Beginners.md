@@ -4,7 +4,7 @@ Side page to the start-from-zero pages. Read it before [Droplet hardening](Dropl
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-> **Status: vendor facts checked against vendor pages on 2026-10-22; commands not run by the author.** Every lifecycle date, default and maintainer below was read from the vendor page named next to it, on **2026-10-22**. Anything I could not read (several vendor sites blocked automated reads) is marked **est.** (estimate) and is a guess to check. No price appears anywhere on this page: prices change, so go to the vendor. The commands are standard and stable but I did not run them in a container for this page, so run the lab, and trust what your terminal prints over what this page says.
+> **Status: vendor facts checked against vendor pages on 2026-10-22; commands not run by the author.** Every lifecycle date, default and maintainer below was read from the vendor page named next to it, on **2026-10-22**. Where a vendor site blocked automated reads, lifecycle dates come from endoflife.date, a secondary community-maintained aggregator (also read 2026-10-22) and say so; confirm them on the vendor page before a real decision. Anything else I could not read is marked **est.** (estimate) and is a guess to check. No price appears anywhere on this page: prices change, so go to the vendor. The commands are standard and stable but I did not run them in a container for this page, so run the lab, and trust what your terminal prints over what this page says.
 
 > **Prerequisites.** You can open a terminal and type a command ([Git from zero](Git-From-Zero.md) has a gentle first look) and you know what an SSH key is ([Networking basics](Networking-Basics-for-This-Project.md#ssh-in-one-paragraph)). Nothing about Linux itself. About three hours for the reading and the free lab.
 
@@ -53,19 +53,19 @@ Who feeds whom:
 
 ### Comparison table
 
-Read left to right as "who stands behind it, and what will I type". Every cell has a source in the claims register at the bottom; cells marked **est.** are guesses I could not verify.
+Read left to right as "who stands behind it, and what will I type". Every cell has a source in the claims register at the bottom; cells marked **est.** are guesses I could not verify. Lifecycle cells tagged "aggregator" come from the secondary community site endoflife.date (see [where the dates come from](#where-the-dates-come-from-and-how-far-to-trust-them)), not the vendor; confirm on the vendor page before a real decision.
 
 | Distro | Maintained by | Family and package manager | Init and firewall tool | MAC (mandatory access control) | Typical use | Support length and cost model |
 |---|---|---|---|---|---|---|
-| RHEL | Red Hat | Red Hat, `dnf` | systemd; firewalld (**est.**) | SELinux, enforcing by default (**est.**) | Enterprise servers, regulated shops | 10-year life cycle for 8, 9 and 10, up to 14 years with add-ons; paid subscription |
-| Rocky Linux | Community project, founded after the 2020 CentOS announcement | Red Hat, `dnf` | systemd; firewalld (**est.**) | SELinux (**est.**) | Free RHEL-style servers | Follows RHEL majors (**est.**); free |
-| AlmaLinux | AlmaLinux OS Foundation | Red Hat, `dnf` | systemd; firewalld (**est.**) | SELinux (**est.**) | Free RHEL-compatible servers | AlmaLinux 10: active support to 31 May 2030, security to 31 May 2035; free, paid support from third parties |
-| CentOS Stream | The CentOS Project | Red Hat, `dnf` | systemd; firewalld (**est.**) | SELinux (**est.**) | Development, ahead of RHEL | Rolling just ahead of RHEL; no fixed long life (**est.**) |
+| RHEL | Red Hat | Red Hat, `dnf` | systemd; firewalld (**est.**) | SELinux, enforcing by default (**est.**) | Enterprise servers, regulated shops | 10-year life cycle for 8, 9 and 10, up to 14 years with add-ons (Red Hat); RHEL 9 ends maintenance 2032-05-31 and RHEL 10 on 2035-05-31 (aggregator); paid subscription |
+| Rocky Linux | Community project, founded after the 2020 CentOS announcement | Red Hat, `dnf` | systemd; firewalld (**est.**) | SELinux (**est.**) | Free RHEL-style servers | Rocky 9 ends 2032-05-31, Rocky 10 on 2035-05-31 (aggregator; matches RHEL); free |
+| AlmaLinux | AlmaLinux OS Foundation | Red Hat, `dnf` | systemd; firewalld (**est.**) | SELinux (**est.**) | Free RHEL-compatible servers | AlmaLinux 10: active support to 31 May 2030, security to 31 May 2035 (vendor and aggregator agree); free, paid support from third parties |
+| CentOS Stream | The CentOS Project | Red Hat, `dnf` | systemd; firewalld (**est.**) | SELinux (**est.**) | Development, ahead of RHEL | Stream 9 ends 2027-05-31, Stream 10 on 2030-05-31 (aggregator): about five years, far shorter than RHEL; free |
 | Amazon Linux 2023 | AWS | Own, Fedora-based; `dnf` | systemd (**est.**); security groups outside the host | SELinux present, permissive by default | Workloads on AWS | Supported to 2029-06-30 (standard support ends 2027-06-30); no additional charge |
 | Ubuntu LTS (24.04) | Canonical | Debian, `apt` | systemd (**est.**); `ufw`, disabled by default | AppArmor | Cloud images, general servers, this project | 24.04: security maintenance to May 2029, expanded to May 2034 with Ubuntu Pro; free base, paid Pro |
-| Debian | Debian project (community) | Debian, `apt` | systemd (**est.**); nftables or none (**est.**) | AppArmor (**est.**) | Stable servers, container base images | Current stable is 13 "trixie" (2025-08-09); lifetime not read (**est.**); free |
-| SUSE Linux Enterprise Server | SUSE | SUSE, `zypper` | systemd (**est.**); firewalld since SLES 15 | AppArmor in 15; SELinux supported but off by default there; SLES 16 default **est.** SELinux | SAP, large enterprises | Multi-year with paid extensions (**est.**; the lifecycle page was blocked); subscription |
-| Oracle Linux | Oracle | Red Hat-compatible, `dnf` (**est.**) | systemd (**est.**) | SELinux (**est.**) | Oracle database shops | Product life cycle page exists; not read (**est.**) |
+| Debian | Debian project (community) | Debian, `apt` | systemd (**est.**); nftables or none (**est.**) | AppArmor (**est.**) | Stable servers, container base images | Current stable is 13 "trixie" (2025-08-09); Debian 12 ends 2028-06-30 and 13 on 2030-06-30; community long-term extension beyond that (aggregator); free |
+| SUSE Linux Enterprise Server | SUSE | SUSE, `zypper` | systemd (**est.**); firewalld since SLES 15 | AppArmor in 15; SELinux supported but off by default there; SLES 16 default **est.** SELinux | SAP, large enterprises | SLES 15 SP7 ends 2031-07-31, extended (LTSS) to 2034-07-31; 16.0 ends 2027-11-30 (aggregator; SUSE's page not readable); subscription |
+| Oracle Linux | Oracle | Red Hat-compatible, `dnf` (**est.**) | systemd (**est.**) | SELinux (**est.**) | Oracle database shops | Oracle Linux 9 ends 2032-06-30, 10 on 2035-06-30 (aggregator); Oracle's own page not read |
 | Alpine | Alpine project | Own, `apk` (**est.**) | OpenRC (**est.**); usually none in containers | None by default (**est.**) | Container base images | Releases each May and November, a branch is supported for a stated period |
 
 Two reading tips. First, "free" and "paid" describe the **support relationship**, not the software: the software is open source in all of these. Second, the lifecycle column is the one that matters for security (see [Patching and lifecycle dates](#patching-and-why-lifecycle-dates-matter)).
@@ -233,6 +233,12 @@ Clocks drift, and TLS, tokens and log correlation all fail when they do. The Red
 
 A distro is supported for a stated period. After the date, the vendor stops publishing security fixes for it, and every new vulnerability stays open on that machine forever. So an **end-of-life date is a security date**. Ask of every machine: what release is it, when does support end, who is going to move it before that date? Amazon Linux 2 reached its end on 2026-06-30; Ubuntu 22.04 LTS reaches the end of standard security maintenance in May 2027 (read on the Ubuntu release page).
 
+**Two examples already in the past** (from the aggregator described below, read 2026-10-22, today being 2026-10-22): Debian 11 reached its end of support on **2026-08-31**, and SLES 15 SP6 reached its general-support end on **2025-12-31**. A machine still on either today gets no new security fixes from the vendor's normal channel. Older still: RHEL 7 ended maintenance on 2024-06-30.
+
+#### Where the dates come from, and how far to trust them
+
+The vendor's own lifecycle page is the authority; each is linked in the claims register. For a quick overview I also read [endoflife.date](https://endoflife.date/), a **secondary, community-maintained aggregator**, through its public read-only API on 2026-10-22 (for example `https://endoflife.date/api/rhel.json`). It carried the RHEL, SLES, Rocky, Debian, Oracle Linux and CentOS Stream dates in this page's table, which I could not read on the vendors' pages. For Amazon Linux 2023, AlmaLinux 10 and Ubuntu 24.04 it matched what I read from the vendors, with one small difference: for the end of Ubuntu 24.04's expanded security maintenance the aggregator says 2034-04-25 and Canonical's page says May 2034, so prefer Canonical's. **Confirm a date on the vendor's own page before relying on it for a real decision.**
+
 Two distinctions come up in interviews. **Standard** support (security fixes plus bug fixes) is different from **extended** support (security fixes only, often paid). And "supported" depends on the product: Red Hat's own page lists a Full Support Phase, a Maintenance Support Phase and an Extended Life Phase.
 
 Patching practice in one line each: test, stage, roll out in rings, keep a way back, and reboot when a kernel update needs it. Automatic security updates are reasonable for a small stateless fleet like this one and risky for a database server. See [Enterprise change management for beginners](Enterprise-Change-Management-for-Beginners.md).
@@ -285,6 +291,20 @@ You will run the same tasks on two families. A container shares your computer's 
 3. **Check.** `sudo -l` works for her only in the right group, and the group name differs. Try the wrong group name; the command fails.
 4. **Undo.** `exit`. The container goes away with the user.
 
+### Exercise 4: read the end-of-life date of the OS you just ran
+
+1. **Predict.** Will the AlmaLinux 9 container you used show an end date earlier or later than the Ubuntu 24.04 one? Write the two years down.
+2. **Do.** On your host (not in the minimal container, which may lack `curl` and Python), read-only:
+
+   ```text
+   $ curl -sL https://endoflife.date/api/almalinux.json | python3 -m json.tool | head -30
+   $ curl -sL https://endoflife.date/api/ubuntu.json | python3 -m json.tool | head -30
+   ```
+
+   Find the entry whose `cycle` matches your container's `VERSION_ID` from `/etc/os-release` (`9` and `24.04`). Read `eol` (end of support), `support` (end of the full-support phase), and `extendedSupport` where present.
+3. **Check.** AlmaLinux 9 should show `eol` 2032-05-31 and Ubuntu 24.04 `eol` 2029-05-31 (as read on 2026-10-22; the data changes). Compare with the vendor pages in the claims register. If they disagree, the vendor wins.
+4. **Undo.** Nothing to undo: the requests only read.
+
 ### Paid optional path: a small cloud instance of a family you pick
 
 For a real machine with systemd, a firewall and SELinux or AppArmor, rent a small instance of one family. This project's own sizes and their cost basis are in `docs/cost.md` ([Cost](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md)); other providers' prices are on their own pricing pages, which I did not read, so I give no figure here. Use key-based login only, do not open port 22 to the world (restrict it to your own address, or use the Twingate model if you built this project), and write down the machine's creation time before you start.
@@ -322,6 +342,11 @@ All retrieved 2026-10-22 with read-only requests. "Not read" means the page was 
 | Claim | Source | Status |
 |---|---|---|
 | RHEL 8, 9 and 10 have a ten-year life cycle (Full and Maintenance Support) then Extended Life Phase; up to 14 years with ELCP and Long-Life add-ons | [Red Hat: Enterprise Linux life cycle](https://access.redhat.com/support/policy/updates/errata) | Read. Exact end dates per major version not read |
+| RHEL 7, 8, 9, 10 dates: 10 `eol` 2035-05-31 (extended 2039-05-31), 9 `eol` 2032-05-31 (extended 2036-05-31), 8 `eol` 2029-05-31 (extended 2033-05-31), 7 `eol` 2024-06-30 | [endoflife.date: rhel](https://endoflife.date/api/rhel.json), secondary aggregator | Read 2026-10-22. Consistent with Red Hat's ten-year statement; vendor per-version dates not extracted from Red Hat's page |
+| SLES: 15.7 `eol` 2031-07-31 (extended 2034-07-31), 15.6 `eol` 2025-12-31, 16.0 `eol` 2027-11-30 | [endoflife.date: sles](https://endoflife.date/api/sles.json), secondary aggregator | Read 2026-10-22. SUSE's own [lifecycle page](https://www.suse.com/lifecycle/) could not be read; confirm there |
+| Rocky 9 `eol` 2032-05-31, 10 `eol` 2035-05-31; CentOS Stream 9 `eol` 2027-05-31, 10 `eol` 2030-05-31; Oracle Linux 9 `eol` 2032-06-30, 10 `eol` 2035-06-30 | [rocky-linux](https://endoflife.date/api/rocky-linux.json), [centos-stream](https://endoflife.date/api/centos-stream.json), [oracle-linux](https://endoflife.date/api/oracle-linux.json), secondary aggregator | Read 2026-10-22. Vendor pages: [Rocky](https://rockylinux.org/), [CentOS Stream](https://www.centos.org/centos-stream/), [Oracle Linux](https://docs.oracle.com/en/operating-systems/oracle-linux/); their dates not read there |
+| Debian 11 `eol` 2026-08-31 (past), 12 `eol` 2028-06-30, 13 `eol` 2030-06-30 | [endoflife.date: debian](https://endoflife.date/api/debian.json), secondary aggregator | Read 2026-10-22. [Debian releases](https://www.debian.org/releases/) confirms 13 only (release date) |
+| Cross-check: AL2023 `eol` 2029-06-30, AL2 `eol` 2026-06-30, Alma 10 `eol` 2035-05-31 and Alma 9 `eol` 2032-05-31, Ubuntu 24.04 `eol` 2029-05-31 | [amazon-linux](https://endoflife.date/api/amazon-linux.json), [almalinux](https://endoflife.date/api/almalinux.json), [ubuntu](https://endoflife.date/api/ubuntu.json) | Matches the vendor pages above. One difference: Ubuntu 24.04 extended 2034-04-25 (aggregator) vs May 2034 (Canonical); vendor preferred |
 | Red Hat subscription tiers (Standard, Premium, ELCP) exist | Same page | Read. No prices given |
 | RHEL SELinux enforcing, firewalld default | [Red Hat documentation](https://docs.redhat.com/) | Not read (blocked for automated reads); **est.** |
 | AL2023 supported to 2029-06-30, standard support ends 2027-06-30, based in part on Fedora, DNF | [Amazon Linux 2023 release cadence](https://docs.aws.amazon.com/linux/al2023/ug/release-cadence.html) | Read |
@@ -336,7 +361,7 @@ All retrieved 2026-10-22 with read-only requests. "Not read" means the page was 
 | CentOS Stream is a midstream between Fedora and RHEL | [CentOS Stream](https://www.centos.org/centos-stream/) | Read |
 | Debian stable is 13 "trixie", released 2025-08-09 | [Debian releases](https://www.debian.org/releases/) | Read. Support length not read |
 | Alpine uses musl libc and busybox; releases each May and November | [Alpine releases](https://alpinelinux.org/releases/) | Read |
-| SLES 15 introduced firewalld as default; AppArmor chapter exists; SELinux supported, permissive by default, enabled via boot parameters | [SLES 15 SP7 firewall chapter](https://documentation.suse.com/sles/15-SP7/html/SLES-all/cha-security-firewall.html), [AppArmor](https://documentation.suse.com/sles/15-SP7/html/SLES-all/cha-apparmor-intro.html), [SELinux](https://documentation.suse.com/en-us/sles/15-SP7/html/SLES-all/cha-selinux.html) | Read. SUSE's own lifecycle page and the SLES 16 default were not readable: **est.** |
+| SLES 15 introduced firewalld as default; AppArmor chapter exists; SELinux supported, permissive by default, enabled via boot parameters | [SLES 15 SP7 firewall chapter](https://documentation.suse.com/sles/15-SP7/html/SLES-all/cha-security-firewall.html), [AppArmor](https://documentation.suse.com/sles/15-SP7/html/SLES-all/cha-apparmor-intro.html), [SELinux](https://documentation.suse.com/en-us/sles/15-SP7/html/SLES-all/cha-selinux.html) | Read. SUSE's own lifecycle page was not readable (dates come from the aggregator row above); the SLES 16 default MAC is **est.** |
 | Docker Hub official images `ubuntu:24.04`, `almalinux:9`, `rockylinux:9`, `amazonlinux:2023` exist; SUSE publishes images at registry.suse.com | [Docker Hub: ubuntu](https://hub.docker.com/_/ubuntu), [almalinux](https://hub.docker.com/_/almalinux), [rockylinux](https://hub.docker.com/_/rockylinux), [amazonlinux](https://hub.docker.com/_/amazonlinux), [SUSE registry](https://registry.suse.com/) | Read |
 | This project's images and first-boot settings | `modules/twingate-connector/main.tf`, `modules/aws/twingate-connector/main.tf`, `modules/twingate-bootstrap/cloud-init.yaml.tftpl` | Read in this repository |
 | Everything else (commands, file layout, group names, `systemctl` behaviour) | General Linux knowledge, standard across the named distros | Not re-verified per distro; run the lab |
