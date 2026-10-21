@@ -13,8 +13,12 @@ locals {
   # One scrape resource per allowlisted endpoint per connector. The connector
   # keys (a, b) are not private; the addresses stay sensitive.
   connector_keys = var.metrics_enabled ? nonsensitive(keys(var.connector_private_ips)) : []
+  # Only connector-role entries are ever multiplied across connector addresses
+  # (variables.tf already refuses any other host_role; this keeps it true if
+  # that validation is ever relaxed).
+  scrape_entries = [for s in var.scrape_allowlist : s if s.host_role == "connector"]
   scrape_pairs = {
-    for p in setproduct(var.scrape_allowlist, local.connector_keys) :
+    for p in setproduct(local.scrape_entries, local.connector_keys) :
     "${p[0].name}-${p[1]}" => {
       port     = p[0].port
       instance = p[1]
@@ -33,9 +37,9 @@ locals {
     "${p[0]}:${p[1]}" => { skey = p[0], server = p[1] }
   }
 
-  extra_scrape_pairs = merge([
+  extra_scrape_pairs = merge({}, [
     for sk in local.extra_scrape : {
-      for p in setproduct(var.scrape_allowlist, nonsensitive(keys(var.sites[sk].connector_private_ips))) :
+      for p in setproduct(local.scrape_entries, nonsensitive(keys(var.sites[sk].connector_private_ips))) :
       "${sk}:${p[0].name}-${p[1]}" => {
         skey     = sk
         port     = p[0].port
@@ -43,6 +47,25 @@ locals {
       }
     }
   ]...)
+
+  # Isolation and collision checks, read by preconditions below. A scrape
+  # endpoint is a (remote network, address) pair: it must belong to exactly one
+  # site, or two sites' services would reach the same endpoint. Addresses are
+  # private, so these lists are sensitive and never appear in an error message.
+  scrape_endpoints = concat(
+    [for ip in values(var.connector_private_ips) : "${var.cloud_remote_network_id}|${ip}"],
+    flatten([for sk in local.extra_scrape : [for ip in values(var.sites[sk].connector_private_ips) : "${var.sites[sk].cloud_remote_network_id}|${ip}"]])
+  )
+  # Generated Twingate resource names. Distinct (key, server) pairs can render
+  # the same name when the parts contain hyphens, so uniqueness is checked.
+  logging_resource_names = concat(
+    [for n in local.logging_names : "logging-${local.resource_key}-${n}"],
+    [for p in local.extra_logging_pairs : "logging-${p.skey}-${p.server}"]
+  )
+  scrape_resource_names = concat(
+    [for k, v in local.scrape_pairs : "scrape-${local.resource_key}-${k}"],
+    [for k, v in local.extra_scrape_pairs : "scrape-${replace(k, ":", "-")}"]
+  )
 }
 
 # One Twingate service per site per role, each granted only that role's
@@ -65,6 +88,10 @@ resource "twingate_service_account" "scrape" {
   name  = "telemetry-${local.resource_key}-scrape"
 
   lifecycle {
+    precondition {
+      condition     = length(distinct(local.scrape_endpoints)) == length(local.scrape_endpoints)
+      error_message = "Every scrape endpoint (cloud_remote_network_id plus connector address) must belong to exactly one site, across the default site and every sites entry. A repeated pair would give two sites' scrape services access to the same endpoint."
+    }
     precondition {
       condition     = var.cloud_remote_network_id != "" && length(var.scrape_allowlist) > 0 && length(var.connector_private_ips) > 0
       error_message = "metrics_enabled needs cloud_remote_network_id, a non-empty scrape_allowlist and connector_private_ips."
@@ -149,6 +176,10 @@ resource "twingate_service_account" "site_logging" {
 
   lifecycle {
     precondition {
+      condition     = length(distinct(local.logging_resource_names)) == length(local.logging_resource_names)
+      error_message = "Two logging resources would get the same generated name (a hyphen in a sites key or a logging server name makes distinct pairs render alike). Rename a sites key or a server."
+    }
+    precondition {
       condition     = each.key != local.resource_key
       error_message = "A sites key must differ from this stack's own resource_key (the default site)."
     }
@@ -164,6 +195,10 @@ resource "twingate_service_account" "site_scrape" {
   name     = "telemetry-${each.key}-scrape"
 
   lifecycle {
+    precondition {
+      condition     = length(distinct(local.scrape_resource_names)) == length(local.scrape_resource_names)
+      error_message = "Two scrape resources would get the same generated name (a hyphen in a sites key or an allowlist name makes distinct pairs render alike). Rename a sites key or an allowlist entry."
+    }
     precondition {
       condition     = each.key != local.resource_key
       error_message = "A sites key must differ from this stack's own resource_key (the default site)."

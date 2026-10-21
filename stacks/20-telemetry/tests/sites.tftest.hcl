@@ -50,8 +50,13 @@ run "sites_with_flags_off_plans_nothing" {
   }
 
   assert {
-    condition     = length(twingate_service_account.site_logging) == 0 && length(twingate_service_account.site_scrape) == 0 && length(twingate_resource.site_logging) == 0 && length(twingate_resource.site_scrape) == 0 && length(twingate_service_account.logging) == 0
-    error_message = "Listing a site must create nothing until a flag is true."
+    condition = (length(twingate_service_account.logging) + length(twingate_service_account.scrape) + length(twingate_service_account.site_logging) + length(twingate_service_account.site_scrape)
+    + length(twingate_resource.logging) + length(twingate_resource.scrape) + length(twingate_resource.site_logging) + length(twingate_resource.site_scrape)) == 0
+    error_message = "Listing a site must create nothing until a flag is true: every service and resource count is zero."
+  }
+  assert {
+    condition     = output.extra_site_identities == { tor2 = { site = "site-tor2", region = "tor1" } } && output.scrape_targets == {}
+    error_message = "With the flags off the labels of listed sites are still reported (labels only, no objects) and scrape_targets stays empty."
   }
 }
 
@@ -153,7 +158,7 @@ run "a_site_key_equal_to_the_resource_key_is_refused" {
   command = plan
   variables {
     metrics_enabled = true
-    sites           = { tor1 = { cloud_remote_network_id = "x", connector_private_ips = { a = "10.98.0.5" } } }
+    sites           = { tor1 = { site_name = "site-other", cloud_remote_network_id = "x", connector_private_ips = { a = "10.98.0.5" } } }
   }
   expect_failures = [twingate_service_account.site_scrape]
 }
@@ -234,4 +239,120 @@ run "adding_a_site_leaves_the_default_site_addresses_unchanged" {
     condition     = toset(keys(twingate_resource.logging)) == toset(["siem-home-agent", "siem-home-syslog"]) && toset(keys(twingate_resource.scrape)) == toset(["node-a", "node-b", "connector-a", "connector-b"]) && length(twingate_service_account.logging) == 1 && length(twingate_service_account.scrape) == 1
     error_message = "A second site must not change the first site's addresses or count."
   }
+}
+
+# --- fix round: isolation, filtering, name and label collisions -------------------
+
+run "empty_sites_with_metrics_on_evaluates_the_merge" {
+  command = plan
+  variables {
+    metrics_enabled = true
+    sites           = {}
+  }
+  assert {
+    condition     = length(twingate_resource.site_scrape) == 0 && length(twingate_resource.scrape) == 4
+    error_message = "An empty sites map must evaluate and add nothing."
+  }
+}
+
+run "two_sites_with_the_same_network_and_address_are_refused" {
+  command = plan
+  variables {
+    metrics_enabled = true
+    sites = {
+      tor2 = { cloud_remote_network_id = "shared-net", connector_private_ips = { a = "10.98.0.5" } }
+      tor3 = { cloud_remote_network_id = "shared-net", connector_private_ips = { a = "10.98.0.5" } }
+    }
+  }
+  expect_failures = [twingate_service_account.scrape]
+}
+
+run "a_site_sharing_an_endpoint_with_the_default_site_is_refused" {
+  command = plan
+  variables {
+    metrics_enabled = true
+    sites           = { tor2 = { cloud_remote_network_id = "cloud-network-id", connector_private_ips = { a = "10.99.0.5" } } }
+  }
+  expect_failures = [twingate_service_account.scrape]
+}
+
+run "the_same_address_in_different_networks_is_allowed" {
+  command = plan
+  variables {
+    metrics_enabled = true
+    sites           = { tor2 = { cloud_remote_network_id = "cloud-two", connector_private_ips = { a = "10.99.0.5" } } }
+  }
+  assert {
+    condition     = length(twingate_resource.site_scrape) == 2
+    error_message = "Overlapping ranges in different remote networks are distinct endpoints."
+  }
+}
+
+run "only_connector_role_entries_ever_become_scrape_resources" {
+  command = plan
+  variables {
+    metrics_enabled = true
+    scrape_allowlist = [
+      { name = "node", host_role = "connector", port = 9100 },
+      { name = "db", host_role = "database", port = 5432 },
+    ]
+  }
+  expect_failures = [var.scrape_allowlist]
+}
+
+run "colliding_logging_names_across_sites_are_refused" {
+  command = plan
+  variables {
+    logging_enabled = true
+    logging_servers = [
+      { name = "de", address = "192.0.2.10", port = 1514, protocol = "tcp", purpose = "wazuh-agent" },
+      { name = "c-de", address = "192.0.2.10", port = 1515, protocol = "tcp", purpose = "wazuh-enroll" },
+    ]
+    sites = { "ab-c" = {}, "ab" = {} }
+  }
+  expect_failures = [twingate_service_account.site_logging]
+}
+
+run "colliding_scrape_names_across_sites_are_refused" {
+  command = plan
+  variables {
+    metrics_enabled = true
+    scrape_allowlist = [
+      { name = "de", host_role = "connector", port = 9100 },
+      { name = "c-de", host_role = "connector", port = 9101 },
+    ]
+    sites = {
+      "ab-c" = { cloud_remote_network_id = "n1", connector_private_ips = { a = "10.91.0.5" } }
+      "ab"   = { cloud_remote_network_id = "n2", connector_private_ips = { a = "10.92.0.5" } }
+    }
+  }
+  expect_failures = [twingate_service_account.site_scrape]
+}
+
+run "two_sites_with_the_same_site_label_are_refused" {
+  command = plan
+  variables {
+    sites = {
+      tor2 = { site_name = "site-x" }
+      tor3 = { site_name = "site-x" }
+    }
+  }
+  expect_failures = [output.extra_site_identities]
+}
+
+run "a_site_label_equal_to_the_default_label_is_refused" {
+  command = plan
+  variables {
+    sites = { tor2 = { site_name = "site-tor1" } }
+  }
+  expect_failures = [output.extra_site_identities]
+}
+
+run "a_site_label_equal_to_the_explicit_default_label_is_refused" {
+  command = plan
+  variables {
+    site_name = "site-home"
+    sites     = { home = {} }
+  }
+  expect_failures = [output.extra_site_identities]
 }

@@ -77,6 +77,10 @@ def test_the_guard_bites_on_an_added_or_missing_address():
     )
     problems = "\n".join(pnc.check(plan, g, False))
     assert "site_scrape" in problems
+    # a fresh plan, from which an ORIGINAL golden entry is removed by name
+    missing = 'twingate_resource.scrape["node-a"]'
     plan = noop_plan(g)
-    plan["resource_changes"].pop()
-    assert pnc.check(plan, g, False)
+    assert any(e["address"] == missing for e in plan["resource_changes"])
+    plan["resource_changes"] = [e for e in plan["resource_changes"] if e["address"] != missing]
+    problems = "\n".join(pnc.check(plan, g, False))
+    assert missing in problems, problems

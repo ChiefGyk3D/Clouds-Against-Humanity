@@ -42,4 +42,11 @@ output "site_identity" {
 # attaches to it. Empty by default. No private value.
 output "extra_site_identities" {
   value = local.extra_site_labels
+
+  # The site label is the identity in every metric: two sites must not resolve
+  # to the same one, nor may one equal the default site's label.
+  precondition {
+    condition     = length(distinct(concat([local.site], [for k, v in local.extra_site_labels : v.site]))) == length(local.extra_site_labels) + 1
+    error_message = "Every site label must be distinct: the default site's label (its own setting, or site-<region>) and each sites entry's (its own setting, or site-<key>)."
+  }
 }
