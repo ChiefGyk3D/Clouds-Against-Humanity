@@ -203,3 +203,46 @@ variable "labels" {
     error_message = "No labels value may be longer than 32 characters."
   }
 }
+
+variable "sites" {
+  type = map(object({
+    site_name               = optional(string, "")
+    region                  = optional(string, "")
+    cloud_remote_network_id = optional(string, "")
+    connector_private_ips   = optional(map(string), {})
+  }))
+  default     = {}
+  sensitive   = true
+  description = "Additional sites served by this stack, keyed by each site's resource_key (immutable once applied: it is in the names). Empty, the default, adds nothing and leaves the single-site plan unchanged. Each entry gets its OWN logging and scrape Twingate service (one per site per role, never shared), a logging resource per logging_servers element and a scrape resource per scrape_allowlist entry per connector, all gated on the same two flags. site_name is the telemetry label (empty means site-<key>) and appears in no name; region is a label too (empty means region). cloud_remote_network_id and connector_private_ips are the site's own, as for the single site, and are private. Service keys are still issued out of band, one per host. The home logging servers are shared by every site."
+
+  validation {
+    condition     = alltrue([for k in nonsensitive(keys(var.sites)) : can(regex("^[a-z][a-z0-9-]{1,23}$", k))])
+    error_message = "Every sites key must be 2 to 24 characters: a lowercase letter, then lowercase letters, digits or hyphens."
+  }
+
+  validation {
+    condition     = alltrue([for k, v in nonsensitive(var.sites) : v.site_name == "" || can(regex("^[a-z][a-z0-9-]{1,23}$", v.site_name))])
+    error_message = "Every sites site_name must be empty (meaning site-<key>) or 2 to 24 characters: a lowercase letter, then lowercase letters, digits or hyphens."
+  }
+
+  validation {
+    condition     = alltrue([for k, v in nonsensitive(var.sites) : v.region == "" || can(regex("^[a-z]{3}[0-9]$", v.region))])
+    error_message = "Every sites region must be empty or a DigitalOcean region slug such as tor1."
+  }
+
+  validation {
+    condition     = alltrue([for k, v in nonsensitive(var.sites) : alltrue([for ck in keys(v.connector_private_ips) : contains(["a", "b"], ck)])])
+    error_message = "A sites connector_private_ips may only have the keys a and b."
+  }
+
+  validation {
+    condition = alltrue([
+      for k, v in nonsensitive(var.sites) : alltrue([
+        for ip in values(v.connector_private_ips) :
+        can(regex("^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])[.]){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$", ip))
+        && anytrue([for c in ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"] : try(cidrcontains(c, ip), false)])
+      ])
+    ])
+    error_message = "Every sites connector_private_ips value must be a private IPv4 address (10/8, 172.16/12 or 192.168/16)."
+  }
+}

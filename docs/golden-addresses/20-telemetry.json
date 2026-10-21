@@ -1,0 +1,60 @@
+{
+  "stack": "stacks/20-telemetry",
+  "note": "The resource addresses stack 20 plans for ONE site (resource_key empty, region tor1, sites empty) with logging_enabled and metrics_enabled both true and the fixture values of stacks/20-telemetry/tests/telemetry.tftest.hcl (two logging servers, two allowlist entries, connectors a and b). With both flags false (the default) the stack plans nothing. Adding the sites map must not change any address here: additional sites use the separate site_* resources. tests/test_golden_telemetry.py ties this file to the sources. A pull request that adds a single-site resource updates this file on purpose.",
+  "addresses": {
+    "twingate_service_account.logging[0]": {
+      "type": "twingate_service_account",
+      "force_new": {
+        "name": "telemetry-tor1-logging"
+      }
+    },
+    "twingate_service_account.scrape[0]": {
+      "type": "twingate_service_account",
+      "force_new": {
+        "name": "telemetry-tor1-scrape"
+      }
+    },
+    "twingate_resource.logging[\"siem-home-agent\"]": {
+      "type": "twingate_resource",
+      "force_new": {
+        "name": "logging-tor1-siem-home-agent",
+        "remote_network_id": "@unchanged"
+      }
+    },
+    "twingate_resource.logging[\"siem-home-syslog\"]": {
+      "type": "twingate_resource",
+      "force_new": {
+        "name": "logging-tor1-siem-home-syslog",
+        "remote_network_id": "@unchanged"
+      }
+    },
+    "twingate_resource.scrape[\"node-a\"]": {
+      "type": "twingate_resource",
+      "force_new": {
+        "name": "scrape-tor1-node-a",
+        "remote_network_id": "@unchanged"
+      }
+    },
+    "twingate_resource.scrape[\"node-b\"]": {
+      "type": "twingate_resource",
+      "force_new": {
+        "name": "scrape-tor1-node-b",
+        "remote_network_id": "@unchanged"
+      }
+    },
+    "twingate_resource.scrape[\"connector-a\"]": {
+      "type": "twingate_resource",
+      "force_new": {
+        "name": "scrape-tor1-connector-a",
+        "remote_network_id": "@unchanged"
+      }
+    },
+    "twingate_resource.scrape[\"connector-b\"]": {
+      "type": "twingate_resource",
+      "force_new": {
+        "name": "scrape-tor1-connector-b",
+        "remote_network_id": "@unchanged"
+      }
+    }
+  }
+}

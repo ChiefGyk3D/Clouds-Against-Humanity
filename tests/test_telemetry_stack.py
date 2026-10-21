@@ -33,16 +33,20 @@ def test_the_stack_has_exactly_the_expected_resources():
     assert sorted(resource_blocks()) == [
         "twingate_resource.logging",
         "twingate_resource.scrape",
+        "twingate_resource.site_logging",
+        "twingate_resource.site_scrape",
         "twingate_service_account.logging",
         "twingate_service_account.scrape",
+        "twingate_service_account.site_logging",
+        "twingate_service_account.site_scrape",
     ]
 
 
 def test_every_resource_is_gated_on_a_flag():
     for name, body in resource_blocks().items():
-        gate = "logging" if name.endswith(".logging") else "metrics"
+        gate = "logging" if name.endswith("logging") else "metrics"
         assert re.search(
-            rf"(?m)^\s*(count|for_each)\s*=.*(var\.{gate}_enabled|local\.(logging_names|scrape_pairs))",
+            rf"(?m)^\s*(count|for_each)\s*=.*(var\.{gate}_enabled|local\.(logging_names|scrape_pairs|extra_{"logging" if gate == "logging" else "scrape"}\w*))",
             body,
         ), f"{name} is not gated on {gate}_enabled"
     text = code(STACK / "main.tf")
