@@ -2432,7 +2432,7 @@
         "stacks/10-access (user_data of each connector with log_shipping.enabled)"
       ],
       "delivered_as": "sensitive stack variable log_shipping_bootstrap_token; the first-boot script deletes the token file",
-      "expiry": "UNVERIFIED: must expire on its own within a day; revoke after the first boot if Doppler's minimum is longer",
+      "expiry": "Must expire on its own within a day; Doppler documents expiring service tokens (--max-age, https://docs.doppler.com/docs/service-tokens, read 2026-10-21) but not a minimum expiry, which is UNVERIFIED, so revoke after the first boot regardless",
       "rotation": "create a new token for each rebuild; revoke the old one",
       "sensitivity": "secret",
       "status": "planned"

@@ -9,6 +9,7 @@
 4. [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
 5. [Infrastructure as code](What-Is-Infrastructure-as-Code.md)
 6. [Git and pull requests](Git-GitHub-and-Pull-Requests.md)
+    - Side page: [Git from zero: your first change](Git-From-Zero.md)
 7. [Containers and Docker (optional)](Containers-and-Docker-Basics.md)
 8. [How money works](How-Money-Works-in-the-Cloud.md)
 9. [Enterprise habits](Enterprise-Engineering-Habits.md)

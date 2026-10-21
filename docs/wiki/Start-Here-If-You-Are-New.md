@@ -38,7 +38,7 @@ Read these in order. Each one is short, explains one idea, and ends by pointing 
 | 2 | [Networking basics for this project](Networking-Basics-for-This-Project.md) | Addresses, ports, firewalls, and why a machine can use the internet while nothing on the internet can reach it |
 | 3 | [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) | What a secret is, why it must never be in a file, what MFA and SSH keys do, and what "zero trust" means without the marketing |
 | 4 | [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) | What Terraform and OpenTofu are, what a plan is, what state is, and how to read the code in this repo |
-| 5 | [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) | How a change gets proposed, checked by robots, reviewed and merged, and why the documentation lives in git too |
+| 5 | [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) (never used git? do [Git from zero](Git-From-Zero.md) first) | How a change gets proposed, checked by robots, reviewed and merged, and why the documentation lives in git too |
 | 6 | [Containers and Docker basics](Containers-and-Docker-Basics.md) | What a container is, how it differs from a virtual machine, and what has to change about a Pi-shaped app before it is "cloud shaped" |
 | 7 | [How money works in the cloud](How-Money-Works-in-the-Cloud.md) | What costs, what is free, how a bill gets out of hand, and how this project makes the bill a reviewed number |
 | 8 | [Enterprise engineering habits](Enterprise-Engineering-Habits.md) | Why this lab does things that look like overkill, and which of those habits are worth copying at home |

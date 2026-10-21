@@ -12,7 +12,7 @@ This page follows one tiny change through this repository's real chain. It names
 
 | Word | Plain meaning | In this project |
 |---|---|---|
-| **CI** (continuous integration) | Every proposed change is tested by machines, automatically, before anyone merges it. | The `tofu`, `python` and `security` jobs, gathered under `CI green`. They hold no cloud credential and change nothing. |
+| **CI** (continuous integration) | Every proposed change is tested by machines, automatically, before anyone merges it. | The `tofu`, `python` and `security` jobs, gathered under `CI green`. They hold no cloud-provider credential and change nothing in the cloud. |
 | **CD** (continuous delivery) | An approved change is carried towards the real system by automation, with a person deciding the last step. | After the merge, Spacelift runs a plan from `main` and waits. A human confirms, and only then does the apply happen. |
 | **Shift left** | Find a problem as early in the chain as possible, because a fix costs a minute at the start and an outage at the end. | Secret scanning, the cost gate and the tests run on the pull request, before the merge, long before a droplet exists. |
 
@@ -32,7 +32,7 @@ flowchart LR
     subgraph left["Shift left: cheap to fix"]
         commit["1. Commit<br/>on a branch"]:::you
         push["2. Push and open<br/>a pull request"]:::you
-        ci["3. CI checks<br/>tofu, python + cost gate,<br/>security. No credentials"]:::ctrl
+        ci["3. CI checks<br/>tofu, python + cost gate,<br/>security. No cloud credentials"]:::ctrl
     end
     subgraph gate["The merge gate"]
         green{"4. CI green?<br/>required by<br/>branch protection"}:::warn
@@ -136,7 +136,7 @@ Shifting left means putting the questions where the answers are cheapest. It doe
 Security is "shifted left" in this chain in four places:
 
 1. **Secrets never enter a file** ([Doppler](Doppler-and-Secrets.md)), and Gitleaks checks the diff anyway.
-2. **CI has no credentials**, so the checks cannot be turned against you.
+2. **CI holds no cloud-provider credentials**, so the checks cannot be turned against your cloud account. They do run with a GitHub token, and that token is boxed in too: the workflow starts with `permissions: {}`, and each job is granted only what it asks for. In `ci.yml` the three jobs get `contents: read` and `id-token: write` (to request a short-lived identity token); the `security` job also gets `security-events: write` (to post code-scanning results) and `pull-requests: write` (to comment on the pull request). None of those can create a droplet, but a token that can comment or write scan results is still something to keep narrow, which is why each grant is listed per job.
 3. **Rules are tests and policies**, so a change that weakens a control fails a check instead of relying on a reviewer's memory.
 4. **A human confirms the plan**, so a mistake that every automated check agreed with still has one last reader.
 
@@ -266,6 +266,6 @@ If your plan cannot enforce branch protection, the merge button stays available 
 
 - Take the nine boxes in the diagram and, for each, write one sentence on the mistake only that box can catch. A box with no answer is either a good gate that rarely fires or decoration; decide which.
 - Pick one check from the table in step 3 and say what it could not have caught. Then read [Trace one change end to end](Trace-One-Change-End-to-End.md#what-would-have-stopped-it-three-bad-variants) and see whether you found the same limit.
-- Look at the `permissions:` lines in `ci.yml`. For each job, ask what the worst thing is it could do if the code it runs were malicious. That is the reason the checks hold no cloud credential.
+- Look at the `permissions:` lines in `ci.yml`. For each job, ask what the worst thing is it could do if the code it runs were malicious. That is the reason the checks hold no cloud-provider credential and only a narrow GitHub token.
 
 Next: [Trace one change end to end](Trace-One-Change-End-to-End.md), then back to the [Reading order](Reading-Order.md).

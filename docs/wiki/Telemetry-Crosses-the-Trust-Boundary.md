@@ -84,7 +84,7 @@ Where that still leaks, in the design's own list:
 
 | Still holds the secret | For how long |
 |---|---|
-| `user_data`, state and the metadata endpoint hold the **bootstrap token** | While it is valid. Whether a Doppler token can expire within hours or be single-use is UNVERIFIED; the design needs only "expires within a day", and otherwise the maintainer revokes it after first boot |
+| `user_data`, state and the metadata endpoint hold the **bootstrap token** | While it is valid. Doppler documents service tokens that expire on their own (`--max-age`, example `1m`; [Service Tokens](https://docs.doppler.com/docs/service-tokens), read 2026-10-21), the page does not state a plan restriction (confirm in your dashboard). The minimum expiry and a single-use token are UNVERIFIED; the design needs only "expires within a day", and the maintainer revokes it after first boot regardless |
 | Any root process on the droplet can read the secrets files | For the host's lifetime |
 | The disk | For the host's lifetime |
 | The log enrollment password | Removed from the host after enrollment; the per-host agent key it yields stays |

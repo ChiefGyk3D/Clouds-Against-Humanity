@@ -53,7 +53,7 @@ Pick the row that sounds like you. Every path is a numbered list: read in that o
 
 **Who it is for.** A learner who wants a private copy running, or who wants to see every safety check fail on purpose before trusting it.
 
-**Before you start.** The core path through step 18 (CI, tests and the cost gate). The capstone leans on Spacelift and Doppler. If git commands are new, start with the Git from zero page first; [From commit to pipeline](From-Commit-to-Pipeline.md) (in the design path below) has exercises for your private copy.
+**Before you start.** The core path through step 18 (CI, tests and the cost gate). The capstone leans on Spacelift and Doppler. If git commands are new, start with [Git from zero](Git-From-Zero.md) first; [From commit to pipeline](From-Commit-to-Pipeline.md) (in the design path below) has exercises for your private copy.
 
 | # | Page | Read | Checkpoint |
 |---|---|---|---|
@@ -175,6 +175,7 @@ Not a path. Open these when you need them; every one is linked from the sidebar.
 | [Terraform reference](Terraform-Reference.md) | You want every variable, resource and output explained line by line. |
 | [Lessons learned](Lessons-Learned.md) | You want the things that broke during the build, and what fixed them. |
 | [Roadmap](Roadmap.md) | You want to know what is built and what is only planned. |
+| [Git from zero: your first change](Git-From-Zero.md) | You have never used git, a terminal or GitHub Desktop. A side page to [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md); read it first if those are new. About 90 minutes with the exercise; not counted in the path totals. |
 | [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) | You wonder why the droplets have public addresses and no NAT gateway. A side page to [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md); not counted in the path totals. |
 | [How this project is planned](How-This-Project-Is-Planned.md) | You want to know how the work is organised: the board, sprints, sizes, definition of done. |
 | [Screenshots policy](Screenshots-Policy.md) | You are adding a picture to a page, or want to know why a console is described but not shown. |
