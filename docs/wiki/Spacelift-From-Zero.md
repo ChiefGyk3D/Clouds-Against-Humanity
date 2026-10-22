@@ -2,13 +2,13 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Lesson I3 of the four-lesson infrastructure-as-code track. The track: I1 [OpenTofu from zero: init, plan, apply, destroy](OpenTofu-From-Zero.md), I2 [Plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md), **I3 this page**, I4 [Build and destroy a stack per service](Build-and-Destroy-Stack-Per-Service.md). A foundations side page to [Spacelift](Spacelift.md); no step of the core path is renumbered.
+Lesson I3 of the four-lesson infrastructure-as-code track. The track: I1 "OpenTofu from zero: init, plan, apply, destroy" (`OpenTofu-From-Zero`), I2 "Plans, state, drift and recovery" (`Plans-State-Drift-and-Recovery`), **I3 this page**, I4 "Build and destroy a stack per service" (`Build-and-Destroy-Stack-Per-Service`). The other three are written at the same time and are plain text here until they merge; the names in code are their page names. A foundations side page to [Spacelift](Spacelift.md); no step of the core path is renumbered.
 
 > **Status: written from vendor documentation; the free local exercises were run once, the Spacelift console exercises were not.** On **2026-10-22** the author read the Spacelift pricing and documentation pages listed in the [claims register](#claims-register) with read-only `curl`, and ran the free local exercises (Exercises 1 and 2) on Linux with OpenTofu 1.12.6, pasting trimmed output from that run. The own-account path (Exercises 3 to 11) uses menu names as the documentation gave them that day; **nobody has run it against a real Spacelift account for this page**, so every console step, every message it shows and every statement about what the free plan lets you do is marked **est.** unless the claims register says it was read. Vendor pages change; if your screen disagrees, trust your screen and the vendor's current page, and tell the project (see [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md)). Windows PowerShell commands are **est.** (not run; no PowerShell was available when this was written).
 
-> **Prerequisites.** [OpenTofu from zero](OpenTofu-From-Zero.md) (I1) and [Plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) (I2), or the same ideas from [What is infrastructure as code](What-Is-Infrastructure-as-Code.md): plan, apply, state. [Git from zero](Git-From-Zero.md) for branches, commits and pushes, and [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) for pull requests. A terminal ([The terminal and your first script](Terminal-and-Your-First-Script.md)). The free theory path needs no account. The own-account path needs a GitHub account and a Spacelift account, both yours. About 90 minutes for reading and the free local exercises (est.); the own-account path adds about three hours (est.), most of it waiting for runs and clicking.
+> **Prerequisites.** "OpenTofu from zero" (I1) and "Plans, state, drift and recovery" (I2), once they merge, or the same ideas from [What is infrastructure as code](What-Is-Infrastructure-as-Code.md): plan, apply, state. [Git from zero](Git-From-Zero.md) for branches, commits and pushes, and [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) for pull requests. A terminal ([The terminal and your first script](Terminal-and-Your-First-Script.md)). The free theory path needs no account. The own-account path needs a GitHub account and a Spacelift account, both yours. About 90 minutes for reading and the free local exercises (est.); the own-account path adds about three hours (est.), most of it waiting for runs and clicking.
 
-> **I1, I2 and I4 are written at the same time as this page by other authors.** If one of those links is dead when you read this, the lesson has not merged yet. This page does not depend on their text; it repeats the three words it needs (plan, apply, state) where it uses them.
+> **I1, I2 and I4 are written at the same time as this page by other authors.** They are named but not linked until they merge. This page does not depend on their text; it repeats the three words it needs (plan, apply, state) where it uses them.
 
 ## Read this first: what this lesson touches, and what it never touches
 
@@ -65,7 +65,7 @@ Read from the documentation (`docs.spacelift.io`) on the same day:
 |---|---|---|
 | Policies (Rego) | "This feature is only available to paid Spacelift accounts." ([policy page](https://docs.spacelift.io/concepts/policy/)) | On the free plan you can read policies and test them on your own computer, but this page expects you cannot attach them. Confirm in the console. |
 | Drift detection | "Only available on the Starter+ plan and above." "Drift detection only works on private workers." ([drift page](https://docs.spacelift.io/concepts/stack/drift-detection)) | Read-only for you. |
-| Scheduling (tasks, runs, scheduled stack deletion) | "Only available on the Business plan and above." Schedules on public workers do not trigger. ([scheduling page](https://docs.spacelift.io/concepts/stack/scheduling)) | Read-only for you. |
+| Scheduling (scheduled tasks, scheduled runs, scheduled stack deletion) | "Only available on the Business plan and above." Schedules on public workers do not trigger. The page says nothing about running a single task by hand, so whether the free plan offers that is **unconfirmed**. ([scheduling page](https://docs.spacelift.io/concepts/stack/scheduling)) | Read-only for you. |
 | Targeted replan | "Only available to Business plan and above." | Not used. |
 | Stack dependencies, contexts | Documented with no plan note on their pages. The pricing comparison lists them but shows no Free column. | **Unconfirmed for the free plan.** Exercises 7 and 8 say what to do if your account lacks them. |
 | Audit trail | Listed under Enterprise on the pricing page. | Not available to you; the run list is your record. |
@@ -252,11 +252,11 @@ tofu destroy -auto-approve -input=false
 
 You have two real policies to read in this repository: the push policy [`.spacelift/policies/push.rego`](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/.spacelift/policies/push.rego) and the plan policy [`.spacelift/policies/plan.rego`](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/.spacelift/policies/plan.rego). Each has a test file next to it.
 
-**Predict.** In the push policy, which three rule names does the file define or mention, and which one does it deliberately never define? What does that mean for a pull request?
+**Predict.** In the push policy, which two rule names does the file define (`track` and `ignore`), and which two does it deliberately never define? What does that mean for a pull request?
 
 **Do.** Read `push.rego` from the top. Find the rule names `track` and `ignore`, and the comment that starts "Deliberately absent".
 
-**Check.** `track` holds when the push is to the stack's tracked branch, is not a tag, and touches a file under the stack's project root or under `modules/`, `scripts/spacelift/` or `.spacelift/`. `ignore` is defined as "not track". `propose` and `allow_fork` are deliberately absent, so **no event ever proposes a run**: that is the "no red check on pull requests" design, and it also means no pull request's code runs in Spacelift next to the secrets context. (This is what the project's wiki says about the file; reading it yourself is the exercise.)
+**Check.** `track` holds when the push is to the stack's tracked branch, is not a tag, and touches a file under the stack's project root or under `modules/`, `scripts/spacelift/` or `.spacelift/`. `ignore` is defined as "not track". Both `propose` and `allow_fork` are deliberately absent, so **no event ever proposes a run**: that is the "no red check on pull requests" design, and it also means no pull request's code runs in Spacelift next to the secrets context. (This is what the project's wiki says about the file; reading it yourself is the exercise.)
 
 **Optional, if you have OPA installed** (the project's CI uses OPA 1.21.0; this page's author did not have it, so this is **est.**):
 
@@ -303,7 +303,7 @@ deny contains msg if {
 **Do.**
 
 1. Open `https://spacelift.io/pricing`, find the free-plan banner, and follow its link (the documentation names the button **Free trial**; the page text says free, no card, no time limit).
-2. Choose the data region the form offers (the documentation lists Europe or United States). Pick the closer; it is a hosting choice, not a security one.
+2. Choose the data region the form offers (the documentation lists Europe or United States). This is also a data-residency choice: it decides where your account's data is hosted, which can matter for privacy law or an employer's rules. For a scratch account with no real data, pick either; for anything real, decide with your residency and compliance requirements in mind.
 3. Sign in with a GitHub, GitLab, Google or Microsoft account you own. The documentation notes that if you sign in with GitHub, the GitHub organization or account name becomes your Spacelift account name, so use a **personal** account you are happy to see in a URL, not an employer's.
 4. You land on the LaunchPad, which has Learn missions, a knowledge base, videos and an FAQ. Find where the console shows your plan or usage (the documentation says usage lives under Organization Settings, then Other, then Usage).
 
@@ -417,7 +417,7 @@ git push -u origin change-greeting
 **Do.**
 
 1. Build a throwaway value at run time, not one you invent and type into a file. Bash: `openssl rand -hex 8`. PowerShell (est.): `-join ((1..8) | ForEach-Object { '{0:x2}' -f (Get-Random -Maximum 256) })`. Do not paste the value into chat, a screenshot or a commit.
-2. On `scratch-a-base`, open **Environment**, **Add variable**: name `TF_VAR_greeting`, value `set from the environment`, not secret. Trigger a run. The plan should show the greeting changing.
+2. On `scratch-a-base`, open **Environment**, **Add variable**: name `TF_VAR_greeting`, value `set from the environment`, not secret. Trigger a run. The plan should show the greeting changing and the run stops at Unconfirmed. **Press Confirm and let it finish** (or Discard it); a run left waiting keeps the stack locked, and Exercise 8 could not trigger it.
 3. Add a second variable: name `SCRATCH_SECRET`, the random value, **Mark as secret** on. Open the Environment tab again.
 4. Create a **context**: Share code and config, Contexts, **Create context**, name `scratch-context`, label `autoattach:scratch`, add a variable `SCRATCH_SHARED` = `shared` (not secret). The stack has the label `scratch`, so the context should attach itself. Open the stack's Contexts tab to confirm.
 
@@ -466,7 +466,7 @@ This is the exercise that matters most for your bill later. The rule, from the d
 
 **Do.** For each stack, **child first** (`scratch-b-app`, then `scratch-a-base`):
 
-1. Destroy the resources. Two routes from the documentation: run a **task** on the stack with the command for OpenTofu, `tofu destroy -auto-approve`; or, when you delete the stack, choose to **delete the stack's resources**, which runs a destroy run and then deletes the stack when that succeeds (stated on the scheduling page for scheduled deletion; for the manual path the delete dialog offers "delete or keep the stack's resources"). The task route lets you read the result before deleting anything.
+1. Destroy the resources. **Primary route:** in the stack deletion dialog (step 5), choose to **delete the stack's resources**; Spacelift runs a destroy run and then deletes the stack when that succeeds (the scheduling page states this for scheduled deletion; that the manual dialog behaves the same is **est.**). Turn off deletion protection first (step 4), so do steps 4 and 5 in that order. **Optional route, only if your account offers it:** run a **task** with `tofu destroy -auto-approve` (the documentation's command for OpenTofu) so you can read the result before deleting anything. If you do not see a way to run a task, use the primary route.
 2. Check the destroy: open the stack's resources view (no resources) and the run's log (`Destroy complete! Resources: 1 destroyed.`, est.).
 3. If you want the final state file, the documentation says you can retrieve it with a task before deleting.
 4. Turn off **Protect from deletion** in the stack's settings (est.: the setting's exact location is not in the pages read).
@@ -520,7 +520,7 @@ Build order: parents before children, so each referenced output exists. Destroy 
 
 **Do.**
 
-1. Rebuild the code with five names (regenerates the repository content; you recreate the scratch repository and reinstall the app per Exercise 4 if you tore it down):
+1. Make sure the generator exists. If you removed `~/iac-scratch-tools` in Exercise 11, recreate it by repeating the generator step of Exercise 1 (the Bash heredoc or the PowerShell script), and recreate the scratch repository and reinstall the app per Exercise 4. Then rebuild the code with five names:
 
 ```bash
 bash ~/iac-scratch-tools/make-scratch.sh ~/iac-scratch a-base b-app c-extra d-extra e-extra
@@ -532,7 +532,7 @@ bash ~/iac-scratch-tools/make-scratch.sh ~/iac-scratch a-base b-app c-extra d-ex
 
 2. Create the five stacks as in Exercise 5, one at a time, labeled `scratch`, autodeploy off. Add the two dependencies as in Exercise 8 (where dependencies exist on your plan).
 3. Trigger and confirm each, parents first. Write down the order and how long each took.
-4. Destroy in the reverse order. For each stack: task `tofu destroy -auto-approve`, check the resources view, then turn off deletion protection and delete the stack.
+4. Destroy in the reverse order. For each stack: turn off deletion protection and delete the stack choosing to delete its resources (or, if your account offers tasks, run `tofu destroy -auto-approve` as a task first), then confirm in the run log and the Stacks tab that the destroy finished.
 5. Run the checklist.
 
 **Checklist, tick each box after looking, not remembering.**
@@ -543,7 +543,7 @@ bash ~/iac-scratch-tools/make-scratch.sh ~/iac-scratch a-base b-app c-extra d-ex
 - [ ] No API key or machine user you made remains.
 - [ ] GitHub's installed-apps list does not show the Spacelift app, or shows it with no repository you care about.
 - [ ] The scratch repository is deleted, or contains only code and no secret.
-- [ ] No local state file or `.terraform` folder remains: `find ~ -name terraform.tfstate -o -name .terraform` finds nothing from this lesson (PowerShell: `Get-ChildItem -Recurse -Force $HOME -Include terraform.tfstate,.terraform -ErrorAction SilentlyContinue`).
+- [ ] No local state file or `.terraform` folder remains: `find ~/iac-scratch ~/cah-scratch \( -name terraform.tfstate -o -name .terraform \) 2>/dev/null` prints nothing (both folders should be gone; PowerShell: `Get-ChildItem -Recurse -Force "$HOME/iac-scratch","$HOME/cah-scratch" -Include terraform.tfstate,.terraform -ErrorAction SilentlyContinue`, which also prints nothing).
 - [ ] The billing or usage page still shows $0 and no card (or the trial end date you wrote down).
 
 If a box fails, do not add resources to fix it: find what is left and remove it, and write down how you got there. That note is the most useful thing in the exercise.
@@ -622,6 +622,6 @@ Read-only requests with `curl`; all retrieved **2026-10-22** unless stated. "Rea
 
 ## Where to next
 
-[Build and destroy a stack per service](Build-and-Destroy-Stack-Per-Service.md) (I4) takes the same loop and makes it repeatable. Meanwhile, [Spacelift](Spacelift.md) shows the real run lifecycle this project uses, and [Teardown checklist](Teardown-Checklist.md) shows the same destroy-before-delete order applied to the project's own stacks.
+Lesson I4, "Build and destroy a stack per service", takes the same loop and makes it repeatable. Meanwhile, [Spacelift](Spacelift.md) shows the real run lifecycle this project uses, and [Teardown checklist](Teardown-Checklist.md) shows the same destroy-before-delete order applied to the project's own stacks.
 
-Next: lesson I4, Build and destroy a stack per service (planned; its page name is `Build-and-Destroy-Stack-Per-Service`, linked above once it merges).
+Next: lesson I4, Build and destroy a stack per service (planned; its page name is `Build-and-Destroy-Stack-Per-Service`, not linked until it merges).
