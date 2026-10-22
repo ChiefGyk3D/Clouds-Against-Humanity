@@ -81,6 +81,7 @@ The rest of this track is on the core path; see [Reading order](Reading-Order.md
 - [Threat model exercise](Threat-Model-Exercise.md)
 - [Threat Dragon exercise](Threat-Dragon-Exercise.md)
 - [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
+    - Side page: [Security tools basics: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md)
 - [Troubleshooting index](Troubleshooting-Index.md)
 
 The [Threat model](Threat-Model.md) is core step 19.
