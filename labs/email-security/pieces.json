@@ -1,0 +1,11 @@
+{
+  "lesson": "Email-Security-DNS-Gateways-and-API-Driven-Protection",
+  "prices_source": "docs/cost-prices.json (retrieved 2026-10-21); reserved IP from DigitalOcean's pricing page, read 2026-10-22",
+  "pieces": [
+    {"name": "project", "depends_on": [], "monthly_usd": 0, "build": 1, "destroy": 5},
+    {"name": "firewall", "depends_on": [], "monthly_usd": 0, "build": 1, "destroy": 4},
+    {"name": "droplet", "depends_on": ["firewall"], "monthly_usd": 6, "size": "s-1vcpu-1gb", "build": 2, "destroy": 3},
+    {"name": "reserved-ip", "depends_on": ["droplet"], "monthly_usd": 0, "unassigned_monthly_usd": 5, "build": 3, "destroy": 2},
+    {"name": "dns", "depends_on": ["reserved-ip"], "monthly_usd": 0, "build": 4, "destroy": 1}
+  ]
+}
