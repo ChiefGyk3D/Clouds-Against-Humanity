@@ -65,7 +65,11 @@
       "active": true,
       "allowed_sources": {
         "digitalocean_droplet": [
-          "modules/twingate-connector/main.tf"
+          "modules/twingate-connector/main.tf",
+          "modules/edge-host/main.tf"
+        ],
+        "digitalocean_reserved_ip": [
+          "modules/edge-host/main.tf"
         ]
       }
     },

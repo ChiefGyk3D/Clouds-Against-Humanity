@@ -14,7 +14,7 @@ jobs:
       contents: read
       id-token: write
     with:
-      directories: "stacks/00-foundation stacks/10-access stacks/20-telemetry stacks/aws/00-foundation stacks/aws/10-access modules/vpc modules/firewall modules/twingate-bootstrap modules/twingate-connector modules/aws/vpc modules/aws/firewall modules/aws/twingate-connector"
+      directories: "stacks/00-foundation stacks/10-access stacks/20-telemetry stacks/50-edge stacks/aws/00-foundation stacks/aws/10-access modules/vpc modules/firewall modules/twingate-bootstrap modules/twingate-connector modules/edge-host modules/aws/vpc modules/aws/firewall modules/aws/twingate-connector"
       # tofu test in each directory; every test file mocks its providers, so
       # the job needs no credential, which is all a pull request may have.
       test: true
