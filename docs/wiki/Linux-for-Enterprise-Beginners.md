@@ -196,7 +196,7 @@ $ sudo ufw status verbose                   # ufw
 $ sudo nft list ruleset                     # the engine underneath, read-only
 ```
 
-Before you enable `ufw`, allow SSH first (`sudo ufw allow ssh`) or you cut off your own session. Pick one manager per machine; two tools editing one ruleset is how rules silently disappear. This project's optional host firewall uses plain nftables on Ubuntu ([Droplet hardening: host firewall](Droplet-Hardening.md#host-firewall-built-off-by-default)).
+Before you enable `ufw`, allow SSH first (`sudo ufw allow ssh`) or you cut off your own session. Pick one manager per machine; two tools editing one ruleset is how rules silently disappear. [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md) sets iptables, nftables, UFW and BSD pf side by side. This project's optional host firewall uses plain nftables on Ubuntu ([Droplet hardening: host firewall](Droplet-Hardening.md#host-firewall-built-off-by-default)).
 
 ### SELinux and AppArmor, in plain language
 
