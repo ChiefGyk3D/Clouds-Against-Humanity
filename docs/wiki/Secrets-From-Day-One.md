@@ -966,10 +966,10 @@ This path teaches the real thing the exercises imitated: a project, a config, a 
 
 ```bash
 # 1. find the token's slug, then revoke it (this is irreversible and immediate, per Doppler's docs)
-doppler configs tokens --project secrets-lab-demo --config dev
-doppler configs tokens revoke --slug TOKEN_SLUG --project secrets-lab-demo --config dev
+doppler configs tokens --project example-secrets-lab --config dev
+doppler configs tokens revoke --slug TOKEN_SLUG --project example-secrets-lab --config dev
 # 2. delete the project and everything in it
-doppler projects delete secrets-lab-demo --yes
+doppler projects delete example-secrets-lab --yes
 # 3. remove the local token file and sign the CLI out
 rm -f reader.token && doppler logout
 ```
@@ -978,13 +978,13 @@ rm -f reader.token && doppler logout
 
 ```bash
 doppler login                                                    # opens your browser; signs the CLI in to your own account
-doppler projects create secrets-lab-demo                         # three default environments: dev, stg and prd (est.: slugs)
-doppler secrets set DEMO_GREETING --project secrets-lab-demo --config dev    # prompts for a value; type any harmless text
+doppler projects create example-secrets-lab                         # three default environments: dev, stg and prd (est.: slugs)
+doppler secrets set DEMO_GREETING --project example-secrets-lab --config dev    # prompts for a value; type any harmless text
 ```
 
 ```bash
 # a read-only token that deletes itself after one hour (read-only is the default; --max-age sets the expiry)
-( umask 077; doppler configs tokens create lab-reader --project secrets-lab-demo --config dev --max-age 1h --plain > reader.token )
+( umask 077; doppler configs tokens create lab-reader --project example-secrets-lab --config dev --max-age 1h --plain > reader.token )
 ls -l reader.token                                               # mode -rw-------
 # a program reads the secret from its environment, with no file and no value in the command line
 DOPPLER_TOKEN="$(cat reader.token)" doppler run --no-fallback -- python3 -I -c 'import os; print("the secret has", len(os.environ["DEMO_GREETING"]), "characters")'
@@ -992,8 +992,8 @@ DOPPLER_TOKEN="$(cat reader.token)" doppler run --no-fallback -- python3 -I -c '
 
 ```bash
 # revoke, then prove it is dead (--no-fallback so a cached copy cannot answer for the token)
-doppler configs tokens --project secrets-lab-demo --config dev
-doppler configs tokens revoke --slug TOKEN_SLUG --project secrets-lab-demo --config dev
+doppler configs tokens --project example-secrets-lab --config dev
+doppler configs tokens revoke --slug TOKEN_SLUG --project example-secrets-lab --config dev
 DOPPLER_TOKEN="$(cat reader.token)" doppler run --no-fallback -- true; echo "exit: $?"
 ```
 
