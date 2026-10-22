@@ -70,12 +70,13 @@ Two questions settle most of a transfer's security.
 A transfer role should do one job. Compare the two policies the lab prints:
 
 ```text
-narrow:  one role from account A may put, tag, get and delete objects
-         under one prefix of one bucket in account B.
+narrow:  one role from account A may only put and tag objects under one
+         prefix of one bucket in account B (write-only); a separate processing
+         role INSIDE account B may read and delete under that prefix.
 broad:   Principal "*", Action "s3:*", the whole bucket.
 ```
 
-The narrow one answers four questions: **who** (a named role in a named account), **what** (four actions, no listing of other keys, no policy changes), **where** (one prefix), **when** (add a condition, such as a source address or a required encryption header; the lab's toy ignores conditions, so read the AWS page for them). The broad one is what an urgent Friday fix leaves behind: it also lets any other principal read the batch. A wildcard principal on a bucket that holds personal data is a finding in any audit.
+The narrow one answers four questions: **who** (a named role in a named account), **what** (two write actions for the transfer role; read and delete go to a different role that lives in the destination account, so a stolen transfer credential can add data but cannot read or destroy it; no listing of other keys, no policy changes), **where** (one prefix), **when** (add a condition, such as a source address or a required encryption header; the lab's toy ignores conditions, so read the AWS page for them). The broad one is what an urgent Friday fix leaves behind: it also lets any other principal read the batch. A wildcard principal on a bucket that holds personal data is a finding in any audit.
 
 Two habits help. Use a **role** the job assumes for a short time rather than a user with a long-lived key (see [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md)). And write the policy so the *destination* owner reviews it: the people who will hold the copy should agree to what can land there.
 
@@ -305,10 +306,14 @@ narrow
   transfer role puts under the prefix : True
   transfer role puts outside it       : False
   a stranger account reads the batch  : False
+  transfer role reads or deletes      : False False
+  processor role reads and deletes    : True True
 broad
   transfer role puts under the prefix : True
   transfer role puts outside it       : True
   a stranger account reads the batch  : True
+  transfer role reads or deletes      : True True
+  processor role reads and deletes    : True True
 ```
 
 The same JSON a real bucket policy uses was evaluated by a 30-line toy. The broad policy also gives the stranger the batch, which is the mistake in the loop below.
@@ -431,11 +436,11 @@ What the script does **not** do, and a production job must: send the alert somew
 **Check.** The author's run (the numbers are masked, only the last two characters survive):
 
 ```text
-FINDING parts.txt:1: fake_member_id=**********ZZ
-FINDING payments.txt:1: card_candidate=**************97
-FINDING payments.txt:2: card_candidate=*****************10
-FINDING outbox.mbox#msg2: fake_member_id=**********ZZ, card_candidate=**************58
-FINDING outbox.mbox#msg4: fake_member_id=**********ZZ, fake_member_id=**********ZZ, fake_member_id=**********ZZ
+FINDING batch/parts.txt:1: fake_member_id=**********ZZ
+FINDING batch/payments.txt:1: card_candidate=**************97
+FINDING batch/payments.txt:2: card_candidate=*****************10
+FINDING mail/outbox.mbox#msg2: fake_member_id=**********ZZ, card_candidate=**************58
+FINDING mail/outbox.mbox#msg4: fake_member_id=**********ZZ, fake_member_id=**********ZZ, fake_member_id=**********ZZ
 5 finding(s)
 exit=1
 ```

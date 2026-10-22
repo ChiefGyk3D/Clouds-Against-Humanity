@@ -21,6 +21,7 @@ ACCOUNT_B = "123456789012"
 SRC_BUCKET = "governance-extracts"
 DST_BUCKET = "analytics-inbox"
 TRANSFER_ROLE = f"arn:aws:iam::{ACCOUNT_A}:role/monthly-transfer"
+PROCESSOR_ROLE = f"arn:aws:iam::{ACCOUNT_B}:role/analytics-processor"  # lives in tenant B
 PREFIX = "batch/2026-10/"
 
 
@@ -33,16 +34,27 @@ def client(tenant: str):
 
 
 def narrow_policy() -> dict:
-    """Tenant B lets exactly one role from tenant A put objects under one prefix."""
+    """Tenant B lets the transfer role from A only WRITE under one prefix, and a
+    separate processing role inside B read and delete what landed there."""
+    arn = f"arn:aws:s3:::{DST_BUCKET}/{PREFIX}*"
     return {
         "Version": "2012-10-17",
-        "Statement": [{
-            "Sid": "AllowMonthlyTransferWriteOnly",
-            "Effect": "Allow",
-            "Principal": {"AWS": TRANSFER_ROLE},
-            "Action": ["s3:PutObject", "s3:PutObjectTagging", "s3:GetObject", "s3:DeleteObject"],
-            "Resource": f"arn:aws:s3:::{DST_BUCKET}/{PREFIX}*",
-        }],
+        "Statement": [
+            {
+                "Sid": "AllowMonthlyTransferWriteOnly",
+                "Effect": "Allow",
+                "Principal": {"AWS": TRANSFER_ROLE},
+                "Action": ["s3:PutObject", "s3:PutObjectTagging"],
+                "Resource": arn,
+            },
+            {
+                "Sid": "AllowDestinationProcessorReadAndPurge",
+                "Effect": "Allow",
+                "Principal": {"AWS": PROCESSOR_ROLE},
+                "Action": ["s3:GetObject", "s3:DeleteObject"],
+                "Resource": arn,
+            },
+        ],
     }
 
 
@@ -124,6 +136,8 @@ def main() -> int:
             print("  transfer role puts under the prefix :", policy_allows(pol, TRANSFER_ROLE, "s3:PutObject", res))
             print("  transfer role puts outside it       :", policy_allows(pol, TRANSFER_ROLE, "s3:PutObject", other))
             print("  a stranger account reads the batch  :", policy_allows(pol, stranger, "s3:GetObject", res))
+            print("  transfer role reads or deletes      :", policy_allows(pol, TRANSFER_ROLE, "s3:GetObject", res), policy_allows(pol, TRANSFER_ROLE, "s3:DeleteObject", res))
+            print("  processor role reads and deletes    :", policy_allows(pol, PROCESSOR_ROLE, "s3:GetObject", res), policy_allows(pol, PROCESSOR_ROLE, "s3:DeleteObject", res))
         return 0
     setup(Path(a.data) if a.data else None)
     return 0

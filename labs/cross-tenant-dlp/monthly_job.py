@@ -10,6 +10,7 @@ import argparse
 import datetime as dt
 import hashlib
 import json
+import shutil
 import sys
 from pathlib import Path
 
@@ -52,6 +53,15 @@ def run(args) -> int:
         res = f"arn:aws:s3:::{t.DST_BUCKET}/{t.PREFIX}x"
         if not t.policy_allows(pol, t.TRANSFER_ROLE, "s3:PutObject", res):
             raise RuntimeError("preflight: transfer role is not allowed to write to tenant B")
+        if t.policy_allows(pol, t.TRANSFER_ROLE, "s3:GetObject", res) or t.policy_allows(
+            pol, t.TRANSFER_ROLE, "s3:DeleteObject", res
+        ):
+            raise RuntimeError("preflight: transfer role can read or delete in tenant B; it must be write-only")
+        if not (
+            t.policy_allows(pol, t.PROCESSOR_ROLE, "s3:GetObject", res)
+            and t.policy_allows(pol, t.PROCESSOR_ROLE, "s3:DeleteObject", res)
+        ):
+            raise RuntimeError("preflight: the destination processing role cannot read and purge")
         # 1. Extract: list the batch in tenant A.
         src = keys(a, t.SRC_BUCKET)
         ev["steps"]["extract"] = {"objects": len(src)}
@@ -88,12 +98,20 @@ def run(args) -> int:
         # 4. Scan (the DLP step) on the staged copy; record counts only.
         stage = work / "stage"
         stage.mkdir(mode=0o700, exist_ok=True)
-        for k in src:
-            (stage / Path(k).name).write_bytes(b.get_object(Bucket=t.DST_BUCKET, Key=k)["Body"].read())
-        findings = dlp_scan.scan_path(stage, {"QX-123456-ZZ"}, 2)
-        ev["steps"]["scan"] = {"findings": len(findings)}
-        for p in stage.glob("*"):
-            p.unlink()  # staged copy is purged right after the scan
+        try:
+            for k in src:
+                # Keep the key's folder structure so two keys with the same file
+                # name cannot overwrite each other; refuse anything that would
+                # land outside the staging folder.
+                dest = (stage / k[len(t.PREFIX):]).resolve()
+                if stage.resolve() not in dest.parents:
+                    raise RuntimeError(f"scan: key {k!r} would stage outside the staging folder")
+                dest.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+                dest.write_bytes(b.get_object(Bucket=t.DST_BUCKET, Key=k)["Body"].read())
+            findings = dlp_scan.scan_path(stage, {"QX-123456-ZZ"}, 2)
+            ev["steps"]["scan"] = {"findings": len(findings)}
+        finally:
+            shutil.rmtree(stage, ignore_errors=True)  # staged copy is purged right after the scan
         # 5. (Processing would happen here, on tenant B.) Then purge.
         if args.inject_error == "purge":
             raise RuntimeError("purge: simulated outage while deleting from tenant B")

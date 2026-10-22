@@ -64,12 +64,13 @@ def scan_text(text: str, allow: set[str], threshold: int) -> list[dict]:
 
 def items(path: Path):
     for p in sorted(path.rglob("*")):
+        rel = p.relative_to(path).as_posix()  # not p.name: two folders can hold the same file name
         if p.suffix == ".mbox":
             for i, msg in enumerate(mailbox.mbox(str(p))):
-                yield f"{p.name}#msg{i + 1}", f"{msg.get('Subject', '')}\n{msg.get_payload()}"
+                yield f"{rel}#msg{i + 1}", f"{msg.get('Subject', '')}\n{msg.get_payload()}"
         elif p.is_file():
             for n, line in enumerate(p.read_text(errors="replace").splitlines(), 1):
-                yield f"{p.name}:{n}", line
+                yield f"{rel}:{n}", line
 
 
 def scan_path(path: Path, allow: set[str], threshold: int) -> dict:

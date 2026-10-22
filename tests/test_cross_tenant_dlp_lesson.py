@@ -44,12 +44,12 @@ def test_scan_expected_findings_and_masking(tmp_path, monkeypatch):
     fake.main()
     found = scan.scan_path(tmp_path, set(), 2)
     names = sorted(found)
-    assert names == ["outbox.mbox#msg2", "outbox.mbox#msg4", "parts.txt:1", "payments.txt:1", "payments.txt:2"]
+    assert names == ["batch/parts.txt:1", "batch/payments.txt:1", "batch/payments.txt:2", "mail/outbox.mbox#msg2", "mail/outbox.mbox#msg4"]
     for hits in found.values():
         for h in hits:
             assert "*" in h["masked"] and len(h["masked"].replace("*", "")) <= 2
     tuned = scan.scan_path(tmp_path, {"QX-123456-ZZ"}, 2)
-    assert "parts.txt:1" not in tuned and len(tuned) == 4
+    assert "batch/parts.txt:1" not in tuned and len(tuned) == 4
     assert len(scan.scan_path(tmp_path, set(), 1)) > len(found)
 
 
@@ -137,3 +137,17 @@ def test_private_dir_helper_refuses_open_folders(tmp_path):
         labdir.private_dir(open_dir)
     made = labdir.private_dir(tmp_path / "x" / "new")
     assert (made.stat().st_mode & 0o777) == 0o700
+
+
+def test_same_file_name_in_two_folders_is_reported_twice(tmp_path):
+    scan = load("dlp_scan")
+    for d in ("a", "b"):
+        (tmp_path / d).mkdir()
+        (tmp_path / d / "data.csv").write_text("member QX-111111-ZZ\n")
+    assert sorted(scan.scan_path(tmp_path, set(), 2)) == ["a/data.csv:1", "b/data.csv:1"]
+
+
+def test_transfer_role_is_write_only_in_the_narrow_policy():
+    text = (LAB / "tenants_setup.py").read_text()
+    stmt = text[text.index("AllowMonthlyTransferWriteOnly"):text.index("AllowDestinationProcessorReadAndPurge")]
+    assert "s3:GetObject" not in stmt and "s3:DeleteObject" not in stmt
