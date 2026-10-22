@@ -113,7 +113,7 @@ The secondary source [endoflife.date/php](https://endoflife.date/php) (read 2026
 
 ### Worked example: check your PHP version and patch the runtime
 
-On **2026-10-21** the PHP project published a security advisory, headed "Critical remote code execution vulnerabilities, update now", and the same banner was on php.net on 2026-10-22. It says PHP 8.5.12, 8.4.27, 8.3.36 and 8.2.35 fix two critical vulnerabilities that can allow unauthenticated remote code execution (CVE-2026-109618 and CVE-2026-109619). It names every way of running PHP as affected, including PHP-FPM and Apache with `mod_php`, and says the risk is **highest for `mod_php`**, with a demonstrated exploit where an unauthenticated request can trigger the attack before any application code runs. The project's release notes say there are no complete mitigations and that updating is the only safe choice ([php.net news archive 2026](https://www.php.net/archive/2026.php), read 2026-10-22). PHP 8.1 and older no longer receive project updates.
+On **2026-10-21** the PHP project published a security advisory, headed "Critical remote code execution vulnerabilities, update now", and the same banner was on php.net on 2026-10-22. It says PHP 8.5.12, 8.4.27, 8.3.36 and 8.2.35 fix two critical vulnerabilities that can allow unauthenticated remote code execution (CVE-2026-109618 and CVE-2026-109619). It names every way of running PHP as affected, including PHP-FPM and Apache with `mod_php`, and says the risk is **highest for `mod_php`**, with a demonstrated exploit where an unauthenticated request can trigger the attack before any application code runs. Both advisories list CWE-416 (use after free) and CWE-824 (access of uninitialized pointer), the memory-safety class; that detail is taken from [W2](WordPress-and-PHP-Security-WAF-and-Static-Sites.md), which read the advisory pages, and I did not read them for this page. The project's release notes say there are no complete mitigations and that updating is the only safe choice ([php.net news archive 2026](https://www.php.net/archive/2026.php), read 2026-10-22). PHP 8.1 and older no longer receive project updates.
 
 What that teaches, in order:
 
@@ -171,7 +171,7 @@ tofu-lab/
   out/                      the files the pieces write
 ```
 
-The two pieces are written with the free `hashicorp/local` provider, which writes files on your own computer, so you can practice the structure without a cloud account. They write the files that the container lab uses. First the database piece:
+The two pieces are written with the free `hashicorp/local` provider, which writes files on your own computer, so you can practice the structure without a cloud account. They write files in the same shapes the container lab uses, but they are practice for the structure and are **not wired into the compose lab**: the lab below reads its own `.env` and `nginx.conf` from `stacklab/`. (`out/nginx.conf` is the same server block, so you can copy it over; `out/db.env` holds only the MariaDB variables, not the root and admin passwords, so it is illustrative.) First the database piece:
 
 ```hcl
 # modules/db/main.tf  (SPDX-License-Identifier: Apache-2.0)
@@ -277,7 +277,7 @@ module "web" {
 }
 ```
 
-Run it (the password is made at run time and passed as an environment variable, never written in a file). On 2026-10-22 these ran with OpenTofu 1.12.6: `init` and `validate` succeeded and `apply` reported `1 added` for each single stack and `2 added` for the launch; `db.env` came out mode `0600`.
+Run it. The password is made at run time and passed as an environment variable, so you never type it into a source file. It still ends up in **two places on disk**: `out/db.env` (mode `0600`) and the stack's state file `terraform.tfstate`, which stores sensitive values in plain text. Treat both as secrets, keep them out of git, and delete them at teardown (`rm -rf out stacks/*/terraform.tfstate* launch/terraform.tfstate*`; PowerShell: `Remove-Item -Recurse -Force out, stacks\*\terraform.tfstate*, launch\terraform.tfstate*`). On 2026-10-22 these ran with OpenTofu 1.12.6: `init` and `validate` succeeded and `apply` reported `1 added` for each single stack and `2 added` for the launch; `db.env` came out mode `0600`.
 
 ```bash
 mkdir -p out && export TF_VAR_db_password="$(openssl rand -hex 16)"
@@ -365,7 +365,7 @@ EOF
 ```powershell
 New-Item -ItemType Directory -Force $HOME\stacklab | Out-Null; Set-Location $HOME\stacklab
 function New-Hex { $b = New-Object byte[] 16; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); -join ($b | ForEach-Object { $_.ToString('x2') }) }
-"DB_PASS=$(New-Hex)`nDB_ROOT_PASS=$(New-Hex)`nWP_ADMIN_PASS=$(New-Hex)" | Set-Content .env
+"DB_PASS=$(New-Hex)`nDB_ROOT_PASS=$(New-Hex)`nWP_ADMIN_PASS=$(New-Hex)" | Set-Content -Encoding ascii .env
 @'
 server {
     listen 80;
@@ -380,10 +380,10 @@ server {
     }
     location ~ /\.ht { deny all; }
 }
-'@ | Set-Content nginx.conf
+'@ | Set-Content -Encoding ascii nginx.conf
 ```
 
-(The same file is what the OpenTofu `web` piece writes. On 2026-10-22 an equivalent block, with the address pointed at a local port, passed `nginx -t` on Nginx 1.26.3; with nothing behind it, `/hello.php` returned `502`, a missing file `404` and a static file `200`.) **Check.** `ls -l .env` shows mode `-rw-------` on Linux. **Undo.** Delete the folder at the end (Exercise 8).
+(PowerShell 5.1 writes UTF-16 with `Set-Content` unless told otherwise, which Compose cannot read as a `.env` file; `-Encoding ascii` avoids that, and these values are plain ASCII. The same file is what the OpenTofu `web` piece writes. On 2026-10-22 an equivalent block, with the address pointed at a local port, passed `nginx -t` on Nginx 1.26.3; with nothing behind it, `/hello.php` returned `502`, a missing file `404` and a static file `200`.) **Check.** `ls -l .env` shows mode `-rw-------` on Linux. **Undo.** Delete the folder at the end (Exercise 8).
 
 Now the compose file. Save it as `compose.yaml` in the same folder (it is the same text for Bash and PowerShell). The `${...}` values are read from `.env` by compose; no secret is written in the file.
 
@@ -500,7 +500,7 @@ docker compose up -d
 docker compose ps
 ```
 
-**Check.** Six services listed; the only published ports are `127.0.0.1:8081->80` and `127.0.0.1:8082->80`. First start downloads images and can take minutes. **Undo.** `docker compose down` (Exercise 8 removes the data too).
+**Check.** Five services listed (the two WP-CLI services are not started by `up`; Exercise 4 creates them one at a time); the only published ports are `127.0.0.1:8081->80` and `127.0.0.1:8082->80`. First start downloads images and can take minutes. **Undo.** `docker compose down` (Exercise 8 removes the data too).
 
 ### Exercise 4: install WordPress on each with WP-CLI, then see the `.htaccess` difference
 
@@ -605,6 +605,11 @@ host = urllib.parse.urlparse(url).hostname
 if host not in ("127.0.0.1", "localhost", "::1"):
     sys.exit("refusing: this script only talks to loopback")
 
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        return None  # never follow a redirect: it could point off loopback
+
+opener = urllib.request.build_opener(NoRedirect)
 lock = threading.Lock()
 times, codes = [], {}
 todo = [total]
@@ -617,7 +622,7 @@ def worker():
             todo[0] -= 1
         t0 = time.perf_counter()
         try:
-            with urllib.request.urlopen(url, timeout=30) as r:
+            with opener.open(url, timeout=30) as r:
                 r.read()
                 code = r.status
         except urllib.error.HTTPError as e:
@@ -652,7 +657,21 @@ py -I load.py http://127.0.0.1:8081/ 200 10
 py -I load.py http://127.0.0.1:8082/ 200 10
 ```
 
-**Check.** Every `codes=` line should read `{200: 200}`. Write both medians into your table, and run `docker stats --no-stream` again to see memory after the load. A WordPress page runs PHP and several database queries, so expect it to be much slower than the static page above (est.). **To isolate the database:** edit `compose.yaml` so `lemp-db` uses `mariadb:11.8` with the `MARIADB_*` variable names from `lamp-db`, run `docker compose up -d`, and repeat. If the numbers barely move, the database was not the cause. **Undo.** Put the file back as it was.
+**Check.** Every `codes=` line should read `{200: 200}`. The script does not follow redirects (so it can never be sent off loopback); a `301` in `codes=` means the address you gave redirects, so use the address it points to. Write both medians into your table, and run `docker stats --no-stream` again to see memory after the load. A WordPress page runs PHP and several database queries, so expect it to be much slower than the static page above (est.). **To isolate the database:** edit `compose.yaml` so `lemp-db` uses `mariadb:11.8` with the `MARIADB_*` variable names from `lamp-db`, recreate the LEMP side with fresh volumes, because the old `lemp-db` volume holds a MySQL data directory that MariaDB should not be started on:
+
+```bash
+docker compose rm -sf lemp-web lemp-php lemp-db
+docker volume rm stacklab_lemp-db stacklab_lemp-www
+docker compose up -d
+```
+
+```powershell
+docker compose rm -sf lemp-web lemp-php lemp-db
+docker volume rm stacklab_lemp-db stacklab_lemp-www
+docker compose up -d
+```
+
+Then repeat the LEMP half of Exercise 4 (the WordPress install) and the load run. If the numbers barely move, the database was not the cause. **Undo.** Put the file back as it was.
 
 ### Exercise 7: break it and look at the log
 
