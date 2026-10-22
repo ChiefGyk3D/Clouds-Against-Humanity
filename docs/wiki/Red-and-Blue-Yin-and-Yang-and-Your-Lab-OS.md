@@ -16,7 +16,7 @@ Lesson 2 is [Security tools basics: Nmap, OpenVAS, Burp and Metasploit](Security
 - Say why "it was just a scan" is not a defense, and write the three things you need in writing before any test: scope, authorization and rules of engagement.
 - Draw a small enterprise on a page and point at the box where a single local exploit lands, and name what else in the picture should have caught it.
 - Choose a lab operating system (Kali Linux or Parrot OS) and a way to run it (VirtualBox, KVM and QEMU, Windows Subsystem for Linux or Hyper-V) with reasons, and quote each project's own documentation instead of repeating folklore.
-- Build an isolated lab network, take a snapshot, and prove with a ping test that your lab cannot reach anything else.
+- Build an isolated lab network, take a snapshot, and check, with a ping inside the lab and a route check that sends no traffic, that your lab has no way out.
 
 ## Red and blue, and the idea of yin and yang
 
@@ -68,7 +68,7 @@ flowchart TB
         sec["Secrets manager"]:::ctl
     end
     subgraph z4["Boundary 4: corporate network (segmented)"]
-        end["Endpoints: Windows, macOS, Linux"]:::srv
+        endpoint["Endpoints: Windows, macOS, Linux"]:::srv
         idp["Identity provider: SSO and MFA"]:::ctl
         dir["Directory (Active Directory)"]:::ctl
         ztna["ZTNA or VPN broker"]:::net
@@ -87,9 +87,9 @@ flowchart TB
     users --> cdn
     cdn --> web
     web -->|"one allowed path"| app
-    end --> idp
+    endpoint --> idp
     idp --> dir
-    end --> ztna
+    endpoint --> ztna
     ztna --> app
     git -->|"deploys"| cloud
     sec -->|"secrets"| cloud
@@ -284,7 +284,7 @@ In scope: virtual machines I create on this computer, on the isolated network 20
 Out of scope: everything else, including my home network, any other computer, any internet address
 Allowed: tools named in the lab lesson, run only from the lab VM, only at lab VMs
 Not allowed: bridged networking, shared folders, scanning any address outside the isolated range
-Stop and revert the snapshot if: a ping test shows the lab can reach an outside address
+Stop and revert the snapshot if: the isolation check shows a default route or any way out of the lab
 Date and time window: ____ to ____
 EOF
 cat lab-scope.txt
@@ -302,7 +302,7 @@ In scope: virtual machines I create on this computer, on the isolated network 20
 Out of scope: everything else, including my home network, any other computer, any internet address
 Allowed: tools named in the lab lesson, run only from the lab VM, only at lab VMs
 Not allowed: bridged networking, shared folders, scanning any address outside the isolated range
-Stop and revert the snapshot if: a ping test shows the lab can reach an outside address
+Stop and revert the snapshot if: the isolation check shows a default route or any way out of the lab
 Date and time window: ____ to ____
 '@ | Set-Content -Path lab-scope.txt
 Get-Content lab-scope.txt
@@ -370,11 +370,11 @@ Remove-VMSnapshot -VMName lab-vm -Name clean-install
 
 **Undo.** `cd ~ && rm -r ~/snapshot-practice`.
 
-### Exercise 4: build the isolated network (KVM, VirtualBox, Hyper-V) and prove it with a ping test
+### Exercise 4: build the isolated network (KVM, VirtualBox, Hyper-V) and check it without sending traffic outside
 
 This is the exercise that matters. Three versions; do the one for your setup. Every command here is unrun (**est.**), because libvirt, VirtualBox and Hyper-V were not available to the author. The libvirt network definition was checked only to be well-formed XML.
 
-**Predict.** The lab VM sits on an isolated network. Which should work, which should fail: reaching the gateway address on that network, reaching a name on the internet, reaching an address in the 192.0.2.0/24 documentation range?
+**Predict.** The lab VM sits on an isolated network. Which should work and which should be impossible: reaching the gateway address on that network, and having any route at all to an address in the 192.0.2.0/24 documentation range?
 
 **Do, KVM with libvirt (Bash, Linux host):**
 
@@ -401,8 +401,11 @@ There is deliberately no `<forward>` element, which is what makes libvirt treat 
 ```bash
 VBoxManage hostonlyif create
 VBoxManage list hostonlyifs
+VBoxManage hostonlyif ipconfig "<name from the list>" --ip 203.0.113.1 --netmask 255.255.255.0
 VBoxManage modifyvm "lab-vm" --nic1 hostonly --hostonlyadapter1 "<name from the list>"
 ```
+
+The `ipconfig` line pins the adapter to the same range the scope file names, so the written scope and the real network agree (**est.**: I could not run it, and VirtualBox 7 versions differ in how they manage host-only networks, so read `VBoxManage hostonlyif` help for yours). Setting a DHCP range is optional; the simplest route is to give the guest a static address from the same range (below).
 
 On macOS hosts VirtualBox's manual says the option is a "host-only network" and the adapter form is legacy (read in chapter 6); on a Windows host the exact command names may differ by version (**est.**). In the graphical manager the same thing is Settings, Network, Attached to: Host-only Adapter.
 
@@ -414,19 +417,22 @@ Get-VMNetworkAdapter -VMName lab-vm | Connect-VMNetworkAdapter -SwitchName "lab-
 Get-VMSwitch
 ```
 
-**Check, inside the lab VM** (this is the ping test; Bash in the guest):
+A Private switch has no address on the host and no DHCP, so give each lab VM a static address in the range (below) and ping the other lab VM.
+
+**Give the guest an address in the range** if nothing handed it one (Bash in the guest, **est.**; the interface name varies, and this lasts until reboot): `sudo ip addr add 203.0.113.10/24 dev <interface>`. On a Windows guest (PowerShell, **est.**): `New-NetIPAddress -InterfaceAlias "<name>" -IPAddress 203.0.113.10 -PrefixLength 24`.
+
+**Check, inside the lab VM.** This is the isolation check. It sends nothing to any outside host: only the first command sends packets, and only to an address inside your lab.
 
 ```bash
-ip -brief address           # the card should have an address in your isolated range (203.0.113.x for the libvirt example)
-ip route                    # there should be no default route that leads outward
-ping -c 2 -W 2 203.0.113.1  # (your range's gateway) the gateway on the isolated network: expect replies (libvirt and VirtualBox host-only: the host holds the first address; a Hyper-V private switch has no host address, so ping a second lab VM instead)
-ping -c 2 -W 2 192.0.2.1    # a documentation-range address that nothing answers: expect 100% loss
-ping -c 2 -W 2 example.com  # expect a name resolution failure or 100% loss
+ip -brief address                  # the card has an address in your isolated range
+ip route                           # expect only the lab range; no line starting with "default"
+ping -c 2 -W 2 203.0.113.1         # a lab address: libvirt and VirtualBox host-only have the host here; on Hyper-V ping the other lab VM instead
+ip route get 192.0.2.1             # asks the kernel which way it would send a packet; sends nothing
 ```
 
-In a Windows guest, PowerShell: `Test-Connection -Count 2 -TargetName 203.0.113.1` and the same for the other two (PowerShell 7 syntax; on Windows PowerShell 5.1 the parameter is `-ComputerName`).
+Windows guest (PowerShell, **est.**): `Get-NetIPAddress -AddressFamily IPv4`, `Get-NetRoute -DestinationPrefix 0.0.0.0/0` (expect nothing returned) and `Test-Connection -Count 2 -TargetName 203.0.113.1` (PowerShell 7 syntax; on Windows PowerShell 5.1 use `-ComputerName`).
 
-**Expected result (est.):** the gateway answers where the host holds that address, and the other two fail. If `example.com` answers, **stop**: your lab can reach the internet, which means the adapter is not on the isolated network. Fix it before you do anything else.
+**Expected result (est.):** the lab address answers, there is no default route, and `ip route get 192.0.2.1` fails with "Network is unreachable" instead of naming a gateway. If a default route exists, **stop**: the VM has a way out, so the adapter is not on the isolated network or the guest has a second adapter. Fix it before doing anything else. This check shows there is no route out of the guest; it does not by itself prove nothing else outside can ever be reached, so also read the adapter attachment in your hypervisor (the screenshot placeholder in Exercise 5 and the Detect step below).
 
 **Undo.** KVM: `sudo virsh net-destroy lab-isolated && sudo virsh net-undefine lab-isolated`. VirtualBox: `VBoxManage hostonlyif remove "<name>"`. Hyper-V: `Remove-VMSwitch -Name "lab-private"`.
 
@@ -454,11 +460,11 @@ Then create the VM. Use the project's own guide for your hypervisor: [Kali insid
 2. Start with the **outbound-only** network (VirtualBox NAT, libvirt default) so the installer and updates work.
 3. Install, update, reboot.
 4. **Snapshot it** as `clean-install-updated`.
-5. Switch the adapter to the isolated network from Exercise 4, boot, and repeat the ping test.
+5. Switch the adapter to the isolated network from Exercise 4, boot, and repeat the isolation check.
 
 VirtualBox command line for the snapshot (Bash or PowerShell, **est.**): `VBoxManage snapshot "lab-vm" take clean-install-updated`. KVM (**est.**): `sudo virsh snapshot-create-as lab-vm clean-install-updated`.
 
-**Check.** The ping test from Exercise 4 passes (gateway answers, outside addresses fail) after you switched networks. Write the date and the snapshot name in `lab-scope.txt`.
+**Check.** The isolation check from Exercise 4 passes (a lab address answers, no default route) after you switched networks. Write the date and the snapshot name in `lab-scope.txt`.
 
 **Undo.** Delete the VM and its disk in your hypervisor's manager, and remove the isolated network from Exercise 4.
 
@@ -493,11 +499,11 @@ The loop on a lab, in miniature. Everything is on your own isolated lab, with no
 
 **Break (show, do not run).** Think through what happens if the adapter is changed from host-only to bridged. VirtualBox's manual says bridged mode exchanges "network packets directly, circumventing your host operating system's network stack." Your lab VM would be on your real network. You do not need to do it to learn from it: change it in your head, and write down which of your real devices a scanner in that VM could now reach.
 
-**Detect.** The ping test is your detection. Run it after every change to the VM's network settings, not just once. Also read the adapter settings in your hypervisor: VirtualBox (`VBoxManage showvminfo "lab-vm" --machinereadable`, est.), libvirt (`sudo virsh domiflist lab-vm`, est.) and Hyper-V (`Get-VMNetworkAdapter -VMName lab-vm`, est.) each list which network the card is attached to.
+**Detect.** The isolation check is your detection. Run it after every change to the VM's network settings, not just once. Also read the adapter settings in your hypervisor: VirtualBox (`VBoxManage showvminfo "lab-vm" --machinereadable`, est.), libvirt (`sudo virsh domiflist lab-vm`, est.) and Hyper-V (`Get-VMNetworkAdapter -VMName lab-vm`, est.) each list which network the card is attached to.
 
 **Evade, in words only.** Defenders sometimes run tools in virtual machines to study them, and some malicious programs try to notice that they are running in a VM and behave differently when they do (**est.**, general knowledge; I did not read a source for it on this page). It is a reminder that "I tested it in a VM and it looked harmless" is a statement about the VM. This page shows no technique for it.
 
-**Defend.** The list from "A safe network for the lab": an isolated network, no bridging, no shared folders, a snapshot before risk, a written scope, and the ping test every time.
+**Defend.** The list from "A safe network for the lab": an isolated network, no bridging, no shared folders, a snapshot before risk, a written scope, and the isolation check every time.
 
 ### Flip the board
 
@@ -521,7 +527,7 @@ The loop on a lab, in miniature. Everything is on your own isolated lab, with no
 
 ## Checkpoint
 
-You are done when you can say, without looking: the difference between a red, blue and purple team in one sentence each; the three things you need in writing before any test (scope, authorization, rules of engagement); what the Kali documentation says about who Kali is for and what it recommends for a first install; what Parrot's Home and Security editions differ in; which of the five ways to run a lab OS suits your computer and which one does not give you an isolated network by default; and what the ping test shows if your lab is really isolated.
+You are done when you can say, without looking: the difference between a red, blue and purple team in one sentence each; the three things you need in writing before any test (scope, authorization, rules of engagement); what the Kali documentation says about who Kali is for and what it recommends for a first install; what Parrot's Home and Security editions differ in; which of the five ways to run a lab OS suits your computer and which one does not give you an isolated network by default; and what the isolation check shows if your lab is really isolated.
 
 ## Common mistakes
 
@@ -529,7 +535,7 @@ You are done when you can say, without looking: the difference between a red, bl
 |---|---|---|
 | "It was only a scan, so no harm done" | Laws and contracts speak about access and authorization, not volume. | The Nmap legal chapter and your own contracts. |
 | "Kali is the best OS for learning Linux" | Kali's own docs say it is not for people unfamiliar with Linux or wanting a general-purpose desktop. | The quoted page. |
-| "Host-only means safe" | It means no route outward; it does not stop the lab from reaching the host or other lab VMs. | Your adapter settings and the ping test. |
+| "Host-only means safe" | It means no route outward; it does not stop the lab from reaching the host or other lab VMs. | Your adapter settings and the isolation check. |
 | "WSL is my lab" | WSL 2 uses NAT by default and shares files with Windows; it is not an isolated network. | Microsoft's WSL networking page. |
 | "Hyper-V is on every Windows" | It is not available on Windows Home. | The edition check in Exercise 2. |
 | "A snapshot is a backup" | It is usually stored next to the disk it protects. | [Backups, recovery and patching](Backups-Recovery-and-Patching.md). |
