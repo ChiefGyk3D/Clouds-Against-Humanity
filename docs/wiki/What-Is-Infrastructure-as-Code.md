@@ -134,6 +134,8 @@ The [Terraform reference](Terraform-Reference.md) explains every line of all of 
 
 ## Try it yourself, without a cloud account
 
+Want to type `tofu init`, `plan`, `apply` and `destroy` yourself first, with providers that only write files in a scratch folder? [OpenTofu from zero: init, plan, apply, destroy](OpenTofu-From-Zero.md) is a hands-on lesson for that, with a loop that builds and destroys ten times and proves the state is empty each time.
+
 The tests in this repo use **mocked providers**: fake DigitalOcean and Twingate that accept any request and return made-up IDs. So you can run the whole test suite with no account and no cost.
 
 ```bash
