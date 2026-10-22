@@ -48,16 +48,16 @@ variable "extra_outbound_rules" {
     condition = alltrue(flatten([
       for r in var.extra_outbound_rules : [
         for d in r.destinations :
-        r.allow_world_destinations || !(can(regex("/0+$", d)) || contains(["0.0.0.0", "::"], d))
+        r.allow_world_destinations || !(can(regex("/0+$", d)) || d == "0.0.0.0" || can(regex("^[0:]*:[0:]*$", d)))
       ]
     ]))
-    error_message = "A destinations entry that is a /0 (0.0.0.0/0 or ::/0) or an unspecified address (0.0.0.0, ::) opens the rule to the whole internet. Leave destinations empty for that, or set allow_world_destinations = true on the rule to say so on purpose."
+    error_message = "A destinations entry that is a /0 (0.0.0.0/0 or ::/0) or an unspecified address (0.0.0.0, ::, or any all-zero IPv6 spelling such as 0:0:0:0:0:0:0:0) opens the rule to the whole internet. Leave destinations empty for that, or set allow_world_destinations = true on the rule to say so on purpose."
   }
 
   validation {
     condition = alltrue([
       for r in var.extra_outbound_rules :
-      !r.allow_world_destinations || length([for d in r.destinations : d if can(regex("/0+$", d)) || contains(["0.0.0.0", "::"], d)]) > 0
+      !r.allow_world_destinations || length([for d in r.destinations : d if can(regex("/0+$", d)) || d == "0.0.0.0" || can(regex("^[0:]*:[0:]*$", d))]) > 0
     ])
     error_message = "allow_world_destinations = true is only for a rule whose destinations list includes a /0 entry; remove the flag, or list the world entry it is meant to allow."
   }

@@ -700,3 +700,30 @@ run "the_opt_in_flag_does_not_excuse_another_rule" {
   }
   expect_failures = [var.extra_outbound_rules]
 }
+
+run "an_expanded_unspecified_ipv6_address_without_opt_in_is_refused" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["0:0:0:0:0:0:0:0"] }]
+  }
+  expect_failures = [var.extra_outbound_rules]
+}
+
+run "a_compressed_zero_ipv6_address_without_opt_in_is_refused" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["0::0"] }]
+  }
+  expect_failures = [var.extra_outbound_rules]
+}
+
+run "a_real_ipv6_address_with_zero_groups_is_not_world" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["2001:db8::10", "::1"] }]
+  }
+  assert {
+    condition     = contains(output.outbound_rules, "tcp/5201/2001:db8::10,::1")
+    error_message = "Only an all-zero address is world-open; others must pass."
+  }
+}
