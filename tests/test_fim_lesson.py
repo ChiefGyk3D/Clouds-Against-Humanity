@@ -97,7 +97,16 @@ def test_a_hostile_file_name_cannot_forge_a_second_line(lab):
     assert sh(lab, "fim-alert.sh", "tree", "baseline.tsv", "alerts.log").returncode == 1
     log = (lab / "alerts.log").read_text().splitlines()
     assert len(log) == 1 and "forged" in log[0]
-    assert sh(lab, "fim-normalize.sh", "alerts.log").stdout.count("\n") == 1
+    norm = sh(lab, "fim-normalize.sh", "alerts.log").stdout
+    assert norm.count("\n") == 1 and "forged" in norm
+
+
+def test_normalizer_keeps_a_path_with_spaces_whole(lab):
+    built(lab)
+    (lab / "tree/data/my file.txt").write_text("x")
+    assert sh(lab, "fim-alert.sh", "tree", "baseline.tsv", "alerts.log").returncode == 1
+    norm = sh(lab, "fim-normalize.sh", "alerts.log").stdout.strip()
+    assert norm.endswith("path=./data/my\\ file.txt")
 
 
 def test_same_size_same_time_change_is_caught_by_the_hash(lab):

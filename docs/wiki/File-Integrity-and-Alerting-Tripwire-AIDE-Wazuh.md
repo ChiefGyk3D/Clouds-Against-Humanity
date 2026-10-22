@@ -553,8 +553,11 @@ exit 1
 awk -v year="$(date +%Y)" '
   BEGIN { split("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec", m, " "); for (i = 1; i <= 12; i++) mon[m[i]] = i }
   $5 ~ /^fimcheck\[[0-9]+\]:$/ && $6 == "ALERT" {
-    split($7, a, "="); split($8, p, "=")
-    printf "ts=%04d-%02d-%02dT%sZ src=- source=fim action=fim_%s user=- path=%s\n", year, mon[$1], $2, $3, a[2], p[2]
+    # The path is %q-escaped, so a space inside it is written as "\ ". Take everything between
+    # " path=" and the last " detail=" instead of splitting on spaces.
+    split($7, a, "=")
+    path = $0; sub(/^.* ALERT action=[^ ]+ path=/, "", path); sub(/ detail=[^ ]*$/, "", path)
+    printf "ts=%04d-%02d-%02dT%sZ src=- source=fim action=fim_%s user=- path=%s\n", year, mon[$1], $2, $3, a[2], path
   }' "$1"
 ```
 
