@@ -71,6 +71,14 @@ Whatever level you pick, read [How money works in the cloud](How-Money-Works-in-
 
 It is not a tutorial that ends with a working website. The environment is deliberately tiny: two machines, zero open ports, one way in. The value is in how it was built and why, and in the fact that every decision, including the wrong ones, is written down. If you want to learn cloud by building a thing, pick a thing and build it; then come back here to learn how to build it so that it does not get owned, does not surprise you on the bill, and can be rebuilt from scratch in an afternoon.
 
+## On what I left out, and on AI
+
+While this project helps you learn, some things have purposely been left out, condensed, or only given as partial lessons, because I, just like the real field, will not spoonfeed you all the answers, and AI can't reason for you. Learn to understand this yourself first, and then at most guide and direct the AI.
+
+I will be honest and say I still google things the old-fashioned way, as you may call it today, because it is often faster and I can reason better than AI can. Practice it and you will get better at it. AI is a great tool, but it is not always right or perfect, and it will amplify what you are great at and what you suck at. Use it as a tool, not as a crutch.
+
+I am not anti AI. [Scrum Around and Find Out](https://github.com/ChiefGyk3D/scrum-around-and-find-out), [Department of Internal Arguments](https://github.com/ChiefGyk3D/department-of-internal-arguments), [FrankenLLM](https://github.com/ChiefGyk3D/FrankenLLM), [Stream Daemon](https://github.com/ChiefGyk3D/Stream-Daemon), [Boon Tube Daemon](https://github.com/ChiefGyk3D/Boon-Tube-Daemon), [Star Daemon](https://github.com/ChiefGyk3D/Star-Daemon), [Penguin Overlord](https://github.com/ChiefGyk3D/penguin-overlord) and [Yo Mama as a Service](https://github.com/ChiefGyk3D/yomama-as-a-service) all have various AI features, I run my own AI server, and I am in both the Anthropic and OpenAI cybersecurity programs.
+
 If something here is wrong, confusing or does not work on your computer, please tell me: [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md) shows how, and it costs nothing.
 
 Next: [What is the cloud](What-Is-the-Cloud.md), the first primer. Every path through the wiki is laid out on the [Reading order](Reading-Order.md) page.
