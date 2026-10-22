@@ -211,17 +211,17 @@ def test_the_repository_gate_is_green_with_the_edge_present(tree):
     assert problems == []
 
 
-def test_pricing_a_droplet_for_the_edge_is_refused_until_the_gate_counts_the_module(tree):
-    # Fail closed: a priced droplet in the edge manifest has no connector module
-    # block to match, so the gate refuses it. The cost-gate follow-up (design
-    # section 5.6 item 7) changes this on purpose.
+def test_pricing_a_droplet_for_the_edge_still_needs_approval_and_a_reserved_ip(tree):
+    # With one droplet priced the edge-host reconciliation passes, but the total
+    # ($18) is above the approved $12, and the missing reserved_ip is not priceable.
     manifest = tree / "stacks/50-edge/cost.json"
     manifest.write_text(
         json.dumps({"stage": 5, "resources": [{"name": "edge", "kind": "droplet", "size": "s-1vcpu-1gb", "backups": False}]})
     )
     approved = json.loads(read(tree / "docs/stages/approved.json"))
     problems, _ = cost_check.gate_problems(tree, approved)
-    assert any("stacks/50-edge" in p and "twingate-connector module block" in p for p in problems), problems
+    assert any("above approved" in p for p in problems), problems
+    assert not any("twingate-connector module block" in p for p in problems), problems
 
 
 def test_a_reserved_ip_entry_cannot_be_priced_yet(tree):
@@ -236,3 +236,50 @@ def test_turning_the_switch_on_in_the_stack_is_refused_by_its_own_guard():
     outputs = strip_comments(read(STACK / "outputs.tf"))
     assert "!var.edge_enabled ||" in outputs
     assert 'r.kind == "reserved_ip"' in outputs and 'r.kind == "droplet"' in outputs
+
+
+# --- edge-host module calls are held to the connector's rules -----------------
+
+CALL = 'module "edge_host" {\n  source = "../../modules/edge-host"\n%s}\n'
+
+
+def edge_tree(tree, body, entries=()):
+    (tree / "stacks/50-edge/main.tf").write_text(CALL % body)
+    (tree / "stacks/50-edge/cost.json").write_text(json.dumps({"stage": 5, "resources": list(entries)}))
+    return cost_check.edge_module_problems(tree)[0]
+
+
+GOOD_BODY = "  count = local.on\n  size  = local.edge_droplet.size\n"
+DROP = {"name": "edge", "kind": "droplet", "size": "s-1vcpu-1gb", "backups": False}
+RIP = {"name": "ip", "kind": "reserved_ip", "assigned_to": "edge"}
+
+
+def test_a_conforming_call_passes(tree):
+    assert edge_tree(tree, GOOD_BODY) == []
+    assert edge_tree(tree, GOOD_BODY, [DROP, RIP]) == []
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        "  count = 2\n  size = local.edge_droplet.size\n",
+        "  count = var.n\n  size = local.edge_droplet.size\n",
+        '  for_each = toset(["a"])\n  size = local.edge_droplet.size\n',
+    ],
+)
+def test_count_other_than_the_switch_and_for_each_are_refused(tree, body):
+    assert any("uses" in p for p in edge_tree(tree, body))
+
+
+@pytest.mark.parametrize("size", ['"s-1vcpu-1gb"', "var.droplet_size", "lower(local.edge_droplet.size)"])
+def test_a_size_that_is_not_a_plain_local_reference_is_refused(tree, size):
+    assert any("plain reference" in p for p in edge_tree(tree, f"  count = local.on\n  size = {size}\n"))
+
+
+def test_a_missing_size_is_refused(tree):
+    assert any("plain reference" in p for p in edge_tree(tree, "  count = local.on\n"))
+
+
+def test_manifest_entries_must_match_the_module_calls(tree):
+    assert any("2 droplet" in p for p in edge_tree(tree, GOOD_BODY, [DROP, {**DROP, "name": "b"}]))
+    assert any("2 reserved_ip" in p for p in edge_tree(tree, GOOD_BODY, [RIP, {**RIP, "name": "b"}]))
