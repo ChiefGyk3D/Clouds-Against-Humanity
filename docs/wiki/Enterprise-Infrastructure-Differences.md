@@ -106,7 +106,7 @@ Buying a product at a company involves a security questionnaire, a review of the
 
 ## Shared responsibility
 
-Cloud providers publish a **shared responsibility model**: they secure the platform; you secure what you put on it. The line moves with the service: you patch the operating system on a virtual machine, but not on a managed database. The practical effect is that "the cloud is secure" is half a sentence. Every enterprise audit asks who owns each control.
+Cloud providers publish a **shared responsibility model**: they secure the platform; you secure what you put on it. The line moves with the service: you patch the operating system on a virtual machine, but not on a managed database. The [side page on service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md#iaas-paas-saas-and-shared-responsibility) has the full map. The practical effect is that "the cloud is secure" is half a sentence. Every enterprise audit asks who owns each control.
 
 **What this project does instead.** The droplets are your responsibility down to the operating system, and that is why [hardening](Droplet-Hardening.md) exists. Fine, and instructive: the example is built to show which layer is yours.
 

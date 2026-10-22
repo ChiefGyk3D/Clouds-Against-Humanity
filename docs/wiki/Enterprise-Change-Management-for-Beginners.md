@@ -234,6 +234,7 @@ Open [Trace one change end to end](Trace-One-Change-End-to-End.md) and name two 
 
 - [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) and [Trace one change end to end](Trace-One-Change-End-to-End.md): the project's lightweight version of this page, step by step.
 - [Enterprise engineering habits](Enterprise-Engineering-Habits.md): the habits worth taking home from a tiny lab.
+- [Working in a company: tickets, change, on-call and documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md): write the ticket, the change record, the runbook step and the post-mortem yourself, for free.
 - [Lessons learned](Lessons-Learned.md): a worked example of post-implementation review done without ceremony.
 - DORA's guide to its metrics at dora.dev, and the research it links to (the claims in this page about DORA were read on 2026-10-16).
 - The official ITIL 4 publication on change enablement from PeopleCert, for the primary wording (this page did not read it).
