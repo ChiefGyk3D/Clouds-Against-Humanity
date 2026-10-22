@@ -74,7 +74,7 @@ Inside the encrypted pipe the client sends a plain **HTTP** request (`GET /` wit
 - **Reverse proxy:** a server that stands in front of the real servers, receives requests for them, and forwards them; it is a good place for TLS, logging and filtering. (A *forward* proxy is the other direction: it stands in front of clients.)
 - **Load balancer:** a reverse proxy that spreads requests across several servers and stops sending to a failed one; it is often where **TLS termination** happens, meaning the encrypted connection ends at the balancer and the rest of the trip may or may not be encrypted again.
 
-Each one can be another place a certificate is checked and another place a log line is written, which matters when you try to answer "where did this request go wrong?"
+Each one can be another place a certificate is checked and another place a log line is written, which matters when you try to answer "where did this request go wrong?" To build a web server, a PHP runtime and a database yourself and trace a request through them, see [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md).
 
 ## Certificates and trust chains in plain language
 

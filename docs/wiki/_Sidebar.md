@@ -21,6 +21,7 @@
     - Side page: [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md)
     - Foundations side page: [Windows, Active Directory and macOS in the enterprise](Windows-Active-Directory-and-macOS-in-the-Enterprise.md)
     - Foundations side page: [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md)
+    - Foundations side page: [LAMP and LEMP from zero: web server, PHP runtime, database](LAMP-and-LEMP-From-Zero.md)
 8. [How money works](How-Money-Works-in-the-Cloud.md)
 9. [Enterprise habits](Enterprise-Engineering-Habits.md)
     - Foundations side page: [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md)
