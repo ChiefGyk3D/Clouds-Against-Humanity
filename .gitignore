@@ -13,3 +13,8 @@ __pycache__/
 .pytest_cache/
 .venv/
 .superpowers/
+
+# local secrets files stay on this machine; the example is documentation
+.env
+.env.*
+!.env.example

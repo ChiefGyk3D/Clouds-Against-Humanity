@@ -117,5 +117,6 @@ One honest note: zero trust shifts trust, it does not remove it. This project tr
 - Turn on MFA for your GitHub account and your email, today, if you have not.
 - Make an SSH key with `ssh-keygen -t ed25519 -C ""` (the empty `-C` gives it no comment) and look at the two files it made. Open the `.pub` one; that is the half you may share. Never open the other one in anything that leaves your machine.
 - Search your own public repositories for the strings `password`, `token` and `secret`. If you find one, rotate it first, then remove it; removing it from git does not remove it from history or from the bots that already copied it.
+- Set up the habits this page describes in order, with a scanner and a leak drill to practice on: [Secrets from day one](Secrets-From-Day-One.md).
 
 Next: [What is infrastructure as code](What-Is-Infrastructure-as-Code.md).
