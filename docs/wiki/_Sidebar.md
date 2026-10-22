@@ -1,4 +1,4 @@
-**[Home](Home.md)** | **[Reading order](Reading-Order.md)** | **[Why this exists](Why-This-Exists.md)**
+**[Home](Home.md)** | **[Reading order](Reading-Order.md)** | **[Why this exists](Why-This-Exists.md)** | **[Give feedback](Give-Feedback-and-Open-an-Issue.md)**
 
 <details open>
 <summary><b>Core path: read in this order</b></summary>
@@ -142,6 +142,7 @@ The [Threat model](Threat-Model.md) is core step 19.
 - [Troubleshooting index](Troubleshooting-Index.md)
 - [Settings reference](Settings-Reference.md)
 - [Terraform reference](Terraform-Reference.md)
+- [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md)
 - [How this project is planned](How-This-Project-Is-Planned.md)
 - [Screenshots policy](Screenshots-Policy.md)
 - [Stage 0 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/00-foundation.md)

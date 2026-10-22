@@ -100,6 +100,18 @@ Exceptions, kept exactly as written: direct quotes and vendor text, code and con
 
 `tests/test_american_english.py` fails when a clear British spelling appears in any Markdown page, in a Python, HCL, YAML or shell comment or docstring, or in a threat-model description, outside code fences, inline code and URLs. `tests/test_markdown_anchors.py` checks that every link to a heading still points at one. If a page must keep one on purpose, add a line to `docs/american-english-allowlist.txt` with the page, the word and the reason.
 
+## Feedback from readers
+
+Readers are part of the plan. [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md) explains how to report a mistake, a failed command or a question, and the repository has issue forms, a `SECURITY.md` and a `CONTRIBUTING.md` for it. A report becomes an issue like any other and goes through the flow above.
+
+Every new lesson page ends with a one-line feedback footer placed just before its **Next** line, so a reader who finds a mistake is one click from the how-to:
+
+```
+Found a mistake or a command that failed? [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md).
+```
+
+Lessons written before this footer existed get it as they are next edited; the foundations and deception lessons do not carry it yet.
+
 ## Changing the plan
 
 Plans change in the open. To add work, open an issue with a reason and a "done when" list. To change the sequence or the board's shape, open a pull request: `board.yaml` is reviewed like code, and `safo --board board.yaml audit` reports where the live board differs from the file. A few settings (the Roadmap view's date fields, view grouping and the project's built-in workflows) cannot be set through GitHub's API; `board.yaml` lists them under `ui_only` so they are checked by eye.
