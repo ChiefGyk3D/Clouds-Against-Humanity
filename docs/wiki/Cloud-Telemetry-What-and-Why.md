@@ -85,6 +85,7 @@ Write your answers before opening the reference.
 
 - **No cost.** Pick three things that went wrong in [Lessons learned](Lessons-Learned.md) and write which signal (log, metric, trace) would have shown each one first, and which would have been an alert.
 - **Say it in one sentence each.** Without the table, explain NOC, SOC and SIEM to someone who has not read this page. If your SIEM sentence mentions a team, rewrite it.
+- **Read one.** If you have never read a log line, [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) takes you through an SSH line and a web access line field by field, on invented logs.
 - **Find the cheapest signal.** For "is connector a up", name the cheapest signal that answers it, and then the one that would also tell you *why* it is down.
 
 Next: [Multiple sites and identity](Multiple-Sites-and-Identity.md). Back to the [Reading order](Reading-Order.md).
