@@ -12,7 +12,7 @@ Lesson 7 of the [deception and honeypots track](Deception-and-Honeypots-Start-He
 
 - Say what a medium-interaction honeypot is, and what [Cowrie](Glossary.md) does and does not do.
 - Draw the path from the internet to the sensor's log file, and name the control that sits at each step.
-- Give the reason for each of the guardrails a cloud sensor needs: its own account, a management port only you can reach, exposed lure ports, nothing real on the box, no route to your other things, closed outgoing traffic, logs pulled out, a teardown written first and a spend limit.
+- Give the reason for each of the guardrails a cloud sensor needs: its own account, a separate management path that only your address can reach, exposed lure ports, nothing real on the box, no route to your other things, closed outgoing traffic, logs pulled out, a teardown written first and a spend limit.
 - Read a provider's acceptable-use policy for the clause that decides whether you may run a honeypot at all, and quote it.
 - Say what the cost is, what is **not** a spending cap, and what is.
 
@@ -46,7 +46,7 @@ Each row is a control with a reason and a way to check it. Lesson 8 builds every
 | # | Guardrail | Why | How you check it |
 |---|---|---|---|
 | 1 | **An account of its own**, holding nothing else, with its own payment method. | A provider acts on an account. A honeypot is built to draw complaints, and a suspension should land somewhere that holds nothing you need. The [honeypot design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-21-honeypot-design.md) (section 3) says why a separate team or project in your main account is not enough. | The account's resource list shows the sensor, its firewall and nothing else. |
-| 2 | **The real SSH moved off port 22**, key-only, no root login, and reachable **only from your own address**. | Port 22 now belongs to the imitation. If real SSH stayed on a port anyone can reach, the first password-guesser is guessing against your real door. | From a machine that is not yours, the management port does not answer. From yours, it does. |
+| 2 | **A separate management path**: real SSH on a port other than 22 (for function: the imitation needs 22), reachable **only from your own address** at the cloud firewall and again on the host, key-only, no passwords, no root login. | Port 22 now belongs to the imitation, so the operator needs another way in. **The new port number is not a protection**: anyone who scans finds it. What protects the door is the firewall allowing only your address, key-only login, no passwords, patching by rebuild, and logs you read. If real SSH were open to everyone, the first password-guesser would be guessing against your real door whatever its port. | From a machine that is not yours, the management port does not answer. From yours, it does. |
 | 3 | **Only the lure ports are open to everyone**: 22 and, if you chose it, 23. | A honeypot is exposed on purpose; nothing else should be. | The firewall lists exactly the rows in the table in lesson 8. |
 | 4 | **Nothing real on the box.** No real files, keys, tokens, passwords or accounts, and no key that opens anything else. | The sensor will be attacked, and a clever visitor may get past the imitation. Whatever is on it is lost. | Read the machine's files and its user-data once, before exposing it. |
 | 5 | **No route to anything else of yours.** No peering, no tunnel, no VPN client, no Twingate connector or client on the box, no stored key for another machine. | A taken-over sensor with a path home is a way in. Twingate is how this project reaches private things; the sensor must have none of that. | The account has no other resources; the box has no software that joins a private network. |
@@ -100,7 +100,7 @@ What that means for you: expect mostly automated visitors, repeating a short scr
 
 ## Exercise: review the plan on paper
 
-**Predict.** Before you read anything else: which of the nine guardrails do you think a first-time builder is most likely to get wrong? Write it down. (The author's guess is the management port: moving real SSH and locking it to one address is the step where people lock themselves out.)
+**Predict.** Before you read anything else: which of the nine guardrails do you think a first-time builder is most likely to get wrong? Write it down. (The author's guess is the management path: giving real SSH a different port and locking it to one address is the step where people lock themselves out.)
 
 **Do.**
 
@@ -144,7 +144,7 @@ What that means for you: expect mostly automated visitors, repeating a short scr
 | Treating a spend alert as a limit. | The provider says it is not one. | Enforce the five layers yourself. |
 | Putting the sensor in your main account "because it is only a weekend". | A suspension takes everything in that account with it. | A separate account, with its own payment method. |
 | Leaving outgoing traffic open "just for updates". | That is how a taken-over sensor attacks others. | Open it only while you build; close it before you expose anything. |
-| Copying a tutorial's port 22 redirect without moving real SSH first. | You lock yourself out, or you expose your real door. | Move and test the management port first (lesson 8 does it in order). |
+| Copying a tutorial's port 22 redirect before real SSH has another way in. | You lock yourself out, or you expose your real door. | Set up and test the separate management path first (lesson 8 does it in order). A different port number is for function, not protection: the firewall rule and the key are the protection. |
 
 ## Claims register
 
