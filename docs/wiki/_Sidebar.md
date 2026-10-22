@@ -85,6 +85,8 @@ The [Threat model](Threat-Model.md) is core step 19.
         - [Plant a canary token](Deception-and-Honeypots-Plant-a-Canary.md)
         - [Honeyfiles on a host you own](Deception-and-Honeypots-Honeyfiles-on-Your-Host.md)
         - [Deception alerts in the SIEM](Deception-and-Honeypots-Alerts-in-the-SIEM.md)
+        - [Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md)
+        - [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md)
 - [Cloud telemetry: what and why (unverified draft)](Cloud-Telemetry-What-and-Why.md)
 - [Multiple sites and identity (unverified draft)](Multiple-Sites-and-Identity.md)
 - [Telemetry crosses the trust boundary (unverified draft)](Telemetry-Crosses-the-Trust-Boundary.md)
