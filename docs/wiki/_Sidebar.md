@@ -39,6 +39,7 @@
     - Side page: [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md)
 14. [Droplet hardening](Droplet-Hardening.md)
     - Foundations side page: [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
+    - Foundations side page: [First hour on a new system: updates and a baseline](First-Hour-on-a-New-System-Updates-and-Baseline.md)
 15. [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
     - Foundations side page: [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md)
 16. [Spacelift](Spacelift.md)
