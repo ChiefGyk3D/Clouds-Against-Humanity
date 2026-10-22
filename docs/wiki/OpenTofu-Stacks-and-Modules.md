@@ -1,6 +1,6 @@
 # OpenTofu, stacks and modules
 
-> Never used Terraform or OpenTofu? [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) explains providers, resources, plan, apply and state from zero, and shows how to run this repo's tests with no cloud account.
+> Never used Terraform or OpenTofu? [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) explains providers, resources, plan, apply and state from zero, and shows how to run this repo's tests with no cloud account. To type the commands yourself with free, local providers, do [OpenTofu from zero: init, plan, apply, destroy](OpenTofu-From-Zero.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
