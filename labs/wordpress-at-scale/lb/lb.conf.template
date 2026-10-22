@@ -1,0 +1,33 @@
+# SPDX-License-Identifier: Apache-2.0
+# The load balancer. It answers only requests that carry the origin secret the
+# edge adds, so a request that skips the edge is refused (origin protection).
+# Without "resolve", Nginx looks the node names up once at start and keeps the old
+# addresses: a node that comes back at a new address is never used again. "resolve"
+# (open source since Nginx 1.27.3) re-checks DNS; it needs a resolver and a shared zone.
+resolver ${NGINX_RESOLVER} valid=2s ipv6=off;
+
+upstream web {
+    zone web 64k;
+    server web1:8000 resolve max_fails=1 fail_timeout=5s;
+    server web2:8000 resolve max_fails=1 fail_timeout=5s;
+}
+
+server {
+    listen 80;
+
+    if ($http_x_origin_auth != "${ORIGIN_SECRET}") {
+        return 403 "origin: this request did not come through the edge\n";
+    }
+
+    location / {
+        proxy_pass http://web;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_connect_timeout 1s;
+        # A node that is down is skipped, and a read request is retried on the other node.
+        proxy_next_upstream error timeout http_502 http_503;
+        add_header X-Upstream $upstream_addr always;
+    }
+}
