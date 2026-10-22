@@ -5,3 +5,4 @@ docs/wiki/CI-Tests-and-Cost-Gate.md:cancelled | GitHub's literal job result valu
 docs/wiki/From-Commit-to-Pipeline.md:cancelled | GitHub's literal job result value (needs.<job>.result), not prose
 docs/superpowers/specs/2026-10-21-honeypot-design.md:Licences | Quoted heading of the vendor's README, kept as the vendor wrote it
 tests/test_american_english.py:cancelled | The test's own comment and examples name the word it detects
+labs/wordpress-at-scale/ci/example-wordpress-ci.yml:analyse | PHPStan's literal command name (vendor/bin/phpstan analyse), not prose
