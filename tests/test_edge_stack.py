@@ -244,7 +244,8 @@ CALL = 'module "edge_host" {\n  source = "../../modules/edge-host"\n%s}\n'
 
 
 def edge_tree(tree, body, entries=()):
-    (tree / "stacks/50-edge/main.tf").write_text(CALL % body)
+    # The switch definition stays (the real outputs.tf holds the precondition).
+    (tree / "stacks/50-edge/main.tf").write_text("locals {\n  on = var.edge_enabled ? 1 : 0\n}\n" + CALL % body)
     (tree / "stacks/50-edge/cost.json").write_text(json.dumps({"stage": 5, "resources": list(entries)}))
     return cost_check.edge_module_problems(tree)[0]
 
@@ -283,3 +284,44 @@ def test_a_missing_size_is_refused(tree):
 def test_manifest_entries_must_match_the_module_calls(tree):
     assert any("2 droplet" in p for p in edge_tree(tree, GOOD_BODY, [DROP, {**DROP, "name": "b"}]))
     assert any("2 reserved_ip" in p for p in edge_tree(tree, GOOD_BODY, [RIP, {**RIP, "name": "b"}]))
+
+
+# --- zero manifest entries need a verified switch; other droplets still count --
+
+
+def real_stack_problems(tree, main=None, outputs=None, entries=()):
+    if main is not None:
+        (tree / "stacks/50-edge/main.tf").write_text(main)
+    if outputs is not None:
+        (tree / "stacks/50-edge/outputs.tf").write_text(outputs)
+    (tree / "stacks/50-edge/cost.json").write_text(json.dumps({"stage": 5, "resources": list(entries)}))
+    return cost_check.edge_module_problems(tree)[0]
+
+
+def test_the_real_stack_has_a_verified_switch(tree):
+    assert cost_check.edge_switch_verified(tree, "stacks/50-edge")
+    assert real_stack_problems(tree) == []
+
+
+def test_zero_entries_are_refused_when_the_call_has_no_switch(tree):
+    main = read(tree / "stacks/50-edge/main.tf").replace("  count  = local.on\n", "", 1)
+    assert any("0 droplet" in p for p in real_stack_problems(tree, main=main))
+
+
+def test_zero_entries_are_refused_when_the_switch_is_not_a_variable_ternary(tree):
+    main = read(tree / "stacks/50-edge/main.tf").replace("on = var.edge_enabled ? 1 : 0", "on = 0")
+    assert any("0 droplet" in p for p in real_stack_problems(tree, main=main))
+
+
+def test_zero_entries_are_refused_when_the_precondition_is_gone(tree):
+    outputs = read(tree / "stacks/50-edge/outputs.tf").replace("!var.edge_enabled ||", "true ||")
+    assert any("0 droplet" in p for p in real_stack_problems(tree, outputs=outputs))
+
+
+def test_a_non_edge_droplet_in_the_edge_manifest_is_still_counted(tree):
+    # One droplet is the edge's and is subtracted; the second has no connector
+    # module block, so the connector reconciliation still reports it.
+    entries = [DROP, {**DROP, "name": "stray"}]
+    (tree / "stacks/50-edge/cost.json").write_text(json.dumps({"stage": 5, "resources": entries}))
+    problems = cost_check.structure_problems(tree)
+    assert any("stacks/50-edge: 0 twingate-connector module block(s) but 1 machine" in p for p in problems), problems
