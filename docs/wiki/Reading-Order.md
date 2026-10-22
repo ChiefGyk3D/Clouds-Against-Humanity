@@ -172,6 +172,7 @@ Not a path. Open these when you need them; every one is linked from the sidebar.
 | [Glossary](Glossary.md) | A word or acronym is new. Terms marked **(basics)** are the ones to learn first. |
 | [Troubleshooting index](Troubleshooting-Index.md) | Something failed and you have a symptom. |
 | [Settings reference](Settings-Reference.md) | You want to change a value and need to know where it lives. Generated from one manifest. |
+| [Project status](Project-Status.md) | You want to know where the work stands right now: what is in flight, what merged and needs review, what waits on the maintainer. Generated from GitHub; shows when it was last refreshed. |
 | [Terraform reference](Terraform-Reference.md) | You want every variable, resource and output explained line by line. |
 | [Lessons learned](Lessons-Learned.md) | You want the things that broke during the build, and what fixed them. |
 | [Roadmap](Roadmap.md) | You want to know what is built and what is only planned. |
