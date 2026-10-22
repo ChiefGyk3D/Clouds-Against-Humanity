@@ -4,6 +4,8 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+> Side page: [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) says where this project uses a service account and which plan each use needs.
+
 Twingate is the only way to reach a droplet in this project. This page covers the moving parts, how they are wired up in `stacks/10-access`, and why each choice was made. For the "why not a VPN" argument itself, see [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md).
 
 ## The four pieces
