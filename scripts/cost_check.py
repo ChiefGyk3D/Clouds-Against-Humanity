@@ -1193,7 +1193,7 @@ def edge_switch_verified(root, stack):
         return False
     var = match.group("var")
     return bool(
-        re.search(r"precondition\s*\{[^{}]*?!var\." + re.escape(var) + r"\s*\|\|[^{}]*?local\.cost\.resources", text, re.S)
+        re.search(r"precondition\s*\{[^{}]*?!var\." + re.escape(var) + r"\s*\|\|[^{}]*?local\.cost\.resources", text, re.DOTALL)
     )
 
 
