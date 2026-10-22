@@ -44,6 +44,8 @@ fields:
       - {name: Multi-cloud, color: PURPLE, description: "AWS, Azure, GCP"}
       - {name: Learning and wiki, color: GRAY, description: "Lessons, labs, screenshots"}
       - {name: Process, color: YELLOW, description: "How the project is run"}
+      - {name: Security, color: RED, description: "Threat models, hardening reviews, vulnerability and advisory work"}
+      - {name: Docs, color: BLUE, description: "Wiki pages, specs and README: reading, not building"}
   - name: Size
     type: single_select
     options:
@@ -93,7 +95,7 @@ fields:
   - {name: Target date, type: date}
   - {name: Done on, type: date}
 views:
-  - {name: All items, layout: table, filter: ""}
+  - {name: All Items, layout: table, filter: ""}
   - {name: Board, layout: board, filter: "-status:Done"}
   - {name: Roadmap, layout: roadmap, filter: "-status:Done"}
   - {name: Sprint, layout: board, filter: "sprint:@current"}
@@ -102,8 +104,8 @@ views:
   - {name: Bugs, layout: table, filter: "kind:Bug -status:Done"}
   - {name: "Blocked: needs the maintainer", layout: table, filter: "status:Blocked"}
   - {name: By area, layout: table, filter: "-status:Done"}
-  - {name: Security, layout: table, filter: 'area:"Stage 1 hardening" -status:Done'}
-  - {name: Docs, layout: table, filter: 'area:"Learning and wiki" -status:Done'}
+  - {name: Security, layout: table, filter: 'area:Security -status:Done'}
+  - {name: Docs, layout: table, filter: 'area:Docs -status:Done'}
   - {name: Backlog, layout: table, filter: "status:Backlog"}
   - {name: Done log, layout: table, filter: "status:Done"}
   - {name: By repository, layout: table, filter: ""}
@@ -124,7 +126,7 @@ agents:
   working: [In progress, In review, Next]
   waiting: [Blocked]
 ui_only:
-  - "Rename the live views once: 'View 1' -> 'All items', 'Sprint board' -> 'Board' (bootstrap creates, never renames)"
+  - "Rename the live view 'Sprint board' -> 'Board' once (bootstrap creates, never renames)"
   - "Board and Sprint views: Column field = Status, Sort by Priority"
   - "Roadmap view: Date fields = Start date and Target date, Group by = Epic, zoom = Quarter"
   - "Sprint plan view: Group by = Sprint; show Size, Agent, Area, Kind"

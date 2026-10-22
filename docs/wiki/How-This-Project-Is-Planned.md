@@ -6,7 +6,7 @@
 
 The work is planned the way a small team plans software: a written backlog, a size on every item, two-week sprints, a review at the end of each, and a definition of done. The plan lives in GitHub, next to the code, so a change to the plan is as visible as a change to the code.
 
-- **The board:** the [Clouds Against Humanity project](https://github.com/users/ChiefGyk3D/projects/4) (All items, Board, Roadmap, Sprint, Epics, Bugs, Blocked, By area, Security, Docs, Done log and Agents at work views, among others). It is laid out the same way as the board of the author's Hammunition suite, so one reading habit works for both.
+- **The board:** the [Clouds Against Humanity project](https://github.com/users/ChiefGyk3D/projects/4) (All Items, Board, Roadmap, Sprint, Epics, Bugs, Blocked, By area, Security, Docs, Done log and Agents at work views, among others). It is laid out the same way as the board of the author's Hammunition suite, so one reading habit works for both.
 - **The backlog:** the repository's [issues](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues), grouped into epics and milestones.
 - **The board as code:** `board.yaml` in the repository root. It names every field, option, iteration and view, and [Scrum Around and Find Out](https://github.com/ChiefGyk3D/scrum-around-and-find-out) (SAFO) creates and checks the board from it.
 
@@ -53,7 +53,7 @@ SAFO moves a card as GitHub events happen: an opened issue is Backlog, a ready p
 | Field | What it holds |
 |---|---|
 | Status | Backlog, Next, In progress, In review, Blocked, Done (table above) |
-| Area | The theme: operations and gates, stage 1 hardening, stage 2 telemetry, stage 3 workloads, edge and DMZ, multi-cloud, learning and wiki, process |
+| Area | The theme: operations and gates, stage 1 hardening, stage 2 telemetry, stage 3 workloads, edge and DMZ, multi-cloud, learning and wiki, process, security (threat models, hardening reviews, advisories), docs (wiki pages, specs and README) |
 | Kind | Feature, Bug, Decision, Lesson, Chore, Docs, Release or Epic. A Decision is a ruling, a design note or an approval; a Lesson is wiki teaching |
 | Epic | Which of the eight epic issues the card belongs to |
 | Priority | P0 now, P1 soon, P2 later, P3 someday |
@@ -70,7 +70,7 @@ Pull requests are cards too. A merged pull request is Done with its Done on date
 
 | View | Shows |
 |---|---|
-| All items | Everything, unfiltered |
+| All Items | Everything, unfiltered |
 | Board | Cards by Status, without Done |
 | Roadmap | Bars from Start date to Target date, without Done |
 | Sprint | The current sprint only |
@@ -79,8 +79,8 @@ Pull requests are cards too. A merged pull request is Done with its Done on date
 | Bugs | Kind Bug, without Done |
 | Blocked: needs the maintainer | Status Blocked |
 | By area | Open work grouped by Area |
-| Security | Stage 1 hardening, without Done |
-| Docs | Learning and wiki, without Done |
+| Security | Area Security, without Done |
+| Docs | Area Docs, without Done |
 | Backlog | Status Backlog |
 | Done log | Everything with Status Done |
 | By repository | Grouped by repository |
