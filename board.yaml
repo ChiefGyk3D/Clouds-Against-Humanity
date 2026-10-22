@@ -51,9 +51,33 @@ fields:
       - {name: M, color: BLUE, description: "About 5 hours"}
       - {name: L, color: ORANGE, description: "About 12 hours"}
       - {name: XL, color: RED, description: "About 30 hours: split before scheduling"}
+  - name: Kind
+    type: single_select
+    options:
+      - {name: Feature, color: GREEN, description: "New capability in the repository"}
+      - {name: Bug, color: RED, description: "Something is wrong"}
+      - {name: Decision, color: PURPLE, description: "A ruling, design note or approval"}
+      - {name: Lesson, color: BLUE, description: "A wiki lesson, lab or learning track"}
+      - {name: Chore, color: GRAY, description: "Upkeep, rotation, dependency bump"}
+      - {name: Docs, color: YELLOW, description: "Documentation that is not a lesson"}
+      - {name: Release, color: ORANGE, description: "A tag, a release or a cutover"}
+      - {name: Epic, color: PINK, description: "A grouping issue; its work is in sub-issues"}
+  - name: Epic
+    type: single_select
+    options:
+      - {name: Operations and gates, color: RED, description: "Epic #68"}
+      - {name: Stage 1 hardening, color: ORANGE, description: "Epic #69"}
+      - {name: Stage 2 telemetry, color: BLUE, description: "Epic #70"}
+      - {name: Stage 3 workloads, color: GREEN, description: "Epic #71"}
+      - {name: Edge and DMZ, color: PINK, description: "Epic #72"}
+      - {name: Multi-cloud, color: PURPLE, description: "Epic #73"}
+      - {name: Learning and wiki, color: GRAY, description: "Epic #74"}
+      - {name: Process, color: YELLOW, description: "Epic #75"}
+  - {name: Decision, type: text}
   - name: Priority
     type: single_select
     options:
+      - {name: P0 now, color: RED, description: "Drop everything"}
       - {name: P1 soon, color: ORANGE, description: ""}
       - {name: P2 later, color: YELLOW, description: ""}
       - {name: P3 someday, color: GRAY, description: ""}
@@ -69,10 +93,20 @@ fields:
   - {name: Target date, type: date}
   - {name: Done on, type: date}
 views:
-  - {name: Sprint board, layout: board, filter: "-status:Done"}
+  - {name: All items, layout: table, filter: ""}
+  - {name: Board, layout: board, filter: "-status:Done"}
+  - {name: Roadmap, layout: roadmap, filter: "-status:Done"}
+  - {name: Sprint, layout: board, filter: "sprint:@current"}
   - {name: Sprint plan, layout: table, filter: "-status:Done"}
-  - {name: Roadmap, layout: roadmap, filter: ""}
+  - {name: Epics, layout: table, filter: "kind:Epic"}
+  - {name: Bugs, layout: table, filter: "kind:Bug -status:Done"}
+  - {name: "Blocked: needs the maintainer", layout: table, filter: "status:Blocked"}
+  - {name: By area, layout: table, filter: "-status:Done"}
+  - {name: Security, layout: table, filter: 'area:"Stage 1 hardening" -status:Done'}
+  - {name: Docs, layout: table, filter: 'area:"Learning and wiki" -status:Done'}
   - {name: Backlog, layout: table, filter: "status:Backlog"}
+  - {name: Done log, layout: table, filter: "status:Done"}
+  - {name: By repository, layout: table, filter: ""}
   - {name: Agents at work, layout: table, filter: 'status:"In progress","In review",Next'}
 rules:
   status:
@@ -90,7 +124,10 @@ agents:
   working: [In progress, In review, Next]
   waiting: [Blocked]
 ui_only:
-  - "Board view: Group by = Status; Sprint board: set Group by Status and Sort by Priority"
-  - "Roadmap view: Date fields = Start date and Target date, Group by = Area, zoom = Quarter"
-  - "Sprint plan view: Group by = Sprint; show Size, Agent, Area"
+  - "Rename the live views once: 'View 1' -> 'All items', 'Sprint board' -> 'Board' (bootstrap creates, never renames)"
+  - "Board and Sprint views: Column field = Status, Sort by Priority"
+  - "Roadmap view: Date fields = Start date and Target date, Group by = Epic, zoom = Quarter"
+  - "Sprint plan view: Group by = Sprint; show Size, Agent, Area, Kind"
+  - "By area view: Group by = Area. By repository view: Group by = Repository. Agents at work view: Group by = Agent"
+  - "Epics view: show Epic, Start date, Target date. Blocked view: show Agent, Decision. Done log view: Sort by Done on, descending; show Kind, Epic"
   - "Project workflows: Item closed -> Done; Pull request merged -> Done; Auto-add is not needed (reconcile adds)"

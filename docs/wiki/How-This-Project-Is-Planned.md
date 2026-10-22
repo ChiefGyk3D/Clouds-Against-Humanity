@@ -6,7 +6,7 @@
 
 The work is planned the way a small team plans software: a written backlog, a size on every item, two-week sprints, a review at the end of each, and a definition of done. The plan lives in GitHub, next to the code, so a change to the plan is as visible as a change to the code.
 
-- **The board:** the [Clouds Against Humanity project](https://github.com/users/ChiefGyk3D/projects/4) (Sprint board, Sprint plan, Roadmap, Backlog and Agents at work views).
+- **The board:** the [Clouds Against Humanity project](https://github.com/users/ChiefGyk3D/projects/4) (All items, Board, Roadmap, Sprint, Epics, Bugs, Blocked, By area, Security, Docs, Done log and Agents at work views, among others). It is laid out the same way as the board of the author's Hammunition suite, so one reading habit works for both.
 - **The backlog:** the repository's [issues](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues), grouped into epics and milestones.
 - **The board as code:** `board.yaml` in the repository root. It names every field, option, iteration and view, and [Scrum Around and Find Out](https://github.com/ChiefGyk3D/scrum-around-and-find-out) (SAFO) creates and checks the board from it.
 
@@ -46,7 +46,51 @@ The maintainer has a day job and works on this in the evenings and at weekends, 
 | Blocked | Needs the maintainer or an answer from outside |
 | Done | Closed or merged, with the date in **Done on** |
 
-SAFO moves a card as GitHub events happen: an opened issue is Backlog, a ready pull request is In review, a merged one is Done. The sprint, size, area, priority and agent are set by hand when an issue is planned.
+SAFO moves a card as GitHub events happen: an opened issue is Backlog, a ready pull request is In review, a merged one is Done. The sprint, size, area, kind, epic, priority and agent are set when an issue is planned. Agents add the pull-request cards and set Done on when they finish a task.
+
+## The board: fields
+
+| Field | What it holds |
+|---|---|
+| Status | Backlog, Next, In progress, In review, Blocked, Done (table above) |
+| Area | The theme: operations and gates, stage 1 hardening, stage 2 telemetry, stage 3 workloads, edge and DMZ, multi-cloud, learning and wiki, process |
+| Kind | Feature, Bug, Decision, Lesson, Chore, Docs, Release or Epic. A Decision is a ruling, a design note or an approval; a Lesson is wiki teaching |
+| Epic | Which of the eight epic issues the card belongs to |
+| Priority | P0 now, P1 soon, P2 later, P3 someday |
+| Size | S, M, L, XL, as in the capacity section |
+| Agent | Claude, Codex, Copilot or You |
+| Sprint | S1 to S8, a two-week iteration |
+| Start date, Target date | Draw the card's bar on the Roadmap view |
+| Done on | The day the card closed or merged |
+| Decision | A free-text line: the ruling, when the card is a decision |
+
+Pull requests are cards too. A merged pull request is Done with its Done on date, an open one is In review, a draft is In progress. That is what makes the Done log a history of what actually shipped, and not only of what was planned.
+
+## The board: views
+
+| View | Shows |
+|---|---|
+| All items | Everything, unfiltered |
+| Board | Cards by Status, without Done |
+| Roadmap | Bars from Start date to Target date, without Done |
+| Sprint | The current sprint only |
+| Sprint plan | A table for planning, without Done |
+| Epics | The eight epic issues |
+| Bugs | Kind Bug, without Done |
+| Blocked: needs the maintainer | Status Blocked |
+| By area | Open work grouped by Area |
+| Security | Stage 1 hardening, without Done |
+| Docs | Learning and wiki, without Done |
+| Backlog | Status Backlog |
+| Done log | Everything with Status Done |
+| By repository | Grouped by repository |
+| Agents at work | In progress, In review and Next, grouped by Agent |
+
+How to read three of them:
+
+- **Done log:** sort by Done on, newest first. Each row is one thing that finished, with its Kind and Epic. A row that is a pull request says what changed; a row that is an issue says what was asked.
+- **Agents at work:** which agent has what in flight. More than three agent items In progress or In review means the review queue, not the agents, is the limit.
+- **Blocked: needs the maintainer:** every card waiting on a decision or a step only the maintainer can take (an approval, a console check, a rotation). If this view is empty, the agents are not waiting on anyone. If it is long, the next planning session starts here.
 
 ## Definition of ready
 
@@ -114,6 +158,6 @@ Lessons written before this footer existed get it as they are next edited; the f
 
 ## Changing the plan
 
-Plans change in the open. To add work, open an issue with a reason and a "done when" list. To change the sequence or the board's shape, open a pull request: `board.yaml` is reviewed like code, and `safo --board board.yaml audit` reports where the live board differs from the file. A few settings (the Roadmap view's date fields, view grouping and the project's built-in workflows) cannot be set through GitHub's API; `board.yaml` lists them under `ui_only` so they are checked by eye.
+Plans change in the open. To add work, open an issue with a reason and a "done when" list. To change the sequence or the board's shape, open a pull request: `board.yaml` is reviewed like code, and `safo --board board.yaml audit` reports where the live board differs from the file. A few settings (the Roadmap view's date fields, view grouping, adding an option to a field that already holds values and the project's built-in workflows) cannot be set through GitHub's API; `board.yaml` lists them under `ui_only` so they are checked by eye.
 
 Next: [Roadmap](Roadmap.md).
