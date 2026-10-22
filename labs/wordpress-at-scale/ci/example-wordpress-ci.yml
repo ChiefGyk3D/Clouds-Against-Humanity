@@ -48,13 +48,11 @@ jobs:
         run: php -v
       - name: Lint every PHP file
         run: find . -name '*.php' -not -path './vendor/*' -print0 | xargs -0 -n1 php -l
-      - name: Reviewer's rules for this repository
-        run: python3 labs/wordpress-at-scale/ci/ci_policy_check.py --site site --workflow .github/workflows/wordpress-ci.yml
       # With Composer installed: composer validate --strict; composer install --no-scripts;
       # composer audit; vendor/bin/phpstan analyse; vendor/bin/phpcs; vendor/bin/phpunit.
 
-  build:
-    needs: [php]
+  policy:
+    # The reviewer's rules as a script. Its own job: it needs Python, which the php image lacks.
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -62,6 +60,21 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Reviewer's rules for this repository
+        run: python3 -I labs/wordpress-at-scale/ci/ci_policy_check.py --site site --workflow .github/workflows/wordpress-ci.yml
+
+  build:
+    needs: [php, policy]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # ILLUSTRATION, not a deployable release: the sample site has no composer.lock and uses invented
+      # packages, so the install line is commented out. In a real repository commit composer.lock and
+      # run it; without it the archive would hold only source and config files.
       - name: Build one release artifact from the lock file
         run: |
           # composer install --no-dev --prefer-dist --no-scripts --optimize-autoloader
@@ -75,7 +88,7 @@ jobs:
   deploy-staging:
     # Only from main. The credential arrives by OIDC or a secrets manager at this step only.
     if: github.ref == 'refs/heads/main'
-    needs: [security, scripts, php, build]
+    needs: [security, scripts, php, policy, build]
     runs-on: ubuntu-latest
     environment: staging
     permissions:
@@ -111,7 +124,7 @@ jobs:
   ci-green:
     name: CI green
     if: ${{ always() }}
-    needs: [security, scripts, php, build]
+    needs: [security, scripts, php, policy, build]
     runs-on: ubuntu-latest
     permissions: {}
     steps:

@@ -51,10 +51,13 @@ deploy() { # deploy ENV : unpack the SAME artifact into releases/<id>, then swit
   echo "$1 now points at $(pointer "$1")"
 }
 smoke() { # smoke ENV : the release the pointer names must exist and pass the same site rules
-  step "smoke test on $1"
+  step "smoke test on $1 (structural check, plus a live request if the lab stack is up)"
   local id; id="$(pointer "$1")"
   [ -f "$STATE/$1/releases/$id/site/composer.json" ] || { echo "SMOKE FAIL: release $id has no composer.json"; return 1; }
   "${CHECK[@]}" --site "$STATE/$1/releases/$id/site"
+  local code
+  code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 "http://127.0.0.1:8080/?smoke=$RANDOM" || true)"
+  if [ "$code" = 200 ]; then echo "live request through the edge: 200"; else echo "lab stack not running: skipped the live request"; fi
 }
 
 case "${1:-}" in

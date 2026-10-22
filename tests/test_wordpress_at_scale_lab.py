@@ -112,3 +112,17 @@ def test_each_site_rule_bites(tmp_path):
     assert any("S6" in f for f in cpc.check_site(site))
     (site / "web" / "app" / "uploads").mkdir(parents=True)
     assert any("S4" in f for f in cpc.check_site(site))
+
+
+def test_review_findings_stay_fixed(tmp_path):
+    pin = "a" * 40
+    head = f"name: x\npermissions: {{}}\njobs:\n  p:\n    environment: production\n"
+    # W1 cannot be satisfied by a SHA that only appears in a comment
+    bypass = head + f"    uses: o/r/.github/workflows/w.yml@main # {pin}\n"
+    assert any("W1" in f for f in _bad_workflow(tmp_path, bypass))
+    # W3 sees the scalar and list forms
+    assert any("W3" in f for f in _bad_workflow(tmp_path, "on: pull_request_target\n" + head))
+    assert any("W3" in f for f in _bad_workflow(tmp_path, "on:\n  - pull_request_target\n" + head))
+    # W7 sees unquoted scalars and still hides the value
+    findings = _bad_workflow(tmp_path, head + "    env:\n      API_KEY: abcdefghijkl\n")
+    assert any("W7" in f for f in findings) and not any("abcdefghijkl" in f for f in findings)

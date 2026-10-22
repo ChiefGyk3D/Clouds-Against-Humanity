@@ -17,10 +17,10 @@ import re
 import sys
 from pathlib import Path
 
-SHA = re.compile(r"@[0-9a-f]{40}(\s|$)")
+FULL_SHA = re.compile(r"[0-9a-f]{40}")
 USES = re.compile(r"^\s*(?:-\s*)?uses:\s*(\S+)")
 EXACT = re.compile(r"^\d+(\.\d+){1,3}$")
-SECRET_LIKE = re.compile(r"""(password|passwd|secret|token|api[_-]?key)\w*\s*[:=]\s*['"]([^$'"\s]{8,})['"]""", re.I)
+SECRET_LIKE = re.compile(r"""(password|passwd|secret|token|api[_-]?key)\w*\s*[:=]\s*['"]?([^$'"\s{][^'"\s]{7,})""", re.I)
 INJECTION = re.compile(r"\$\{\{\s*(github\.event\.|github\.head_ref)")
 
 
@@ -38,9 +38,11 @@ def check_workflow(path: Path) -> list[str]:
         m = USES.match(line)
         if m:
             target = m.group(1)
-            if not target.startswith("./") and not SHA.search(line + " "):
+            ref = target.partition("@")[2]
+            if not target.startswith("./") and not FULL_SHA.fullmatch(ref):
                 out.append(f"{path}:{n}: W1: `{target}` is not pinned to a full 40-character commit")
-        if re.search(r"^\s*pull_request_target\s*:", line) or re.search(r"\[.*pull_request_target.*\]", line):
+        if (re.search(r"^\s*pull_request_target\s*:", line) or re.search(r"\[.*pull_request_target.*\]", line)
+                or re.search(r"^\s*on:\s*pull_request_target\b", line) or re.search(r"^\s*-\s*pull_request_target\b", line)):
             out.append(f"{path}:{n}: W3: pull_request_target runs with secrets on code from a fork")
         if re.search(r"secrets:\s*inherit", line):
             out.append(f"{path}:{n}: W4: `secrets: inherit` hands every secret to the called workflow")

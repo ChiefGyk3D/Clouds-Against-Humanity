@@ -450,10 +450,10 @@ cd labs\wordpress-at-scale
 .\lab.ps1 up
 ```
 
-`up` writes `.env` (an untracked file holding a random secret), starts six containers and prints a page. The first run pulls two images (Nginx and Redis, a few tens of megabytes each, est.) and uses a Python image you may already have; that is the only download. If the page prints `Hello, visitor` and `object cache: miss`, you are running. Check it any time with `./lab.sh status` (PowerShell: `.\lab.ps1 status`).
+`up` writes `.env` (an untracked file holding a random secret), starts five containers and prints a page. The first run pulls two images (Nginx and Redis, a few tens of megabytes each, est.) and uses a Python image you may already have; that is the only download. If the page prints `Hello, visitor` and `object cache: miss`, you are running. Check it any time with `./lab.sh status` (PowerShell: `.\lab.ps1 status`).
 
 > **Screenshot to take yourself:** your terminal after `./lab.sh up` and `./lab.sh status`.
-> Capture: six containers running and the one published port line for `edge`.
+> Capture: five containers running and the one published port line for `edge`.
 > Look for: only `127.0.0.1:8080` and `127.0.0.1:8081` are published.
 > Redact: your username and path if they identify you.
 
@@ -636,7 +636,7 @@ Traffic continued on `web2` because the balancer skipped the dead node and retri
 
 *A note found while building the lab:* the first version of the load balancer listed the nodes as plain names. Nginx looks names up once at start. After a node was killed and restarted it came back at a different address, and the balancer never used it again: traffic stayed on one node, with no error. The fix in the lab is the `resolve` parameter on the upstream servers (open source since Nginx 1.27.3, per [the upstream docs](https://nginx.org/en/docs/http/ngx_http_upstream_module.html), 2026-10-22) with a resolver and a shared zone. The lesson is general: **test the recovery, not only the failure.**
 
-**Undo.** `./lab.sh status` should show all six containers running; if not, `./lab.sh up` again.
+**Undo.** `./lab.sh status` should show all five containers running; if not, `./lab.sh up` again.
 
 ### Exercise 8: origin protection
 
@@ -726,7 +726,7 @@ site/config/application.php:1: S6: DISALLOW_FILE_MODS is not true
 site/config/application.php:16: S7: a secret is written as a literal (value not shown)
 ```
 
-The checker never prints the value of a secret-shaped literal. Read `ci/example-wordpress-ci.yml` next to the diagram: each job in the file is one box. To run the real file with the real runner image, the tool `act` runs GitHub Actions workflows locally using Docker ([act README](https://github.com/nektos/act), 2026-10-22); it is not needed for this lab, and I did not run it.
+The checker never prints the value of a secret-shaped literal. In the local script the smoke test is a structural check (the release exists and passes the site rules) and, if the lab stack is running, also a real request through the edge expecting `200` and the marker text; the workflow's smoke steps are placeholders you replace with a request to your own staging URL. The example workflow is an illustration, not a deployable release: the sample site has no `composer.lock` and invented package names, so the build step's `composer install` line is commented out; in a real repository you commit the lock file and keep that line. Read `ci/example-wordpress-ci.yml` next to the diagram: each job in the file is one box. To run the real file with the real runner image, the tool `act` runs GitHub Actions workflows locally using Docker ([act README](https://github.com/nektos/act), 2026-10-22); it is not needed for this lab, and I did not run it.
 
 **Undo.** `ci/ci_local.sh clean` (PowerShell: `.\ci_local.ps1 clean`) deletes `.state/`.
 

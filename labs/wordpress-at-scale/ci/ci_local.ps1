@@ -9,7 +9,7 @@ $Lab = Split-Path $Here -Parent
 $State = Join-Path $Lab ".state"
 $Py = if (Get-Command python3 -ErrorAction SilentlyContinue) { "python3" } else { "python" }
 
-function Check { & $Py -I (Join-Path $Here "ci_policy_check.py") @args; $LASTEXITCODE -eq 0 }
+function Check { & $Py -I (Join-Path $Here "ci_policy_check.py") @args | Out-Host; return ($LASTEXITCODE -eq 0) }
 function Pointer($env_) { $p = Join-Path $State "$env_/current"; if (Test-Path $p) { (Get-Content $p).Trim() } else { "(none)" } }
 function Build {
     "`n== build one artifact"
@@ -34,10 +34,12 @@ function Deploy($env_) {
     "$env_ now points at $(Pointer $env_)"
 }
 function Smoke($env_) {
-    "`n== smoke test on $env_"
+    "`n== smoke test on $env_ (structural check, plus a live request if the lab stack is up)"
     $id = Pointer $env_
     if (-not (Test-Path (Join-Path $State "$env_/releases/$id/site/composer.json"))) { throw "SMOKE FAIL: release $id has no composer.json" }
-    Check --site (Join-Path $State "$env_/releases/$id/site") | Out-Null
+    if (-not (Check --site (Join-Path $State "$env_/releases/$id/site"))) { throw "SMOKE FAIL: site rules failed" }
+    try { $r = curl.exe -s -o NUL -w "%{http_code}" "http://127.0.0.1:8080/?smoke=$(Get-Random)" } catch { $r = "" }
+    if ($r -eq "200") { "live request through the edge: 200" } else { "lab stack not running: skipped the live request" }
 }
 
 switch ($Cmd) {

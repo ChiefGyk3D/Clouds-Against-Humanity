@@ -12,7 +12,7 @@ $script:Fails = 0
 
 function Compose { docker compose --project-directory $Lab -f "$Lab/compose.yaml" --env-file "$Lab/.env" @args }
 function Header([string]$Url, [string[]]$Extra = @()) { (curl.exe -s -D - -o NUL @Extra $Url) -replace "`r", "" }
-function HVal($Lines, [string]$Name) { ($Lines | Where-Object { $_ -match "^$Name:" } | Select-Object -First 1) -replace "^[^:]*:\s*", "" }
+function HVal($Lines, [string]$Name) { ($Lines | Where-Object { $_ -match "^${Name}:" } | Select-Object -First 1) -replace "^[^:]*:\s*", "" }
 function Check([string]$What, [bool]$Ok) { if ($Ok) { "PASS  $What" } else { "FAIL  $What"; $script:Fails++ } }
 function Rand { Get-Random -Maximum 1000000 }
 function DbQueries { (curl.exe -s "$Edge/stats?x=$(Rand)" | ConvertFrom-Json).db_queries }
