@@ -101,6 +101,7 @@ The [Threat model](Threat-Model.md) is core step 19.
 - [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md)
 - [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md)
     - Foundations side page: [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md)
+    - Side page: [File integrity and alerting: Tripwire, AIDE, Wazuh FIM, auditd, fail2ban](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md)
     - Foundations side page: [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md)
     - Side page: [Deception and honeypots: start here](Deception-and-Honeypots-Start-Here.md)
         - [What deception is](Deception-and-Honeypots-What-Deception-Is.md)
