@@ -7,6 +7,8 @@ compare it with the page's claims. Nothing leaves the machine; the only addresse
 127.x.x.x. Nmap is used only if it is installed, against that same loopback lab.
 """
 
+import errno
+import random
 import re
 import shutil
 import socket
@@ -32,13 +34,29 @@ def one_block(marker: str) -> str:
 
 
 def free_base() -> int:
-    for base in range(20100, 20900, 7):
+    """A random base port whose next two ports are free on 127.0.0.1 (and 127.0.0.2/3 where they exist).
+
+    Regression note (issue #241): this used to scan upward from a fixed 20100, so every parallel copy
+    of the file, and every other agent running the suite, chose the same ports; the loser's lab died
+    with "address in use" (or the proxy test talked to someone else's listener). A random start spreads
+    the choices; launch_lab() and launch_proxy() below still retry, because a probe can never be
+    atomic with the bind that follows it.
+    """
+    rng = random.SystemRandom()
+    for _ in range(200):
+        base = rng.randrange(21000, 31990)
         socks = []
         try:
-            for off in range(3):
-                s = socket.socket()
-                s.bind(("127.0.0.1", base + off))
-                socks.append(s)
+            for host in ("127.0.0.1", "127.0.0.2", "127.0.0.3"):
+                for off in range(3):
+                    s = socket.socket()
+                    socks.append(s)
+                    try:
+                        s.bind((host, base + off))
+                    except OSError as exc:
+                        if exc.errno == errno.EADDRNOTAVAIL and host != "127.0.0.1":
+                            continue                       # this system has no 127.0.0.2/3: fine
+                        raise
             return base
         except OSError:
             continue
@@ -66,14 +84,49 @@ def scripts(tmp_path):
     return tmp_path
 
 
-def start_lab(folder: Path, base: int, *extra: str) -> subprocess.Popen:
-    proc = subprocess.Popen(
-        [sys.executable, "-I", "lab.py", "--base-port", str(base), *extra],
-        cwd=folder, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
-    )
-    for _ in range(3):
-        assert "listening on" in proc.stdout.readline()
-    return proc
+def stop(proc: subprocess.Popen) -> None:
+    proc.terminate()
+    try:
+        proc.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait(timeout=10)
+
+
+def launch_lab(folder: Path, *extra: str) -> tuple[subprocess.Popen, int]:
+    """Start lab.py on a free base port; if it dies at startup (a port was taken meanwhile), pick again."""
+    for _ in range(10):
+        base = free_base()
+        proc = subprocess.Popen(
+            [sys.executable, "-I", "lab.py", "--base-port", str(base), *extra],
+            cwd=folder, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+        )
+        lines = [proc.stdout.readline() for _ in range(3)]
+        if all("listening on" in x for x in lines):
+            return proc, base
+        stop(proc)
+    raise AssertionError("lab.py could not start on any port tried")
+
+
+def launch_proxy(folder: Path) -> tuple[subprocess.Popen, int]:
+    """Start proxy.py and prove it is OUR proxy answering (a refused target gives its 403), not a stranger."""
+    for _ in range(10):
+        pbase = free_base()
+        proc = subprocess.Popen([sys.executable, "-I", "proxy.py", str(pbase)], cwd=folder,
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        for _ in range(100):
+            if proc.poll() is not None:
+                break
+            try:
+                with socket.create_connection(("127.0.0.1", pbase), timeout=0.5) as raw:
+                    raw.sendall(b"GET http://203.0.113.9/ HTTP/1.0\r\n\r\n")
+                    if b" 403 " in raw.recv(200).split(b"\r\n")[0] and proc.poll() is None:
+                        return proc, pbase
+            except OSError:
+                pass
+            time.sleep(0.1)
+        stop(proc)
+    raise AssertionError("proxy.py could not start on any port tried")
 
 
 def get(url: str):
@@ -94,12 +147,25 @@ def can_connect(host: str, port: int) -> bool:
 
 @pytest.fixture()
 def lab(scripts):
-    base = free_base()
-    proc = start_lab(scripts, base)
-    wait_for("127.0.0.1", base + 2)
-    yield scripts, base
-    proc.terminate()
-    proc.wait(timeout=10)
+    proc, base = launch_lab(scripts)
+    try:                                   # setup and yield share one try, so a failed wait still stops the process
+        wait_for("127.0.0.1", base + 2)
+        # Regression note (issue #226): wait_for() itself connects to the db port, and lab.py logs that
+        # CONN line from its own server thread, a moment AFTER the connect returns. A test that emptied
+        # lab.log right away could have the fixture's late line land after the truncation and count it as
+        # a scan connection (one extra dport=<base+2>; about 1 run in 15 alone, about half under load).
+        # So the fixture does not hand over until that line exists, and tests then clear the log safely.
+        deadline = time.time() + 10
+        log = scripts / "lab.log"
+        while time.time() < deadline:
+            if log.exists() and f"CONN db src=127.0.0.1 dport={base + 2}" in log.read_text():
+                break
+            time.sleep(0.05)
+        else:
+            raise AssertionError("the fixture's own probe was never logged")
+        yield scripts, base
+    finally:
+        stop(proc)
 
 
 def test_default_build_is_flat_leaky_and_loopback_only(lab):
@@ -130,8 +196,7 @@ def test_the_log_has_the_fields_the_page_and_the_detector_read(lab):
 
 
 def test_fixed_build_segments_and_says_less(scripts):
-    base = free_base()
-    proc = start_lab(scripts, base, "--fixed")
+    proc, base = launch_lab(scripts, "--fixed")
     try:
         wait_for("127.0.0.1", base)
         if not can_connect("127.0.0.1", base):
@@ -149,8 +214,7 @@ def test_fixed_build_segments_and_says_less(scripts):
         assert get(f"http://127.0.0.1:{base}/admin/")[0] == 404
         assert get(f"http://127.0.0.2:{base + 1}/")[0] == 200            # the app tier still works
     finally:
-        proc.terminate()
-        proc.wait(timeout=10)
+        stop(proc)
 
 
 def run_detect(folder: Path, text: str, window: int, need: int):
@@ -195,11 +259,8 @@ def test_detector_treats_hostile_lines_as_data(scripts):
 
 def test_proxy_forwards_loopback_and_refuses_everything_else(lab):
     folder, base = lab
-    pbase = free_base()
-    proc = subprocess.Popen([sys.executable, "-I", "proxy.py", str(pbase)], cwd=folder,
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    proc, pbase = launch_proxy(folder)
     try:
-        wait_for("127.0.0.1", pbase)
         opener = urllib.request.build_opener(urllib.request.ProxyHandler({"http": f"http://127.0.0.1:{pbase}"}))
         with opener.open(f"http://127.0.0.1:{base}/admin/", timeout=5) as r:
             assert r.status == 200 and b"debug page" in r.read()
@@ -215,8 +276,7 @@ def test_proxy_forwards_loopback_and_refuses_everything_else(lab):
                 raw.sendall(b"GET " + bad + b" HTTP/1.0\r\n\r\n")
                 assert b" 403 " in raw.recv(200).split(b"\r\n")[0], bad
     finally:
-        proc.terminate()
-        proc.wait(timeout=10)
+        stop(proc)
     out = proc.stdout.read()
     assert ">>> GET http://127.0.0.1:" in out and "<<< 200 OK" in out and "<<< Server: LabHTTP/1.0" in out
     assert "203.0.113.9" not in out                                               # refused before anything was printed or sent
@@ -225,11 +285,17 @@ def test_proxy_forwards_loopback_and_refuses_everything_else(lab):
 @pytest.mark.skipif(shutil.which("nmap") is None, reason="nmap is not installed")
 def test_a_connect_scan_leaves_one_connection_line_per_open_port(lab):
     folder, base = lab
-    (folder / "lab.log").write_text("")                                           # drop the fixture's own connect probes
+    (folder / "lab.log").write_text("")                                           # safe now: the fixture's probe is already logged
     subprocess.run(["nmap", "-sT", "-p", f"{base}-{base + 2}", "127.0.0.1"], capture_output=True, timeout=60, check=True)
-    time.sleep(0.5)
+    ports: list[str] = []
+    for _ in range(100):          # the server logs from its own threads: wait for the lines, not a fixed time
+        ports = [x.split()[-1] for x in (folder / "lab.log").read_text().splitlines() if " CONN " in x]
+        if len(ports) >= 3:
+            break
+        time.sleep(0.05)
+    time.sleep(0.2)               # a short grace so a spurious extra line would still be caught
     ports = [x.split()[-1] for x in (folder / "lab.log").read_text().splitlines() if " CONN " in x]
-    assert sorted(ports) == [f"dport={base + i}" for i in range(3)]
+    assert sorted(ports) == [f"dport={base + i}" for i in range(3)]      # order-independent
 
 
 # --- the page itself --------------------------------------------------------------
