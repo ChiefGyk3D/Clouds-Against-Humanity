@@ -6,7 +6,7 @@ Side page to [Droplet hardening](Droplet-Hardening.md), and lesson 2 of a four-l
 
 > **Status: written from vendor and project documentation read on 2026-10-22; three of the five exercises were run once on Linux that day; the PowerShell lines and the two container exercises were not run.** Exercises 1, 2 and 5 (Bash) and the small memory-safety demo were run on Linux with PHP 8.4.26, Python 3.13 and rustc 1.99.0, and the output shown is trimmed from those runs. Exercise 3 (a WordPress container) and Exercise 4 (ModSecurity with the Core Rule Set) need container images that I could not pull in my environment, so they are written from the image documentation and marked **est.** (estimate): run them expecting to fix something. Every figure and quotation names the page it came from in the claims register at the end. Vendor statistics are the vendor's own and the vendors sell products in this area; the register says so. Cost: $0. The reading and every exercise on this page run on your own computer, are free and always will be, and use only the loopback address (`127.0.0.1`), which no other machine can reach. Nothing here asks you to scan, probe or attack anything you do not own. There is no working exploit code on this page; attack classes are named so you can defend against them. The project's real spending lives on the [cost page](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md).
 
-> **Prerequisites.** A terminal ([Git from zero](Git-From-Zero.md#what-a-terminal-is) shows how to open one), `php` (version 8.2 or newer) and `curl` for Exercises 1 and 2, `python3` for Exercise 5, and Docker or Podman only for the two optional container exercises ([Containers and Docker basics](Containers-and-Docker-Basics.md) explains them). It helps to have read [How a web request works](How-a-Web-Request-Works.md) and [Threats in plain words](Threats-in-Plain-Words.md), because this page uses the words request, header, vulnerability, exploit, patch and CVE without stopping to define them again. About 3 hours for the reading and the free exercises (est.).
+> **Prerequisites.** A terminal ([Git from zero](Git-From-Zero.md#what-a-terminal-is) shows how to open one), `php` (version 8.2 or newer) and `curl` for Exercises 1 and 2, `python3` for Exercises 3 and 5, and Docker or Podman with the Compose plugin only for the two optional container exercises ([Containers and Docker basics](Containers-and-Docker-Basics.md) explains them). It helps to have read [How a web request works](How-a-Web-Request-Works.md) and [Threats in plain words](Threats-in-Plain-Words.md), because this page uses the words request, header, vulnerability, exploit, patch and CVE without stopping to define them again. About 3 hours for the reading and the free exercises (est.).
 
 > **The four-lesson web-hosting track.** This is lesson 2. The others are written at the same time as this one, so their links may not resolve until they are merged, and for that reason none of them is in the closing line of the introduction above. Lesson 1: [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md). Lesson 3: [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md). Lesson 4: [WordPress at scale: CDN, WAF and CI](WordPress-at-Scale-CDN-WAF-and-CI.md). You can read this page without them.
 
@@ -223,7 +223,7 @@ What I got on 2026-10-22: plain C printed garbage bytes (it can print `hello`; t
 | `upload_max_filesize`, `post_max_size`, `max_file_uploads` | `2M`, `8M`, `20` | Caps on one file, a whole request body, and files per request. | As small as the site needs. The manual says a large `post_max_size` or `upload_max_filesize` "for a complete server" may raise risk because PHP must parse oversize bodies; set bigger limits only for the one path that needs them. `post_max_size` must be larger than `upload_max_filesize`. |
 | `session.use_strict_mode` | `0` | Rejects session IDs the server did not issue. The manual: "mandatory for general session security". | `1`. |
 | `session.use_only_cookies` | `1` | Session IDs only in cookies, not in the URL. | Keep `1`. |
-| `session.cookie_httponly` | `0` | JavaScript cannot read the session cookie. | `1`. Reduces what a cross-site scripting flaw can steal. |
+| `session.cookie_httponly` | `0` | JavaScript cannot read the PHP session cookie (not WordPress's own login cookies, which it sets itself). | `1`. Reduces what a cross-site scripting flaw can steal. |
 | `session.cookie_secure` | `0` | Cookie only sent over HTTPS. | `1` once the site is HTTPS only. |
 | `session.cookie_samesite` | empty | Tells browsers not to send the cookie on cross-site requests. | `Lax` (or `Strict`). |
 
@@ -297,7 +297,7 @@ How CRS decides, from its [anomaly scoring page](https://coreruleset.org/docs/2-
 
 **Detection-only mode first.** The engine setting `SecRuleEngine` has three values: `On`, `Off` and `DetectionOnly`. With the container, the environment variable is `MODSEC_RULE_ENGINE` and it accepts `On`, `Off`, `DetectionOnly`. In `DetectionOnly` the rules run and log but nothing is blocked. That is how you start on a real site: watch what it would have blocked, fix the false positives, then switch to blocking. CRS's own install page uses `DetectionOnly` in its container example, and says that new detections bring "a certain risk of false alarms" so you should "test first before going live".
 
-**Tuning a false positive.** From the [false positives and tuning page](https://coreruleset.org/docs/2-how-crs-works/2-3-false-positives-and-tuning/): a false positive is a genuine transaction that triggers a rule, and you fix it with a **rule exclusion**. It can be as coarse as removing a rule (`SecRuleRemoveById`) or as precise as removing one request parameter from one rule's inspection (`SecRuleUpdateTargetById`, with an example for a WordPress post field). Prefer the precise form. Placement matters: an exclusion that removes a rule must come after the CRS rules are loaded; one that modifies a rule must come before. The CRS ships two example files for that (`REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example` and `RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf.example`). The CRS 4 install page notes that application-specific exclusion packages were replaced by a plugin system; check the CRS plugin registry for a WordPress one rather than relying on a package I did not install.
+**Tuning a false positive.** From the [false positives and tuning page](https://coreruleset.org/docs/2-how-crs-works/2-3-false-positives-and-tuning/): a false positive is a genuine transaction that triggers a rule, and you fix it with a **rule exclusion**. It can be as coarse as removing a rule (`SecRuleRemoveById`) or as precise as removing one request parameter from one rule's inspection (`SecRuleUpdateTargetById`, with an example for a WordPress post field). Prefer the precise form. Placement matters, and the page sorts exclusions into two kinds. **Configure-time** exclusions (`SecRuleRemoveById`, `SecRuleRemoveByTag`, `SecRuleUpdateTargetById`, `SecRuleUpdateTargetByTag`) must come **after** the CRS rules are loaded, because a rule has to exist before it can be removed or changed. **Runtime** exclusions (the `ctl:ruleRemoveById` and `ctl:ruleRemoveTargetById` family, written inside a rule of your own) must come **before** the CRS rules, because they act as the request is processed. The runtime kind can be limited to one URL; the configure-time kind applies to every request. The CRS ships two example files for that (`REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example` and `RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf.example`). The CRS 4 install page notes that application-specific exclusion packages were replaced by a plugin system; check the CRS plugin registry for a WordPress one rather than relying on a package I did not install.
 
 ### Cloudflare's WAF (the managed example)
 
@@ -369,7 +369,7 @@ This is the exercise from [Threat model: exercise](Threat-Model-Exercise.md) app
 
 | Threat (STRIDE letter) | Example for this site | Mitigation | Residual risk |
 |---|---|---|---|
-| **S**poofing | Someone logs in as an administrator with a guessed, reused or phished password, or steals a session cookie. | Two-factor or passkeys for admins; rate-limit `wp-login.php` and `xmlrpc.php`; `session.cookie_httponly`, HTTPS only; few admins. | A phished one-time code or a stolen device is still a way in. |
+| **S**poofing | Someone logs in as an administrator with a guessed, reused or phished password, or steals a session cookie. | Two-factor or passkeys for admins; rate-limit `wp-login.php` and `xmlrpc.php`; HTTPS only; check in your browser's storage panel that WordPress's own login cookies are marked `HttpOnly` and `Secure` (**est.**: I did not verify this), because `session.cookie_httponly` covers only PHP-session cookies; few admins. | A phished one-time code or a stolen device is still a way in. |
 | **T**ampering | An attacker with admin access edits a plugin file, or a flawed plugin lets an upload land in the web root. | `DISALLOW_FILE_EDIT`; plugin files not writable by the PHP user; do not run PHP from the uploads folder; file integrity monitoring. | A plugin flaw that writes where it should not can still win once; monitoring finds it after the fact. |
 | **R**epudiation | Nobody can say who changed what or when. | Keep web, PHP and database logs; ship them off the server ([Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md)); an activity log plugin. | Logs on the compromised server are only as trustworthy as the server. |
 | **I**nformation disclosure | Error pages show file paths; a database dump or backup file sits in the web root; SQL injection reads the user table. | `display_errors` Off; backups outside the web root; database user limited to one database; `open_basedir`. | A SQL injection in a plugin reads what the database user can read. |
@@ -585,7 +585,7 @@ The "before" page advertised the PHP version in a header and printed the full fi
 set -eu
 D="$HOME/w2-lab/wp"; mkdir -p "$D"; cd "$D"
 umask 077
-printf 'DB_PASSWORD=%s\n' "$(openssl rand -hex 16)" > .env          # generated now, never typed or committed
+printf 'DB_PASSWORD=%s\n' "$(python3 -I -c 'import secrets; print(secrets.token_hex(16))')" > .env          # generated now, never typed or committed
 cat > compose.yaml <<'EOF'
 # Apache-2.0. Loopback-only WordPress lab for lesson W2. No credential literals: .env is made at run time.
 services:
@@ -597,9 +597,15 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_RANDOM_ROOT_PASSWORD: "1"
     volumes: ["db:/var/lib/mysql"]            # no ports: published
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u wplab -p$$MYSQL_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
   wordpress:
     image: wordpress:php8.4-apache
-    depends_on: [db]
+    depends_on:
+      db: { condition: service_healthy }
     ports: ["127.0.0.1:8080:80"]              # loopback only
     environment:
       WORDPRESS_DB_HOST: db
@@ -612,7 +618,7 @@ services:
 volumes: { db: {}, wp: {} }
 EOF
 docker compose up -d
-sleep 20
+for i in $(seq 1 60); do curl -sf -o /dev/null http://127.0.0.1:8080/ && break; sleep 2; done   # wait up to 2 minutes
 curl -sI http://127.0.0.1:8080/ | grep -i -E '^(HTTP|x-powered-by|server)'
 docker compose exec wordpress php -i | grep -E '^(expose_php|display_errors|disable_functions|open_basedir) ' > before-ini.txt
 cat before-ini.txt
@@ -628,7 +634,7 @@ Now add the hardening file as a second mount. Make `hardening-container.ini` fro
 
 ```bash
 docker compose up -d --force-recreate wordpress
-sleep 10
+for i in $(seq 1 60); do curl -sf -o /dev/null http://127.0.0.1:8080/ && break; sleep 2; done
 curl -sI http://127.0.0.1:8080/ | grep -i -E '^(HTTP|x-powered-by|server)'
 docker compose exec wordpress php -i | grep -E '^(expose_php|display_errors|disable_functions|open_basedir) ' > after-ini.txt
 diff before-ini.txt after-ini.txt || true
@@ -682,7 +688,7 @@ services:
       BLOCKING_PARANOIA: "1"
 EOF
 docker compose up -d
-sleep 10
+for i in $(seq 1 30); do curl -s -o /dev/null http://127.0.0.1:8088/ && break; sleep 2; done
 curl -s -o /dev/null -w 'normal page:   %{http_code}\n' http://127.0.0.1:8088/
 curl -s -o /dev/null -w 'documented probe: %{http_code}\n' 'http://127.0.0.1:8088/?foo=/etc/passwd&bar=/bin/sh'
 docker compose logs waf | grep -i -E 'anomaly|passwd' | head -n 5
@@ -699,13 +705,17 @@ curl -s -o /dev/null -w 'reader search: %{http_code}\n' 'http://127.0.0.1:8088/?
 docker compose logs waf | grep -i 'passwd' | tail -n 3        # note the rule id(s) and the matched argument name: s
 ```
 
-Expected (est.): it is flagged, because it contains the same text. The precise fix removes the argument `s` from the inspection of that one rule, not the rule itself. Write an exclusion file (replace `RULE_ID` with the number from your log; CRS's own example for a WordPress field uses this exact form with another rule and argument):
+Expected (est.): it is flagged, because it contains the same text. The precise fix removes the argument `s` from the inspection of that one rule, and only on the one page that needs it. A configure-time `SecRuleUpdateTargetById` would do it for every URL on the site, which is a new blind spot (for example on login or admin pages). The CRS tuning page's Example 7 shows the scoped form: a small rule of your own, written before the CRS rules load, that runs `ctl:ruleRemoveTargetById` only when the request path matches. Write it to the file CRS names for runtime exclusions (replace `RULE_ID` with the number from your log, and `/` with the path of your real search page; in this lab the search is at `/`):
 
 ```bash
-printf 'SecRuleUpdateTargetById RULE_ID "!ARGS:s"\n' > RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
+cat > REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf <<'EOF'
+# Runtime exclusion, scoped to one path: let the search argument "s" through rule RULE_ID there only.
+SecRule REQUEST_FILENAME "@streq /" \
+    "id:1000001,phase:1,pass,t:none,nolog,ctl:ruleRemoveTargetById=RULE_ID;ARGS:s"
+EOF
 ```
 
-Mount it into the `waf` service at `/etc/modsecurity.d/owasp-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf` (the README's volume example uses that path), recreate the container and repeat both requests. Expected (est.): the search no longer scores, the documented probe on `foo` and `bar` still does. If your tuning removed too much, the probe will go quiet: that is the danger of exclusions, and why you check the probe after every change.
+Mount it into the `waf` service at `/etc/modsecurity.d/owasp-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf` (the README's volume example names this file and path), recreate the container and repeat both requests. Expected (est.): the search no longer scores, and the documented probe on `foo` and `bar` still does. Also send the search to a different path (for example `/other?s=what+is+in+/etc/passwd`): it should still be flagged, which proves the exclusion is scoped. If your tuning removed too much, the probe will go quiet: that is the danger of exclusions, and why you check the probe after every change. The simpler configure-time form, `SecRuleUpdateTargetById RULE_ID "!ARGS:s"` in `RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf`, is what CRS's WordPress example uses; it is global, so prefer the scoped form unless the argument is safe everywhere.
 
 **Undo (teardown).** `cd "$HOME/w2-lab/waf" && docker compose down -v`. PowerShell: `Set-Location $HOME\w2-lab\waf; docker compose down -v`. Confirm with `docker ps -a`.
 
