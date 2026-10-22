@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: Apache-2.0
+name: Lesson feedback or error
+description: A claim looks wrong or outdated, an explanation is confusing, or there is a typo
+title: "[lesson] "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Before you submit: do not paste secrets or anything that identifies you.** That means no tokens, API keys or passwords, no account or tenant names, no real IP addresses or hostnames, no amateur radio callsign or grid square, and nothing from a real vendor console that shows who you are. Replace each with a placeholder such as `REDACTED` or `203.0.113.10`. A security problem does not go in a public issue; see the security policy.
+
+        New to this? [How to give feedback or open an issue](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Give-Feedback-and-Open-an-Issue) walks through it. Reading and doing the exercises is free, and so is telling us what is wrong.
+  - type: input
+    id: page
+    attributes:
+      label: Page name or link
+      description: For example, "How a web request works" or the page URL.
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of problem is it?
+      options:
+        - A claim that looks wrong
+        - Something outdated (a vendor page or price changed)
+        - A confusing explanation
+        - A typo or broken link
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: What did you see, and what did you expect?
+      description: Quote the sentence if you can. If you know a source, add its link.
+    validations:
+      required: true

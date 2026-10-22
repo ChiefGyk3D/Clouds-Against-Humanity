@@ -16,6 +16,10 @@ It is a cloud extension of a homelab, and it exists to teach: this repository is
 >
 > **Cost:** the reading and the exercises are free and always will be, and nothing here is sold. Hands-on work uses your own accounts and your provider's bill, nothing you spend goes to the maintainer, and you choose what you can afford to run. The cost gates are explained in [docs/cost.md](docs/cost.md). If you open a DigitalOcean account, my [referral link](https://m.do.co/c/e3aaa65aed6b) is optional and nothing is gated behind it; the wiki says exactly what it is. The same pages are in [`docs/wiki/`](docs/wiki/Home.md) if you prefer reading them in the repo.
 
+> ### Found a mistake or have a question? Open an issue
+>
+> Something wrong, a command that failed, a confusing explanation, or a topic you wish was here? Please say so. Feedback is free, and it is how the lessons get better. **[Give feedback and open an issue](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Give-Feedback-and-Open-an-Issue)** walks through it for a first-timer. Never paste tokens, keys, account names, real IP addresses or hostnames, or anything that identifies you. Security problems go through [SECURITY.md](SECURITY.md), not a public issue. See also [CONTRIBUTING.md](CONTRIBUTING.md).
+
 Recommending other springboards is encouraged throughout this project. The point is to get you thinking in different ways and outside the box, not to hand you one path to copy, so expect pages to point at things to try beyond what they cover.
 
 ## How it fits together
@@ -120,6 +124,8 @@ Clouds-Against-Humanity/
   .spacelift/config.yml                    which secrets each stack loads
   .github/workflows/ci.yml                 GYST callers only (tofu, python, security) + CI green
   .github/workflows/wiki.yml               publishes docs/wiki through GYST's wiki-publish.yml
+  .github/ISSUE_TEMPLATE/                  issue forms (lesson feedback, command failed, question, topic request) and config.yml
+  SECURITY.md, CONTRIBUTING.md             private security reporting; how to give feedback and contribute
   .spacelift/policies/                     Spacelift push and plan policies and their OPA tests
   labs/demo-monitoring/                    synthetic Prometheus + Grafana demo: two sites, dashboards, alert rules and their promtool tests (no real hosts)
   docs/wiki/                               the wiki pages (source of truth)

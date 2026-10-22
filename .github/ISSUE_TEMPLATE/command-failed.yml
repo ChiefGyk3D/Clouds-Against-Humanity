@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: Apache-2.0
+name: A command did not work
+description: A command on a page failed or behaved differently on your machine
+title: "[command] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Before you submit: do not paste secrets or anything that identifies you.** That means no tokens, API keys or passwords, no account or tenant names, no real IP addresses or hostnames, no amateur radio callsign or grid square, and nothing from a real vendor console that shows who you are. Replace each with a placeholder such as `REDACTED` or `203.0.113.10`. A security problem does not go in a public issue; see the security policy.
+
+        New to this? [How to give feedback or open an issue](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Give-Feedback-and-Open-an-Issue) walks through it. Reading and doing the exercises is free, and so is telling us what is wrong.
+  - type: input
+    id: page
+    attributes:
+      label: Page name or link, and the step number
+      description: For example, "Git from zero, exercise 2".
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Your operating system
+      options:
+        - Linux
+        - macOS
+        - Windows (PowerShell)
+        - Windows (WSL or Git Bash)
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Tool version (optional)
+      description: The output of the tool's version command, such as `git --version`.
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected to happen
+    validations:
+      required: true
+  - type: textarea
+    id: happened
+    attributes:
+      label: What happened, including the error text
+      description: Paste the command and the error. Read it first and replace anything private with REDACTED.
+      render: text
+    validations:
+      required: true
