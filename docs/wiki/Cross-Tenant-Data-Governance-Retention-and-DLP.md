@@ -231,20 +231,23 @@ An access-only product sees *who connected to what, when, and how many bytes*. I
 
 ## Free path: a lab on your own computer
 
-Every exercise follows four steps: **predict** (write down what you expect), **do**, **check**, **undo**. The code lives in [`labs/cross-tenant-dlp`](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/tree/main/labs/cross-tenant-dlp) in the repository. Copy that folder to your machine, `cd` into it, and set a work folder:
+Every exercise follows four steps: **predict** (write down what you expect), **do**, **check**, **undo**. The code lives in [`labs/cross-tenant-dlp`](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/tree/main/labs/cross-tenant-dlp) in the repository. Copy that folder to your machine, `cd` into it, and set a work folder.
+
+**Keep the work folder private.** It holds a Python environment the lab runs and files the lab uses to stop its own servers. A predictable folder in a shared place such as `/tmp` can be created ahead of you by another user on the same machine, who could then plant code you will run. So the lab uses a folder under your own account, and its scripts create it with mode 700 and **refuse to continue** if it already exists and is not yours, is a symbolic link, or is writable by group or others. Do not point `LAB_WORK` at a shared folder.
 
 ```bash
-export LAB_WORK="$HOME/cah-xtenant-lab"
-mkdir -p "$LAB_WORK"
+export LAB_WORK="${XDG_RUNTIME_DIR:-$HOME/.cache}/cah-xtenant-lab"
 ```
 
 ```powershell
-# est.: not run. PowerShell 7 on Windows, with Python 3 installed.
-$env:LAB_WORK = "$HOME\cah-xtenant-lab"
+# est.: not run. PowerShell 7 on Windows, with Python 3 installed. LOCALAPPDATA is per user.
+$env:LAB_WORK = "$env:LOCALAPPDATA\cah-xtenant-lab"
 New-Item -ItemType Directory -Force $env:LAB_WORK | Out-Null
 ```
 
-Why `moto`? The obvious local S3 server, MinIO, was archived: on **2026-10-22** its repository README says it is no longer maintained and the community edition is distributed as source only, under the AGPL v3 license. Container images are no longer published for it, as that README describes. So the lab uses [`moto`](https://docs.getmoto.org/) (Apache-2.0, from PyPI), which implements the S3 calls the lab needs. It is a test double, not a storage product: it accepts any credentials, keeps data in memory, and applies bucket policies only in a limited way, which is why the lab's policy check is a separate toy.
+The Bash start script (next exercise) creates the folder for you. The PowerShell route creates it above, in your own profile, which other users cannot write to by default (est.).
+
+Why `moto`? The obvious local S3 server, MinIO, was archived: on **2026-10-22** its repository README says it is no longer maintained and the community edition is distributed as source only, under the AGPL v3 license. The same README says no pre-compiled binaries are provided for the community edition. So the lab uses [`moto`](https://docs.getmoto.org/) (Apache-2.0, from PyPI), which implements the S3 calls the lab needs. It is a test double, not a storage product: it accepts any credentials, keeps data in memory, and applies bucket policies only in a limited way, which is why the lab's policy check is a separate toy.
 
 ### Exercise 1: start two tenants on loopback
 

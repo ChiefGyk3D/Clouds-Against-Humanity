@@ -15,6 +15,7 @@ from pathlib import Path
 
 import dlp_scan
 import tenants_setup as t
+from labdir import private_dir
 
 PURGE_WINDOW_HOURS = 24
 
@@ -42,8 +43,7 @@ def keys(c, bucket: str) -> list[str]:
 
 
 def run(args) -> int:
-    work = Path(args.work)
-    work.mkdir(parents=True, exist_ok=True)
+    work = private_dir(args.work)
     a, b = t.client("a"), t.client("b")
     ev = {"run_at": now().isoformat(), "dry_run": args.dry_run, "steps": {}}
     try:
@@ -87,7 +87,7 @@ def run(args) -> int:
             raise RuntimeError(f"verify: {len(bad)} object(s) differ; NOT purging, data stays for a human")
         # 4. Scan (the DLP step) on the staged copy; record counts only.
         stage = work / "stage"
-        stage.mkdir(exist_ok=True)
+        stage.mkdir(mode=0o700, exist_ok=True)
         for k in src:
             (stage / Path(k).name).write_bytes(b.get_object(Bucket=t.DST_BUCKET, Key=k)["Body"].read())
         findings = dlp_scan.scan_path(stage, {"QX-123456-ZZ"}, 2)
@@ -120,8 +120,7 @@ def run(args) -> int:
 def sweep(args) -> int:
     """Manual path / backstop: purge anything in tenant B past its deadline,
     and alert on anything old that is still there."""
-    work = Path(args.work)
-    work.mkdir(parents=True, exist_ok=True)
+    work = private_dir(args.work)
     b = t.client("b")
     overdue = 0
     for k in keys(b, t.DST_BUCKET):

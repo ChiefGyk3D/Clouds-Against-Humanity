@@ -15,6 +15,9 @@ LAB = ROOT / "labs" / "cross-tenant-dlp"
 PAGE = ROOT / "docs" / "wiki" / "Cross-Tenant-Data-Governance-Retention-and-DLP.md"
 
 
+sys.path.insert(0, str(LAB))
+
+
 def load(name):
     spec = importlib.util.spec_from_file_location(name, LAB / f"{name}.py")
     mod = importlib.util.module_from_spec(spec)
@@ -63,3 +66,74 @@ def test_lab_files_carry_spdx_and_the_page_links_the_lab():
     text = PAGE.read_text()
     assert "labs/cross-tenant-dlp" in text and "Next:" in text.splitlines()[2]
     assert "Zscaler" in text and "Twingate" in text and "does not claim it replaces" in text
+
+
+def run_start(work, *args, env_extra=None):
+    import os
+    import subprocess
+
+    env = {**os.environ, "LAB_WORK": str(work), **(env_extra or {})}
+    return subprocess.run(
+        ["bash", str(LAB / "start_tenants.sh"), *args], env=env, check=False, capture_output=True, text=True, timeout=60
+    )
+
+
+def test_start_script_text_has_the_private_folder_checks():
+    s = (LAB / "start_tenants.sh").read_text()
+    assert "/tmp" not in s and "TMPDIR" not in s
+    for needle in ("mkdir -m 700", "-O \"$WORK\"", "-L \"$WORK\"", "group or other writable", "^[0-9]+$", "moto.server"):
+        assert needle in s, needle
+    assert "pkill" not in s and "pgrep" not in s
+    assert "/tmp/" not in PAGE.read_text()
+
+
+def test_start_script_refuses_a_group_or_other_writable_folder(tmp_path):
+    shared = tmp_path / "shared"
+    shared.mkdir()
+    shared.chmod(0o777)
+    r = run_start(shared, "status")
+    assert r.returncode != 0 and "writable" in r.stderr
+    shared.chmod(0o770)
+    assert run_start(shared, "status").returncode != 0
+
+
+def test_start_script_refuses_a_symlink_and_makes_a_private_folder(tmp_path):
+    real = tmp_path / "real"
+    real.mkdir(mode=0o700)
+    link = tmp_path / "link"
+    link.symlink_to(real)
+    r = run_start(link, "status")
+    assert r.returncode != 0 and "symlink" in r.stderr
+    fresh = tmp_path / "a" / "fresh"
+    r = run_start(fresh, "status")
+    assert r.returncode == 0 and (fresh.stat().st_mode & 0o777) == 0o700
+
+
+def test_down_ignores_a_pid_file_that_is_not_a_moto_server(tmp_path):
+    import subprocess
+
+    work = tmp_path / "w"
+    work.mkdir(mode=0o700)
+    victim = subprocess.Popen(["sleep", "60"])
+    try:
+        (work / "a.pid").write_text(str(victim.pid))
+        (work / "b.pid").write_text("123; echo pwned")
+        r = run_start(work, "down")
+        assert r.returncode == 0
+        assert victim.poll() is None  # not killed: its command line is not a moto server
+    finally:
+        victim.kill()
+        victim.wait()
+
+
+def test_private_dir_helper_refuses_open_folders(tmp_path):
+    import pytest
+
+    labdir = load("labdir")
+    open_dir = tmp_path / "open"
+    open_dir.mkdir()
+    open_dir.chmod(0o777)
+    with pytest.raises(SystemExit):
+        labdir.private_dir(open_dir)
+    made = labdir.private_dir(tmp_path / "x" / "new")
+    assert (made.stat().st_mode & 0o777) == 0o700

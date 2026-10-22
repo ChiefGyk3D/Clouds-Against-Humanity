@@ -11,6 +11,8 @@ import argparse
 import random
 from pathlib import Path
 
+from labdir import private_dir
+
 
 def luhn_check_digit(partial: str) -> str:
     total = 0
@@ -39,7 +41,7 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=7)
     a = ap.parse_args()
     rng = random.Random(a.seed)
-    out = Path(a.out)
+    out = private_dir(a.out)
     (out / "batch").mkdir(parents=True, exist_ok=True)
     (out / "mail").mkdir(parents=True, exist_ok=True)
     names = ["alex", "sam", "jo", "kai", "robin", "max"]
