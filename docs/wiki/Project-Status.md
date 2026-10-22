@@ -43,6 +43,8 @@ The rules are the ones the 2026-10-22 audit used, applied in this order. Only an
 
 A pull request closed without merging counts for nothing. A reference into another repository is ignored. Linking is by keyword in the pull request body; a number in a title or a branch name is not a link.
 
+Titles and other text from GitHub are shown as plain code text. Special characters in titles are shown as look-alikes: a pipe appears as ∣ and a backslash as ⧵, so no title can break a table.
+
 ## Open issues by state
 
 ### In flight (4)

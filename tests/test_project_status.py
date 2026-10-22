@@ -263,6 +263,13 @@ HOSTILE_TITLES = [
     "![x](https://evil.example/p.png)",
     "<script>alert(1)</script>",
     "a `b` | c `|` d",
+    "a\\|b",
+    "a\\\\|b",
+    "ends with a backslash\\",
+    "\\\nnext",
+    "|",
+    "||",
+    "\\\\\\\\",
     "see https://evil.example and www.evil.example and bob@evil.example",
     "line one\nline two\r\n| injected | row |",
     "x" * 5000,
@@ -272,6 +279,39 @@ HOSTILE_TITLES = [
 ]
 CODE_SPAN = re.compile(r"`[^`]*`")
 LEGIT_LINK = re.compile(r"\[#\d+\]\(https://github\.com/Example/Repo/(?:issues|pull)/\d+\)")
+
+
+def split_row(row):
+    """A minimal GFM table-row splitter, as the spec describes it.
+
+    Cells are separated by unescaped pipes. A pipe preceded by a backslash is
+    part of the cell, and this happens before any inline parsing, so it applies
+    inside code spans too (GFM spec 0.29, extension "Tables", example 200:
+    `| f\\|oo  |` is one cell holding f|oo). A leading and a trailing pipe are
+    delimiters, not cells.
+    """
+    cells, current, i = [], "", 0
+    while i < len(row):
+        ch = row[i]
+        if ch == "\\" and row[i + 1 : i + 2] == "|":
+            current += "|"
+            i += 2
+            continue
+        if ch == "|":
+            cells.append(current)
+            current = ""
+        else:
+            current += ch
+        i += 1
+    cells.append(current)
+    return [c.strip() for c in cells[1:-1]] if row.startswith("|") and row.rstrip().endswith("|") else None
+
+
+def test_the_splitter_follows_the_spec_example():
+    # The spec's table example: an escaped pipe stays inside its cell.
+    assert split_row("| f\\|oo  |") == ["f|oo"]
+    assert split_row("| a | b |") == ["a", "b"]
+    assert split_row("| a\\\\| b |") == ["a\\| b"]  # `\\|` is a backslash, then an escaped pipe
 
 
 def rows_for(page, number):
@@ -288,6 +328,25 @@ def assert_inert(page, number):
         assert row.count("`") % 2 == 0 and len(row) < 1200, row
     for line in page.splitlines():
         assert not line.startswith(("# Heading", "[a]("))
+    assert_every_row_has_its_tables_columns(page)
+
+
+def assert_every_row_has_its_tables_columns(page):
+    """Every table row splits into as many cells as its header row has."""
+    lines = page.splitlines()
+    width = None
+    for i, line in enumerate(lines):
+        if not line.startswith("|"):
+            width = None
+            continue
+        if i + 1 < len(lines) and re.fullmatch(r"\|(---\|)+", lines[i + 1]):
+            width = len(split_row(line))
+            continue
+        if re.fullmatch(r"\|(---\|)+", line):
+            continue
+        assert width is not None, line
+        cells = split_row(line)
+        assert cells is not None and len(cells) == width, line
 
 
 @pytest.mark.parametrize("title", HOSTILE_TITLES, ids=range(len(HOSTILE_TITLES)))
@@ -308,9 +367,21 @@ def test_a_hostile_title_stays_inert_everywhere(title, where):
     assert_inert(gps.render(snapshot), number)
 
 
-def test_titles_are_code_spans_with_pipes_escaped_and_backticks_removed():
+def test_titles_are_code_spans_with_look_alikes_and_backticks_removed():
     page = gps.render(snap([issue(1, title="a | b `x` <i>")]))
-    assert "`a \\| b x <i>`" in rows_for(page, 1)[0]
+    assert "`a \u2223 b x <i>`" in rows_for(page, 1)[0]
+
+
+def test_no_cell_contains_a_pipe_or_backslash_at_all():
+    page = gps.render(snap([issue(1, title="a\\|b \\ | || \\\\")], [pr(10, "Closes #1", ci="x|y\\")]))
+    for row in rows_for(page, 1) + rows_for(page, 10):
+        for cell_text in CODE_SPAN.findall(row):
+            assert "|" not in cell_text and "\\" not in cell_text
+    assert "\u2223" in page and "\u29f5" in page
+
+
+def test_the_page_says_special_characters_are_shown_as_look_alikes():
+    assert "Special characters in titles are shown as look-alikes" in gps.render(snap([]))
 
 
 def test_a_long_title_is_cut():
@@ -320,7 +391,7 @@ def test_a_long_title_is_cut():
 
 def test_a_newline_in_a_title_cannot_start_a_new_line():
     page = gps.render(snap([issue(1, title="x\n# Heading\n| [#9](https://evil.example) |")]))
-    assert "`x # Heading \\| [#9](https://evil.example) \\|`" in page
+    assert "`x # Heading \u2223 [#9](https://evil.example) \u2223`" in page
 
 
 def test_board_values_and_ci_are_inert_too():

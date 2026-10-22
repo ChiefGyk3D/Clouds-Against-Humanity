@@ -189,6 +189,8 @@ def board_gaps(snapshot: dict) -> dict:
 
 
 MAX_CELL = 200
+PIPE_LOOKALIKE = "\u2223"  # DIVIDES, looks like a pipe
+BACKSLASH_LOOKALIKE = "\u29f5"  # REVERSE SOLIDUS OPERATOR, looks like a backslash
 NAME_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 
@@ -199,9 +201,8 @@ def cell(value: object) -> str:
     must never become Markdown: no link, image, autolink, HTML or table break.
     Inside a code span none of those is interpreted. Control characters and
     backticks are removed (a backtick would end the span), whitespace is
-    collapsed, the text is cut to MAX_CELL characters, and the pipe is escaped
-    for the table. Backslash is left literal: it has no meaning in a code span,
-    and the only escape the table adds is the one before a pipe.
+    collapsed, the text is cut to MAX_CELL characters, and every pipe and
+    backslash becomes a look-alike character (see the comment below).
     """
     text = "".join(" " if unicodedata.category(c) in ("Cc", "Zl", "Zp") else c for c in str(value))
     text = " ".join(text.replace("`", "").split())
@@ -209,7 +210,12 @@ def cell(value: object) -> str:
         text = text[: MAX_CELL - 3] + "..."
     if not text:
         return ""
-    return "`" + text.replace("|", "\\|") + "`"
+    # A pipe or a backslash is replaced by a look-alike, never escaped. GFM
+    # splits a table row on `\|` before it parses inline Markdown, so any escaping
+    # scheme that keeps a backslash or a pipe can be made to disagree with the
+    # code span. With neither character present in the cell, nothing can.
+    text = text.replace("|", PIPE_LOOKALIKE).replace("\\", BACKSLASH_LOOKALIKE)
+    return "`" + text + "`"
 
 
 def ref(snapshot: dict, kind: str, number: int) -> str:
@@ -283,7 +289,7 @@ The rules are the ones the 2026-10-22 audit used, applied in this order. Only an
 3. **Needs the maintainer:** neither of the above, and the issue has the `needs-maintainer` label.
 4. **Not started:** none of the above.
 
-A pull request closed without merging counts for nothing. A reference into another repository is ignored. Linking is by keyword in the pull request body; a number in a title or a branch name is not a link.
+A pull request closed without merging counts for nothing. A reference into another repository is ignored. Linking is by keyword in the pull request body; a number in a title or a branch name is not a link.\n\nTitles and other text from GitHub are shown as plain code text. Special characters in titles are shown as look-alikes: a pipe appears as \u2223 and a backslash as \u29f5, so no title can break a table.
 """
 
 
