@@ -45,6 +45,7 @@
 16. [Spacelift](Spacelift.md)
     - Foundations side page: [Spacelift from zero](Spacelift-From-Zero.md)
 17. [Doppler and secrets](Doppler-and-Secrets.md)
+    - Foundations side page: [Secrets from day one: a password manager, Doppler for every asset, and the .env rules](Secrets-From-Day-One.md)
 18. [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md)
 19. [Threat model](Threat-Model.md)
 20. [Lessons learned](Lessons-Learned.md)
