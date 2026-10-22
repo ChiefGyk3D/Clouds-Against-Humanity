@@ -698,7 +698,7 @@ A short loop, entirely on your own machine and your own files.
 
 ## What to read next
 
-Read [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) for packages, services, permissions and logs. Then go back to [Droplet hardening](Droplet-Hardening.md) or [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) and see how much of it reads now. For where the checks in this repository run, see [From commit to pipeline](From-Commit-to-Pipeline.md).
+Read [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) for packages, services, permissions and logs. If your machines are Windows or Macs, read [Windows, Active Directory and macOS in the enterprise](Windows-Active-Directory-and-macOS-in-the-Enterprise.md) as well. Then go back to [Droplet hardening](Droplet-Hardening.md) or [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) and see how much of it reads now. For where the checks in this repository run, see [From commit to pipeline](From-Commit-to-Pipeline.md).
 
 ## Claims register
 

@@ -44,7 +44,7 @@ A system can get one right and another wrong: strong sign-in with sloppy roles l
 
 Three words, three jobs, often sold in one product:
 
-- A **directory** is the database of identities: people, their groups, their attributes (department, manager, employment status), and sometimes devices. Examples of directory software are LDAP servers and Microsoft Active Directory. It answers "who exists, and what are they a member of?". By itself it does not hand out proof to web applications.
+- A **directory** is the database of identities: people, their groups, their attributes (department, manager, employment status), and sometimes devices. Examples of directory software are LDAP servers and Microsoft Active Directory (which [Windows, Active Directory and macOS in the enterprise](Windows-Active-Directory-and-macOS-in-the-Enterprise.md) explains for beginners). It answers "who exists, and what are they a member of?". By itself it does not hand out proof to web applications.
 - An **identity provider (IdP)** is the service that *authenticates* a person (password, MFA) and then *tells other systems* who that person is, in a form they can check. It usually reads the directory (or contains one). It is the one place sign-in policy lives.
 - **Single sign-on (SSO)** is the result: you sign in once, at the IdP, and many applications accept that. The applications are called **service providers** in SAML and **relying parties** in OIDC; both mean "the application that relies on the IdP's word".
 
