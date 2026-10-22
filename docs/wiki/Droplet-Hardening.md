@@ -119,7 +119,7 @@ What it does not prove: UDP (no reply there only means "open or filtered", so sp
 
 ## Not done yet
 
-- **Audit logging** (auditd, and shipping auth logs off the box). Planned for stage 2 alongside the SIEM link.
+- **Audit logging** (auditd, and shipping auth logs off the box). Planned for stage 2 alongside the SIEM link. What a log line is and what a rule does with it: [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md).
 - **A pinned package version source** for the connector, once Twingate documents one.
 
 These are listed in the [stage 1 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md) and on the [Threat model](Threat-Model.md) page, because a hardening page that only lists what was done is marketing.

@@ -82,7 +82,7 @@ This matters for two reasons:
 
 ## Who is responsible for what
 
-Providers talk about a **shared responsibility model**. The split for a virtual machine is roughly:
+Providers talk about a **shared responsibility model**. The split for a virtual machine is roughly (the line moves for containers, databases and hosted apps: see [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md#iaas-paas-saas-and-shared-responsibility)):
 
 | The provider is responsible for | You are responsible for |
 |---|---|

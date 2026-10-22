@@ -20,6 +20,7 @@
 7. [Containers and Docker (optional)](Containers-and-Docker-Basics.md)
     - Side page: [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md)
     - Foundations side page: [Windows, Active Directory and macOS in the enterprise](Windows-Active-Directory-and-macOS-in-the-Enterprise.md)
+    - Foundations side page: [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md)
 8. [How money works](How-Money-Works-in-the-Cloud.md)
 9. [Enterprise habits](Enterprise-Engineering-Habits.md)
 10. [Architecture overview](Architecture-Overview.md)
@@ -81,6 +82,7 @@ The [Threat model](Threat-Model.md) is core step 19.
 
 - [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md)
 - [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md)
+    - Foundations side page: [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md)
     - Side page: [Deception and honeypots: start here](Deception-and-Honeypots-Start-Here.md)
         - [What deception is](Deception-and-Honeypots-What-Deception-Is.md)
         - [Deception safety and law](Deception-and-Honeypots-Safety-and-Law.md)
