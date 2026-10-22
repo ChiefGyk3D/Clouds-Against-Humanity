@@ -124,6 +124,19 @@ def test_symlinked_labs_directory_is_not_exempt(tmp_path):
     assert mentions(problems, "labs: symlinked directory is refused")
 
 
+def project_roots(node, where="config"):
+    """Every (path, value) of a project_root key anywhere in the parsed config."""
+    if isinstance(node, dict):
+        for key, value in node.items():
+            if key == "project_root" and isinstance(value, str):
+                yield f"{where}.{key}", value
+            else:
+                yield from project_roots(value, f"{where}.{key}")
+    elif isinstance(node, list):
+        for i, value in enumerate(node):
+            yield from project_roots(value, f"{where}[{i}]")
+
+
 def labs_registration_problems(approved, spacelift_dir, root):
     """Every way labs/ could be approved or handed to Spacelift."""
     found = []
@@ -142,6 +155,10 @@ def labs_registration_problems(approved, spacelift_dir, root):
 
         loaded = yaml.safe_load(config.read_text(encoding="utf-8"))
         ids = cost_check.manifest_ids(root)
+        for where, root_value in project_roots(loaded):
+            parts = [x.lower() for x in Path(os.path.normpath(root_value)).parts]
+            if "labs" in parts:
+                found.append(f"{where} has project_root {root_value!r}")
         for sid in loaded["stacks"]:
             for manifest in ids.get(sid, []):
                 if str(manifest).startswith("labs/"):
@@ -228,3 +245,12 @@ def test_lab_may_call_a_module_read_only(tmp_path):
         "modules/ok/other.tf": 'resource "random_id" "r" {}\n',
     }
     assert problems_for(tmp_path, files) == []
+
+
+@pytest.mark.parametrize("value", ["labs", "./labs", "labs/", "Labs", "stacks/../labs", "labs/vm"])
+def test_guard_catches_a_bare_labs_project_root(tmp_path, value):
+    sl = tmp_path / ".spacelift"
+    sl.mkdir()
+    (sl / "config.yml").write_text(f"stacks:\n  cah-x:\n    project_root: '{value}'\n")
+    found = labs_registration_problems({"providers": {}}, sl, tmp_path)
+    assert any("project_root" in f for f in found), value
