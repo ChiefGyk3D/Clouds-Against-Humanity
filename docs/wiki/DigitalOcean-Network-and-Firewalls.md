@@ -6,6 +6,8 @@
 
 Every DigitalOcean droplet gets a public IP address, and you cannot remove it. So the question is not "how do we keep it off the internet" but "how do we make sure nothing on that address answers". The answer is a cloud firewall that is attached by tag and in force from the first boot.
 
+If you want to put a public website on a droplet, the lesson [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) shows how to allow web traffic from a proxy's published ranges only, which is the opposite of this project's zero-inbound baseline and is for your own account, not these stacks.
+
 ## The pieces
 
 | Piece | Built by | Purpose |
@@ -49,7 +51,7 @@ flowchart TB
 
 </details>
 
-DigitalOcean evaluates all firewalls attached to a droplet together: traffic is allowed if any attached firewall allows it, and denied otherwise. That is why the two can be layered: the baseline guarantees "nothing in", the connector firewall adds only what connectors need.
+DigitalOcean evaluates all firewalls attached to a droplet together: allow rules add up, so traffic is allowed if any attached firewall allows it, and denied otherwise. Deny rules, which the provider's firewall documentation (read 2026-10-22) says it now supports, take precedence over allow rules, including across firewalls. The firewalls in this project use allow rules only. ([Cloud Cowrie for a weekend](Deception-and-Honeypots-Cloud-Cowrie-Weekend.md#the-plan-addresses-ports-and-two-firewalls) records the sources.) That is why the two can be layered: the baseline guarantees "nothing in", the connector firewall adds only what connectors need.
 
 > **Screenshot to take yourself:** the Networking, Firewalls screen in the DigitalOcean control panel.
 > Capture: the two firewalls and the rules screen of one of them, with the inbound and outbound tabs each in frame.

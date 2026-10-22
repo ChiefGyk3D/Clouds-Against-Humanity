@@ -58,6 +58,8 @@ flowchart LR
 | **Readable plans** | A human confirms every apply, and a short plan gets read. A 300-line plan gets skimmed. |
 | **Destroy order is explicit** | Destroy 10 first, then 00. The dependency is a real dependency, not something you remember. |
 
+The general rule, the costs of splitting and a free lab that builds and destroys five stacks in a loop are on [Build and destroy a bunch: one stack per service](Build-and-Destroy-Stack-Per-Service.md).
+
 The numbers leave gaps (00, 10, later 20, 30, 40) so a layer can be slotted in later without renaming everything.
 
 Outputs flow from 00 to 10 through Spacelift stack dependencies, mapped to `TF_VAR_*` environment variables, rather than through `terraform_remote_state`. That way stack 10 never needs read access to stack 00's entire state, only the four values it consumes.
