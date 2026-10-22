@@ -210,6 +210,10 @@ def test_proxy_forwards_loopback_and_refuses_everything_else(lab):
         with socket.create_connection(("127.0.0.1", pbase), timeout=5) as raw:   # a non-http scheme, sent by hand
             raw.sendall(b"GET https://127.0.0.1/ HTTP/1.0\r\n\r\n")
             assert b" 403 " in raw.recv(200).split(b"\r\n")[0]
+        for bad in (b"http://127.0.0.1:notaport/", b"http://127.0.0.1:99999/"):   # bad ports are refused, not a crash
+            with socket.create_connection(("127.0.0.1", pbase), timeout=5) as raw:
+                raw.sendall(b"GET " + bad + b" HTTP/1.0\r\n\r\n")
+                assert b" 403 " in raw.recv(200).split(b"\r\n")[0], bad
     finally:
         proc.terminate()
         proc.wait(timeout=10)

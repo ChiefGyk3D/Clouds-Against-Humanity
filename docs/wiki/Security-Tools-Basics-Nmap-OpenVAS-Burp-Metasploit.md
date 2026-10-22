@@ -330,6 +330,7 @@ class Proxy(BaseHTTPRequestHandler):
     def do_GET(self):
         url = urllib.parse.urlsplit(self.path)
         try:
+            port = url.port or 80          # raises ValueError for a bad or out-of-range port
             ok = url.scheme == "http" and ipaddress.ip_address(url.hostname).is_loopback
         except ValueError:
             ok = False
@@ -339,7 +340,7 @@ class Proxy(BaseHTTPRequestHandler):
         print(f">>> {self.command} {self.path}", flush=True)
         for k, v in self.headers.items():
             print(f">>> {k}: {v}", flush=True)
-        conn = http.client.HTTPConnection(url.hostname, url.port or 80, timeout=10)
+        conn = http.client.HTTPConnection(url.hostname, port, timeout=10)
         conn.request("GET", (url.path or "/") + ("?" + url.query if url.query else ""),
                      headers={k: v for k, v in self.headers.items() if k.lower() != "proxy-connection"})
         resp = conn.getresponse()
