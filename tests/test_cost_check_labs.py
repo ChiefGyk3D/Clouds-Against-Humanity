@@ -165,3 +165,66 @@ def test_guard_catches_allowed_source_and_spacelift_reference(tmp_path):
     found = labs_registration_problems(approved, sl, tmp_path)
     assert any("approved.json" in f for f in found)
     assert any("refers to labs/" in f for f in found)
+
+
+def module_ref(source):
+    return f'module "m" {{\n  source = "{source}"\n}}\n'
+
+
+def module_problems_for(tmp_path, files, symlinks=()):
+    root = make_repo(tmp_path, [droplet()], tf_files=files)
+    for link, target in symlinks:
+        (root / link).parent.mkdir(parents=True, exist_ok=True)
+        (root / link).symlink_to(root / target, target_is_directory=True)
+    approved = json.loads((root / "docs/stages/approved.json").read_text())
+    problems, _ = cost_check.gate_problems(root, approved)
+    return problems
+
+
+@pytest.mark.parametrize(
+    "where,source",
+    [
+        ("stacks/10-access/ref.tf", "../../labs/y"),
+        ("modules/x/main.tf", "../../labs/y"),
+        ("modules/x/main.tf", "../../modules/../labs/y"),
+    ],
+)
+def test_module_outside_labs_may_not_source_labs(tmp_path, where, source):
+    files = {where: module_ref(source), "labs/y/main.tf": COSTED}
+    assert mentions(module_problems_for(tmp_path, files), "points into labs/")
+
+
+def test_symlinked_dir_into_labs_is_refused(tmp_path):
+    files = {"stacks/10-access/ref.tf": module_ref("../../modules/viz"), "labs/y/main.tf": COSTED}
+    problems = module_problems_for(tmp_path, files, symlinks=[("modules/viz", "labs/y")])
+    assert mentions(problems, "symlinked directory is refused")
+
+
+def test_resolved_symlink_target_in_labs_is_refused(tmp_path):
+    # Reached through a symlinked path the walk does not follow: the module
+    # block still resolves into labs/ and is refused on its own.
+    root = make_repo(tmp_path, [droplet()], tf_files={"labs/y/main.tf": COSTED})
+    (root / "stacks/10-access/link").symlink_to(root / "labs/y", target_is_directory=True)
+    block = cost_check.find_blocks(module_ref("./link"))[0]
+    _, problem = cost_check.module_source_problem(root, "stacks/10-access/ref.tf", block)
+    assert problem and "points into labs/" in problem
+
+
+def test_labs2_lookalike_source_behaves_as_before(tmp_path):
+    files = {"stacks/10-access/ref.tf": module_ref("../../labs2/y"), "labs2/y/main.tf": VOLUME}
+    problems = module_problems_for(tmp_path, files)
+    assert not mentions(problems, "points into labs/")
+    assert mentions(problems, "labs2/y/main.tf")
+
+
+def test_lab_may_call_a_module_read_only(tmp_path):
+    """Decision: a lab may call modules/ by relative path. modules/ is scanned
+    by the gate in full on its own, so nothing is hidden; the lab's own
+    arguments are unpriced like the rest of the lab. A lab may even name
+    stacks/ code: that is not a gate bypass (stacks/ is scanned wherever it is
+    called from) and Spacelift never runs labs/."""
+    files = {
+        "labs/y/main.tf": module_ref("../../modules/ok"),
+        "modules/ok/other.tf": 'resource "random_id" "r" {}\n',
+    }
+    assert problems_for(tmp_path, files) == []

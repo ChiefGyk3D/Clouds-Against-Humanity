@@ -123,6 +123,8 @@ The top-level `labs/` directory holds learner labs, which may create cloud resou
 
 Everything else is unchanged: `stacks/` and `modules/` get exactly the rules above. The exemption applies only to a path whose first component is exactly `labs` (so not `Labs`, `labs2`, `stacks/labs` or `docs/labs`), with no `..`, whose real path resolves inside the real `labs/` directory of the repository root. A symlink from `labs/` into `stacks/` is not exempt, and a symlinked `labs/` is refused.
 
+A module block outside `labs/` may not take a source that points into `labs/` (by `..`, or through a symlink, checked with the resolved path), because lab files are not costed and the lab's resources would reach a stack unseen. A lab may call `modules/` by relative path: `modules/` is scanned in full wherever it is called from, so nothing is hidden.
+
 What the exemption is not:
 
 - It is not an approval. Nothing under `labs/` is priced, listed in `approved.json` `allowed_sources`, or counted in the project's spend or in any ceiling.

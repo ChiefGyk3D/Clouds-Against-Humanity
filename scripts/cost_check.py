@@ -1105,6 +1105,14 @@ def module_source_problem(root, rel, block):
             f"{rel}:{block.line}: module {block.labels[0]!r} source {source!r} is outside the repository "
             "once symlinks are resolved"
         )
+    real_labs = Path(os.path.realpath(root), LABS_DIR)
+    if not lab_file(root, rel) and (
+        resolved.is_relative_to(real_labs) or target.split("/")[0] == LABS_DIR
+    ):
+        return None, (
+            f"{rel}:{block.line}: module {block.labels[0]!r} source {source!r} points into {LABS_DIR}/, "
+            "which the gate does not cost; a stack or module may not compose lab code"
+        )
     return source, None
 
 
