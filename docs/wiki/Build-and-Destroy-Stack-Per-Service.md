@@ -38,6 +38,7 @@ First the words. A **stack** is a folder of OpenTofu code that you plan and appl
 |---|---|---|
 | **Blast radius** | A mistake can only touch what is in that stack's state. | A bad edit to the web app's stack cannot plan a change to the network, because the network is not in that state. |
 | **State isolation** | One state file, one lock, one thing to corrupt or lose. State often holds sensitive values, so fewer secrets per file is a smaller loss. | Two people can apply two services at the same time; only two applies to the same stack have to wait for each other. |
+| **Trust boundary** | Each stack runs with its own credentials and identity, so what one stack's credentials can reach is limited to what that stack needs. The maintainer's ruling for this project is that stack boundaries are trust boundaries: for example, the lxmd service and Reticulum get separate stacks and separate identities, so a mistake or a compromise in one does not carry into the other. | The token for the logging stack cannot touch the network. |
 | **Ownership** | A folder can have an owner, a reviewer and a set of permissions. | The team that runs the web app can change the web app, and is not able to change the network by accident. |
 | **Independent destroy** | You can switch one service off, or rebuild it, without touching the others. | Rebuild a test server nightly while the network stays up. |
 | **Cost gating per stack** | Each stack declares its own spend, so a price change shows up in the right place. | This project keeps one `cost.json` per stack; see [the cost gate](#cost-counters-a-number-per-stack-and-one-for-the-whole). |
@@ -359,10 +360,20 @@ destroy() {
   return $rc
 }
 
+# statecount STACK [managed]: items in one stack's state. No state file means nothing was ever applied: 0.
+# A state file that exists but cannot be read is an error (return 1), never a zero.
+statecount() {
+  local s="$1" out
+  [ -f "$LAB/stacks/$s/terraform.tfstate" ] || { echo 0; return 0; }
+  out=$(tf "$s" state list 2>&1) || return 1
+  if [ "${2:-}" = managed ]; then out=$(printf '%s\n' "$out" | grep -v '^data\.'); fi
+  printf '%s\n' "$out" | grep -c . || true
+}
+
 count() { # managed resources recorded in all states (data sources do not count)
   local s total=0 n
   for s in "${ORDER[@]}"; do
-    n=$(tf "$s" state list 2>/dev/null | grep -v '^data\.' | grep -c . || true)
+    n=$(statecount "$s" managed) || { echo "state of $s is unreadable" >&2; return 1; }
     total=$((total + n))
   done
   echo "$total"
@@ -371,9 +382,12 @@ count() { # managed resources recorded in all states (data sources do not count)
 check() { # every state empty, AND the second look (proof.sh) finds nothing
   local s n bad=0
   for s in "${ORDER[@]}"; do
-    n=$(tf "$s" state list 2>/dev/null | grep -c . || true)
-    printf '%-14s %s item(s) in state\n' "$s" "$n"
-    [ "$n" = 0 ] || bad=1
+    if n=$(statecount "$s"); then
+      printf '%-14s %s item(s) in state\n' "$s" "$n"
+      [ "$n" = 0 ] || bad=1
+    else
+      printf '%-14s state UNREADABLE (this proves nothing)\n' "$s"; bad=1
+    fi
   done
   bash "$LAB/proof.sh" || bad=1
   if [ $bad = 0 ]; then echo "CHECK PASSED: nothing remains"; else echo "CHECK FAILED: something remains"; fi
@@ -562,18 +576,28 @@ function Destroy {
     return $ok
 }
 
+# State-Count STACK: items in one state. No state file means nothing was applied: 0.
+# A state file that exists but cannot be read returns -1 (an error), never 0.
+function State-Count([string]$Stack, [bool]$ManagedOnly = $false) {
+    if (-not (Test-Path "$Lab\stacks\$Stack\terraform.tfstate")) { return 0 }
+    $out = Tf $Stack @('state', 'list') 2>&1
+    if ($LASTEXITCODE -ne 0) { return -1 }
+    $items = @($out | Where-Object { $_ })
+    if ($ManagedOnly) { $items = @($items | Where-Object { $_ -notmatch '^data\.' }) }
+    return $items.Count
+}
+
 function Count-Managed { # managed resources in all states (data sources do not count)
     $total = 0
-    foreach ($s in $Order) {
-        $total += @(Tf $s @('state', 'list') 2>$null | Where-Object { $_ -and $_ -notmatch '^data\.' }).Count
-    }
+    foreach ($s in $Order) { $total += [Math]::Max(0, (State-Count $s $true)) }
     return $total
 }
 
 function Check { # every state empty, AND the second look (proof.ps1) finds nothing
     $bad = $false
     foreach ($s in $Order) {
-        $n = @(Tf $s @('state', 'list') 2>$null | Where-Object { $_ }).Count
+        $n = State-Count $s
+        if ($n -lt 0) { "{0,-14} state UNREADABLE (this proves nothing)" -f $s; $bad = $true; continue }
         "{0,-14} {1} item(s) in state" -f $s, $n
         if ($n -ne 0) { $bad = $true }
     }
@@ -872,7 +896,7 @@ doctl compute tag delete cah-lab-iac4 --force
 
 (`FIREWALL_ID` and `VPC_ID` are placeholders for the IDs you read. Whether `--force` is accepted by the `firewall delete`, `vpcs delete` and `tag delete` commands should be confirmed with `--help` on your doctl version; est.)
 
-**Prove nothing remains.** Use a read-only token. The `proof.sh` the setup script writes lists droplets, firewalls, VPCs and tags whose names start with `cah-lab-`, and prints how many volumes, snapshots and reserved addresses your account holds. It **fails closed**: if `doctl` is missing or the token is rejected, it says the listing failed and exits 1, instead of printing zero. An API alternative, read-only: `GET https://api.digitalocean.com/v2/droplets?tag_name=cah-lab-iac4`, which per DigitalOcean's published API description needs the `tag:read` scope.
+**Prove nothing remains.** Use a read-only token. The `proof.sh` the setup script writes lists droplets, firewalls, VPCs and tags whose names start with `cah-lab-`, and also lists your volumes, snapshots and reserved addresses, which do not carry the lab's name; use a dedicated account or project, because any item in those three lists fails the proof until you explain or delete it. It **fails closed**: if `doctl` is missing or the token is rejected, it says the listing failed and exits 1, instead of printing zero. An API alternative, read-only: `GET https://api.digitalocean.com/v2/droplets?tag_name=cah-lab-iac4`, which per DigitalOcean's published API description needs the `tag:read` scope.
 
 **Cost.** Computed from `docs/cost-prices.json` only (retrieved 2026-10-21 from DigitalOcean's sizes API) and DigitalOcean's pricing page (read 2026-10-22):
 
@@ -888,7 +912,7 @@ doctl compute tag delete cah-lab-iac4 --force
 
 Region and size availability differ by account: the file lists `s-1vcpu-512mb-10gb`, but `docs/cost.md` only re-read five other sizes for `tor1`, so check yours first with `doctl compute size list` (read-only) and fall back to `s-1vcpu-1gb` if it is missing.
 
-**Hard budget: $1.00 for the whole path.** The planned run is 2 droplets x 3 cycles x 30 minutes. Each droplet-run is billed at least the $0.01 minimum. Worst case if you forget the droplets for a day is about $0.29 (est.), and for a whole month $8.00 at $4 each. Do not trust my arithmetic: this script recomputes it from the file in your clone, and refuses to say OK if the number is over budget or the size is not in the file.
+**Hard budget: $1.00 for the whole path.** The planned run is 2 droplets x 3 cycles x 30 minutes. Each droplet-run is billed at least the $0.01 minimum. The budget covers that run **and one forgotten day** (about $0.29, est.). A forgotten month would be $8.00 at $4 each, which is eight times the budget: the script prints it but does not count it as covered, because only the destroy, your calendar reminder and a spend alert cover that. Do not trust my arithmetic: this script recomputes it from the file in your clone, and refuses to say OK if the covered number is over budget or the size is not in the file.
 
 ```python
 # budget.py: worst-case cost of the cloud lab, from the repository's own price file only.
@@ -909,9 +933,11 @@ one_run = max(hours * hourly, 0.01)  # DigitalOcean's minimum charge is 60 secon
 planned = droplets * cycles * one_run
 forgotten_day = droplets * 24 * hourly
 forgotten_month = droplets * monthly
+# The guard covers the planned run and one forgotten day. A forgotten month is shown, not allowed.
 print(f"size {size}: ${monthly:.2f} a month (file), about ${hourly:.5f} an hour (est.)")
 print(f"planned: {droplets} droplet(s) x {cycles} cycle(s) x {hours:g} h each: about ${planned:.3f} (est.)")
-print(f"if you forget them for a day: about ${forgotten_day:.3f} (est.); for a month: ${forgotten_month:.2f}")
+print(f"if you forget them for a day: about ${forgotten_day:.3f} (est.)")
+print(f"if you forget them for a month: ${forgotten_month:.2f} (NOT covered by the budget: only destroying covers that)")
 ok = max(planned, forgotten_day) <= budget
 print(f"budget ${budget:.2f}:", "OK" if ok else "OVER, do not run")
 sys.exit(0 if ok else 1)
@@ -930,7 +956,8 @@ The output the author got on 2026-10-22:
 ```text
 size s-1vcpu-512mb-10gb: $4.00 a month (file), about $0.00595 an hour (est.)
 planned: 2 droplet(s) x 3 cycle(s) x 0.5 h each: about $0.060 (est.)
-if you forget them for a day: about $0.286 (est.); for a month: $8.00
+if you forget them for a day: about $0.286 (est.)
+if you forget them for a month: $8.00 (NOT covered by the budget: only destroying covers that)
 budget $1.00: OK
 ```
 
@@ -1002,10 +1029,21 @@ printf 'root = "%s"\n' "$LAB" > "$LAB/stacks/10-firewall/terraform.tfvars"
 mkdir -p "$LAB/stacks/20-network"
 { hdr; up; cat <<'EOF'
 variable "region" { type = string }
+data "terraform_remote_state" "fw" {
+  backend = "local"
+  config  = { path = "${var.root}/stacks/10-firewall/terraform.tfstate" }
+}
 resource "digitalocean_vpc" "this" {
   name     = "cah-lab-iac4-net"
   region   = var.region
   ip_range = "10.99.0.0/24"
+  # Reading the firewall's id makes the order real: the network cannot even be planned without it.
+  lifecycle {
+    precondition {
+      condition     = data.terraform_remote_state.fw.outputs.id != ""
+      error_message = "Build 10-firewall first."
+    }
+  }
 }
 output "id" { value = digitalocean_vpc.this.id }
 EOF
@@ -1070,7 +1108,10 @@ show vpcs      doctl vpcs list --no-header --format Name
 show tags      doctl compute tag list --no-header --format Name
 for kind in "volume list" "snapshot list" "reserved-ip list"; do
   out=$(doctl compute $kind --no-header 2>&1) || { echo "$kind: the listing FAILED: $out"; bad=1; continue; }
-  printf '%-16s %s item(s) (each one that bills must be explained)\n' "$kind" "$(printf '%s\n' "$out" | grep -c . || true)"
+  n=$(printf '%s\n' "$out" | grep -c . || true)
+  printf '%-16s %s item(s)\n' "$kind" "$n"
+  # These do not carry the lab's name, so use a dedicated account or project: any item fails the proof.
+  [ "$n" = 0 ] || { echo "  ^ not empty: explain it or delete it, then run the proof again"; bad=1; }
 done
 exit $bad
 EOF
