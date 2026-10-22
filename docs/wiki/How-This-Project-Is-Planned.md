@@ -155,6 +155,10 @@ Exceptions, kept exactly as written: direct quotes and vendor text, code and con
 
 `tests/test_american_english.py` fails when a clear British spelling appears in any Markdown page, in a Python, HCL, YAML or shell comment or docstring, or in a threat-model description, outside code fences, inline code and URLs. `tests/test_markdown_anchors.py` checks that every link to a heading still points at one. If a page must keep one on purpose, add a line to `docs/american-english-allowlist.txt` with the page, the word and the reason.
 
+## Writing labs and lessons: no shared temp paths
+
+Every lab and every command block in a lesson follows one rule: state lives in a folder only you can use, never at a fixed name in a shared place such as `/tmp`. On a shared machine another local user can plant a file, a link or a pid file at a predictable path before your lab uses it. Make the folder with `mktemp -d`, or with `mkdir -m 700` under `$XDG_RUNTIME_DIR` or `$HOME/.cache`, and refuse a folder that already exists but is a symlink, is not yours or is writable by others. Before a script kills a process it started in an earlier run, read the pid file, check that it holds only digits, belongs to you and names the process you expect (`ps -o command=`), and never reach for `pkill` or `pgrep` with a literal name, which can match your own shell. Killing the pid in `$!` from the same shell is fine. `tests/test_no_shared_temp_paths.py` scans `labs/` and the code blocks in `docs/wiki/` for these patterns. A real exception, such as hostile text inside an invented log line, goes in `docs/shared-temp-allowlist.txt` with a reason.
+
 ## Feedback from readers
 
 Readers are part of the plan. [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md) explains how to report a mistake, a failed command or a question, and the repository has issue forms, a `SECURITY.md` and a `CONTRIBUTING.md` for it. A report becomes an issue like any other and goes through the flow above.

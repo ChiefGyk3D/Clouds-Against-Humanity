@@ -33,7 +33,9 @@
 CAH_DOPPLER_VERSION="3.77.0"
 CAH_DOPPLER_SHA256_AMD64="92587cb89c2ff82fc2ddec2b2a9f275ff320994a44e16cd9310b55a429a82084"
 CAH_DOPPLER_SHA256_ARM64="3aa603d60bc8502ec67d9a57e917925f357ac2822eead484acda3875fe6a4d95"
-CAH_DOPPLER_DIR="${CAH_DOPPLER_DIR:-/tmp/cah-doppler}"
+# CAH_DOPPLER_DIR is optional. When it is not set, a new private folder is made
+# with mktemp -d (never a fixed name in the shared /tmp, where another local user
+# could plant the file this script then runs).
 
 cah_doppler_log() {
   printf 'doppler-env: %s\n' "$*"
@@ -58,7 +60,15 @@ cah_doppler_install() {
 
   _tar="doppler_${CAH_DOPPLER_VERSION}_linux_${_arch}.tar.gz"
   _url="https://github.com/DopplerHQ/cli/releases/download/${CAH_DOPPLER_VERSION}/${_tar}"
-  mkdir -p "$CAH_DOPPLER_DIR" || return 1
+  if [ -z "${CAH_DOPPLER_DIR:-}" ]; then
+    CAH_DOPPLER_DIR=$(mktemp -d) || return 1
+  else
+    mkdir -p -m 700 "$CAH_DOPPLER_DIR" || return 1
+  fi
+  if [ -L "$CAH_DOPPLER_DIR" ] || [ ! -d "$CAH_DOPPLER_DIR" ] || [ ! -O "$CAH_DOPPLER_DIR" ]; then
+    cah_doppler_log "refusing: $CAH_DOPPLER_DIR is a symlink, not a folder, or not yours"
+    return 1
+  fi
 
   if ! curl -fsSL --proto '=https' --tlsv1.2 --retry 3 -o "$CAH_DOPPLER_DIR/$_tar" "$_url"; then
     cah_doppler_log "download failed: $_url"
