@@ -239,6 +239,11 @@ def test_the_banner_says_what_was_not_run():
     assert "Wazuh" in banner and "applied" in banner
 
 
+def test_the_powershell_detector_is_an_advanced_script_that_takes_pipeline_input():
+    ps = one_block("powershell", "detect.ps1 [-Threshold")
+    assert re.search(r"\[CmdletBinding\(\)\]\s*param\(", ps) and "ValueFromPipeline" in ps
+
+
 def test_the_lesson_has_the_loop_and_the_flip():
     page = text()
     for word in ("**Build.**", "**Break.**", "**Detect.**", "**Evade.**", "**Defend.**", "### Flip the board"):

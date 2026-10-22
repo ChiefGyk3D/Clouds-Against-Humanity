@@ -463,6 +463,8 @@ echo "exit=$?"
 ```powershell
 # detect.ps1 [-Threshold 5] [-Window 60] [-HoursFile hours.txt]   (normalized lines on the pipeline)
 # Same two rules as detect.sh. Every line is only compared, never run. One day of input only.
+# [CmdletBinding()] makes this an advanced script so the pipeline binds each line to $Line.
+[CmdletBinding()]
 param(
     [int]$Threshold = 5,
     [int]$Window = 60,
