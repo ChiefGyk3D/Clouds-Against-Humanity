@@ -122,7 +122,7 @@ A DigitalOcean cloud firewall attached to a **tag**, not to a droplet. Any dropl
 | `layer`, `region` | string | required | Name parts. |
 | `purpose` | string | required | The role in the name: `baseline` or `connector`. Final name: `<layer>-<region>-<purpose>`. |
 | `tag` | string | required | The droplet tag this firewall attaches to. |
-| `extra_outbound_rules` | list of `{protocol, port_range}` | `[]` | Outbound rules added to the defaults. These apply to *any address*. |
+| `extra_outbound_rules` | list of `{protocol, port_range, destinations?, allow_world_destinations?}` | `[]` | Outbound rules added to the defaults. A rule with no `destinations` applies to *any address* (`0.0.0.0/0` and `::/0`), as it always did. A rule with `destinations` (IPv4 and IPv6 CIDRs or plain addresses) reaches only those, and an IPv4-only list opens no IPv6. **Validation:** every entry must parse as an address or CIDR, no repeats; a `/0` entry (`0.0.0.0/0`, `::/0`) is refused unless that rule sets `allow_world_destinations = true`, and the flag is refused on a rule with no such entry. |
 | `inbound_from_tag_rules` | list of `{protocol, port_range}` | `[]` | Inbound rules that admit only droplets carrying the firewall's own tag. Empty means deny-all inbound. **Validation:** every rule needs protocol `tcp` or `udp` and a non-empty port range. |
 | `outbound_to_tag_rules` | list of `{protocol, port_range}` | `[]` | Outbound rules that reach only droplets carrying the firewall's own tag. Same validation. |
 | `inbound_from_other_tags` | list of `{protocol, port_range, tag}` | `[]` | Inbound rules that admit only droplets carrying the given *other* tag, one rule per entry (`source_tags = [tag]`, never an address). Additive; rendered after `inbound_from_tag_rules`. A tag equal to the firewall's own `tag` is rejected (use `inbound_from_tag_rules`). **Validation:** protocol `tcp` or `udp`; port range a port or an ascending range within 1 to 65535; tag 1 to 255 characters of letters, digits, `:`, `-`, `_`; no duplicate `(protocol, port_range, tag)`. |
@@ -144,7 +144,7 @@ Why three lists? DigitalOcean firewalls are stateful for *replies* only. Admitti
 | Rule group | Source of the list | Scope |
 |---|---|---|
 | `inbound_rule` | `var.inbound_from_tag_rules` | `source_tags = [var.tag]`, never an address |
-| `outbound_rule` (addresses) | `local.outbound` | `destination_addresses = ["0.0.0.0/0", "::/0"]`, specific ports only |
+| `outbound_rule` (addresses) | `local.outbound` | `destination_addresses = ["0.0.0.0/0", "::/0"]` unless the rule lists `destinations`, then exactly those; specific ports only |
 | `outbound_rule` (tags) | `var.outbound_to_tag_rules` | `destination_tags = [var.tag]`, never an address |
 | `inbound_rule` (other tags) | `var.inbound_from_other_tags` | `source_tags = [rule.tag]`, never an address; after the rules above |
 | `outbound_rule` (other tags) | `var.outbound_to_other_tags` | `destination_tags = [rule.tag]`, never an address; last |
