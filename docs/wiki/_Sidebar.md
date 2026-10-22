@@ -9,6 +9,7 @@
     - Side page: [How a web request works](How-a-Web-Request-Works.md)
     - Foundations side page: [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md)
     - Foundations side page: [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md)
+    - Foundations side page: [Behind a CDN: real client IPs, why an IP is a weak identifier, and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md)
 4. [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
     - Side page: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md)
     - Side page: [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md)
