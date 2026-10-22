@@ -126,4 +126,6 @@ What it does not prove: UDP (no reply there only means "open or filtered", so sp
 
 These are listed in the [stage 1 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md) and on the [Threat model](Threat-Model.md) page, because a hardening page that only lists what was done is marketing.
 
+If you will run a website on a droplet, the application layer needs its own hardening: [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md).
+
 Next: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md), step 15 of the core path on the [Reading order](Reading-Order.md) page.
