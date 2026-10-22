@@ -19,6 +19,7 @@
     - Foundations side page: [The terminal and your first script](Terminal-and-Your-First-Script.md)
 7. [Containers and Docker (optional)](Containers-and-Docker-Basics.md)
     - Side page: [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md)
+    - Foundations side page: [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md)
 8. [How money works](How-Money-Works-in-the-Cloud.md)
 9. [Enterprise habits](Enterprise-Engineering-Habits.md)
 10. [Architecture overview](Architecture-Overview.md)
