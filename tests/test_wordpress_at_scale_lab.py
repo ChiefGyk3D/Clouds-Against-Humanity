@@ -116,7 +116,7 @@ def test_each_site_rule_bites(tmp_path):
 
 def test_review_findings_stay_fixed(tmp_path):
     pin = "a" * 40
-    head = f"name: x\npermissions: {{}}\njobs:\n  p:\n    environment: production\n"
+    head = "name: x\npermissions: {}\njobs:\n  p:\n    environment: production\n"
     # W1 cannot be satisfied by a SHA that only appears in a comment
     bypass = head + f"    uses: o/r/.github/workflows/w.yml@main # {pin}\n"
     assert any("W1" in f for f in _bad_workflow(tmp_path, bypass))
