@@ -100,6 +100,7 @@ Each idea names the wiki pages it builds on. Do them in your own accounts and ke
 - Write your own ladder: the next three rungs for you, with a date each.
 - Choose one "keep tinkering" idea, write the acceptance test first, and then do it.
 - Ask someone in a role above what they would do differently if they were starting again, and write down the answer.
+- Do the practice session for your first week: [Working in a company: tickets, change, on-call and documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md).
 
 ## Claims register
 
