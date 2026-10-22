@@ -124,6 +124,7 @@ agents:
   working: [In progress, In review, Next]
   waiting: [Blocked]
 ui_only:
+  - "Options added to a field that already holds values (Area: Security and Docs; Priority: P0 now) are not created by bootstrap. They were added to the live project on 2026-10-22 by an options update that passes every existing option id; a future option is added the same way, or in Settings > the field > Add option"
   - "Board and Sprint views: Column field = Status, Sort by Priority"
   - "Roadmap view: Date fields = Start date and Target date, Group by = Epic, zoom = Quarter"
   - "Sprint plan view: Group by = Sprint; show Size, Agent, Area, Kind"

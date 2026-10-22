@@ -46,7 +46,7 @@ The maintainer has a day job and works on this in the evenings and at weekends, 
 | Blocked | Needs the maintainer or an answer from outside |
 | Done | Closed or merged, with the date in **Done on** |
 
-SAFO moves a card as GitHub events happen: an opened issue is Backlog, a ready pull request is In review, a merged one is Done. The sprint, size, area, kind, epic, priority and agent are set when an issue is planned. Agents add the pull-request cards and set Done on when they finish a task.
+SAFO moves a card as GitHub events happen: an opened issue is Backlog, a ready pull request is In review, a merged one is Done. The sprint, size, area, kind, epic, priority and agent are set when an issue is planned. `safo reconcile` adds the missing pull-request cards and sets Done on from the close or merge date; it is not typed in by hand.
 
 ## The board: fields
 
