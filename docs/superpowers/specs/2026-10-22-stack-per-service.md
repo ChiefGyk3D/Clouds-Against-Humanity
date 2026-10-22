@@ -1,8 +1,8 @@
 # Clouds Against Humanity: one stack per service
 
-> **Proposal for the maintainer. Nothing is built, nothing is approved, nothing is applied.** This note records a ruling, works out what it means for the repository, and asks the questions that decide the cost. It changes no stack, no module, no manifest and no ceiling. The draft edge stack on branch `feat/dmz-stack-122` (draft PR #206) is read, not modified.
+> **Proposal for the maintainer. Nothing is built, nothing is approved, nothing is applied.** Two questions are ruled (2026-10-22): edge per service with stage 3 shared (question 1), and edge services approved step by step (question 2); questions 3 to 6, 8 and 9 stay open. This note records a ruling, works out what it means for the repository, and asks the questions that decide the cost. It changes no stack, no module, no manifest and no ceiling. The draft edge stack on branch `feat/dmz-stack-122` (draft PR #206) is read, not modified.
 
-Status: DRAFT for review. Date: 2026-10-22. Based on main `936a15d`. Epic: #72 (edge), issue #122 (edge stack), issue #96 (stack factory).
+Status: DRAFT for review; questions 1 and 2 RULED 2026-10-22, the rest open. Date: 2026-10-22. Based on main `936a15d`. Epic: #72 (edge), issue #122 (edge stack), issue #96 (stack factory).
 Tooling: OpenTofu throughout.
 Scope: how the ruling splits the edge, the stage 3 workloads, the honeypot sensor and the telemetry pieces into stacks; the numbering; the one question that decides the bill; how values pass between stacks; and what the factory, the cost gate, the plan policy and the teardown checklist must change. It is not an implementation plan.
 
@@ -18,9 +18,9 @@ What I take it to mean, in plain words:
 
 1. A "service" is one thing that runs and has its own failure and its own lifecycle: Reticulum, lxmd, i2pd, Mosquitto, iperf3, each stage 3 daemon, the honeypot sensor. It gets its own directory under `stacks/`, its own Spacelift stack, its own state, its own `cost.json`, its own Doppler config and its own plan.
 2. It applies to a whole build, not only to the edge. If someone terraforms an entire environment, the result is many small stacks that can each be planned, applied and destroyed alone, not one stack with everything in it.
-3. It does not say whether each service gets its own machine. That is the open question in section 4, and it is the one that costs money.
+3. It does not say by itself whether each service gets its own machine. The maintainer ruled that on 2026-10-22: "Agree, edge per service, stage 3 shared." Each internet-facing edge service stack gets its own droplet; the stage 3 daemons are separate stacks on one shared Docker host. The honeypot and the shared network stack are not ruled yet (section 4.3).
 
-This reverses part of an earlier ruling. Edge design decision 7 (2026-10-19) accepted the single stack name `50-edge`, and decisions 1 and 2 priced one shared droplet at a $35 ceiling. Those rulings stand until the maintainer answers section 4; this note shows which of them it reopens.
+This reverses part of an earlier ruling. Edge design decision 7 (2026-10-19) accepted the single stack name `50-edge`, and decisions 1 and 2 priced one shared droplet at a $35 ceiling. The 2026-10-22 ruling (edge per service) reopens decisions 1 and 2, because five edge droplets cost more than one; the ceiling is handled by the question 2 ruling (step by step, section 4.4). Decision 7 (the name) is question 5. They stand until he answers those.
 
 ## 2. What exists today
 
@@ -58,7 +58,7 @@ Two facts shape everything below.
 | Telemetry | node_exporter, log shippers | No | They are packages on the connector droplets, installed by the access stack's cloud-init. They stay with the host they run on |
 | Dashboards | Grafana (stage 4) | No cloud stack | On-prem, $0 to the cloud bill |
 
-## 4. The open question
+## 4. The droplet question (ruled 2026-10-22)
 
 > **Does each service stack get its own droplet, or do several service stacks deploy onto one shared host?**
 
@@ -99,7 +99,9 @@ This is the part that is easy to get wrong, so it is spelled out. OpenTofu creat
 
 So on the edge, "several stacks on one host" has only two honest forms, both of which weaken the design's central rule (config only from cloud-init, no admin path). On stage 3 there is a clean form (Portainer), because that host is already designed to be managed that way.
 
-### 4.3 Recommendation
+### 4.3 Recommendation and ruling
+
+**Ruled by the maintainer on 2026-10-22: "Agree, edge per service, stage 3 shared."** Points 1 and 2 below are therefore the ruling, kept with their reasoning. Points 3 and 4 (the shared network stack, the honeypot in its own account) are my recommendation only and are not ruled.
 
 **Isolation follows exposure.** One rule, applied twice:
 
@@ -108,16 +110,17 @@ So on the edge, "several stacks on one host" has only two honest forms, both of 
 3. **Shared free things stay shared, in their own network stack.** VPC, tags, project resource lists and the bucket cost nothing or a flat fee and are used by many services. They are a stack of their own (`50-edge-network`, and a workloads host/bucket stack), built first and destroyed last.
 4. **Honeypot: its own account, its own stacks, never shared.** Unchanged from its design.
 
-That is shape S1 in the table: **$59 a month at full build**, one dollar under `hard_max`. That is thin and I would not hide it. Three ways to widen it, none decided here: put iperf3 and Mosquitto on the $4 size once measured (S1a, $55 est.); run lxmd on Reticulum's machine if question 3 says it must (S2, $53); or build the edge in stages and stop where the ceiling stops (section 4.4).
+That is shape S1 in the table, now the ruled shape: **$59 a month at full build**, one dollar under `hard_max`. That is thin and I would not hide it. Three ways to widen it, none decided here: put iperf3 and Mosquitto on the $4 size once measured (S1a, $55 est.); run lxmd on Reticulum's machine if question 3 says it must (S2, $53); or build the edge in stages and stop where the ceiling stops (section 4.4).
 
-Why not S4 (everything shared, $35): it is the only shape that fits today's `edge` ceiling unchanged, and it is the cheapest, but on the edge it either collapses the stacks back into one plan (user-data) or adds a runtime puller on a host designed to have no admin path. It satisfies the letter of the ruling and defeats its point. I would pick it only if the money is the hard constraint, and then I would say in the lesson that these are "stacks in name" on one machine.
+Why S4 (everything shared, $35) is not the shape, recorded for the lesson: it is the only shape that fits today's `edge` ceiling unchanged, and it is the cheapest, but on the edge it either collapses the stacks back into one plan (user-data) or adds a runtime puller on a host designed to have no admin path. It satisfies the letter of the ruling and defeats its point. It would have been the choice only if the money were the hard constraint; the lesson can use it as the contrast case ("stacks in name" on one machine).
 
-Why not S3 (everything per service): it breaks `hard_max` ($83, or about $67 at the smallest sizes) to isolate pollers from each other for no stated threat.
+Why S3 (everything per service) is also not the shape: it breaks `hard_max` ($83, or about $67 at the smallest sizes) to isolate pollers from each other for no stated threat.
 
-### 4.4 What the recommendation does to the ceilings
+### 4.4 What the ruling does to the ceilings (step by step, ruled 2026-10-22)
 
-Edge design decisions 1 and 2 priced one edge droplet and set the `edge` phase at $35. Under S1 the real number is $59 at full build. Nothing forces full build at once, and the cost gate already makes each step its own reviewed raise:
+Edge design decisions 1 and 2 priced one edge droplet and set the `edge` phase at $35. Under the ruled shape S1 the real number is $59 at full build. Nothing forces full build at once, and the cost gate already makes each step its own reviewed raise:
 
+- Ruled: approval is step by step, one service stack per reviewed change, and the ceiling is not raised to the full-build figure in advance.
 - At the unchanged $35 ceiling there is room for exactly one edge droplet ($29 for stage 3 plus $6). The first service stack can be switched on; the rest wait.
 - Each further service stack raises the DigitalOcean approved total by its droplet in its own reviewed change (`scripts/cost_raise.py` prints the diff; the process is in `docs/cost.md`). A raise past the `edge` phase's ceiling also needs a ceiling edit. So the order of enablement is also the order of spending, and the maintainer approves one $6 step at a time.
 - `hard_max` stays $60 and the full S1 build sits just under it. Raising `hard_max` is its own reviewed edit and I do not propose it.
@@ -257,8 +260,11 @@ Each line is one pull request or one maintainer action. Nothing in the first nin
 | 4 | Split `modules/edge-host` into base plus per-service payload; mocked tests only; no stack uses it yet | $0 | Mocked `tofu test` |
 | 5 | First service stack, `51-edge-iperf3`, disabled, empty manifest | $0 | Mocked tests; the gate |
 | 6 to 9 | `52-edge-mosquitto`, `53-edge-i2pd`, `54-edge-reticulum`, `55-edge-lxmd`, one pull request each, disabled | $0 | Same |
-| 10 | Approval of the first service: the `edge` phase and DigitalOcean total in `approved.json`, its `cost.json`, its Spacelift stanza and factory entry (a pair), its Doppler config and bootstrap token, the plan policy allowlist line. Then the switch. Order inside this step follows the draft's own approval order in `05-edge.md` section 3 | +$6 | Maintainer in Spacelift; read the plan |
-| 11 onward | One approval step per further service, each +$6 (or +$4), each its own reviewed change | +$6 each | Same, one at a time |
+| 10 | Approve edge service 1 (`51-edge-iperf3`) as its own reviewed change: the DigitalOcean approved total up by its droplet, the `edge` phase left as is while it fits, its `cost.json`, its Spacelift stanza and factory entry (a pair), its Doppler config and bootstrap token, the plan policy allowlist line. Then its switch. Order inside the step follows the draft's own approval order in `05-edge.md` section 3 | +$6 | Maintainer in Spacelift; read the plan |
+| 11 | Approve edge service 2 (`52-edge-mosquitto`), same checklist as step 10, its own pull request. The running total passes the $35 `edge` ceiling here, so this change also carries the matching ceiling edit and nothing beyond it | +$6 (or +$4) | Same |
+| 12 | Approve edge service 3 (`53-edge-i2pd`), same checklist, own change; ceiling edit by the step only | +$6 | Same |
+| 13 | Approve edge service 4 (`54-edge-reticulum`), same | +$6 | Same |
+| 14 | Approve edge service 5 (`55-edge-lxmd`), same; if question 3 merges it into Reticulum this step does not exist | +$6 | Same |
 | later | Stage 3: the workloads host stack, then each daemon stack through Portainer, then the bridge | per the stage 3 design | Stage 3's own approval |
 
 The sizes of steps 1 and 2 are the point: the two repository-wide changes (cost gate, plan policy) land first, once, with no stack in flight, so no service stack ever lands on a gate that cannot price it or a policy that cannot tell it from its neighbor.
@@ -282,13 +288,13 @@ What this note could not check: Spacelift's actual dependency and destroy-orderi
 
 ## 13. Questions for the maintainer
 
-1. **Does each service stack get its own droplet?** My recommendation is: edge services yes (five droplets, $30), workload daemons no (one shared host stack, daemons as stacks deployed through Portainer), honeypot in its own account. That is $59 a month at full build against a $60 hard limit. The alternative, everything shared, is $35 but turns the edge stacks into stacks in name only. Which?
-2. **Which ceiling?** If question 1 is yes, the `edge` phase of $35 only covers one edge droplet. Do you want to approve the services one $6 step at a time (each its own reviewed raise), or set a higher `edge` ceiling now?
+1. **RULED 2026-10-22.** Does each service stack get its own droplet? The maintainer: "Agree, edge per service, stage 3 shared." Edge services get a droplet each (five, $30); stage 3 daemons are separate stacks on one shared Docker host. Full build is $59 a month against the $60 hard limit. The honeypot-in-its-own-account and shared-network-stack parts of my recommendation were not part of the ruling and remain proposals.
+2. **RULED 2026-10-22.** Which ceiling? The maintainer: "A, step by step." The edge ceiling is not raised to about $59 up front; each edge service is approved as its own reviewed change that raises the approved total by that service's droplet (about $6). Where a step takes the running total past the `edge` phase ceiling, that same reviewed change carries the matching ceiling edit and no more. Reading to confirm: I take "keep the edge ceiling as is" to mean no up-front raise, not that a second droplet can be added without touching the $35 figure, since $35 covers only one.
 3. **Can lxmd run on its own machine?** Does it need a Reticulum instance on the same machine? If yes, is Reticulum plus lxmd allowed to be one stack (S2, $53) as a named exception to one stack per service?
 4. **Logging from each edge host.** The log path home (Twingate headless client, one service account) was designed for one host and decision 9 is still not ruled. With a host per service do you want a client per host, or no log shipping from the edge until the relay exists?
 5. **Numbering.** Flat decades (`50-edge-network`, `51` to `55` for services, a separate decade for the honeypot), or something else? Is renaming the draft's `50-edge` to `50-edge-network` acceptable, given you ruled the name `50-edge` on 2026-10-19?
 6. **Plan policy.** May the destroy guard allow a firewall delete when the same plan deletes its droplet in the same stack (a whole-service teardown), or do you want every teardown to go through the allowlist pull request ceremony?
-7. **Workloads.** Are the stage 3 daemons stacks deployed onto one shared Docker host through Portainer, as recommended, or does the ruling mean a droplet each there too (S3, over the hard limit)?
+7. **Workloads. Settled by the question 1 ruling.** The stage 3 daemons are separate stacks on one shared Docker host. What stays open under it is only the mechanism (Portainer, as the stage 3 design plans) and the stack count; confirm when stage 3 is approved.
 8. **Telemetry.** Leave `20-telemetry` as one stack (it creates only Twingate access objects, $0), or split logging and scrape for the lesson's sake?
 9. **Honeypot figure.** Still outside the core ceiling in its own account, as its design says, so the gate needs a separate total for it?
 
