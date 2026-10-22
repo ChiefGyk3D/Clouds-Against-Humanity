@@ -36,6 +36,7 @@
     - Foundations side page: [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
 15. [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
 16. [Spacelift](Spacelift.md)
+    - Foundations side page: [Spacelift from zero](Spacelift-From-Zero.md)
 17. [Doppler and secrets](Doppler-and-Secrets.md)
 18. [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md)
 19. [Threat model](Threat-Model.md)
