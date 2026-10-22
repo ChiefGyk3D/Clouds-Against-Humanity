@@ -656,6 +656,8 @@ Get-ChildItem out -ErrorAction SilentlyContinue
 tofu apply -no-color -auto-approve | Select-Object -Last 6
 ```
 
+(`path.root` is the root module's folder as OpenTofu reports it; for the root module it is a relative `.` on 1.12.6, which is why the test compares against `./out/first.txt`. If your version reports an absolute path, change the two expected strings to match what the failure message prints.)
+
 **Check.** `tofu test` prints each run as `pass` and ends `Success! 2 passed, 0 failed.` Then `ls out` reports that `out` does not exist: the mock provider replaced `local`, so the test made no file. The `apply` afterward is the real thing: `Apply complete! Resources: 2 added`, and it prints the two paths (`./out/first.txt` and `./out/second.txt`). The second test run passes **because** the bad input fails: change `expect_failures` to something else and it would fail with "Missing expected failure".
 
 Two lessons here. The module is the unit you test; and the test checks the plan's promises (names, counts, guard rails) without any real resource, which is why this repository's CI can test every stack with no cloud credentials.
@@ -755,7 +757,9 @@ for change in "label=b" "greeting=bye" "release=2"; do
 done
 tofu plan -destroy -input=false -no-color "${VARS[@]}" | grep '^Plan:'
 tofu destroy -auto-approve -input=false -no-color "${VARS[@]}" > destroy.log
-echo "change-run: state left after destroy=$(count_state)"
+left=$(count_state)
+echo "change-run: state left after destroy=$left"
+if [ "$left" -ne 0 ]; then echo "STATE NOT EMPTY in $dir" >&2; exit 1; fi
 SH
 chmod +x "$HOME/cah-tofu-lab/bunch.sh"
 "$HOME/cah-tofu-lab/bunch.sh" "$HOME/cah-tofu-lab/bunch" 10
@@ -862,7 +866,9 @@ foreach ($change in 'label=b', 'greeting=bye', 'release=2') {
 }
 Tofu plan -destroy -input=false -no-color @vars | Select-String '^Plan:' | ForEach-Object { $_.Line }
 Tofu destroy -auto-approve -input=false -no-color @vars | Out-File destroy.log
-Write-Host "change-run: state left after destroy=$(Count-State)"
+$left = Count-State
+Write-Host "change-run: state left after destroy=$left"
+if ($left -ne 0) { throw "STATE NOT EMPTY in $dir" }
 '@ | Set-Content -Path "$HOME\cah-tofu-lab\bunch.ps1" -Encoding utf8NoBOM
 
 & "$HOME\cah-tofu-lab\bunch.ps1" -Lab "$HOME\cah-tofu-lab\bunch" -Cycles 10
