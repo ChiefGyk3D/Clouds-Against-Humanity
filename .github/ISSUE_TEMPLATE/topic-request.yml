@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: Apache-2.0
+name: A topic request
+description: Something you wish the project taught
+title: "[topic] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Before you submit: do not paste secrets or anything that identifies you.** That means no tokens, API keys or passwords, no account or tenant names, no real IP addresses or hostnames, no amateur radio callsign or grid square, and nothing from a real vendor console that shows who you are. Replace each with a placeholder such as `REDACTED` or `203.0.113.10`. A security problem does not go in a public issue; see the security policy.
+
+        New to this? [How to give feedback or open an issue](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Give-Feedback-and-Open-an-Issue) walks through it. Reading and doing the exercises is free, and so is telling us what is wrong.
+  - type: textarea
+    id: topic
+    attributes:
+      label: What would you like a lesson on?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why does it matter to you?
+      description: Where are you in your learning, and what got in the way?
