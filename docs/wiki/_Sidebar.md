@@ -15,6 +15,7 @@
 4. [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
     - Side page: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md)
     - Side page: [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md)
+    - Side page: [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md)
     - Foundations side page: [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md)
 5. [Infrastructure as code](What-Is-Infrastructure-as-Code.md)
     - Foundations side page: [Data formats and config files: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md)
