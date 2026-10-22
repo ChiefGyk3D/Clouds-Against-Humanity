@@ -6,7 +6,7 @@ Side page to the start-from-zero pages. Read it at core step 11 ([Why ZTNA and n
 
 > **Status: written from public sources read on 2026-10-22; the Bash exercises were run once on Linux on that date; the PowerShell lines were not run.** Every real case below names the page it came from and the date I read it, in the claims register at the end. Anything I could not read is marked **est.** (estimate) and is a guess to check; the one source I could not open is named in the register. Trust what your terminal prints over what this page says: public lists such as the CISA catalog change every few days, so your counts will differ from mine. Cost: $0. There is no hands-on path that uses your own cloud account, hardware or provider bill; the reading and the exercises are free and always will be. This page never asks you to run an exploit, build malware or touch a computer you do not own. The project's real spending lives on the [cost page](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md).
 
-> **Prerequisites.** Core step 11 helps, because that is where the CVE number below first shows up, but it is not required. You can open a terminal ([Git from zero](Git-From-Zero.md#what-a-terminal-is) shows how) and have `python3` and `curl` (Bash) or PowerShell 7 for the exercises. For the detection side of every threat here, the planned foundations lesson on logs, alerts and detection is not written yet; until it is, read [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) and [Build your own mini SOC](Build-Your-Own-Mini-SOC.md). About 90 minutes for the reading and the four exercises (est.).
+> **Prerequisites.** Core step 11 helps, because that is where the CVE number below first shows up, but it is not required. You can open a terminal ([Git from zero](Git-From-Zero.md#what-a-terminal-is) shows how) and have `python3` and `curl` (Bash) or PowerShell 7 for the exercises. For the detection side of every threat here, read [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) first; [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) and [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) go further. About 90 minutes for the reading and the four exercises (est.).
 
 ## What you will be able to do
 
@@ -183,8 +183,8 @@ LAB="$(mktemp -d)" && cd "$LAB"   # a fresh scratch folder, remembered in $LAB
 PowerShell (**not run**):
 
 ```powershell
-$d = Join-Path ([IO.Path]::GetTempPath()) "f11lab"
-New-Item -ItemType Directory -Path $d | Out-Null
+$d = Join-Path ([IO.Path]::GetTempPath()) ("f11lab-" + [guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory -Path $d -ErrorAction Stop | Out-Null
 Set-Location $d
 ```
 
@@ -386,7 +386,7 @@ The same loop as the [labs](Labs-Break-It-on-Purpose.md), at concept level only.
 
 - **Build.** A one-page asset list for your home or lab: each device, its maker and product, the version, and whether it is reachable from the internet (the `inventory.csv` from Exercise 3 is that page). You cannot defend what you cannot list.
 - **Break.** Add a device with old firmware to the list: a made-up router on a version years behind. You have not touched a real device; you have written down a row that, if it were real, would be the weakest one.
-- **Detect.** Look the product up in a public list (Exercise 3), read the record (Exercise 1) and decide whether it touches you (Exercise 4). For a real network, detection also means logs and alerts that show someone *using* a flaw: see the planned logs-and-detection lesson, and today [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) and [Build your own mini SOC](Build-Your-Own-Mini-SOC.md).
+- **Detect.** Look the product up in a public list (Exercise 3), read the record (Exercise 1) and decide whether it touches you (Exercise 4). For a real network, detection also means logs and alerts that show someone *using* a flaw: see [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md), then [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) and [Build your own mini SOC](Build-Your-Own-Mini-SOC.md).
 - **Evade.** In words only: an attacker prefers the unpatched, internet-facing device because the work was already done. A known flaw has a public write-up and often public tools, so one method works against many owners at once, and it is far cheaper than finding a new flaw (the cases above show campaigns against many organizations that shared one product). They also prefer quiet: stolen valid credentials and ordinary admin tools, as in the lateral movement case, give a defender little that looks "bad" to catch. This page gives no working steps and none are needed to understand the economics.
 - **Defend.** A patch plan with owners and dates (who patches what, how fast for something on a known-exploited list, and what you do if there is no fix: turn the feature off, remove the device, or limit who can reach it); an exposure review (what is reachable from the internet, and whether it needs to be: this project's answer is [zero public inbound ports behind a zero trust gateway](Why-ZTNA-Not-a-VPN.md)); segmentation so one fallen machine does not reach the rest; a restore you have tested from a copy an attacker could not alter (see [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md#high-availability-disaster-recovery-and-backups)); and sign-in that resists phishing.
 
