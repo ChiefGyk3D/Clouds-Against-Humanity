@@ -313,11 +313,11 @@ scp -P 49152 -r lure admin@SENSOR:/tmp/lure
 scp -P 49152 -r lure admin@SENSOR:/tmp/lure
 ```
 
-On the server, as `cowrie` (still in `~/my-honeypot` with the environment active):
+On the server, as `cowrie` (still in `~/my-honeypot` with the environment active; the `cowrie` user has no `sudo`, so these commands use only its own files and the copy in `/tmp` that `scp` left readable):
 
 ```bash
-sudo install -d -o cowrie -g cowrie /home/cowrie/lure
-sudo install -o cowrie -g cowrie -m 644 /tmp/lure/deploy-notes-OLD.txt /home/cowrie/lure/
+mkdir -p /home/cowrie/lure
+cp /tmp/lure/deploy-notes-OLD.txt /home/cowrie/lure/
 python -c "from cowrie.core.resources import read_data_bytes; open('var/lib/cowrie/fs.pickle', 'wb').write(read_data_bytes('fs.pickle'))"
 printf '\n[shell]\nfilesystem = var/lib/cowrie/fs.pickle\n' >> etc/cowrie.cfg
 SIZE=$(wc -c < /home/cowrie/lure/deploy-notes-OLD.txt)
@@ -394,7 +394,7 @@ curl -m 5 -sS https://example.com -o /dev/null; echo "exit=$?"
 
 **Check.** `curl` fails: the error says a timeout or that it could not resolve the name, and `exit=` is not `0` (typically `6` or `28`; the number is curl's, est.). If you get `0`, **stop**: something still allows traffic out. Fix it before you go on.
 
-**Undo.** `sudo nft flush ruleset` opens the host layer (the cloud layer is the firewalls).
+**Undo.** `sudo nft flush ruleset` opens the host layer (the cloud layer is the firewalls). If you flush it to debug, **reload it before exercise 6** with `sudo nft -f /etc/nftables.conf`, then check with `sudo nft list ruleset | grep -c 'policy drop'` (it should print `3`: input, forward and output).
 
 ## Exercise 6: open the lure ports and run the window
 
@@ -432,7 +432,7 @@ ssh -o PubkeyAuthentication=no -o PreferredAuthentications=password -p 22 root@S
 
 Any short invented password will log in (see exercise 4). Do not use a password you use anywhere. Type `exit`. Your own visit is in the log too; lesson 9 shows how to leave it out of the count.
 
-**While it runs, do three things each day, and nothing else:** read the abuse inbox; look at the billing page against your arithmetic; log in on the management port and run `cowrie status`. Do not "improve" the box while it is exposed: a change is a rebuild. And do not look back at any address that appears in the log: no scan, no login attempt, no report by script.
+**While it runs, do three things each day, and nothing else:** read the abuse inbox; look at the billing page against your arithmetic; log in on the management port and run `sudo -iu cowrie bash -c 'cd my-honeypot && source cowrie-env/bin/activate && cowrie status'` (the `cowrie` command lives in the `cowrie` user's environment, not on `admin`'s path). Do not "improve" the box while it is exposed: a change is a rebuild. And do not look back at any address that appears in the log: no scan, no login attempt, no report by script.
 
 *Screenshot to take yourself: the billing usage page after day one. Blur everything that identifies the account.*
 

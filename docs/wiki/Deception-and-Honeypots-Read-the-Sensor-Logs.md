@@ -60,8 +60,9 @@ out = []
 
 def ev(sec, eventid, ip, session, **extra):
     stamp = (T0 + timedelta(seconds=sec)).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-    out.append(json.dumps({"eventid": eventid, "src_ip": ip, "session": session, "sensor": "lab",
-                           "timestamp": stamp, "protocol": "ssh", "dst_port": 2222, **extra}))
+    out.append(json.dumps({"eventid": eventid, "message": eventid, "src_ip": ip, "session": session,
+                           "sensor": "lab", "timestamp": stamp, "protocol": "ssh",
+                           "dst_ip": "192.0.2.10", "dst_port": 2222, **extra}))
 
 # Visit A: a bot. Five wrong guesses, an accepted login, a scripted batch of commands.
 A, a = "203.0.113.7", "a1a1a1a1"
