@@ -1175,6 +1175,28 @@ def module_problems(root):
     return problems, connectors
 
 
+EDGE_SWITCH_DEF_RE = re.compile(r"(?m)^\s*on\s*=\s*var\.(?P<var>[A-Za-z_][A-Za-z0-9_]*)\s*\?\s*1\s*:\s*0\s*$")
+
+
+def edge_switch_verified(root, stack):
+    """The stack defines `on = var.<x> ? 1 : 0` and an output precondition refuses
+    <x> being true unless the manifest (local.cost.resources) prices the edge."""
+    texts = []
+    for path in sorted(Path(root, stack).glob("*.tf")):
+        try:
+            texts.append(strip_comments(path.read_text(encoding="utf-8")))
+        except (OSError, UnicodeDecodeError, HclError):
+            return False
+    text = "\n".join(texts)
+    match = EDGE_SWITCH_DEF_RE.search(text)
+    if not match:
+        return False
+    var = match.group("var")
+    return bool(
+        re.search(r"precondition\s*\{[^{}]*?!var\." + re.escape(var) + r"\s*\|\|[^{}]*?local\.cost\.resources", text, re.S)
+    )
+
+
 def edge_module_problems(root):
     """Hold modules/edge-host to the connector's rules (it may hold a droplet and
     a reserved IP, both priced from a stack's cost.json).
@@ -1183,7 +1205,7 @@ def edge_module_problems(root):
     plain `local.<name>.size`; and the manifest's droplet entries and
     reserved_ip entries each number either 0 (switched off, priced nothing) or
     the number of edge-host module calls."""
-    problems, calls = [], {}
+    problems, calls, switched = [], {}, {}
     manifests = dict(stack_manifests(root))
     for rel, block in file_blocks(root):
         if block.kind != "module" or block.problem:
@@ -1194,6 +1216,10 @@ def edge_module_problems(root):
         name, stack = block.labels[0], str(Path(rel).parent.as_posix())
         calls[stack] = calls.get(stack, 0) + 1
         attrs = block.attrs()
+        counts = [v.strip() for k, v in attrs if k == "count"]
+        switched[stack] = switched.get(stack, True) and len(counts) == 1 and bool(
+            EDGE_COUNT_RE.fullmatch(counts[0])
+        )
         for key, value in attrs:
             if key == "for_each" or (key == "count" and not EDGE_COUNT_RE.fullmatch(value.strip())):
                 problems.append(
@@ -1210,12 +1236,14 @@ def edge_module_problems(root):
         if stack not in manifests:
             continue
         entries = load_json(manifests[stack])["resources"]
+        off_ok = switched[stack] and edge_switch_verified(root, stack)
         for kind in ("droplet", "reserved_ip"):
             have = sum(1 for r in entries if r.get("kind") == kind)
-            if have not in (0, calls[stack]):
+            if have != calls[stack] and not (have == 0 and off_ok):
                 problems.append(
                     f"{stack}: {have} {kind} manifest entr(ies) but {calls[stack]} edge-host module call(s); "
-                    "they must match (or the manifest prices nothing while the edge is off)"
+                    "they must match (0 is accepted only when every call is count = local.on and the "
+                    "stack defines that switch and ties it to the manifest)"
                 )
     return problems, calls
 
@@ -1414,8 +1442,11 @@ def structure_problems(root):
             machines = machine_count(bases[stack])
             if stack in edge_calls:
                 # The edge-host droplets are reconciled by edge_module_problems.
-                machines -= sum(
-                    1 for r in load_json(bases[stack])["resources"] if r.get("kind") == "droplet"
+                # Only as many as there are edge-host calls: any other droplet
+                # is still counted and must match a connector module block.
+                machines -= min(
+                    edge_calls[stack],
+                    sum(1 for r in load_json(bases[stack])["resources"] if r.get("kind") == "droplet"),
                 )
         have = connectors.get(stack, 0)
         if have != machines:
