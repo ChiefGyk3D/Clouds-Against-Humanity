@@ -1,6 +1,6 @@
 # Deception and honeypots: start here
 
-The hub for a small track of lessons on **deception**: planting things that nobody legitimate should touch, and watching them. A foundations side page to [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md); read that page first. This hub covers **track 1**, which needs no honeypot and no server. Tracks 2 and 3 are separate later lessons, and the [last section](#tracks-2-and-3-what-they-will-need) says what they will need. Next: [What deception is](Deception-and-Honeypots-What-Deception-Is.md), lessons 1 and 2.
+The hub for a small track of lessons on **deception**: planting things that nobody legitimate should touch, and watching them. A foundations side page to [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md); read that page first. This hub covers **track 1**, which needs no honeypot and no server. Track 3, the path for your own hardware, is two more pages: [Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md) and [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md). Track 2 is a separate later lesson, and the [last section](#tracks-2-and-3-what-they-will-need) says what it will need. Next: [What deception is](Deception-and-Honeypots-What-Deception-Is.md), lessons 1 and 2.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
@@ -41,7 +41,7 @@ Read them in this order. Lesson 6 comes before the hands-on lessons on purpose: 
 
 ## Tracks 2 and 3: what they will need
 
-These are **separate later lessons**. They are not written here, and nothing on this page should be read as a recipe for them. The [education plan](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-22-honeypot-education-plan.md) lays out both, with lesson titles, times and the gates described below.
+Track 2 is a **separate later lesson**, not written yet. Track 3 now has two pages ([Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md) and [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md)), written from reading and not run on a real T-Pot; the table below still describes what each track needs, and nothing on this page should be read as a recipe for track 2. The [education plan](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-22-honeypot-education-plan.md) lays out both, with lesson titles, times and the gates described below.
 
 | Aspect | Track 2: a cloud sensor | Track 3: an on-premises honeynet |
 |---|---|---|
