@@ -52,6 +52,13 @@ denied(changes) := reasons if {
 	reasons := spacelift.deny with input as plan(changes)
 }
 
+# The same plan, as Spacelift sends it for one stack.
+on_stack(id, changes) := object.union(plan(changes), {"spacelift": {"stack": {"id": id, "autodeploy": false}}})
+
+denied_on(id, changes) := reasons if {
+	reasons := spacelift.deny with input as on_stack(id, changes)
+}
+
 # Clean plans.
 
 test_connector_firewall_with_zero_inbound_passes if {
@@ -136,10 +143,11 @@ test_firewall_replacement_is_checked_too if {
 	count(denied_destroy_allowed([replace])) == 1
 }
 
-# The inbound checks in isolation: the firewall's destroy is allowlisted, so
-# only the inbound rules can deny. The destroy guard has its own tests below.
+# The inbound checks in isolation: the firewall's destroy is allowlisted for
+# the stack, so only the inbound rules can deny. The destroy guard has its own
+# tests below.
 denied_destroy_allowed(changes) := reasons if {
-	reasons := spacelift.deny with input as plan(changes) with data.spacelift.destroy_allowlist as {fw}
+	reasons := spacelift.deny with input as on_stack("svc-a", changes) with data.spacelift.destroy_allowlist as {"svc-a": [fw]}
 }
 
 # Empty and null fields do not crash and do not deny.
@@ -173,23 +181,185 @@ test_plan_without_resource_changes_does_not_crash if {
 	count(reasons) == 0
 }
 
-# The escape hatch: exact addresses in the policy file, nothing a plan sets.
+# The escape hatch: entries in the policy file keyed by stack id, then address
+# or group, each saying what it allows. Nothing a plan sets.
 
-test_allowlisted_address_passes if {
-	bad := with_source({"source_tags": [], "source_addresses": ["198.51.100.0/24"]})
-	reasons := spacelift.deny with input as plan([firewall_with([bad])]) with data.spacelift.inbound_allowlist as {fw}
-	count(reasons) == 0
+bad_rule := with_source({"source_tags": [], "source_addresses": ["198.51.100.0/24"]})
+
+entry(overrides) := object.union(
+	{
+		"direction": "inbound",
+		"protocol": "tcp",
+		"ports": ["8080"],
+		"sources": ["198.51.100.0/24"],
+	},
+	overrides,
+)
+
+allow_for(stack, key, entries) := {stack: {key: entries}}
+
+reasons_with(id, changes, allowlist) := reasons if {
+	reasons := spacelift.deny with input as on_stack(id, changes) with data.spacelift.inbound_allowlist as allowlist
 }
 
-test_same_rule_at_another_address_still_fails if {
-	bad := with_source({"source_tags": [], "source_addresses": ["198.51.100.0/24"]})
-	other := create("module.other.digitalocean_firewall.this", "digitalocean_firewall", {"inbound_rule": [bad]})
-	reasons := spacelift.deny with input as plan([other]) with data.spacelift.inbound_allowlist as {fw}
+test_allowlisted_entry_passes_in_its_stack if {
+	allow := allow_for("svc-a", fw, [entry({})])
+	count(reasons_with("svc-a", [firewall_with([bad_rule])], allow)) == 0
+}
+
+# The defect from the stack-per-service note: one module reused in several
+# stacks gives the same address in each. An entry covers only its own stack.
+test_same_address_in_another_stack_still_fails if {
+	allow := allow_for("svc-a", fw, [entry({})])
+	count(reasons_with("svc-b", [firewall_with([bad_rule])], allow)) == 1
+}
+
+test_same_stack_other_address_still_fails if {
+	allow := allow_for("svc-a", fw, [entry({})])
+	other := create("module.other.digitalocean_firewall.this", "digitalocean_firewall", {"inbound_rule": [bad_rule]})
+	count(reasons_with("svc-a", [other], allow)) == 1
+}
+
+test_plan_with_no_stack_id_gets_no_exception if {
+	allow := allow_for("svc-a", fw, [entry({})])
+	count(reasons_with("svc-a", [firewall_with([bad_rule])], allow)) == 0
+	reasons := spacelift.deny with input as plan([firewall_with([bad_rule])]) with data.spacelift.inbound_allowlist as allow
+	count(reasons) == 1
+	empty := spacelift.deny with input as on_stack("", [firewall_with([bad_rule])]) with data.spacelift.inbound_allowlist as {"": {fw: [entry({})]}}
+	count(empty) == 1
+	nulled := spacelift.deny with input as object.union(plan([firewall_with([bad_rule])]), {"spacelift": {"stack": null}}) with data.spacelift.inbound_allowlist as allow
+	count(nulled) == 1
+}
+
+# Each field narrows the entry. A mismatch, or a field left out, denies.
+
+test_entry_for_another_port_denies if {
+	allow := allow_for("svc-a", fw, [entry({"ports": ["9090"]})])
+	count(reasons_with("svc-a", [firewall_with([bad_rule])], allow)) == 1
+}
+
+test_entry_for_another_protocol_denies if {
+	allow := allow_for("svc-a", fw, [entry({"protocol": "udp"})])
+	count(reasons_with("svc-a", [firewall_with([bad_rule])], allow)) == 1
+}
+
+test_entry_for_another_source_denies if {
+	allow := allow_for("svc-a", fw, [entry({"sources": ["203.0.113.7/32"]})])
+	count(reasons_with("svc-a", [firewall_with([bad_rule])], allow)) == 1
+}
+
+test_every_source_of_the_rule_must_be_listed if {
+	two := with_source({"source_tags": [], "source_addresses": ["198.51.100.0/24", "203.0.113.7/32"]})
+	allow := allow_for("svc-a", fw, [entry({})])
+	count(reasons_with("svc-a", [firewall_with([two])], allow)) == 1
+	both := allow_for("svc-a", fw, [entry({"sources": ["198.51.100.0/24", "203.0.113.7/32"]})])
+	count(reasons_with("svc-a", [firewall_with([two])], both)) == 0
+}
+
+test_entry_with_another_direction_denies if {
+	allow := allow_for("svc-a", fw, [entry({"direction": "outbound"})])
+	count(reasons_with("svc-a", [firewall_with([bad_rule])], allow)) == 1
+}
+
+test_entry_missing_a_field_denies if {
+	every field in ["direction", "protocol", "ports", "sources"] {
+		partial := object.remove(entry({}), [field])
+		count(reasons_with("svc-a", [firewall_with([bad_rule])], allow_for("svc-a", fw, [partial]))) == 1
+	}
+}
+
+test_entry_with_empty_lists_denies if {
+	allow := allow_for("svc-a", fw, [entry({"ports": [], "sources": []})])
+	count(reasons_with("svc-a", [firewall_with([bad_rule])], allow)) == 1
+}
+
+test_rule_without_a_port_is_never_covered if {
+	no_port := object.remove(bad_rule, ["port_range"])
+	allow := allow_for("svc-a", fw, [entry({"ports": ["", "?"]})])
+	count(reasons_with("svc-a", [firewall_with([no_port])], allow)) == 1
+}
+
+# World-open needs both ranges named; one does not cover the other.
+test_world_open_entry_must_list_both_ranges if {
+	world := with_source({"source_tags": [], "source_addresses": ["0.0.0.0/0", "::/0"]})
+	v4 := allow_for("svc-a", fw, [entry({"sources": ["0.0.0.0/0"]})])
+	count(reasons_with("svc-a", [firewall_with([world])], v4)) == 1
+	both := allow_for("svc-a", fw, [entry({"sources": ["0.0.0.0/0", "::/0"]})])
+	count(reasons_with("svc-a", [firewall_with([world])], both)) == 0
+}
+
+# A different port on the same firewall is not covered by the first entry.
+test_rules_are_judged_one_by_one if {
+	second := object.union(bad_rule, {"port_range": "9090"})
+	allow := allow_for("svc-a", fw, [entry({})])
+	reasons := reasons_with("svc-a", [firewall_with([bad_rule, second])], allow)
+	count(reasons) == 1
+	some reason in reasons
+	contains(reason, "tcp/9090")
+	both := allow_for("svc-a", fw, [entry({}), entry({"ports": ["9090"]})])
+	count(reasons_with("svc-a", [firewall_with([bad_rule, second])], both)) == 0
+}
+
+test_other_kinds_of_source_are_never_covered_by_an_address_entry if {
+	with_droplet := object.union(bad_rule, {"source_droplet_ids": [12345]})
+	allow := allow_for("svc-a", fw, [entry({})])
+	count(reasons_with("svc-a", [firewall_with([with_droplet])], allow)) == 1
+}
+
+# A named group covers its addresses, in its stack only.
+test_group_covers_its_members_in_its_stack_only if {
+	fw2 := "module.edge.digitalocean_firewall.this"
+	changes := [firewall_with([bad_rule]), create(fw2, "digitalocean_firewall", {"inbound_rule": [bad_rule]})]
+	allow := allow_for("svc-a", "edge-pair", [entry({})])
+	groups := {"svc-a": {"edge-pair": [fw, fw2]}}
+	in_a := spacelift.deny with input as on_stack("svc-a", changes) with data.spacelift.inbound_allowlist as allow with data.spacelift.address_groups as groups
+	count(in_a) == 0
+	in_b := spacelift.deny with input as on_stack("svc-b", changes) with data.spacelift.inbound_allowlist as allow with data.spacelift.address_groups as groups
+	count(in_b) == 2
+
+	# A third address that is not in the group stays denied.
+	third := create("module.third.digitalocean_firewall.this", "digitalocean_firewall", {"inbound_rule": [bad_rule]})
+	only_third := spacelift.deny with input as on_stack("svc-a", [third]) with data.spacelift.inbound_allowlist as allow with data.spacelift.address_groups as groups
+	count(only_third) == 1
+}
+
+test_groups_of_another_stack_do_not_apply if {
+	allow := allow_for("svc-a", "edge-pair", [entry({})])
+	groups := {"svc-b": {"edge-pair": [fw]}}
+	reasons := spacelift.deny with input as on_stack("svc-a", [firewall_with([bad_rule])]) with data.spacelift.inbound_allowlist as allow with data.spacelift.address_groups as groups
 	count(reasons) == 1
 }
 
-test_allowlist_is_empty_by_default if {
+test_allowlists_are_empty_by_default if {
 	count(spacelift.inbound_allowlist) == 0
+	count(spacelift.address_groups) == 0
+	count(spacelift.destroy_allowlist) == 0
+	count(spacelift.whole_service_teardown_stacks) == 0
+}
+
+# Today's stacks: with the shipped (empty) allowlists their verdicts are the
+# ones they had before the keyed allowlists, whatever the stack id says.
+
+current_stacks := ["cah-00-foundation", "cah-10-access", "cah-20-telemetry", "cah-aws-00-foundation", "cah-aws-10-access"]
+
+test_current_stacks_keep_their_verdicts if {
+	every id in current_stacks {
+		count(denied_on(id, [connector_firewall, firewall_with([tag_rule])])) == 0
+		count(denied_on(id, [firewall_with([bad_rule])])) == 1
+		count(denied_on(id, [firewall_with([with_source({"source_tags": [], "source_addresses": ["0.0.0.0/0"]})])])) == 1
+		count(denied_on(id, [sg_cidr])) == 1
+		count(denied_on(id, [delete_of(fw, "digitalocean_firewall", {"name": "core"})])) == 1
+		count(denied_on(id, [delete_of(vpc_addr, "digitalocean_vpc", {"name": "core"})])) == 1
+		count(denied_on(id, [delete_of("module.c.digitalocean_droplet.this", "digitalocean_droplet", {"tags": ["cah-access"]})])) == 0
+		count(denied_on(id, [droplet(true)])) == 1
+	}
+}
+
+# Even a whole-service teardown stays denied on today's stacks: none opted in.
+test_current_stacks_have_no_whole_service_teardown if {
+	every id in current_stacks {
+		count(denied_on(id, teardown_changes)) == 1
+	}
 }
 
 # A plan cannot allowlist itself: a field or label in the input changes nothing.
@@ -281,8 +451,44 @@ test_aws_security_group_with_no_rules_passes if {
 }
 
 test_aws_allowlisted_address_passes if {
-	reasons := spacelift.deny with input as plan([sg_cidr]) with data.spacelift.inbound_allowlist as {ingress_rule_address}
-	count(reasons) == 0
+	allow := allow_for("aws-a", ingress_rule_address, [aws_entry({})])
+	count(reasons_with("aws-a", [sg_cidr], allow)) == 0
+}
+
+aws_entry(overrides) := object.union(
+	{
+		"direction": "inbound",
+		"protocol": "tcp",
+		"ports": ["443"],
+		"sources": ["0.0.0.0/0"],
+	},
+	overrides,
+)
+
+test_aws_entry_is_keyed_by_stack if {
+	allow := allow_for("aws-a", ingress_rule_address, [aws_entry({})])
+	count(reasons_with("aws-b", [sg_cidr], allow)) == 1
+}
+
+test_aws_entry_is_scoped_by_port_protocol_and_cidr if {
+	every overrides in [{"ports": ["80"]}, {"protocol": "udp"}, {"sources": ["10.0.0.0/8"]}, {"direction": "outbound"}] {
+		allow := allow_for("aws-a", ingress_rule_address, [aws_entry(overrides)])
+		count(reasons_with("aws-a", [sg_cidr], allow)) == 1
+	}
+}
+
+test_aws_port_range_is_matched_as_text if {
+	ranged := create("a.aws_security_group_rule.r", "aws_security_group_rule", {"type": "ingress", "protocol": "tcp", "from_port": 8000, "to_port": 8100, "cidr_blocks": ["10.0.0.0/8"], "ipv6_cidr_blocks": null})
+	ok := allow_for("aws-a", "a.aws_security_group_rule.r", [aws_entry({"ports": ["8000-8100"], "sources": ["10.0.0.0/8"]})])
+	count(reasons_with("aws-a", [ranged], ok)) == 0
+	narrow := allow_for("aws-a", "a.aws_security_group_rule.r", [aws_entry({"ports": ["8000"], "sources": ["10.0.0.0/8"]})])
+	count(reasons_with("aws-a", [ranged], narrow)) == 1
+}
+
+test_aws_rule_with_unknown_ports_is_never_covered if {
+	no_ports := create("a.aws_security_group_rule.r", "aws_security_group_rule", {"type": "ingress", "cidr_blocks": ["10.0.0.0/8"]})
+	allow := allow_for("aws-a", "a.aws_security_group_rule.r", [aws_entry({"ports": ["", "null"], "sources": ["10.0.0.0/8"]})])
+	count(reasons_with("aws-a", [no_ports], allow)) == 1
 }
 
 # IPv6 stays closed.
@@ -436,10 +642,99 @@ test_allowlisted_address_is_allowed_while_another_is_denied if {
 		delete_of(vpc_addr, "digitalocean_vpc", {"name": "a"}),
 		delete_of(other, "digitalocean_vpc", {"name": "b"}),
 	]
-	reasons := spacelift.deny with input as plan(changes) with data.spacelift.destroy_allowlist as {vpc_addr}
+	reasons := spacelift.deny with input as on_stack("svc-a", changes) with data.spacelift.destroy_allowlist as {"svc-a": [vpc_addr]}
 	count(reasons) == 1
 	some msg in reasons
 	contains(msg, other)
+}
+
+test_destroy_entry_is_keyed_by_stack if {
+	changes := [delete_of(vpc_addr, "digitalocean_vpc", {"name": "a"})]
+	allow := {"svc-a": [vpc_addr]}
+	in_b := spacelift.deny with input as on_stack("svc-b", changes) with data.spacelift.destroy_allowlist as allow
+	count(in_b) == 1
+	no_stack := spacelift.deny with input as plan(changes) with data.spacelift.destroy_allowlist as allow
+	count(no_stack) == 1
+}
+
+test_destroy_group_covers_members_in_its_stack_only if {
+	other := "module.other.digitalocean_vpc.this"
+	changes := [delete_of(vpc_addr, "digitalocean_vpc", {"name": "a"}), delete_of(other, "digitalocean_vpc", {"name": "b"})]
+	allow := {"svc-a": ["both-vpcs"]}
+	groups := {"svc-a": {"both-vpcs": [vpc_addr, other]}}
+	in_a := spacelift.deny with input as on_stack("svc-a", changes) with data.spacelift.destroy_allowlist as allow with data.spacelift.address_groups as groups
+	count(in_a) == 0
+	in_b := spacelift.deny with input as on_stack("svc-b", changes) with data.spacelift.destroy_allowlist as allow with data.spacelift.address_groups as groups
+	count(in_b) == 2
+}
+
+# Whole-service teardown: a firewall delete next to its droplet's delete, in a
+# stack that opted in.
+
+svc_fw := "module.service_host.digitalocean_firewall.this"
+
+svc_droplet := "module.service_host.digitalocean_droplet.this"
+
+teardown_changes := [
+	delete_of(svc_fw, "digitalocean_firewall", {"name": "svc", "tags": ["svc-a"], "droplet_ids": []}),
+	delete_of(svc_droplet, "digitalocean_droplet", {"name": "svc", "id": "111", "tags": ["svc-a"]}),
+]
+
+teardown_reasons(id, changes) := reasons if {
+	reasons := spacelift.deny with input as on_stack(id, changes) with data.spacelift.whole_service_teardown_stacks as {"svc-a"}
+}
+
+test_whole_service_teardown_is_allowed_in_an_opted_in_stack if {
+	count(teardown_reasons("svc-a", teardown_changes)) == 0
+}
+
+test_whole_service_teardown_is_denied_in_another_stack if {
+	count(teardown_reasons("svc-b", teardown_changes)) == 1
+	reasons := spacelift.deny with input as plan(teardown_changes) with data.spacelift.whole_service_teardown_stacks as {"svc-a"}
+	count(reasons) == 1
+}
+
+test_lone_firewall_delete_is_denied_even_when_opted_in if {
+	count(teardown_reasons("svc-a", [teardown_changes[0]])) == 1
+}
+
+test_firewall_replace_with_droplet_delete_is_denied if {
+	replace := removal(svc_fw, "digitalocean_firewall", ["delete", "create"], {"tags": ["svc-a"]})
+	count(teardown_reasons("svc-a", [replace, teardown_changes[1]])) == 1
+}
+
+test_firewall_delete_with_droplet_replace_is_denied if {
+	replace := removal(svc_droplet, "digitalocean_droplet", ["delete", "create"], {"id": "111", "tags": ["svc-a"]})
+	count(teardown_reasons("svc-a", [teardown_changes[0], replace])) == 1
+}
+
+test_firewall_delete_with_an_unrelated_droplet_is_denied if {
+	other := delete_of(svc_droplet, "digitalocean_droplet", {"id": "222", "tags": ["svc-b"]})
+	count(teardown_reasons("svc-a", [teardown_changes[0], other])) == 1
+}
+
+test_a_shared_protected_tag_does_not_link_them if {
+	fw_rc := delete_of(svc_fw, "digitalocean_firewall", {"tags": ["protected"]})
+	droplet_rc := delete_of(svc_droplet, "digitalocean_droplet", {"id": "1", "tags": ["protected"]})
+
+	# The tagged droplet is itself protected, so both are denied.
+	reasons := teardown_reasons("svc-a", [fw_rc, droplet_rc])
+	count(reasons) == 2
+	some reason in reasons
+	contains(reason, svc_fw)
+}
+
+test_firewall_naming_the_droplet_id_is_linked if {
+	fw_rc := delete_of(svc_fw, "digitalocean_firewall", {"droplet_ids": [111]})
+	droplet_rc := delete_of(svc_droplet, "digitalocean_droplet", {"id": "111"})
+	count(teardown_reasons("svc-a", [fw_rc, droplet_rc])) == 0
+}
+
+# The whole-service rule is for the firewall only: other protected types, and
+# anything tagged protected, still need the destroy allowlist.
+test_whole_service_teardown_does_not_cover_other_protected_types if {
+	vpc := delete_of(vpc_addr, "digitalocean_vpc", {"name": "a", "tags": ["svc-a"]})
+	count(teardown_reasons("svc-a", array.concat(teardown_changes, [vpc]))) == 1
 }
 
 # Autodeploy guard. The plan input carries input.spacelift.stack.autodeploy.

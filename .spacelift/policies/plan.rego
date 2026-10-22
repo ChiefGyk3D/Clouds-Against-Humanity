@@ -28,11 +28,20 @@
 # Pure deletes and no-ops are ignored: removing a rule never opens anything.
 #
 # The escape hatch is this file. A deliberate inbound rule is allowed only by
-# adding the exact resource address of the firewall or rule to
-# inbound_allowlist below, in a pull request that gets reviewed. Nothing a plan
-# can set itself (a stack label, an environment variable, a field in the plan)
-# is read, so a branch cannot grant its own exception. The IPv6 checks have no
-# escape hatch.
+# an entry in inbound_allowlist below, in a pull request that gets reviewed.
+# Nothing a plan can set itself (a stack label, an environment variable, a
+# field in the plan) is read, so a branch cannot grant its own exception. The
+# IPv6 checks have no escape hatch.
+#
+# Allowlists are keyed by stack id, then by resource address (or the name of a
+# group of addresses), because an address such as
+# `module.service_host.digitalocean_firewall.this` is stack-relative: one
+# module reused in five stacks gives five resources with the same address, and
+# an exception for one must not cover the others (issue #246). The stack id is
+# input.spacelift.stack.id. An entry is added only when that service's stack is
+# approved, and an entry says exactly what it allows: its direction, protocol,
+# ports and sources (see inbound_allowlist). A missing or unknown stack id, key,
+# or field allows nothing: the policy fails closed.
 #
 # Two guards turn the "locked and manual" convention into a rule (issue #92):
 #
@@ -40,7 +49,9 @@
 #     digitalocean_project, digitalocean_firewall, twingate_remote_network,
 #     aws_vpc, aws_security_group, or anything tagged `protected`, is denied.
 #     Droplets are deliberately not protected: a connector replace is a normal,
-#     reviewed event. Escape hatch: destroy_allowlist, same rule as above.
+#     reviewed event. Escape hatches: destroy_allowlist (stack id, then address or group),
+#     and, for a stack listed in whole_service_teardown_stacks, a firewall that
+#     the same plan deletes together with the droplet it protects.
 #   - Autodeploy guard: a stack with autodeploy on is denied. Spacelift's plan
 #     input does expose it (input.spacelift.stack.autodeploy; the contract
 #     lists it as required), so this is a real check, not a note. It has no
@@ -56,46 +67,89 @@ package spacelift
 
 import rego.v1
 
-# Exact resource addresses (as shown in the plan, for example
-# `module.fw.digitalocean_firewall.this`) whose inbound rules are allowed even
-# though they are not tag-scoped. Empty by default. Every entry needs a
-# threat-model note (docs/wiki/Threat-Model.md) and a pull request review that
-# names the port, the source and the reason. Remove the entry when the rule
-# goes away.
-inbound_allowlist := set()
+# Inbound exceptions, keyed by stack id, then by a resource address (as shown
+# in the plan, for example `module.fw.digitalocean_firewall.this`) or the name
+# of a group in address_groups. Each key holds a list of entries; an entry
+# allows one kind of inbound rule and nothing else:
+#
+#   {
+#     "direction": "inbound",         # required; only "inbound" is read
+#     "protocol": "tcp",              # required, exact match
+#     "ports": ["5201"],              # required, exact port_range strings
+#     "sources": ["203.0.113.7/32"],  # required, every non-tag source address
+#                                     # the rule has must be in this list
+#   }
+#
+# World-open is just the sources list naming "0.0.0.0/0" and "::/0": listing
+# only one of them does not allow the other. A rule that adds a droplet,
+# load balancer or Kubernetes source is never covered. Rules are judged one by
+# one, so a firewall with two rules needs an entry for each rule that is not
+# tag-scoped. The same entries judge AWS ingress rules (sources are the CIDR
+# ranges; ports are "443" or "8000-8100").
+#
+# Empty by default. Every entry needs a threat-model note
+# (docs/wiki/Threat-Model.md) and a pull request review that names the stack,
+# the port, the source and the reason, and lands together with that service's
+# stack approval. Remove the entry when the rule goes away.
+inbound_allowlist := {}
 
-# Exact resource addresses whose deletion (or replacement) is allowed even
-# though the resource is protected. Empty by default. Same rule as above: a
-# pull request that names the address and the reason, reviewed, then the new
-# body pasted into Spacelift. Remove the entry once the change has applied.
-destroy_allowlist := set()
+# Named groups of resource addresses, per stack id, so one entry can cover
+# several resources in that stack: {"stack-id": {"group-name": ["address"]}}.
+# A group of one stack means nothing in another.
+address_groups := {}
+
+# Resource addresses (or group names) whose deletion or replacement is allowed
+# even though the resource is protected, per stack id:
+# {"stack-id": ["module.vpc.digitalocean_vpc.this"]}. Empty by default. Same
+# rule as above: a pull request that names the stack, the address and the
+# reason, reviewed, then the new body pasted into Spacelift. Remove the entry
+# once the change has applied.
+destroy_allowlist := {}
+
+# Stack ids where a whole-service teardown is routine: a plan there that
+# deletes (not replaces) a digitalocean_firewall and the droplet it protects,
+# in the same plan, is allowed without a destroy_allowlist entry. Protection
+# is shown by a shared target tag or by the firewall naming the droplet id. A
+# lone firewall delete, a replacement, an unrelated droplet and every other
+# protected type are still denied. A stack id is added here when that service's
+# stack is approved. Empty by default.
+whole_service_teardown_stacks := set()
+
+# The stack this plan belongs to, or "" when the plan does not say. Nothing is
+# allowlisted for "".
+stack_id := id if {
+	stack := input.spacelift.stack
+	is_object(stack)
+	id := stack.id
+	is_string(id)
+} else := ""
 
 deny contains msg if {
 	some rc in changed_resources("digitalocean_firewall")
-	not allowlisted(rc)
 	some rule in rc.change.after.inbound_rule
 	world_open(rule)
+	not rule_allowed(rc, rule)
 	msg := sprintf(
-		"%s: inbound rule %s opens the port to the whole internet (%s). Inbound on core tags must come from a tag only.",
+		"%s: inbound rule %s opens the port to the whole internet (%s). Inbound on core tags must come from a tag only, unless inbound_allowlist has an entry for this stack and address.",
 		[rc.address, rule_label(rule), source_summary(rule)],
 	)
 }
 
 deny contains msg if {
 	some rc in changed_resources("digitalocean_firewall")
-	not allowlisted(rc)
 	some rule in rc.change.after.inbound_rule
 	not world_open(rule)
 	not tag_scoped(rule)
+	not rule_allowed(rc, rule)
 	msg := sprintf(
-		"%s: inbound rule %s is not tag-scoped (%s). Inbound on core tags must come from a tag only.",
+		"%s: inbound rule %s is not tag-scoped (%s). Inbound on core tags must come from a tag only, unless inbound_allowlist has an entry for this stack and address.",
 		[rc.address, rule_label(rule), source_summary(rule)],
 	)
 }
 
 deny contains msg if {
 	some entry in aws_ingress_cidrs
-	not entry.address in inbound_allowlist
+	not aws_allowed(entry)
 	msg := sprintf(
 		"%s: %s admits inbound traffic from %s. AWS ingress here may only reference a security group, never a CIDR range.",
 		[entry.address, entry.type, entry.cidr],
@@ -105,9 +159,9 @@ deny contains msg if {
 deny contains msg if {
 	some rc in removed_resources
 	protected(rc)
-	not rc.address in destroy_allowlist
+	not destroy_allowed(rc)
 	msg := sprintf(
-		"%s: this plan deletes (or replaces) a protected %s. A human must add the address to destroy_allowlist in .spacelift/policies/plan.rego, in a pull request, before it can be applied.",
+		"%s: this plan deletes (or replaces) a protected %s. A human must add the address to destroy_allowlist under this stack's id in .spacelift/policies/plan.rego, in a pull request, before it can be applied.",
 		[rc.address, rc.type],
 	)
 }
@@ -145,7 +199,89 @@ changed_resources(type) := {rc |
 	action in {"create", "update"}
 }
 
-allowlisted(rc) if rc.address in inbound_allowlist
+# Does a key in this stack's allowlist (an address, or a group name) cover
+# this resource address?
+key_covers(key, address) if key == address
+
+key_covers(key, address) if address in object.get(object.get(address_groups, stack_id, {}), key, [])
+
+# The entries that apply to one resource in this stack. Another stack's
+# entries, and a plan with no stack id, give none.
+entries_for(address) := [entry |
+	stack_id != ""
+	some key, entries in object.get(inbound_allowlist, stack_id, {})
+	key_covers(key, address)
+	some entry in entries
+]
+
+# One entry admits one rule when every part matches exactly. Anything missing
+# from the entry, or from the rule, admits nothing.
+admits(entry, protocol, port, addresses) if {
+	object.get(entry, "direction", "") == "inbound"
+	protocol != ""
+	protocol == object.get(entry, "protocol", "")
+	port != ""
+	port in object.get(entry, "ports", [])
+	count(addresses) > 0
+	every address in addresses {
+		address in object.get(entry, "sources", [])
+	}
+}
+
+# A DigitalOcean inbound rule is allowed only when it carries source
+# addresses, no other non-tag source kind, and an entry admits it.
+rule_allowed(rc, rule) if {
+	filled(rule, "source_addresses")
+	not has_other_source(rule)
+	some entry in entries_for(rc.address)
+	admits(entry, object.get(rule, "protocol", ""), object.get(rule, "port_range", ""), values(rule, "source_addresses"))
+}
+
+has_other_source(rule) if {
+	some key in (non_tag_sources - {"source_addresses"})
+	filled(rule, key)
+}
+
+aws_allowed(finding) if {
+	some entry in entries_for(finding.address)
+	admits(entry, finding.protocol, finding.port, [finding.cidr])
+}
+
+destroy_allowed(rc) if {
+	stack_id != ""
+	some key in object.get(destroy_allowlist, stack_id, [])
+	key_covers(key, rc.address)
+}
+
+destroy_allowed(rc) if whole_service_teardown(rc)
+
+# A firewall delete that comes with the delete of the droplet it protects, in
+# a stack that opted in. Both must be pure deletes: a replacement is a change
+# to a live service, not a teardown.
+whole_service_teardown(rc) if {
+	stack_id in whole_service_teardown_stacks
+	rc.type == "digitalocean_firewall"
+	actions_of(rc) == ["delete"]
+	some droplet in removed_resources
+	droplet.type == "digitalocean_droplet"
+	actions_of(droplet) == ["delete"]
+	protects(rc, droplet)
+}
+
+protects(firewall, droplet) if {
+	some tag in values(before_of(firewall), "tags")
+	tag != "protected"
+	tag in values(before_of(droplet), "tags")
+}
+
+protects(firewall, droplet) if {
+	id := object.get(before_of(droplet), "id", null)
+	id != null
+	some listed in values(before_of(firewall), "droplet_ids")
+	sprintf("%v", [listed]) == sprintf("%v", [id])
+}
+
+actions_of(rc) := object.get(object.get(rc, "change", {}), "actions", [])
 
 # Resources this plan deletes, including the delete half of a replacement
 # (either order). Creates, updates, reads and no-ops are not removals.
@@ -245,26 +381,63 @@ source_summary(rule) := concat(", ", sort(parts)) if {
 
 # AWS ingress from an address. A reference to a security group (or to the group
 # itself) carries no CIDR and is the one admitted kind.
-aws_ingress_cidrs contains {"address": rc.address, "type": "aws_vpc_security_group_ingress_rule", "cidr": cidr} if {
+aws_ingress_cidrs contains {
+	"address": rc.address,
+	"type": "aws_vpc_security_group_ingress_rule",
+	"cidr": cidr,
+	"protocol": aws_protocol(rc.change.after, "ip_protocol"),
+	"port": aws_port(rc.change.after),
+} if {
 	some rc in changed_resources("aws_vpc_security_group_ingress_rule")
 	some key in {"cidr_ipv4", "cidr_ipv6"}
 	filled_string(rc.change.after, key)
 	cidr := rc.change.after[key]
 }
 
-aws_ingress_cidrs contains {"address": rc.address, "type": "aws_security_group_rule", "cidr": cidr} if {
+aws_ingress_cidrs contains {
+	"address": rc.address,
+	"type": "aws_security_group_rule",
+	"cidr": cidr,
+	"protocol": aws_protocol(rc.change.after, "protocol"),
+	"port": aws_port(rc.change.after),
+} if {
 	some rc in changed_resources("aws_security_group_rule")
 	rc.change.after.type == "ingress"
 	some key in {"cidr_blocks", "ipv6_cidr_blocks"}
 	some cidr in values(rc.change.after, key)
 }
 
-aws_ingress_cidrs contains {"address": rc.address, "type": "aws_security_group", "cidr": cidr} if {
+aws_ingress_cidrs contains {
+	"address": rc.address,
+	"type": "aws_security_group",
+	"cidr": cidr,
+	"protocol": aws_protocol(block, "protocol"),
+	"port": aws_port(block),
+} if {
 	some rc in changed_resources("aws_security_group")
 	some block in values(rc.change.after, "ingress")
 	some key in {"cidr_blocks", "ipv6_cidr_blocks"}
 	some cidr in values(block, key)
 }
+
+aws_protocol(obj, key) := p if {
+	p := object.get(obj, key, "")
+	is_string(p)
+} else := ""
+
+# "443" for from_port = to_port = 443, "8000-8100" for a range, "" when the
+# ports are not both numbers (so no entry can match).
+aws_port(obj) := port if {
+	from := object.get(obj, "from_port", null)
+	to := object.get(obj, "to_port", null)
+	is_number(from)
+	is_number(to)
+	port := port_text(from, to)
+} else := ""
+
+port_text(from, to) := sprintf("%d", [from]) if from == to
+
+port_text(from, to) := sprintf("%d-%d", [from, to]) if from != to
 
 # AWS settings that give a network, subnet or machine an IPv6 range or address.
 ipv6_findings contains {"address": rc.address, "reason": "assign_generated_ipv6_cidr_block = true"} if {
