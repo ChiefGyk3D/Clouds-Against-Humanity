@@ -159,6 +159,7 @@ The [Threat model](Threat-Model.md) is core step 19.
 - [Glossary](Glossary.md)
 - [Troubleshooting index](Troubleshooting-Index.md)
 - [Settings reference](Settings-Reference.md)
+- [Project status](Project-Status.md)
 - [Terraform reference](Terraform-Reference.md)
 - [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md)
 - [How this project is planned](How-This-Project-Is-Planned.md)
