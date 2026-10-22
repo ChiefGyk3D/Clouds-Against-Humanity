@@ -101,7 +101,7 @@ The range in rule 2 also covers `64296`, which the README does not list; blockin
 |---|---|---|---|---|---|---|
 | 1 | Block | any | `HONEYNET` net | any | any | Default deny made explicit, so you can log it. A hit here means the decoy tried to call out: that is the alarm |
 
-**Update window.** While you install or update, add a rule *above* the block: Pass, TCP, `HONEYNET` net to `UPDATE_MIRRORS`, ports `80`, `443`. Remove it, or give it an expiry if your firewall supports a schedule (est.), when the work is done. The T-Pot README also lists outgoing `80` and `443` as the install and update path; the decoy will need name resolution too, which you allow to one resolver of your choosing if you find it fails (est.).
+**Update window.** While you install or update, add a rule *above* the block: Pass, TCP, `HONEYNET` net to `UPDATE_MIRRORS`, ports `80`, `443`. `UPDATE_MIRRORS` is a one-address stand-in so the checker has something to test. A real T-Pot install reaches several kinds of endpoint (GitHub for the clone, your operating system's package mirrors, and container registries for the images), so your real alias must list all of them, found by watching the firewall log during a trial install in a VM. If you would rather not allow that many, download what you need on another machine and copy it over, or point the decoy at a proxy you control (est.; the README says T-Pot wants a non-proxied connection, so a proxy may break it). Remove it, or give it an expiry if your firewall supports a schedule (est.), when the work is done. The T-Pot README also lists outgoing `80` and `443` as the install and update path; the decoy will need name resolution too, which you allow to one resolver of your choosing if you find it fails (est.).
 
 **On the `WAN` interface** (the internet side): no port forward, no DMZ host, and nothing that sends traffic to `HONEYNET`. The default deny rule already blocks unsolicited inbound traffic.
 
@@ -145,8 +145,11 @@ MAX_BYTES, MAX_LINES = 65536, 500
 
 
 def lines_of(path):
-    with open(path, "rb") as fh:
-        raw = fh.read(MAX_BYTES + 1)
+    try:
+        with open(path, "rb") as fh:
+            raw = fh.read(MAX_BYTES + 1)
+    except OSError as err:
+        sys.exit(f"{path}: cannot read ({err.strerror})")
     if len(raw) > MAX_BYTES:
         sys.exit(f"{path}: larger than {MAX_BYTES} bytes")
     text = raw.decode("utf-8", errors="replace").splitlines()
@@ -218,6 +221,8 @@ def main(rules_path, expect_path):
         ok = got == want
         bad += not ok
         print(f"{'ok  ' if ok else 'FAIL'} {want:5} {src} -> {dst} {proto}/{port}  [{why_matched}]  {why}")
+    if total == 0:
+        sys.exit(f"{expect_path}: no expectations found; an empty list proves nothing")
     print(f"{total - bad} of {total} expectations hold")
     return 1 if bad else 0
 

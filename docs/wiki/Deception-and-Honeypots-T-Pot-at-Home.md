@@ -119,18 +119,20 @@ All of this is est.: nothing here was run. Do it in a VM first if you can.
 
 **2. Install a minimal operating system** from your chosen release's list, with only SSH as an extra, no desktop.
 
-**3. Open the update window** (the temporary rule from the design page) so the host can reach the web on 80 and 443. The installer will use it.
+**3. Open the update window** (the temporary rule from the design page) so the host can reach the web on 80 and 443. The installer will use it, and it needs more than one destination (GitHub, package mirrors, container registries): see the note on the design page about building the real alias from a trial run.
 
 **4. Read the installer before you run it.** The README's quick start pipes a downloaded script into a shell. Clone and read first instead:
 
 ```bash
 # est.: not run. Run on the Linux host that will be the decoy, as an ordinary user (not root).
-git clone https://github.com/telekom-security/tpotce ~/tpotce
-less ~/tpotce/install.sh                 # read it; q to quit
-~/tpotce/install.sh                      # or add -b <tag> as the default-branch README describes (see below)
+# Pin the release you read the README of (24.04.1 is the latest tag read on 2026-10-22; use yours).
+git clone --branch 24.04.1 https://github.com/telekom-security/tpotce ~/tpotce
+git -C ~/tpotce describe --tags --exact-match      # must print 24.04.1; if not, stop
+less ~/tpotce/install.sh                           # read it; q to quit
+~/tpotce/install.sh                                # the default-branch README says the installer follows the checked-out clone
 ```
 
-The default-branch README says `-b` takes a "branch, tag or commit" for the installer, and that the installer "prints what it settled on before it changes anything": read that line and stop if it is not what you meant. A plain clone without `-b` follows the default branch, which is ahead of the latest tag. Whether the 24.04.1 tag's own installer accepts `-b` was not read.
+A clone of a tag is in a "detached HEAD" state (it points at a fixed release, not a moving branch), which is what you want for a pin. The default-branch README says the installer prints what it settled on before it changes anything: read that line and stop if it is not the release you meant. Whether the 24.04.1 tag's own installer behaves the same was not read. If you choose the newer default branch instead, clone without `--branch`, read the default-branch README, and write down the commit (`git -C ~/tpotce rev-parse HEAD`) so you can say what you ran.
 
 **5. Know what the installer changes.** The README lists, among others: it **changes the SSH port to 64295**, **disables the DNS stub listener**, sets SELinux (a Linux access-control system) to monitor mode, **sets the firewall target for the public zone to ACCEPT**, installs Docker, and **adds your user to the `docker` group**. Two consequences. First, the host's own firewall is opened up, so **your network firewall is the wall**; this is why the design page tests it first. Second, membership of the `docker` group is effectively root on that machine (est.; widely documented), which is fine on a disposable decoy and a reason never to reuse that account anywhere else.
 
@@ -169,7 +171,8 @@ You will cause a few events yourself, from **your own machine on your own LAN**,
 ```bash
 # est.: not run
 curl -sS -m 5 -o /dev/null -w '%{http_code}\n' http://203.0.113.5:80/
-ssh -o PubkeyAuthentication=no -o PreferredAuthentications=password -o StrictHostKeyChecking=no -p 22 labuser@203.0.113.5
+ssh -o PubkeyAuthentication=no -o PreferredAuthentications=password -p 22 labuser@203.0.113.5
+# it will ask you to trust a new host key: this is your own decoy, so check the address and answer yes.
 # type an invented password when asked, e.g. the word "invented-1"; a refusal is expected
 ```
 

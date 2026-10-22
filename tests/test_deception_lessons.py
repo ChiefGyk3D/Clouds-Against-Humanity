@@ -513,3 +513,21 @@ def test_the_t_pot_page_keeps_its_unverified_banner_and_names_no_version_it_did_
     versions = set(re.findall(r"\b\d{2}\.\d{2}\.\d\b", text))        # the project's year.month.patch tags
     assert versions == {"24.04.1"}, versions
     assert "DMZ host" in DESIGN.read_text(encoding="utf-8") and "port forward" in DESIGN.read_text(encoding="utf-8").lower()
+
+
+def test_an_empty_expectation_list_cannot_pass_vacuously(policy_lab):
+    (policy_lab / "none.txt").write_text("# only a comment\n")
+    proc = run_py(policy_lab, "policy_check.py", "rules.txt", "none.txt")
+    assert proc.returncode != 0 and "no expectations" in proc.stderr
+    assert "0 of 0" not in proc.stdout
+
+
+def test_the_t_pot_install_command_pins_the_release_and_ssh_checks_host_keys():
+    text = TPOT.read_text(encoding="utf-8")
+    assert "git clone --branch 24.04.1" in text and "--exact-match" in text
+    assert "StrictHostKeyChecking=no" not in text
+
+
+def test_a_missing_expectation_file_is_a_clean_error(policy_lab):
+    proc = run_py(policy_lab, "policy_check.py", "rules.txt", "absent.txt")
+    assert proc.returncode != 0 and "cannot read" in proc.stderr and "Traceback" not in proc.stderr
