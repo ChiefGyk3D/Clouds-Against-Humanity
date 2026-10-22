@@ -37,6 +37,14 @@ OK_NETS = [
 ]
 
 
+EXPLICIT_EXCEPTIONS = {
+    "0.0.0.0/0",
+    "173.245.48.0/20",
+    "103.21.244.0/22",
+    "103.22.200.0/22",
+}
+
+
 def page() -> str:
     return PAGE.read_text()
 
@@ -142,8 +150,9 @@ def test_page_prints_only_documentation_style_addresses():
             except ValueError:
                 continue
             if not any(addr in net for net in OK_NETS):
-                # Cloudflare's own first ranges appear only in the pasted Exercise 7 output.
-                if "set_real_ip_from" in line:
+                # Exact exceptions only: "trust everything" shown as the mistake, and the three
+                # Cloudflare ranges pasted in the Exercise 7 output.
+                if match.group(0) in EXPLICIT_EXCEPTIONS:
                     continue
                 bad.append((number, match.group(1)))
     assert not bad, f"addresses outside the documentation ranges: {bad}"
