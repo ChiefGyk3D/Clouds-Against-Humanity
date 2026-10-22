@@ -71,4 +71,6 @@ Whatever level you pick, read [How money works in the cloud](How-Money-Works-in-
 
 It is not a tutorial that ends with a working website. The environment is deliberately tiny: two machines, zero open ports, one way in. The value is in how it was built and why, and in the fact that every decision, including the wrong ones, is written down. If you want to learn cloud by building a thing, pick a thing and build it; then come back here to learn how to build it so that it does not get owned, does not surprise you on the bill, and can be rebuilt from scratch in an afternoon.
 
+If something here is wrong, confusing or does not work on your computer, please tell me: [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md) shows how, and it costs nothing.
+
 Next: [What is the cloud](What-Is-the-Cloud.md), the first primer. Every path through the wiki is laid out on the [Reading order](Reading-Order.md) page.

@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0
+# Issue chooser settings. Blank issues are off so every report goes through a
+# form that carries the "do not paste secrets" reminder; the question and
+# topic-request forms cover everything that is not a mistake.
+blank_issues_enabled: false
+contact_links:
+  - name: How to give feedback or open an issue (wiki)
+    url: https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Give-Feedback-and-Open-an-Issue
+    about: Step-by-step help for a first issue, what to include and what never to paste.
+  - name: Report a security problem privately
+    url: https://github.com/ChiefGyk3D/Clouds-Against-Humanity/security/policy
+    about: Do not open a public issue for a vulnerability or an exposed secret. Read the policy first.
