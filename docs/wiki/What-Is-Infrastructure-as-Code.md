@@ -102,7 +102,7 @@ A shell script says "do these steps". IaC says "this is the end result"; the too
 
 ## Drift
 
-**Drift** is when reality stops matching the files because someone changed something by hand in the console. The next plan shows the difference and offers to put it back. That is a feature: a port someone opened "just for a minute" shows up as a change the next time anyone runs a plan. The rule in this project is that nothing is changed by hand, so a plan that shows unexpected changes is itself an alarm.
+**Drift** is when reality stops matching the files because someone changed something by hand in the console. The next plan shows the difference and offers to put it back. That is a feature: a port someone opened "just for a minute" shows up as a change the next time anyone runs a plan. The rule in this project is that nothing is changed by hand, so a plan that shows unexpected changes is itself an alarm. To make drift happen on purpose and handle it, see [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md).
 
 ## Modules and stacks
 

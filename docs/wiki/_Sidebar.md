@@ -35,6 +35,7 @@
 14. [Droplet hardening](Droplet-Hardening.md)
     - Foundations side page: [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
 15. [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
+    - Foundations side page: [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md)
 16. [Spacelift](Spacelift.md)
 17. [Doppler and secrets](Doppler-and-Secrets.md)
 18. [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md)
