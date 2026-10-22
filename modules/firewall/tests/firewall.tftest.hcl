@@ -488,3 +488,242 @@ run "outbound_other_tag_equal_to_own_tag_is_rejected" {
   }
   expect_failures = [digitalocean_firewall.this]
 }
+
+# ---- extra_outbound_rules destinations (issue #245) ----
+
+run "a_rule_with_ipv4_destinations_emits_only_those_addresses" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["203.0.113.0/24", "198.51.100.7"] }]
+  }
+  assert {
+    condition     = output.outbound_rule_count == 6
+    error_message = "The rule must be appended to the five defaults."
+  }
+  assert {
+    condition = jsonencode(output.outbound_rules) == jsonencode(sort([
+      "tcp/443/0.0.0.0/0,::/0",
+      "tcp/80/0.0.0.0/0,::/0",
+      "tcp/53/0.0.0.0/0,::/0",
+      "udp/53/0.0.0.0/0,::/0",
+      "udp/123/0.0.0.0/0,::/0",
+      "tcp/5201/198.51.100.7,203.0.113.0/24",
+    ]))
+    error_message = "A rule with destinations must emit exactly those addresses and the defaults must be unchanged."
+  }
+  assert {
+    condition = alltrue([
+      for r in digitalocean_firewall.this.outbound_rule :
+      r.port_range != "5201" || (!contains(r.destination_addresses, "0.0.0.0/0") && !contains(r.destination_addresses, "::/0"))
+    ])
+    error_message = "A rule with destinations must not carry either any-address entry."
+  }
+}
+
+run "an_ipv4_only_destination_list_opens_no_ipv6" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["203.0.113.0/24"] }]
+  }
+  assert {
+    condition = alltrue([
+      for r in digitalocean_firewall.this.outbound_rule :
+      r.port_range != "5201" || alltrue([for a in r.destination_addresses : !strcontains(a, ":")])
+    ])
+    error_message = "A destination list of IPv4 entries must not add an IPv6 destination."
+  }
+}
+
+run "an_ipv6_destination_list_emits_only_ipv6" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "udp", port_range = "5201", destinations = ["2001:db8::/32", "2001:db8:1::7"] }]
+  }
+  assert {
+    condition     = contains(output.outbound_rules, "udp/5201/2001:db8:1::7,2001:db8::/32")
+    error_message = "An IPv6 list must emit exactly its own entries."
+  }
+  assert {
+    condition = alltrue([
+      for r in digitalocean_firewall.this.outbound_rule :
+      r.port_range != "5201" || alltrue([for a in r.destination_addresses : strcontains(a, ":")])
+    ])
+    error_message = "A destination list of IPv6 entries must not add an IPv4 destination."
+  }
+}
+
+run "a_mixed_list_emits_both_families_as_given" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["203.0.113.7", "2001:db8::7"] }]
+  }
+  assert {
+    condition     = contains(output.outbound_rules, "tcp/5201/2001:db8::7,203.0.113.7")
+    error_message = "A mixed list must emit both entries and nothing more."
+  }
+}
+
+run "a_rule_without_destinations_is_still_any_address" {
+  command = plan
+  variables {
+    extra_outbound_rules = [
+      { protocol = "tcp", port_range = "30000-31000" },
+      { protocol = "udp", port_range = "1-65535", destinations = [] },
+    ]
+  }
+  assert {
+    condition = jsonencode(output.outbound_rules) == jsonencode(sort([
+      "tcp/443/0.0.0.0/0,::/0",
+      "tcp/80/0.0.0.0/0,::/0",
+      "tcp/53/0.0.0.0/0,::/0",
+      "udp/53/0.0.0.0/0,::/0",
+      "udp/123/0.0.0.0/0,::/0",
+      "tcp/30000-31000/0.0.0.0/0,::/0",
+      "udp/1-65535/0.0.0.0/0,::/0",
+    ]))
+    error_message = "A rule with no destinations (unset or empty) must keep 0.0.0.0/0 and ::/0."
+  }
+}
+
+run "destination_rules_mix_with_any_address_rules" {
+  command = plan
+  variables {
+    extra_outbound_rules = [
+      { protocol = "tcp", port_range = "30000-31000" },
+      { protocol = "tcp", port_range = "5201", destinations = ["203.0.113.7"] },
+    ]
+  }
+  assert {
+    condition     = contains(output.outbound_rules, "tcp/30000-31000/0.0.0.0/0,::/0") && contains(output.outbound_rules, "tcp/5201/203.0.113.7")
+    error_message = "A narrowed rule must not change the any-address rule next to it."
+  }
+}
+
+run "an_invalid_destination_is_refused" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["203.0.113.0/33"] }]
+  }
+  expect_failures = [var.extra_outbound_rules]
+}
+
+run "a_hostname_destination_is_refused" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["example.com"] }]
+  }
+  expect_failures = [var.extra_outbound_rules]
+}
+
+run "a_malformed_ipv4_destination_is_refused" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["999.1.1.1"] }]
+  }
+  expect_failures = [var.extra_outbound_rules]
+}
+
+run "a_malformed_ipv6_destination_is_refused" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["2001:db8::/129"] }]
+  }
+  expect_failures = [var.extra_outbound_rules]
+}
+
+run "a_duplicate_destination_is_refused" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["203.0.113.7", "203.0.113.7"] }]
+  }
+  expect_failures = [var.extra_outbound_rules]
+}
+
+run "a_world_open_ipv4_entry_without_opt_in_is_refused" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["203.0.113.7", "0.0.0.0/0"] }]
+  }
+  expect_failures = [var.extra_outbound_rules]
+}
+
+run "a_world_open_ipv6_entry_without_opt_in_is_refused" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["::/0"] }]
+  }
+  expect_failures = [var.extra_outbound_rules]
+}
+
+run "an_expanded_ipv6_world_entry_without_opt_in_is_refused" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["0:0:0:0:0:0:0:0/0"] }]
+  }
+  expect_failures = [var.extra_outbound_rules]
+}
+
+run "an_unspecified_address_without_opt_in_is_refused" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["0.0.0.0"] }]
+  }
+  expect_failures = [var.extra_outbound_rules]
+}
+
+run "a_world_open_entry_with_the_explicit_opt_in_is_allowed" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["0.0.0.0/0"], allow_world_destinations = true }]
+  }
+  assert {
+    condition     = contains(output.outbound_rules, "tcp/5201/0.0.0.0/0")
+    error_message = "With allow_world_destinations the listed world entry renders, and only that one (no IPv6 added)."
+  }
+}
+
+run "the_opt_in_flag_without_a_world_entry_is_refused" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["203.0.113.7"], allow_world_destinations = true }]
+  }
+  expect_failures = [var.extra_outbound_rules]
+}
+
+run "the_opt_in_flag_does_not_excuse_another_rule" {
+  command = plan
+  variables {
+    extra_outbound_rules = [
+      { protocol = "tcp", port_range = "5201", destinations = ["0.0.0.0/0"], allow_world_destinations = true },
+      { protocol = "tcp", port_range = "5202", destinations = ["0.0.0.0/0"] },
+    ]
+  }
+  expect_failures = [var.extra_outbound_rules]
+}
+
+run "an_expanded_unspecified_ipv6_address_without_opt_in_is_refused" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["0:0:0:0:0:0:0:0"] }]
+  }
+  expect_failures = [var.extra_outbound_rules]
+}
+
+run "a_compressed_zero_ipv6_address_without_opt_in_is_refused" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["0::0"] }]
+  }
+  expect_failures = [var.extra_outbound_rules]
+}
+
+run "a_real_ipv6_address_with_zero_groups_is_not_world" {
+  command = plan
+  variables {
+    extra_outbound_rules = [{ protocol = "tcp", port_range = "5201", destinations = ["2001:db8::10", "::1"] }]
+  }
+  assert {
+    condition     = contains(output.outbound_rules, "tcp/5201/2001:db8::10,::1")
+    error_message = "Only an all-zero address is world-open; others must pass."
+  }
+}

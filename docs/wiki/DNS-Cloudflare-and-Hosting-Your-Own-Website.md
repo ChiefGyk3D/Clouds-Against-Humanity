@@ -177,7 +177,7 @@ Cloudflare's page says other record types (MX, TXT) are always DNS-only, and rec
 - **Other records that point at the server.** A `mail` record, an `ssh` record, an `ftp` record, or a gray-cloud `dev` record on the same address gives it away. Cloudflare says the same: an origin address can be found "through historical DNS records or mail server configuration".
 - **The server's own behavior.** A certificate scan of the internet's address space can match your certificate to your address; a site that echoes its own address in a page or header gives it away.
 
-Once the address is known, an attacker connects straight to it and skips the proxy and its WAF. That is why the **origin must refuse everyone except the proxy**, the next section.
+Once the address is known, an attacker connects straight to it and skips the proxy and its WAF. That is why the **origin must refuse everyone except the proxy**, the next section. Once the origin does accept only the proxy, it sees only the proxy's address on every connection; [Behind a CDN: real client IPs, why an IP is a weak identifier, and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md) shows how to get the visitor's address back safely.
 
 ## TLS between the visitor, Cloudflare and your server
 

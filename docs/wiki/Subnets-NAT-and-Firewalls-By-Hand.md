@@ -92,7 +92,7 @@ NAT hides the inside addresses from the other end of a connection: the lab serve
 
 ## Firewalls
 
-A **firewall** is a list of rules that decides which packets pass. Three ideas matter more than any product.
+A **firewall** is a list of rules that decides which packets pass. (The tools that carry those rules out, `iptables`, `nftables`, UFW and `pf`, are compared in [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md).) Three ideas matter more than any product.
 
 **Default deny.** What happens to a packet that matches no rule? In a default-deny firewall it is dropped, so a forgotten rule breaks something you will notice instead of exposing something you will not. The opposite, default allow, makes the rule list a list of things you thought of blocking. DigitalOcean's cloud firewall is default deny in both directions ([claims register](#claims-register)), and the Linux `nft` rule sets below say it with `policy drop`.
 
