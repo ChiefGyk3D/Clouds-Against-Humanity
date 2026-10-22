@@ -200,11 +200,15 @@ def test_the_wrapper_keeps_the_container_small():
         assert "--network none" in body and "--cap-drop all" in body
         assert "docker.sock" not in body and "podman.sock" not in body and "--privileged" not in body
         assert "jasonish/suricata:8.0.7" in body and ":latest" not in body
+        assert "RUNTIME" in body and "IMAGE" in body
         assert "sudo" not in body
     assert not re.search(r"-v\s+\S*(\$HOME|~|/home|/:)", one_block("bash", "run.sh RULES_FILE").replace("$PWD", ""))
 
 
-@pytest.mark.skipif(not shutil.which("suricata"), reason="no suricata on this machine")
+@pytest.mark.skipif(
+    not (shutil.which("suricata") and Path("/etc/suricata/suricata.yaml").is_file()),
+    reason="no suricata with /etc/suricata/suricata.yaml on this machine",
+)
 def test_suricata_alerts_on_the_capture_as_the_page_says(lab):
     run_py(lab, "make_pcap.py")
     out = lab / "out"

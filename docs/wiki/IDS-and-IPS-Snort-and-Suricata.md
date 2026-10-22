@@ -228,7 +228,7 @@ Everything here runs on your computer, reads a capture file you build yourself, 
 
 ### Ground rules
 
-1. **A capture file, not a wire.** Suricata reads `lab.pcap`, a file. It does not sniff your home or work network, and neither should you "to see what is there". Other people's traffic is theirs, and the packets you did not make may hold passwords. Two exercises use traffic on your own loopback interface (`127.0.0.1`), which never leaves your computer.
+1. **A capture file, not a wire.** Suricata reads `lab.pcap`, a file. It does not sniff your home or work network, and neither should you "to see what is there". Other people's traffic is theirs, and the packets you did not make may hold passwords. One exercise (Exercise 7, optional) captures traffic on your own loopback interface (`127.0.0.1`), which never leaves your computer.
 2. **The container has no network.** Every run uses `--network none`: the container gets a loopback interface and nothing else (Exercise 1 proves it). The Docker or Podman socket is never mounted, and the only folder shared is the lab folder.
 3. **Documentation addresses.** The capture uses `192.0.2.0/24` and `198.51.100.0/24` ([RFC 5737](https://www.rfc-editor.org/rfc/rfc5737)), ranges reserved for examples, and `example.com`. No real host is involved.
 4. **A pcap is data.** A real capture holds everything that crossed the wire. Delete `.pcap` files you no longer need, and never post one.
@@ -236,7 +236,9 @@ Everything here runs on your computer, reads a capture file you build yourself, 
 
 ### Where the Suricata comes from, and how far to trust it
 
-You do not need to install Suricata on your machine. The exercises run the **8.0.7** release from the container image `docker.io/jasonish/suricata:8.0.7`. About that name, honestly: it is published by Jason Ish, who appears among the top contributors to the `OISF/suricata` repository on GitHub (the contributors list, read 2026-10-22). The Suricata documentation I read does not link to it, so I cannot call it the project's official image. Its README says tags follow Suricata versions and that the image is also on `quay.io` and `ghcr.io` ([README](https://github.com/jasonish/docker-suricata), read 2026-10-22). If that is not enough trust for you, the project's own routes are in its [install guide](https://docs.suricata.io/en/suricata-8.0.7/install.html): your distribution's package, the OISF packages for Ubuntu, Debian-family and RPM systems, or building the signed source from [suricata.io](https://suricata.io/download/). Do that in a disposable virtual machine and replace the `podman run` line in `run.sh` with a `suricata` command; every other file stays the same. Pinning a version tag and not `latest` is deliberate: the exercises were checked against 8.0.7 and the tag keeps a rerun comparable.
+You do not need to install Suricata on your machine. The exercises run the **8.0.7** release from the container image `docker.io/jasonish/suricata:8.0.7`. About that name, honestly: it is published by Jason Ish, who appears among the top contributors to the `OISF/suricata` repository on GitHub (the contributors list, read 2026-10-22). The Suricata documentation I read does not link to it, so I cannot call it the project's official image. Its README says tags follow Suricata versions and that the image is also on `quay.io` and `ghcr.io` ([README](https://github.com/jasonish/docker-suricata), read 2026-10-22). If that is not enough trust for you, the project's own routes are in its [install guide](https://docs.suricata.io/en/suricata-8.0.7/install.html): your distribution's package, the OISF packages for Ubuntu, Debian-family and RPM systems, or building the signed source from [suricata.io](https://suricata.io/download/). Do that in a disposable virtual machine and replace the `podman run` line in `run.sh` with a `suricata` command; every other file stays the same. A version tag is better than `latest` but it is still a mutable registry label: a later pull of `8.0.7` could in principle return different bytes. This lesson does not verify a signature (I did not find a published one). What it does instead: Exercise 1 has you record the image's digest after the pull, and `run.sh` takes an `IMAGE` variable so you can run by that digest (`docker.io/jasonish/suricata@sha256:...`) and know every later run uses the same bytes. The container has no network, no socket and only the lab folder mounted, which limits what a swapped image could reach; it is still third-party code, so do not mount anything else. For stronger assurance, use one of the project's own routes above.
+
+Runtime note: the wrappers use Podman by default; set `RUNTIME=docker` (Bash) or `$env:RUNTIME = 'docker'` (PowerShell) to use rootless Docker instead (**est.**, not run).
 
 Rootless Podman note: the Suricata security page says "Suricata will not work with rootless Podman" for live capture, because it needs privileges to open a network interface. Reading a file needs none of that, and the exercises ran this way. Rootless Docker should behave the same (**est.**, not run). A normal (rootful) Docker would write root-owned output files; use Podman or rootless Docker.
 
@@ -359,21 +361,23 @@ alert http any any -> any any (msg:"CAH LAB any request for a health check"; flo
 set -u
 rules=$1; out=$2; shift 2
 mkdir -p "$out"
-podman run --rm --network none --cap-drop all --cap-add dac_override --entrypoint suricata \
-  -v "$PWD:/work:Z" -w /work docker.io/jasonish/suricata:8.0.7 \
+"${RUNTIME:-podman}" run --rm --network none --cap-drop all --cap-add dac_override --entrypoint suricata \
+  -v "$PWD:/work:Z" -w /work "${IMAGE:-docker.io/jasonish/suricata:8.0.7}" \
   -c /etc/suricata/suricata.yaml -r "${PCAP:-lab.pcap}" -S "$rules" -l "$out" -k none \
   --set vars.address-groups.HOME_NET="[198.51.100.0/24,192.0.2.0/24]" "$@"
 ```
 
-Make it executable with `chmod +x run.sh`. PowerShell (**est.**), save as `run.ps1`; it needs Podman for Windows, whose path mapping for the `-v` flag may differ from the Linux one:
+Make it executable with `chmod +x run.sh`. PowerShell (**est.**), save as `run.ps1`; it needs Podman for Windows (or Docker, see the runtime note), whose path mapping for the `-v` flag may differ from the Linux one:
 
 ```powershell
 # run.ps1 RULES_FILE OUT_DIR [extra suricata args...] - offline run over lab.pcap (or $env:PCAP) in a container with NO network.
 param([string]$Rules, [string]$Out)
 $pcap = if ($env:PCAP) { $env:PCAP } else { 'lab.pcap' }
 New-Item -ItemType Directory -Force $Out | Out-Null
-& podman run --rm --network none --cap-drop all --cap-add dac_override --entrypoint suricata `
-  -v "${PWD}:/work:Z" -w /work docker.io/jasonish/suricata:8.0.7 `
+$runtime = if ($env:RUNTIME) { $env:RUNTIME } else { 'podman' }
+$image = if ($env:IMAGE) { $env:IMAGE } else { 'docker.io/jasonish/suricata:8.0.7' }
+& $runtime run --rm --network none --cap-drop all --cap-add dac_override --entrypoint suricata `
+  -v "${PWD}:/work:Z" -w /work $image `
   -c /etc/suricata/suricata.yaml -r $pcap -S $Rules -l $Out -k none `
   --set 'vars.address-groups.HOME_NET=[198.51.100.0/24,192.0.2.0/24]' @args
 exit $LASTEXITCODE
@@ -442,6 +446,7 @@ sys.exit(1 if missing else 0)
 ```bash
 which suricata snort tcpdump tshark podman docker
 podman pull docker.io/jasonish/suricata:8.0.7
+podman image inspect docker.io/jasonish/suricata:8.0.7 --format '{{.Digest}}'
 podman run --rm --network none --entrypoint suricata docker.io/jasonish/suricata:8.0.7 --build-info | head -1
 podman run --rm --network none --entrypoint sh docker.io/jasonish/suricata:8.0.7 -c 'cut -d: -f1 /proc/net/dev | tail -n +3; getent hosts example.com || echo "no name resolution"'
 ```
@@ -451,13 +456,15 @@ podman run --rm --network none --entrypoint sh docker.io/jasonish/suricata:8.0.7
 ```powershell
 Get-Command suricata, snort, tcpdump, tshark, podman, docker -ErrorAction SilentlyContinue | Select-Object Name, Source
 podman pull docker.io/jasonish/suricata:8.0.7
+podman image inspect docker.io/jasonish/suricata:8.0.7 --format '{{.Digest}}'
 podman run --rm --network none --entrypoint suricata docker.io/jasonish/suricata:8.0.7 --build-info | Select-Object -First 1
 podman run --rm --network none --entrypoint sh docker.io/jasonish/suricata:8.0.7 -c 'cut -d: -f1 /proc/net/dev | tail -n +3; getent hosts example.com || echo "no name resolution"'
 ```
 
-**Check.** On the machine where this was run, `suricata` and `snort` were not installed, so the answer to "which do I have" was `tcpdump`, `tshark`, `podman` and `docker` (on that machine `docker` was Podman's Docker-compatible command, not Docker). The last two commands printed:
+**Check.** On the machine where this was run, `suricata` and `snort` were not installed, so the answer to "which do I have" was `tcpdump`, `tshark`, `podman` and `docker` (on that machine `docker` was Podman's Docker-compatible command, not Docker). Write down the `sha256:...` digest the `image inspect` line prints and, if you want identical bytes on every rerun, `export IMAGE=docker.io/jasonish/suricata@<that digest>` (PowerShell: `$env:IMAGE = ...`) before the later exercises. If you use Docker, replace `podman` with `docker` in this exercise's commands. The last two commands printed:
 
 ```text
+sha256:(a 64-character hash; yours is whatever you pulled)
 This is Suricata version 8.0.7 RELEASE
     lo
 no name resolution
