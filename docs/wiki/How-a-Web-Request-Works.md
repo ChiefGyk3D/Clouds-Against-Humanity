@@ -44,6 +44,8 @@ Computers connect to addresses, not names. The **Domain Name System (DNS)** is t
 
 An answer is a **record**. The ones you will meet: `A` (a name to an IPv4 address), `AAAA` (to an IPv6 address), `CNAME` (this name is an alias for that name), `NS` (which servers are authoritative) and `MX` (where mail goes). Each record carries a **TTL** (time to live): the number of seconds a cache may keep it. Cache means the second lookup is faster and also that a changed record takes up to its TTL to reach everyone, which is why people lower a TTL before a move.
 
+For who owns a name, how delegation works, the other record types, email records and running your own zone, see [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md).
+
 DNS usually travels over UDP port 53 (and TCP when an answer is large), and normally in the clear. The project's baseline firewall allows exactly that outbound ([Networking basics](Networking-Basics-for-This-Project.md#what-a-firewall-does)).
 
 ### Step 2: TCP, a reliable connection
@@ -74,7 +76,7 @@ Inside the encrypted pipe the client sends a plain **HTTP** request (`GET /` wit
 - **Reverse proxy:** a server that stands in front of the real servers, receives requests for them, and forwards them; it is a good place for TLS, logging and filtering. (A *forward* proxy is the other direction: it stands in front of clients.)
 - **Load balancer:** a reverse proxy that spreads requests across several servers and stops sending to a failed one; it is often where **TLS termination** happens, meaning the encrypted connection ends at the balancer and the rest of the trip may or may not be encrypted again.
 
-Each one can be another place a certificate is checked and another place a log line is written, which matters when you try to answer "where did this request go wrong?"
+Each one can be another place a certificate is checked and another place a log line is written, which matters when you try to answer "where did this request go wrong?" To build a web server, a PHP runtime and a database yourself and trace a request through them, see [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md).
 
 ## Certificates and trust chains in plain language
 
