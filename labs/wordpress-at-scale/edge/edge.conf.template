@@ -1,0 +1,72 @@
+# SPDX-License-Identifier: Apache-2.0
+# The edge: what a CDN and a WAF do, built from Nginx so you can read every rule.
+# Port 8080 is the careful edge. Port 8081 is the careless one ("cache everything",
+# no bypass, no lock, no rules) so you can watch what goes wrong.
+
+proxy_cache_path /var/cache/nginx/good  levels=1:2 keys_zone=good:5m  max_size=50m inactive=10m use_temp_path=off;
+proxy_cache_path /var/cache/nginx/naive levels=1:2 keys_zone=naive:5m max_size=50m inactive=10m use_temp_path=off;
+
+limit_req_zone $binary_remote_addr zone=login:1m rate=1r/s;
+
+# A visitor with one of these cookies is a person with state (logged in, cart, password-protected post).
+map $http_cookie $has_session {
+    default 0;
+    "~*(wordpress_logged_in_|wp-postpass_|comment_author_|woocommerce_items_in_cart)" 1;
+}
+
+# A TOY rule set. A real WAF has thousands of rules, tuning and updates; this has three.
+map $request_uri $waf_hit {
+    default 0;
+    "~*union(%20|\+)+select" 1;
+    "~*(<|%3c)script" 1;
+    "~*(\.\./|%2e%2e%2f)" 1;
+}
+
+server {
+    listen 8080;
+
+    if ($waf_hit) {
+        return 403 "blocked by the toy WAF\n";
+    }
+
+    # Login: never cached, and slowed down per client address.
+    location = /wp-login.php {
+        limit_req zone=login burst=3 nodelay;
+        limit_req_status 429;
+        proxy_pass http://lb;
+        proxy_set_header Host $host;
+        proxy_set_header X-Origin-Auth "${ORIGIN_SECRET}";
+        add_header X-Cache-Status $upstream_cache_status always;
+    }
+
+    location / {
+        proxy_pass http://lb;
+        proxy_set_header Host $host;
+        proxy_set_header X-Origin-Auth "${ORIGIN_SECRET}";
+
+        proxy_cache good;
+        # Two different jobs: bypass = do not answer FROM the cache; no_cache = do not SAVE to it.
+        proxy_cache_bypass $has_session;
+        proxy_no_cache     $has_session;
+        # One request fills a missing entry; the rest wait instead of all hitting the origin.
+        proxy_cache_lock on;
+        # If the origin is failing, serve the last good copy rather than an error.
+        proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+        add_header X-Cache-Status $upstream_cache_status always;
+    }
+}
+
+server {
+    listen 8081;
+
+    location / {
+        proxy_pass http://lb;
+        proxy_set_header Host $host;
+        proxy_set_header X-Origin-Auth "${ORIGIN_SECRET}";
+
+        proxy_cache naive;
+        proxy_ignore_headers Cache-Control Expires;   # "cache everything", whatever the origin says
+        proxy_cache_valid 200 30s;
+        add_header X-Cache-Status $upstream_cache_status always;
+    }
+}

@@ -1,0 +1,3 @@
+# SPDX-License-Identifier: Apache-2.0
+# WP-CLI project config: run `wp` against the checked-out site, never against hand-edited files.
+path: web/wp
