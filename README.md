@@ -109,6 +109,7 @@ Clouds-Against-Humanity/
   scripts/cost_raise.py                    proposes (dry run) or makes a per-phase ceiling change in approved.json
   scripts/identifier_check.py              fails on cloud account ids in tracked files (never prints them)
   scripts/gen_settings_doc.py              writes docs/wiki/Settings-Reference.md from docs/settings.json (--check fails when stale)
+  scripts/gen_project_status.py            writes docs/wiki/Project-Status.md from docs/wiki/.status-snapshot.json (--check fails when stale; --refresh fetches live data with the maintainer login)
   scripts/gen_example_tests.py             writes each live stack's example.tftest.hcl from its terraform.tfvars.example
   scripts/gen_timezones.py                 regenerates modules/twingate-bootstrap/timezones.txt from the local tz database
   scripts/hcl_variables.py                 helper module: a fail-closed reader of `variable` blocks (used by tests and the generators)
@@ -154,6 +155,7 @@ python3 -I scripts/cost_check.py --root .
 
 # the settings page must match docs/settings.json
 python3 -I scripts/gen_settings_doc.py --check
+python3 -I scripts/gen_project_status.py --check
 
 # the repository tests (needs a virtualenv with pytest and pyyaml installed)
 python3 -I -m pytest tests -q

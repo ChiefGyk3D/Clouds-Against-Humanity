@@ -102,4 +102,6 @@ Two things can only be confirmed on a real tracked run, and are worth doing the 
 
 The full operator guide, including adding secrets and upgrading the pinned CLI, is [docs/spacelift-secrets.md](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md).
 
+The habits around this page, meaning a password manager first, the `.env` rules, secret scanning and a leak drill you can run, are in the side page [Secrets from day one](Secrets-From-Day-One.md).
+
 Next: [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md), step 18 of the core path on the [Reading order](Reading-Order.md) page.
