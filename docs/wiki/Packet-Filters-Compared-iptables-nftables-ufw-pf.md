@@ -249,7 +249,7 @@ table inet filter {
 }
 ```
 
-Read it: one file, one atomic load. The first two lines are the idiom the repository's own scripts use: create the table if it is missing, then delete it, so the file loads the same way whether or not the table existed. `inet` means the one table sees both IP versions, so there is no second file for IPv6, and the `icmpv6` rule is there because IPv6 needs those messages to find its neighbors (without it, default deny silently kills IPv6; the lab measures this). The rate limit is different in kind from the `iptables` one: the dynamic set `ssh_rate` gets one entry per source address and attaches a **token bucket** to it (`burst 5 packets`, refilled at 6 a minute); `recent` counts hits in a time window. The two will not drop the same connection, and the page does not claim they should.
+Read it: one file, one atomic load. The first two lines are the idiom the repository's own scripts use: create the table if it is missing, then delete it, so the file loads the same way whether or not the table existed. In the lab I loaded this file three times (no table, the table already present, and with an unrelated table `inet other` present): all three exits were 0 and the unrelated table was untouched. It replaces only the table it names; if you keep other rules in `inet filter`, put them in this file or use another table name. `inet` means the one table sees both IP versions, so there is no second file for IPv6, and the `icmpv6` rule is there because IPv6 needs those messages to find its neighbors (without it, default deny silently kills IPv6; the lab measures this). The rate limit is different in kind from the `iptables` one: the dynamic set `ssh_rate` gets one entry per source address and attaches a **token bucket** to it (`burst 5 packets`, refilled at 6 a minute); `recent` counts hits in a time window. The two will not drop the same connection, and the page does not claim they should.
 
 ### Linux: UFW
 
@@ -280,22 +280,26 @@ set block-policy drop             # blocked packets are dropped silently
 
 match in all scrub (no-df random-id max-mss 1440)    # normalize packets (FreeBSD 13 and older: see text)
 
-block log all                     # 1 and 4: default deny, and log what is blocked to pflog0
-
 block in quick from <bruteforce>  # known abusers: decided here, evaluation stops (quick)
 
-pass out on $ext_if               # our own traffic and its replies (keep state is the default)
+# Every pass rule below is quick, so a packet that is allowed stops here and is never
+# logged. Only what falls through to the last line is blocked and logged.
+pass out quick on $ext_if         # our own traffic and its replies (keep state is the default)
 
 # 2 and 5: SSH only from <admins>; more than 6 new connections in 30 seconds
 # puts the source in <bruteforce> and kills its existing connections
-pass in on $ext_if proto tcp from <admins> to ($ext_if) port ssh flags S/SA keep state \
+pass in quick on $ext_if proto tcp from <admins> to ($ext_if) port ssh flags S/SA keep state \
     (max-src-conn-rate 6/30, overload <bruteforce> flush global)
 
 # 3: web from anywhere
-pass in on $ext_if proto tcp to ($ext_if) port { http, https } flags S/SA keep state
+pass in quick on $ext_if proto tcp to ($ext_if) port { http, https } flags S/SA keep state
+
+block log all                     # 1 and 4: default deny, and log only what reached this line (pflog0)
 ```
 
-Read it from the top, remembering that **the last match wins**. `block log all` is the default deny and also the logging: every packet that no later rule passes is dropped and logged to `pflog0`. `block in quick from <bruteforce>` comes next and, being `quick`, ends the evaluation for known abusers. The `pass out` rule is the outbound allow (state is kept by default, so replies come back). The SSH rule has the allowed table as its source and the rate limit in parentheses: more than 6 connections in 30 seconds from one address puts that address into `<bruteforce>`, and `flush global` kills its existing connections. The web rule is last. A packet that matches only `block log all` is blocked; a packet that matches `block log all` and then a pass rule is passed, because the later rule wins.
+Read it from the top. The rules are written in the "quick" style: each `pass` rule is `quick`, so an allowed packet is decided there and stops. `block in quick from <bruteforce>` comes first and ends the evaluation for known abusers. The `pass out` rule is the outbound allow (state is kept by default, so replies come back). The SSH rule has the allowed table as its source and the rate limit in parentheses: more than 6 connections in 30 seconds from one address puts that address into `<bruteforce>`, and `flush global` kills its existing connections. The web rule follows. The last line, `block log all`, is the default deny and the log: with last-match-wins it would win over a non-quick `pass`, but nothing that matched a `quick` rule ever reaches it, so only dropped packets go to `pflog0`.
+
+The other common way to write it, and the one the OpenBSD FAQ teaches, puts `block all` first and leaves the `pass` rules without `quick`, so the later pass overrides the earlier block. That works and is shorter. I did not write the logging on that first line, because the `pf.conf` manual says, in its description of `match` rules, that `log` is "different still, in that the action happens every time a rule matches", so I could not rule out that a packet that is later passed is still logged; whether `log` on a `block` that a later `pass` overrides is logged is **est.** (not tested). Putting the log on the last, `quick`-protected line avoids the question.
 
 Differences to expect on other systems (all **est.** unless the claims register says otherwise):
 
@@ -760,8 +764,14 @@ mkdir -p "$R/etc/ufw/applications.d" "$R/etc/default" "$R/lib" "$R/usr/share"
 cp -rL /usr/share/ufw "$R/usr/share/ufw"
 cp -r /lib/ufw "$R/lib/ufw"
 cp /etc/default/ufw "$R/etc/default/ufw"
+# The config files live in /etc/ufw, but the rule files there are readable by root only. The package
+# also ships pristine copies under /usr/share/ufw (some layouts keep them in /usr/share/ufw/iptables),
+# so take the first readable copy of each.
 for f in ufw.conf before.rules after.rules before6.rules after6.rules user.rules user6.rules before.init after.init; do
-  cp -L "/usr/share/ufw/$f" "$R/etc/ufw/$f"
+  for src in "/etc/ufw/$f" "/usr/share/ufw/$f" "/usr/share/ufw/iptables/$f"; do
+    if [ -r "$src" ]; then cp -L "$src" "$R/etc/ufw/$f"; continue 2; fi
+  done
+  echo "ufw-prepare: no readable copy of $f; this layout is not supported by this script" >&2; exit 1
 done
 : > "$R/etc/ufw/sysctl.conf"
 echo "ufw sandbox ready in $R"
@@ -981,7 +991,7 @@ All read-only requests; retrieved 2026-10-22 unless stated. "Read" means I read 
 | RHEL 8: nftables is the preferred low-level firewall solution. RHEL 9 and 10 defaults: not read | [Red Hat, Using nftables in RHEL 8](https://www.redhat.com/en/blog/using-nftables-red-hat-enterprise-linux-8) | Read for 8. RHEL 9 and 10 documentation refused automated reads: **est.** |
 | SLES 15 introduced firewalld as the default software firewall | [SLES 15 SP7 firewall chapter](https://documentation.suse.com/sles/15-SP7/html/SLES-all/cha-security-firewall.html) | Read |
 | pf: part of OpenBSD's GENERIC kernel since 3.0; filter rules evaluated first to last, last match wins, `quick` ends evaluation; "default deny" with `block all` first; `keep state` the default; table lookups "very fast" | [OpenBSD PF FAQ](https://www.openbsd.org/faq/pf/index.html), [filtering](https://www.openbsd.org/faq/pf/filter.html), [tables](https://www.openbsd.org/faq/pf/tables.html) | Read |
-| pf.conf: last matching rule decides; `quick`; stateful default `flags S/SA`; `max-src-conn-rate`, `overload`, `flush global`; scrub is `match ... scrub (...)`; `set limit states`; `log` goes to `pflog0` | [pf.conf(5), OpenBSD](https://man.openbsd.org/pf.conf) | Read |
+| pf.conf: `log` "happens every time a rule matches" (stated in the `match` rule description); last matching rule decides; `quick`; stateful default `flags S/SA`; `max-src-conn-rate`, `overload`, `flush global`; scrub is `match ... scrub (...)`; `set limit states`; `log` goes to `pflog0` | [pf.conf(5), OpenBSD](https://man.openbsd.org/pf.conf) | Read |
 | Anchors: a named collection of rules, tables and anchors; `quick` inside ends evaluation | [PF Anchors](https://www.openbsd.org/faq/pf/anchors.html) | Read |
 | `pflogd` writes `pflog0` traffic to `/var/log/pflog`; `tcpdump -n -e -ttt -i pflog0` shows it live | [PF Logging](https://www.openbsd.org/faq/pf/logging.html) | Read |
 | `pfctl -n`: "Do not actually load rules, just parse them"; table `expire` | [pfctl(8), OpenBSD](https://man.openbsd.org/pfctl) | Read |
