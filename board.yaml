@@ -90,6 +90,9 @@ fields:
       - {name: Codex, color: GREEN, description: "OpenAI Codex"}
       - {name: Copilot, color: BLUE, description: "GitHub Copilot coding agent"}
       - {name: You, color: PURPLE, description: "The maintainer"}
+      - {name: ChatGPT, color: GREEN, description: "OpenAI ChatGPT: language, copy and prompt wording"}
+      - {name: Ollama, color: PINK, description: "Local model on the maintainer's server: triage, summaries, first drafts"}
+      - {name: RAG, color: GRAY, description: "Retrieval over the project's docs and issues, where it answers a question"}
   - {name: Sprint, type: iteration, start: 2026-10-20, duration_days: 14, count: 8, title_prefix: "S"}
   - {name: Start date, type: date}
   - {name: Target date, type: date}
@@ -128,6 +131,6 @@ ui_only:
   - "Board and Sprint views: Column field = Status, Sort by Priority"
   - "Roadmap view: Date fields = Start date and Target date, Group by = Epic, zoom = Quarter"
   - "Sprint plan view: Group by = Sprint; show Size, Agent, Area, Kind"
-  - "By area view: Group by = Area. Agents at work view: Group by = Agent"
+  - "By area view: Group by = Area. Agents at work view: Group by = Agent (UI step; the planning page says who each agent is for)"
   - "Epics view: show Epic, Start date, Target date. Blocked view: show Agent, Decision. Done log view: Sort by Done on, descending; show Kind, Epic"
   - "Project workflows: Item closed -> Done; Pull request merged -> Done; Auto-add is not needed (reconcile adds)"

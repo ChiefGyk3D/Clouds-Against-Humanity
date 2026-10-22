@@ -117,7 +117,19 @@ Work is routed by what it is, from measurements recorded in SAFO:
 | Security-sensitive changes | Built by one agent, attacked by another before merge |
 | Text in, text out (summaries, triage, drafts) | The local model first, checked before anything is applied |
 
-The Agent field on the board names the intended owner. The maintainer-only steps carry the `needs-maintainer` label so they are easy to filter.
+The Agent field on the board names the intended owner, and the Agents at work view groups by it:
+
+| Agent | Used for |
+|---|---|
+| Claude | Technical and integration work, and the orchestration of the others |
+| Codex | Adversarial code review |
+| Copilot | Pull request review |
+| ChatGPT | Public and non-technical wording |
+| Ollama | Local text triage and summaries |
+| RAG | Retrieval answers over the project's docs and issues |
+| You | Maintainer-only steps |
+
+ The maintainer-only steps carry the `needs-maintainer` label so they are easy to filter.
 
 ## The rhythm
 
