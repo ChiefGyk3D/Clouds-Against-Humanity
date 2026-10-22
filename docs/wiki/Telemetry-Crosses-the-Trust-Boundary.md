@@ -4,7 +4,7 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-**Prerequisites:** [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md), [Twingate](Twingate.md), [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) and the [Threat model](Threat-Model.md).
+**Prerequisites:** [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md), [Twingate](Twingate.md) (and, for the service accounts and keys this page mentions, [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md)), [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) and the [Threat model](Threat-Model.md).
 
 The repository's central promise is that nothing on the cloud side listens to the Internet. Telemetry needs data to move between the cloud and the home SIEM. This page is about how that happens without breaking the promise, and about the places where it still costs something.
 

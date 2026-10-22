@@ -35,7 +35,7 @@ This is the maintainer's own home lab, described in general terms. It is a small
 - Two small single-board computers (Raspberry Pi 4 boards with 4 GB of memory) each run one Twingate **connector** in a container. The two are **active peers** in one remote network: either one can carry a new connection, so losing one is survivable (high availability, with failover to whichever is still up). There is no "primary" and "standby".
 - Both sit on **their own VLAN**. A VLAN is a way to split one physical network into separate virtual ones, so the connector hosts are not on the same network as laptops, phones or smart devices.
 - In his lab, different roles and individuals get access to different resources, scoped at the network level in different ways: some to a single device and port, some to a whole subnet. The pfSense firewall rules limit what the connector hosts themselves can reach. Per-role and per-person scoping is where a ZTNA product beats a VPN; the section below spells it out.
-- The connector hosts are patched automatically with his own project, [Patch Gremlin](https://github.com/ChiefGyk3D/Patch-Gremlin).
+- The host operating systems of the two boards are patched automatically with his own project, [Patch Gremlin](https://github.com/ChiefGyk3D/Patch-Gremlin). Patch Gremlin patches only the host operating system, not container images, so the Twingate connector containers on the two boards are updated **manually** today (his statement). Adding container-image updates to Patch Gremlin is a possible later feature; it is not built.
 
 No diagram image is used here: the repository renders diagrams with `scripts/render_diagrams.py`, which needs Mermaid CLI and a browser, and neither is available in the sandbox this page was written in. A text diagram follows; every box and arrow is invented-for-teaching and carries no real address.
 
@@ -138,12 +138,12 @@ A caution that matters: a firewall such as pfSense does not see which identity-p
 
 The software that provides access to everything is the most important thing to keep patched, and it is also the thing whose failure locks you out. So:
 
-- **Automate it**, because a manual patch routine is a patch routine that gets skipped.
+- **Automate it**, because a manual patch routine is a patch routine that gets skipped. The honest state of his own lab is mixed: the host operating systems are automated, and the connector containers are still updated by hand.
 - **Stagger it**: never update both connectors at the same time. This repository does it with reboots an hour apart.
 - **Have a rollback plan**: know how to start the previous container image, or reinstall from a known-good version, before you need it. Write the commands down on paper.
 - **Watch the outcome**: an update that silently fails is the same as no update.
 
-Patch Gremlin is the maintainer's public project for this. What its README says (read 2026-10-21, read-only): it provides automated system update notifications for Debian and RHEL-based systems, integrating with `unattended-upgrades` (Debian, Ubuntu) or `dnf-automatic` (RHEL, Fedora, Amazon Linux); it fires when the upgrade run finishes so the report describes that run; its setup asks for update type, schedule and whether to auto-reboot; it lists Raspberry Pi OS among supported systems; and it sends to Discord, Teams, Slack, Matrix, ntfy, Gotify and generic webhooks. The README does not mention Docker or container images, so this page makes no claim about how a connector container is updated; plan and check that separately.
+Patch Gremlin is the maintainer's public project for this. What its README says (read 2026-10-21, read-only): it provides automated system update notifications for Debian and RHEL-based systems, integrating with `unattended-upgrades` (Debian, Ubuntu) or `dnf-automatic` (RHEL, Fedora, Amazon Linux); it fires when the upgrade run finishes so the report describes that run; its setup asks for update type, schedule and whether to auto-reboot; it lists Raspberry Pi OS among supported systems; and it sends to Discord, Teams, Slack, Matrix, ntfy, Gotify and generic webhooks. The README does not mention Docker or container images, and the maintainer confirms Patch Gremlin patches only the host operating system, not container images. So a connector container is not updated by it: on his two boards that is a manual step today, and container-image updates in Patch Gremlin are a possible later feature, not built. Twingate's own [upgrading connectors](https://www.twingate.com/docs/upgrading-connectors) page (read 2026-10-22) says "For Docker and systemd deployments, you apply updates manually using the platform-specific instructions above", publishes connector updates "on an approximately monthly cadence", and says the admin console "will surface an upgrade prompt for any Connector that has an update available". Plan and check your own update routine separately.
 
 ## ZTNA versus a VPN: flexibility of access
 
@@ -201,7 +201,7 @@ Tailscale offers a comparable feature called a **subnet router**: a machine that
 
 - **A connector is a high-value target.** It sits inside your network and can reach what its firewall allows. Compromise one and the attacker starts from there. That is why it has its own VLAN, minimal rules and patches.
 - **The identity provider is now critical.** If the IdP is down you cannot sign in; if an attacker takes it over they hold your roles. Protect it with phishing-resistant MFA, as on [Identity basics](Identity-Secrets-and-Zero-Trust-Basics.md#mfa-and-identity-providers).
-- **Role-based reach from an identity provider is a plan question.** From this repository's checked guidance (2026-10-19, see [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md)): the free Starter plan (up to 5 users) signs in with a social login (Google, Microsoft, GitHub or LinkedIn); directory integrations such as Entra ID, JumpCloud, Okta, OneLogin and Keycloak are listed as Business and Enterprise features, so they need a paid Twingate plan. The SAML requirement was not stated on the pages read there; confirm it. Check the pricing page on the day.
+- **Role-based reach from an identity provider is a plan question.** From this repository's checked guidance (2026-10-19, see [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md)): the free Starter plan (up to 5 users) signs in with a social login (Google, Microsoft, GitHub or LinkedIn); directory integrations such as Entra ID, JumpCloud, Okta, OneLogin and Keycloak are listed as Business and Enterprise features, so they need a paid Twingate plan. The SAML requirement was not stated on the pages read there, and none of the Twingate pages read on 2026-10-22 uses the word SAML; confirm it. Separately, Twingate's pricing page lists service accounts (which headless clients use) on Home, Business and Enterprise and not on the free Starter plan, so cloud-to-home automation is a second plan question; see [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md). Check the pricing page on the day.
 - **The two Pis share a house.** Power, switch and router are single points of failure.
 - **Connector telemetry is off by default.** If you turn on the optional connection analytics, each line names the user's email, client IP and city (see [Twingate: connector telemetry](Twingate.md#connector-telemetry-off-by-default)), and you should then treat those logs as personal data. With it off, that identifying detail is not written.
 
@@ -264,9 +264,9 @@ A mini-loop for this design.
 
 | Step | Question | Here |
 |---|---|---|
-| **Build** | What is the smallest working version? | Two connectors, own VLAN, roles in Twingate groups, firewall limits on the connectors, patches automated |
+| **Build** | What is the smallest working version? | Two connectors, own VLAN, roles in Twingate groups, firewall limits on the connectors, host patches automated (connector containers updated by hand) |
 | **Break** | What happens when a part fails? | Stop one connector, then the other; the table of failures above |
-| **Detect** | How would you know? | Connector offline in the console; patch notifications; the identity provider's sign-in log |
+| **Detect** | How would you know? | Connector offline in the console; host patch notifications (container updates are a manual check); the identity provider's sign-in log |
 | **Evade** | How would an attacker avoid being noticed? | Use a stolen identity-provider session so the traffic looks like you; stay inside the allowed resource |
 | **Defend** | What stops that? | Phishing-resistant MFA, device checks where available, narrow resources, alerts on odd sign-ins |
 | **Flip** | What if you were the attacker on the connector host? | You hold whatever its firewall can reach; the VLAN and default deny are what limits you |
