@@ -100,7 +100,7 @@ Details worth knowing, each with its primary source:
 
 ### TTL and caching: why changes "take time"
 
-The **TTL** (time to live) on a record says how many seconds a resolver may keep the answer. A resolver that has your record cached with a TTL of 3,600 will keep giving the old address for up to an hour after you change it, and nothing you do at the DNS host can reach inside that cache. That is the whole story behind "DNS propagation": it is not data travelling around the world, it is thousands of independent caches expiring at different moments. The standard describes TTL as a cache limit ([RFC 1034](https://www.rfc-editor.org/rfc/rfc1034), [RFC 2181](https://www.rfc-editor.org/rfc/rfc2181)).
+The **TTL** (time to live) on a record says how many seconds a resolver may keep the answer. A resolver that has your record cached with a TTL of 3,600 will keep giving the old address for up to an hour after you change it, and nothing you do at the DNS host can reach inside that cache. That is the whole story behind "DNS propagation": it is not data traveling around the world, it is thousands of independent caches expiring at different moments. The standard describes TTL as a cache limit ([RFC 1034](https://www.rfc-editor.org/rfc/rfc1034), [RFC 2181](https://www.rfc-editor.org/rfc/rfc2181)).
 
 Practical rules:
 
@@ -867,7 +867,7 @@ dev                 300   IN  A      198.51.100.77
 1. `v=spf1 +all` authorizes **every server on the internet** to send mail as the domain. It should name the real senders and end in `-all`.
 2. There is no DMARC record at all, and no DKIM key is published, so forged mail is not rejected.
 3. The wildcard `*.example.com` answers for every name that does not exist, including typos and names an attacker can invent; it also makes dangling records harder to notice. Remove it unless you need it.
-4. `shop` is a CNAME to a third-party hosting name. If the shop is ever cancelled and this line stays, someone else can claim that hosting name: a subdomain takeover.
+4. `shop` is a CNAME to a third-party hosting name. If the shop is ever canceled and this line stays, someone else can claim that hosting name: a subdomain takeover.
 5. `dev` points at a separate address that is probably an unpatched test server, on a record that is not proxied, so it exposes an address and a service. Many forgotten `dev` names start as one record.
 6. The `mail` record and the apex share one address. If that is also the web server, the "hidden" origin address is not hidden: a gray-cloud `mail` record gives it away.
 7. There is no CAA record, so any certificate authority may issue certificates for the name.
