@@ -21,6 +21,7 @@
     - Side page: [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md)
 8. [How money works](How-Money-Works-in-the-Cloud.md)
 9. [Enterprise habits](Enterprise-Engineering-Habits.md)
+    - Foundations side page: [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md)
 10. [Architecture overview](Architecture-Overview.md)
 11. [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md)
     - Side page: [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md)
