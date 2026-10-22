@@ -6,6 +6,8 @@
 
 Every DigitalOcean droplet gets a public IP address, and you cannot remove it. So the question is not "how do we keep it off the internet" but "how do we make sure nothing on that address answers". The answer is a cloud firewall that is attached by tag and in force from the first boot.
 
+If you want to put a public website on a droplet, the lesson [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) shows how to allow web traffic from a proxy's published ranges only, which is the opposite of this project's zero-inbound baseline and is for your own account, not these stacks.
+
 ## The pieces
 
 | Piece | Built by | Purpose |
