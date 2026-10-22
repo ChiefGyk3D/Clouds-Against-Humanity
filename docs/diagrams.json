@@ -94,5 +94,11 @@
   },
   "docs/wiki/images/why-ztna-not-a-vpn-diagram-3.png": {
     "sha256": "fe1c83111e2e1275c77fd6574d616ec9bb45ef8ed371dc39daa7375a7a118d3e"
+  },
+  "docs/wiki/images/wordpress-at-scale-cdn-waf-and-ci-diagram-1.png": {
+    "sha256": "8c6e22806d10bdf1a967a4064d70a14dc94829993acb66536489a7c449190a66"
+  },
+  "docs/wiki/images/wordpress-at-scale-cdn-waf-and-ci-diagram-2.png": {
+    "sha256": "9595a47f1156db316513f1457535398034c85dd3fb8255072d51ee7336499416"
   }
 }

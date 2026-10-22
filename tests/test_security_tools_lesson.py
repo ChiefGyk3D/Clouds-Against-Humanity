@@ -97,6 +97,19 @@ def lab(scripts):
     base = free_base()
     proc = start_lab(scripts, base)
     wait_for("127.0.0.1", base + 2)
+    # Regression note (issue #226): wait_for() itself connects to the db port, and lab.py logs that
+    # CONN line from its own server thread, a moment AFTER the connect returns. A test that emptied
+    # lab.log right away could have the fixture's late line land after the truncation and count it as
+    # a scan connection (one extra dport=<base+2>; about 1 run in 15 alone, about half under load).
+    # So the fixture does not hand over until that line exists, and tests then clear the log safely.
+    deadline = time.time() + 10
+    log = scripts / "lab.log"
+    while time.time() < deadline:
+        if log.exists() and f"CONN db src=127.0.0.1 dport={base + 2}" in log.read_text():
+            break
+        time.sleep(0.05)
+    else:
+        raise AssertionError("the fixture's own probe was never logged")
     yield scripts, base
     proc.terminate()
     proc.wait(timeout=10)
@@ -225,11 +238,17 @@ def test_proxy_forwards_loopback_and_refuses_everything_else(lab):
 @pytest.mark.skipif(shutil.which("nmap") is None, reason="nmap is not installed")
 def test_a_connect_scan_leaves_one_connection_line_per_open_port(lab):
     folder, base = lab
-    (folder / "lab.log").write_text("")                                           # drop the fixture's own connect probes
+    (folder / "lab.log").write_text("")                                           # safe now: the fixture's probe is already logged
     subprocess.run(["nmap", "-sT", "-p", f"{base}-{base + 2}", "127.0.0.1"], capture_output=True, timeout=60, check=True)
-    time.sleep(0.5)
+    ports: list[str] = []
+    for _ in range(100):          # the server logs from its own threads: wait for the lines, not a fixed time
+        ports = [x.split()[-1] for x in (folder / "lab.log").read_text().splitlines() if " CONN " in x]
+        if len(ports) >= 3:
+            break
+        time.sleep(0.05)
+    time.sleep(0.2)               # a short grace so a spurious extra line would still be caught
     ports = [x.split()[-1] for x in (folder / "lab.log").read_text().splitlines() if " CONN " in x]
-    assert sorted(ports) == [f"dport={base + i}" for i in range(3)]
+    assert sorted(ports) == [f"dport={base + i}" for i in range(3)]      # order-independent
 
 
 # --- the page itself --------------------------------------------------------------
