@@ -1,8 +1,8 @@
 # Clouds Against Humanity: one stack per service
 
-> **Proposal for the maintainer. Nothing is built, nothing is approved, nothing is applied.** Two questions are ruled (2026-10-22): edge per service with stage 3 shared (question 1), and edge services approved step by step (question 2); questions 3 to 6, 8 and 9 stay open. This note records a ruling, works out what it means for the repository, and asks the questions that decide the cost. It changes no stack, no module, no manifest and no ceiling. The draft edge stack on branch `feat/dmz-stack-122` (draft PR #206) is read, not modified.
+> **Proposal for the maintainer. Nothing is built, nothing is approved, nothing is applied.** Three questions are ruled (2026-10-22): edge per service with stage 3 shared (question 1), edge services approved step by step (question 2), and lxmd on its own stack and droplet (question 3); questions 4 to 6, 8 and 9 stay open. This note records a ruling, works out what it means for the repository, and asks the questions that decide the cost. It changes no stack, no module, no manifest and no ceiling. The draft edge stack on branch `feat/dmz-stack-122` (draft PR #206) is read, not modified.
 
-Status: DRAFT for review; questions 1 and 2 RULED 2026-10-22, the rest open. Date: 2026-10-22. Based on main `936a15d`. Epic: #72 (edge), issue #122 (edge stack), issue #96 (stack factory).
+Status: DRAFT for review; questions 1 to 3 RULED 2026-10-22, the rest open. Date: 2026-10-22. Based on main `936a15d`. Epic: #72 (edge), issue #122 (edge stack), issue #96 (stack factory).
 Tooling: OpenTofu throughout.
 Scope: how the ruling splits the edge, the stage 3 workloads, the honeypot sensor and the telemetry pieces into stacks; the numbering; the one question that decides the bill; how values pass between stacks; and what the factory, the cost gate, the plan policy and the teardown checklist must change. It is not an implementation plan.
 
@@ -46,7 +46,7 @@ Two facts shape everything below.
 |---|---|---|---|
 | Edge | Network (VPC, tags, project resources) | Yes, one shared stack | Free resources every edge service needs. Not a service, but it must exist first |
 | Edge | Reticulum transport (rnsd) | Yes | Internet-facing, own CVE surface |
-| Edge | lxmd (LXMF propagation node) | Yes, with a caveat | lxmd talks to a Reticulum instance. Whether it can use rnsd on another machine, or needs a local one, is not verified here (est.: it uses a local shared instance). If it needs a local rnsd it cannot be a separate machine. Question 3 |
+| Edge | lxmd (LXMF propagation node) | Yes (ruled 2026-10-22) | Own stack and droplet, connecting to Reticulum over a TCPClientInterface. See section 9a |
 | Edge | i2pd | Yes | Heaviest on bandwidth; its own transit and share caps |
 | Edge | Mosquitto (private MQTT over TLS) | Yes | Holds credentials and a TLS key |
 | Edge | iperf3 | Yes | Source-restricted; the only edge port core connectors reach (design 4.3) |
@@ -73,7 +73,7 @@ Prices are from `docs/cost-prices.json`, retrieved 2026-10-21 from the DigitalOc
 | S0. Today's rulings: one shared edge droplet, one shared stage 3 droplet | 1 x $6 | 1 x $12 | $12 + $12 + $5 + $6 = **$35** | Fits, $25 spare |
 | S1. Edge: one droplet per service (5). Stage 3: one shared host | 5 x $6 = $30 | 1 x $12 | $12 + $12 + $5 + $30 = **$59** | Fits by $1 |
 | S1a. As S1, with iperf3 and Mosquitto on the $4 size (est. fit) | 3 x $6 + 2 x $4 = $26 | 1 x $12 | **$55** (est.) | Fits, $5 spare |
-| S2. Edge: lxmd forced onto the Reticulum droplet, four droplets. Stage 3 shared | 4 x $6 = $24 | 1 x $12 | **$53** | Fits, $7 spare |
+| S2. Fallback only (question 3 ruled lxmd separate): lxmd on the Reticulum droplet, four droplets. Stage 3 shared | 4 x $6 = $24 | 1 x $12 | **$53** | Fits, $7 spare |
 | S3. Everything per service: 5 edge, 6 workload droplets at $6 | 5 x $6 = $30 | 6 x $6 = $36 | $12 + $5 + $30 + $36 = **$83** | Over by $23 |
 | S3a. As S3, every droplet that can on $4 (est.) | about $26 | 6 x $4 = $24 | about **$67** (est.) | Over by about $7 |
 | S4. Several service stacks on one shared host stack per zone | 1 x $6 | 1 x $12 | **$35** | Fits |
@@ -110,7 +110,7 @@ So on the edge, "several stacks on one host" has only two honest forms, both of 
 3. **Shared free things stay shared, in their own network stack.** VPC, tags, project resource lists and the bucket cost nothing or a flat fee and are used by many services. They are a stack of their own (`50-edge-network`, and a workloads host/bucket stack), built first and destroyed last.
 4. **Honeypot: its own account, its own stacks, never shared.** Unchanged from its design.
 
-That is shape S1 in the table, now the ruled shape: **$59 a month at full build**, one dollar under `hard_max`. That is thin and I would not hide it. Three ways to widen it, none decided here: put iperf3 and Mosquitto on the $4 size once measured (S1a, $55 est.); run lxmd on Reticulum's machine if question 3 says it must (S2, $53); or build the edge in stages and stop where the ceiling stops (section 4.4).
+That is shape S1 in the table, now the ruled shape: **$59 a month at full build**, one dollar under `hard_max`. That is thin and I would not hide it. Three ways to widen it, none decided here: put iperf3 and Mosquitto on the $4 size once measured (S1a, $55 est.); fold lxmd onto Reticulum's machine only if the two-droplet link proves fragile (S2, $53, the fallback); or build the edge in stages and stop where the ceiling stops (section 4.4).
 
 Why S4 (everything shared, $35) is not the shape, recorded for the lesson: it is the only shape that fits today's `edge` ceiling unchanged, and it is the cheapest, but on the edge it either collapses the stacks back into one plan (user-data) or adds a runtime puller on a host designed to have no admin path. It satisfies the letter of the ruling and defeats its point. It would have been the choice only if the money were the hard constraint; the lesson can use it as the contrast case ("stacks in name" on one machine).
 
@@ -213,7 +213,7 @@ Build order, lowest number first. Everything in a row may be built in any order 
 | 1 | `00-foundation` | nothing |
 | 2 | `10-access` | foundation |
 | 3 | `50-edge-network` (separate VPC, no peering; independent of core) | nothing in core |
-| 4 | `51-edge-iperf3`, `52-edge-mosquitto`, `53-edge-i2pd`, `54-edge-reticulum`, `55-edge-lxmd` | edge network; lxmd also needs a reachable Reticulum (question 3) |
+| 4 | `51-edge-iperf3`, `52-edge-mosquitto`, `53-edge-i2pd`, `54-edge-reticulum`, `55-edge-lxmd` | edge network; lxmd also needs a reachable Reticulum (section 9a) |
 | 5 | `30-workloads-host`, then the daemon stacks and the bridge | foundation, access (Twingate path), bucket |
 | 6 | `20-telemetry` | access, plus the home side |
 | separate | the honeypot stacks | nothing in core; separate account |
@@ -228,6 +228,30 @@ Teardown checklist impact (`docs/wiki/Teardown-Checklist.md` today covers two st
 4. Section 4 "revoke and rotate" gains one Doppler bootstrap token and one service key per edge host. Revoke each with its host.
 5. The "look again tomorrow" step stays and matters more.
 6. A partial teardown becomes a normal, safe operation: destroy one service stack and the other five keep running. That is the main practical gain of the ruling, and the checklist should teach it as a first-class path ("take one service down", not only "take everything down").
+
+## 9a. lxmd and Reticulum as a trust boundary
+
+The maintainer ruled on 2026-10-22 that lxmd (the LXMF propagation node) and the Reticulum transport each get their own stack and droplet, joined by a TCPClientInterface, and said to remember that "this is an example of trust boundaries". It is the clearest worked example in the edge, and the lesson should use it.
+
+What was read (2026-10-22, not run): lxmd's source (`LXMF/Utilities/lxmd.py`, around line 369) calls `RNS.Reticulum(configdir=...)`, so lxmd always starts its own Reticulum stack or joins a shared instance on the same machine. The Reticulum manual (`reticulum.network/manual/using.html`) describes the shared instance as for local programs only, and its interfaces page (`interfaces.html`) shows a TCPClientInterface with `target_host` and `target_port`. Not verified: whether a shared instance can be reached from another machine. This design does not need it to be: lxmd runs its own Reticulum stack on its own droplet and reaches the transport as a client of it. So the link is an ordinary Reticulum interface, not a remote shared-instance socket (est.; confirm against the pinned versions before building, as the draft's pinning rule already requires).
+
+**What crosses the boundary.** One TCP connection, from the lxmd droplet to the Reticulum droplet's Reticulum port, and only from that one source: the Reticulum host's Cloud Firewall and nftables name the lxmd host as the single permitted source for that port, in addition to whatever public sources the transport serves. The Reticulum stack must expose its address as a plain output or Doppler value (non-secret), never a key. Nothing else crosses: no shared disk, no shared tag, no shared Doppler config, no shared secret.
+
+**What each side trusts.**
+- Reticulum trusts the lxmd host only as an interface peer. It does not trust the content: LXMF messages are untrusted data to it.
+- lxmd trusts the transport for reachability only. It does not trust that the transport is honest about who sent a message; Reticulum's own cryptography authenticates destinations, and each side checks it.
+- Neither trusts the other's host. Each has no SSH, no admin path and cloud-init only (edge design).
+
+**What a compromise gives the other side.**
+- Compromised Reticulum host: the attacker can drop, delay or flood traffic to lxmd and can send it hostile frames. They cannot read lxmd's message store, its identity key or its Doppler config, because none are on that machine. The blast radius is availability plus whatever a parser bug in lxmd lets hostile frames do.
+- Compromised lxmd host: the attacker holds the propagation store and its identity. They can send hostile frames back down the link and use the one permitted source address, which gives them nothing on the Reticulum host except what that one port exposes. They cannot read the transport's identity or configuration.
+- Compared with one shared droplet (the fallback), where either compromise gives both: same disk, same user space, both identities.
+
+**Why separate identities matter.** Each Reticulum stack has its own identity (a keypair). On one machine they could share a config directory and a single identity, so stealing one is stealing both and a rebuild would rotate both. On two machines each identity is generated and stored on its own host, each has its own bootstrap token and Doppler config, and each can be revoked and rebuilt alone. Identities are secrets: they never cross a stack boundary as outputs (section 6, rule 1).
+
+**What this costs.** One more droplet, $6 (edge total unchanged at five services, $59 at full build, section 4.1), one more bootstrap token, and a link that can fail (the fragility the maintainer named). The TCP link should be tested first, with the host firewall rule that admits exactly one source, before either service is approved. The test is the plan-level one already in the stack tests: the rule exists with one source, and an unlisted source is refused.
+
+**How it ties to the threat model.** The repository's approach is in `docs/wiki/Threat-Model.md`: name assets, actors and trust boundaries, then abuse cases, ranked risks, a mitigation and a verification for each, and residual risk. The edge design (section 3) applies it to the edge; this boundary is a new row in its trust-boundary table ("lxmd to Reticulum: one TCP flow from one named source, no shared secrets") and a new mitigation under its risk 1 (remote code execution in a daemon). No part of this section is a live test of anything; any verification against real hosts follows the edge design's rule of my own resources only, in a window the maintainer sets.
 
 ## 10. What has to change in the draft #122 stack
 
@@ -264,7 +288,7 @@ Each line is one pull request or one maintainer action. Nothing in the first nin
 | 11 | Approve edge service 2 (`52-edge-mosquitto`), same checklist as step 10, its own pull request. The running total passes the $35 `edge` ceiling here, so this change also carries the matching ceiling edit and nothing beyond it | +$6 (or +$4) | Same |
 | 12 | Approve edge service 3 (`53-edge-i2pd`), same checklist, own change; ceiling edit by the step only | +$6 | Same |
 | 13 | Approve edge service 4 (`54-edge-reticulum`), same | +$6 | Same |
-| 14 | Approve edge service 5 (`55-edge-lxmd`), same; if question 3 merges it into Reticulum this step does not exist | +$6 | Same |
+| 14 | Approve edge service 5 (`55-edge-lxmd`), same checklist, own change | +$6 | Same |
 | later | Stage 3: the workloads host stack, then each daemon stack through Portainer, then the bridge | per the stage 3 design | Stage 3's own approval |
 
 The sizes of steps 1 and 2 are the point: the two repository-wide changes (cost gate, plan policy) land first, once, with no stack in flight, so no service stack ever lands on a gate that cannot price it or a policy that cannot tell it from its neighbor.
@@ -280,7 +304,7 @@ The sizes of steps 1 and 2 are the point: the two repository-wide changes (cost 
 | 5 | Cross-stack coupling creeps in (core depends on edge, or secrets travel in outputs) | Rule 4 and rule 1 of section 6, with tests | Remove the reference; the stacks stay independent |
 | 6 | More stacks, more drift between the public stanza list and the private factory | The cross-repo agreement check from the status note | Remove the unregistered stack from the factory |
 | 7 | More hosts means more hosts to patch | Edge hosts are immutable and rebuilt monthly (design risk 5); a rebuild per service is smaller than one rebuild of everything | Rebuild the one stack |
-| 8 | lxmd cannot be separated from rnsd | Question 3; fall back to S2 (one Reticulum host with lxmd on it) and say so | Merge the two stacks before either is applied |
+| 8 | The two-droplet lxmd and Reticulum setup proves fragile | Ruled 2026-10-22: separate is the plan, folding lxmd into the Reticulum stack (S2) is only the fallback; test the TCP link first | Merge the two stacks before either is applied |
 | 9 | The shared network stack is a single point: destroying it with services present | Dependencies in the factory; destroy guard on the VPC stays; reverse-order teardown | Rebuild from code (it is free resources only) |
 | 10 | Honeypot account mixed with core by a shared pattern or Doppler name | Own provider pattern, own secret names, own state; never a core stanza | Delete the honeypot account's stacks; core is untouched |
 
@@ -290,7 +314,7 @@ What this note could not check: Spacelift's actual dependency and destroy-orderi
 
 1. **RULED 2026-10-22.** Does each service stack get its own droplet? The maintainer: "Agree, edge per service, stage 3 shared." Edge services get a droplet each (five, $30); stage 3 daemons are separate stacks on one shared Docker host. Full build is $59 a month against the $60 hard limit. The honeypot-in-its-own-account and shared-network-stack parts of my recommendation were not part of the ruling and remain proposals.
 2. **RULED 2026-10-22.** Which ceiling? The maintainer: "A, step by step." The edge ceiling is not raised to about $59 up front; each edge service is approved as its own reviewed change that raises the approved total by that service's droplet (about $6). Where a step takes the running total past the `edge` phase ceiling, that same reviewed change carries the matching ceiling edit and no more. Reading to confirm: I take "keep the edge ceiling as is" to mean no up-front raise, not that a second droplet can be added without touching the $35 figure, since $35 covers only one.
-3. **Can lxmd run on its own machine?** Does it need a Reticulum instance on the same machine? If yes, is Reticulum plus lxmd allowed to be one stack (S2, $53) as a named exception to one stack per service?
+3. **RULED 2026-10-22.** Can lxmd run on its own machine? The maintainer: "yes." lxmd keeps its own stack and droplet and connects to Reticulum over a TCPClientInterface; folding it into the Reticulum stack (S2, $53) stays only a fallback if the two-droplet setup proves fragile. He added: "remember this is an example of trust boundaries." See section 9a.
 4. **Logging from each edge host.** The log path home (Twingate headless client, one service account) was designed for one host and decision 9 is still not ruled. With a host per service do you want a client per host, or no log shipping from the edge until the relay exists?
 5. **Numbering.** Flat decades (`50-edge-network`, `51` to `55` for services, a separate decade for the honeypot), or something else? Is renaming the draft's `50-edge` to `50-edge-network` acceptable, given you ruled the name `50-edge` on 2026-10-19?
 6. **Plan policy.** May the destroy guard allow a firewall delete when the same plan deletes its droplet in the same stack (a whole-service teardown), or do you want every teardown to go through the allowlist pull request ceremony?
