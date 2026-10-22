@@ -116,6 +116,8 @@ Approver:         <a person other than you who can say yes>
 
 **Ten worked examples from this repository.** Each is a real merged pull request, cited by number only (read them with `gh pr view NUMBER --repo ChiefGyk3D/Clouds-Against-Humanity`, or on the Pull requests page on GitHub, on **2026-10-22**). The facts come from the pull request's own description. The type and the reasoning are the author's teaching reading; no company approved or classified these. The sizes are lines added and removed, from `gh pr view`.
 
+**The Rollback column is incomplete on purpose.** It is what each pull request's description supports, and most descriptions say only "revert". A real record needs more: which commit or file to restore, the commands (for these, revert the pull request, let the pipeline plan, read the plan), and the trigger that says "back out now". Exercise 3 asks you to write that fuller version yourself. Where an entry says "Revert", treat it as a prompt to fill in those three things, not as a finished rollback plan.
+
 | PR | What it changed (in plain words) | Type I would give it | Why | Rollback, and its limit |
 |---|---|---|---|---|
 | #8 | Added an outbound firewall rule so each connector can open SSH (TCP 22) to the other, scoped to one tag, one port | **Normal** | A firewall is a security boundary, so not a pre-approved type. The page [Trace one change end to end](Trace-One-Change-End-to-End.md) walks this one in detail. | Revert the pull request, read the plan (one in-place firewall update expected). The description says only mocked providers were tested: the real behavior was proved only by the apply. |
@@ -421,12 +423,12 @@ Write the change record as the pull request description:
 cat > change.md <<'EOF'
 Refs #1
 
-Type: standard (practice; no real system)
+Type: normal (practice; this fork has no pre-approved types, so nothing here can be standard)
 Reason: Ticket #1.
 Systems affected: One new Markdown file in this fork.
 Risk: None to any running system.
 Test evidence: The file renders on GitHub.
-Rollback: Revert this pull request.
+Rollback: Revert this pull request on GitHub (the Revert button on the merged PR), then confirm practice-notes.md is gone from main. Trigger: any reason at all; this is practice.
 Approver: Myself (practice only; at work this must be someone else).
 EOF
 gh pr create --repo YOUR-USER/Clouds-Against-Humanity --base main \
@@ -449,14 +451,14 @@ Steps: Look in the repository root for a file called practice-notes.md.
 Tried: Searched the wiki folder; nothing with that purpose.
 Wanted outcome: A one-page practice-notes.md file.
 Priority (my suggestion; triager decides): Low. Severity: Low.
-'@ | Set-Content ticket.md
+'@ | Set-Content -Encoding ascii ticket.md
 gh issue create --repo YOUR-USER/Clouds-Against-Humanity `
   --title "Add a practice note explaining change records" --body-file ticket.md
 
 gh repo clone YOUR-USER/Clouds-Against-Humanity f12-practice
 Set-Location f12-practice
 git switch -c practice/f12-change-record
-Set-Content practice-notes.md "# Practice notes`n`nA change record says what, why, risk, test evidence and rollback."
+Set-Content -Encoding ascii practice-notes.md "# Practice notes`n`nA change record says what, why, risk, test evidence and rollback."
 git add practice-notes.md
 git commit -m "practice: add a note about change records"
 git push -u origin practice/f12-change-record
@@ -464,14 +466,14 @@ git push -u origin practice/f12-change-record
 @'
 Refs #1
 
-Type: standard (practice; no real system)
+Type: normal (practice; this fork has no pre-approved types, so nothing here can be standard)
 Reason: Ticket #1.
 Systems affected: One new Markdown file in this fork.
 Risk: None to any running system.
 Test evidence: The file renders on GitHub.
-Rollback: Revert this pull request.
+Rollback: Revert this pull request on GitHub (the Revert button on the merged PR), then confirm practice-notes.md is gone from main. Trigger: any reason at all; this is practice.
 Approver: Myself (practice only; at work this must be someone else).
-'@ | Set-Content change.md
+'@ | Set-Content -Encoding ascii change.md
 gh pr create --repo YOUR-USER/Clouds-Against-Humanity --base main `
   --head practice/f12-change-record --title "practice: add a note about change records" `
   --body-file change.md
@@ -582,7 +584,7 @@ if ((Get-Field 'Type') -eq 'emergency') { $keys += 'Incident','Review within' }
 foreach ($k in $keys) { if (-not (Get-Field $k)) { "MISSING: $k"; $problems++ } }
 if ($problems -eq 0) { "OK: $File" }
 exit ([int]($problems -ne 0))
-'@ | Set-Content check_change.ps1
+'@ | Set-Content -Encoding ascii check_change.ps1
 @'
 Title: Allow TCP 8443 from 198.51.100.0/24 to the reporting server 192.0.2.10
 Type: normal
@@ -592,7 +594,7 @@ Risk: Low. One source range, one port, one destination.
 Test evidence: Rule applied in the test firewall; a test connection from 198.51.100.7 succeeded.
 Rollback: Delete the rule by its name, "reporting-8443"; confirm the connection now fails.
 Approver: Network owner (a different person from the requester)
-'@ | Set-Content records\chg-001.txt
+'@ | Set-Content -Encoding ascii records\chg-001.txt
 .\check_change.ps1 records\chg-001.txt; "exit=$LASTEXITCODE"
 ```
 
@@ -605,7 +607,7 @@ grep -v '^Rollback' records/chg-001.txt > records/chg-002.txt
 ```
 
 ```powershell
-Get-Content records\chg-001.txt | Where-Object { $_ -notmatch '^Rollback' } | Set-Content records\chg-002.txt
+Get-Content records\chg-001.txt | Where-Object { $_ -notmatch '^Rollback' } | Set-Content -Encoding ascii records\chg-002.txt
 ```
 
 **Detect.** Run the checklist on the broken record. The reviewer script is what catches it.
@@ -667,7 +669,7 @@ All pages were retrieved read-only on **2026-10-22**. Pull request facts come fr
 | Severity is a measurement of impact; priority is a measurement of urgency; they can disagree (the examples in the table are paraphrased in the author's words) | [Atlassian, understanding incident severity levels](https://www.atlassian.com/incident-management/kpis/severity-levels) | Read |
 | A blameless postmortem identifies contributing causes without indicting any individual or team, and assumes everyone involved had good intentions | [Google SRE book, Postmortem Culture](https://sre.google/sre-book/postmortem-culture/) | Read |
 | `gh issue create` takes `--title`, `--body-file`, `--label`, `--repo`; `gh repo edit` takes `--enable-issues` | [GitHub CLI manual: gh issue create](https://cli.github.com/manual/gh_issue_create), [gh repo edit](https://cli.github.com/manual/gh_repo_edit) | Option names read; not run against a real fork |
-| `gh pr view`, `gh pr create`, `gh pr close --delete-branch` options | [GitHub CLI manual](https://cli.github.com/manual/gh_pr_view) | `pr view` read and run against this public repository; `pr create` and `pr close` not run (est.) |
+| `gh pr view`, `gh pr create`, `gh pr close --delete-branch` options | [gh pr view](https://cli.github.com/manual/gh_pr_view), [gh pr create](https://cli.github.com/manual/gh_pr_create), [gh pr close](https://cli.github.com/manual/gh_pr_close) | `pr view` read and run against this public repository; `pr create` and `pr close` not run (est.) |
 | GitHub Free: unlimited collaborators on unlimited public repositories | [GitHub plans](https://docs.github.com/en/get-started/learning-about-github/githubs-plans) | Read; an explicit line for Issues was not found on that page: **est.** |
 | GitHub Projects is "a table, board, and roadmap that integrates with your issues and pull requests" | [About Projects](https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects) | Read; its price on a free plan was not read: **est.** | <!-- identifier-check: ignore -->
 | The ten worked examples (#8, #136, #139, #140, #141, #142, #143, #147, #163, #173): sizes, descriptions, "not verified" statements and rollback limits | `gh pr view` on this repository | Read; the type and risk classifications are the author's teaching reading and were **not approved by any process** |
