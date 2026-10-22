@@ -4,7 +4,7 @@
 
 Request, in the maintainer's words: "Don't forget we need to go over threat modeling for everything in this project too."
 
-Method: read `docs/threat-model/` (three Threat Dragon files, `framework-reference.json`, the Navigator layer), the five threat-modeling lesson pages, `tests/test_threat_dragon_model.py`, `tests/test_threat_frameworks.py` and `tests/test_threat_dragon_layout.py` (test names and headers), the threat or risk section of every spec under `docs/superpowers/specs/`, `docs/stages/01-access.md`, the stack and module directories, the two workflows, `.spacelift/` policies, and the wiki page list. Open branches were listed with `git fetch origin` and compared by file name only: `docs/iac-1` to `docs/iac-4` and `docs/foundations-f1` to `f12` exist; no `docs/web-*` branch exists yet, so the web lessons W1 to W4 are **est.** and not audited.
+Method: read `docs/threat-model/` (three Threat Dragon files, `framework-reference.json`, the Navigator layer), the five threat-modeling lesson pages, `tests/test_threat_dragon_model.py`, `tests/test_threat_frameworks.py` and `tests/test_threat_dragon_layout.py` (test names and headers), the threat or risk section of every spec under `docs/superpowers/specs/`, `docs/stages/01-access.md`, the stack and module directories, the two workflows, `.spacelift/` policies, and the wiki page list. Open branches were listed with `git fetch origin` and compared by file name only: `docs/iac-1` to `docs/iac-4` and `docs/foundations-f1` to `f12` exist; the IaC lessons (PRs #209 to #212) and the web lessons (PRs #216, #217, #219, #220) were added to the inventory from their PR heads, by status line and keyword counts, not read in full. The security tools lessons (S1, S2) are still in flight and are **est.**
 
 The five threat-modeling lesson pages are: [Threat model](../../wiki/Threat-Model.md) (core step 19), [Threat model exercise](../../wiki/Threat-Model-Exercise.md), [Threat Dragon exercise](../../wiki/Threat-Dragon-Exercise.md), [Threat frameworks: STRIDE, ATT&CK, ATLAS](../../wiki/Threat-Frameworks-STRIDE-ATTACK-ATLAS.md) and [Threats in plain words](../../wiki/Threats-in-Plain-Words.md) (foundations F11).
 
@@ -63,10 +63,10 @@ A lesson that teaches a mechanism should name the boundary the mechanism guards.
 | Core path (Build-It-From-Zero, Twingate, Doppler-and-Secrets, Spacelift, Droplet-Hardening, CI-Tests-and-Cost-Gate, Fork-Private-Stacks) | Link to Threat-Model.md, 1 to 3 mentions each | `Doppler-and-Secrets` has no mention of "threat model" or "trust boundary" (grep count 0) |
 | Telemetry (`Telemetry-Crosses-the-Trust-Boundary`, `Cloud-Telemetry-What-and-Why`, `Build-Your-Own-Mini-SOC`, `Stage-2-Home-Side-Runbook`) | The first has a boundary section; the others link or are silent | Mini SOC names a boundary once and states no residual risk (count 0) |
 | Foundations F1 to F12 (branches and main) | F11 is the threat vocabulary page. F1 to F10, F12 are not models and need none, but F5 (subnets, NAT, firewall), F4 (crypto), F7 (identity), F9 (logs) and F10 (backups) each teach one boundary | Audit of the F-pages themselves is est.: only F11, F10 and F12 are on main; the rest were not opened |
-| Deception and honeypots (7 pages on main: Start-Here, What-Deception-Is, Plant-a-Canary, Honeyfiles, Alerts-in-the-SIEM, Design-a-Honeynet, T-Pot-at-Home, plus Safety-and-Law) | The design spec has a sketch; the lesson pages mention "threat model" 0 to 2 times each and never "trust boundary" or "residual" (counts read) | `Design-a-Honeynet` and `T-Pot-at-Home` teach a hostile-by-design host and are the highest-risk lessons in the set |
+| Deception and honeypots (8 pages on main: the Start-Here hub, five short lessons (What-Deception-Is, Safety-and-Law, Plant-a-Canary, Honeyfiles, Alerts-in-the-SIEM) and two on-premises pages (Design-a-Honeynet, T-Pot-at-Home)) | The design spec has a sketch; the lesson pages mention "threat model" 0 to 2 times each and never "trust boundary" or "residual" (counts read) | `Design-a-Honeynet` and `T-Pot-at-Home` teach a hostile-by-design host and are the highest-risk lessons in the set |
 | Provider lessons (AWS, Azure, GCP: preparation, cost, same four pieces) | Two of the "Same four pieces" pages mention a threat model once or twice | No provider page states what an account boundary protects |
-| IaC lessons I1 to I4 (`docs/iac-1` to `iac-4`, open branches) | Not merged; only the file names and diffstat were read. Content est. | I3 (Spacelift from zero) and I4 (stack per service) teach the Spacelift-to-cloud and state boundaries |
-| Web lessons W1 to W4 | No branch exists. Est. | The most exposed topic family once it exists (internet-facing) |
+| IaC lessons I1 to I4 (open PRs #210 OpenTofu from zero, #212 plans, state, drift and recovery, #209 Spacelift from zero, #211 build and destroy a stack per service) | Not merged. Opened by head fetch and checked by status line and keyword counts only, **not read in full**. Keyword counts for "threat model", "trust boundary", "residual": I1 0/0/0, I2 0/0/0, I3 0/1/0, I4 0/0/0. None states a threat model or residual risk | I3 and I4 teach the Spacelift-to-cloud and state boundaries; state holds connector tokens (T6), so I2 (state) and I4 belong in TM-9 |
+| Web lessons W1 to W4 (open PRs #216 LAMP and LEMP from zero, #217 DNS, Cloudflare and hosting your own website, #219 WordPress and PHP security, WAF and static sites, #220 WordPress at scale: CDN, WAF and CI) | Not merged. Opened by head fetch and checked by status line and keyword counts only, **not read in full**. Counts for "threat model" / "trust boundary" / "residual": #216 5/6/1, #217 1/4/0, #219 5/2/5, #220 3/4/0. These four are the only lessons that already use the vocabulary; #219 also states residual risk. Whether each boundary matches a component model is not checked | The most exposed topic family (internet-facing). The CDN or WAF to origin boundary in section 7 is taught here (#217, #220), so TM-9 for W1 to W4 is a review of existing text, not new text |
 | Labs and demo monitoring (`labs/demo-monitoring`, `Labs-Break-It-on-Purpose`) | Labs mention threats (Labs: 1 grep hit) | Not read in depth; est. |
 | Pi connectors lesson | Not found: `Zero-Trust-at-Home-Two-Connectors-and-Failover` is the nearest page; no Pi-specific connector lesson is in the repository. Status est. | A home connector on a small board is a boundary lesson in waiting |
 
@@ -132,27 +132,27 @@ Sections, in order:
 10. **Framework mapping (optional).** ATT&CK IDs or ATLAS IDs that exist in `framework-reference.json`, copied to a sibling file the way the ATT&CK model copies the STRIDE one.
 11. **Review trigger.** Any of: a new inbound port or public hostname; a new credential type or holder; a new third-party service in the path; a provider or plan change; an incident; a change to the component's firewall, cloud-init or policy file; six months since the last review.
 
-Rules carried from the existing models: generic names only, no addresses or account identifiers (documentation ranges only), no secret-shaped literals, untrusted data is evidence and never instruction, American spelling.
+Rules carried from the existing models: generic names only, no IP addresses (not even documentation ranges: the existing `test_no_addresses_or_private_identifiers` and `test_no_addresses_urls_or_private_identifiers` reject every IPv4 and IPv6 literal, so write "the reserved IP" or a name) and no account identifiers, no secret-shaped literals, untrusted data is evidence and never instruction, American spelling.
 
 ## 5. Proposed test: a stack or lesson family with no threat-model entry fails CI
 
 Described only; not written.
 
-**Registry.** New file `docs/threat-model/coverage.json`, a list of entries `{"component": "...", "kind": "stack|module|stage|lessons|system", "path_globs": [...], "model": "docs/threat-model/<file>" or "spec": "<spec path>#<section>", "status": "modeled|sketch|exempt", "exempt_reason": "...", "last_reviewed": "YYYY-MM-DD", "owner": "..."}`. Everything in section 2 becomes a row.
+**Registry.** New file `docs/threat-model/coverage.json`, a list of entries `{"component": "...", "kind": "stack|module|stage|lessons|system", "path_globs": [...], "phase_ids": [...] (optional), "model": "docs/threat-model/<file>" or "spec": "<spec path>#<section>", "status": "modeled|sketch|exempt", "exempt_reason": "...", "last_reviewed": "YYYY-MM-DD", "owner": "..."}`. Everything in section 2 becomes a row.
 
 **New test file.** `tests/test_threat_coverage.py`, which would read:
 
 1. `stacks/*/` and `stacks/aws/*/` (directories containing `main.tf`) and `modules/*/` and `modules/aws/*/` (directories containing `main.tf`): each must match a registry `path_globs` entry.
 2. `docs/wiki/*.md`, grouped into lesson families by filename prefix: `Deception-and-Honeypots-`, `Provider-`, `Threat`, plus the families named in `docs/wiki/Reading-Order.md`. A new prefix that matches no registry entry fails.
-3. `docs/stages/approved.json` phase ids: each phase must appear in a registry entry (this catches a new phase such as a future `edge` or `second-site` build with no model).
+3. `docs/stages/approved.json` phase ids: each key under `phases` must appear in exactly one entry's `phase_ids` (an entry that has `phase_ids` and no `path_globs` is allowed; `approved.json` is never used as a path, so the exactly-one rule for paths is not affected). This catches a new phase such as a future `edge` or `second-site` build with no model).
 4. `docs/threat-model/*.threat-dragon.json`: an entry whose `status` is `modeled` must name a file that exists and whose diagram has at least one `tm.BoundaryBox` and one threat.
 5. `docs/superpowers/specs/*-design.md`: any spec that has a "Threat model" heading must be registered with `status: sketch` or higher.
 6. `.github/workflows/*.yml` and `.spacelift/policies/*.rego`: each must be matched by a `system` entry.
 
 **Assertions.**
 
-- Every path found in 1 to 3 and 6 is covered by exactly one entry or a fully reasoned `exempt` (non-empty reason, at most a small set, listed in the test as an allowlist that a reviewer sees in the diff).
-- A `modeled` entry's file exists and passes the existing structure tests (those already glob `docs/threat-model/*.threat-dragon.json`, so a new file is covered with no new test).
+- Every path found in 1 to 6 (including every Threat Dragon file from 4 and every design spec with a threat-model heading from 5) is covered by exactly one entry or a fully reasoned `exempt` (non-empty reason, at most a small set, listed in the test as an allowlist that a reviewer sees in the diff).
+- A `modeled` entry's file exists and passes the existing structure tests (the structure and framework tests glob `docs/threat-model/*.threat-dragon.json`). `tests/test_threat_dragon_layout.py` also asserts the on-disk model set equals `LAYOUTS` in `scripts/threat_dragon_layout.py` and regenerates each file from its layout, so every new model needs a `LAYOUTS` entry in the same pull request, and the model must satisfy the geometry checks.
 - `last_reviewed` is a valid date no later than today and, for `modeled`, within 180 days (the six-month trigger; the day count is a proposal).
 - Every `sketch` entry's `spec` path exists and its heading anchor resolves (reuse the anchor logic in `tests/test_markdown_anchors.py`).
 - The registry has no entry whose paths match nothing (stale rows fail).
@@ -181,6 +181,8 @@ Sizes per [How this project is planned](../../wiki/How-This-Project-Is-Planned.m
 | TM-11 | ATLAS model update for local-model triage of logs and issues | S | S4 | SIEM triage plans | New AI element and rows; counts synced |
 | TM-12 | Azure and GCP module models | M | S8 | modules exist | Done with the modules, mocked tests only; labeled unverified like the lessons |
 
+Every new Threat Dragon model (TM-2 to TM-8) also needs its `LAYOUTS` entry in `scripts/threat_dragon_layout.py`, which adds about an hour to each; the sizes above include it.
+
 Rough load: TM-0 to TM-4 about 22 h of agent time in S2, split across three agents is too much for one sprint, so TM-3 and TM-4 may slip to S3; TM-5 (L) is the biggest single item. S1 holds no items.
 
 ## 7. Trust boundaries are the unifying idea
@@ -192,7 +194,7 @@ The clearest example is the planned edge. A public relay (the Reticulum transpor
 The same question appears elsewhere:
 
 - **Twingate connectors.** Connectors dial out, so there is no inbound edge to defend (B1); the controller and the identity provider decide who may ask for a resource (B8); a stolen identity still needs the host key. Two connectors are a boundary against lockout as well as against attack.
-- **Spacelift to the cloud.** A proposed run holds no credential; a tracked run on `main` does, and a human confirms apply (B3, B5, B7). The push policy keeps pull requests from crossing at all. Per cloud, the Doppler config and the Spacelift context are separate so that one tracked run does not reach every control plane.
+- **Spacelift to the cloud.** A proposed run is not given the named provider secrets, because the hook skips the fetch, but the `cah-doppler` context is attached to every run type, so `DOPPLER_TOKEN` is present and branch-controlled hook code could read it (`docs/spacelift-secrets.md` section 3); a tracked run on `main` fetches the secrets, and a human confirms apply (B3, B5, B7). The push policy keeps pull requests from crossing at all. Per cloud, the Doppler config and the Spacelift context are separate so that one tracked run does not reach every control plane.
 - **Doppler to the host.** The secret store is a boundary with the host's disk and with the metadata endpoint. The token is read-only, one config, expiring; the bootstrap token that must exist in user-data is the one place the boundary leaks, and the design says so (T5, edge risk 6).
 - **CDN or WAF to origin** (est.; no CDN is planned in the repository). If one is ever added in front of the edge or PeerTube, the origin must accept traffic only from it, or the filter is a suggestion. That is the web lessons' version of the same question and belongs in W1 to W4.
 - **The cloud-to-home link.** Stage 2 adds a boundary the repository does not own: the home connector, its VLAN and the log relay. The model should state the assumption, because the public repository cannot test the far side.
