@@ -152,7 +152,7 @@ deny contains msg if {
 	not aws_allowed(entry)
 	msg := sprintf(
 		"%s: %s admits inbound traffic from %s. AWS ingress here may only reference a security group, never a CIDR range.",
-		[entry.address, entry.type, entry.cidr],
+		[entry.address, entry.type, concat(", ", entry.cidrs)],
 	)
 }
 
@@ -244,7 +244,7 @@ has_other_source(rule) if {
 
 aws_allowed(finding) if {
 	some entry in entries_for(finding.address)
-	admits(entry, finding.protocol, finding.port, [finding.cidr])
+	admits(entry, finding.protocol, finding.port, finding.cidrs)
 }
 
 destroy_allowed(rc) if {
@@ -266,20 +266,54 @@ whole_service_teardown(rc) if {
 	droplet.type == "digitalocean_droplet"
 	actions_of(droplet) == ["delete"]
 	protects(rc, droplet)
+	not survivor_protected(rc)
+	every id in values(before_of(rc), "droplet_ids") {
+		id_deleted(id)
+	}
+}
+
+# A droplet this firewall still protects after the plan: any droplet in the
+# plan that is not a pure delete (kept, replaced, updated or created) and
+# matches by tag or id. A shared tag or a second droplet id must not let the
+# firewall go while another droplet keeps running.
+survivor_protected(firewall) if {
+	some droplet in input.terraform.resource_changes
+	droplet.type == "digitalocean_droplet"
+	actions_of(droplet) != ["delete"]
+	protects(firewall, droplet)
+}
+
+# A droplet id the firewall lists must belong to a droplet this plan deletes.
+id_deleted(id) if {
+	some droplet in removed_resources
+	droplet.type == "digitalocean_droplet"
+	actions_of(droplet) == ["delete"]
+	sprintf("%v", [object.get(before_of(droplet), "id", null)]) == sprintf("%v", [id])
 }
 
 protects(firewall, droplet) if {
+	some view in droplet_views(droplet)
 	some tag in values(before_of(firewall), "tags")
 	tag != "protected"
-	tag in values(before_of(droplet), "tags")
+	tag in values(view, "tags")
 }
 
 protects(firewall, droplet) if {
-	id := object.get(before_of(droplet), "id", null)
+	some view in droplet_views(droplet)
+	id := object.get(view, "id", null)
 	id != null
 	some listed in values(before_of(firewall), "droplet_ids")
 	sprintf("%v", [listed]) == sprintf("%v", [id])
 }
+
+# The values a droplet has before and after the plan (after is null for a
+# delete, and before is null for a create).
+droplet_views(droplet) := [before_of(droplet), after_view(droplet)]
+
+after_view(rc) := a if {
+	a := object.get(object.get(rc, "change", {}), "after", {})
+	is_object(a)
+} else := {}
 
 actions_of(rc) := object.get(object.get(rc, "change", {}), "actions", [])
 
@@ -381,44 +415,54 @@ source_summary(rule) := concat(", ", sort(parts)) if {
 
 # AWS ingress from an address. A reference to a security group (or to the group
 # itself) carries no CIDR and is the one admitted kind.
+# One finding per rule (or inline block), holding every CIDR range it admits,
+# so an allowlist entry must cover the whole rule, not one range of it.
 aws_ingress_cidrs contains {
 	"address": rc.address,
 	"type": "aws_vpc_security_group_ingress_rule",
-	"cidr": cidr,
+	"cidrs": cidrs,
 	"protocol": aws_protocol(rc.change.after, "ip_protocol"),
 	"port": aws_port(rc.change.after),
 } if {
 	some rc in changed_resources("aws_vpc_security_group_ingress_rule")
-	some key in {"cidr_ipv4", "cidr_ipv6"}
-	filled_string(rc.change.after, key)
-	cidr := rc.change.after[key]
+	cidrs := sort([cidr |
+		some key in {"cidr_ipv4", "cidr_ipv6"}
+		filled_string(rc.change.after, key)
+		cidr := rc.change.after[key]
+	])
+	count(cidrs) > 0
 }
 
 aws_ingress_cidrs contains {
 	"address": rc.address,
 	"type": "aws_security_group_rule",
-	"cidr": cidr,
+	"cidrs": cidrs,
 	"protocol": aws_protocol(rc.change.after, "protocol"),
 	"port": aws_port(rc.change.after),
 } if {
 	some rc in changed_resources("aws_security_group_rule")
 	rc.change.after.type == "ingress"
-	some key in {"cidr_blocks", "ipv6_cidr_blocks"}
-	some cidr in values(rc.change.after, key)
+	cidrs := listed_cidrs(rc.change.after)
+	count(cidrs) > 0
 }
 
 aws_ingress_cidrs contains {
 	"address": rc.address,
 	"type": "aws_security_group",
-	"cidr": cidr,
+	"cidrs": cidrs,
 	"protocol": aws_protocol(block, "protocol"),
 	"port": aws_port(block),
 } if {
 	some rc in changed_resources("aws_security_group")
 	some block in values(rc.change.after, "ingress")
-	some key in {"cidr_blocks", "ipv6_cidr_blocks"}
-	some cidr in values(block, key)
+	cidrs := listed_cidrs(block)
+	count(cidrs) > 0
 }
+
+listed_cidrs(obj) := sort([cidr |
+	some key in {"cidr_blocks", "ipv6_cidr_blocks"}
+	some cidr in values(obj, key)
+])
 
 aws_protocol(obj, key) := p if {
 	p := object.get(obj, key, "")

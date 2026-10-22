@@ -761,3 +761,59 @@ test_missing_or_null_stack_does_not_crash_autodeploy_guard if {
 	count(denied_input({"spacelift": {"stack": null}, "terraform": {"resource_changes": []}})) == 0
 	count(denied_input({"spacelift": {"stack": {"autodeploy": null}}})) == 0
 }
+
+# Review fixes (PR 252).
+
+# A second droplet that the firewall still targets keeps the firewall guarded.
+test_teardown_denied_when_another_droplet_keeps_the_tag if {
+	kept := {
+		"address": "module.service_host.digitalocean_droplet.second",
+		"type": "digitalocean_droplet",
+		"change": {"actions": ["no-op"], "before": {"id": "222", "tags": ["svc-a"]}, "after": {"id": "222", "tags": ["svc-a"]}},
+	}
+	count(teardown_reasons("svc-a", array.concat(teardown_changes, [kept]))) == 1
+}
+
+test_teardown_denied_when_another_droplet_is_replaced if {
+	replaced := removal("module.service_host.digitalocean_droplet.second", "digitalocean_droplet", ["delete", "create"], {"id": "222", "tags": ["svc-a"]})
+	count(teardown_reasons("svc-a", array.concat(teardown_changes, [replaced]))) == 1
+}
+
+test_teardown_denied_when_a_created_droplet_takes_the_tag if {
+	made := create("module.service_host.digitalocean_droplet.new", "digitalocean_droplet", {"id": "333", "tags": ["svc-a"]})
+	count(teardown_reasons("svc-a", array.concat(teardown_changes, [made]))) == 1
+}
+
+test_teardown_allowed_when_every_matching_droplet_is_deleted if {
+	second := delete_of("module.service_host.digitalocean_droplet.second", "digitalocean_droplet", {"id": "222", "tags": ["svc-a"]})
+	count(teardown_reasons("svc-a", array.concat(teardown_changes, [second]))) == 0
+}
+
+test_teardown_denied_when_firewall_lists_an_id_not_deleted if {
+	fw_rc := delete_of(svc_fw, "digitalocean_firewall", {"droplet_ids": [111, 999]})
+	droplet_rc := delete_of(svc_droplet, "digitalocean_droplet", {"id": "111"})
+	count(teardown_reasons("svc-a", [fw_rc, droplet_rc])) == 1
+	both := delete_of("module.service_host.digitalocean_droplet.b", "digitalocean_droplet", {"id": "999"})
+	count(teardown_reasons("svc-a", [fw_rc, droplet_rc, both])) == 0
+}
+
+# One AWS rule with two ranges needs one entry that covers both.
+test_aws_two_ranges_need_one_entry_covering_both if {
+	two := create("a.aws_security_group_rule.r", "aws_security_group_rule", {"type": "ingress", "protocol": "tcp", "from_port": 443, "to_port": 443, "cidr_blocks": ["10.0.0.0/8", "172.16.0.0/12"], "ipv6_cidr_blocks": null})
+	one_each := {"aws-a": {"a.aws_security_group_rule.r": [
+		aws_entry({"sources": ["10.0.0.0/8"]}),
+		aws_entry({"sources": ["172.16.0.0/12"]}),
+	]}}
+	count(reasons_with("aws-a", [two], one_each)) == 1
+	both := {"aws-a": {"a.aws_security_group_rule.r": [aws_entry({"sources": ["10.0.0.0/8", "172.16.0.0/12"]})]}}
+	count(reasons_with("aws-a", [two], both)) == 0
+}
+
+test_aws_inline_block_with_two_ranges_needs_one_entry if {
+	sg := create("a.aws_security_group.this", "aws_security_group", {"ingress": [{"from_port": 22, "to_port": 22, "protocol": "tcp", "cidr_blocks": ["10.0.0.0/8"], "ipv6_cidr_blocks": ["fd00::/8"], "security_groups": []}]})
+	split := {"aws-a": {"a.aws_security_group.this": [
+		aws_entry({"ports": ["22"], "sources": ["10.0.0.0/8"]}),
+		aws_entry({"ports": ["22"], "sources": ["fd00::/8"]}),
+	]}}
+	count(reasons_with("aws-a", [sg], split)) == 1
+}
