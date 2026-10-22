@@ -110,6 +110,7 @@ The [Threat model](Threat-Model.md) is core step 19.
 
 - [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md)
 - [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md)
+- [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
 - [Enterprise change management for beginners (not used here)](Enterprise-Change-Management-for-Beginners.md)
 - [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md)
 - [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
