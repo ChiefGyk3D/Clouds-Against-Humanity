@@ -28,6 +28,7 @@
 13. [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md)
     - Side page: [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md)
 14. [Droplet hardening](Droplet-Hardening.md)
+    - Foundations side page: [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
 15. [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
 16. [Spacelift](Spacelift.md)
 17. [Doppler and secrets](Doppler-and-Secrets.md)

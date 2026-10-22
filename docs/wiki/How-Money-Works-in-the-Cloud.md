@@ -11,7 +11,7 @@ Prices below are DigitalOcean's at the time this project's price table was fetch
 | Thing | Costs | Notes |
 |---|---|---|
 | A **droplet** (virtual machine) | From about $4 to $6 a month for the smallest sizes, billed per second it exists | Billed whether it is busy or idle, powered on or off. "Off" is not "deleted". |
-| **Backups** of a droplet | 20 percent of the droplet's price for weekly, 30 percent for daily | Confirmed on DigitalOcean's pricing page on 2026-10-11 |
+| **Backups** of a droplet ([what a backup is](Backups-Recovery-and-Patching.md#four-words-that-sound-alike)) | 20 percent of the droplet's price for weekly, 30 percent for daily | Confirmed on DigitalOcean's pricing page on 2026-10-11 |
 | **Snapshots** | Per gigabyte stored | A snapshot you took once and forgot is a small bill forever |
 | **Block storage** (extra disks) | Per gigabyte per month | |
 | **Object storage** (Spaces) | $5 a month flat for a generous allowance | Flat fee even if you store one file |
