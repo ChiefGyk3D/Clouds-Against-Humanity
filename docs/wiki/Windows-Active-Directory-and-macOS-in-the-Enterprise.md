@@ -127,8 +127,8 @@ The five tasks of this lesson, with the closest equivalent on the other systems.
 
 | Task | PowerShell (Windows) | macOS (Terminal) | Linux (Bash) |
 |---|---|---|---|
-| List local users | `Get-LocalUser` (est.) | `dscl . list /Users` (est.) | `getent passwd` or `cut -d: -f1 /etc/passwd` |
-| Who is in the local admin group | `Get-LocalGroupMember -Group Administrators` (est.) | `dscl . read /Groups/admin GroupMembership` (est.) | `getent group sudo` or `wheel` |
+| List local users | `Get-LocalUser` (est.) | `dscl . -list /Users` (est.) | `getent passwd` or `cut -d: -f1 /etc/passwd` |
+| Who is in the local admin group | `Get-LocalGroupMember -Group Administrators` (est.) | `dscl . -read /Groups/admin GroupMembership` (est.) | `getent group sudo` or `getent group wheel` |
 | List and check services | `Get-Service` (and `Get-Service -Name <name>`) | `launchctl list` (est.) | `systemctl list-units --type=service` |
 | Read the event log | `Get-WinEvent -LogName System -MaxEvents 10` | `log show --last 10m` (est.) | `journalctl -n 20` |
 | Check the firewall | `Get-NetFirewallProfile` (est.) | `/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate` (est.) | `sudo ufw status` or `firewall-cmd --list-all` |
@@ -138,7 +138,7 @@ The five tasks of this lesson, with the closest equivalent on the other systems.
 
 `Get-WinEvent` can filter at the source with `-FilterHashtable`, which is much faster than fetching everything and filtering afterward (Microsoft's reference shows the pattern with `LogName`, `Level` and `StartTime`). The `Get-FileHash` reference says SHA-256 is the default algorithm, and what a hash is for is in [Hashing: a fingerprint, not a lock](Hashing-Encryption-and-Keys.md#hashing-a-fingerprint-not-a-lock).
 
-A safety habit that carries over from the terminal lesson: cmdlets that change things accept `-WhatIf`, which prints what would happen and does nothing (**est.**). Use it first, every time, on anything that deletes or modifies.
+A safety habit that carries over from the terminal lesson: many cmdlets that change things accept `-WhatIf`, which prints what would happen and does nothing, but support depends on the individual cmdlet (**est.**), so check with `Get-Help <cmdlet> -Parameter WhatIf` or the cmdlet's reference page before you rely on it. Where it is supported, use it first on anything that deletes or modifies.
 
 ## macOS in the enterprise
 
@@ -155,7 +155,7 @@ How the three compare, as a beginner's map. Every cell marked **est.** is genera
 
 | Aspect | Linux | Windows (domain) | macOS (MDM) |
 |---|---|---|---|
-| Central sign-in | Often none per machine; SSO via a directory or SSH keys | Active Directory, with Kerberos | MDM plus a cloud identity provider (**est.**) |
+| Central sign-in | Often none per machine; SSO via a directory or SSH keys | Active Directory, with Kerberos | A local account or a cloud identity provider signs the person in; MDM is the separate plane that enrolls and configures the device (**est.**) |
 | Central configuration | A configuration-management tool or cloud-init ([What is infrastructure as code](What-Is-Infrastructure-as-Code.md)) | Group Policy | Configuration profiles and declarative management |
 | Where settings live | Text files under `/etc` | The registry | Property list (`.plist`) files and profiles (**est.**) |
 | Software installs | Package manager (`apt`, `dnf`) | Installers, plus a management tool that deploys them (**est.**) | App Store, installers, and MDM-deployed apps (**est.**) |
@@ -190,7 +190,7 @@ What the defensive side looks like, in the order I would explain it to a new hir
 
 ## Hands-on, free path: read, then read-only commands
 
-You need no account and no money for this path. Everything below only **reads**. There are two ways to do it, pick the one you have:
+You need no account and no money for this path. The commands in Exercises 1 to 4 and 6 only **read**. Exercise 5 and Exercise 7 write small files into a new, uniquely named temporary folder that they delete again, and the optional virtual-machine path changes a disposable machine. There are two ways to do it, pick the one you have:
 
 - **On a Windows machine you own.** Run the PowerShell blocks in a normal (non-administrator) PowerShell window. A few events need administrator rights to read, and the lesson says when.
 - **On a Mac or a Linux machine.** Run the Bash or macOS commands. You will see the same ideas with different words.
@@ -215,13 +215,13 @@ Each exercise has Predict, Do, Check and Undo. Windows and macOS lines are **est
    ```bash
    # macOS
    id
-   dscl . list /Users | grep -v '^_'
-   dscl . read /Groups/admin GroupMembership
+   dscl . -list /Users | grep -v '^_'
+   dscl . -read /Groups/admin GroupMembership
 
    # Linux
    id
    getent passwd | cut -d: -f1
-   getent group sudo wheel
+   getent group sudo; getent group wheel
    ```
 3. **Check.** On Windows, built-in accounts such as Guest are usually disabled (**est.**). Count the enabled ones. A machine you set up yourself usually has one administrator; a machine from an employer often has more than one. On a Mac, accounts starting with an underscore are system accounts, which the `grep` hides.
 4. **Undo.** Nothing changed; you only read.
@@ -234,7 +234,7 @@ Each exercise has Predict, Do, Check and Undo. Windows and macOS lines are **est
    ```powershell
    # PowerShell (Windows)
    Get-Service | Group-Object Status | Select-Object Name, Count
-   Get-Service -Name W32Time | Select-Object Name, Status, StartType
+   Get-CimInstance Win32_Service -Filter "Name='W32Time'" | Select-Object Name, State, StartMode, StartName
    ```
 
    ```bash
@@ -243,7 +243,7 @@ Each exercise has Predict, Do, Check and Undo. Windows and macOS lines are **est
    # Linux
    systemctl list-units --type=service --state=running | head -n 15
    ```
-3. **Check.** The group counts show how many services are running and stopped. On a domain-joined machine, `W32Time` is normally set to start automatically (**est.**); on a standalone home PC it may be on demand. The StartType column is the "does this survive a reboot" answer, as `systemctl enable` is on Linux.
+3. **Check.** The group counts show how many services are running and stopped. On a domain-joined machine, `W32Time` is normally set to start automatically (**est.**); on a standalone home PC it may be on demand. The `StartMode` column is the "does this survive a reboot" answer, as `systemctl enable` is on Linux, and `StartName` is the account the service runs as. (`Get-Service` itself has a start-type property only in some PowerShell versions, which is why this uses the CIM query, **est.**)
 4. **Undo.** Nothing changed.
 
 ### Exercise 3: read the event log
@@ -295,8 +295,8 @@ Each exercise has Predict, Do, Check and Undo. Windows and macOS lines are **est
 
    ```powershell
    # PowerShell
-   $dir = Join-Path ([System.IO.Path]::GetTempPath()) "f8-hash"
-   New-Item -ItemType Directory -Path $dir -Force | Out-Null
+   $dir = Join-Path ([System.IO.Path]::GetTempPath()) ("f8-hash-" + [guid]::NewGuid())
+   New-Item -ItemType Directory -Path $dir | Out-Null
    Set-Content -Path "$dir\note.txt" -Value "hello domain" -NoNewline
    Get-FileHash "$dir\note.txt" | Select-Object Algorithm, Hash
    Set-Content -Path "$dir\note.txt" -Value "hello domaiN" -NoNewline
@@ -335,14 +335,14 @@ Each exercise has Predict, Do, Check and Undo. Windows and macOS lines are **est
 
 ### Exercise 7: a group-change report from made-up data (any operating system)
 
-This is the one exercise I ran, in Bash on Linux, on 2026-10-22. The data is invented: `casey`, `blake`, `drew` and `helpdesk1` are made-up names, and the file stands in for an export of group-change events. It shows how a defender spots a change to a privileged group.
+This list reads additions only: it does not know about removals or about people who were already members, so for current membership you would query the directory (`Get-ADGroupMember`) and use the event file only to see changes. This is the one exercise I ran, in Bash on Linux, on 2026-10-22. The data is invented: `casey`, `blake`, `drew` and `helpdesk1` are made-up names, and the file stands in for an export of group-change events. It shows how a defender spots a change to a privileged group.
 
 1. **Predict.** Looking at the four rows you are about to create, which one would you ask about?
 2. **Do.**
 
    ```bash
    # Bash
-   mkdir -p ~/f8-lab && cd ~/f8-lab
+   d="$(mktemp -d)" && cd "$d"   # a new, empty, uniquely named folder
    printf 'casey\n' > approved_admins.txt
    cat > group_events.csv <<'EOF'
    time,event_id,group,member,changed_by
@@ -353,13 +353,13 @@ This is the one exercise I ran, in Bash on Linux, on 2026-10-22. The data is inv
    EOF
    awk -F, -v p='^(Domain Admins|Enterprise Admins|Administrators)$' \
      'NR>1 && $3 ~ p {print "PRIVILEGED CHANGE:", $1, "event", $2, $3, "<-", $4, "by", $5}' group_events.csv
-   echo "--- members of Domain Admins who are not approved:"
+   echo "--- additions to Domain Admins of people who are not on the approved list:"
    awk -F, 'NR>1 && $3=="Domain Admins" {print $4}' group_events.csv | sort -u | grep -vxFf approved_admins.txt
    ```
 
    ```powershell
    # PowerShell (not run; est.)
-   $dir = Join-Path $HOME "f8-lab"; New-Item -ItemType Directory -Path $dir -Force | Out-Null
+   $dir = Join-Path $HOME ("f8-lab-" + [guid]::NewGuid()); New-Item -ItemType Directory -Path $dir | Out-Null
    Set-Location $dir
    Set-Content approved_admins.txt "casey"
    @"
@@ -380,12 +380,12 @@ This is the one exercise I ran, in Bash on Linux, on 2026-10-22. The data is inv
 
    ```text
    PRIVILEGED CHANGE: 2026-10-20T22:47:03Z event 4728 Domain Admins <- blake by helpdesk1
-   --- members of Domain Admins who are not approved:
+   --- additions to Domain Admins of people who are not on the approved list:
    blake
    ```
 
    One row is the odd one: a helpdesk account added someone to Domain Admins at 22:47. Two things made it stand out: the group, and the hour. Whether it was a mistake or an intrusion, nobody should learn about it from a quarterly review.
-4. **Undo.** `cd ~ && rm -r ~/f8-lab` (Bash) or `Remove-Item -Recurse $dir` (PowerShell). The `-r` and `-Recurse` are safe here because the folder is the one you just made.
+4. **Undo.** `cd ~ && rm -r "$d"` (Bash) or `Set-Location ~; Remove-Item -Recurse $dir` (PowerShell). Both paths were created fresh by this exercise (`mktemp -d`, a GUID in the name), so the recursive delete cannot reach anything you already had. Check the variable is set first: `echo "$d"` or `$dir`.
 
 ## Optional own-hardware path: a disposable Windows evaluation virtual machine
 
@@ -399,7 +399,7 @@ If you want to build a real domain and break it, the sensible place is a virtual
 - **Hardware.** Microsoft's hardware-requirements page for Windows Server lists a 1.4 GHz 64-bit processor minimum and, for RAM, 2 GB minimum for Server Core and for Server with Desktop Experience, with 4 GB recommended for the latter. Give a lab domain controller 4 GB or more of memory and a disk of a few tens of gigabytes (**est.**).
 - **Virtualization.** Microsoft documents Hyper-V on Windows (an edition and hardware requirement applies; **est.**). Free alternatives exist, such as VirtualBox ([downloads](https://www.virtualbox.org/wiki/Downloads), which I confirmed loads but did not review for terms).
 
-**Isolation rules.** Put the virtual machine on a **host-only or internal virtual network** with no route to your home network, so the test domain, its DNS and DHCP cannot collide with real ones. Take a snapshot before every change you may want to undo. Use a domain name under a reserved domain such as `corp.example.com`. Never join a real computer to it, and never reuse a real password.
+**Isolation rules.** Activate the evaluation first (the Server edition needs internet activation in its first 10 days): give the new virtual machine a temporary NAT connection, activate, run Windows Update, then disconnect it. Only after that, build the domain lab and put the virtual machine on a **host-only or internal virtual network** with no route to your home network, so the test domain, its DNS and DHCP cannot collide with real ones. Take a snapshot before every change you may want to undo. Use a domain name under a reserved domain such as `corp.example.com`. Never join a real computer to it, and never reuse a real password.
 
 **Teardown.** When you are done: delete the virtual machine and its disk files, delete the ISO or VHD if you will not use it again, and delete the snapshots. The evaluation expires on its own; deleting is cleaner.
 
@@ -428,7 +428,7 @@ Add-ADGroupMember -Identity "Helpdesk" -Members "blake"
 Get-ADGroupMember -Identity "Helpdesk" | Select-Object Name, SamAccountName
 ```
 
-A first Group Policy: in the Group Policy Management console, create a GPO called "Lab banner", link it to the Staff OU, and set a harmless value, such as the sign-in message text (**est.** where in the editor). Then on a joined lab computer run `gpresult /r` and look for the GPO in the output.
+A first Group Policy: in the Group Policy Management console, create a GPO called "Lab banner", link it to an OU that holds the lab computer, and set a harmless value, such as the sign-in message text (**est.** where in the editor). That setting is a computer-side policy, so linking it to the Staff OU, which holds only users and a group, would do nothing: create a "Workstations" OU, move the joined lab computer into it (it lands in the default Computers container otherwise, **est.**), and link the GPO there. Then on a joined lab computer run `gpresult /r` and look for the GPO in the output.
 
 ## Build it, break it, detect it, evade it, defend it
 
@@ -446,7 +446,7 @@ The loop, on the lab domain if you built one, or on the fake data of Exercise 7 
 
 **Flip the board.** Two short paper exercises. (1) You are the intruder who just got one helpdesk password. Using the lab picture above, list which groups that account can change and which single change would give you the most reach; then name the one log entry that would give you away. (2) You are the defender with ten minutes to write one alert. Pick the event, the group names it should fire on, and one benign case that would cause a false alarm (a planned change at a known time by a named person). Write down what the on-call person should do in the first five minutes.
 
-**Undo.** In the lab, remove the test user from Domain Admins (`Remove-ADGroupMember`, **est.**), or revert to the snapshot you took before. Delete the virtual machine when you finish.
+**Undo.** In the lab, remove the test user from Domain Admins (`Remove-ADGroupMember -Identity "Domain Admins" -Members "blake"`, lab only, **est.**; it asks for confirmation), or revert to the snapshot you took before. Delete the virtual machine when you finish.
 
 ## Common mistakes
 
