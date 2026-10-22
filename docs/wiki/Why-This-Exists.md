@@ -85,4 +85,4 @@ The order below is the order I would do them in: build first, and only then swit
 | 5. Defend it | [Build your own mini SOC](Build-Your-Own-Mini-SOC.md), [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) | The CI and cost gates are built and tested. The mini SOC is a springboard for you to build, written as an unverified draft; nothing in it has been run. |
 | 6. Flip the board, again | [Trace one change end to end](Trace-One-Change-End-to-End.md) | Follow one real pull request through every gate, read three bad variants and which gate would stop each, then trace a different change yourself. |
 
-I have not measured what anyone gets out of this, and I am not claiming a result. If a page is wrong, or the board needs flipping somewhere I have not thought of, say so; suggestions are welcome anywhere in the project.
+I have not measured what anyone gets out of this, and I am not claiming a result. If a page is wrong, or the board needs flipping somewhere I have not thought of, say so; suggestions are welcome anywhere in the project, and [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md) shows how to send them.
