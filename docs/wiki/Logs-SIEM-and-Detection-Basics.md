@@ -112,7 +112,7 @@ Correlating two logs means putting their events in order. If one machine's clock
 | Tool | Watches | What it does when it sees something | Where it fits |
 |---|---|---|---|
 | **SIEM** | Logs from everywhere | Collects, normalizes, stores, searches, alerts | The "store and detect" job |
-| **IDS** (intrusion detection system) | Network traffic, or a host's activity | Raises an alert and does not block | Detection only. Suricata describes itself as a network IDS, IPS and monitoring engine |
+| **IDS** (intrusion detection system) | Network traffic, or a host's activity | Raises an alert and does not block | Detection only. Suricata describes itself as a network IDS, IPS and monitoring engine; [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md) runs one offline |
 | **IPS** (intrusion prevention system) | The same | Drops or blocks the traffic it judges hostile | Detection plus action; a false positive here **breaks something real**, which is why many run in alert-only mode first |
 | **EDR** (endpoint detection and response) | Processes, files and network activity on each laptop or server | Records, detects, and can isolate the machine | Per-machine, agent-based ([the landscape page](Detection-and-Monitoring-Wazuh-and-the-Landscape.md#four-jobs-and-the-words-people-mix-up) places the products) |
 | **NOC** | Whether things are up and fast | A team acts to restore service | Uses metrics first |
