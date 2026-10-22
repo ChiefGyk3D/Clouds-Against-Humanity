@@ -162,7 +162,7 @@ An **availability zone (AZ)** is a separate location inside a region, so that on
 
 Other providers use other words. DigitalOcean's regional page says it has "16 datacenters across 13 regions" (last verified by DigitalOcean 9 October 2026, read 2026-10-22), and talks of datacenters, not zones; it does not use the AWS term on that page. Azure and Google Cloud also have zones (est.; I did not read their pages for this lesson).
 
-Why you care: a single machine in a single zone is a single point of failure; two machines in two zones survive the loss of one building; two regions survive the loss of a whole area, at the price of complexity and often a second bill. Location also decides latency, which laws apply to the data, and which sizes are available ([cost.md](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md) records a real case where a cheap size was missing in one region).
+Why you care: a single machine in a single zone is a single point of failure; two machines in two zones can survive the loss of one building, and two regions the loss of a whole area, but only if the design supports it: state replicated to both places, health checks that route traffic away from the failed side, and a failover you have tested. Machines in two zones that share one database, one dependency or one bad deploy can still fail together. More places also means more complexity and often a second bill. Location also decides latency, which laws apply to the data, and which sizes are available ([cost.md](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md) records a real case where a cheap size was missing in one region).
 
 ## Sizes, in plain terms
 
@@ -178,7 +178,7 @@ What this repository records (the only figures on this page):
 | AWS `t4g.nano` | (vCPU and memory not read) | $0.0042 an hour, about $3.07 a month at 730 hours | `docs/cost-prices/aws.json`, us-east-1, retrieved 2026-10-16 |
 | AWS `t3.micro` | (vCPU and memory not read) | $0.0104 an hour, about $7.59 a month at 730 hours | same |
 
-(The monthly AWS figures are the hourly price times 730, my arithmetic. AWS prices here leave out disk, a public IPv4 address, data transfer and anything else; the file says so in its `not_priced` field. The vCPU and memory of the AWS types are on AWS's instance-types page, which I did not read for this lesson.)
+(The monthly AWS figures are the hourly price times 730, my arithmetic. The instance prices above are for the instance alone. The same file lists separate charges for a public IPv4 address ($0.005 an hour) and a gp3 disk ($0.08 per GB-month), which are not included in them, and its `not_priced` field lists what it does not price at all: data transfer, logging, snapshots and anything created outside OpenTofu. The vCPU and memory of the AWS types are on AWS's instance-types page, which I did not read for this lesson.)
 
 Two ideas make sizes less mysterious. First, a **vCPU** is a share of a physical processor handed to your VM by the hypervisor; two VMs on one server may share cores (est.). Second, a size is not a promise about speed under load: some families are "burstable" and slow down when their credits run out, which is what the [AWS cost lesson](Provider-AWS-Cost-Lesson.md) covers for AWS.
 
@@ -544,7 +544,7 @@ Without looking back: draw the VM stack and the container stack and mark the ker
 | "It is in the cloud, so the provider patches it" | Only the layers the service model gives them | The map table, and the vendor's page |
 | "`-p 8080:80` is local" | It is open to every address on the host | `podman port NAME`; write `127.0.0.1:8080:80` |
 | "A stopped droplet costs nothing" | A powered-off bundled-plan droplet is still billed | Destroy it; read the billing page |
-| "One zone is high availability" | One building is one point of failure | Two machines in two zones, and a tested restore |
+| "One zone is high availability" (or "two zones is") | One building is one point of failure; a second zone helps only with replicated state, health-aware routing and a tested failover | Two machines in two zones, shared dependencies removed, and a tested restore |
 
 ## Claims register
 
@@ -571,7 +571,7 @@ Retrieved 2026-10-22 with read-only requests, unless stated.
 | CVE-2024-21626: runc file descriptor leak allowing container escape | [NVD](https://nvd.nist.gov/vuln/detail/CVE-2024-21626) | Read (published 2024-01-31) |
 | `doctl` commands used: `compute tag create/delete/list`, `compute firewall create/delete/list`, `compute droplet create/get/delete/list`, `compute ssh-key list` | [doctl reference](https://docs.digitalocean.com/reference/doctl/reference/) | Names and the rule syntax checked against the firewall create page; never run |
 | `s-1vcpu-1gb` $6, `s-1vcpu-2gb` $12, `s-2vcpu-2gb` $18 a month, with memory, disk and transfer | `docs/cost.md`, `docs/cost-prices.json` | Read in this repository (retrieved 2026-10-21) |
-| AWS `t4g.nano` $0.0042 and `t3.micro` $0.0104 an hour, us-east-1, 730 hours a month; excludes disk, IPv4, transfer | `docs/cost-prices/aws.json` | Read in this repository (retrieved 2026-10-16); monthly figures are my arithmetic |
+| AWS `t4g.nano` $0.0042 and `t3.micro` $0.0104 an hour, us-east-1, 730 hours a month; the file lists IPv4 ($0.005 an hour) and gp3 ($0.08 per GB-month) separately and says data transfer, logging, snapshots and non-OpenTofu resources are not priced | `docs/cost-prices/aws.json` | Read in this repository (retrieved 2026-10-16); monthly figures are my arithmetic |
 | Exercise outputs (kernel and `libc6` versions, image date, capability values, loopback binding, audit lines) | One run each on Linux with Podman 5.4.2, 2026-10-22 | Observed; your values differ |
 | VM boot time, container start time, "VM boundary generally considered stronger", `systemd-detect-virt` naming kvm, vCPU sharing, SELinux `:Z`, the rootless-versus-rootful root mapping, PowerShell and Windows behavior | General knowledge | **est.** |
 
