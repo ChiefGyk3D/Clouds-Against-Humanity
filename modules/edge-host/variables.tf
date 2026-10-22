@@ -75,26 +75,10 @@ variable "restricted_ports" {
   }
 }
 
-variable "service_packages" {
-  type        = map(string)
-  default     = {}
-  description = "Service packages to install, name to EXACT version (for example { mosquitto = \"2.0.18-1build3\" }). The default installs none. Every entry is pinned: a missing, empty or wildcard version is refused, so no unpinned service package can reach cloud-init. The pins are not chosen here; they are verified against the distribution by whoever fills this in."
-
-  validation {
-    condition     = alltrue([for n, v in var.service_packages : can(regex("^[a-z0-9][a-z0-9+.-]*$", n)) && can(regex("^[A-Za-z0-9][A-Za-z0-9.+~:_-]*$", v))])
-    error_message = "Each service package needs a plain package name and an exact version (letters, digits and . + ~ : _ - only; no *, no empty string, no latest)."
-  }
-
-  validation {
-    condition     = alltrue([for n, v in var.service_packages : !contains(["latest", "any"], lower(v))])
-    error_message = "latest and any are not versions; pin an exact one."
-  }
-}
-
 variable "timezone" {
   type        = string
-  default     = "UTC"
-  description = "IANA time zone name of the machine (UTC or Area/Location). Also the zone reboot_time is read in."
+  default     = "America/New_York"
+  description = "IANA time zone name of the machine (UTC or Area/Location). Also the zone reboot_time is read in. Eastern by default, the zone the connectors' reboot times and reboot-slots.json are written in."
 
   validation {
     condition     = can(regex("^(UTC|[A-Za-z_]+(/[A-Za-z0-9_+-]+){1,2})$", var.timezone))
@@ -102,12 +86,28 @@ variable "timezone" {
   }
 }
 
-variable "reboot_time" {
+variable "service" {
   type        = string
-  description = "HH:MM in `timezone` when unattended-upgrades may reboot the host. Pick a time that does not collide with the connectors' reboot times."
+  description = "The one edge service this droplet runs: a key of reboot-slots.json (reticulum, lxmd, i2pd, mosquitto, iperf3). Each service is its own stack and its own droplet; the name, the reboot slot and the Doppler config name follow from it. This module installs no service."
 
   validation {
-    condition     = can(regex("^([01][0-9]|2[0-3]):[0-5][0-9]$", var.reboot_time))
-    error_message = "reboot_time must be HH:MM in 24-hour time, for example 05:00."
+    condition     = contains(["reticulum", "lxmd", "i2pd", "mosquitto", "iperf3"], var.service)
+    error_message = "service must be one of reticulum, lxmd, i2pd, mosquitto, iperf3 (the keys of reboot-slots.json)."
+  }
+}
+
+variable "project_id" {
+  type        = string
+  description = "Id of the existing DigitalOcean project (the foundation stack's project_id output). The droplet and the reserved IP are attached to it."
+}
+
+variable "reboot_time" {
+  type        = string
+  default     = null
+  description = "HH:MM in `timezone` when unattended-upgrades may reboot this host. null (the default) takes the service's slot from reboot-slots.json (01:00 to 03:00 Eastern, before the connectors' 04:00 and 05:00). A test keeps the slots distinct from each other and from the connectors."
+
+  validation {
+    condition     = var.reboot_time == null ? true : can(regex("^([01][0-9]|2[0-3]):[0-5][0-9]$", var.reboot_time))
+    error_message = "reboot_time must be null or HH:MM in 24-hour time, for example 02:30."
   }
 }

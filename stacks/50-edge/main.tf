@@ -1,18 +1,17 @@
 # SPDX-License-Identifier: Apache-2.0
-# The public edge (DMZ), design: docs/superpowers/specs/2026-10-19-edge-dmz-design.md.
+# The shared edge network (DMZ): the rns-dmz VPC, its tags and the Cloud Firewall.
+# Design: docs/superpowers/specs/2026-10-19-edge-dmz-design.md. It holds no
+# droplet: every edge service is its own stack (one droplet each, built from
+# modules/edge-host), created and approved later.
 # UNAPPLIED and DISABLED: every resource below is count 0 unless edge_enabled is
-# true, and the stage is not approved. The cost gate does not price a droplet
-# here (cost.json is empty), and turning the switch on is refused until it does.
+# true, and the stage is not approved. Turning the switch on is refused until
+# cost.json says the network is approved.
 
 locals {
   # Names use resource_key when it is set and region otherwise.
   resource_key = var.resource_key != "" ? var.resource_key : var.region
 
   on = var.edge_enabled ? 1 : 0
-
-  # The size the cost gate wants to read as a plain local reference. The output
-  # precondition ties it to the exact droplet cost.json prices.
-  edge_droplet = { size = var.droplet_size }
 
   cost = jsondecode(file("${path.module}/cost.json"))
 
@@ -32,19 +31,15 @@ locals {
     for b in local.avoid_bounds : local.vpc_bounds[0] <= b[1] && b[0] <= local.vpc_bounds[1]
   ])
 
-  # The one list both firewalls are built from: the Cloud Firewall below and the
-  # host's nftables in the module. 8883 (Meshtastic MQTT over TLS) is fixed by
-  # the design; the others come from variables. iperf3 (5201) is restricted.
-  public_ports = concat(
-    [{ protocol = "tcp", port_range = tostring(var.reticulum_port) }],
-    var.i2pd_port == null ? [] : [
-      { protocol = "tcp", port_range = tostring(var.i2pd_port) },
-      { protocol = "udp", port_range = tostring(var.i2pd_port) },
-    ],
-    [{ protocol = "tcp", port_range = "8883" }],
-  )
-  restricted_ports = [
-    { protocol = "tcp", port_range = "5201", sources = var.iperf3_allowed_sources },
+  # Public inbound ports of the shared Cloud Firewall. Only Reticulum and MQTT
+  # over TLS (8883, fixed by the design) are listed. i2pd stays closed until its
+  # own stack exists (it will pick a random port; that is NOT a security measure),
+  # and iperf3 (TCP 5201) stays closed to everyone until an iperf3 stack exists
+  # and a variable carries the observed connector addresses. No service is
+  # installed yet, and no droplet exists in this stack.
+  public_ports = [
+    { protocol = "tcp", port_range = tostring(var.reticulum_port) },
+    { protocol = "tcp", port_range = "8883" },
   ]
 
   # Outbound starts from what the built pieces need: DNS, apt mirrors (80, 443)
@@ -80,7 +75,7 @@ resource "digitalocean_tag" "transport" {
   name = "rns-dmz-transport"
 }
 
-# Inbound is the public service ports plus iperf3 from named sources. Trivy
+# Inbound is the public service ports only. Trivy
 # DIG-0001 (inbound from anywhere) and DIG-0003 (egress to anywhere) are
 # accepted: the host is public by design, every inbound rule names one port,
 # nothing else is open, and the hosts it must reach (package mirrors, DNS and NTP
@@ -104,17 +99,6 @@ resource "digitalocean_firewall" "dmz" {
     }
   }
 
-  # With no source the rule is not rendered at all: 5201 stays closed. The test
-  # that keeps this IPv4-only reads the variable's validation (tests/test_edge_stack.py).
-  dynamic "inbound_rule" {
-    for_each = nonsensitive(length(var.iperf3_allowed_sources) > 0) ? [1] : []
-    content {
-      protocol         = "tcp"
-      port_range       = "5201"
-      source_addresses = var.iperf3_allowed_sources
-    }
-  }
-
   dynamic "outbound_rule" {
     for_each = local.outbound
     content {
@@ -123,19 +107,4 @@ resource "digitalocean_firewall" "dmz" {
       destination_addresses = ["0.0.0.0/0", "::/0"]
     }
   }
-}
-
-module "edge_host" {
-  count  = local.on
-  source = "../../modules/edge-host"
-
-  layer            = "edge"
-  region           = var.region
-  resource_key     = var.resource_key
-  vpc_id           = digitalocean_vpc.dmz[0].id
-  tags             = [digitalocean_tag.dmz[0].name, digitalocean_tag.transport[0].name]
-  size             = local.edge_droplet.size
-  public_ports     = local.public_ports
-  restricted_ports = local.restricted_ports
-  reboot_time      = var.reboot_time
 }

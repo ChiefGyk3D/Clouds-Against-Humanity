@@ -3,7 +3,7 @@ variable "edge_enabled" {
   type        = bool
   default     = false
   nullable    = false
-  description = "Master switch for the public edge (DMZ). false (the default) creates nothing: no VPC, tag, firewall, droplet or reserved IP. The stage is not approved; turning this on also needs a priced cost.json for this stack and the cost gate's reserved IP support (see docs/stages/05-edge.md)."
+  description = "Master switch for the shared edge network (VPC, tags and Cloud Firewall; no droplet). false (the default) creates nothing. The stage is not approved; turning this on also needs this stack's cost.json to carry edge_network_approved = true, set in the reviewed change that approves the stage (see docs/stages/05-edge.md)."
 }
 
 variable "region" {
@@ -72,12 +72,6 @@ variable "reserved_ranges" {
   }
 }
 
-variable "droplet_size" {
-  type        = string
-  default     = "s-1vcpu-1gb"
-  description = "Droplet size slug (design option A, 1 GiB, memory to be measured first). Enabling the edge requires cost.json to price this exact size."
-}
-
 variable "reticulum_port" {
   type        = number
   default     = 4242
@@ -87,44 +81,5 @@ variable "reticulum_port" {
   validation {
     condition     = var.reticulum_port == floor(var.reticulum_port) && var.reticulum_port >= 1 && var.reticulum_port <= 65535
     error_message = "reticulum_port must be a whole port number from 1 to 65535."
-  }
-}
-
-variable "i2pd_port" {
-  type        = number
-  default     = null
-  description = "The pinned inbound i2pd port, opened for TCP and UDP. null (the default) opens nothing: the design names no port number and this is not guessed."
-
-  validation {
-    condition     = var.i2pd_port == null ? true : (var.i2pd_port == floor(var.i2pd_port) && var.i2pd_port >= 1 && var.i2pd_port <= 65535)
-    error_message = "i2pd_port must be null or a whole port number from 1 to 65535."
-  }
-}
-
-variable "iperf3_allowed_sources" {
-  type        = list(string)
-  default     = []
-  sensitive   = true
-  description = "IPv4 ranges allowed to reach iperf3 (TCP 5201): the maintainer's home WAN address as a /32, and the core connectors' egress addresses once the source address the edge sees is verified. Empty (the default) keeps 5201 closed. Never 0.0.0.0/0 and never IPv6. The home address identifies the owner, so it arrives from Doppler, never from a committed file."
-
-  validation {
-    condition     = alltrue([for s in var.iperf3_allowed_sources : can(cidrnetmask(s)) && !strcontains(s, ":") && s != "0.0.0.0/0"])
-    error_message = "iperf3_allowed_sources entries must be IPv4 ranges, never 0.0.0.0/0 and never IPv6."
-  }
-
-  validation {
-    condition     = length(var.iperf3_allowed_sources) <= 20
-    error_message = "At most 20 sources: the Cloud Firewall allows 50 rules in all and 1000 addresses in total across them."
-  }
-}
-
-variable "reboot_time" {
-  type        = string
-  default     = "05:00"
-  description = "HH:MM (UTC) when unattended-upgrades may reboot the edge host. Pick a time that does not collide with the connectors' reboot_times in stack 10-access (a connector reboots 30 minutes before its weekly update)."
-
-  validation {
-    condition     = can(regex("^([01][0-9]|2[0-3]):[0-5][0-9]$", var.reboot_time))
-    error_message = "reboot_time must be HH:MM in 24-hour time, for example 05:00."
   }
 }

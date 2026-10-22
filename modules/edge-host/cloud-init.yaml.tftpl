@@ -12,16 +12,12 @@ timezone: ${timezone}
 ssh_pwauth: false
 package_update: true
 package_upgrade: true
-# OS packages come from the distribution and are patched by unattended-upgrades.
-# Service packages are pinned: each entry is [name, exact version], and the list
-# is empty unless the module is given pins.
+# OS packages only, patched by unattended-upgrades. No service is installed here:
+# each service is its own stack and brings its own verified, exactly pinned install.
 packages:
   - unattended-upgrades
   - chrony
   - nftables
-%{ for name, version in service_packages ~}
-  - [${name}, ${version}]
-%{ endfor ~}
 
 write_files:
   - path: /etc/apt/apt.conf.d/20auto-upgrades

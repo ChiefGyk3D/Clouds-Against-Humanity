@@ -10,17 +10,19 @@ Cloud Firewall, the metadata-endpoint lock).
 (`edge_enabled = false`) and the stage is not approved. Nothing here has run on
 a real machine. Design: [edge DMZ design](../../docs/superpowers/specs/2026-10-19-edge-dmz-design.md).
 
-What it does not do yet, on purpose: it installs no service. The service
-packages (Reticulum, lxmd, i2pd, Mosquitto, iperf3), their configuration and
-the log path home are open questions in the design (sections 4.5, 4.6, 9);
-`service_packages` takes exact pins and installs nothing by default.
+What it does not do, on purpose: it installs no service. Each service
+(Reticulum, lxmd, i2pd, Mosquitto, iperf3) is its own stack and droplet, built
+and approved later with exact pins verified from that project's releases. There
+is no log shipping from the edge until the Twingate headless relay exists.
 
 | Variable | Meaning |
 |---|---|
 | `public_ports` | Ports open to the internet; the host firewall mirrors them |
 | `restricted_ports` | Ports open to named IPv4 ranges only; no source means closed |
-| `service_packages` | Name to exact version; the default installs none |
+| `service` | Which edge service this droplet is for: names the droplet and picks its reboot slot and Doppler config name |
+| `project_id` | The existing DigitalOcean project the droplet and reserved IP join |
+| `reboot_time` | Default: the service's slot in `reboot-slots.json` (01:00 to 03:00 Eastern) |
 | `size` | Droplet size; the stack checks it against `cost.json` |
 
 Outputs: `name`, `droplet_id`, `size`, `reserved_ip`, `host_firewall_rules`
-(sensitive). The rendered user-data is never an output.
+(sensitive), `droplet_urn`, `doppler_config`, `reboot_time`. The rendered user-data is never an output.
