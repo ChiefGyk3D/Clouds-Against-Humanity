@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: Apache-2.0
+name: A question
+description: You are stuck or unsure and want to ask
+title: "[question] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Before you submit: do not paste secrets or anything that identifies you.** That means no tokens, API keys or passwords, no account or tenant names, no real IP addresses or hostnames, no amateur radio callsign or grid square, and nothing from a real vendor console that shows who you are. Replace each with a placeholder such as `REDACTED` or `203.0.113.10`. A security problem does not go in a public issue; see the security policy.
+
+        New to this? [How to give feedback or open an issue](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Give-Feedback-and-Open-an-Issue) walks through it. Reading and doing the exercises is free, and so is telling us what is wrong.
+  - type: input
+    id: page
+    attributes:
+      label: Page name or link (if there is one)
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: Say what you were trying to do and where you got stuck. There are no silly questions here.
+    validations:
+      required: true
