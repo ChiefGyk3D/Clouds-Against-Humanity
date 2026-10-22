@@ -85,7 +85,7 @@ That is not "VPNs are always wrong". WireGuard is a very different animal from a
 | 2 | Logs to the on-prem SIEM, cloud-to-home access | $0 in the cloud | In progress: the cloud-side code (settings layer, telemetry stack, opt-in node exporter, Wazuh agent and auditd, dashboards) is merged but nothing is applied |
 | 3 | Workload host: Portainer, five daemons, Discord-to-Matrix bridge, Spaces bucket, Functions | est. $17 | Planned |
 | 4 | Grafana, on-prem | $0 in the cloud | Planned (a cloud Grafana is a learner option, see [Build your own mini SOC](docs/wiki/Build-Your-Own-Mini-SOC.md)) |
-| Edge | Public edge (DMZ) and hardening | past the ceiling (design option A adds a $6 droplet) | Code written, disabled by default and never applied: `stacks/50-edge` creates nothing until the stage is approved ([stage page](docs/stages/05-edge.md)) |
+| Edge | Public edge (DMZ) and hardening | past the ceiling (design option A adds a $6 droplet) | Shared network code written, disabled by default and never applied (`stacks/50-edge` creates nothing until the stage is approved); each service becomes its own stack later ([stage page](docs/stages/05-edge.md)) |
 | AWS | The AWS twin of stages 0 and 1: `modules/aws/*`, `stacks/aws/*` | $0 and $20.84 | Written and tested with mocked providers, never applied. Azure and GCP have no code |
 
 Working ceiling: $30 per month in the current phase (stage 1), shared by every cloud; each phase carries its own ceiling in `docs/stages/approved.json`, so a later phase can raise it on purpose. A cost gate in CI fails any change that raises a cloud's planned total above its approved total, or the active clouds' approved totals above the current phase's ceiling (the AWS twin is marked inactive, because it does not fit beside stage 1). See the [roadmap](docs/wiki/Roadmap.md).
@@ -97,13 +97,13 @@ Clouds-Against-Humanity/
   stacks/00-foundation/                    project, tag, VPC, baseline firewall
   stacks/10-access/                        site, SSH key lookup, two connectors, connector firewall, group, SSH resources
   stacks/20-telemetry/                     stage 2 telemetry settings layer (see docs/stages/02-telemetry.md)
-  stacks/50-edge/                          the public edge (DMZ): VPC, tags, firewall, edge host; disabled by default, never applied (see docs/stages/05-edge.md)
+  stacks/50-edge/                          the shared edge network (DMZ): VPC, tags, Cloud Firewall; disabled by default, never applied (see docs/stages/05-edge.md)
   stacks/aws/{00-foundation,10-access}     the AWS twin of stages 0 and 1 (mocked tests only, never applied)
   modules/vpc/                             per-region VPC
   modules/firewall/                        tag-based deny-inbound firewall
   modules/twingate-bootstrap/              shared connector boot script and tokens, called by every provider's connector
   modules/twingate-connector/              connector, its tokens, its droplet and cloud-init
-  modules/edge-host/                       the edge droplet, reserved IP and its small cloud-init (no SSH, no connector)
+  modules/edge-host/                       reusable edge host: droplet, reserved IP, project attachment and a small cloud-init (no SSH, no connector, no service)
   modules/aws/{vpc,firewall,twingate-connector}  the AWS versions of those modules
   dashboards/                              importable Grafana dashboards (sites overview, droplet health, Wazuh agents); see docs/wiki/Grafana-Dashboards.md
   scripts/cost_check.py                    cost gate

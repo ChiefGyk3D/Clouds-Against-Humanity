@@ -174,9 +174,10 @@ def is_null(expr: str) -> bool:
 
 
 # References that are provably IPv4-only because the variable's own validation
-# rejects any ':' and 0.0.0.0/0; tests/test_edge_stack.py keeps that validation
-# in place. Adding a name here is a reviewed decision, like an allowlist entry.
-IPV4_ONLY_REFERENCES = frozenset({"var.iperf3_allowed_sources"})
+# rejects any ':' and 0.0.0.0/0. Empty today (the edge firewall has no variable
+# source; iperf3 stays closed until its own stack). Adding a name here is a
+# reviewed decision, and the variable's validation needs a test beside it.
+IPV4_ONLY_REFERENCES: frozenset[str] = frozenset()
 
 
 def literal_without_ipv6(expr: str) -> bool:
@@ -339,7 +340,6 @@ BAD = {
 GOOD = {
     "droplet": 'resource "digitalocean_droplet" "x" {\n  ipv6 = false\n}\n',
     "firewall-tags-only": 'resource "digitalocean_firewall" "x" {\n  inbound_rule {\n    source_tags = ["a"]\n  }\n  outbound_rule {\n    destination_addresses = ["0.0.0.0/0", "::/0"]\n  }\n}\n',
-    "firewall-named-ipv4-only-reference": 'resource "digitalocean_firewall" "x" {\n  inbound_rule {\n    source_addresses = var.iperf3_allowed_sources\n  }\n}\n',
     "aws-sg": 'resource "aws_security_group" "x" {\n  description = "no ::/0 and no ipv6 here"\n  ingress {\n    ipv6_cidr_blocks = []\n  }\n}\n',
     "aws-ingress-rule": 'resource "aws_vpc_security_group_ingress_rule" "x" {\n  cidr_ipv4 = "10.0.0.0/8"\n}\n',
     "aws-sg-rule-egress": 'resource "aws_security_group_rule" "x" {\n  type = "egress"\n  ipv6_cidr_blocks = ["::/0"]\n}\n',

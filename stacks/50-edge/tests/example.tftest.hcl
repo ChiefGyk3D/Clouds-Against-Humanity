@@ -3,31 +3,21 @@
 # `python -I scripts/gen_example_tests.py`. CI fails when this file is stale.
 # It plans the stack with the example values, so the example stays valid.
 
-mock_provider "digitalocean" {
-  mock_resource "digitalocean_droplet" {
-    defaults = {
-      id = "12345678"
-    }
-  }
-  mock_resource "digitalocean_reserved_ip" {
-    defaults = {
-      ip_address = "203.0.113.10"
-    }
-  }
-}
+mock_provider "digitalocean" {}
 
 variables {
-  # Example values for stacks/50-edge, the public edge (DMZ). UNAPPLIED: the stage
-  # is not approved and the switch below is off. Copy this file to terraform.tfvars
+  # Example values for stacks/50-edge, the shared edge network (VPC, tags and Cloud
+  # Firewall; no droplet, every edge service is its own stack later). UNAPPLIED: the
+  # stage is not approved and the switch below is off. Copy this file to terraform.tfvars
   # (which git ignores) for a local plan. Never put a token, key or password in a
   # value file: those live in Doppler. Every value here is a placeholder or a
   # documentation/private range, not a real one.
   #
-  # The droplet size is not priced here. It lives in cost.json, so the cost gate
-  # stays the one place that prices it (see docs/cost.md).
+  # Droplet sizes are not set here. Each service stack prices its droplet in its
+  # own cost.json, so the cost gate stays the one place that prices it.
 
-  # Master switch. false creates nothing. Turning it on also needs a priced
-  # cost.json and the cost gate's reserved IP support (docs/stages/05-edge.md).
+  # Master switch. false creates nothing. Turning it on also needs
+  # edge_network_approved = true in this stack's cost.json (docs/stages/05-edge.md).
   edge_enabled = false
 
   # DigitalOcean region slug, the same as core. Check the sizes your account may
@@ -49,23 +39,9 @@ variables {
   # identify your network, so never commit the real list.
   reserved_ranges = ["10.50.0.0/16", "10.60.0.0/16"]
 
-  # Droplet size slug. Enabling the edge requires cost.json to price this size.
-  droplet_size = "s-1vcpu-1gb"
-
-  # Public TCP port of the Reticulum TCPServerInterface.
+  # Public TCP port of the Reticulum TCPServerInterface. i2pd and iperf3 have no
+  # variable here: they stay closed until their own stacks exist.
   reticulum_port = 4242
-
-  # The pinned inbound i2pd port (TCP and UDP). The default is null, which opens
-  # nothing; the design names no number, so this one is only an example.
-  i2pd_port = 24680
-
-  # IPv4 ranges allowed to reach iperf3 (TCP 5201). Empty keeps it closed. The real
-  # value is the owner's address and comes from Doppler; this is a documentation range.
-  iperf3_allowed_sources = ["203.0.113.10/32"]
-
-  # HH:MM (UTC) when unattended-upgrades may reboot the host. Keep it clear of the
-  # connectors' reboot times.
-  reboot_time = "05:00"
 }
 
 run "the_example_values_are_valid" {

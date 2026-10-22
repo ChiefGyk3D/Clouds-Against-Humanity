@@ -11,16 +11,8 @@ output "edge_enabled" {
   }
 
   precondition {
-    condition     = var.i2pd_port == null ? true : var.i2pd_port != var.reticulum_port
-    error_message = "i2pd_port and reticulum_port must differ: two listeners cannot share a port."
-  }
-
-  precondition {
-    condition = !var.edge_enabled || (
-      length([for r in local.cost.resources : r if r.kind == "droplet" && r.size == var.droplet_size]) == 1 &&
-      length([for r in local.cost.resources : r if r.kind == "reserved_ip"]) == 1
-    )
-    error_message = "edge_enabled needs this stack's cost.json to price exactly one droplet of droplet_size and one reserved_ip. It is empty until the stage is approved and the cost gate can price a reserved IP (docs/stages/05-edge.md)."
+    condition     = !var.edge_enabled || try(local.cost.edge_network_approved, false) == true
+    error_message = "edge_enabled needs this stack's cost.json to carry edge_network_approved = true. It is false until the stage is approved in a reviewed change (docs/stages/05-edge.md)."
   }
 }
 
@@ -28,9 +20,13 @@ output "vpc_id" {
   value = one(digitalocean_vpc.dmz[*].id)
 }
 
-output "reserved_ip" {
-  description = "The edge's public address, or null while the edge is off."
-  value       = one(module.edge_host[*].reserved_ip)
+output "dmz_tag" {
+  description = "The tag the Cloud Firewall attaches to; every edge service droplet carries it."
+  value       = one(digitalocean_tag.dmz[*].name)
+}
+
+output "transport_tag" {
+  value = one(digitalocean_tag.transport[*].name)
 }
 
 output "region" {

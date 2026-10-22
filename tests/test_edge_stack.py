@@ -55,7 +55,7 @@ def test_the_switch_defaults_to_off():
 def test_every_resource_and_module_of_the_stack_is_behind_the_switch():
     main = strip_comments(read(STACK / "main.tf"))
     found = blocks(main, "resource") + blocks(main, "module")
-    assert len(found) >= 5, "the scan lost its targets"
+    assert len(found) >= 4, "the scan lost its targets"
     for labels, body in found:
         assert re.search(r"(?m)^\s*count\s*=\s*local\.on\s*$", body), (
             f"{labels}: count = local.on is missing, so it would exist with the switch off"
@@ -66,6 +66,7 @@ def test_every_resource_and_module_of_the_stack_is_behind_the_switch():
 def test_the_cost_manifest_prices_nothing_and_the_stage_is_not_approved():
     manifest = json.loads(read(STACK / "cost.json"))
     assert manifest["resources"] == []
+    assert manifest["edge_network_approved"] is False
     approved = json.loads(read(ROOT / "docs/stages/approved.json"))
     assert approved["current_phase"] != "edge"
     assert approved["phases"]["edge"]["status"] == "planned"
@@ -80,17 +81,71 @@ def test_the_stack_is_not_registered_for_a_spacelift_apply():
     assert "edge" not in config
 
 
-def test_the_iperf3_sources_variable_keeps_its_ipv4_only_validation():
-    # tests/test_ipv6_closed.py accepts var.iperf3_allowed_sources as an inbound
-    # source only because this validation rejects IPv6 and the whole internet.
-    variables = strip_comments(read(STACK / "variables.tf"))
-    (_, body), = [b for b in blocks(variables, "variable") if b[0] == ["iperf3_allowed_sources"]]
-    assert 'strcontains(s, ":")' in body
-    assert 's != "0.0.0.0/0"' in body
-    assert "can(cidrnetmask(s))" in body
+def test_i2pd_and_iperf3_are_closed_to_everyone_in_the_network_stack():
+    # Both stay closed until their own stacks exist: no variable, no rule, no port.
+    code = strip_comments(read(STACK / "main.tf") + read(STACK / "variables.tf") + read(STACK / "outputs.tf"))
+    for needle in ("i2pd", "iperf3", "5201", "source_addresses = var."):
+        assert needle not in code, needle
+    assert 'source_addresses = ["0.0.0.0/0"]' in code
+    # The module's restricted ports stay IPv4-only whenever a service stack uses them.
     module_vars = strip_comments(read(MODULE / "variables.tf"))
-    (_, body), = [b for b in blocks(module_vars, "variable") if b[0] == ["restricted_ports"]]
+    ((_, body),) = [b for b in blocks(module_vars, "variable") if b[0] == ["restricted_ports"]]
     assert 'strcontains(s, ":")' in body and 's != "0.0.0.0/0"' in body
+
+
+def test_no_edge_service_stack_exists_yet():
+    # Each service is its own stack, built and approved later. Until then nothing
+    # calls modules/edge-host, no service is installed and no droplet is declared.
+    for path in (ROOT / "stacks").rglob("*.tf"):
+        if ".terraform" in path.parts:
+            continue
+        code = strip_comments(read(path))
+        assert "modules/edge-host" not in code, f"{path}: a service stack appeared"
+        assert 'resource "digitalocean_droplet"' not in code, path
+
+
+def test_the_module_attaches_droplet_and_reserved_ip_to_the_project():
+    main = strip_comments(read(MODULE / "main.tf"))
+    assert re.search(r'resource "digitalocean_project_resources" "edge"', main)
+    assert "digitalocean_droplet.edge.urn" in main and "digitalocean_reserved_ip.edge.urn" in main
+    assert "var.project_id" in main
+
+
+def parse_slots():
+    data = json.loads(read(MODULE / "reboot-slots.json"))
+    return data["timezone"], data["slots"]
+
+
+def minutes(hhmm):
+    h, m = hhmm.split(":")
+    return int(h) * 60 + int(m)
+
+
+def test_reboot_slots_are_unique_staggered_and_clear_of_the_connectors():
+    tz, slots = parse_slots()
+    assert len(slots) == 5
+    times = [minutes(v) for v in slots.values()]
+    assert len(set(times)) == len(times), "two edge droplets share a reboot minute"
+    assert all(60 <= t <= 180 for t in times), "slots are 01:00 to 03:00 Eastern"
+    access = read(ROOT / "stacks/10-access/variables.tf")
+    connectors = [minutes(m) for m in re.findall(r'(?m)^\s*[ab]\s*=\s*"(\d\d:\d\d)"', access)]
+    assert sorted(connectors) == [240, 300], "the connectors' reboot defaults changed; revisit the slots"
+    assert not set(times) & set(connectors)
+    assert tz == "America/New_York"
+    assert re.search(r'variable "timezone".*?default\s*=\s*"America/New_York"', access, re.DOTALL)
+    module_vars = read(MODULE / "variables.tf")
+    assert re.search(r'variable "timezone".*?default\s*=\s*"America/New_York"', module_vars, re.DOTALL)
+
+
+def test_every_slot_service_has_its_own_doppler_config_name():
+    _, slots = parse_slots()
+    variables = read(MODULE / "variables.tf")
+    listed = re.search(r'contains\(\[([^\]]*)\], var\.service\)', variables).group(1)
+    assert sorted(re.findall(r'"([a-z0-9]+)"', listed)) == sorted(slots)
+    main = read(MODULE / "main.tf")
+    assert 'doppler_config = "cah-edge-${var.service}"' in main
+    names = {f"cah-edge-{svc}" for svc in slots}
+    assert len(names) == len(slots)
 
 
 def test_the_default_vpc_range_is_disjoint_from_the_core_default():
@@ -141,24 +196,19 @@ def packages_section(template):
     return [l.strip() for l in m.group(1).splitlines() if l.strip() and not l.strip().startswith("#")]
 
 
-def test_no_unpinned_service_package_in_the_cloud_init():
+def test_the_cloud_init_installs_only_os_packages_and_no_service():
     template = read(MODULE / "cloud-init.yaml.tftpl")
-    entries = packages_section(template)
-    os_packages = {"- unattended-upgrades", "- chrony", "- nftables"}
-    template_lines = {e for e in entries if e.startswith("%{")}
-    pinned = [e for e in entries if e not in os_packages and e not in template_lines]
-    # Anything beyond the OS packages is the one pinned [name, version] line the
-    # service_packages loop renders.
-    assert pinned == ["- [${name}, ${version}]"], pinned
+    assert packages_section(template) == ["- unattended-upgrades", "- chrony", "- nftables"]
     variables = strip_comments(read(MODULE / "variables.tf"))
-    (_, body), = [b for b in blocks(variables, "variable") if b[0] == ["service_packages"]]
-    assert re.search(r"(?m)^\s*default\s*=\s*\{\}\s*$", body)
-    assert "latest" in body
+    assert "service_packages" not in variables and "service_packages" not in read(MODULE / "main.tf")
+    for needle in ("rnsd", "lxmd", "i2pd", "mosquitto", "iperf3", "%{ for"):
+        assert needle not in template, needle
 
 
 SECRET_SHAPED = re.compile(r"token|secret|password|passwd|api[_-]?key|private[_-]?key|credential", re.IGNORECASE)
 # The design allows exactly one secret-shaped field in user-data, a short-lived
-# read-only Doppler bootstrap token (risk 6). It is NOT built yet, so none today.
+# read-only Doppler token for the service's own config (risk 6). It arrives with
+# each service stack, not with this module, so none today.
 ALLOWED_SECRET_FIELDS: set[str] = set()
 
 
@@ -186,9 +236,8 @@ def test_the_host_firewall_is_default_drop_and_mirrors_the_cloud_firewall_input(
     template = read(MODULE / "cloud-init.yaml.tftpl")
     assert "policy drop;" in template
     stack = strip_comments(read(STACK / "main.tf"))
-    # Both layers are built from the same two lists.
-    assert re.search(r"public_ports\s*=\s*local\.public_ports", stack)
-    assert re.search(r"restricted_ports\s*=\s*local\.restricted_ports", stack)
+    # The Cloud Firewall is built from one list; a service stack passes the same
+    # list to the module so the host firewall mirrors it (the module's tests).
     assert re.search(r"for_each\s*=\s*local\.public_ports", stack)
 
 
@@ -211,17 +260,16 @@ def test_the_repository_gate_is_green_with_the_edge_present(tree):
     assert problems == []
 
 
-def test_pricing_a_droplet_for_the_edge_still_needs_approval_and_a_reserved_ip(tree):
-    # With one droplet priced the edge-host reconciliation passes, but the total
-    # ($18) is above the approved $12, and the missing reserved_ip is not priceable.
+def test_a_droplet_in_the_network_stack_is_refused(tree):
+    # The shared network stack owns no droplet; one priced there has no connector
+    # module block and no edge-host call to match.
     manifest = tree / "stacks/50-edge/cost.json"
     manifest.write_text(
         json.dumps({"stage": 5, "resources": [{"name": "edge", "kind": "droplet", "size": "s-1vcpu-1gb", "backups": False}]})
     )
     approved = json.loads(read(tree / "docs/stages/approved.json"))
     problems, _ = cost_check.gate_problems(tree, approved)
-    assert any("above approved" in p for p in problems), problems
-    assert not any("twingate-connector module block" in p for p in problems), problems
+    assert any("stacks/50-edge" in p and "twingate-connector module block" in p for p in problems), problems
 
 
 def test_a_reserved_ip_entry_cannot_be_priced_yet(tree):
@@ -232,10 +280,9 @@ def test_a_reserved_ip_entry_cannot_be_priced_yet(tree):
         cost_check.gate_problems(tree, approved)
 
 
-def test_turning_the_switch_on_in_the_stack_is_refused_by_its_own_guard():
+def test_turning_the_switch_on_is_refused_by_the_stacks_own_guard():
     outputs = strip_comments(read(STACK / "outputs.tf"))
-    assert "!var.edge_enabled ||" in outputs
-    assert 'r.kind == "reserved_ip"' in outputs and 'r.kind == "droplet"' in outputs
+    assert "!var.edge_enabled || try(local.cost.edge_network_approved, false) == true" in outputs
 
 
 # --- edge-host module calls are held to the connector's rules -----------------
@@ -243,10 +290,33 @@ def test_turning_the_switch_on_in_the_stack_is_refused_by_its_own_guard():
 CALL = 'module "edge_host" {\n  source = "../../modules/edge-host"\n%s}\n'
 
 
+SYN = "stacks/51-edge-example"
+SYN_LOCALS = (
+    "locals {\n  on = var.edge_enabled ? 1 : 0\n"
+    '  cost = jsondecode(file("${path.module}/cost.json"))\n'
+    "  edge_droplet = { size = var.droplet_size }\n}\n"
+)
+SYN_OUT = (
+    'output "edge_enabled" {\n  value = var.edge_enabled\n  precondition {\n'
+    "    condition = !var.edge_enabled || (\n"
+    '      length([for r in local.cost.resources : r if r.kind == "droplet"]) == 1 &&\n'
+    '      length([for r in local.cost.resources : r if r.kind == "reserved_ip"]) == 1\n    )\n'
+    '    error_message = "price it"\n  }\n}\n'
+)
+
+
+def syn_stack(tree, body="__good__", entries=(), main=None, outputs=None):
+    """A stand-in service stack (none exists yet) that calls modules/edge-host."""
+    d = tree / SYN
+    d.mkdir(exist_ok=True)
+    body = GOOD_BODY if body == "__good__" else body
+    (d / "main.tf").write_text(main if main is not None else SYN_LOCALS + CALL % body)
+    (d / "outputs.tf").write_text(outputs if outputs is not None else SYN_OUT)
+    (d / "cost.json").write_text(json.dumps({"stage": 5, "resources": list(entries)}))
+
+
 def edge_tree(tree, body, entries=()):
-    # The switch definition stays (the real outputs.tf holds the precondition).
-    (tree / "stacks/50-edge/main.tf").write_text("locals {\n  on = var.edge_enabled ? 1 : 0\n}\n" + CALL % body)
-    (tree / "stacks/50-edge/cost.json").write_text(json.dumps({"stage": 5, "resources": list(entries)}))
+    syn_stack(tree, body, entries)
     return cost_check.edge_module_problems(tree)[0]
 
 
@@ -289,39 +359,30 @@ def test_manifest_entries_must_match_the_module_calls(tree):
 # --- zero manifest entries need a verified switch; other droplets still count --
 
 
-def real_stack_problems(tree, main=None, outputs=None, entries=()):
-    if main is not None:
-        (tree / "stacks/50-edge/main.tf").write_text(main)
-    if outputs is not None:
-        (tree / "stacks/50-edge/outputs.tf").write_text(outputs)
-    (tree / "stacks/50-edge/cost.json").write_text(json.dumps({"stage": 5, "resources": list(entries)}))
-    return cost_check.edge_module_problems(tree)[0]
-
-
-def test_the_real_stack_has_a_verified_switch(tree):
-    assert cost_check.edge_switch_verified(tree, "stacks/50-edge")
-    assert real_stack_problems(tree) == []
+def test_the_stand_in_stack_has_a_verified_switch(tree):
+    syn_stack(tree)
+    assert cost_check.edge_switch_verified(tree, SYN)
+    assert cost_check.edge_module_problems(tree)[0] == []
 
 
 def test_zero_entries_are_refused_when_the_call_has_no_switch(tree):
-    main = read(tree / "stacks/50-edge/main.tf").replace("  count  = local.on\n", "", 1)
-    assert any("0 droplet" in p for p in real_stack_problems(tree, main=main))
+    syn_stack(tree, body="  size = local.edge_droplet.size\n")
+    assert any("0 droplet" in p for p in cost_check.edge_module_problems(tree)[0])
 
 
 def test_zero_entries_are_refused_when_the_switch_is_not_a_variable_ternary(tree):
-    main = read(tree / "stacks/50-edge/main.tf").replace("on = var.edge_enabled ? 1 : 0", "on = 0")
-    assert any("0 droplet" in p for p in real_stack_problems(tree, main=main))
+    syn_stack(tree, main=(SYN_LOCALS + CALL % GOOD_BODY).replace("on = var.edge_enabled ? 1 : 0", "on = 0"))
+    assert any("0 droplet" in p for p in cost_check.edge_module_problems(tree)[0])
 
 
 def test_zero_entries_are_refused_when_the_precondition_is_gone(tree):
-    outputs = read(tree / "stacks/50-edge/outputs.tf").replace("!var.edge_enabled ||", "true ||")
-    assert any("0 droplet" in p for p in real_stack_problems(tree, outputs=outputs))
+    syn_stack(tree, outputs=SYN_OUT.replace("!var.edge_enabled ||", "true ||"))
+    assert any("0 droplet" in p for p in cost_check.edge_module_problems(tree)[0])
 
 
-def test_a_non_edge_droplet_in_the_edge_manifest_is_still_counted(tree):
-    # One droplet is the edge's and is subtracted; the second has no connector
+def test_a_non_edge_droplet_in_a_service_manifest_is_still_counted(tree):
+    # One droplet is the service's and is subtracted; the second has no connector
     # module block, so the connector reconciliation still reports it.
-    entries = [DROP, {**DROP, "name": "stray"}]
-    (tree / "stacks/50-edge/cost.json").write_text(json.dumps({"stage": 5, "resources": entries}))
+    syn_stack(tree, entries=[DROP, {**DROP, "name": "stray"}, RIP])
     problems = cost_check.structure_problems(tree)
-    assert any("stacks/50-edge: 0 twingate-connector module block(s) but 1 machine" in p for p in problems), problems
+    assert any(f"{SYN}: 0 twingate-connector module block(s) but 1 machine" in p for p in problems), problems

@@ -1,23 +1,12 @@
 # SPDX-License-Identifier: Apache-2.0
-# The edge ships DISABLED. These tests plan with mocked providers only.
+# The shared edge network ships DISABLED. These tests plan with mocked providers only.
 #
-# Turning the edge on is refused while cost.json prices nothing, by a
-# precondition on output.edge_enabled. The runs below that look at the ENABLED
-# shape therefore expect that one failure and still assert on the planned
+# Turning it on is refused while cost.json does not say edge_network_approved,
+# by a precondition on output.edge_enabled. The runs below that look at the
+# ENABLED shape therefore expect that one failure and still assert on the planned
 # resources: the plan is evaluated, it is just never allowed to apply.
 
-mock_provider "digitalocean" {
-  mock_resource "digitalocean_droplet" {
-    defaults = {
-      id = "12345678"
-    }
-  }
-  mock_resource "digitalocean_reserved_ip" {
-    defaults = {
-      ip_address = "203.0.113.10"
-    }
-  }
-}
+mock_provider "digitalocean" {}
 
 # --- disabled by default -----------------------------------------------------
 
@@ -28,26 +17,26 @@ run "the_edge_is_off_by_default_and_creates_nothing" {
     error_message = "edge_enabled must default to false."
   }
   assert {
-    condition     = length(digitalocean_vpc.dmz) == 0 && length(digitalocean_tag.dmz) == 0 && length(digitalocean_tag.transport) == 0 && length(digitalocean_firewall.dmz) == 0 && length(module.edge_host) == 0
-    error_message = "With the switch off no VPC, tag, firewall or droplet module may exist."
+    condition     = length(digitalocean_vpc.dmz) == 0 && length(digitalocean_tag.dmz) == 0 && length(digitalocean_tag.transport) == 0 && length(digitalocean_firewall.dmz) == 0
+    error_message = "With the switch off no VPC, tag or firewall may exist."
   }
   assert {
-    condition     = output.vpc_id == null && output.reserved_ip == null && output.edge_enabled == false
+    condition     = output.vpc_id == null && output.dmz_tag == null && output.edge_enabled == false
     error_message = "With the switch off the outputs are null."
   }
 }
 
-run "the_cost_manifest_prices_nothing_while_the_stage_is_unapproved" {
+run "the_cost_manifest_prices_nothing_and_the_network_is_unapproved" {
   command = plan
   assert {
-    condition     = length(jsondecode(file("${path.module}/cost.json")).resources) == 0
-    error_message = "cost.json must stay empty until the stage is approved: the edge is not in the approved total."
+    condition     = length(jsondecode(file("${path.module}/cost.json")).resources) == 0 && jsondecode(file("${path.module}/cost.json")).edge_network_approved == false
+    error_message = "cost.json must stay empty and unapproved until the stage is approved."
   }
 }
 
 # --- the switch is guarded -----------------------------------------------------
 
-run "turning_the_edge_on_is_refused_while_cost_json_is_empty" {
+run "turning_the_edge_on_is_refused_while_cost_json_is_unapproved" {
   command = plan
   variables {
     edge_enabled = true
@@ -76,63 +65,33 @@ run "enabled_plan_names_and_isolation" {
     error_message = "The firewall must attach to the rns-dmz tag."
   }
   assert {
-    condition     = module.edge_host[0].name == "edge-tor1-transport"
-    error_message = "The droplet name changed."
-  }
-  assert {
     condition     = length([for r in digitalocean_firewall.dmz[0].inbound_rule : r if r.port_range == "22"]) == 0
     error_message = "There must be no SSH rule."
   }
 }
 
-run "enabled_with_defaults_opens_reticulum_and_mqtt_only" {
+run "enabled_opens_reticulum_and_mqtt_only_so_i2pd_and_iperf3_stay_closed" {
   command = plan
   variables {
-    edge_enabled           = true
-    iperf3_allowed_sources = []
+    edge_enabled = true
   }
   expect_failures = [output.edge_enabled]
   assert {
     condition     = join(",", sort([for r in digitalocean_firewall.dmz[0].inbound_rule : "${r.protocol}/${r.port_range}"])) == "tcp/4242,tcp/8883"
-    error_message = "By default only the Reticulum and MQTT TLS ports are open: iperf3 has no source and i2pd has no port."
-  }
-  assert {
-    condition     = join(",", nonsensitive(module.edge_host[0].host_firewall_rules)) == "tcp/4242/any,tcp/8883/any"
-    error_message = "The host firewall must mirror the Cloud Firewall."
+    error_message = "Only the Reticulum and MQTT TLS ports are open: i2pd and iperf3 (5201) are closed to everyone until their own stacks exist."
   }
 }
 
-run "iperf3_opens_only_for_the_named_sources" {
+run "the_reticulum_port_is_a_variable" {
   command = plan
   variables {
-    edge_enabled           = true
-    iperf3_allowed_sources = ["203.0.113.10/32"]
+    edge_enabled   = true
+    reticulum_port = 4343
   }
   expect_failures = [output.edge_enabled]
   assert {
-    condition     = length([for r in digitalocean_firewall.dmz[0].inbound_rule : r if r.port_range == "5201"]) == 1
-    error_message = "iperf3 must have exactly one rule once a source is given."
-  }
-  assert {
-    condition     = length([for r in digitalocean_firewall.dmz[0].inbound_rule : r if r.port_range == "5201" && contains(nonsensitive(r.source_addresses), "0.0.0.0/0")]) == 0
-    error_message = "The iperf3 rule must never name the whole internet."
-  }
-  assert {
-    condition     = join(",", nonsensitive(module.edge_host[0].host_firewall_rules)) == "tcp/4242/any,tcp/5201/restricted,tcp/8883/any"
-    error_message = "The host firewall must mirror the Cloud Firewall, iperf3 included."
-  }
-}
-
-run "the_i2pd_port_opens_tcp_and_udp_together" {
-  command = plan
-  variables {
-    edge_enabled = true
-    i2pd_port    = 24680
-  }
-  expect_failures = [output.edge_enabled]
-  assert {
-    condition     = join(",", sort([for r in digitalocean_firewall.dmz[0].inbound_rule : "${r.protocol}/${r.port_range}"])) == "tcp/24680,tcp/4242,tcp/8883,udp/24680"
-    error_message = "i2pd needs the same port on tcp and udp."
+    condition     = join(",", sort([for r in digitalocean_firewall.dmz[0].inbound_rule : "${r.protocol}/${r.port_range}"])) == "tcp/4343,tcp/8883"
+    error_message = "The Reticulum port must follow the variable."
   }
 }
 
@@ -155,7 +114,7 @@ run "every_public_inbound_rule_is_ipv4_only" {
   }
   expect_failures = [output.edge_enabled]
   assert {
-    condition     = alltrue([for r in digitalocean_firewall.dmz[0].inbound_rule : !contains(nonsensitive(r.source_addresses), "::/0")])
+    condition     = alltrue([for r in digitalocean_firewall.dmz[0].inbound_rule : !contains(r.source_addresses, "::/0")])
     error_message = "No inbound rule may open IPv6."
   }
 }
@@ -240,17 +199,9 @@ run "reserved_ranges_must_be_cidrs" {
   expect_failures = [var.reserved_ranges]
 }
 
-# --- ports and sources ---------------------------------------------------------
+# --- ports -----------------------------------------------------------------------
 
-run "i2pd_and_reticulum_cannot_share_a_port" {
-  command = plan
-  variables {
-    i2pd_port = 4242
-  }
-  expect_failures = [output.edge_enabled]
-}
-
-run "reticulum_port_rejects_zero_and_65536" {
+run "reticulum_port_rejects_zero" {
   command = plan
   variables {
     reticulum_port = 0
@@ -266,41 +217,9 @@ run "reticulum_port_rejects_a_fraction" {
   expect_failures = [var.reticulum_port]
 }
 
-run "i2pd_port_rejects_65536" {
-  command = plan
-  variables {
-    i2pd_port = 65536
-  }
-  expect_failures = [var.i2pd_port]
-}
-
-run "iperf3_sources_reject_the_whole_internet" {
-  command = plan
-  variables {
-    iperf3_allowed_sources = ["0.0.0.0/0"]
-  }
-  expect_failures = [var.iperf3_allowed_sources]
-}
-
-run "iperf3_sources_reject_ipv6" {
-  command = plan
-  variables {
-    iperf3_allowed_sources = ["2001:db8::/32"]
-  }
-  expect_failures = [var.iperf3_allowed_sources]
-}
-
-run "iperf3_sources_reject_a_malformed_range" {
-  command = plan
-  variables {
-    iperf3_allowed_sources = ["nonsense"]
-  }
-  expect_failures = [var.iperf3_allowed_sources]
-}
-
 # --- names ---------------------------------------------------------------------
 
-run "resource_key_names_the_firewall_and_droplet_not_the_vpc_or_tags" {
+run "resource_key_names_the_firewall_not_the_vpc_or_tags" {
   command = plan
   variables {
     edge_enabled = true
@@ -308,8 +227,8 @@ run "resource_key_names_the_firewall_and_droplet_not_the_vpc_or_tags" {
   }
   expect_failures = [output.edge_enabled]
   assert {
-    condition     = digitalocean_firewall.dmz[0].name == "edge-tor1-b-dmz" && module.edge_host[0].name == "edge-tor1-b-transport"
-    error_message = "resource_key must name the firewall and droplet."
+    condition     = digitalocean_firewall.dmz[0].name == "edge-tor1-b-dmz"
+    error_message = "resource_key must name the firewall."
   }
   assert {
     condition     = digitalocean_vpc.dmz[0].name == "rns-dmz" && digitalocean_tag.dmz[0].name == "rns-dmz" && digitalocean_vpc.dmz[0].region == "tor1"
@@ -331,12 +250,4 @@ run "region_rejects_a_city_name" {
     region = "toronto"
   }
   expect_failures = [var.region]
-}
-
-run "reboot_time_rejects_a_bad_value" {
-  command = plan
-  variables {
-    reboot_time = "5am"
-  }
-  expect_failures = [var.reboot_time]
 }

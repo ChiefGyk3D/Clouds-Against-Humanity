@@ -14,18 +14,19 @@ mock_provider "digitalocean" {
 }
 
 variables {
-  layer       = "edge"
-  region      = "tor1"
-  vpc_id      = "00000000-0000-0000-0000-000000000000"
-  tags        = ["rns-dmz", "rns-dmz-transport"]
-  size        = "s-1vcpu-1gb"
-  reboot_time = "05:00"
+  layer      = "edge"
+  region     = "tor1"
+  vpc_id     = "00000000-0000-0000-0000-000000000000"
+  tags       = ["rns-dmz", "rns-dmz-transport"]
+  size       = "s-1vcpu-1gb"
+  service    = "reticulum"
+  project_id = "00000000-0000-0000-0000-000000000001"
 }
 
 run "names_follow_layer_key_role" {
   command = plan
   assert {
-    condition     = digitalocean_droplet.edge.name == "edge-tor1-transport"
+    condition     = digitalocean_droplet.edge.name == "edge-tor1-reticulum"
     error_message = "Droplet name must be <layer>-<region>-transport."
   }
 }
@@ -36,7 +37,7 @@ run "resource_key_replaces_the_region_in_the_name_only" {
     resource_key = "tor1-b"
   }
   assert {
-    condition     = digitalocean_droplet.edge.name == "edge-tor1-b-transport" && digitalocean_droplet.edge.region == "tor1" && digitalocean_reserved_ip.edge.region == "tor1"
+    condition     = digitalocean_droplet.edge.name == "edge-tor1-b-reticulum" && digitalocean_droplet.edge.region == "tor1" && digitalocean_reserved_ip.edge.region == "tor1"
     error_message = "resource_key names the droplet; the region argument stays the real region."
   }
 }
@@ -165,47 +166,12 @@ run "public_ports_reject_an_unknown_protocol" {
   expect_failures = [var.public_ports]
 }
 
-run "service_packages_install_nothing_by_default" {
+run "no_service_is_installed" {
   command = plan
   assert {
-    condition     = !strcontains(digitalocean_droplet.edge.user_data, "mosquitto") && !strcontains(digitalocean_droplet.edge.user_data, "iperf3")
-    error_message = "No service package is installed unless a pin is given."
+    condition     = !strcontains(digitalocean_droplet.edge.user_data, "mosquitto") && !strcontains(digitalocean_droplet.edge.user_data, "iperf3") && !strcontains(digitalocean_droplet.edge.user_data, "i2pd") && !strcontains(digitalocean_droplet.edge.user_data, "lxmd") && !strcontains(digitalocean_droplet.edge.user_data, "rnsd")
+    error_message = "The module installs no service; each service is its own stack."
   }
-}
-
-run "a_pinned_service_package_is_rendered_with_its_version" {
-  command = plan
-  variables {
-    service_packages = { mosquitto = "2.0.18-1build3" }
-  }
-  assert {
-    condition     = strcontains(digitalocean_droplet.edge.user_data, "- [mosquitto, 2.0.18-1build3]")
-    error_message = "A pinned package must render as [name, version]."
-  }
-}
-
-run "an_empty_version_is_refused" {
-  command = plan
-  variables {
-    service_packages = { mosquitto = "" }
-  }
-  expect_failures = [var.service_packages]
-}
-
-run "a_wildcard_version_is_refused" {
-  command = plan
-  variables {
-    service_packages = { mosquitto = "2.*" }
-  }
-  expect_failures = [var.service_packages]
-}
-
-run "latest_is_not_a_version" {
-  command = plan
-  variables {
-    service_packages = { mosquitto = "latest" }
-  }
-  expect_failures = [var.service_packages]
 }
 
 run "the_user_data_has_no_ssh_path" {
@@ -216,7 +182,26 @@ run "the_user_data_has_no_ssh_path" {
   }
 }
 
-run "reboot_time_is_rendered_and_validated" {
+run "the_reboot_time_defaults_to_the_services_slot_in_eastern" {
+  command = plan
+  assert {
+    condition     = output.reboot_time == "01:00" && strcontains(digitalocean_droplet.edge.user_data, "Automatic-Reboot-Time \"01:00\"") && strcontains(digitalocean_droplet.edge.user_data, "timezone: America/New_York")
+    error_message = "reticulum reboots in its 01:00 Eastern slot by default."
+  }
+}
+
+run "each_service_has_its_own_slot" {
+  command = plan
+  variables {
+    service = "iperf3"
+  }
+  assert {
+    condition     = output.reboot_time == "03:00" && output.doppler_config == "cah-edge-iperf3" && digitalocean_droplet.edge.name == "edge-tor1-iperf3"
+    error_message = "iperf3 takes the 03:00 slot, its own Doppler config and its own droplet name."
+  }
+}
+
+run "an_explicit_reboot_time_overrides_the_slot" {
   command = plan
   variables {
     reboot_time = "03:15"
@@ -224,6 +209,22 @@ run "reboot_time_is_rendered_and_validated" {
   assert {
     condition     = strcontains(digitalocean_droplet.edge.user_data, "Automatic-Reboot-Time \"03:15\"")
     error_message = "reboot_time must reach unattended-upgrades."
+  }
+}
+
+run "an_unknown_service_is_refused" {
+  command = plan
+  variables {
+    service = "web"
+  }
+  expect_failures = [var.service]
+}
+
+run "the_droplet_and_reserved_ip_join_the_existing_project" {
+  command = plan
+  assert {
+    condition     = digitalocean_project_resources.edge.project == "00000000-0000-0000-0000-000000000001" && length(digitalocean_project_resources.edge.resources) == 2
+    error_message = "Both the droplet and the reserved IP must be attached to the project."
   }
 }
 

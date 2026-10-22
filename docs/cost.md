@@ -40,16 +40,15 @@ The stage 3 phase exists in `approved.json` as a planned entry with a $30 placeh
 
 ## Edge (DMZ) estimate (not approved)
 
-The public edge is written as `stacks/50-edge` and `modules/edge-host`, disabled and unapplied ([stage page](stages/05-edge.md)). Design option A ([edge DMZ design](superpowers/specs/2026-10-19-edge-dmz-design.md), section 5.1) adds:
+The shared edge network (VPC, tags, Cloud Firewall) is written as `stacks/50-edge`, disabled, unapplied and free. Edge services are one droplet each, built later from `modules/edge-host` in their own stacks ([stage page](stages/05-edge.md)). Design option A ([edge DMZ design](superpowers/specs/2026-10-19-edge-dmz-design.md), section 5.1) priced one droplet:
 
 | Line | Basis | Monthly |
 |---|---|---|
-| Edge droplet `s-1vcpu-1gb` | `docs/cost-prices.json`, retrieved 2026-10-21 | $6.00 |
+| Edge droplet `s-1vcpu-1gb` | `docs/cost-prices.json`, retrieved 2026-10-21 | $6.00 each |
 | Reserved IP, assigned | DigitalOcean pricing page as read in the design, 2026-10-19: free when assigned | $0.00 |
 | `rns-dmz` VPC, Cloud Firewall | free types in the gate | $0.00 |
-| Added | | $6.00 |
 
-The running total is $35 only if the unbuilt stage 3 ($29) is also running. A reserved IP that is not assigned costs $5.00 a month ($0.01 an hour, same page), so a failed apply that leaves the IP behind costs money until someone notices. The `edge` phase stays `planned` at its $35 placeholder, the DigitalOcean total stays $12, and `stacks/50-edge/cost.json` prices nothing: the gate has no `reserved_ip` manifest kind yet, so the stack cannot be switched on. Outbound transfer is not priced and is not seen by the gate; check the usage page once the edge runs (design section 5.7), the same way as Functions.
+With one droplet per service the cost is $6.00 per approved service. The `edge` ceiling stays at its existing placeholder and is raised one approved service at a time; nothing is approved yet. A reserved IP that is not assigned costs $5.00 a month ($0.01 an hour, same page), so a failed apply that leaves the IP behind costs money until someone notices. The DigitalOcean total stays $12, and no `cost.json` prices a droplet: the gate has no `reserved_ip` manifest kind yet, so no service stack can be switched on. Outbound transfer is not priced and is not seen by the gate; check the usage page once an edge service runs (design section 5.7), the same way as Functions.
 
 ## Ceilings per phase
 
