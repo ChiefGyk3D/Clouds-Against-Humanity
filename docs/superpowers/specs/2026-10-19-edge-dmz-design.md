@@ -106,6 +106,8 @@ Ranked by impact times how easy the first step is. Each has a mitigation and a v
 | 8 | IPv6 left open (abuse case 9) | Cloud Firewall rules and nftables written for both families; if IPv6 is off on the droplet, a test says so | The existing `test_ipv6_closed.py` pattern extended to the edge; the zero-open-ports check runs against the v6 address too |
 | 9 | Log path abused to inject content into the SIEM | The relay treats edge logs as untrusted input: parse, size-limit, never execute, never feed a triage model as instruction | A relay-side test with an oversized and a hostile line |
 
+**Ruling, 2026-10-22 (issue 236): one Doppler config and one short-lived token per edge service.** Each edge service gets its own Doppler config and its own short-lived, read-only token, not one config shared by the whole edge. This tightens risk 3 and risk 6: a leaked token reads one service's values only. **Open, not decided:** risk 6 lets `user_data` carry exactly one secret-shaped field, and option A runs the services on one droplet. One token per service on one droplet needs several such fields, one droplet per service (which changes the cost), or another hand-off; the template test in risk 6 depends on which. The lesson that teaches the pattern is [Secrets from day one](../../wiki/Secrets-From-Day-One.md).
+
 ### 3.6 Residual risk
 
 A public host running five daemons will be scanned and sometimes attacked. The design accepts that the edge can be compromised and limits what that buys: no path to core, one narrow path home, no admin path to steal, and a rebuild from code as the recovery. What it does not remove: loss of the public IP to a flood, an abuse action against the team, and a zero-day in a daemon that exposes the service user's files until the rebuild.
@@ -157,7 +159,7 @@ Nothing on the edge is "reachable only through Twingate" inbound, because the ed
 
 ### 4.3 How it relates to the zero-inbound core
 
-Core keeps zero inbound. The edge does touch core in one place, and it is a change to core: the connector firewall's outbound rules today are the module defaults (TCP 443, 80, 53; UDP 53, 123) plus TCP 30000-31000 and UDP 1-65535 (`stacks/10-access/main.tf`, `extra_outbound_rules`). TCP 5201 is not among them, so the ZTNA half of the measurement path needs one added outbound rule on the connector tag. The module's extra rules are port-only, so the rule is "TCP 5201 to anywhere" unless the module grows an address field. That is a stage 1 change and it belongs in the implementation PR with its own review.
+Core keeps zero inbound. The edge does touch core in one place, and it is a change to core: the connector firewall's outbound rules today are the module defaults (TCP 443, 80, 53; UDP 53, 123) plus TCP 30000-31000 and UDP 1-65535 (`stacks/10-access/main.tf`, `extra_outbound_rules`). TCP 5201 is not among them, so the ZTNA half of the measurement path needs one added outbound rule on the connector tag. The module's extra rules were port-only; issue #245 adds an optional `destinations` list per rule (IPv4 and IPv6 CIDRs or plain addresses, default unchanged), so the rule can name the measurement server's address instead of "TCP 5201 to anywhere". That is a stage 1 change and it belongs in the implementation PR with its own review.
 
 The traffic model, per Twingate's docs (read 2026-10-19):
 

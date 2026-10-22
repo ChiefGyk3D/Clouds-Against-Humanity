@@ -127,6 +127,8 @@ Ways to resolve it, for the maintainer to choose (question 4):
 | L2. A separate repository for the labs | New repo, GYST caller, its own CI | Medium. Cleanest separation, but a lesson and its code live apart, which invites drift |
 | L3. Lab code stored as `*.tf.txt` or `*.tf.example`, copied to `*.tf` by the learner | No gate change | Small, but the code is never validated by `tofu validate` unless CI renames it, which is a workaround, not a design |
 
+**Decision: L1 chosen.** The maintainer approved L1 on 2026-10-22 (issue #250). The exemption skips only the type allowlist, the `count`/`for_each` rule and the module-source rules, still reads every `.tf` file under `labs/` for syntax, and applies to the top-level `labs/` directory alone (real path, case-sensitive, no symlink or `..` widening). It is not an approval, Spacelift does not apply it, and it is not counted in project spend. The rules are in `docs/cost.md` ("The labs/ exemption") and pinned by `tests/test_cost_check_labs.py`. The text below is the original recommendation.
+
 I recommend **L1**: the gate is a tool for the maintainer's deployment, labs are explicitly outside it, and a test pins the boundary in both directions (labs skipped; stacks not).
 
 **How labs stay outside the cost gate yet stay tested.** Labs get their own CI job, not the gate:

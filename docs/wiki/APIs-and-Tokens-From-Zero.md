@@ -231,6 +231,8 @@ In that order, and fast. Every minute between the leak and the revoke is a minut
 
 A **rate limit** is the number of requests a service lets you make in a time window (for example 60 an hour without logging in); go over it and you get a `429`. **Pagination** is how a service sends a long list in pieces: you ask for a page of, say, 30 items at a time, and the response tells you how to ask for the next page (a `Link` header or a "next" field).
 
+How a limiter works inside, what it counts by and what each layer from DNS to the database can and cannot limit is the subject of [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md).
+
 ## Hands-on: free exercises
 
 Every exercise below follows four steps: **predict** (write down what you expect before you run anything; guessing wrong is how you learn), **do**, **check**, **undo**.
@@ -433,4 +435,4 @@ You are done when you can say, without looking:
 
 ## Where to next
 
-[Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) uses these words directly, then [Doppler and secrets](Doppler-and-Secrets.md) shows them in this project's pipeline.
+[Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) uses these words directly, then [Doppler and secrets](Doppler-and-Secrets.md) shows them in this project's pipeline. For the habits around them (a password manager first, the `.env` rules, scanning and a leak drill), read [Secrets from day one](Secrets-From-Day-One.md).
