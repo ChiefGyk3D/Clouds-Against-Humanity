@@ -83,7 +83,6 @@ Pull requests are cards too. A merged pull request is Done with its Done on date
 | Docs | Area Docs, without Done |
 | Backlog | Status Backlog |
 | Done log | Everything with Status Done |
-| By repository | Grouped by repository |
 | Agents at work | In progress, In review and Next, grouped by Agent |
 
 How to read three of them:
