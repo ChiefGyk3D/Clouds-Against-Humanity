@@ -38,7 +38,7 @@ flowchart TB
 
 </details>
 
-Consequences:
+Consequences (the side page [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md) draws both stacks and says what each isolates):
 
 - Six small containers fit comfortably on one small droplet, which is why stage 3 costs one machine and not six.
 - Containers share the kernel, so the isolation is weaker than between virtual machines. A kernel bug can cross it. For a lab running the author's own code this is fine; it is why "untrusted code" and "containers" is a harder problem than it looks.

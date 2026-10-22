@@ -35,6 +35,8 @@ LOGS = WIKI / "Deception-and-Honeypots-Read-the-Sensor-Logs.md"
 TRACK2 = (ANATOMY, WEEKEND, LOGS)
 COST_PRICES = WIKI.parent / "cost-prices.json"
 COST_MD = WIKI.parent / "cost.md"
+DESIGN = WIKI / "Deception-and-Honeypots-Design-a-Honeynet.md"
+TPOT = WIKI / "Deception-and-Honeypots-T-Pot-at-Home.md"
 FENCE = re.compile(r"^```(\w*)\n(.*?)^```$", re.MULTILINE | re.DOTALL)
 
 
@@ -640,3 +642,169 @@ def test_the_page_commands_use_the_documented_cowrie_and_doctl_forms():
         assert needle in weekend, needle
     # the version pin is the one the pages say they read, and no unpinned install is shown
     assert "pip install cowrie\n" not in weekend and 'pip install cowrie"' not in weekend
+
+
+# --- track 3, lesson 10: the rule checker on the honeynet design page -----------------
+
+
+
+@pytest.fixture()
+def policy_lab(tmp_path):
+    (tmp_path / "policy_check.py").write_text(one_block(DESIGN, "python", "Checks a firewall rule file"))
+    (tmp_path / "rules.txt").write_text(one_block(DESIGN, "text", "# Internal-only honeynet rules"))
+    (tmp_path / "expect.txt").write_text(one_block(DESIGN, "text", "# what must be true"))
+    # the page's own commands make the three broken copies
+    made = subprocess.run(
+        ["bash", "-c", one_block(DESIGN, "bash", "broken1.txt")],
+        cwd=tmp_path, capture_output=True, text=True, timeout=30, check=False,
+    )
+    assert made.returncode == 0, made.stderr
+    return tmp_path
+
+
+def check(folder: Path, rules: str) -> subprocess.CompletedProcess:
+    return run_py(folder, "policy_check.py", rules, "expect.txt")
+
+
+def verdicts(proc) -> list[str]:
+    return [line.split()[0] for line in proc.stdout.splitlines()[:-1]]
+
+
+def test_the_designed_rules_satisfy_every_expectation(policy_lab):
+    proc = check(policy_lab, "rules.txt")
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    assert proc.stdout.splitlines()[-1] == "11 of 11 expectations hold"
+    # the page shows this run; the printed lines must be what the program prints
+    shown = one_block(DESIGN, "text", "11 of 11 expectations hold").splitlines()
+    assert shown[:-1] == proc.stdout.splitlines()
+    assert shown[-1] == "exit=0"
+
+
+def test_each_broken_copy_fails_where_the_page_says(policy_lab):
+    shown = one_block(DESIGN, "text", "== broken1")
+    expected: list[str] = []
+    for name in ("broken1", "broken2", "broken3"):
+        proc = check(policy_lab, f"{name}.txt")
+        assert proc.returncode == 1, name
+        expected.append(f"== {name}")
+        expected += [x for x in proc.stdout.splitlines() if x.startswith("FAIL") or " of 11 " in x]
+    assert shown.splitlines() == expected
+    # and the three fail for three different reasons, so they are not one test three times
+    assert verdicts(check(policy_lab, "broken1.txt")).count("FAIL") == 4
+    assert verdicts(check(policy_lab, "broken2.txt")).count("FAIL") == 2
+    assert verdicts(check(policy_lab, "broken3.txt")).count("FAIL") == 1
+
+
+def test_order_matters_the_same_rules_in_the_wrong_order_fail(policy_lab):
+    rules = (policy_lab / "rules.txt").read_text().splitlines()
+    block = next(i for i, r in enumerate(rules) if r.split()[:3] == ["block", "lan", "honeynet"])
+    allow = next(i for i, r in enumerate(rules) if r.split()[:3] == ["pass", "lan", "honeynet"])
+    assert block < allow
+    rules[block], rules[allow] = rules[allow], rules[block]
+    (policy_lab / "swapped.txt").write_text("\n".join(rules) + "\n")
+    assert check(policy_lab, "swapped.txt").returncode == 1
+
+
+def test_the_checker_has_no_default_allow_an_empty_rule_file_denies_everything(policy_lab):
+    (policy_lab / "empty.txt").write_text("# nothing\n")
+    proc = check(policy_lab, "empty.txt")
+    assert proc.returncode == 1                      # the three allow expectations fail
+    assert [line.split()[0] for line in proc.stdout.splitlines()[:-1]].count("FAIL") == 3
+    assert all("[default deny]" in line for line in proc.stdout.splitlines()[:-1])
+
+
+@pytest.mark.parametrize(
+    "rule",
+    [
+        "pass lan honeynet tcp",                       # too few fields
+        "allow lan honeynet tcp 22",                   # not pass or block
+        "pass lan nowhere tcp 22",                     # unknown network name
+        "pass lan honeynet icmp 22",                   # unsupported protocol
+        "pass lan honeynet tcp 70000",                 # port out of range
+        "pass lan honeynet tcp 9-2",                   # reversed range
+        "pass lan honeynet tcp 22,x",                  # not a number
+        "pass lan honeynet tcp 22 extra",              # too many fields
+    ],
+)
+def test_malformed_rules_are_refused_with_a_message_and_no_traceback(policy_lab, rule):
+    (policy_lab / "bad.txt").write_text(rule + "\n")
+    proc = check(policy_lab, "bad.txt")
+    assert proc.returncode != 0
+    assert "bad.txt:1" in proc.stderr and "Traceback" not in proc.stderr
+
+
+def test_malformed_expectations_and_oversized_files_are_refused(policy_lab):
+    for line in ("allow 192.0.2.1 203.0.113.5 tcp 22", "maybe 192.0.2.1 203.0.113.5 tcp 22 x",
+                 "allow not-an-ip 203.0.113.5 tcp 22 x", "allow 192.0.2.1 203.0.113.5 icmp 22 x",
+                 "allow 192.0.2.1 203.0.113.5 tcp 99999 x"):
+        (policy_lab / "e.txt").write_text(line + "\n")
+        proc = run_py(policy_lab, "policy_check.py", "rules.txt", "e.txt")
+        assert proc.returncode != 0 and "Traceback" not in proc.stderr, line
+    (policy_lab / "big.txt").write_text("# x\n" * 40000)       # 160,000 bytes
+    proc = check(policy_lab, "big.txt")
+    assert proc.returncode != 0 and "larger than" in proc.stderr
+    (policy_lab / "many.txt").write_text("#\n" * 501)
+    proc = check(policy_lab, "many.txt")
+    assert proc.returncode != 0 and "more than 500 lines" in proc.stderr
+    (policy_lab / "bin.txt").write_bytes(b"\xff\xfe\x00 pass lan honeynet tcp 22\n")
+    assert "Traceback" not in check(policy_lab, "bin.txt").stderr
+
+
+def test_the_checker_names_only_documentation_addresses(policy_lab):
+    names = re.search(r"NAMES = \{(.*?)\n\}", (policy_lab / "policy_check.py").read_text(), re.DOTALL).group(1)
+    for cidr in re.findall(r'"(\d+\.\d+\.\d+\.\d+/\d+)"', names):
+        net = ipaddress.ip_network(cidr)
+        assert net == ipaddress.ip_network("0.0.0.0/0") or any(net.subnet_of(d) for d in DOC_NETS), cidr
+    for line in (policy_lab / "expect.txt").read_text().splitlines():
+        if line and not line.startswith("#"):
+            for addr in line.split()[1:3]:
+                assert any(ipaddress.ip_address(addr) in d for d in DOC_NETS), addr
+
+
+# --- track 3, lessons 10 and 11: the claims the pages make about T-Pot ----------------
+
+def page_addresses(path: Path) -> set[str]:
+    text = re.sub(r"https?://\S+", "", path.read_text(encoding="utf-8"))   # drop URLs and their version-like parts
+    return set(re.findall(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", text))
+
+
+@pytest.mark.parametrize("page", [DESIGN, TPOT])
+def test_the_track_3_pages_use_documentation_addresses_only(page):
+    for addr in page_addresses(page):
+        assert addr == "0.0.0.0" or any(ipaddress.ip_address(addr) in d for d in DOC_NETS), f"{page.name}: {addr}"
+
+
+def test_the_pages_agree_on_the_management_ports_and_the_opt_out():
+    design, tpot = DESIGN.read_text(encoding="utf-8"), TPOT.read_text(encoding="utf-8")
+    for port in ("64294", "64295", "64297"):
+        assert port in design and port in tpot
+    # the rule table, the checker's rule file and the expectations all use the same ports
+    assert "64294-64297" in one_block(DESIGN, "text", "# Internal-only honeynet rules")
+    assert "# Ewsposter service" in tpot and "ewsposter" in tpot.lower()
+    assert "mercilessly" in tpot            # updates can undo the opt-out; the page must keep saying so
+
+
+def test_the_t_pot_page_keeps_its_unverified_banner_and_names_no_version_it_did_not_read():
+    text = TPOT.read_text(encoding="utf-8")
+    assert "T-Pot was not installed, run or tested" in text
+    versions = set(re.findall(r"\b\d{2}\.\d{2}\.\d\b", text))        # the project's year.month.patch tags
+    assert versions == {"24.04.1"}, versions
+    assert "DMZ host" in DESIGN.read_text(encoding="utf-8") and "port forward" in DESIGN.read_text(encoding="utf-8").lower()
+
+
+def test_an_empty_expectation_list_cannot_pass_vacuously(policy_lab):
+    (policy_lab / "none.txt").write_text("# only a comment\n")
+    proc = run_py(policy_lab, "policy_check.py", "rules.txt", "none.txt")
+    assert proc.returncode != 0 and "no expectations" in proc.stderr
+    assert "0 of 0" not in proc.stdout
+
+
+def test_the_t_pot_install_command_pins_the_release_and_ssh_checks_host_keys():
+    text = TPOT.read_text(encoding="utf-8")
+    assert "git clone --branch 24.04.1" in text and "--exact-match" in text
+    assert "StrictHostKeyChecking=no" not in text
+
+
+def test_a_missing_expectation_file_is_a_clean_error(policy_lab):
+    proc = run_py(policy_lab, "policy_check.py", "rules.txt", "absent.txt")
+    assert proc.returncode != 0 and "cannot read" in proc.stderr and "Traceback" not in proc.stderr
