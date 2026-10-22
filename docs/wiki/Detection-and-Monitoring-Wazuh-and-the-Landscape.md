@@ -44,7 +44,7 @@ Wazuh is open-source security monitoring. It is useful to learn on because every
 | **Indexer and dashboard** | Store and search alerts; the web interface | At home, alongside OpenSearch and Grafana. |
 | **Decoders and rules** | XML that turns a raw log line into fields, then decides if the fields are worth an alert, at what level | The home setup already has rules for Twingate connector logs written for the Docker log format; the cloud connectors log to journald instead, so the rules need a version for that shape. |
 
-Beyond log analysis, Wazuh includes file integrity monitoring (tell me when `/etc/ssh/sshd_config` changes), configuration assessment against hardening benchmarks, vulnerability detection for installed packages, and active response (run a command when a rule fires). Which of these this project turns on is a stage 2 decision.
+Beyond log analysis, Wazuh includes file integrity monitoring (tell me when `/etc/ssh/sshd_config` changes; the idea, its limits and how to protect the baseline are in [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md)), configuration assessment against hardening benchmarks, vulnerability detection for installed packages, and active response (run a command when a rule fires). Which of these this project turns on is a stage 2 decision.
 
 ### Why it fits here
 
