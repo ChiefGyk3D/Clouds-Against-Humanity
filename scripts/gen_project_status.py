@@ -38,6 +38,7 @@ import re
 import subprocess
 import sys
 import time
+import unicodedata
 from pathlib import Path
 
 SNAPSHOT = Path("docs") / "wiki" / ".status-snapshot.json"
@@ -187,10 +188,28 @@ def board_gaps(snapshot: dict) -> dict:
 # --- rendering ----------------------------------------------------------------
 
 
+MAX_CELL = 200
+NAME_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
+
+
 def cell(value: object) -> str:
-    text = str(value).replace("\r", " ").replace("\n", " ")
-    text = text.replace("|", "\\|").replace("<", "&lt;").replace(">", "&gt;")
-    return text.replace("$", "\\$").replace("`", "'")
+    """Render untrusted text (a title, a board value) as an inert code span.
+
+    A title is typed by anyone who can open an issue or a pull request, so it
+    must never become Markdown: no link, image, autolink, HTML or table break.
+    Inside a code span none of those is interpreted. Control characters and
+    backticks are removed (a backtick would end the span), whitespace is
+    collapsed, the text is cut to MAX_CELL characters, and the pipe is escaped
+    for the table. Backslash is left literal: it has no meaning in a code span,
+    and the only escape the table adds is the one before a pipe.
+    """
+    text = "".join(" " if unicodedata.category(c) in ("Cc", "Zl", "Zp") else c for c in str(value))
+    text = " ".join(text.replace("`", "").split())
+    if len(text) > MAX_CELL:
+        text = text[: MAX_CELL - 3] + "..."
+    if not text:
+        return ""
+    return "`" + text.replace("|", "\\|") + "`"
 
 
 def ref(snapshot: dict, kind: str, number: int) -> str:
@@ -388,10 +407,13 @@ def validate_snapshot(snap: object) -> list[str]:
     for key in ("repo", "fetched_at"):
         if not isinstance(snap.get(key), str):
             problems.append(f"{key!r} missing")
+    repo = snap.get("repo")
+    if isinstance(repo, str) and not (repo.count("/") == 1 and all(NAME_RE.match(x) for x in repo.split("/"))):
+        problems.append("repo is not owner/name")
     if isinstance(snap.get("fetched_at"), str) and not STAMP_RE.match(snap["fetched_at"]):
         problems.append("fetched_at is not YYYY-MM-DDTHH:MM:SSZ")
     project = snap.get("project")
-    if not (isinstance(project, dict) and isinstance(project.get("owner"), str) and isinstance(project.get("number"), int)):
+    if not (isinstance(project, dict) and isinstance(project.get("owner"), str) and NAME_RE.match(project["owner"]) and isinstance(project.get("number"), int)):
         problems.append("project owner/number missing")
     for key in ("issues", "prs"):
         if not isinstance(snap.get(key), list):

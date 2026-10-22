@@ -15,6 +15,7 @@ GitHub):
 
 import copy
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -257,10 +258,90 @@ def test_open_prs_show_ci_and_review_state():
     assert "failing" in row and "changes requested" in row
 
 
-def test_titles_cannot_break_a_table():
-    page = gps.render(snap([issue(1, title="a | b <script> $x `y`")]))
-    row = next(line for line in page.splitlines() if line.startswith("| [#1]"))
-    assert "a \\| b &lt;script&gt; \\$x 'y'" in row
+HOSTILE_TITLES = [
+    "[click](https://evil.example)",
+    "![x](https://evil.example/p.png)",
+    "<script>alert(1)</script>",
+    "a `b` | c `|` d",
+    "see https://evil.example and www.evil.example and bob@evil.example",
+    "line one\nline two\r\n| injected | row |",
+    "x" * 5000,
+    "\\[escaped](https://evil.example)",
+    "# heading > quote * star _ under ~ tilde",
+    "x\n# Heading\n[a](https://evil.example)",
+]
+CODE_SPAN = re.compile(r"`[^`]*`")
+LEGIT_LINK = re.compile(r"\[#\d+\]\(https://github\.com/Example/Repo/(?:issues|pull)/\d+\)")
+
+
+def rows_for(page, number):
+    rows = [line for line in page.splitlines() if line.startswith(f"| [#{number}]")]
+    assert rows
+    return rows
+
+
+def assert_inert(page, number):
+    """Outside code spans a row holds only the one link this code builds."""
+    for row in rows_for(page, number):
+        bare = LEGIT_LINK.sub("#", CODE_SPAN.sub("", row))
+        assert "](" not in bare and "![" not in bare and "<" not in bare and "http" not in bare, row
+        assert row.count("`") % 2 == 0 and len(row) < 1200, row
+    for line in page.splitlines():
+        assert not line.startswith(("# Heading", "[a]("))
+
+
+@pytest.mark.parametrize("title", HOSTILE_TITLES, ids=range(len(HOSTILE_TITLES)))
+@pytest.mark.parametrize("where", ["issue", "pr", "unlinked", "closed"])
+def test_a_hostile_title_stays_inert_everywhere(title, where):
+    if where == "issue":
+        snapshot, number = snap([issue(1, title=title)]), 1
+    elif where == "pr":
+        pull = pr(10, "Closes #1")
+        pull["title"] = title
+        snapshot, number = snap([issue(1)], [pull]), 10
+    elif where == "unlinked":
+        pull = pr(10, "nothing")
+        pull["title"] = title
+        snapshot, number = snap([], [pull]), 10
+    else:
+        snapshot, number = snap([issue(1, "CLOSED", title=title)], [], [item("Issue", 1, Status="Next")]), 1
+    assert_inert(gps.render(snapshot), number)
+
+
+def test_titles_are_code_spans_with_pipes_escaped_and_backticks_removed():
+    page = gps.render(snap([issue(1, title="a | b `x` <i>")]))
+    assert "`a \\| b x <i>`" in rows_for(page, 1)[0]
+
+
+def test_a_long_title_is_cut():
+    row = rows_for(gps.render(snap([issue(1, title="y" * 5000)])), 1)[0]
+    assert "y" * 201 not in row and "..." in row
+
+
+def test_a_newline_in_a_title_cannot_start_a_new_line():
+    page = gps.render(snap([issue(1, title="x\n# Heading\n| [#9](https://evil.example) |")]))
+    assert "`x # Heading \\| [#9](https://evil.example) \\|`" in page
+
+
+def test_board_values_and_ci_are_inert_too():
+    snapshot = snap(
+        [issue(1)],
+        [pr(10, "Closes #1", ci="[a](https://evil.example)", review="![b](https://evil.example/p.png)")],
+        [item("Issue", 1, Status="[s](https://evil.example)", Size="<b>", Sprint="x")],
+    )
+    page = gps.render(snapshot)
+    assert_inert(page, 1)
+    assert_inert(page, 10)
+
+
+def test_the_repo_name_must_be_a_plain_owner_slash_name():
+    for bad in ("a/b](https://evil.example", "a b/c", "abc", "a/b/c"):
+        broken = snap([issue(1)])
+        broken["repo"] = bad
+        assert gps.validate_snapshot(broken), bad
+    broken = snap([issue(1)])
+    broken["project"]["owner"] = "x](https://evil.example"
+    assert gps.validate_snapshot(broken)
 
 
 def test_render_is_deterministic_and_does_not_mutate_its_input():
