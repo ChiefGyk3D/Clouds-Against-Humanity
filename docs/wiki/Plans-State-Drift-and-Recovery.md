@@ -36,7 +36,7 @@ I searched the wiki before writing this page. What exists, and what was missing:
 
 **Free path (reading only).** Read the sections below in order. Every behavior is cited, and every output you need to follow is shown in the page. You can skip the exercises and still finish the checkpoint, but you will have read about a plan instead of reading one.
 
-**Free path (hands-on, local).** The exercises use three providers that touch only your own computer: [`hashicorp/local`](https://registry.opentofu.org/providers/hashicorp/local/latest) (writes files), [`hashicorp/random`](https://registry.opentofu.org/providers/hashicorp/random/latest) (makes names and ids) and `terraform_data` (built into OpenTofu, needs no provider download). Names read from the registry on 2026-10-22. Everything happens in a scratch folder under your home directory. No account, no API token and no money: the reading and the exercises are free and always will be. The one network use is `tofu init` downloading the two providers from the public registry.
+**Free path (hands-on, local).** The exercises use two providers and one built-in resource, all of which touch only your own computer. The providers are [`hashicorp/local`](https://registry.opentofu.org/providers/hashicorp/local/latest) (writes files), [`hashicorp/random`](https://registry.opentofu.org/providers/hashicorp/random/latest) (makes names and ids). The built-in resource is `terraform_data`: it is not a provider and needs no download. Names read from the registry on 2026-10-22. Everything happens in a scratch folder under your home directory. No account, no API token and no money: the reading and the exercises are free and always will be. The one network use is `tofu init` downloading the two providers from the public registry.
 
 **Optional own-account path (remote state).** After the local exercises you can move a scratch state to a bucket in your own cloud account. Read the cost and teardown notes first, in [Optional: put the scratch state in a bucket of your own](#optional-put-the-scratch-state-in-a-bucket-of-your-own).
 
@@ -148,7 +148,7 @@ So when a plan shows drift you have two choices. This table is a way to think, n
 | **Accept** (make the code match reality) | The hand change was right, for example a fix during an incident. | Edit the code to say what reality now says, in a pull request, so the next plan is a no-op. A refresh-only apply can bring the record up to date, but the code still has to agree. |
 | **Neither yet** | You do not know who or why. | Do not apply. Capture the plan, ask, and discard the run. |
 
-Detecting drift on a schedule is a pipeline job: run a plan with `-detailed-exitcode` (or a refresh-only plan) on a timer and alert when it exits 2. Some hosted services offer this as a feature; that is out of scope for the local exercises and not something this project has switched on (est.).
+Detecting drift on a schedule is a pipeline job: run `tofu plan -detailed-exitcode` on a timer and alert when it exits 2. The exit code 2 exists only because of that flag; a plain plan, including `-refresh-only`, would not return it, so a job that omits the flag treats drift as success. To look at drift only, add `-refresh-only` to the same command (est.: I ran `-detailed-exitcode` alone, not combined with `-refresh-only`). Some hosted services offer this as a feature; that is out of scope for the local exercises and not something this project has switched on (est.).
 
 ## Changing the map without changing the world
 
