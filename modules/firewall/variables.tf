@@ -18,11 +18,49 @@ variable "tag" {
 
 variable "extra_outbound_rules" {
   type = list(object({
-    protocol   = string
-    port_range = string
+    protocol                 = string
+    port_range               = string
+    destinations             = optional(list(string), [])
+    allow_world_destinations = optional(bool, false)
   }))
   default     = []
-  description = "Outbound rules appended to the defaults."
+  description = "Outbound rules appended to the defaults. destinations (optional) lists the only addresses the rule may reach: IPv4 and IPv6 CIDRs or plain addresses (203.0.113.0/24, 203.0.113.7, 2001:db8::/32, 2001:db8::7). Empty or unset keeps the rule as it always was: 0.0.0.0/0 and ::/0. A list of IPv4 entries opens no IPv6 and the reverse. A /0 entry (0.0.0.0/0, ::/0) in the list is refused unless that rule sets allow_world_destinations = true."
+
+  validation {
+    condition = alltrue(flatten([
+      for r in var.extra_outbound_rules : [
+        for d in r.destinations :
+        can(regex("^[0-9A-Fa-f:.]+(/[0-9]{1,3})?$", d)) && can(cidrhost(strcontains(d, "/") ? d : format("%s/%d", d, strcontains(d, ":") ? 128 : 32), 0))
+      ]
+    ]))
+    error_message = "Each destinations entry must be an IPv4 or IPv6 address or CIDR, for example 203.0.113.0/24, 203.0.113.7, 2001:db8::/32 or 2001:db8::7."
+  }
+
+  validation {
+    condition = alltrue([
+      for r in var.extra_outbound_rules :
+      length(distinct(r.destinations)) == length(r.destinations)
+    ])
+    error_message = "A destinations list may not repeat an entry."
+  }
+
+  validation {
+    condition = alltrue(flatten([
+      for r in var.extra_outbound_rules : [
+        for d in r.destinations :
+        r.allow_world_destinations || !(can(regex("/0+$", d)) || contains(["0.0.0.0", "::"], d))
+      ]
+    ]))
+    error_message = "A destinations entry that is a /0 (0.0.0.0/0 or ::/0) or an unspecified address (0.0.0.0, ::) opens the rule to the whole internet. Leave destinations empty for that, or set allow_world_destinations = true on the rule to say so on purpose."
+  }
+
+  validation {
+    condition = alltrue([
+      for r in var.extra_outbound_rules :
+      !r.allow_world_destinations || length([for d in r.destinations : d if can(regex("/0+$", d)) || contains(["0.0.0.0", "::"], d)]) > 0
+    ])
+    error_message = "allow_world_destinations = true is only for a rule whose destinations list includes a /0 entry; remove the flag, or list the world entry it is meant to allow."
+  }
 }
 
 variable "inbound_from_tag_rules" {

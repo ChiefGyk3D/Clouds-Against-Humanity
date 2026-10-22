@@ -157,7 +157,7 @@ Nothing on the edge is "reachable only through Twingate" inbound, because the ed
 
 ### 4.3 How it relates to the zero-inbound core
 
-Core keeps zero inbound. The edge does touch core in one place, and it is a change to core: the connector firewall's outbound rules today are the module defaults (TCP 443, 80, 53; UDP 53, 123) plus TCP 30000-31000 and UDP 1-65535 (`stacks/10-access/main.tf`, `extra_outbound_rules`). TCP 5201 is not among them, so the ZTNA half of the measurement path needs one added outbound rule on the connector tag. The module's extra rules are port-only, so the rule is "TCP 5201 to anywhere" unless the module grows an address field. That is a stage 1 change and it belongs in the implementation PR with its own review.
+Core keeps zero inbound. The edge does touch core in one place, and it is a change to core: the connector firewall's outbound rules today are the module defaults (TCP 443, 80, 53; UDP 53, 123) plus TCP 30000-31000 and UDP 1-65535 (`stacks/10-access/main.tf`, `extra_outbound_rules`). TCP 5201 is not among them, so the ZTNA half of the measurement path needs one added outbound rule on the connector tag. The module's extra rules were port-only; issue #245 adds an optional `destinations` list per rule (IPv4 and IPv6 CIDRs or plain addresses, default unchanged), so the rule can name the measurement server's address instead of "TCP 5201 to anywhere". That is a stage 1 change and it belongs in the implementation PR with its own review.
 
 The traffic model, per Twingate's docs (read 2026-10-19):
 

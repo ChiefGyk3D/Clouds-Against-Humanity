@@ -6,7 +6,11 @@ locals {
     { protocol = "udp", port_range = "53" },
     { protocol = "udp", port_range = "123" },
   ]
-  outbound = concat(local.default_outbound, var.extra_outbound_rules)
+  # The defaults carry no destinations, so they keep the any-address pair below.
+  outbound = concat(
+    [for r in local.default_outbound : merge(r, { destinations = [] })],
+    var.extra_outbound_rules,
+  )
 
   # Names use resource_key when it is set and region otherwise.
   name_key = var.resource_key != "" ? var.resource_key : var.region
@@ -25,6 +29,7 @@ locals {
 #
 # Trivy DIG-0003 flags egress to any address. It is accepted here: the
 # any-address outbound rules are restricted to specific ports (never "all"),
+# an extra rule may name destinations to narrow itself to known addresses,
 # inbound is zero unless a rule admits the firewall's own tag, tag-scoped
 # outbound rules name no address at all, and the hosts these droplets must
 # reach (Twingate relays, package mirrors, DNS and NTP servers) have no fixed
@@ -68,9 +73,12 @@ resource "digitalocean_firewall" "this" {
   dynamic "outbound_rule" {
     for_each = local.outbound
     content {
-      protocol              = outbound_rule.value.protocol
-      port_range            = outbound_rule.value.port_range
-      destination_addresses = ["0.0.0.0/0", "::/0"]
+      protocol   = outbound_rule.value.protocol
+      port_range = outbound_rule.value.port_range
+      # No destinations listed (every default rule, and any extra rule that
+      # leaves the list out) renders the any-address pair exactly as before.
+      # A list renders only what it names, so an IPv4-only list opens no IPv6.
+      destination_addresses = length(outbound_rule.value.destinations) == 0 ? ["0.0.0.0/0", "::/0"] : outbound_rule.value.destinations
     }
   }
 
