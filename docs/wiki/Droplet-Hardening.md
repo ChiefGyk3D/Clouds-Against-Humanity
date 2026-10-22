@@ -77,6 +77,8 @@ The SSH key comment is stripped before it is stored in Doppler (keep only `<type
 | Reboot, only if an update requires it | 04:00 (a), 05:00 (b) |
 | Connector package update (cron, from Twingate's update guide) | Sundays 04:30 (a), 05:30 (b) |
 
+New to patch cadence, maintenance windows or why a container image is not covered by these updates? [Backups, recovery and patching](Backups-Recovery-and-Patching.md#patching-cadence-emergencies-and-windows) explains them from the ground up.
+
 The droplet clock is set to the `timezone` setting (default `America/New_York`), and `reboot_times` and the weekly update are read in that zone, so the times above are Eastern unless you change it. `timezone` must be a zone listed in `modules/twingate-bootstrap/timezones.txt` (generated from the tz database with `python -I scripts/gen_timezones.py`; regenerate it when zones change), so a misspelt zone fails the plan instead of leaving the clock on UTC at boot. Changing `timezone` changes the rendered cloud-init and replaces the droplets. A `cron.d` entry is used instead of `cron.weekly` because `cron.weekly` would fire on both connectors at the same moment, and the whole point of two connectors is that they never restart together.
 
 First boot races Ubuntu's own apt timers for the dpkg lock. `DPkg::Lock::Timeout "300"` makes the install wait instead of failing.
@@ -119,9 +121,11 @@ What it does not prove: UDP (no reply there only means "open or filtered", so sp
 
 ## Not done yet
 
-- **Audit logging** (auditd, and shipping auth logs off the box). Planned for stage 2 alongside the SIEM link.
+- **Audit logging** (auditd, and shipping auth logs off the box). Planned for stage 2 alongside the SIEM link. What a log line is and what a rule does with it: [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md).
 - **A pinned package version source** for the connector, once Twingate documents one.
 
 These are listed in the [stage 1 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md) and on the [Threat model](Threat-Model.md) page, because a hardening page that only lists what was done is marketing.
+
+If you will run a website on a droplet, the application layer needs its own hardening: [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md).
 
 Next: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md), step 15 of the core path on the [Reading order](Reading-Order.md) page.

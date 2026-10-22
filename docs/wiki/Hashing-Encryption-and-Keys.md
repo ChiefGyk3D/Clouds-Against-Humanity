@@ -163,8 +163,8 @@ printf 'pay Alice 100 dollars\n' > note.txt
 PowerShell (**not run**):
 
 ```powershell
-$d = Join-Path ([IO.Path]::GetTempPath()) "f4lab"
-New-Item -ItemType Directory -Path $d | Out-Null
+$d = Join-Path ([IO.Path]::GetTempPath()) ("f4lab-" + [guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory -Path $d -ErrorAction Stop | Out-Null
 Set-Location $d
 [IO.File]::WriteAllText("$d\note.txt", "pay Alice 100 dollars`n")
 ```

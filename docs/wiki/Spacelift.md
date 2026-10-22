@@ -4,6 +4,8 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+> Want to build and destroy a stack of your own first, in your own account, before reading how this project runs its stacks? [Spacelift from zero](Spacelift-From-Zero.md) is a hands-on side page for that.
+
 Spacelift is where `tofu plan` and `tofu apply` actually run. It holds the state, waits for a human to approve every apply, and is the reason nothing ever applies from a laptop or from GitHub Actions.
 
 ## The run lifecycle

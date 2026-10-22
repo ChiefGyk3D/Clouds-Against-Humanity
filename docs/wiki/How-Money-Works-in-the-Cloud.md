@@ -11,7 +11,7 @@ Prices below are DigitalOcean's at the time this project's price table was fetch
 | Thing | Costs | Notes |
 |---|---|---|
 | A **droplet** (virtual machine) | From about $4 to $6 a month for the smallest sizes, billed per second it exists | Billed whether it is busy or idle, powered on or off. "Off" is not "deleted". |
-| **Backups** of a droplet | 20 percent of the droplet's price for weekly, 30 percent for daily | Confirmed on DigitalOcean's pricing page on 2026-10-11 |
+| **Backups** of a droplet ([what a backup is](Backups-Recovery-and-Patching.md#four-words-that-sound-alike)) | 20 percent of the droplet's price for weekly, 30 percent for daily | Confirmed on DigitalOcean's pricing page on 2026-10-11 |
 | **Snapshots** | Per gigabyte stored | A snapshot you took once and forgot is a small bill forever |
 | **Block storage** (extra disks) | Per gigabyte per month | |
 | **Object storage** (Spaces) | $5 a month flat for a generous allowance | Flat fee even if you store one file |
@@ -22,7 +22,7 @@ Prices below are DigitalOcean's at the time this project's price table was fetch
 
 On DigitalOcean specifically: This is my DigitalOcean referral link ([https://m.do.co/c/e3aaa65aed6b](https://m.do.co/c/e3aaa65aed6b)). DigitalOcean's referral program page (https://www.digitalocean.com/referral-program, read 2026-10-22) says the person who refers gets $25 after the new account spends its first $25, and I would rather you read DigitalOcean's referral terms than take my summary for what you get. It helps me fund more open-source cloud projects like this one. Using it is optional, the project works exactly the same without it, and nothing here is gated behind it.
 
-The other services in this project (Spacelift, Doppler, Twingate, GitHub) have free tiers that cover a one-person lab at the time of writing. The project's [cost page](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md) deliberately lists those limits as "not yet verified", because a wiki that promises a free tier is wrong the day the vendor changes it. Check the pricing page yourself before you depend on it.
+The other services in this project (Spacelift, Doppler, Twingate, GitHub) have free tiers that cover a one-person lab at the time of writing, with one Twingate exception for stage 2: service accounts are listed on Twingate's Home, Business and Enterprise plans and not on the free Starter plan ([Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md)). The project's [cost page](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md) deliberately lists those limits as "not yet verified", because a wiki that promises a free tier is wrong the day the vendor changes it. Check the pricing page yourself before you depend on it.
 
 ## How bills get out of hand
 

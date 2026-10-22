@@ -27,7 +27,7 @@ The word "honeypot" covers two kinds of activity with very different risk.
 | What goes wrong | A false alarm; a service that holds your email address. | It is taken over and used against other people; your account is closed; your address is blocked; the machine becomes a route into your network. |
 | Safety lesson | The minimums below that apply to data and privacy. | All eight. |
 
-This track's lessons 1 to 6 involve **only the left column**. The right column is the subject of tracks 2 and 3, which are separate later lessons ([what they will need](Deception-and-Honeypots-Start-Here.md#tracks-2-and-3-what-they-will-need)). This page exists so that nobody drifts from the left column to the right one without noticing.
+This track's lessons 1 to 6 involve **only the left column**. The right column is the subject of tracks 2 and 3. Track 2, a cloud sensor in your own account, now has its lessons ([anatomy of a cloud honeypot](Deception-and-Honeypots-Cloud-Sensor-Anatomy.md) is the first); track 3 is a later lesson ([what they will need](Deception-and-Honeypots-Start-Here.md#tracks-2-and-3-what-they-will-need)). This page exists so that nobody drifts from the left column to the right one without noticing.
 
 ## The eight minimums
 
@@ -51,7 +51,9 @@ Every hands-on lesson that exposes a decoy to strangers repeats these. They come
 | 3: a canary token | 6 (invented data), 7 (privacy of what the service sees) and 8 (a stop: delete the token) | Nothing is exposed to strangers. |
 | 4: honeyfiles | 6, 7 (what your watcher records), 8 | A watcher on your own folder. |
 | 5: a rule in the SIEM | 6 (synthetic data only), 7 | The events are made up at run time. |
-| Any internet-facing sensor | All eight | This is where the risk lives. |
+| 8: a cloud sensor in your own account | All eight | This is where the risk lives. |
+| 9: reading the logs | 6 (invented data in the exercises) and 7 (raw logs stay private) | The exercises run on invented lines; with a real sensor's logs, 7 applies in full. |
+| Any other internet-facing sensor | All eight | Same reason. |
 
 ## Counter-hacking, in plain terms
 

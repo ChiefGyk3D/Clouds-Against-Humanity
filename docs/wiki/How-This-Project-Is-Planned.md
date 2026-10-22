@@ -6,7 +6,7 @@
 
 The work is planned the way a small team plans software: a written backlog, a size on every item, two-week sprints, a review at the end of each, and a definition of done. The plan lives in GitHub, next to the code, so a change to the plan is as visible as a change to the code.
 
-- **The board:** the [Clouds Against Humanity project](https://github.com/users/ChiefGyk3D/projects/4) (Sprint board, Sprint plan, Roadmap, Backlog and Agents at work views).
+- **The board:** the [Clouds Against Humanity project](https://github.com/users/ChiefGyk3D/projects/4) (All Items, Board, Roadmap, Sprint, Epics, Bugs, Blocked, By area, Security, Docs, Done log and Agents at work views, among others). It is laid out the same way as the board of the author's Hammunition suite, so one reading habit works for both.
 - **The backlog:** the repository's [issues](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues), grouped into epics and milestones.
 - **The board as code:** `board.yaml` in the repository root. It names every field, option, iteration and view, and [Scrum Around and Find Out](https://github.com/ChiefGyk3D/scrum-around-and-find-out) (SAFO) creates and checks the board from it.
 
@@ -46,7 +46,50 @@ The maintainer has a day job and works on this in the evenings and at weekends, 
 | Blocked | Needs the maintainer or an answer from outside |
 | Done | Closed or merged, with the date in **Done on** |
 
-SAFO moves a card as GitHub events happen: an opened issue is Backlog, a ready pull request is In review, a merged one is Done. The sprint, size, area, priority and agent are set by hand when an issue is planned.
+SAFO moves a card as GitHub events happen: an opened issue is Backlog, a ready pull request is In review, a merged one is Done. The sprint, size, area, kind, epic, priority and agent are set when an issue is planned. `safo reconcile` adds the missing pull-request cards and sets Done on from the close or merge date; it is not typed in by hand.
+
+## The board: fields
+
+| Field | What it holds |
+|---|---|
+| Status | Backlog, Next, In progress, In review, Blocked, Done (table above) |
+| Area | The theme: operations and gates, stage 1 hardening, stage 2 telemetry, stage 3 workloads, edge and DMZ, multi-cloud, learning and wiki, process, security (threat models, hardening reviews, advisories), docs (wiki pages, specs and README) |
+| Kind | Feature, Bug, Decision, Lesson, Chore, Docs, Release or Epic. A Decision is a ruling, a design note or an approval; a Lesson is wiki teaching |
+| Epic | Which of the eight epic issues the card belongs to |
+| Priority | P0 now, P1 soon, P2 later, P3 someday |
+| Size | S, M, L, XL, as in the capacity section |
+| Agent | Claude, Codex, Copilot or You |
+| Sprint | S1 to S8, a two-week iteration |
+| Start date, Target date | Draw the card's bar on the Roadmap view |
+| Done on | The day the card closed or merged |
+| Decision | A free-text line: the ruling, when the card is a decision |
+
+Pull requests are cards too. A merged pull request is Done with its Done on date, an open one is In review, a draft is In progress. That is what makes the Done log a history of what actually shipped, and not only of what was planned.
+
+## The board: views
+
+| View | Shows |
+|---|---|
+| All Items | Everything, unfiltered |
+| Board | Cards by Status, without Done |
+| Roadmap | Bars from Start date to Target date, without Done |
+| Sprint | The current sprint only |
+| Sprint plan | A table for planning, without Done |
+| Epics | The eight epic issues |
+| Bugs | Kind Bug, without Done |
+| Blocked: needs the maintainer | Status Blocked |
+| By area | Open work grouped by Area |
+| Security | Area Security, without Done |
+| Docs | Area Docs, without Done |
+| Backlog | Status Backlog |
+| Done log | Everything with Status Done |
+| Agents at work | In progress, In review and Next, grouped by Agent |
+
+How to read three of them:
+
+- **Done log:** sort by Done on, newest first. Each row is one thing that finished, with its Kind and Epic. A row that is a pull request says what changed; a row that is an issue says what was asked.
+- **Agents at work:** which agent has what in flight. More than three agent items In progress or In review means the review queue, not the agents, is the limit.
+- **Blocked: needs the maintainer:** every card waiting on a decision or a step only the maintainer can take (an approval, a console check, a rotation). If this view is empty, the agents are not waiting on anyone. If it is long, the next planning session starts here.
 
 ## Definition of ready
 
@@ -74,7 +117,19 @@ Work is routed by what it is, from measurements recorded in SAFO:
 | Security-sensitive changes | Built by one agent, attacked by another before merge |
 | Text in, text out (summaries, triage, drafts) | The local model first, checked before anything is applied |
 
-The Agent field on the board names the intended owner. The maintainer-only steps carry the `needs-maintainer` label so they are easy to filter.
+The Agent field on the board names the intended owner, and the Agents at work view groups by it:
+
+| Agent | Used for |
+|---|---|
+| Claude | Technical and integration work, and the orchestration of the others |
+| Codex | Adversarial code review |
+| Copilot | Pull request review |
+| ChatGPT | Public and non-technical wording |
+| Ollama | Local text triage and summaries |
+| RAG | Retrieval answers over the project's docs and issues |
+| You | Maintainer-only steps |
+
+ The maintainer-only steps carry the `needs-maintainer` label so they are easy to filter.
 
 ## The rhythm
 
@@ -100,8 +155,20 @@ Exceptions, kept exactly as written: direct quotes and vendor text, code and con
 
 `tests/test_american_english.py` fails when a clear British spelling appears in any Markdown page, in a Python, HCL, YAML or shell comment or docstring, or in a threat-model description, outside code fences, inline code and URLs. `tests/test_markdown_anchors.py` checks that every link to a heading still points at one. If a page must keep one on purpose, add a line to `docs/american-english-allowlist.txt` with the page, the word and the reason.
 
+## Feedback from readers
+
+Readers are part of the plan. [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md) explains how to report a mistake, a failed command or a question, and the repository has issue forms, a `SECURITY.md` and a `CONTRIBUTING.md` for it. A report becomes an issue like any other and goes through the flow above.
+
+Every new lesson page ends with a one-line feedback footer placed just before its **Next** line, so a reader who finds a mistake is one click from the how-to:
+
+```
+Found a mistake or a command that failed? [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md).
+```
+
+Lessons written before this footer existed get it as they are next edited; the foundations and deception lessons do not carry it yet.
+
 ## Changing the plan
 
-Plans change in the open. To add work, open an issue with a reason and a "done when" list. To change the sequence or the board's shape, open a pull request: `board.yaml` is reviewed like code, and `safo --board board.yaml audit` reports where the live board differs from the file. A few settings (the Roadmap view's date fields, view grouping and the project's built-in workflows) cannot be set through GitHub's API; `board.yaml` lists them under `ui_only` so they are checked by eye.
+Plans change in the open. To add work, open an issue with a reason and a "done when" list. To change the sequence or the board's shape, open a pull request: `board.yaml` is reviewed like code, and `safo --board board.yaml audit` reports where the live board differs from the file. A few settings (the Roadmap view's date fields, view grouping, adding an option to a field that already holds values and the project's built-in workflows) cannot be set through GitHub's API; `board.yaml` lists them under `ui_only` so they are checked by eye.
 
 Next: [Roadmap](Roadmap.md).

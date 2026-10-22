@@ -1,6 +1,6 @@
 # OpenTofu, stacks and modules
 
-> Never used Terraform or OpenTofu? [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) explains providers, resources, plan, apply and state from zero, and shows how to run this repo's tests with no cloud account.
+> Never used Terraform or OpenTofu? [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) explains providers, resources, plan, apply and state from zero, and shows how to run this repo's tests with no cloud account. To type the commands yourself with free, local providers, do [OpenTofu from zero: init, plan, apply, destroy](OpenTofu-From-Zero.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
@@ -57,6 +57,8 @@ flowchart LR
 | **Different credentials** | Stack 00 only needs a DigitalOcean token. Only stack 10 receives the Twingate API token. Least privilege at the run level. |
 | **Readable plans** | A human confirms every apply, and a short plan gets read. A 300-line plan gets skimmed. |
 | **Destroy order is explicit** | Destroy 10 first, then 00. The dependency is a real dependency, not something you remember. |
+
+The general rule, the costs of splitting and a free lab that builds and destroys five stacks in a loop are on [Build and destroy a bunch: one stack per service](Build-and-Destroy-Stack-Per-Service.md).
 
 The numbers leave gaps (00, 10, later 20, 30, 40) so a layer can be slotted in later without renaming everything.
 

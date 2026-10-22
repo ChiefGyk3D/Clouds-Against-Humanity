@@ -53,6 +53,7 @@ Some things were never in the stacks, or are kept on purpose. Destroying everyth
 | The Twingate account and its identity provider link | You made the account, not the stack. | See the vendor's pricing page | Keep it or close it; this is an account decision. |
 | The Doppler project and its secrets | Outside OpenTofu entirely. | See the vendor's pricing page | Delete the secrets you no longer need, or the project. |
 | The Spacelift stacks, contexts and policies | Deletion protection is on, and contexts and policies are not stacks. | See the vendor's pricing page | Delete in the Spacelift console once the cloud side is gone. |
+| A droplet's automated backups, if you turned them on | Destroying a droplet does not destroy them; they expire on their own schedule (four weeks for weekly backups, per DigitalOcean's pages). The [backups lesson](Backups-Recovery-and-Patching.md#cost-and-teardown-read-first) shows where this was read. | Possibly; check the billing page after a destroy | Look at the image list and the billing page; do not assume. |
 | Anything you made by hand in the cloud console | It is not in the repository, so no destroy touches it and the cost gate never saw it. | Yes, possibly | Find it with the checks in section 3. |
 
 ## 3. Prove zero billable resources
@@ -126,6 +127,7 @@ Tick every line. If you cannot tick one, the cost may not have stopped.
 
 - **Predict, then check.** Before you destroy anything, write down what you expect each list in section 3 to show. Which entry would surprise you most if it were not empty?
 - Read the destroy guard's table in the secrets runbook, then say why a droplet is not protected and a network is.
+- Practice the order on something free first: [Build and destroy a bunch: one stack per service](Build-and-Destroy-Stack-Per-Service.md) builds and destroys five throwaway stacks in a loop and shows what a wrong destroy order looks like.
 - Pick one row from section 2 and find where, in the repository, the code that does *not* create it lives.
 
 Back to [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) or the [Reading order](Reading-Order.md).
