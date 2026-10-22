@@ -530,7 +530,7 @@ bash ~/iac-scratch-tools/make-scratch.sh ~/iac-scratch a-base b-app c-extra d-ex
 & "$HOME/iac-scratch-tools/make-scratch.ps1" -Root "$HOME/iac-scratch" -Names a-base,b-app,c-extra,d-extra,e-extra
 ```
 
-2. Create the five stacks as in Exercise 5, one at a time, labelled `scratch`, autodeploy off. Add the two dependencies as in Exercise 8 (where dependencies exist on your plan).
+2. Create the five stacks as in Exercise 5, one at a time, labeled `scratch`, autodeploy off. Add the two dependencies as in Exercise 8 (where dependencies exist on your plan).
 3. Trigger and confirm each, parents first. Write down the order and how long each took.
 4. Destroy in the reverse order. For each stack: task `tofu destroy -auto-approve`, check the resources view, then turn off deletion protection and delete the stack.
 5. Run the checklist.
