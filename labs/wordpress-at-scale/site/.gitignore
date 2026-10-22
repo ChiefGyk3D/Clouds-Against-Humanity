@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0
+# Code that Composer installs, uploads and secrets are not source.
+/vendor/
+/web/wp/
+/web/app/plugins/
+/web/app/themes/
+/web/app/uploads/
+/web/app/mu-plugins/vendor/
+.env
