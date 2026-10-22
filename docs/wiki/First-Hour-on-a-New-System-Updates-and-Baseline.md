@@ -1,6 +1,6 @@
 # First hour on a new system: updates, automatic updates and a baseline, before anything else
 
-Side page to the start-from-zero pages. Read it after [Droplet hardening](Droplet-Hardening.md) (core step 14), or at any point you are about to set up a machine, a virtual machine, a container host or a router and wonder what to do first. It is about the **order** of the first hour. The details of patch cadence, CVE scores and backups are on [Backups, recovery and patching](Backups-Recovery-and-Patching.md); this page does not repeat them. Next: [Droplet hardening](Droplet-Hardening.md).
+Side page to the start-from-zero pages. Read it after [Droplet hardening](Droplet-Hardening.md) (core step 14), or at any point you are about to set up a machine, a virtual machine, a container host or a router and wonder what to do first. It is about the **order** of the first hour. The details of patch cadence, CVE scores and backups are on [Backups, recovery and patching](Backups-Recovery-and-Patching.md); this page does not repeat them. Next: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
@@ -56,7 +56,7 @@ The two GitHub advisories, [GHSA-w8hw-w9fx-j79w](https://github.com/php/php-src/
 | The distribution's PHP package (for example `php8.3` from the Ubuntu or Debian archive) | Yes, **if** the distribution shipped a fixed package and the automatic mechanism is allowed to take it. Ubuntu's defaults take the security pocket (Debian's default I did not read, est.); a package fixed there arrives on the next run. Whether your distribution had published the fix on a given day is a fact about your vendor, not about the tool (est.: check the vendor's security tracker). | Make sure the **service restarts** after the package changes (a reboot does it; on some systems a service restart is automatic, on others it is not) and then check the version. |
 | A third-party repository (for example a vendor-maintained PHP repository you added) | Only if that repository is in the tool's allowed list. Ubuntu's documentation says adding a repository "WILL NOT make unattended-upgrades consider it for updates" ([Ubuntu Server documentation](https://documentation.ubuntu.com/server/how-to/software/automatic-updates/), read 2026-10-22). | Add the origin to the allowed list on purpose, or update that repository by hand. |
 | PHP compiled from source, or unpacked from a download | No. The OS does not know it exists. | You are the vendor. Track the releases yourself. |
-| PHP inside a container image (`php:8.3-apache`, a WordPress image) | **No.** The host's updates never look inside an image. Docker says: "Docker images are immutable. Building an image is taking a snapshot of that image at that moment ... To keep your images up-to-date and secure, rebuild your images often" ([Docker build best practices](https://docs.docker.com/build/building/best-practices/), read 2026-10-22). | Pull or rebuild the image, then recreate the container. A running container keeps running the old image (est.; the consequence of immutability). |
+| PHP inside a container image (`php:8.3-apache`, a WordPress image) | **No.** The host's updates do not look inside an image. Docker says: "Docker images are immutable. Building an image is taking a snapshot of that image at that moment ... To keep your images up-to-date and secure, rebuild your images often" ([Docker build best practices](https://docs.docker.com/build/building/best-practices/), read 2026-10-22). | Pull or rebuild the image, then recreate the container. A running container keeps running the old image (est.; the consequence of immutability). |
 | PHP vendored in an application bundle or a Windows `.zip` | No. | Replace it from the application vendor's fixed release. |
 | PHP 8.1 or older | Only if your vendor backports fixes. The project does not. | Move to a supported version, or confirm the vendor's backport. |
 
@@ -89,7 +89,7 @@ Four things to take from the table.
 
 ### Security-only or all updates?
 
-A **security-only** policy keeps changes small, which lowers the chance of a surprise, and fixes the flaws you hear about. The cost is that the machine slowly drifts from the vendor's tested whole: bug fixes you skip may be what the next security fix assumes. Amazon's recommendation for AL2023 (take all updates in a release) and Debian/Ubuntu's security-first default are both defensible. A practical split (est.; this is a convention, not a vendor rule): **automatic security updates daily; a full update on a calendar, in a maintenance window, after testing.** That is also what this project's droplets do: security updates daily, nothing else automatic ([Droplet hardening: updates](Droplet-Hardening.md#updates)).
+A **security-only** policy keeps changes small, which lowers the chance of a surprise, and fixes the flaws you hear about. The cost is that the machine slowly drifts from the vendor's tested whole: bug fixes you skip may be what the next security fix assumes. Amazon's recommendation for AL2023 (take all updates in a release) and Debian/Ubuntu's security-first default are both defensible. A practical split (est.; this is a convention, not a vendor rule): **automatic security updates daily; a full update on a calendar, in a maintenance window, after testing.** That is also what this project's droplets do: security updates daily from the distribution, with no other distribution updates automatic; the one exception is the connector package, which has its own weekly cron job ([Droplet hardening: updates](Droplet-Hardening.md#updates)).
 
 ### Reboots, kernel live patching, maintenance windows
 
@@ -237,7 +237,7 @@ Save this as `baseline.sh`. It only reads the system and writes one file.
 # baseline.sh - write a plain-text baseline of this machine, and compare two of them.
 # Usage: ./baseline.sh snapshot FILE      write the baseline to FILE
 #        ./baseline.sh compare OLD NEW    show what changed between two baselines
-# Read-only: it reads system state and writes only FILE. It never changes the system.
+# Read-only: it reads system state and writes only FILE. It does not change the system.
 set -u
 section() { printf '\n## %s\n' "$1"; }
 snapshot() {
@@ -259,7 +259,7 @@ snapshot() {
     section groups-with-admin-rights
     getent group sudo wheel admin 2>/dev/null
     section enabled-services
-    if command -v systemctl >/dev/null && systemctl is-system-running >/dev/null 2>&1; then
+    if command -v systemctl >/dev/null && [ -d /run/systemd/system ]; then
       systemctl list-unit-files --state=enabled --no-legend | awk '{print $1}' | sort
     else echo "(systemd not running here)"; fi
     section firewall
@@ -477,7 +477,7 @@ Everything above is free. This path uses **your own** DigitalOcean account and *
 
 **Cost and teardown first.** The smallest regular size in [`docs/cost-prices.json`](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost-prices.json), `s-1vcpu-512mb-10gb`, is **$4 a month** (retrieved 2026-10-21; see [`docs/cost.md`](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md)). Billing is by time used, so a few hours is a small fraction of that (est.; the sibling page records DigitalOcean's "billed per second" statement as read on 2026-10-21). A powered-off droplet is still billed; **destroy** it when you finish, and prove it is gone with the [teardown checklist](Teardown-Checklist.md). Backups are off in this path.
 
-**Steps, without repeating the other lessons.** Create the cloud firewall first and attach it, so the new machine is never open to the internet while it updates ([DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md)); create the droplet with `user_data` like the one below; then log in through the access method your lesson set up ([Build it from zero](Build-It-From-Zero-Accounts-to-Stage-1.md) and [Droplet hardening](Droplet-Hardening.md) show the piece-by-piece versions). A cloud-config that follows the order, with no secrets in it:
+**Steps, without repeating the other lessons.** Create the cloud firewall first and attach it, so the new machine is not open to the internet while it updates ([DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md)); create the droplet with `user_data` like the one below; then log in through the access method your lesson set up ([Build it from zero](Build-It-From-Zero-Accounts-to-Stage-1.md) and [Droplet hardening](Droplet-Hardening.md) show the piece-by-piece versions). A cloud-config that follows the order, with no secrets in it:
 
 ```yaml
 #cloud-config
