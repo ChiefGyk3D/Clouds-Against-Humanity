@@ -6,7 +6,7 @@
 
 You have one model of this pipeline, written with STRIDE. This page adds two more views of the same project and the files to open them: the pipeline mapped to MITRE ATT&CK, and the AI tools that touch this repository mapped to MITRE ATLAS. The point is not that three frameworks are better than one. The point is that each answers a different question, that you should recognize all three when a job or a report uses them, and that this repository is a springboard: the models are small enough to read in an evening and wrong enough in places to be worth fixing.
 
-The format is the usual one: **predict, then check**. Write your answer down first.
+The format is the usual one: **predict, then check**. Write your answer down first. If words such as exploit, zero-day, ransomware or lateral movement are new, [Threats in plain words](Threats-in-Plain-Words.md) comes first.
 
 ## What was checked and what was not
 
