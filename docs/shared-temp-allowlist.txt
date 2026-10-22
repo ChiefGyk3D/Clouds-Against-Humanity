@@ -1,0 +1,7 @@
+# Exceptions to tests/test_no_shared_temp_paths.py (issue #260).
+# One per line: <path relative to the repository root>:<the matched text> | <reason>
+# The reason is required. Lines starting with # and blank lines are ignored.
+# An entry that no longer matches anything fails the test, so remove it with the code it covered.
+docs/wiki/Deception-and-Honeypots-Alerts-in-the-SIEM.md:/tmp/pwned | Hostile text inside an invented log line to prove the rules ignore it; nothing is created at that path
+docs/wiki/Deception-and-Honeypots-Read-the-Sensor-Logs.md:/tmp/pwned | Hostile text inside an invented log line the reader parses as data; nothing is created at that path
+docs/wiki/Deception-and-Honeypots-Read-the-Sensor-Logs.md:/tmp/x.sh | A command typed by an invented attacker in a made-up sensor log; the lesson only reads it

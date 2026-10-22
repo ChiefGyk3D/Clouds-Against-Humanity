@@ -501,7 +501,7 @@ Save this as `nginx.conf` in the `rl-lab` folder. Read the comments; every line 
 ```nginx
 # rl-lab nginx.conf - a rate limiting lab for 127.0.0.1 only. Not a production configuration.
 worker_processes 1;
-pid /tmp/nginx.pid;
+pid /run/nginx.pid;   # inside the container, as the official image does
 error_log /dev/stderr notice;
 events { worker_connections 256; }
 

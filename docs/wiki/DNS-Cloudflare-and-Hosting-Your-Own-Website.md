@@ -548,7 +548,21 @@ Two `dnsmasq` programs on the loopback address (`127.0.0.1`, reachable only from
 Create a folder and the generator script (it writes the zone, so you can regenerate it with a different address later):
 
 ```bash
-mkdir -p ~/dns-lab && cd ~/dns-lab
+mkdir -p -m 700 ~/dns-lab && cd ~/dns-lab
+[ "$(stat -c %u .)" = "$(id -u)" ] && [ -z "$(find . -maxdepth 0 -perm /022)" ] || { echo "~/dns-lab is not private to you; stop" >&2; exit 1; }   # the pid files live here, so only you may write to it
+cat > stop-dns.sh <<'STOP_EOF'
+#!/usr/bin/env bash
+# stop-dns.sh NAME...: stop the dnsmasq started with NAME.conf (auth, resolver or tofu-auth).
+# It kills only when the pid file is ours, holds only digits, and that process is a dnsmasq using NAME.conf.
+for n in "$@"; do
+  case $n in tofu-auth) f="$PWD/tofu.pid" ;; *) f="$PWD/$n.pid" ;; esac
+  [ -f "$f" ] && [ -O "$f" ] || continue
+  pid="$(cat "$f")"
+  if [[ "$pid" =~ ^[0-9]+$ ]] && [[ "$(ps -o command= -p "$pid" 2>/dev/null)" == *"dnsmasq"*"$n.conf"* ]]; then kill "$pid"; fi
+  rm -f "$f"
+done
+STOP_EOF
+chmod +x stop-dns.sh
 cat > make-auth.sh <<'EOF'
 #!/usr/bin/env bash
 # make-auth.sh [IPV4_FOR_WWW] writes auth.conf: the zone example.test (www defaults to 192.0.2.10)
@@ -604,15 +618,15 @@ cat auth.pid resolver.pid
 
 `dnsmasq` is a small server that is not a full authoritative implementation (its zone support is a subset, so the apex must exist as a host record and the addresses must fall inside the subnets given to `auth-zone`), but it answers real DNS and is enough to teach every concept here. The lab's `dns-rr` line builds a `CAA` record's data from text at run time, so no opaque hex string is stored in the page. The addresses are RFC 5737 and RFC 3849 documentation ranges.
 
-**Stop it** whenever you finish (never `pkill -f`, which can match your own shell; the pid files name exactly the two processes you started):
+**Stop it** whenever you finish (never `pkill -f`, which can match your own shell; `stop-dns.sh` reads each pid file, checks that it holds only digits, belongs to you and names a `dnsmasq` running that config, and only then stops it):
 
 ```bash
-kill "$(cat ~/dns-lab/auth.pid)" "$(cat ~/dns-lab/resolver.pid)"
+cd ~/dns-lab && ./stop-dns.sh auth resolver
 ```
 
 ```powershell
 # Inside WSL, the same Bash commands; from Windows:
-wsl -e bash -c 'kill "$(cat ~/dns-lab/auth.pid)" "$(cat ~/dns-lab/resolver.pid)"'   # est.
+wsl -e bash -c 'cd ~/dns-lab && ./stop-dns.sh auth resolver'   # est.
 ```
 
 #### Exercise 3: ask every record type
@@ -685,7 +699,7 @@ echo "--- ask again 4 seconds later: the TTL has counted down"
 dig +noall +answer @127.0.0.1 -p 5301 www.example.test
 
 echo "--- BREAK: change www at the authoritative server"
-kill "$(cat auth.pid)"; sleep 1; ./make-auth.sh 192.0.2.99; dnsmasq -C auth.conf; sleep 1
+./stop-dns.sh auth; sleep 1; ./make-auth.sh 192.0.2.99; dnsmasq -C auth.conf; sleep 1
 echo "authoritative says:"; dig +short @127.0.0.1 -p 5300 www.example.test
 echo "resolver still says:"; dig +noall +answer @127.0.0.1 -p 5301 www.example.test
 
@@ -708,7 +722,7 @@ dig +noall +answer @127.0.0.1 -p 5301 www.example.test
 
 ```bash
 cd ~/dns-lab
-kill "$(cat auth.pid)"; sleep 1
+./stop-dns.sh auth; sleep 1
 ./make-auth.sh
 echo 'cname=old.example.test,gone.example.test' >> auth.conf
 dnsmasq -C auth.conf; sleep 1
@@ -742,7 +756,7 @@ EOF
 dnsmasq -C tofu-auth.conf
 dig +noall +answer @127.0.0.1 -p 5302 www.example.test
 dig +noall +answer @127.0.0.1 -p 5302 blog.example.test
-kill "$(cat tofu.pid)"
+./stop-dns.sh tofu-auth
 ```
 
 On 2026-10-22, `www` returned `192.0.2.10` and `blog` returned the CNAME to `www.example.test.` followed by that address. Edit a value in `main.tf`, run `tofu plan`, and read the one-line difference before you apply. **Undo:** `tofu destroy -auto-approve` and delete the folder.
@@ -811,7 +825,7 @@ A small loop in the local lab (nothing here touches a real domain).
 
 ```bash
 cd ~/dns-lab
-kill "$(cat auth.pid)"; sleep 1
+./stop-dns.sh auth; sleep 1
 ./make-auth.sh
 echo 'host-record=www.example.test,198.51.100.66' >> auth.conf
 dnsmasq -C auth.conf; sleep 1
