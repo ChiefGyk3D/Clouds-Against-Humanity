@@ -44,6 +44,20 @@ mock_provider "digitalocean" {
 mock_provider "twingate" {}
 """,
     "stacks/20-telemetry": 'mock_provider "twingate" {}\n',
+    "stacks/50-edge": """\
+mock_provider "digitalocean" {
+  mock_resource "digitalocean_droplet" {
+    defaults = {
+      id = "12345678"
+    }
+  }
+  mock_resource "digitalocean_reserved_ip" {
+    defaults = {
+      ip_address = "203.0.113.10"
+    }
+  }
+}
+""",
 }
 
 RUN = """\
