@@ -239,13 +239,18 @@ export KEY_ID=YOUR_KEY_ID
 
 # 1. The firewall first, attached by tag, so the droplet is never open.
 #    Cloudflare's ranges are fetched now, from Cloudflare, not copied into this page.
+set -eu    # stop on the first error: a failed fetch must never reach the firewall command
+CF_RANGES="$(curl -fsS https://www.cloudflare.com/ips-v4 https://www.cloudflare.com/ips-v6)"
+# Fail closed: refuse to continue unless both lists came back, with a plausible count.
+[ "$(printf '%s\n' "$CF_RANGES" | grep -c '[./:]')" -ge 10 ] || { echo "Cloudflare ranges missing; stopping" >&2; exit 1; }
 CF_RULES=""
-for r in $(curl -fsS https://www.cloudflare.com/ips-v4 https://www.cloudflare.com/ips-v6); do
+for r in $CF_RANGES; do
   CF_RULES="${CF_RULES},address:${r}"
 done
+case "$CF_RULES" in ,address:*) ;; *) echo "empty rule list; stopping" >&2; exit 1;; esac
 doctl compute firewall create --name web-origin --tag-names web-origin \
   --inbound-rules "protocol:tcp,ports:443${CF_RULES} protocol:tcp,ports:22,address:${MY_IP}/32" \
-  --outbound-rules "protocol:tcp,ports:80,address:0.0.0.0/0,address:::/0 protocol:tcp,ports:443,address:0.0.0.0/0,address:::/0 protocol:udp,ports:53,address:0.0.0.0/0,address:::/0 protocol:udp,ports:123,address:0.0.0.0/0,address:::/0"
+  --outbound-rules "protocol:tcp,ports:80,address:0.0.0.0/0,address:::/0 protocol:tcp,ports:443,address:0.0.0.0/0,address:::/0 protocol:udp,ports:53,address:0.0.0.0/0,address:::/0 protocol:tcp,ports:53,address:0.0.0.0/0,address:::/0 protocol:udp,ports:123,address:0.0.0.0/0,address:::/0"
 
 # 2. The droplet, carrying the tag.
 doctl compute droplet create web-origin --region "$REGION" --size "$SIZE" --image "$IMAGE" \
@@ -253,9 +258,9 @@ doctl compute droplet create web-origin --region "$REGION" --size "$SIZE" --imag
 export ORIGIN_IP=$(doctl compute droplet get web-origin --format PublicIPv4 --no-header)
 ```
 
-In PowerShell, build the list with `$cf = (curl.exe -fsS https://www.cloudflare.com/ips-v4 https://www.cloudflare.com/ips-v6) -split "\s+" | Where-Object { $_ }` and `$CF_RULES = ($cf | ForEach-Object { ",address:$_" }) -join ""`; the `doctl` flags are the same (est.).
+Save this block as a script and run it with `bash`, rather than pasting it into your login shell: `set -eu` would close an interactive terminal on the first error. The count check is a sanity floor (the lists held 22 entries on 2026-10-22), not a validation of the ranges; compare them with Cloudflare's page if anything looks off. In PowerShell, build the list with `$ErrorActionPreference = 'Stop'`, then `$cf = (curl.exe -fsS https://www.cloudflare.com/ips-v4 https://www.cloudflare.com/ips-v6) -split "\s+" | Where-Object { $_ }`, stop if `$LASTEXITCODE -ne 0` or `$cf.Count -lt 10`, and only then `$CF_RULES = ($cf | ForEach-Object { ",address:$_" }) -join ""`; the `doctl` flags are the same (est.).
 
-Notes on this block, each marked as what I read or did not: DigitalOcean's firewall limits page says a rule's Sources field can hold up to 1,000 entries and a firewall up to 50 rules, so the 22 Cloudflare ranges (15 IPv4 and 7 IPv6 on 2026-10-22) fit in one rule. That several `address:` entries can be repeated inside one rule string with `doctl` is **est.**: the reference shows the single-address form, so if the command is refused, create the firewall in the control panel and paste the ranges into the Sources box. The outbound rules allow what a patching server needs (package downloads on 80 and 443, DNS, time) and nothing more; check them against [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) for the reasoning. Port 80 is deliberately **not** open inbound: with the proxy in front, Cloudflare can redirect HTTP to HTTPS at its own edge (its Flexible-mode page points to an "Enforce HTTPS connections" setting for this), so the origin needs only 443. The exact setting name in your dashboard is **est.**
+Notes on this block, each marked as what I read or did not: DigitalOcean's firewall limits page says a rule's Sources field can hold up to 1,000 entries and a firewall up to 50 rules, so the 22 Cloudflare ranges (15 IPv4 and 7 IPv6 on 2026-10-22) fit in one rule. That several `address:` entries can be repeated inside one rule string with `doctl` is **est.**: the reference shows the single-address form, so if the command is refused, create the firewall in the control panel and paste the ranges into the Sources box. The outbound rules allow what a patching server needs (package downloads on 80 and 443, DNS on both UDP and TCP port 53 because resolvers fall back to TCP for large answers, and time) and nothing more; check them against [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) for the reasoning. Port 80 is deliberately **not** open inbound: with the proxy in front, Cloudflare can redirect HTTP to HTTPS at its own edge (its Flexible-mode page points to an "Enforce HTTPS connections" setting for this), so the origin needs only 443. The exact setting name in your dashboard is **est.**
 
 On the droplet, a static site and a TLS server block (nginx), using the Origin CA certificate you create in the dashboard:
 
