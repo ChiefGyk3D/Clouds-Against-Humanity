@@ -10,6 +10,10 @@ locals {
 
   on = var.edge_enabled ? 1 : 0
 
+  # The size the cost gate wants to read as a plain local reference. The output
+  # precondition ties it to the exact droplet cost.json prices.
+  edge_droplet = { size = var.droplet_size }
+
   cost = jsondecode(file("${path.module}/cost.json"))
 
   # First and last address of an IPv4 CIDR as a number, so two ranges can be
@@ -130,7 +134,7 @@ module "edge_host" {
   resource_key     = var.resource_key
   vpc_id           = digitalocean_vpc.dmz[0].id
   tags             = [digitalocean_tag.dmz[0].name, digitalocean_tag.transport[0].name]
-  size             = var.droplet_size
+  size             = local.edge_droplet.size
   public_ports     = local.public_ports
   restricted_ports = local.restricted_ports
   reboot_time      = var.reboot_time

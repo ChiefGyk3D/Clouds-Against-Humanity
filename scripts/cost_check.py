@@ -130,6 +130,9 @@ SITES_DIR = "stacks/sites"
 RESOURCE_KEY_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 STACK_NAME_RE = re.compile(r"^[0-9]+-[A-Za-z0-9][A-Za-z0-9_-]*$")
 CONNECTOR_SOURCE_SUFFIX = "twingate-connector"
+EDGE_SOURCE_SUFFIX = "edge-host"
+# The only count an edge-host module call may carry: the stack's own switch.
+EDGE_COUNT_RE = re.compile(r"local\.on")
 RESERVED_IP = "digitalocean_reserved_ip"
 RESERVED_IP_ASSIGNMENT = "digitalocean_reserved_ip_assignment"
 # The only shapes the scanner accepts for an assignment: a plain reference to a
@@ -1138,6 +1141,51 @@ def module_problems(root):
     return problems, connectors
 
 
+def edge_module_problems(root):
+    """Hold modules/edge-host to the connector's rules (it may hold a droplet and
+    a reserved IP, both priced from a stack's cost.json).
+
+    Per stack: no for_each; count only as the plain switch `local.on`; size a
+    plain `local.<name>.size`; and the manifest's droplet entries and
+    reserved_ip entries each number either 0 (switched off, priced nothing) or
+    the number of edge-host module calls."""
+    problems, calls = [], {}
+    manifests = dict(stack_manifests(root))
+    for rel, block in file_blocks(root):
+        if block.kind != "module" or block.problem:
+            continue
+        source, problem = module_source_problem(root, rel, block)
+        if problem or not source.rstrip("/").endswith(EDGE_SOURCE_SUFFIX):
+            continue
+        name, stack = block.labels[0], str(Path(rel).parent.as_posix())
+        calls[stack] = calls.get(stack, 0) + 1
+        attrs = block.attrs()
+        for key, value in attrs:
+            if key == "for_each" or (key == "count" and not EDGE_COUNT_RE.fullmatch(value.strip())):
+                problems.append(
+                    f"{rel}: module {name!r} uses {key} {value.strip()!r}; the edge host is costed from "
+                    "the manifest, so only count = local.on (the stack's switch) is accepted"
+                )
+        sizes = [v for k, v in attrs if k == "size"]
+        if len(sizes) != 1 or not re.fullmatch(LOCAL_REF_RE.format(key="size"), sizes[0]):
+            problems.append(
+                f"{rel}:{block.line}: edge-host module {name!r} must set size to a plain reference such "
+                "as local.edge_droplet.size, tied to cost.json (see docs/cost.md)"
+            )
+    for stack in sorted(calls):
+        if stack not in manifests:
+            continue
+        entries = load_json(manifests[stack])["resources"]
+        for kind in ("droplet", "reserved_ip"):
+            have = sum(1 for r in entries if r.get("kind") == kind)
+            if have not in (0, calls[stack]):
+                problems.append(
+                    f"{stack}: {have} {kind} manifest entr(ies) but {calls[stack]} edge-host module call(s); "
+                    "they must match (or the manifest prices nothing while the edge is off)"
+                )
+    return problems, calls
+
+
 def reserved_ip_problems(root):
     """Each reserved IP is assigned exactly once, in the file that declares it.
 
@@ -1322,10 +1370,17 @@ def structure_problems(root):
     problems += reserved_ip_problems(root)
     mod_problems, connectors = module_problems(root)
     problems += mod_problems
+    edge_problems, edge_calls = edge_module_problems(root)
+    problems += edge_problems
     for stack in sorted(set(connectors) | set(bases)):
         machines = 0
         if stack in bases:
             machines = machine_count(bases[stack])
+            if stack in edge_calls:
+                # The edge-host droplets are reconciled by edge_module_problems.
+                machines -= sum(
+                    1 for r in load_json(bases[stack])["resources"] if r.get("kind") == "droplet"
+                )
         have = connectors.get(stack, 0)
         if have != machines:
             problems.append(
