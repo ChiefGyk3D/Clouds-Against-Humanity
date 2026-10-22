@@ -843,15 +843,15 @@ The same matrix as before from five commands. UFW enabled the IPv6 half by itsel
 
 **Predict.** `pfctl -nf` only parses. What will it print for a correct file, and what for a file with a misspelled keyword?
 
-**Do (BSD shell, in the VM).** Save the `pf.conf` from above as `/tmp/lesson-pf.conf`. On FreeBSD change `ext_if` to the VM's interface name and, on FreeBSD 13 or older, the `match ... scrub` line as the notes say. Then:
+**Do (BSD shell, in the VM).** Save the `pf.conf` from above as `lesson-pf.conf` in a new folder only you can use (`mkdir -m 700 "$HOME/pf-lab" && cd "$HOME/pf-lab"`), not in the shared `/tmp`. On FreeBSD change `ext_if` to the VM's interface name and, on FreeBSD 13 or older, the `match ... scrub` line as the notes say. Then:
 
 ```sh
-pfctl -nf /tmp/lesson-pf.conf && echo SYNTAX-OK
-sed 's/flush global/flush globl/' /tmp/lesson-pf.conf > /tmp/bad-pf.conf
-pfctl -nf /tmp/bad-pf.conf; echo exit=$?
+pfctl -nf lesson-pf.conf && echo SYNTAX-OK
+sed 's/flush global/flush globl/' lesson-pf.conf > bad-pf.conf
+pfctl -nf bad-pf.conf; echo exit=$?
 ```
 
-**Check (est.).** The first command prints nothing and then `SYNTAX-OK`. The second prints a syntax error with a line number and exits non-zero. Neither loads anything (`-n`). To load the file and watch it, `pfctl -f /tmp/lesson-pf.conf` then `pfctl -sr` (show the rules as `pf` interpreted them), and `tcpdump -n -e -ttt -i pflog0` to see logged packets. **Do not load a default-deny file over SSH to a VM you cannot reach from its console**; the FreeBSD handbook gives the same caution about remote firewall edits.
+**Check (est.).** The first command prints nothing and then `SYNTAX-OK`. The second prints a syntax error with a line number and exits non-zero. Neither loads anything (`-n`). To load the file and watch it, `pfctl -f lesson-pf.conf` then `pfctl -sr` (show the rules as `pf` interpreted them), and `tcpdump -n -e -ttt -i pflog0` to see logged packets. **Do not load a default-deny file over SSH to a VM you cannot reach from its console**; the FreeBSD handbook gives the same caution about remote firewall edits.
 
 **PowerShell.** None; use the VM's shell.
 

@@ -311,18 +311,24 @@ What each line does, from the default configuration file (read 2026-10-22): `hos
 The fake home and the lure. Cowrie's `HONEYFS` documentation says a file the visitor can read needs both an entry in the fake file system and content for it. The installation page says the bundled file system is read-only for operators: copy it out, point Cowrie at the copy, and edit the copy with `fsctl`. Copy the lure from your computer first (the `scp` runs on **your** side):
 
 ```bash
-scp -P 49152 -r lure admin@SENSOR:/tmp/lure
+scp -P 49152 -r lure admin@SENSOR:lure-incoming
 ```
 
 ```powershell
-scp -P 49152 -r lure admin@SENSOR:/tmp/lure
+scp -P 49152 -r lure admin@SENSOR:lure-incoming
 ```
 
-On the server, as `cowrie` (still in `~/my-honeypot` with the environment active; the `cowrie` user has no `sudo`, so these commands use only its own files and the copy in `/tmp` that `scp` left readable):
+`scp` put the copy in the `admin` home folder, not in the shared `/tmp`, where another local user could swap the file before you used it. On the server, as `admin` (the `cowrie` user has no `sudo`), hand the file to `cowrie` and remove the staging copy:
 
 ```bash
-mkdir -p /home/cowrie/lure
-cp /tmp/lure/deploy-notes-OLD.txt /home/cowrie/lure/
+sudo install -d -o cowrie -m 700 /home/cowrie/lure
+sudo install -o cowrie -m 600 lure-incoming/deploy-notes-OLD.txt /home/cowrie/lure/
+rm -r lure-incoming
+```
+
+Then as `cowrie` (still in `~/my-honeypot` with the environment active):
+
+```bash
 python -c "from cowrie.core.resources import read_data_bytes; open('var/lib/cowrie/fs.pickle', 'wb').write(read_data_bytes('fs.pickle'))"
 SIZE=$(wc -c < /home/cowrie/lure/deploy-notes-OLD.txt)
 echo "$SIZE"

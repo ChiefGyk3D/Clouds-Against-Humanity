@@ -290,18 +290,19 @@ Then the drift demo, saved as `drift.sh`. It runs **inside a throwaway container
 # drift.sh - runs INSIDE a throwaway container: baseline, drift, baseline, compare.
 set -eu
 B=/usr/local/bin/baseline.sh
-$B snapshot /tmp/before.txt
+W="$(mktemp -d)"   # a private scratch folder, not a fixed name in the shared /tmp
+$B snapshot "$W/before.txt"
 # drift 1: a tiny local package built at run time (no network needed)
-mkdir -p /tmp/pkg/DEBIAN
-printf 'Package: cah-demo\nVersion: 1.0\nArchitecture: all\nMaintainer: lab <lab@example.com>\nDescription: drift demo\n' > /tmp/pkg/DEBIAN/control
-dpkg-deb --build /tmp/pkg /tmp/cah-demo.deb >/dev/null
-dpkg -i /tmp/cah-demo.deb >/dev/null
+mkdir -p "$W/pkg/DEBIAN"
+printf 'Package: cah-demo\nVersion: 1.0\nArchitecture: all\nMaintainer: lab <lab@example.com>\nDescription: drift demo\n' > "$W/pkg/DEBIAN"/control
+dpkg-deb --build "$W/pkg" "$W/cah-demo.deb" >/dev/null
+dpkg -i "$W/cah-demo.deb" >/dev/null
 # drift 2: a new account, as an attacker or a careless install might add
 useradd -M -s /bin/bash cah-drift
 # drift 3: a config file edited
 echo "# edited" >> /etc/hosts 2>/dev/null || true
-$B snapshot /tmp/after.txt
-$B compare /tmp/before.txt /tmp/after.txt || true
+$B snapshot "$W/after.txt"
+$B compare "$W/before.txt" "$W/after.txt" || true
 ```
 
 **Predict.** Name the three sections of the diff that will show a change, before you run it.
@@ -324,8 +325,8 @@ podman run --rm --network none -v "${PWD}/baseline.sh:/usr/local/bin/baseline.sh
 **Check.** What I got, trimmed, from an Ubuntu 24.04 container on 2026-10-22 (hashes shortened):
 
 ```text
-wrote /tmp/before.txt (192 lines)
-wrote /tmp/after.txt (194 lines)
+wrote <random scratch folder>/before.txt (192 lines)
+wrote <random scratch folder>/after.txt (194 lines)
 @@ -14,6 +14,7 @@
  ca-certificates 20260601~24.04.1
 +cah-demo 1.0

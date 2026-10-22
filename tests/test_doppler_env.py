@@ -17,7 +17,7 @@ import pytest
 SCRIPT = (
     Path(__file__).resolve().parent.parent / "scripts" / "spacelift" / "doppler-env.sh"
 )
-TOOLS = ["uname", "sed", "mkdir", "rm", "sha256sum", "tar", "cat", "env", "printf"]
+TOOLS = ["uname", "sed", "mkdir", "rm", "sha256sum", "tar", "cat", "env", "printf", "mktemp"]
 SECRET = "dp_test_SECRET_VALUE_123"
 
 DOPPLER_STUB = """#!/bin/sh
@@ -210,6 +210,38 @@ def test_bad_checksum_refuses_to_run_downloaded_cli(sandbox):
     assert "TOKEN=unset" in result.stdout
     tmp_path, _ = sandbox
     assert not any((tmp_path / "dl").glob("*.tar.gz"))
+
+
+def test_download_folder_is_never_a_fixed_shared_name():
+    text = SCRIPT.read_text()
+    assert "/tmp/cah-doppler" not in text
+    assert "mktemp -d" in text
+
+
+def test_unset_download_folder_is_a_new_private_folder(sandbox):
+    tmp_path, _ = sandbox
+    scratch = tmp_path / "scratch"
+    scratch.mkdir()
+    result = run(
+        sandbox,
+        "DIGITALOCEAN_TOKEN",
+        env_extra={"CAH_DOPPLER_DIR": "", "TMPDIR": str(scratch)},
+        with_doppler=False,
+    )
+    assert "checksum mismatch" in result.stdout  # it got as far as the download, into the new folder
+    made = list(scratch.iterdir())
+    assert len(made) == 1 and made[0].is_dir()
+    assert stat.S_IMODE(made[0].stat().st_mode) == 0o700
+
+
+def test_a_symlinked_download_folder_is_refused(sandbox):
+    tmp_path, _ = sandbox
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    (tmp_path / "link").symlink_to(elsewhere)
+    result = run(sandbox, "DIGITALOCEAN_TOKEN", env_extra={"CAH_DOPPLER_DIR": str(tmp_path / "link")}, with_doppler=False)
+    assert "refusing" in result.stdout and "rc=1" in result.stdout
+    assert list(elsewhere.iterdir()) == []
 
 
 def test_script_has_no_trace_or_unsafe_echo():

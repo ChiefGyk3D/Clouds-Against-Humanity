@@ -435,4 +435,4 @@ You are done when you can say, without looking:
 
 ## Where to next
 
-[Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) uses these words directly, then [Doppler and secrets](Doppler-and-Secrets.md) shows them in this project's pipeline.
+[Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) uses these words directly, then [Doppler and secrets](Doppler-and-Secrets.md) shows them in this project's pipeline. For the habits around them (a password manager first, the `.env` rules, scanning and a leak drill), read [Secrets from day one](Secrets-From-Day-One.md).

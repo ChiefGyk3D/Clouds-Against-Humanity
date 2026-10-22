@@ -409,9 +409,13 @@ cat > ctl.sh <<'LAB_EOF'
 # ctl.sh up MODE [HEADER] | down | reload MODE [HEADER]: start or stop the lab. Run from the lab folder.
 set -euo pipefail
 cd "$(dirname "$0")"
-stop() {
+stop() {  # kill a pid file's process only if the file is ours, holds digits, and the process is the one we started
   for p in cdn origin app; do
-    if [ -f $p.pid ]; then kill "$(cat $p.pid)" 2>/dev/null || true; rm -f $p.pid; fi
+    [ -f $p.pid ] && [ -O $p.pid ] || continue
+    pid="$(cat $p.pid)"
+    case $p in app) want="app.py" ;; *) want="$p.conf" ;; esac
+    if [[ "$pid" =~ ^[0-9]+$ ]] && [[ "$(ps -o command= -p "$pid" 2>/dev/null)" == *"$want"* ]]; then kill "$pid" || true; fi
+    rm -f $p.pid
   done
 }
 case ${1:?up|down|reload} in
