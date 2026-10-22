@@ -40,6 +40,7 @@
 14. [Droplet hardening](Droplet-Hardening.md)
     - Foundations side page: [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
     - Foundations side page: [First hour on a new system: updates and a baseline](First-Hour-on-a-New-System-Updates-and-Baseline.md)
+    - Foundations side page: [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md)
 15. [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
     - Foundations side page: [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md)
 16. [Spacelift](Spacelift.md)
@@ -122,6 +123,7 @@ The [Threat model](Threat-Model.md) is core step 19.
 
 - [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md)
 - [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md)
+- [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
 - [Enterprise change management for beginners (not used here)](Enterprise-Change-Management-for-Beginners.md)
 - [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md)
 - [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)

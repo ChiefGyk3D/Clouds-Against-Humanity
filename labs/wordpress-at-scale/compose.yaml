@@ -1,0 +1,80 @@
+# SPDX-License-Identifier: Apache-2.0
+# A scaled-down replica of a WordPress fleet: edge (CDN-like cache + toy WAF) ->
+# load balancer -> two stateless web nodes -> shared Redis object cache.
+# Everything is local. The only published ports are on 127.0.0.1. The web tier and
+# the load balancer sit on an internal network with no route to the internet and
+# no published port. No Docker socket is mounted anywhere.
+# Run it with ./lab.sh up (it writes .env with a random origin secret).
+name: cah-wp-scale
+
+services:
+  edge:
+    # nginx 1.30.6-alpine, verified to exist on Docker Hub 2026-10-22
+    image: docker.io/library/nginx:1.30.6-alpine
+    environment:
+      ORIGIN_SECRET: ${ORIGIN_SECRET:?run ./lab.sh up, which writes .env}
+    volumes:
+      - ./edge/edge.conf.template:/etc/nginx/templates/default.conf.template:ro
+    ports:
+      - "127.0.0.1:${EDGE_PORT:-8080}:8080"
+      - "127.0.0.1:${EDGE_NAIVE_PORT:-8081}:8081"
+    networks: [public, backend]
+    depends_on: [lb]
+    restart: unless-stopped
+
+  lb:
+    image: docker.io/library/nginx:1.30.6-alpine
+    # Hand the container's own DNS server to the template (the address differs between Docker and Podman).
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        NGINX_RESOLVER="$$(awk '/^nameserver/ {print $$2; exit}' /etc/resolv.conf)"
+        export NGINX_RESOLVER
+        exec /docker-entrypoint.sh nginx -g "daemon off;"
+    environment:
+      ORIGIN_SECRET: ${ORIGIN_SECRET:?run ./lab.sh up, which writes .env}
+    volumes:
+      - ./lb/lb.conf.template:/etc/nginx/templates/default.conf.template:ro
+    networks: [backend]
+    depends_on: [web1, web2]
+    restart: unless-stopped
+
+  web1: &web
+    # python:3.12.11-slim, the same image the monitoring lab uses
+    image: docker.io/library/python:3.12.11-slim
+    command: ["python", "-I", "-u", "/app/app.py"]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      NODE_NAME: web1
+      REDIS_HOST: redis
+    volumes:
+      - ./app/app.py:/app/app.py:ro
+      - shared-uploads:/shared
+    tmpfs:
+      - /var/local-uploads:mode=1777
+    networks: [backend]
+    depends_on: [redis]
+    restart: unless-stopped
+
+  web2:
+    <<: *web
+    environment:
+      NODE_NAME: web2
+      REDIS_HOST: redis
+
+  redis:
+    # redis 8.6.7-alpine, verified to exist on Docker Hub 2026-10-22
+    image: docker.io/library/redis:8.6.7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "32mb", "--maxmemory-policy", "allkeys-lru"]
+    networks: [backend]
+    restart: unless-stopped
+
+volumes:
+  shared-uploads:
+
+networks:
+  public: {}
+  backend:
+    internal: true
