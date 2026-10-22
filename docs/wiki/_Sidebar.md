@@ -24,6 +24,7 @@
 10. [Architecture overview](Architecture-Overview.md)
 11. [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md)
     - Side page: [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md)
+    - Foundations side page: [Threats in plain words](Threats-in-Plain-Words.md)
 12. [Twingate](Twingate.md)
 13. [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md)
     - Side page: [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md)
