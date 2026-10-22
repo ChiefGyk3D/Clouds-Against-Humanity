@@ -127,6 +127,7 @@ Tick every line. If you cannot tick one, the cost may not have stopped.
 
 - **Predict, then check.** Before you destroy anything, write down what you expect each list in section 3 to show. Which entry would surprise you most if it were not empty?
 - Read the destroy guard's table in the secrets runbook, then say why a droplet is not protected and a network is.
+- Practice the order on something free first: [Build and destroy a bunch: one stack per service](Build-and-Destroy-Stack-Per-Service.md) builds and destroys five throwaway stacks in a loop and shows what a wrong destroy order looks like.
 - Pick one row from section 2 and find where, in the repository, the code that does *not* create it lives.
 
 Back to [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) or the [Reading order](Reading-Order.md).
