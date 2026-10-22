@@ -136,12 +136,12 @@ So the unit of isolation is the config, and the unit of access is a token for ex
 
 ### One config and one short-lived token per asset
 
-The pattern, from the maintainer's ruling on 2026-10-22 (issue 236): **each asset gets its own Doppler config and its own short-lived, read-only token.** Not one shared config for the whole project, and not one shared token. The reasons are the least-privilege reasons from [APIs and tokens](APIs-and-Tokens-From-Zero.md#scopes-and-least-privilege): a compromised service reads only its own config, a leaked token reads only one asset's values, and a revoked token stops one asset, not all of them. Here is where each asset stands:
+The pattern, from the maintainer's ruling on 2026-10-22 (issue 236): **each asset gets its own Doppler config and its own short-lived, read-only token**, where you decide what an asset is (a service, a host or a site) and write the choice down. Not one shared config for the whole project, and not one shared token. The reasons are the least-privilege reasons from [APIs and tokens](APIs-and-Tokens-From-Zero.md#scopes-and-least-privilege): a compromised service reads only its own config, a leaked token reads only one asset's values, and a revoked token stops one asset, not all of them. Here is where each asset stands:
 
 | Asset | Doppler config | Token | Status |
 |---|---|---|---|
 | **Spacelift runs** | `clouds-against-humanity` / `prd` | One read-only service token, scoped to that config, 90-day expiry, held as a write-only variable in a Spacelift context ([Doppler and secrets](Doppler-and-Secrets.md#who-holds-what)). | Built and in use. |
-| **Telemetry droplets** (stage 2, per site) | `cah-<resource_key>-hostboot`, holding only that site's host secrets | One read-only token, created out of band, handed to the first boot, written to a root-only file, **deleted after the first pull** ([stage 2 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/02-telemetry.md#secrets-one-mechanism-design-section-28)). | Written and tested as text and with fake binaries; opt-in, off by default, not applied anywhere yet. |
+| **Telemetry droplets** (stage 2). The asset is the **site**, not the host: both connectors of a site share one config and the same bootstrap token (the stack passes one `log_shipping_bootstrap_token` to both connector modules). Revoking it affects both, and a compromised connector can read the sibling's boot secret. Splitting per host would be tighter and is not built | `cah-<resource_key>-hostboot`, holding only that site's host secrets | One read-only token, created out of band, handed to the first boot, written to a root-only file, **deleted after the first pull** ([stage 2 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/02-telemetry.md#secrets-one-mechanism-design-section-28)). | Written and tested as text and with fake binaries; opt-in, off by default, not applied anywhere yet. |
 | **Edge services** (the public edge, planned) | One config per edge service. The config names are not decided; `cah-edge-<service>` is an illustration (est.). | One short-lived, read-only token per service. | **Ruled, not built.** There is an open design question below. |
 | **CI** | not decided on this page | This repository's `security` job runs a full-history gitleaks scan through a reusable workflow ([CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md)). I did not read whether it gives that job any Doppler access; Doppler and secrets says the author's other repositories fetch over OIDC and store no Actions secrets. | Not checked. |
 
@@ -567,9 +567,9 @@ python scan_secrets.py --self-test
 python fake_issuer.py issue deploy
 git init -q -b main repo; Set-Location repo
 git config user.email learner@example.invalid; git config user.name learner
-Set-Content README.md "hello"; git add README.md; git commit -qm "start"
+Set-Content -Encoding ascii README.md "hello"; git add README.md; git commit -qm "start"
 $tok = (Get-Content ..\tokens\deploy.token).Trim()
-Set-Content deploy.sh ('DEPLOY_API_KEY="' + $tok + '"'); Remove-Variable tok
+Set-Content -Encoding ascii deploy.sh ('DEPLOY_API_KEY="' + $tok + '"'); Remove-Variable tok
 git add deploy.sh; git commit -qm "add deploy script"
 git rm -q deploy.sh; git commit -qm "remove the deploy script"
 git log --oneline
@@ -668,11 +668,11 @@ python3 -I ../scan_secrets.py tree . ; echo "exit: $?"
 ```powershell
 Set-Location $LAB; New-Item -ItemType Directory env-lab | Out-Null; Set-Location env-lab; git init -q -b main
 git config user.email learner@example.invalid; git config user.name learner
-Set-Content .gitignore @("# local secrets files stay on this machine", ".env", ".env.*", "!.env.example")
-Set-Content .env.example @("# Copy this file to .env and fill in your own values. Never put a real value in THIS file.",
+Set-Content -Encoding ascii .gitignore @("# local secrets files stay on this machine", ".env", ".env.*", "!.env.example")
+Set-Content -Encoding ascii .env.example @("# Copy this file to .env and fill in your own values. Never put a real value in THIS file.",
   "DOPPLER_PROJECT=example-project", "DOPPLER_CONFIG=dev", "API_BASE_URL=https://api.example.com", "API_TOKEN=replace-with-your-token")
 $v = python -c "import secrets; print(secrets.token_urlsafe(24))"
-(Get-Content .env.example) -replace '^API_TOKEN=.*', "API_TOKEN=$v" | Set-Content .env; Remove-Variable v
+(Get-Content .env.example) -replace '^API_TOKEN=.*', "API_TOKEN=$v" | Set-Content -Encoding ascii .env; Remove-Variable v
 icacls .env /inheritance:r /grant:r "$($env:USERNAME):(R,W)" | Out-Null; icacls .env       # only you can read it
 git check-ignore .env .env.local .env.example
 git add -A; git status --short; git commit -qm "add the example, not the real file"; git ls-files
@@ -783,7 +783,7 @@ cd "$LAB" && python3 -I scan_secrets.py history oldclone ; echo "oldclone exit: 
 
 ```powershell
 Set-Location $LAB; git clone -q repo oldclone; Set-Location repo
-(git show HEAD~1:deploy.sh) -split '"' | Select-Object -Index 1 | Set-Content ..\stolen.token
+(git show HEAD~1:deploy.sh) -split '"' | Select-Object -Index 1 | Set-Content -Encoding ascii ..\stolen.token
 python ..\fake_issuer.py check ..\stolen.token 203.0.113.50
 python ..\fake_issuer.py check ..\tokens\deploy.token ci-runner
 python ..\fake_issuer.py revoke deploy
@@ -792,6 +792,9 @@ python ..\fake_issuer.py issue deploy-2
 python ..\fake_issuer.py check ..\tokens\deploy-2.token ci-runner
 python ..\fake_issuer.py log
 git filter-repo --invert-paths --path deploy.sh --force
+# no git filter-repo? the plain-git fallback in PowerShell:
+#   git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch deploy.sh' --prune-empty -- --all
+#   Remove-Item -Recurse -Force .git\refs\original; git reflog expire --expire=now --all; git gc -q --prune=now
 git log --oneline
 python ..\scan_secrets.py history .
 Set-Location $LAB; python scan_secrets.py history oldclone
