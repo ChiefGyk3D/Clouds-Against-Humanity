@@ -287,7 +287,7 @@ python -m pip install "cowrie==3.1.3"
 cowrie init
 ```
 
-`cowrie init` writes `etc/cowrie.cfg`, and the first `cowrie start` creates the log directories and the host keys. Cowrie reads built-in defaults first and then your `etc/cowrie.cfg`, so the file only needs the keys you change. Write these (`hostname` is yours to choose: pick a plausible name that mentions nothing about honeypots, and nothing of yours):
+`cowrie init` writes `etc/cowrie.cfg`, and the first `cowrie start` creates the log directories and the host keys. Cowrie reads built-in defaults first and then your `etc/cowrie.cfg`, so the file only needs the keys you change. Replace the file's contents with these (`hostname` is yours to choose: pick a plausible name that mentions nothing about honeypots, and nothing of yours):
 
 ```ini
 [honeypot]
@@ -299,7 +299,12 @@ forwarding = false
 
 [telnet]
 enabled = true
+
+[shell]
+filesystem = var/lib/cowrie/fs.pickle
 ```
+
+`cowrie init` writes a template that probably already has these section headers (est.), and a config file normally may not repeat a section header (Python's config reader rejects it, est.). So **replace the whole file** with only the keys above: Cowrie layers its built-in defaults underneath, and the installation page says `etc/cowrie.cfg` "only needs to contain the keys you want to change". The `[shell]` line points Cowrie at the copy of the fake file system you make next; Cowrie will not start until that copy exists.
 
 What each line does, from the default configuration file (read 2026-10-22): `hostname` is the name in the visitor's shell prompt (the default is `svr04`); `download_limit_size` caps a stored file at 1 MiB (the default has no limit); `forwarding = false` turns off SSH direct-tcpip forwarding, which is on by default and which you do not want near an "open proxy" clause; and telnet is off by default, so `enabled = true` is what turns it on. Telnet adds exposure and visitors; leave it out if you want less.
 
@@ -319,7 +324,6 @@ On the server, as `cowrie` (still in `~/my-honeypot` with the environment active
 mkdir -p /home/cowrie/lure
 cp /tmp/lure/deploy-notes-OLD.txt /home/cowrie/lure/
 python -c "from cowrie.core.resources import read_data_bytes; open('var/lib/cowrie/fs.pickle', 'wb').write(read_data_bytes('fs.pickle'))"
-printf '\n[shell]\nfilesystem = var/lib/cowrie/fs.pickle\n' >> etc/cowrie.cfg
 SIZE=$(wc -c < /home/cowrie/lure/deploy-notes-OLD.txt)
 echo "$SIZE"
 fsctl var/lib/cowrie/fs.pickle
@@ -343,7 +347,7 @@ exit    # back to admin
 ssh -p 2222 -o PubkeyAuthentication=no -o PreferredAuthentications=password root@localhost
 ```
 
-At the password prompt type any short invented word (not `root`, not `123456`). Cowrie's built-in login list, read in its source on 2026-10-22, accepts the user `root` with any password except `root`, `123456` and anything containing "honeypot", and the user `phil` with any password; a different list can go in `etc/userdb.txt`. Inside, run `uname -a`, `cat /home/phil/deploy-notes-OLD.txt` and `exit`. The options on that `ssh` line stop your own client from offering your real keys to the imitation: a key offered to a honeypot is a key written in its log.
+At the password prompt type any short invented word (not `root`, not `123456`, and nothing containing "honeypot"). Cowrie's built-in login list, read in its source on 2026-10-22, accepts the user `root` with any password except `root`, `123456` and anything containing "honeypot", and the user `phil` with any password; a different list can go in `etc/userdb.txt`. Inside, run `uname -a`, `cat /home/phil/deploy-notes-OLD.txt` and `exit`. The options on that `ssh` line stop your own client from offering your real keys to the imitation: a key offered to a honeypot is a key written in its log.
 
 **Predict.** Will the `cat` show your lure file's text? And what do you expect `uname -a` to claim?
 
@@ -384,7 +388,14 @@ doctl compute firewall list --format ID,Name
 doctl compute firewall delete BUILD_FIREWALL_ID --force
 ```
 
-**3. Prove nothing leaves.** On the server, as `admin`:
+**3. End the old connections, then prove nothing leaves.** Rule changes do not end connections that already exist: the host rules accept replies on established flows, and the provider's limits page says adding firewall rules "does not terminate existing connections" (assume the same for deleting them until you test). So restart the server, which also proves the host rules load at boot, log in again on the management port, and start Cowrie again as in exercise 4. On the server, as `admin`:
+
+```bash
+sudo systemctl reboot
+# wait a minute, then log in again:  ssh -p 49152 admin@SENSOR
+```
+
+Then the test:
 
 ```bash
 curl -m 5 -sS https://example.com -o /dev/null; echo "exit=$?"

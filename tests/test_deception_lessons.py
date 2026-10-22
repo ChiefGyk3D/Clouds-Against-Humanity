@@ -540,16 +540,17 @@ def test_the_jq_reads_print_what_the_page_says(sensor_lab):
 
 @needs_jq
 def test_hostile_text_is_printed_inert_and_nothing_runs(sensor_lab):
-    existed = Path("/tmp/pwned").exists()
+    trap = sensor_lab / "pwned"   # a unique path under the test folder, so a stray file elsewhere cannot hide a run
+    log = sensor_lab / "cowrie.json"
+    log.write_text(log.read_text().replace("/tmp/pwned", str(trap)))
     shown = bash(sensor_lab, one_block(LOGS, "bash", "# commands per session, made safe to print"))
     assert shown.returncode == 0, shown.stderr
     out = shown.stdout.splitlines()
     assert len(out) == 8 + 1                      # eight commands, then the one raw line made visible by cat -v
-    assert out[7] == 'd4d4d4d4 "x\\"; $(touch /tmp/pwned) \\u001b[2J {\\"eventid\\": \\"cowrie.login.success\\"}"'
+    assert out[7] == f'd4d4d4d4 "x\\"; $(touch {trap}) \\u001b[2J {{\\"eventid\\": \\"cowrie.login.success\\"}}"'
     assert "\x1b" not in shown.stdout            # no raw escape reached the output
-    assert out[8] == 'x"; $(touch /tmp/pwned) ^[[2J {"eventid": "cowrie.login.success"}'
-    assert existed or not Path("/tmp/pwned").exists()
-    assert not (sensor_lab / "pwned").exists()
+    assert out[8] == f'x"; $(touch {trap}) ^[[2J {{"eventid": "cowrie.login.success"}}'
+    assert not trap.exists()                     # the substitution in the field was never run
 
 
 @needs_jq
