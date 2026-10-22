@@ -88,7 +88,7 @@ The pipeline here has seven gates ([capstone](Fork-Private-Stacks-and-the-Pipeli
 | **HA** (high availability) | Design that survives the failure of a component without an outage |
 | **DR** (disaster recovery) | The plan and capacity to restore service after losing a site or region |
 
-An RTO of four hours and an RPO of fifteen minutes lead to specific, costly designs: replicas, a second region, frequent backups. Backups are only real once restored in a test; many organizations keep an **immutable** copy that ransomware cannot encrypt, and test restores on a schedule. Multi-region deployment is the usual answer to a regional outage, and it doubles a lot of what this project calls its cost.
+To work these out from a schedule and time a restore yourself, see [Backups, recovery and patching](Backups-Recovery-and-Patching.md#rpo-and-rto-in-plain-words). An RTO of four hours and an RPO of fifteen minutes lead to specific, costly designs: replicas, a second region, frequent backups. Backups are only real once restored in a test; many organizations keep an **immutable** copy that ransomware cannot encrypt, and test restores on a schedule. Multi-region deployment is the usual answer to a regional outage, and it doubles a lot of what this project calls its cost.
 
 **What this project does instead.** Two connectors in one region give a little redundancy (Twingate can use either), and the whole thing is rebuilt from code with a state in Spacelift. The recovery objective is, in effect, "an evening". That is fine for a teaching lab, and exactly the thing to write down as an accepted risk.
 
