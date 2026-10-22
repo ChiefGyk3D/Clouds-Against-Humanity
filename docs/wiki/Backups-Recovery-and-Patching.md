@@ -6,7 +6,7 @@ Side page to the start-from-zero pages. Read it after [Droplet hardening](Drople
 
 > **Status: the free local lab was run once on Linux; everything else was not run.** On **2026-10-22** the author ran every Bash command in the free path on a Debian-based Linux machine with GNU tar 1.35, gzip 1.13, GNU coreutils 9.7 and Python 3.13.5, as an ordinary user, and pasted trimmed output from those runs. Three things were **not run**: the PowerShell and Windows commands (there was no Windows machine; they are written from Microsoft's documentation and marked **est.**), the commands that read the state of your own package manager or container images on machines other than the author's apt-based one (marked **est.**), and the whole optional own-account path with one droplet (written from DigitalOcean's documentation and its public API description, never applied; run it expecting to fix something). Every vendor and standards claim was read on **2026-10-22** unless a row says otherwise, and sits in the [claims register](#claims-register) with its URL. Times and sizes vary with your machine; trust what your terminal prints over this page.
 
-> **Prerequisites.** [How money works in the cloud](How-Money-Works-in-the-Cloud.md) (core step 8) for the price side, and [The terminal and your first script](Terminal-and-Your-First-Script.md) for running a script and reading an exit code. The free path needs a Linux, macOS or WSL 2 machine with `bash`, `tar`, `gzip`, `sha256sum` and `python3` (on macOS use `shasum -a 256` where this page says `sha256sum`, est.), or Windows with PowerShell 5.1 or later (est.). About three hours for the reading and the free exercises (est.); the optional own-account path adds about an hour of your time spread over a day or two (est.).
+> **Prerequisites.** [How money works in the cloud](How-Money-Works-in-the-Cloud.md) (core step 8) for the price side, and [The terminal and your first script](Terminal-and-Your-First-Script.md) for running a script and reading an exit code. The free path needs a Linux machine or WSL 2 with `bash`, GNU `tar`, `gzip`, `sha256sum` and `python3`, or Windows with PowerShell 5.1 or later (est.). The Bash script uses GNU tools (`sort -z`, `sha256sum`) that stock macOS does not have, so it is **not** written for macOS; use the PowerShell script there if you have PowerShell 7 (est.), or WSL on Windows. About three hours for the reading and the free exercises (est.); the optional own-account path adds about an hour of your time spread over a day or two (est.).
 
 > **Where this runs.** Everything in the free path happens in one throwaway folder on your own computer, and the script refuses to delete anything in a folder that does not carry its own marker file. The ransomware part of the loop is **in words only**: nothing on this page encrypts, damages or hides a file outside that folder, and nothing here is a recipe for an attack. The optional path uses **your own** cloud account and **your own** provider bill.
 
@@ -205,18 +205,20 @@ build)    # make the pretend important data, and write down what it should look 
   (cd "$LAB" && find data -type f -print0 | sort -z | xargs -0 sha256sum > manifest.sha256)
   echo "built $(find "$LAB/data" -type f | wc -l) files, $(du -sh "$LAB/data" | cut -f1) in $LAB/data" ;;
 backup)   # one full backup, one compressed archive, timed
-  guard; start=$(now); stamp=$(date +%Y%m%d-%H%M%S)
-  tar -czf "$LAB/backups/data-$stamp.tar.gz" -C "$LAB" data
-  echo "wrote backups/data-$stamp.tar.gz ($(du -h "$LAB/backups/data-$stamp.tar.gz" | cut -f1))"; elapsed "$start" ;;
+  guard; start=$(now); dest="$LAB/backups/data-$(date +%Y%m%d-%H%M%S).tar.gz"
+  [ ! -e "$dest" ] || { echo "refusing: $dest already exists (wait a second)" >&2; exit 1; }
+  tar -czf "$dest" -C "$LAB" data
+  echo "wrote backups/$(basename "$dest") ($(du -h "$dest" | cut -f1))"; elapsed "$start" ;;
 lose)     # the disaster: the source folder is gone
   guard; rm -rf "$LAB/data"; echo "data/ deleted" ;;
 restore)  # unpack into a fresh folder and PROVE it matches the manifest; the clock covers both
   guard; archive="${2:?usage: lab.sh restore ARCHIVE}"
   rm -rf "$LAB/restore-test"; mkdir "$LAB/restore-test"; start=$(now)
   if ! tar -xzf "$archive" -C "$LAB/restore-test"; then echo "RESTORE FAILED: the archive would not unpack"; exit 1; fi
-  if (cd "$LAB/restore-test" && sha256sum -c --quiet ../manifest.sha256); then
+  # compare the WHOLE restored tree with the manifest: missing, changed and unexpected extra files all show up
+  if (cd "$LAB/restore-test" && find data -type f -print0 | sort -z | xargs -0 sha256sum) | diff -u "$LAB/manifest.sha256" -; then
     echo "RESTORE OK: $(find "$LAB/restore-test/data" -type f | wc -l) files match the manifest"; elapsed "$start"
-  else echo "RESTORE FAILED: files missing or different (see above)"; exit 1; fi ;;
+  else echo "RESTORE FAILED: files missing, different or unexpected (see the diff above)"; exit 1; fi ;;
 corrupt)  # make a damaged copy of an archive (the original is untouched)
   guard; src="${2:?usage: lab.sh corrupt ARCHIVE}"; cp "$src" "$src.damaged"
   printf 'XXXXXXXXXXXXXXXX' | dd of="$src.damaged" bs=1 seek=4000 conv=notrunc status=none
@@ -278,6 +280,7 @@ switch ($Action) {
   'backup' {
     Assert-Lab; $sw = [Diagnostics.Stopwatch]::StartNew()
     $zip = Join-Path $Lab ('backups\data-{0}.zip' -f (Get-Date -Format 'yyyyMMdd-HHmmss'))
+    if (Test-Path $zip) { throw "refusing: $zip already exists (wait a second)" }
     Compress-Archive -Path $Data -DestinationPath $zip
     'wrote {0} ({1:N1} MB)' -f $zip, ((Get-Item $zip).Length / 1MB); Show-Elapsed $sw
   }
@@ -325,7 +328,7 @@ RESTORE OK: 203 files match the manifest
   took 0.04 seconds
 ```
 
-The restore was several times faster than the backup, because compressing is the slow half and unpacking is the quick one (the exact ratio depends on your machine). The check that proved the restore is the last line before the time: **every file's SHA-256 matched the list written when the data was built**. "No error" only means `tar` was happy. Also notice what was **not** timed: finding the file name, deciding to restore, getting onto the machine. Your RTO is all of those added to this number.
+The restore was several times faster than the backup, because compressing is the slow half and unpacking is the quick one (the exact ratio depends on your machine). The check that proved the restore is the last line before the time: **the restored tree's list of files and SHA-256 sums was identical to the list written when the data was built**. "No error" only means `tar` was happy. Also notice what was **not** timed: finding the file name, deciding to restore, getting onto the machine. Your RTO is all of those added to this number.
 
 **Undo.** Delete the lab: `rm -rf ~/backup-lab` (Bash) or `Remove-Item -Recurse -Force $HOME\backup-lab` (PowerShell). That is the only folder either script made. The script's own `lose` step already removed `data/`; the `.backup-lab` marker file is what let the script refuse to touch anything else.
 
@@ -615,7 +618,7 @@ RESTORE FAILED: the archive would not unpack
 exit code: 1
 ```
 
-A damaged archive was caught because the restore **was run**. The second failure is subtler: a backup that is intact but **incomplete**. Delete one file from the source and take a new backup (wait a second first, so the new archive has its own name), then restore it:
+A damaged archive was caught because the restore **was run**. The second failure is subtler: a backup that is intact but **incomplete**. Delete one file from the source and take a new backup (the `sleep 1` below matters: the script refuses to reuse a name), then restore it:
 
 ```bash
 rm ~/backup-lab/data/note-1.txt
@@ -624,7 +627,7 @@ sleep 1
 ./lab.sh restore "$(ls -t ~/backup-lab/backups/*.tar.gz | head -1)"; echo "exit code: $?"
 ```
 
-Output (trimmed): `data/note-1.txt: FAILED open or read`, then `RESTORE FAILED: files missing or different (see above)` and exit code 1. The archive is perfectly good; it faithfully contains a folder that was already missing a file. Only a comparison against a record written **earlier** can say so. That is why the manifest exists, and why real systems keep one (file counts, sizes, checksums, a database row count, a known test record) and alert when a backup, or a restore test, does not match.
+Output (trimmed): a `diff` showing the line for `data/note-1.txt` present in the manifest and absent from the restored tree, then `RESTORE FAILED: files missing, different or unexpected (see the diff above)` and exit code 1. An **extra** file in the archive that the manifest does not list fails the same way. The archive is perfectly good; it faithfully contains a folder that was already missing a file. Only a comparison against a record written **earlier** can say so. That is why the manifest exists, and why real systems keep one (file counts, sizes, checksums, a database row count, a known test record) and alert when a backup, or a restore test, does not match.
 
 For PowerShell, run `.\lab.ps1 corrupt` on the newest zip and restore the `.damaged` file; either `Expand-Archive` stops, or it unpacks and the manifest comparison names the files, and both are `RESTORE FAILED` (est.). Then schedule the restore test too. A restore test that runs on a calendar and **pages someone when it fails** is the cheapest control on this page.
 
@@ -705,7 +708,7 @@ Answers are in the sections above. (For the vector: the attacker must already be
 |---|---|---|
 | "I have snapshots, so I am backed up" | A snapshot on the same storage, in the same account, is one copy | Where the copy lives, who can delete it, and whether you have restored it. |
 | The restore command ran with no error and the data is wrong | Nothing compared the result to a known good record | A manifest or checksum list written before the disaster. |
-| A new backup silently replaced an older one | The script names the file by time to the second, so two runs in one second overwrite each other; or the retention is too short | Name files so they cannot collide, and keep more than you think you need. |
+| A new backup replaced an older one, or the script said "already exists" | Names carry the time to the second; a tool that does not check would overwrite, and this lab's script refuses instead. Or retention is too short | Wait a second, or name files so they cannot collide, and keep more than you think you need. |
 | Weekly backups on, still lost a day of work | The plan's RPO is a week; the window is four hours | RPO from the schedule, not from the product name. |
 | `unattended-upgrades` is on and a library is still old | The library is in a container image, an extra repository, or your own application | Which layer, from the table, owns that file. |
 | A Critical on the scanner is ignored, then exploited | It was not near the top of anyone's list, and nobody checked KEV | Sort by exploited first, exposed second, score third. |
@@ -750,6 +753,6 @@ All read-only requests; retrieved **2026-10-22** unless stated. "Observed" means
 | The lab outputs (sizes, times, the CRC error, the manifest failure, 20 pending packages) | Run 2026-10-22 on Linux as an ordinary user | Observed; numbers change on your machine |
 | Differences between `tar` and `Compress-Archive`, `Expand-Archive` behavior on a damaged zip, `winget upgrade`, `softwareupdate`, `dnf check-update` exit code 100, PowerShell scheduled tasks | Microsoft Learn and vendor manuals, not read in this session | **est.** |
 
-Not verified, plainly: the whole PowerShell and Windows track; macOS; every Docker command; the optional own-account path from start to finish, including whether the doctl backup-plan strings are accepted as written, whether the first weekly backup lands inside the window you choose, the time zone of that window, how long a restore takes, whether the host key is unchanged after a restore, and how a retained backup of a destroyed droplet is billed; Patch Gremlin's code and behavior beyond its README; and the DigitalOcean pages' behavior after their stated "last verified" dates.
+Not verified, plainly: the whole PowerShell and Windows track; macOS (the Bash lab does not support it); every Docker command; the optional own-account path from start to finish, including whether the doctl backup-plan strings are accepted as written, whether the first weekly backup lands inside the window you choose, the time zone of that window, how long a restore takes, whether the host key is unchanged after a restore, and how a retained backup of a destroyed droplet is billed; Patch Gremlin's code and behavior beyond its README; and the DigitalOcean pages' behavior after their stated "last verified" dates.
 
 Next: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md), core step 15 on the [Reading order](Reading-Order.md) page.
