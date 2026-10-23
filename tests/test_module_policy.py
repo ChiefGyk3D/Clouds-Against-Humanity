@@ -85,4 +85,10 @@ def test_the_bootstrap_template_is_the_only_cloud_init():
         for p in ROOT.glob("modules/**/cloud-init*")
         if ".terraform" not in p.parts
     )
-    assert found == [f"modules/{BOOTSTRAP}/cloud-init.yaml.tftpl"], found
+    # The edge host is a different machine role (no Twingate connector, no admin
+    # path), so it has its own, much smaller template and does not use the
+    # connector bootstrap. It is named here on purpose: a third copy fails.
+    assert found == [
+        "modules/edge-host/cloud-init.yaml.tftpl",
+        f"modules/{BOOTSTRAP}/cloud-init.yaml.tftpl",
+    ], found

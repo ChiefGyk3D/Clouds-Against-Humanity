@@ -1,0 +1,10 @@
+{
+  "timezone": "America/New_York",
+  "slots": {
+    "reticulum": "01:00",
+    "lxmd": "01:30",
+    "i2pd": "02:00",
+    "mosquitto": "02:30",
+    "iperf3": "03:00"
+  }
+}
