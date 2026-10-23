@@ -71,29 +71,41 @@ A per-month ceiling (today $30, set per phase) is easy to blow past by accident:
 <summary>Diagram source (Mermaid)</summary>
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 25, "rankSpacing": 40, "padding": 8}}}%%
 flowchart TD
-    start["scripts/cost_check.py"]:::ctrl
-    read["Read every cost.json under stacks/<br/>(base stacks per cloud, and stack instances<br/>under stacks/sites/ via instance_of)"]:::ctrl
-    price["Price each machine from that cloud's table<br/>docs/cost-prices.json, docs/cost-prices/cloud.json"]:::ctrl
-    scan["Scan every .tf and .tofu file for<br/>resource types and module blocks"]:::ctrl
-    q1{"A cloud's total above its<br/>approved_monthly_total, or a site<br/>above its own figure in the sites map?"}:::warn
-    q1b{"Approved totals of the active clouds<br/>above the current phase ceiling?"}:::warn
-    q2{"Resource type not on that cloud's<br/>free list, or a costed type outside<br/>its allowed file?"}:::warn
-    q3{"Connector module blocks differ<br/>from manifest machines, or<br/>a stack id has no single manifest?"}:::warn
-    q4{"Remote module source, *.tf.json,<br/>misnamed stack directory, or backups<br/>with unverified price?"}:::warn
-    fail["Fail the build"]:::ext
-    pass["Pass"]:::you
-    start --> read --> price --> scan --> q1
-    q1 -- "yes" --> fail
-    q1 -- "no" --> q1b
-    q1b -- "yes" --> fail
-    q1b -- "no" --> q2
-    q2 -- "yes" --> fail
-    q2 -- "no" --> q3
-    q3 -- "yes" --> fail
-    q3 -- "no" --> q4
-    q4 -- "yes" --> fail
-    q4 -- "no" --> pass
+    subgraph P["Read and price"]
+        direction LR
+        start["scripts/cost_check.py"]:::ctrl
+        read["Read every cost.json under stacks/<br/>(base stacks per cloud,<br/>site instances via instance_of)"]:::ctrl
+        price["Price each machine from<br/>docs/cost-prices.json and<br/>docs/cost-prices/cloud.json"]:::ctrl
+        scan["Scan every .tf and .tofu file for<br/>resource types and module blocks"]:::ctrl
+        start --> read --> price --> scan
+    end
+    subgraph Q1["Checks 1 to 3"]
+        direction LR
+        q1{{"Cloud or site total<br/>above its approved<br/>monthly figure?"}}:::warn
+        q1b{{"Active clouds'<br/>approved totals above<br/>the phase ceiling?"}}:::warn
+        q2{{"Resource type not on the<br/>free list, or a costed type<br/>outside its allowed file?"}}:::warn
+        fail1["Fail the build"]:::ext
+        q1 -- "no" --> q1b
+        q1b -- "no" --> q2
+        q1 -- "yes" --> fail1
+        q1b -- "yes" --> fail1
+        q2 -- "yes" --> fail1
+    end
+    subgraph Q2["Checks 4 and 5"]
+        direction LR
+        q3{{"Connector modules differ<br/>from manifest machines,<br/>or no single manifest<br/>per stack?"}}:::warn
+        q4{{"Remote module source,<br/>*.tf.json, misnamed stack<br/>directory, or backups<br/>with unverified price?"}}:::warn
+        pass["Pass"]:::you
+        fail2["Fail the build"]:::ext
+        q3 -- "no" --> q4
+        q4 -- "no" --> pass
+        q3 -- "yes" --> fail2
+        q4 -- "yes" --> fail2
+    end
+    P --> Q1
+    Q1 -- "check 3: no" --> Q2
 
     classDef you fill:#132a1f,stroke:#4ade80,color:#dcfce7
     classDef ext fill:#3b1d1d,stroke:#f87171,color:#fde2e2
