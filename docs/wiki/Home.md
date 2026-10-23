@@ -6,7 +6,7 @@ A small, cheap, locked-down DigitalOcean environment built with OpenTofu, applie
 
 Wondering why this exists, who it is for and where I am coming from? Read [Why this exists](Why-This-Exists.md) first; it is a short side page, not part of the core path.
 
-The full tables, with page order, time estimates and checkpoints, are on **[Reading order](Reading-Order.md)**. The short version:
+The full tables, with page order, time estimates and checkpoints, are on **[Reading order](Reading-Order.md)**. Every page of the wiki, grouped by theme with a line on what it is for, is on **[Contents](Contents.md)**. The short version:
 
 | You are... | Start with | Then |
 |---|---|---|
