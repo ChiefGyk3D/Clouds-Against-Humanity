@@ -20,15 +20,23 @@
 #     or one other group's tag), so a source address, droplet id, load
 #     balancer or Kubernetes source is a change the module cannot produce, and
 #     0.0.0.0/0 or ::/0 is the whole internet.
+#   - a digitalocean_firewall with an outbound rule whose destination is the
+#     whole internet (0.0.0.0/0 or ::/0), unless outbound_allowlist has an
+#     entry for that stack and address (issue #253). Outbound rules to a tag,
+#     or to named addresses, are not judged. icmp rules and rules with no
+#     port range (or "all") are never allowlistable: see outbound_allowlist.
 #   - an AWS security group rule that admits a CIDR range (IPv4 or IPv6). The
-#     AWS firewall module admits only a reference to the group itself.
+#     AWS firewall module admits only a reference to the group itself. AWS
+#     egress rules are not judged here.
 #   - a droplet with ipv6 turned on, or an AWS VPC, subnet or instance that
 #     takes an IPv6 range or address. IPv6 stays closed in this repository.
 #
 # Pure deletes and no-ops are ignored: removing a rule never opens anything.
 #
 # The escape hatch is this file. A deliberate inbound rule is allowed only by
-# an entry in inbound_allowlist below, in a pull request that gets reviewed.
+# an entry in inbound_allowlist below, and a deliberate world-open outbound
+# rule only by an entry in outbound_allowlist, in a pull request that gets
+# reviewed.
 # Nothing a plan can set itself (a stack label, an environment variable, a
 # field in the plan) is read, so a branch cannot grant its own exception. The
 # IPv6 checks have no escape hatch.
@@ -93,6 +101,53 @@ import rego.v1
 # stack approval. Remove the entry when the rule goes away.
 inbound_allowlist := {}
 
+# World-open outbound exceptions (issue #253), same shape as inbound_allowlist:
+# keyed by stack id, then by a resource address or a group name from
+# address_groups. An entry allows one kind of outbound rule and nothing else:
+#
+#   {
+#     "direction": "outbound",          # required, exactly "outbound"
+#     "protocol": "tcp",                # required, exact match
+#     "ports": ["443", "80"],           # required, exact port_range strings
+#     "destinations": ["0.0.0.0/0", "::/0"],  # required, every destination
+#                                       # address the rule has must be listed
+#   }
+#
+# Only a rule with 0.0.0.0/0 or ::/0 among its destination_addresses is
+# judged; a rule to a tag, or to named addresses only, needs no entry. Rules
+# are judged one by one, so one entry covers one protocol and a firewall with
+# tcp and udp rules needs an entry for each. An entry naming only one of the
+# two world ranges does not cover a rule that uses both.
+#
+# Decision on icmp and all-port rules: they are NEVER allowlistable, even if an
+# entry tries to name them. An icmp rule has no port, and a tcp or udp rule
+# whose port_range is missing, empty or "all" has no limit; with a world-open
+# destination, nothing narrows either of them, so the way to get them is to
+# name destinations instead of the world. A literal range such as "1-65535"
+# is judged as written: an entry must name that exact string, which puts the
+# widest range in the reviewed pull request with its reason. Empty entries,
+# missing fields and unknown stacks allow nothing.
+#
+# Every entry below exists because the firewall module renders it today: the
+# five default outbound rules (tcp 443, 80, 53; udp 53, 123) on any address,
+# plus the extra rules the connector firewall in cah-10-access adds. Remove an
+# entry when its rule goes away.
+outbound_allowlist := {
+	# stacks/00-foundation: the baseline firewall. Defaults only: package
+	# mirrors, DNS and NTP have no fixed addresses to pin.
+	"cah-00-foundation": {"module.baseline_firewall.digitalocean_firewall.this": [
+		{"direction": "outbound", "protocol": "tcp", "ports": ["443", "80", "53"], "destinations": ["0.0.0.0/0", "::/0"]},
+		{"direction": "outbound", "protocol": "udp", "ports": ["53", "123"], "destinations": ["0.0.0.0/0", "::/0"]},
+	]},
+	# stacks/10-access: the connector firewall. The defaults, plus Twingate's
+	# documented outbound needs: tcp 30000-31000 and udp to any port for
+	# peer-to-peer connections (see the comment above the module call).
+	"cah-10-access": {"module.connector_firewall.digitalocean_firewall.this": [
+		{"direction": "outbound", "protocol": "tcp", "ports": ["443", "80", "53", "30000-31000"], "destinations": ["0.0.0.0/0", "::/0"]},
+		{"direction": "outbound", "protocol": "udp", "ports": ["53", "123", "1-65535"], "destinations": ["0.0.0.0/0", "::/0"]},
+	]},
+}
+
 # Named groups of resource addresses, per stack id, so one entry can cover
 # several resources in that stack: {"stack-id": {"group-name": ["address"]}}.
 # A group of one stack means nothing in another.
@@ -144,6 +199,17 @@ deny contains msg if {
 	msg := sprintf(
 		"%s: inbound rule %s is not tag-scoped (%s). Inbound on core tags must come from a tag only, unless inbound_allowlist has an entry for this stack and address.",
 		[rc.address, rule_label(rule), source_summary(rule)],
+	)
+}
+
+deny contains msg if {
+	some rc in changed_resources("digitalocean_firewall")
+	some rule in values(rc.change.after, "outbound_rule")
+	world_open_outbound(rule)
+	not outbound_rule_allowed(rc, rule)
+	msg := sprintf(
+		"%s: outbound rule %s reaches the whole internet (%s). Outbound world-open rules need an outbound_allowlist entry for this stack and address, naming the direction, protocol, port and destinations. icmp and all-port rules are never allowed: name destinations instead.",
+		[rc.address, rule_label(rule), destination_summary(rule)],
 	)
 }
 
@@ -214,6 +280,14 @@ entries_for(address) := [entry |
 	some entry in entries
 ]
 
+# The same for outbound rules, from outbound_allowlist.
+outbound_entries_for(address) := [entry |
+	stack_id != ""
+	some key, entries in object.get(outbound_allowlist, stack_id, {})
+	key_covers(key, address)
+	some entry in entries
+]
+
 # One entry admits one rule when every part matches exactly. Anything missing
 # from the entry, or from the rule, admits nothing.
 admits(entry, protocol, port, addresses) if {
@@ -226,6 +300,39 @@ admits(entry, protocol, port, addresses) if {
 	every address in addresses {
 		address in object.get(entry, "sources", [])
 	}
+}
+
+# An outbound entry admits a world-open rule when the direction is outbound,
+# the protocol and port_range match exactly, and every destination address of
+# the rule is listed. icmp, a missing or empty port_range and "all" are never
+# admitted (see outbound_allowlist).
+outbound_admits(entry, rule) if {
+	object.get(entry, "direction", "") == "outbound"
+	protocol := object.get(rule, "protocol", "")
+	protocol in {"tcp", "udp"}
+	protocol == object.get(entry, "protocol", "")
+	port := object.get(rule, "port_range", "")
+	is_string(port)
+	not port in {"", "all"}
+	port in object.get(entry, "ports", [])
+	addresses := values(rule, "destination_addresses")
+	count(addresses) > 0
+	every address in addresses {
+		address in object.get(entry, "destinations", [])
+	}
+}
+
+# A world-open outbound rule is allowed only when it names no other kind of
+# destination and an entry admits it.
+outbound_rule_allowed(rc, rule) if {
+	not has_other_destination(rule)
+	some entry in outbound_entries_for(rc.address)
+	outbound_admits(entry, rule)
+}
+
+has_other_destination(rule) if {
+	some key in {"destination_tags", "destination_droplet_ids", "destination_load_balancer_uids", "destination_kubernetes_ids"}
+	filled(rule, key)
 }
 
 # A DigitalOcean inbound rule is allowed only when it carries source
@@ -376,6 +483,11 @@ world_open(rule) if {
 	address in world_addresses
 }
 
+world_open_outbound(rule) if {
+	some address in values(rule, "destination_addresses")
+	address in world_addresses
+}
+
 # The only sources the firewall module emits are tags. Any other kind of
 # source, next to a tag or alone, makes the rule not tag-scoped.
 non_tag_sources := {
@@ -412,6 +524,8 @@ source_summary(rule) := concat(", ", sort(parts)) if {
 	)
 	count(parts) > 0
 } else := "no source tag"
+
+destination_summary(rule) := concat(", ", sort([sprintf("address %s", [a]) | some a in values(rule, "destination_addresses")]))
 
 # AWS ingress from an address. A reference to a security group (or to the group
 # itself) carries no CIDR and is the one admitted kind.

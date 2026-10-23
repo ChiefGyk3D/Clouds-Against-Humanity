@@ -279,6 +279,7 @@ It denies a created or updated resource that is:
 | Resource | Denied when |
 |---|---|
 | `digitalocean_firewall` | An inbound rule has any source other than a tag: a source address (and `0.0.0.0/0` or `::/0` is called out as the whole internet), a droplet id, a load balancer or a Kubernetes cluster. The firewall module only ever emits `source_tags`, so a tag-scoped rule passes. |
+| `digitalocean_firewall` (outbound) | An outbound rule has `0.0.0.0/0` or `::/0` among its destination addresses and no `outbound_allowlist` entry covers it (issue #253). A rule to a tag, or to named addresses only, is not judged. A world-open `icmp` rule, or one with no port range (or `all`), is always denied. |
 | `aws_vpc_security_group_ingress_rule`, `aws_security_group_rule` (ingress), `aws_security_group` (inline ingress) | The source is a CIDR range, IPv4 or IPv6. A reference to a security group passes. |
 | `digitalocean_droplet` | `ipv6 = true`. |
 | `aws_vpc`, `aws_subnet`, `aws_instance` | The plan turns on an IPv6 range or address. |
@@ -318,7 +319,26 @@ inbound_allowlist := {"example-stack-id": {"module.service_host.digitalocean_fir
 
 The rule must match every field: direction (only `inbound` is read today), protocol, port range (exact strings such as `5201` or `8000-8100`) and every source address the rule has. An entry for a rule open to the world names both `0.0.0.0/0` and `::/0`; an entry naming only one does not cover a rule that uses both, while a rule that uses only one of them is within an entry that names both. A rule that adds a droplet, load balancer or Kubernetes source is never covered. A firewall with two rules needs an entry for each rule that is not tag-scoped. AWS ingress rules are judged by the same entries (the sources are CIDR ranges); one rule with several ranges needs one entry that lists them all. `address_groups` names a set of addresses per stack so one entry can cover several resources there. A missing or unknown stack id, address, group or field allows nothing: the policy fails closed.
 
-Add an entry only when that service's stack is approved, in the same pull request, with a threat-model note (`docs/wiki/Threat-Model.md`) naming the stack, the port, the source and the reason, and a review. After the merge, paste the new body into Spacelift. There is no stack label, environment variable or plan field that grants an exception, on purpose: a branch must not be able to grant its own. All the lists are empty today. The IPv6 checks have no exception.
+Add an entry only when that service's stack is approved, in the same pull request, with a threat-model note (`docs/wiki/Threat-Model.md`) naming the stack, the port, the source and the reason, and a review. After the merge, paste the new body into Spacelift. There is no stack label, environment variable or plan field that grants an exception, on purpose: a branch must not be able to grant its own. The inbound and destroy lists are empty today and `outbound_allowlist` holds only the entries below. The IPv6 checks have no exception.
+
+### A deliberate outbound exception
+
+The firewall module renders five outbound rules on every firewall (tcp 443, 80, 53 and udp 53, 123) to any address, because package mirrors, DNS and NTP servers have no fixed addresses, and a stack can add more through `extra_outbound_rules`. The plan policy treats any outbound rule whose destinations include `0.0.0.0/0` or `::/0` the way it treats a world-open inbound rule: denied unless `outbound_allowlist` has an entry for it. The map has the same shape as `inbound_allowlist` (stack id, then address or group name), and an entry says its direction, protocol, ports and destinations:
+
+```rego
+outbound_allowlist := {"example-stack-id": {"module.service_host.digitalocean_firewall.this": [{
+	"direction": "outbound",
+	"protocol": "tcp",
+	"ports": ["443", "80"],
+	"destinations": ["0.0.0.0/0", "::/0"],
+}]}}
+```
+
+Matching is exact, as for inbound: the direction must be `outbound`, the protocol and each port string must match, and every destination address of the rule must be in the entry. One entry covers one protocol, so a firewall with tcp and udp rules needs two. An entry naming only one world range does not cover a rule that uses both. Another stack, another address, or a plan with no stack id gets nothing. A rule that adds a destination tag, droplet, load balancer or Kubernetes cluster next to the world range is never covered. AWS egress rules are not judged by this check.
+
+**Decision on icmp and all-port rules: they are never allowlistable.** An `icmp` rule has no port, and a tcp or udp rule with no `port_range` (missing, empty or `all`) has no limit. Combined with a world-open destination, nothing narrows either one, so an entry that tries to name them (`"ports": ["all"]`, `"protocol": "icmp"`) admits nothing. If one is genuinely needed, give the rule destinations instead of the whole internet. A literal range such as `1-65535` is judged as written: the entry must name that exact string, which puts the widest range in the reviewed pull request with its reason. The connector firewall's `udp 1-65535` is exactly that case.
+
+The shipped `outbound_allowlist` has two stack entries, each for a rule the module renders today and each with its reason in the file: `cah-00-foundation` for `module.baseline_firewall.digitalocean_firewall.this` (the five defaults), and `cah-10-access` for `module.connector_firewall.digitalocean_firewall.this` (the defaults, `tcp 30000-31000` and `udp 1-65535`, which Twingate's documented outbound needs ask for). The telemetry and AWS stacks have no entry, so a world-open outbound rule there is denied. Remove an entry when its rule goes away, and add one only in a pull request that names the stack, the protocol, the ports and the reason.
 
 A deliberate destroy works the same way. `destroy_allowlist` maps a stack id to a list of addresses or group names: add the protected resource under its stack, in a pull request that names the stack, the address and the reason, and paste the new body into Spacelift after the merge. The denial message says the same. Remove the entry once the change has applied, so the next plan is guarded again. Other addresses, and the same address in another stack, stay denied.
 
