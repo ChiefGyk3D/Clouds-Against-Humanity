@@ -140,3 +140,17 @@ def test_at_least_four_existing_pages_link_the_lesson_at_first_use():
 def test_the_lesson_is_in_the_sidebar_and_reading_order():
     assert PAGE.name in (WIKI / "_Sidebar.md").read_text()
     assert PAGE.name in (WIKI / "Reading-Order.md").read_text()
+
+
+def test_powershell_text_validates_the_edge_before_printing():
+    ps = [b for tag, b in FENCE.findall(text()) if tag == "powershell" and "radius.ps1" in b]
+    assert len(ps) == 1
+    body = ps[0]
+    assert body.index("exit 2") < body.index('Show-Table "Before:"')
+    assert "usage:" in body
+
+
+def test_credential_scope_is_called_out_as_a_separate_boundary():
+    body = text()
+    assert "Credentials are a separate boundary" in body
+    assert "reaches only what is in that stack's state" in body
