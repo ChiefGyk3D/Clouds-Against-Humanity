@@ -1,0 +1,56 @@
+<!-- GENERATED from the metrics snapshot by scripts/gen_repo_metrics.py. Do not edit this
+page by hand: the snapshot is refreshed with `python3 -I scripts/gen_repo_metrics.py --refresh`
+from a login that can read the repository. CI fails when this page, the snapshot and the
+picture disagree. -->
+
+# Repository growth: stars, forks and work per week
+
+> Prerequisites: [Project status](Project-Status.md), which counts the same issues and pull requests this page charts by week.
+
+> Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
+
+**Generated at:** 2026-10-23T00:14:32Z (UTC), from `ChiefGyk3D/Clouds-Against-Humanity`, which was created on 2026-10-10 (day 0 on the chart). The numbers come from GitHub and drift: this is a snapshot, not a live counter.
+
+![Hand-drawn style chart: cumulative stars and forks since the repository was created, and weekly merged pull requests and closed issues](images/repo-growth.png)
+
+*As of 2026-10-23, 13 days after the repository was created: 465 stars, 21 forks, 165 pull requests merged and 35 issues closed.*
+
+## How to read it honestly
+
+- **Stars measure attention, not use.** A star is a click. It says someone saw the project and liked the idea, not that they ran it, finished a lesson or would recommend it. Forks are a little closer to use, and still a weak signal.
+- **Early numbers are noisy.** A repository that is a few days or weeks old can jump on one share or one post and then flatten. One chart of a short history proves very little; read the shape over months.
+- **The numbers come from GitHub and drift.** Accounts get deleted and spam stars get removed, so a count can fall. Times are in UTC, and a week runs Monday to Sunday.
+- **Throughput is not quality.** Pull requests merged and issues closed show how much moved, not how good it is.
+- **Only counts per day are stored.** The snapshot has no user names, no addresses and no tokens, and CI checks that.
+
+## The numbers behind the chart
+
+This table is the text version of the picture, one row per week (UTC, Monday to Sunday). The last two columns are running totals at the end of that week.
+
+| Week of | New stars | New forks | PRs merged | Issues closed | Stars so far | Forks so far |
+|---|---|---|---|---|---|---|
+| 2026-10-05 | 2 | 0 | 16 | 0 | 2 | 0 |
+| 2026-10-12 | 230 | 12 | 67 | 8 | 232 | 12 |
+| 2026-10-19 (partial) | 233 | 9 | 82 | 27 | 465 | 21 |
+
+Totals: 465 stars, 21 forks, 165 merged pull requests, 35 closed issues.
+
+## Reproduce it
+
+Run these from a login that can read the repository. They show the same data without the script:
+
+```bash
+gh api repos/ChiefGyk3D/Clouds-Against-Humanity --jq .created_at
+gh api repos/ChiefGyk3D/Clouds-Against-Humanity/forks --paginate --jq '.[].created_at'
+gh pr list --repo ChiefGyk3D/Clouds-Against-Humanity --state merged --limit 5000 --json mergedAt
+gh issue list --repo ChiefGyk3D/Clouds-Against-Humanity --state closed --limit 5000 --json closedAt
+# stars: a GraphQL query for stargazers(first: 100, orderBy: {field: STARRED_AT, direction: ASC}) { edges { starredAt } }, paged
+python3 -I scripts/gen_repo_metrics.py --refresh   # does all of the above, draws the chart and rewrites this page
+python3 -I scripts/gen_repo_metrics.py --check     # offline: the same check CI runs
+```
+
+Drawing needs matplotlib, which the repository does not depend on: use the system package (`python3-matplotlib` on Debian-based systems), or make a private virtual environment with `python3 -m pip install matplotlib` and run the script with that interpreter. The check needs only Python.
+
+The same script works for any repository you can read: pass `--repo owner/name` with its own `--snapshot`, `--out` and `--page` paths (or `--no-page`). Run `python3 -I scripts/gen_repo_metrics.py --help` for the list.
+
+Next: [Project status](Project-Status.md), which says what the work is doing right now.

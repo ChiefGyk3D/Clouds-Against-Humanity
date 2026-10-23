@@ -476,4 +476,4 @@ python -I scripts/gen_project_status.py --refresh   # does all of the above and 
 
 The classification above is applied to that data by `scripts/gen_project_status.py`. CI re-renders the committed snapshot, `docs/wiki/.status-snapshot.json`, and fails when this page does not match it or has no generated-at time; it does not call GitHub. The page is only as current as the last refresh, which the maintainer runs from a login: by hand, from a scheduled local job, or from a hook in the Scrum Around and Find Out (SAFO) audit.
 
-Next: [Roadmap](Roadmap.md), which says what is built and what is only planned; this page says what the work is doing right now.
+Next: [Roadmap](Roadmap.md), which says what is built and what is only planned; this page says what the work is doing right now. For how attention and work have moved week by week, see [Repository growth](Repository-Growth.md).
