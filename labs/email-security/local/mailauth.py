@@ -20,6 +20,7 @@ import re
 import socket
 import struct
 import sys
+from email.utils import getaddresses
 from pathlib import Path
 
 import dkimlite
@@ -258,10 +259,23 @@ def evaluate(res, raw, client_ip, mail_from):
     froms = [r for n, r in headers if n.lower() == "from"]
     # DKIM picks the bottom-most instance of a header (RFC 6376 section 5.4.2); use the same one here
     frm = (froms[-1] if froms else b"").decode("utf-8", "replace")
-    from_addr = re.findall(r"[\w.+-]+@([\w.-]+)", frm.partition(":")[2])
-    from_domain = (from_addr[-1] if from_addr else "").lower()
+    # real addresses only: a quoted display name that looks like an address is not a second author
+    from_addr = [a.rpartition("@")[2] for _, a in getaddresses([re.sub(r"\s+", " ", frm.partition(":")[2]).strip()]) if "@" in a]
+    # Anything that makes the author ambiguous fails DMARC instead of being resolved by a guess.
+    ambiguous = None
+    if len(froms) > 1:
+        ambiguous = f"{len(froms)} From headers: DMARC cannot evaluate an ambiguous author, so it fails"
+    elif len(set(from_addr)) > 1 or len(from_addr) > 1:
+        ambiguous = f"the From header holds {len(from_addr)} addresses: the author is ambiguous, so DMARC fails"
+    elif dkimlite.has_bare_cr(raw):
+        ambiguous = "a bare CR in the headers: parsers disagree about where the lines end, so DMARC fails"
+    # The author domain is only ever taken from exactly one address; an ambiguous message gets none,
+    # so no policy is looked up and no guessed header.from is reported.
+    from_domain = "" if ambiguous or not from_addr else from_addr[0].lower()
     mf_domain = mail_from.rpartition("@")[2].lower() if mail_from else ""
     out = {"from_domain": from_domain, "mail_from_domain": mf_domain, "from_headers": len(froms)}
+    if ambiguous:
+        out["reason"] = ambiguous
     out["spf"], st = spf(res, client_ip, mf_domain) if mf_domain else ("none", SpfState())
     out["spf_trace"], out["spf_lookups"] = st.trace, st.lookups
 
@@ -270,16 +284,20 @@ def evaluate(res, raw, client_ip, mail_from):
         return vals[0] if vals else None
 
     out["dkim"] = dkimlite.verify(raw, lookup_txt)
+    if ambiguous:
+        out.update(dmarc="fail", disposition="fail (author ambiguous; no policy looked up)", dmarc_record=None, dmarc_found_at=None,
+                   spf_aligned=False, dkim_aligned=False)
+        return out
     rec, where = dmarc_policy(res, from_domain)
     out["dmarc_record"], out["dmarc_found_at"] = rec, where
     if rec is None:
         out.update(dmarc="none", disposition="no DMARC policy", spf_aligned=False, dkim_aligned=False)
         return out
-    multi = len(froms) > 1  # RFC 7489 section 6.6.1 / RFC 9989: more than one From is not evaluated as a pass
+    multi = ambiguous is not None  # RFC 7489 section 6.6.1 / RFC 9989: an ambiguous From is not evaluated as a pass
     out["spf_aligned"] = not multi and out["spf"] == "pass" and aligned(mf_domain, from_domain, rec.get("aspf", "r").lower())
     out["dkim_aligned"] = not multi and any(d["result"] == "pass" and aligned(d["d"], from_domain, rec.get("adkim", "r").lower()) for d in out["dkim"])
     if multi:
-        out["reason"] = f"{len(froms)} From headers: DMARC cannot evaluate an ambiguous author, so it fails"
+        out["reason"] = ambiguous
     if out["spf_aligned"] or out["dkim_aligned"]:
         out.update(dmarc="pass", disposition="deliver")
     else:
@@ -294,7 +312,7 @@ def authres(r, authserv="mx.receiver.test"):
     """An RFC 8601 Authentication-Results value, the way a receiving server would stamp it."""
     dk = "; ".join(f"dkim={d['result']} header.d={d['d']} header.s={d['s']}" for d in r["dkim"]) or "dkim=none"
     return (f"{authserv}; spf={r['spf']} smtp.mailfrom={r['mail_from_domain'] or 'none'}; {dk}; "
-            f"dmarc={r['dmarc']} header.from={r['from_domain']}")
+            f"dmarc={r['dmarc']} header.from={r['from_domain'] or 'ambiguous'}")
 
 
 def make_resolver(args):

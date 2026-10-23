@@ -18,7 +18,9 @@ SIGN_HEADERS = ["from", "to", "subject", "date", "message-id", "mime-version"]
 
 def split_message(raw: bytes):
     """Return (headers, body). Each header is (name, raw_text_with_folds, no trailing CRLF)."""
-    raw = raw.replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")
+    # Every line ending becomes CRLF, and a lone CR counts as a line break too (the strictest reading),
+    # so a bare CR cannot hide a second header inside the first one from this parser.
+    raw = raw.replace(b"\r\n", b"\n").replace(b"\r", b"\n").replace(b"\n", b"\r\n")
     head, _, body = raw.partition(b"\r\n\r\n")
     headers = []
     for line in head.split(b"\r\n"):
@@ -27,6 +29,12 @@ def split_message(raw: bytes):
         else:
             headers.append([line.partition(b":")[0].decode("ascii", "replace").strip(), line])
     return [(n, r) for n, r in headers], body
+
+
+def has_bare_cr(raw: bytes) -> bool:
+    """True if the header block contains a CR that is not part of CRLF (a classic parser-differential trick)."""
+    head = raw.split(b"\r\n\r\n", 1)[0].split(b"\n\n", 1)[0]
+    return b"\r" in head.replace(b"\r\n", b"")
 
 
 def canon_header(raw: bytes) -> bytes:
