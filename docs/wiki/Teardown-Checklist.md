@@ -112,7 +112,7 @@ Tick every line. If you cannot tick one, the cost may not have stopped.
 - [ ] `cah-20-telemetry` is destroyed, or I never applied it.
 - [ ] `cah-10-access` is destroyed and the droplet list is empty.
 - [ ] `cah-00-foundation` is destroyed, or I know why a network is left (section 2).
-- [ ] The destroy allowlist is empty again in `plan.rego` and in the live policy.
+- [ ] The destroy allowlist is empty again in `plan.rego` and in the live policy (every stack id's list, and no stale `whole_service_teardown_stacks` entry for a stack that no longer exists).
 - [ ] Reserved addresses, volumes and snapshots lists are empty.
 - [ ] Nothing I made by hand in the console is still running.
 - [ ] The billing page shows no droplet or reserved resource today.
