@@ -304,8 +304,26 @@ def test_bare_cr_and_multi_address_from_cannot_hide_the_author(built, mods):
     two_addr = b"From: Alice <alice@example.test>, Eve <eve@random-host.test>\r\n" + tail
     r = ma.evaluate(res, two_addr, "192.0.2.25", "alice@example.test")
     assert r["dmarc"] != "pass" and "2 addresses" in r["reason"]
+    # ambiguous messages stay out of domain-based evaluation: no policy lookup, no guessed header.from
+    seen = []
+
+    class Spy:
+        def query(self, name, rtype):
+            seen.append(name)
+            return res.query(name, rtype)
+
+    for bad in (two_addr, hidden, lone):
+        seen.clear()
+        r = ma.evaluate(Spy(), bad, "192.0.2.25", "alice@example.test")
+        assert r["dmarc"] == "fail" and r["from_domain"] == "" and r["dmarc_record"] is None
+        assert not [n for n in seen if n.startswith("_dmarc.")], seen
+        assert "header.from=ambiguous" in ma.authres(r)
+        assert "random-host.test" not in ma.authres(r).split("header.from=")[1]
     one = b"From: Alice <alice@example.test>\r\n" + tail
-    assert ma.evaluate(res, one, "192.0.2.25", "alice@example.test")["dmarc"] == "pass"
+    seen.clear()
+    ok = ma.evaluate(Spy(), one, "192.0.2.25", "alice@example.test")
+    assert ok["dmarc"] == "pass" and ok["from_domain"] == "example.test" and "_dmarc.example.test" in seen
+    assert "header.from=example.test" in ma.authres(ok)
 
 
 def test_triage_output_cannot_inject_lines_or_terminal_codes(tmp_path, mods):
