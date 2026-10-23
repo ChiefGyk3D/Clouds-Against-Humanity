@@ -54,6 +54,8 @@ Case: CISA and the FBI wrote that, beginning on 2023-05-27, the CL0P ransomware 
 
 Case: on 2022-08-04, Twilio, a communications company, learned of unauthorized access to some customer accounts. Its own report says employees received text messages that looked like they came from the IT department, saying a password had expired or a schedule had changed, with a link to a page that imitated Twilio's sign-in page; some employees entered their credentials and the attackers used them to reach internal systems and some customer data. Twilio also noted that the attackers seemed able to match employee names with phone numbers. Source: [Twilio incident report](https://www.twilio.com/en-us/blog/august-2022-social-engineering-attack), read 2026-10-22 (the page has been revised since; I read the current version). For why a typed code does not stop this and a security key tied to the real site's name does, read [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md).
 
+The email-specific attacks (business email compromise, look-alike domains, consent phishing, thread hijacking), the DNS records that make forging your domain harder, and a triage workflow are in [Email security: DNS records, gateways, API-driven protection, and running your own server](Email-Security-DNS-Gateways-and-API-Driven-Protection.md).
+
 ### Malware
 
 **Malware is software built to do something unauthorized that harms the confidentiality, integrity or availability of a system.** NIST's glossary lists a virus, a worm, a Trojan horse and other code-based entities that infect a host, and notes that spyware and some adware count too.
