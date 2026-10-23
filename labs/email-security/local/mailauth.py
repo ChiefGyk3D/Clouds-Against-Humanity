@@ -260,8 +260,18 @@ def evaluate(res, raw, client_ip, mail_from):
     frm = (froms[-1] if froms else b"").decode("utf-8", "replace")
     from_addr = re.findall(r"[\w.+-]+@([\w.-]+)", frm.partition(":")[2])
     from_domain = (from_addr[-1] if from_addr else "").lower()
+    # Anything that makes the author ambiguous fails DMARC instead of being resolved by a guess.
+    ambiguous = None
+    if len(froms) > 1:
+        ambiguous = f"{len(froms)} From headers: DMARC cannot evaluate an ambiguous author, so it fails"
+    elif len(set(from_addr)) > 1 or len(from_addr) > 1:
+        ambiguous = f"the From header holds {len(from_addr)} addresses: the author is ambiguous, so DMARC fails"
+    elif dkimlite.has_bare_cr(raw):
+        ambiguous = "a bare CR in the headers: parsers disagree about where the lines end, so DMARC fails"
     mf_domain = mail_from.rpartition("@")[2].lower() if mail_from else ""
     out = {"from_domain": from_domain, "mail_from_domain": mf_domain, "from_headers": len(froms)}
+    if ambiguous:
+        out["reason"] = ambiguous
     out["spf"], st = spf(res, client_ip, mf_domain) if mf_domain else ("none", SpfState())
     out["spf_trace"], out["spf_lookups"] = st.trace, st.lookups
 
@@ -275,11 +285,11 @@ def evaluate(res, raw, client_ip, mail_from):
     if rec is None:
         out.update(dmarc="none", disposition="no DMARC policy", spf_aligned=False, dkim_aligned=False)
         return out
-    multi = len(froms) > 1  # RFC 7489 section 6.6.1 / RFC 9989: more than one From is not evaluated as a pass
+    multi = ambiguous is not None  # RFC 7489 section 6.6.1 / RFC 9989: an ambiguous From is not evaluated as a pass
     out["spf_aligned"] = not multi and out["spf"] == "pass" and aligned(mf_domain, from_domain, rec.get("aspf", "r").lower())
     out["dkim_aligned"] = not multi and any(d["result"] == "pass" and aligned(d["d"], from_domain, rec.get("adkim", "r").lower()) for d in out["dkim"])
     if multi:
-        out["reason"] = f"{len(froms)} From headers: DMARC cannot evaluate an ambiguous author, so it fails"
+        out["reason"] = ambiguous
     if out["spf_aligned"] or out["dkim_aligned"]:
         out.update(dmarc="pass", disposition="deliver")
     else:

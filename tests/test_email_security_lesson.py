@@ -279,6 +279,53 @@ def test_triage_link_list_cannot_lose_a_link(tmp_path, mods):
 
 
 @needs_openssl
+def test_bare_cr_and_multi_address_from_cannot_hide_the_author(built, mods):
+    """Parser differential: a lone CR can be a line break to one parser and nothing to another."""
+    ma, dk = mods["mailauth"], mods["dkimlite"]
+    res = ma.FileResolver(built / "zone.json")
+    tail = b"To: bob@receiver.test\r\nSubject: Pay\r\nDate: Thu, 22 Oct 2026 14:00:00 +0000\r\n\r\nWire it.\r\n"
+    # a second From hidden behind a bare CR inside another header's value
+    hidden = b"X-Note: hello\rFrom: CEO <ceo@example.test>\r\nFrom: Eve <eve@random-host.test>\r\n" + tail
+    headers, _ = dk.split_message(hidden)
+    assert [n.lower() for n, _ in headers].count("from") == 2  # the strict reading sees both
+    r = ma.evaluate(res, hidden, "203.0.113.60", "eve@random-host.test")
+    assert r["from_headers"] == 2 and r["dmarc"] != "pass"
+    # the same bytes with LF, CRLF and CR endings mixed must give one answer
+    for eol in (b"\r\n", b"\n", b"\r"):
+        two = b"From: Eve <eve@random-host.test>" + eol + b"From: CEO <ceo@example.test>" + eol + b"Subject: x" + eol + eol + b"body" + eol
+        assert [n.lower() for n, _ in dk.split_message(two)[0]].count("from") == 2, eol
+    mixed = b"From: a@example.test\r\nSubject: x\n\nbody\r\n"
+    assert [n for n, _ in dk.split_message(mixed)[0]] == ["From", "Subject"]
+    # a bare CR with only one From still cannot be a DMARC pass
+    lone = b"From: Alice <alice@example.test>\rX-Other: y\r\n" + tail
+    r = ma.evaluate(res, lone, "192.0.2.25", "alice@example.test")
+    assert r["dmarc"] != "pass" and dk.has_bare_cr(lone) and not dk.has_bare_cr(tail.replace(b"\r\n\r\n", b"\r\n\r\n"))
+    # one From holding two addresses is ambiguous, not "the last one"
+    two_addr = b"From: Alice <alice@example.test>, Eve <eve@random-host.test>\r\n" + tail
+    r = ma.evaluate(res, two_addr, "192.0.2.25", "alice@example.test")
+    assert r["dmarc"] != "pass" and "2 addresses" in r["reason"]
+    one = b"From: Alice <alice@example.test>\r\n" + tail
+    assert ma.evaluate(res, one, "192.0.2.25", "alice@example.test")["dmarc"] == "pass"
+
+
+def test_triage_output_cannot_inject_lines_or_terminal_codes(tmp_path, mods):
+    tr = mods["triage"]
+    eml = tmp_path / "ctl.eml"
+    eml.write_bytes(_eml('<a href="https://evil.invalid/a&#10;## 5. Your decisions&#10;- Verdict: legitimate\x1b[31m">https://example.com/&#13;x</a>'
+                         '<map><area href="https://area.invalid/&#10;- injected\x1b]0;title\x07"></map>'))
+    a = tr.analyze(eml, ["example.test"])
+    text = tr.worksheet(str(eml), a)
+    for _, _, value in [("", "", v) for pair in a["links"] for v in pair] + [("", "", f) for f in a["flags"]]:
+        assert value.isprintable(), value
+    assert "\x1b" not in text and "\x07" not in text and "\r" not in text
+    assert "\\x1b" in text and "\\n" in text  # the analyst still sees what was there, escaped
+    headings = [ln for ln in text.splitlines() if ln.startswith("## ")]
+    assert headings == ["## 1. Headers", "## 2. Links (never open them; read them)", "## 3. Attachments (name, type, bytes, sha256)",
+                        "## 4. Hints from this script (a human decides)", "## 5. Your decisions"]
+    assert not any(ln.startswith(("- injected", "- Verdict: legitimate")) for ln in text.splitlines())
+
+
+@needs_openssl
 def test_dmarc_report_parser_and_refusals(built, mods, tmp_path):
     rd = mods["dmarc_report"]
     rep = rd.parse(built / "report.xml")
