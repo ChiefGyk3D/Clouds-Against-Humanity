@@ -57,12 +57,16 @@ module "droplet" {
   hostname             = "${var.box_label}.${var.domain}"
   region               = var.region
   ssh_key_fingerprints = var.ssh_key_fingerprints
+
+  # The firewall matches the droplet by tag, which protects nothing if the droplet is created first.
+  depends_on = [module.firewall]
 }
 
 module "reserved_ip" {
   source     = "../cloud/reserved-ip"
   enabled    = var.enable_reserved_ip
   region     = var.region
+  assign     = var.enable_droplet
   droplet_id = module.droplet.droplet_id
 }
 

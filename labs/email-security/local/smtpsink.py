@@ -20,9 +20,13 @@ async def handle(reader, writer, outfile, done):
 
     try:
         say("220 sink.test ESMTP lab sink")
-        data_mode, body = False, []
+        data_mode, body, size = False, [], 0
         while True:
-            raw = await asyncio.wait_for(reader.readline(), timeout=15)
+            try:
+                raw = await asyncio.wait_for(reader.readline(), timeout=15)
+            except ValueError:  # one line longer than the reader's own limit
+                say("552 5.3.4 line too long")
+                break
             if not raw:
                 break
             line = raw.decode("utf-8", "replace").rstrip("\r\n")
@@ -32,11 +36,12 @@ async def handle(reader, writer, outfile, done):
                     with open(outfile, "w", newline="") as f:
                         f.write("\r\n".join(l[1:] if l.startswith("..") else l for l in body) + "\r\n")
                     say("250 2.0.0 queued (to a file, nowhere else)")
-                elif sum(len(l) for l in body) > MAX_BYTES:
+                elif size + len(line) + 2 > MAX_BYTES:  # count this line (and its CRLF) before keeping it
                     say("552 5.3.4 too big")
                     break
                 else:
                     body.append(line)
+                    size += len(line) + 2
                 continue
             print("C:", line)
             cmd = line.upper()
@@ -63,7 +68,7 @@ async def handle(reader, writer, outfile, done):
 
 async def main(outfile, port):
     done = asyncio.Event()
-    server = await asyncio.start_server(lambda r, w: handle(r, w, outfile, done), "127.0.0.1", port)
+    server = await asyncio.start_server(lambda r, w: handle(r, w, outfile, done), "127.0.0.1", port, limit=MAX_BYTES + 2)
     print(f"listening on 127.0.0.1:{port}; waiting for one message", flush=True)
     async with server:
         await asyncio.wait_for(done.wait(), timeout=120)

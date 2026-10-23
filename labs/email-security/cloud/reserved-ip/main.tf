@@ -13,8 +13,14 @@ variable "region" {
   default = "nyc3"
 }
 
+variable "assign" {
+  description = "Whether to attach the address to the droplet. A plain flag known at plan time (not derived from the droplet's id, which is unknown until the droplet exists). False leaves the address reserved but unassigned, which is billed."
+  type        = bool
+  default     = false
+}
+
 variable "droplet_id" {
-  description = "The droplet to attach to. Leave empty and the address is reserved but unassigned, which is billed."
+  description = "The droplet to attach to; only read when assign is true."
   type        = string
   default     = ""
 }
@@ -25,7 +31,7 @@ resource "digitalocean_reserved_ip" "this" {
 }
 
 resource "digitalocean_reserved_ip_assignment" "this" {
-  count      = var.enabled && var.droplet_id != "" ? 1 : 0
+  count      = var.enabled && var.assign ? 1 : 0
   ip_address = digitalocean_reserved_ip.this[0].ip_address
   droplet_id = var.droplet_id
 }

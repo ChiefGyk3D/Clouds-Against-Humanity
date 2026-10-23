@@ -8,6 +8,7 @@ OpenTofu pieces are checked for flag-off defaults, and validated when `tofu` exi
 download its provider (skipped otherwise). Nothing here touches the network except that download.
 """
 
+import asyncio
 import importlib
 import json
 import os
@@ -141,6 +142,72 @@ def test_udp_resolver_parses_a_real_dns_packet(mods):
 
 
 @needs_openssl
+def test_dkim_signature_must_cover_from(built, mods):
+    """Hostile fixture: sign only an unrelated header under the victim's own key. A verifier that
+    accepts it would let any forged visible From pass DMARC through the DKIM side."""
+    ma, dk = mods["mailauth"], mods["dkimlite"]
+    res = ma.FileResolver(built / "zone.json")
+    forged = (b"From: CEO <ceo@example.test>\r\nTo: bob@receiver.test\r\nSubject: Pay now\r\n"
+              b"Date: Thu, 22 Oct 2026 14:00:00 +0000\r\nMessage-ID: <x@lab.test>\r\n\r\nWire it today.\r\n")
+    signed = (dk.sign(forged, "example.test", "s2026a", built / "keys" / "org.pem", names=["subject"]) + "\r\n").encode() + forged
+    r = ma.evaluate(res, signed, "203.0.113.66", "ceo@example.test")
+    assert r["dkim"][0]["result"] == "fail" and "From is not in h=" in r["dkim"][0]["reason"]
+    assert r["dmarc"] == "fail" and not r["dkim_aligned"]
+
+
+def test_smtpsink_cap_counts_the_current_line(tmp_path, mods):
+    sink = importlib.import_module("smtpsink")
+
+    async def talk(lines):
+        out = tmp_path / "got.eml"
+        done = asyncio.Event()
+        server = await asyncio.start_server(lambda r, w: sink.handle(r, w, str(out), done), "127.0.0.1", 0)
+        port = server.sockets[0].getsockname()[1]
+        reader, writer = await asyncio.open_connection("127.0.0.1", port)
+        await reader.readline()
+        for line in lines:
+            writer.write(line)
+        await writer.drain()
+        replies = []
+        try:
+            while True:
+                got = await asyncio.wait_for(reader.readline(), timeout=3)
+                if not got:
+                    break
+                replies.append(got.decode())
+        except TimeoutError:
+            pass
+        writer.close()
+        server.close()
+        return replies, out
+
+    head = [b"EHLO a.test\r\n", b"MAIL FROM:<a@a.test>\r\n", b"RCPT TO:<b@b.test>\r\n", b"DATA\r\n"]
+    # one single oversized line must be refused, and nothing written
+    replies, out = asyncio.run(talk(head + [b"x" * (sink.MAX_BYTES + 10) + b"\r\n", b".\r\n"]))
+    assert any(r.startswith("552") for r in replies) and not out.exists()
+    # many small lines whose last one crosses the cap must be refused too
+    line = b"y" * 998 + b"\r\n"
+    n = sink.MAX_BYTES // 1000 + 2
+    replies, out = asyncio.run(talk(head + [line] * n + [b".\r\n"]))
+    assert any(r.startswith("552") for r in replies) and not out.exists()
+    # a small message still goes through
+    replies, out = asyncio.run(talk(head + [b"Subject: hi\r\n", b"\r\n", b"ok\r\n", b".\r\n"]))
+    assert any(r.startswith("250 2.0.0") for r in replies) and out.exists()
+
+
+def test_triage_reads_single_quoted_and_unquoted_hrefs(tmp_path, mods):
+    tr = mods["triage"]
+    for href in ("'https://evil.invalid/login'", "https://evil.invalid/login", '"https://evil.invalid/login"'):
+        eml = tmp_path / "q.eml"
+        eml.write_bytes(b"From: A <a@random-host.test>\r\nTo: b@receiver.test\r\nSubject: s\r\nMIME-Version: 1.0\r\n"
+                         b"Content-Type: text/html; charset=utf-8\r\n\r\n<p>Go to <a class=x href=" + href.encode()
+                         + b">https://example.com/account</a></p>\r\n")
+        a = tr.analyze(eml, ["example.test"])
+        assert ("https://evil.invalid/login", "https://example.com/account") in a["links"], href
+        assert any("shows example.com but goes to evil.invalid" in f for f in a["flags"]), href
+
+
+@needs_openssl
 def test_dmarc_report_parser_and_refusals(built, mods, tmp_path):
     rd = mods["dmarc_report"]
     rep = rd.parse(built / "report.xml")
@@ -253,3 +320,46 @@ def test_page_disclosure_and_links():
     # no real-looking address other than reserved documentation ranges
     for ip in re.findall(r"\b(\d{1,3}(?:\.\d{1,3}){3})\b", text):
         assert ip.startswith(("192.0.2.", "198.51.100.", "203.0.113.", "127.0.0.")) or ip == "0.0.0.0", ip
+
+
+def _tofu_env(tmp_path):
+    env = dict(os.environ, TF_PLUGIN_CACHE_DIR=str(tmp_path / "plugins"), TF_IN_AUTOMATION="1", DIGITALOCEAN_TOKEN="lab-placeholder")
+    (tmp_path / "plugins").mkdir(exist_ok=True)
+    tree = tmp_path / "lab"
+    if not tree.exists():
+        shutil.copytree(LAB, tree, ignore=shutil.ignore_patterns(".terraform*", "local"))
+    return env, tree
+
+
+def test_compose_orders_droplet_after_firewall_and_gates_assignment_on_a_known_flag():
+    comp = (LAB / "compose" / "main.tf").read_text()
+    droplet_block = re.search(r'module "droplet" \{(.*?)\n\}', comp, re.DOTALL).group(1)
+    assert "depends_on = [module.firewall]" in droplet_block
+    assert "assign     = var.enable_droplet" in comp
+    reserved = (LAB / "cloud" / "reserved-ip" / "main.tf").read_text()
+    assert re.search(r"count\s*=\s*var\.enabled && var\.assign", reserved)
+    assert "var.droplet_id !=" not in reserved  # an unknown value cannot decide a count at plan time
+
+
+@pytest.mark.skipif(shutil.which("tofu") is None, reason="tofu is not installed")
+def test_tofu_all_flags_on_plans_five_resources_and_firewall_rejects_ipv6(tmp_path):
+    env, tree = _tofu_env(tmp_path)
+    comp = tree / "compose"
+    init = subprocess.run(["tofu", "init", "-backend=false", "-input=false"], cwd=comp, env=env, capture_output=True, text=True, check=False)
+    if init.returncode != 0:
+        pytest.skip("tofu could not download its provider (no network)")
+    base = ["tofu", "plan", "-input=false", "-lock=false", "-refresh=false", "-no-color"]
+    flags = ["enable_project", "enable_firewall", "enable_droplet", "enable_reserved_ip", "enable_dns"]
+    args = [a for f in flags for a in ("-var", f"{f}=true")] + ["-var", 'ssh_key_fingerprints=["aa:bb"]']
+    on = subprocess.run(base + args, cwd=comp, env=env, capture_output=True, text=True, check=False)
+    assert on.returncode == 0, on.stdout + on.stderr
+    created = re.findall(r"# (module\.\S+) will be created", on.stdout)
+    assert len(created) == 7, created  # project, firewall, droplet, reserved IP and its assignment, domain, record
+    assert any("reserved_ip_assignment" in c for c in created)
+    off = subprocess.run(base, cwd=comp, env=env, capture_output=True, text=True, check=False)
+    assert off.returncode == 0 and "will be created" not in off.stdout
+    for bad in ("2001:db8::/32", "192.0.2.0/24", "0.0.0.0/0", "192.0.2.10/31"):
+        r = subprocess.run(base + ["-var", f"admin_cidr={bad}"], cwd=comp, env=env, capture_output=True, text=True, check=False)
+        assert r.returncode != 0 and "single IPv4 address" in (r.stdout + r.stderr).replace("\n", " ").replace("│", ""), bad
+    ok = subprocess.run(base + ["-var", "admin_cidr=198.51.100.7/32"], cwd=comp, env=env, capture_output=True, text=True, check=False)
+    assert ok.returncode == 0

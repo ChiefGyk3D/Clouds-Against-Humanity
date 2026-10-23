@@ -107,6 +107,8 @@ def verify(raw: bytes, lookup_txt):
         results.append(res)
         if any(k not in t for k in ("v", "a", "b", "bh", "d", "h", "s")):
             res["reason"] = "missing a required tag"
+        elif "from" not in [n.strip().lower() for n in t["h"].split(":")]:
+            res["reason"] = "From is not in h=: RFC 6376 section 5.4 requires the From field to be signed"
         elif t["a"] != "rsa-sha256" or t.get("c", "simple/simple") != "relaxed/relaxed":
             res.update(result="neutral", reason="this teaching verifier only does rsa-sha256 with relaxed/relaxed")
         elif "l" in t:

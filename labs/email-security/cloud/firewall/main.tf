@@ -17,8 +17,8 @@ variable "admin_cidr" {
   type        = string
   default     = "192.0.2.10/32"
   validation {
-    condition     = can(cidrhost(var.admin_cidr, 0)) && !contains(["0.0.0.0/0", "::/0"], var.admin_cidr) && endswith(var.admin_cidr, "/32")
-    error_message = "admin_cidr must be a single IPv4 address (/32), never the whole internet."
+    condition     = can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}/32$", var.admin_cidr)) && can(cidrhost(var.admin_cidr, 0))
+    error_message = "admin_cidr must be a single IPv4 address written as a.b.c.d/32 (the droplet has no IPv6), never a range or the whole internet."
   }
 }
 

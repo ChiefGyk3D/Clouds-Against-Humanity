@@ -183,6 +183,7 @@ s2026a._domainkey.example.test. IN TXT "v=DKIM1; k=rsa; p=<base64 public key>"
 - **Selectors are what make rotation possible.** Publish a new selector, switch the signer to it, leave the old key published for a while so mail in transit still verifies, then remove it. Microsoft 365 uses two selectors (`selector1` and `selector2`) published as CNAME records so that it can rotate for you; Microsoft's DKIM page says so.
 - **Key size.** RFC 8301 requires signers to use RSA keys of at least 1024 bits and says they should use at least 2048. Google's sender page says delivery to personal Gmail needs 1024 bits or more and recommends 2048. A TXT string is limited to 255 characters, so a 2048-bit key is published as several quoted strings in one record; the lab does exactly that.
 - **A revoked key** is published with an empty `p=`.
+- **The `From:` header must be among the signed headers** (RFC 6376, section 5.4). A signature that covers only, say, the subject proves nothing about who the message claims to be, so the lab verifier fails it; the test suite includes a forged message signed that way to prove DMARC does not pass.
 - DKIM fails at **anything that changes the signed parts after signing**. A mailing list that adds a footer or a `[list]` tag in the subject breaks the signature (Exercise 4 shows the body hash failing).
 - A valid DKIM signature from `d=bulkmailer.test` proves only that bulkmailer.test signed it. It does not tie the message to `From: news@example.test` unless the domains are aligned.
 
@@ -607,6 +608,19 @@ Nothing in this lesson needs one. If you want to see one, the vendor documentati
 3. **Send only to addresses you own.** Do not send bulk mail from this box. Do not use it for anything you cannot afford to lose.
 4. Do **not** run anything on a droplet that you have not put in a firewall first; the OpenTofu creates the firewall by tag before the droplet.
 
+**This lab is IPv4-only on purpose.** The droplet disables IPv6 (the Mail-in-a-Box guide says to disable it if you can), so the firewall's SSH source must be an IPv4 address written `a.b.c.d/32`; the code refuses an IPv6 range, a wider range or the whole internet. To find your public IPv4 address, ask a service that answers with it, for example `curl -4 https://ifconfig.co` (it answered with HTTP 200 on 2026-10-22; any equivalent service works, and the address is whatever your connection presents, so check it again if your router restarts):
+
+```bash
+curl -4 -sS https://ifconfig.co
+```
+
+```powershell
+# est.: not run
+Invoke-RestMethod -Uri https://ifconfig.co/ip
+```
+
+If your internet provider or router gives you IPv6 only, or IPv6 is switched off on your network (the maintainer's is), the lab still needs an IPv4 source: use a connection that has one, such as a phone hotspot or another network, or skip the own-account path; the free lab does not need it. Mail reputation checks differ for IPv6 too: Google's sender guidelines (read 2026-10-22) say a sending IPv6 address needs its own PTR record, with a matching forward record, and show a separate "IPv6 sending guidelines" rejection. I read no equivalent Microsoft statement.
+
 **Steps** (the guide is the authority; I did not run them):
 
 1. Create an SSH key and add it to your DigitalOcean account; note its fingerprint. Create a DigitalOcean API token with the least scope that works, and put it in your shell as `DIGITALOCEAN_TOKEN` only for this session (see [Secrets from day one](Secrets-From-Day-One.md)). Never put it in a file in the repository.
@@ -760,8 +774,9 @@ All read-only requests, retrieved **2026-10-22** unless stated.
 | DigitalOcean blocks SMTP ports 25, 465 and 587 on Droplets and Reserved IPs by default and recommends against self-hosting mail | [Why is SMTP blocked?](https://docs.digitalocean.com/support/why-is-smtp-blocked/) | Read; unblock procedure not found there |
 | AWS blocks outbound port 25 on EC2 and Lambda by default; request removal per Region | [re:Post article](https://repost.aws/knowledge-center/ec2-port-25-throttle) | Read |
 | DigitalOcean reserved IPv4: free while assigned, $5.00 a month unassigned; droplet billing per second capped at 672 hours | [Reserved IP pricing](https://docs.digitalocean.com/products/networking/reserved-ips/details/pricing/), [Droplet pricing](https://docs.digitalocean.com/products/droplets/details/pricing/) | Read |
+| `ifconfig.co` and `api.ipify.org` answered an IPv4-only request with HTTP 200 (address not recorded) | `curl -4`, 2026-10-22 | Observed; any equivalent service works |
 | `s-1vcpu-1gb` is $6 a month | [`docs/cost-prices.json`](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost-prices.json), retrieved 2026-10-21 | Read in this repository |
-| Google sender requirements (SPF or DKIM; SPF, DKIM, DMARC for bulk over 5,000 a day; PTR; TLS; spam rate under 0.3%; one-click unsubscribe; DKIM 1024 bits or more) | [Google email sender guidelines](https://support.google.com/mail/answer/81126) | Read |
+| Google sender requirements (SPF or DKIM; SPF, DKIM, DMARC for bulk over 5,000 a day; PTR; TLS; spam rate under 0.3%; one-click unsubscribe; DKIM 1024 bits or more) | [Google email sender guidelines](https://support.google.com/mail/answer/81126) | Read, including the IPv6 PTR statement and the IPv6 rejection example |
 | Microsoft's high-volume sender requirements | Microsoft Tech Community announcement | Page did not render: **not verified** |
 | Mailgun, Postmark, Amazon SES pricing figures quoted | [Mailgun](https://www.mailgun.com/pricing/), [Postmark](https://postmarkapp.com/pricing), [SES](https://aws.amazon.com/ses/pricing/) | Read the figures shown; not totaled; they change |
 | Mailman DMARC mitigation rule | [Mailman 3 documentation](https://docs.mailman3.org/) (the page titled "DMARC mitigation" under Rules, in the Mailman core documentation, version 3.3.11b1) | Read |

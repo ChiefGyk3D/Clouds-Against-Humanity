@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import re
 import sys
+from html.parser import HTMLParser
 from email import policy
 from email.parser import BytesParser
 from email.utils import parseaddr
@@ -31,6 +32,27 @@ def distance(a, b):
             cur.append(min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (ca != cb)))
         prev = cur
     return prev[-1]
+
+
+class Anchors(HTMLParser):
+    """Collect (href, visible text) for every <a>, whatever quote style the attribute uses."""
+
+    def __init__(self):
+        super().__init__()
+        self.found, self._href, self._text = [], None, []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "a":
+            self._href, self._text = dict(attrs).get("href"), []
+
+    def handle_data(self, data):
+        if self._href is not None:
+            self._text.append(data)
+
+    def handle_endtag(self, tag):
+        if tag == "a" and self._href is not None:
+            self.found.append((self._href, "".join(self._text).strip()))
+            self._href = None
 
 
 def host(url):
@@ -71,8 +93,11 @@ def analyze(path, protect):
         elif ctype in ("text/plain", "text/html"):
             text = part.get_content()
             if ctype == "text/html":
-                for href, label in re.findall(r'<a[^>]+href="([^"]+)"[^>]*>(.*?)</a>', text, re.S | re.I):
-                    links.append((href, re.sub(r"<[^>]+>", "", label).strip()))
+                parser = Anchors()
+                parser.feed(text)
+                parser.close()
+                for href, label in parser.found:
+                    links.append((href, label))
                     shown = re.search(r"https?://[^\s<]+", label)
                     if shown and host(shown.group(0)) != host(href):
                         flags.append(f"link text shows {host(shown.group(0))} but goes to {host(href)}")
