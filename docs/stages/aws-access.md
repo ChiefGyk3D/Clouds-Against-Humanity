@@ -59,6 +59,8 @@ The gate for each state, run on copies of the repository with only the flags cha
 
 ## 4. Bootstrap (when the check has passed)
 
+Order on every instance: update, baseline, harden, then applications. The AWS connectors use the same cloud-init template as the DigitalOcean ones (`modules/twingate-bootstrap`), so the order is the one in the [stage 1 guide](01-access.md#2a-droplet-hardening) and the [first-hour lesson](../wiki/First-Hour-on-a-New-System-Updates-and-Baseline.md): update and automatic security updates first, a baseline you take by hand, the hardening, and the connector last. Amazon Linux behaves differently from Ubuntu at launch (see the lesson); this stack uses the Ubuntu image path through the shared template.
+
 1. Create `cah-aws-00-foundation` rooted at `stacks/aws/00-foundation`, labeled `cah-aws` (not `cah`), with the push policy attached first, then the AWS integration and the `cah-doppler-aws` context, and `TF_VAR_region` set.
 2. Create `cah-aws-10-access` rooted at `stacks/aws/10-access`, labeled `cah-aws`, push policy first, then **the same AWS integration and the `cah-doppler-aws` context attached to this stack too** (a stack dependency passes the mapped outputs, not credentials, so the access stack gets none from the foundation stack). It depends on the foundation stack, with this mapping:
 
