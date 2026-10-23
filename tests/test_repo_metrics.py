@@ -32,6 +32,8 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 import gen_repo_metrics as grm
 
+PNG_DIR = Path("docs/wiki/images")
+WIKI_DIR = Path("docs/wiki")
 LOGIN_LIKE = ("login", "user", "author", "owner", "email", "referrer", "path", "avatar", "node")
 
 
@@ -438,6 +440,68 @@ def test_a_failing_second_or_third_write_leaves_all_three_files_unchanged(tmp_pa
             grm.write_all(fresh, tmp_path / grm.SNAPSHOT, tmp_path / grm.PNG, tmp_path / grm.PAGE, "images/repo-growth.png")
         assert len(calls) == failing
         assert snapshot_files(tmp_path) == before  # same bytes, and no staging leftovers
+
+
+OLD_STAGING_NAMES = (".repo-growth.png.new", ".metrics-snapshot.json.new", ".Repository-Growth.md.new")
+
+
+def test_files_named_like_the_old_staging_names_survive_a_refresh_and_a_failed_one(tmp_path, monkeypatch):
+    setup_tree(tmp_path)
+    fresh = fixture()
+    fresh["fetched_at"] = "2026-10-23T00:00:00Z"
+    monkeypatch.setattr(grm, "draw_png", lambda snap, out: out.write_bytes(png_bytes(color=7)))
+    homes = {".repo-growth.png.new": PNG_DIR, ".metrics-snapshot.json.new": WIKI_DIR, ".Repository-Growth.md.new": WIKI_DIR}
+    bystanders = {}
+    for name, rel in homes.items():
+        path = tmp_path / rel / name
+        path.write_bytes(b"not mine: " + name.encode())
+        bystanders[path] = path.read_bytes()
+    args = (fresh, tmp_path / grm.SNAPSHOT, tmp_path / grm.PNG, tmp_path / grm.PAGE, "images/repo-growth.png")
+    real_replace = grm.os.replace
+    monkeypatch.setattr(grm.os, "replace", lambda src, dst: (_ for _ in ()).throw(OSError("disk full")))
+    with pytest.raises(OSError, match="disk full"):
+        grm.write_all(*args)
+    assert {p: p.read_bytes() for p in bystanders} == bystanders
+    monkeypatch.setattr(grm.os, "replace", real_replace)
+    grm.write_all(*args)
+    assert {p: p.read_bytes() for p in bystanders} == bystanders
+    assert json.loads((tmp_path / grm.SNAPSHOT).read_text())["fetched_at"] == "2026-10-23T00:00:00Z"
+
+
+def test_two_interleaved_writers_do_not_clobber_each_other(tmp_path, monkeypatch):
+    setup_tree(tmp_path)
+    first, second = fixture(), fixture()
+    first["fetched_at"], second["fetched_at"] = "2026-10-23T00:00:00Z", "2026-10-24T00:00:00Z"
+    monkeypatch.setattr(grm, "draw_png", lambda snap, out: out.write_bytes(png_bytes(color=7 if snap is first else 9)))
+    paths = (tmp_path / grm.SNAPSHOT, tmp_path / grm.PNG, tmp_path / grm.PAGE, "images/repo-growth.png")
+    real_replace = grm.os.replace
+    state = {"inner": False}
+
+    def interleave(src, dst):
+        # The first writer has staged all three files and is about to install them; a second
+        # writer now runs start to finish. With shared staging names it would overwrite or
+        # consume the first writer's files.
+        if not state["inner"]:
+            state["inner"] = True
+            grm.write_all(second, *paths)
+        return real_replace(src, dst)
+
+    monkeypatch.setattr(grm.os, "replace", interleave)
+    grm.write_all(first, *paths)
+    snap = json.loads(paths[0].read_text())
+    assert snap["fetched_at"] == "2026-10-23T00:00:00Z"  # the writer that installs last wins, whole
+    assert snap["png_sha256"] == grm.file_digest(paths[1])
+    assert paths[2].read_text() == grm.render_page(snap, "images/repo-growth.png")
+    leftovers = sorted(p.name for p in tmp_path.rglob("*") if p.is_file() and p.name.endswith(".new"))
+    assert not leftovers
+
+
+def test_staged_files_keep_the_mode_of_the_file_they_replace(tmp_path, monkeypatch):
+    setup_tree(tmp_path)
+    (tmp_path / grm.PAGE).chmod(0o640)
+    monkeypatch.setattr(grm, "draw_png", lambda snap, out: out.write_bytes(png_bytes(color=7)))
+    grm.write_all(fixture(), tmp_path / grm.SNAPSHOT, tmp_path / grm.PNG, tmp_path / grm.PAGE, "images/repo-growth.png")
+    assert (tmp_path / grm.PAGE).stat().st_mode & 0o777 == 0o640
 
 
 def test_home_embeds_the_chart_with_alt_text_and_the_current_as_of_date():

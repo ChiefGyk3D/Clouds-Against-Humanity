@@ -67,6 +67,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -533,16 +534,21 @@ def write_all(snap: dict, snapshot_path: Path, png_path: Path, page_path: Path |
         outputs = {png_path: drawn.read_bytes(), snapshot_path: (json.dumps(snap, indent=1, sort_keys=True) + "\n").encode("utf-8")}
         if page_path is not None:
             outputs[page_path] = render_page(snap, image_ref).encode("utf-8")
-    staged: dict[Path, Path] = {}
+    staged: dict[Path, Path] = {}  # target -> the exact staging file this call created
     originals: dict[Path, bytes | None] = {}
     replaced: list[Path] = []
     try:
         for target, data in outputs.items():
             target.parent.mkdir(parents=True, exist_ok=True)
             originals[target] = target.read_bytes() if target.is_file() else None
-            tmp_path = target.with_name(f".{target.name}.new")
-            tmp_path.write_bytes(data)
-            staged[target] = tmp_path
+            mode = stat.S_IMODE(target.stat().st_mode) if originals[target] is not None else 0o644
+            # A unique name in the target's own directory: no other run can share it, and
+            # os.replace stays on one filesystem. mkstemp creates it 0600 and exclusively.
+            fd, name = tempfile.mkstemp(dir=target.parent, prefix=f".{target.name}.", suffix=".new")
+            staged[target] = Path(name)
+            with os.fdopen(fd, "wb") as handle:
+                handle.write(data)
+            os.chmod(name, mode)
         for target, tmp_path in staged.items():
             os.replace(tmp_path, target)
             replaced.append(target)
@@ -550,13 +556,14 @@ def write_all(snap: dict, snapshot_path: Path, png_path: Path, page_path: Path |
         for target in reversed(replaced):
             before = originals[target]
             if before is None:
-                target.unlink(missing_ok=True)
+                target.unlink(missing_ok=True)  # this call created it
             else:
                 target.write_bytes(before)
         raise
     finally:
-        for tmp_path in staged.values():
-            tmp_path.unlink(missing_ok=True)
+        for target, tmp_path in staged.items():
+            if target not in replaced:
+                tmp_path.unlink(missing_ok=True)  # only files this call created
 
 
 def main(argv: list[str] | None = None) -> int:
