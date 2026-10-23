@@ -2,10 +2,6 @@
 
 A small, cheap, locked-down DigitalOcean environment built with OpenTofu, applied by Spacelift, fed secrets by Doppler, and reached only through Twingate. Nothing in it listens on the public internet. It is a real extension of a homelab and, just as much, a teaching repository: every decision is written down along with the reason for it, including the ones that turned out wrong the first time.
 
-![Hand-drawn style chart: cumulative stars and forks since the repository was created, and weekly merged pull requests and closed issues](images/repo-growth.png)
-
-*As of 2026-10-23 (UTC), drawn from GitHub data, which drifts. Stars measure attention, not use. The numbers and how to reproduce them are on [Repository growth](Repository-Growth.md).*
-
 ## Pick a path
 
 Wondering why this exists, who it is for and where I am coming from? Read [Why this exists](Why-This-Exists.md) first; it is a short side page, not part of the core path.
@@ -123,6 +119,12 @@ The droplets dial out. You dial out. Twingate introduces the two of you, checks 
 | AWS twin of stages 0 and 1 | Written and tested with mocked providers, never applied; Azure and GCP have no code | $0 and $20.84, marked inactive in the cost gate because the ceiling cannot hold both clouds |
 
 Working ceiling: $30 per month in the current phase; every phase has its own ceiling that can be raised on purpose (the [Roadmap](Roadmap.md) has the per-phase table and says why the edge does not fit). The [cost gate](CI-Tests-and-Cost-Gate.md) fails any pull request that would push the planned bill above what was approved.
+
+### Growth
+
+![Hand-drawn style chart: cumulative stars and forks since the repository was created, and weekly merged pull requests and closed issues](images/repo-growth.png)
+
+*As of 2026-10-23 (UTC), drawn from GitHub data, which drifts. Stars measure attention, not use. The numbers and how to reproduce them are on [Repository growth](Repository-Growth.md).*
 
 ## Where this wiki comes from
 
