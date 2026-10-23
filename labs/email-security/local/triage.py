@@ -75,6 +75,11 @@ class Anchors(HTMLParser):
 RAW_HREF = re.compile(r"""\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>"']+))""", re.IGNORECASE)
 
 
+def safe(value):
+    """Escape control characters and newlines (repr style) so hostile text cannot add lines or terminal codes."""
+    return "".join(c if c.isprintable() else c.encode("unicode_escape").decode("ascii") for c in str(value))
+
+
 def host(url):
     return (urlparse(url).hostname or "").lower()
 
@@ -141,13 +146,14 @@ def analyze(path, protect):
             flags.append(f"link host {h} is punycode (an internationalized look-alike is possible)")
         if re.fullmatch(r"[\d.]+", h):
             flags.append(f"link host {h} is a bare IP address")
-    return {"from": (name, addr), "return_path": rp, "reply_to": reply, "subject": str(msg["Subject"]),
-            "authres": [str(a) for a in ars], "received": [str(r).replace("\r\n", " ").replace("\n", " ") for r in received],
-            "links": links, "attachments": atts, "flags": flags}
+    return {"from": (safe(name), safe(addr)), "return_path": safe(rp), "reply_to": safe(reply), "subject": safe(msg["Subject"]),
+            "authres": [safe(a) for a in ars], "received": [safe(str(r).replace("\r\n", " ").replace("\n", " ")) for r in received],
+            "links": [(safe(u), safe(t)) for u, t in links],
+            "attachments": [(safe(n), safe(t), s, h) for n, t, s, h in atts], "flags": [safe(f) for f in flags]}
 
 
 def worksheet(path, a):
-    L = [f"# Phishing triage worksheet: {path}", "", "## 1. Headers", f"- From: {a['from'][0]!r} <{a['from'][1]}>",
+    L = [f"# Phishing triage worksheet: {safe(path)}", "", "## 1. Headers", f"- From: {a['from'][0]!r} <{a['from'][1]}>",
          f"- Return-Path domain: {a['return_path'] or '(none)'}   Reply-To domain: {a['reply_to'] or '(none)'}",
          f"- Subject: {a['subject']}"]
     L += [f"- Authentication-Results #{i + 1}: {x}" for i, x in enumerate(a["authres"])] or ["- Authentication-Results: none"]

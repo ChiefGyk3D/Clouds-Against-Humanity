@@ -69,6 +69,8 @@ Two shortcuts follow from the table. **Splitting:** each step down in prefix hal
 | `127.0.0.0/8` | Loopback: this machine talking to itself. | `localhost`. |
 | `169.254.0.0/16` | Link-local: addresses a machine gives itself when it finds no other. | The cloud metadata address `169.254.169.254` that the [hardening page](Droplet-Hardening.md) locks down lives here (est.; the range is from [RFC 3927](https://www.rfc-editor.org/rfc/rfc3927), which I did not read). |
 
+IPv6 uses the same ideas (prefix length, routing, default deny) with 128-bit addresses and no NAT in the usual design; [the IPv6 lesson](IPv6-Adoption-and-Handling-It-Safely.md) does the arithmetic and the firewall differences.
+
 ## Routing, in plain words
 
 A **route table** is a machine's list of "to reach this block, send the packet this way". Every machine has one, not only routers. The rule for each packet is: find the routes whose block contains the destination, take the most specific one (the longest prefix, est.; the `ip-route` manual page mentions "longest match"), and send the packet out that interface, or to the **gateway** that route names. A gateway is a machine on your own subnet that knows the way out.

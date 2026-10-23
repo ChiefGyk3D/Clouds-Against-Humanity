@@ -78,7 +78,7 @@ Everything on this page that runs on Linux is a way to attach rules to those hoo
 - A **target** is what a matching rule does: the special values `ACCEPT`, `DROP` and `RETURN`, a jump to another chain, or an extension such as `LOG`, `NFLOG` or `REJECT`.
 - A chain has a **policy** (`ACCEPT` or `DROP`) for packets that fall off the end.
 
-The rules of a chain are checked from top to bottom; the first rule that matches and ends in a final verdict decides. `iptables` handles IPv4 only. IPv6 is a separate tool, `ip6tables`, with a separate rule set. That is the source of a classic mistake that the loop below measures: a careful IPv4 ruleset next to an IPv6 path with no rules at all.
+The rules of a chain are checked from top to bottom; the first rule that matches and ends in a final verdict decides. `iptables` handles IPv4 only. IPv6 is a separate tool, `ip6tables`, with a separate rule set. That is the source of a classic mistake that the loop below measures: a careful IPv4 ruleset next to an IPv6 path with no rules at all. The [IPv6 lesson](IPv6-Adoption-and-Handling-It-Safely.md#exercise-5-a-dual-stack-service-the-firewall-gap-the-fix-and-the-trap) repeats it with a dual-stack listener and explains the addresses and neighbor discovery behind it.
 
 ### ipset: why sets scale
 
