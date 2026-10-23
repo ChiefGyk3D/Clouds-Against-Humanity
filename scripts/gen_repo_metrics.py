@@ -67,6 +67,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -520,17 +521,49 @@ def check_files(snapshot_path: Path, png_path: Path, page_path: Path | None, ima
 
 
 def write_all(snap: dict, snapshot_path: Path, png_path: Path, page_path: Path | None, image_ref: str) -> None:
-    """Draw into a private temp directory first, so a drawing failure writes nothing."""
+    """Write picture, snapshot and page as one unit: all of them change, or none does.
+
+    The picture is drawn into a private temp directory first, then every output is
+    staged next to its target. Only when all staging succeeded are the targets
+    replaced; if a replace fails, the ones already replaced are put back.
+    """
     with tempfile.TemporaryDirectory() as tmp:
-        staged = Path(tmp) / "chart.png"
-        draw_png(snap, staged)
-        snap = {**snap, "source_sha256": source_digest(snap), "png_sha256": file_digest(staged)}
-        png_path.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(staged, png_path)
-    snapshot_path.parent.mkdir(parents=True, exist_ok=True)
-    snapshot_path.write_text(json.dumps(snap, indent=1, sort_keys=True) + "\n", encoding="utf-8")
-    if page_path is not None:
-        page_path.write_text(render_page(snap, image_ref), encoding="utf-8")
+        drawn = Path(tmp) / "chart.png"
+        draw_png(snap, drawn)
+        snap = {**snap, "source_sha256": source_digest(snap), "png_sha256": file_digest(drawn)}
+        outputs = {png_path: drawn.read_bytes(), snapshot_path: (json.dumps(snap, indent=1, sort_keys=True) + "\n").encode("utf-8")}
+        if page_path is not None:
+            outputs[page_path] = render_page(snap, image_ref).encode("utf-8")
+    staged: dict[Path, Path] = {}  # target -> the exact staging file this call created
+    originals: dict[Path, bytes | None] = {}
+    replaced: list[Path] = []
+    try:
+        for target, data in outputs.items():
+            target.parent.mkdir(parents=True, exist_ok=True)
+            originals[target] = target.read_bytes() if target.is_file() else None
+            mode = stat.S_IMODE(target.stat().st_mode) if originals[target] is not None else 0o644
+            # A unique name in the target's own directory: no other run can share it, and
+            # os.replace stays on one filesystem. mkstemp creates it 0600 and exclusively.
+            fd, name = tempfile.mkstemp(dir=target.parent, prefix=f".{target.name}.", suffix=".new")
+            staged[target] = Path(name)
+            with os.fdopen(fd, "wb") as handle:
+                handle.write(data)
+            os.chmod(name, mode)
+        for target, tmp_path in staged.items():
+            os.replace(tmp_path, target)
+            replaced.append(target)
+    except BaseException:
+        for target in reversed(replaced):
+            before = originals[target]
+            if before is None:
+                target.unlink(missing_ok=True)  # this call created it
+            else:
+                target.write_bytes(before)
+        raise
+    finally:
+        for target, tmp_path in staged.items():
+            if target not in replaced:
+                tmp_path.unlink(missing_ok=True)  # only files this call created
 
 
 def main(argv: list[str] | None = None) -> int:
