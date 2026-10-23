@@ -619,7 +619,7 @@ curl -4 -sS https://ifconfig.co
 Invoke-RestMethod -Uri https://ifconfig.co/ip
 ```
 
-If your internet provider or router gives you IPv6 only, or IPv6 is switched off on your network (the maintainer's is), the lab still needs an IPv4 source: use a connection that has one, such as a phone hotspot or another network, or skip the own-account path; the free lab does not need it. Mail reputation checks differ for IPv6 too: Google's sender guidelines (read 2026-10-22) say a sending IPv6 address needs its own PTR record, with a matching forward record, and show a separate "IPv6 sending guidelines" rejection. I read no equivalent Microsoft statement.
+If IPv6 is switched off on your network (the maintainer's pfSense has it off), you are fine: you still have an IPv4 address and that is what the lab needs. If your internet provider gives you IPv6 only, the lab needs an IPv4 source: use a connection that has one, such as a phone hotspot or another network, or skip the own-account path; the free lab does not need it. Mail reputation checks differ for IPv6 too: Google's sender guidelines (read 2026-10-22) say a sending IPv6 address needs its own PTR record, with a matching forward record, and show a separate "IPv6 sending guidelines" rejection. I read no equivalent Microsoft statement.
 
 **Steps** (the guide is the authority; I did not run them):
 
