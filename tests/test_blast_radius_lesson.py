@@ -134,7 +134,8 @@ def test_glossary_defines_assume_breach_and_defense_in_depth():
 
 def test_at_least_four_existing_pages_link_the_lesson_at_first_use():
     users = [p.name for p in WIKI.glob("*.md") if p != PAGE and p.name not in {"Glossary.md", "_Sidebar.md", "Reading-Order.md"} and PAGE.name in p.read_text()]
-    assert 4 <= len(users) <= 8, users
+    # 9, not 8: issue #230 added the required links from Droplet hardening and the threats lesson.
+    assert 4 <= len(users) <= 9, users
 
 
 def test_the_lesson_is_in_the_sidebar_and_reading_order():

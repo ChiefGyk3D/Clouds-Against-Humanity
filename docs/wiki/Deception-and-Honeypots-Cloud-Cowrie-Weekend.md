@@ -82,7 +82,7 @@ The addresses below are documentation placeholders. In your shell you will use y
 |---|---|---|
 | `SENSOR` | `192.0.2.10` | The server's public address, which the provider shows you once it exists. |
 | `YOU` | `203.0.113.10` | **Your** public address, the only one allowed to reach the management port. Your router's status page shows it. It may change (most homes have a changing address): if it does you are locked out until you edit the firewall from your account console. |
-| `MGMT_PORT` | `49152` | The port real SSH uses, because Cowrie takes 22. It is a **function** choice, not a defense: a scanner finds any open port. The cloud firewall allowing only `YOU`, key-only login and no passwords are the controls; a different port at most makes your own logs quieter. Pick one between 1024 and 65535, not 22, 23, 2222 or 2223. |
+| `MGMT_PORT` | `49152` | The port real SSH uses, because Cowrie takes 22. It is a **function** choice, not a defense: a scanner finds any open port. The cloud firewall allowing only `YOU`, key-only login and no passwords are the controls; a different port at most makes your own logs quieter, which is not a security control. Pick one between 1024 and 65535, not 22, 23, 2222 or 2223. |
 
 Two firewalls, by tag, on the **cloud** side. The provider's pages (read 2026-10-22) say that when more than one firewall applies to a droplet, "the rules from every one of those firewalls are combined into a single set", that allow rules are additive, and that a firewall blocks "all traffic that isn't expressly permitted by a rule". That makes the second firewall easy to remove:
 
@@ -257,7 +257,7 @@ sshd -t && systemctl restart ssh
 ss -ltnp | grep sshd
 ```
 
-(`49152` is `MGMT_PORT`; use yours. Debian 12's main SSH configuration includes the files in `/etc/ssh/sshd_config.d/`, est. Ubuntu has started SSH from a systemd socket since 22.10, and forum posts show a changed port surprising people, which is one reason this lesson uses Debian.) Then, from a **second** terminal on your computer:
+(`49152` is `MGMT_PORT`; use yours. Debian 12's main SSH configuration includes the files in `/etc/ssh/sshd_config.d/`, est. Ubuntu has started SSH from a systemd socket since 22.10, and forum posts show a changed port surprising people (a functional problem, not a security one), which is one reason this lesson uses Debian.) Then, from a **second** terminal on your computer:
 
 ```bash
 ssh -p 49152 admin@SENSOR
