@@ -4,6 +4,12 @@ This page is for you if you have a Raspberry Pi or an old PC running a few thing
 
 The rest of the wiki was written for people who already know the vocabulary. It is still the real documentation of this environment, and you will be able to read it by the time you finish these pages.
 
+## Where zero is
+
+The zero this project presumes is a basic power user. You know how a computer works, you may have built or repaired one, and you have set up a router and done basic networking. If you are qualified for basic help desk or an entry-level IT position, even as someone working a retail or repair counter at a place like Micro Center or Geek Squad, you know enough to start here.
+
+If that is not you yet, that is fine: look at IT 101 level material first, including but not limited to the objectives of [CompTIA A+](https://www.comptia.org/en-us/certifications/a/), which is the certification most commonly associated with the minimum I am looking for you to know. This is not an endorsement of CompTIA or of any exam. It is just the benchmark people recognize, and it was checked as a public page on 2026-10-22. The primers here ([What is the cloud](What-Is-the-Cloud.md), [Networking basics](Networking-Basics-for-This-Project.md) and [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md)) are a bridge into the cloud and security side, not a substitute for knowing what a computer, a router or an IP address is.
+
 ## What this project actually is, in plain words
 
 If you want the reason behind the project before the detail, [Why this exists](Why-This-Exists.md) is a short side page about that. It is not a step in the path below.
@@ -81,4 +87,4 @@ I am not anti AI. [Scrum Around and Find Out](https://github.com/ChiefGyk3D/scru
 
 If something here is wrong, confusing or does not work on your computer, please tell me: [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md) shows how, and it costs nothing.
 
-Next: [What is the cloud](What-Is-the-Cloud.md), the first primer. Every path through the wiki is laid out on the [Reading order](Reading-Order.md) page.
+Next: [What is the cloud](What-Is-the-Cloud.md), the first primer. Every path through the wiki is laid out on the [Reading order](Reading-Order.md) page, and [Contents](Contents.md) lists every page once, grouped by theme.

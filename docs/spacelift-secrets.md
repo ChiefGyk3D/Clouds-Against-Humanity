@@ -303,9 +303,26 @@ Each message names the resource address (or the stack) and says what a human mus
 
 ### A deliberate exception
 
-A deliberate inbound rule is allowed only by a reviewed code change. Add the exact resource address, as the plan shows it (for example `module.fw.digitalocean_firewall.this`), to `inbound_allowlist` in `plan.rego`, in a pull request. Every entry needs a threat-model note (`docs/wiki/Threat-Model.md`) naming the port, the source and the reason, and a review. After the merge, paste the new body into Spacelift. There is no stack label, environment variable or plan field that grants an exception, on purpose: a branch must not be able to grant its own. The list is empty today. The IPv6 checks have no exception.
+A deliberate inbound rule is allowed only by a reviewed code change. The allowlists in `plan.rego` are maps keyed by **stack id**, then by resource address (as the plan shows it, for example `module.fw.digitalocean_firewall.this`) or by the name of a group of addresses. The stack id is `input.spacelift.stack.id`, the same object that carries the autodeploy setting. Keying by stack matters because an address is relative to its stack: when one module is reused in several stacks, each has a `module.service_host.digitalocean_firewall.this`, and an exception for one must not quietly cover the rest.
 
-A deliberate destroy works the same way, with its own list: add the exact resource address of the protected resource to `destroy_allowlist` in `plan.rego`, in a pull request that names the address and the reason, and paste the new body into Spacelift after the merge. The denial message says the same. Remove the entry once the change has applied, so the next plan is guarded again. Other addresses stay denied while one is allowlisted. The autodeploy guard has no exception: turn autodeploy off on the stack.
+Each `inbound_allowlist` entry says exactly what it allows, not "this firewall may be open":
+
+```rego
+inbound_allowlist := {"example-stack-id": {"module.service_host.digitalocean_firewall.this": [{
+	"direction": "inbound",
+	"protocol": "tcp",
+	"ports": ["5201"],
+	"sources": ["203.0.113.7/32"],
+}]}}
+```
+
+The rule must match every field: direction (only `inbound` is read today), protocol, port range (exact strings such as `5201` or `8000-8100`) and every source address the rule has. An entry for a rule open to the world names both `0.0.0.0/0` and `::/0`; an entry naming only one does not cover a rule that uses both, while a rule that uses only one of them is within an entry that names both. A rule that adds a droplet, load balancer or Kubernetes source is never covered. A firewall with two rules needs an entry for each rule that is not tag-scoped. AWS ingress rules are judged by the same entries (the sources are CIDR ranges); one rule with several ranges needs one entry that lists them all. `address_groups` names a set of addresses per stack so one entry can cover several resources there. A missing or unknown stack id, address, group or field allows nothing: the policy fails closed.
+
+Add an entry only when that service's stack is approved, in the same pull request, with a threat-model note (`docs/wiki/Threat-Model.md`) naming the stack, the port, the source and the reason, and a review. After the merge, paste the new body into Spacelift. There is no stack label, environment variable or plan field that grants an exception, on purpose: a branch must not be able to grant its own. All the lists are empty today. The IPv6 checks have no exception.
+
+A deliberate destroy works the same way. `destroy_allowlist` maps a stack id to a list of addresses or group names: add the protected resource under its stack, in a pull request that names the stack, the address and the reason, and paste the new body into Spacelift after the merge. The denial message says the same. Remove the entry once the change has applied, so the next plan is guarded again. Other addresses, and the same address in another stack, stay denied.
+
+Tearing down one whole service has a shortcut that is off until a stack opts in. List the stack id in `whole_service_teardown_stacks` (when that service's stack is approved) and a plan in that stack that **deletes** a `digitalocean_firewall` together with the droplet it protects needs no `destroy_allowlist` entry. "Protects" means the two share a target tag (other than `protected`) or the firewall names the droplet's id. A lone firewall delete, a replacement of either one, an unrelated droplet, and every other protected type are still denied. So is a firewall delete while any other droplet it still protects (by shared tag or listed id) is kept, replaced or created in the same plan, or when it lists a droplet id the plan does not delete. The autodeploy guard has no exception: turn autodeploy off on the stack.
 
 ### Reading a denial
 

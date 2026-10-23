@@ -125,6 +125,12 @@ TOP_SKIP_DIRS = frozenset({".git", ".venv", ".claude"})
 # Directories whose contents the gate must be able to read in full.
 GUARDED_TOP = frozenset({"stacks", "modules"})
 HCL_SUFFIXES = (".tf", ".tofu")
+# Learner labs (option L1 of the composable-labs design, approved 2026-10-22).
+# Files under this one top-level directory are still parsed for syntax, but
+# the resource-type allowlist, the count/for_each rule and the module-source
+# rules do not apply to them. It is not an approval and Spacelift never
+# applies anything here (see lab_file and docs/cost.md).
+LABS_DIR = "labs"
 JSON_SUFFIXES = (".tf.json", ".tofu.json")
 SITES_DIR = "stacks/sites"
 RESOURCE_KEY_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
@@ -987,6 +993,26 @@ def is_hidden(rel):
     return any(part.startswith(".") for part in Path(rel).parts)
 
 
+def lab_file(root, rel):
+    """True only for a file that really lives under <root>/labs.
+
+    The exemption is narrow on purpose: the first path component must be exactly
+    `labs` (case-sensitive, so `Labs` and `stacks/labs` are not), the path may
+    not contain `..`, and the real path of both the file and the labs directory
+    must sit inside the real repository root (so a symlinked labs/ or a symlink
+    leading from labs/ into stacks/ is not exempt).
+    """
+    parts = Path(rel).parts
+    if len(parts) < 2 or parts[0] != LABS_DIR or ".." in parts or Path(rel).is_absolute():
+        return False
+    real_root = os.path.realpath(root)
+    real_labs = os.path.realpath(os.path.join(real_root, LABS_DIR))
+    if real_labs != os.path.join(real_root, LABS_DIR):
+        return False
+    real_file = os.path.realpath(os.path.join(real_root, rel))
+    return real_file.startswith(real_labs + os.sep)
+
+
 def hcl_files(root):
     """Yield (rel, stripped text, error) for every *.tf and *.tofu file."""
     for rel in walk_repo(root)[0]:
@@ -1006,7 +1032,7 @@ def file_blocks(root):
     """Yield (rel, Block) for every readable block; unreadable files are skipped
     here and reported once by block_problems."""
     for rel, text, error in hcl_files(root):
-        if error:
+        if error or lab_file(root, rel):
             continue
         try:
             blocks = find_blocks(text)
@@ -1098,6 +1124,14 @@ def module_source_problem(root, rel, block):
         return None, (
             f"{rel}:{block.line}: module {block.labels[0]!r} source {source!r} is outside the repository "
             "once symlinks are resolved"
+        )
+    real_labs = Path(os.path.realpath(root), LABS_DIR)
+    if not lab_file(root, rel) and (
+        resolved.is_relative_to(real_labs) or target.split("/")[0] == LABS_DIR
+    ):
+        return None, (
+            f"{rel}:{block.line}: module {block.labels[0]!r} source {source!r} points into {LABS_DIR}/, "
+            "which the gate does not cost; a stack or module may not compose lab code"
         )
     return source, None
 
@@ -1332,6 +1366,8 @@ def block_problems(root):
         for block in blocks:
             if block.problem:
                 problems.append(f"{rel}:{block.line}: {block.problem}")
+            elif lab_file(root, rel):
+                continue  # syntax is checked above; the cost rules do not apply to labs/
             elif block.kind == "resource" and block.labels[0] in costed:
                 if block.labels[0] == "digitalocean_droplet":
                     problems += droplet_backup_problems(rel, block)

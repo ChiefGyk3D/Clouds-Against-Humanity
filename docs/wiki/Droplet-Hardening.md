@@ -18,25 +18,37 @@ The guiding idea is that the firewall should never be the only control. If a fir
 <summary>Diagram source (Mermaid)</summary>
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 25, "rankSpacing": 35, "padding": 8}}}%%
 flowchart TD
-    boot["Droplet boots<br/>tags already applied, firewall already enforcing"]:::cloud
-    users["Create cah-admin<br/>key only, no password, root disabled"]:::cloud
-    files["Write config files<br/>sshd drop-in, sysctl, apt, unattended-upgrades,<br/>connector.conf (0600 root), weekly update cron"]:::cloud
-    pkgs["apt update + upgrade<br/>install unattended-upgrades, chrony"]:::cloud
-    sys["sysctl --system<br/>sshd -t then restart ssh<br/>enable chrony"]:::cloud
-    key{"Twingate repo key<br/>fingerprint matches pin?"}:::warn
-    inst["Install twingate-connector<br/>enable --now"]:::cloud
-    act{"Service active?"}:::warn
-    retry["Wait 30 s, retry<br/>(up to 10 attempts)"]:::warn
-    fail["Fail loudly"]:::ext
-    log["Write /var/log/cah-connector-install.log<br/>(no token is read or printed)"]:::cloud
-    boot --> users --> files --> pkgs --> sys --> key
-    key -- "yes" --> inst --> act
-    key -- "no" --> retry
-    act -- "no" --> retry
-    retry -- "attempts left" --> key
-    retry -- "10 failures" --> fail --> log
-    act -- "yes" --> log
+    subgraph A["Identity and files"]
+        direction LR
+        boot["Droplet boots<br/>tags applied, firewall enforcing"]:::cloud
+        users["Create cah-admin<br/>key only, no password, root disabled"]:::cloud
+        files["Write config files<br/>sshd, sysctl, apt,<br/>connector.conf (0600 root),<br/>weekly update cron"]:::cloud
+        boot --> users --> files
+    end
+    subgraph B["Packages and sysctl"]
+        direction LR
+        pkgs["apt update + upgrade<br/>install unattended-upgrades, chrony"]:::cloud
+        sys["sysctl --system<br/>sshd -t then restart ssh<br/>enable chrony"]:::cloud
+        pkgs --> sys
+    end
+    subgraph C["Twingate install with retry"]
+        direction LR
+        key{"Key fingerprint<br/>matches pin?"}:::warn
+        inst["Install connector<br/>enable --now"]:::cloud
+        act{"Service active?"}:::warn
+        retry["Wait 30 s<br/>(10 tries)"]:::warn
+        fail["Fail loudly"]:::ext
+        log["Write install log<br/>(no token printed)"]:::cloud
+        key -- "yes" --> inst --> act
+        key -- "no" --> retry
+        act -- "no" --> retry
+        retry -- "attempts left" --> key
+        retry -- "none left" --> fail --> log
+        act -- "yes" --> log
+    end
+    A --> B --> C
 
     classDef ext fill:#3b1d1d,stroke:#f87171,color:#fde2e2
     classDef cloud fill:#0f2a3d,stroke:#38bdf8,color:#e0f2fe
@@ -121,7 +133,7 @@ What it does not prove: UDP (no reply there only means "open or filtered", so sp
 
 ## Not done yet
 
-- **Audit logging** (auditd, and shipping auth logs off the box). Planned for stage 2 alongside the SIEM link. What a log line is and what a rule does with it: [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md).
+- **Audit logging** (auditd, and shipping auth logs off the box; file integrity checking and the neighboring alerting tools are taught in [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md)). Planned for stage 2 alongside the SIEM link. What a log line is and what a rule does with it: [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md).
 - **A pinned package version source** for the connector, once Twingate documents one.
 
 These are listed in the [stage 1 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md) and on the [Threat model](Threat-Model.md) page, because a hardening page that only lists what was done is marketing.

@@ -1,0 +1,4041 @@
+{
+ "board": {
+  "items": [
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Learning and wiki",
+     "Epic": "Learning and wiki",
+     "Kind": "Lesson",
+     "Size": "M",
+     "Sprint": "S 5",
+     "Status": "Next"
+    },
+    "number": 21,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Multi-cloud",
+     "Epic": "Multi-cloud",
+     "Kind": "Lesson",
+     "Size": "XL",
+     "Sprint": "S 7",
+     "Status": "Backlog"
+    },
+    "number": 22,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Area": "Operations and gates",
+     "Epic": "Operations and gates",
+     "Kind": "Epic",
+     "Status": "Next"
+    },
+    "number": 68,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Area": "Stage 1 hardening",
+     "Epic": "Stage 1 hardening",
+     "Kind": "Epic",
+     "Status": "Next"
+    },
+    "number": 69,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Area": "Stage 2 telemetry",
+     "Epic": "Stage 2 telemetry",
+     "Kind": "Epic",
+     "Status": "Backlog"
+    },
+    "number": 70,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Area": "Stage 3 workloads",
+     "Epic": "Stage 3 workloads",
+     "Kind": "Epic",
+     "Status": "Backlog"
+    },
+    "number": 71,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Area": "Edge and DMZ",
+     "Epic": "Edge and DMZ",
+     "Kind": "Epic",
+     "Status": "Backlog"
+    },
+    "number": 72,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Area": "Multi-cloud",
+     "Epic": "Multi-cloud",
+     "Kind": "Epic",
+     "Status": "Backlog"
+    },
+    "number": 73,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Area": "Learning and wiki",
+     "Epic": "Learning and wiki",
+     "Kind": "Epic",
+     "Status": "Backlog"
+    },
+    "number": 74,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Area": "Process",
+     "Epic": "Process",
+     "Kind": "Epic",
+     "Status": "Next"
+    },
+    "number": 75,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Operations and gates",
+     "Epic": "Operations and gates",
+     "Kind": "Chore",
+     "Size": "S",
+     "Sprint": "S 1",
+     "Status": "Blocked"
+    },
+    "number": 76,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Operations and gates",
+     "Epic": "Operations and gates",
+     "Kind": "Chore",
+     "Size": "M",
+     "Sprint": "S 1",
+     "Status": "Blocked"
+    },
+    "number": 77,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Operations and gates",
+     "Epic": "Operations and gates",
+     "Kind": "Chore",
+     "Size": "S",
+     "Sprint": "S 1",
+     "Status": "Blocked"
+    },
+    "number": 78,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Operations and gates",
+     "Epic": "Operations and gates",
+     "Kind": "Chore",
+     "Size": "S",
+     "Sprint": "S 2",
+     "Status": "Next"
+    },
+    "number": 79,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Operations and gates",
+     "Epic": "Operations and gates",
+     "Kind": "Chore",
+     "Size": "S",
+     "Sprint": "S 2",
+     "Status": "Done"
+    },
+    "number": 80,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Operations and gates",
+     "Epic": "Operations and gates",
+     "Kind": "Chore",
+     "Size": "S",
+     "Sprint": "S 2",
+     "Status": "Blocked"
+    },
+    "number": 81,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Operations and gates",
+     "Epic": "Operations and gates",
+     "Kind": "Decision",
+     "Size": "S",
+     "Sprint": "S 3",
+     "Status": "Next"
+    },
+    "number": 82,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Operations and gates",
+     "Epic": "Operations and gates",
+     "Kind": "Chore",
+     "Size": "S",
+     "Sprint": "S 3",
+     "Status": "Next"
+    },
+    "number": 83,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Operations and gates",
+     "Epic": "Operations and gates",
+     "Kind": "Chore",
+     "Size": "S",
+     "Sprint": "S 6",
+     "Status": "Next"
+    },
+    "number": 84,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Operations and gates",
+     "Epic": "Operations and gates",
+     "Kind": "Chore",
+     "Size": "S",
+     "Sprint": "S 7",
+     "Status": "Blocked"
+    },
+    "number": 85,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Operations and gates",
+     "Epic": "Operations and gates",
+     "Kind": "Chore",
+     "Size": "M",
+     "Sprint": "S 6",
+     "Status": "Backlog"
+    },
+    "number": 86,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 1 hardening",
+     "Epic": "Stage 1 hardening",
+     "Kind": "Feature",
+     "Size": "S",
+     "Sprint": "S 1",
+     "Status": "Done"
+    },
+    "number": 87,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 1 hardening",
+     "Epic": "Stage 1 hardening",
+     "Kind": "Feature",
+     "Size": "M",
+     "Sprint": "S 3",
+     "Status": "Done"
+    },
+    "number": 88,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 1 hardening",
+     "Epic": "Stage 1 hardening",
+     "Kind": "Feature",
+     "Size": "S",
+     "Sprint": "S 3",
+     "Status": "Done"
+    },
+    "number": 89,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 1 hardening",
+     "Epic": "Stage 1 hardening",
+     "Kind": "Feature",
+     "Size": "L",
+     "Sprint": "S 4",
+     "Status": "Done"
+    },
+    "number": 90,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 1 hardening",
+     "Epic": "Stage 1 hardening",
+     "Kind": "Feature",
+     "Size": "M",
+     "Sprint": "S 5",
+     "Status": "Next"
+    },
+    "number": 91,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 1 hardening",
+     "Epic": "Stage 1 hardening",
+     "Kind": "Feature",
+     "Size": "M",
+     "Status": "Done"
+    },
+    "number": 92,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 1 hardening",
+     "Epic": "Stage 1 hardening",
+     "Kind": "Chore",
+     "Size": "M",
+     "Sprint": "S 2",
+     "Status": "Backlog"
+    },
+    "number": 93,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Stage 1 hardening",
+     "Epic": "Stage 1 hardening",
+     "Kind": "Chore",
+     "Size": "S",
+     "Sprint": "S 6",
+     "Status": "Next"
+    },
+    "number": 94,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 2 telemetry",
+     "Epic": "Stage 2 telemetry",
+     "Kind": "Feature",
+     "Size": "M",
+     "Sprint": "S 3",
+     "Status": "Backlog"
+    },
+    "number": 95,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 1 hardening",
+     "Epic": "Stage 1 hardening",
+     "Kind": "Feature",
+     "Size": "L",
+     "Sprint": "S 3",
+     "Status": "Backlog"
+    },
+    "number": 96,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Stage 2 telemetry",
+     "Epic": "Stage 2 telemetry",
+     "Kind": "Chore",
+     "Size": "M",
+     "Sprint": "S 6",
+     "Status": "Next"
+    },
+    "number": 97,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Stage 2 telemetry",
+     "Epic": "Stage 2 telemetry",
+     "Kind": "Chore",
+     "Size": "S",
+     "Sprint": "S 7",
+     "Status": "Next"
+    },
+    "number": 98,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 2 telemetry",
+     "Epic": "Stage 2 telemetry",
+     "Kind": "Feature",
+     "Size": "S",
+     "Sprint": "S 7",
+     "Status": "Done"
+    },
+    "number": 99,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 2 telemetry",
+     "Epic": "Stage 2 telemetry",
+     "Kind": "Feature",
+     "Size": "M",
+     "Sprint": "S 7",
+     "Status": "Next"
+    },
+    "number": 100,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 2 telemetry",
+     "Epic": "Stage 2 telemetry",
+     "Kind": "Feature",
+     "Size": "L",
+     "Sprint": "S 8",
+     "Status": "Next"
+    },
+    "number": 101,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 2 telemetry",
+     "Epic": "Stage 2 telemetry",
+     "Kind": "Feature",
+     "Size": "L",
+     "Sprint": "S 4",
+     "Status": "Backlog"
+    },
+    "number": 102,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 2 telemetry",
+     "Epic": "Stage 2 telemetry",
+     "Kind": "Feature",
+     "Size": "L",
+     "Sprint": "S 3",
+     "Status": "Backlog"
+    },
+    "number": 103,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 2 telemetry",
+     "Epic": "Stage 2 telemetry",
+     "Kind": "Feature",
+     "Size": "M",
+     "Sprint": "S 2",
+     "Status": "Backlog"
+    },
+    "number": 104,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Stage 2 telemetry",
+     "Epic": "Stage 2 telemetry",
+     "Kind": "Chore",
+     "Size": "S",
+     "Sprint": "S 3",
+     "Status": "Backlog"
+    },
+    "number": 105,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Docs",
+     "Epic": "Stage 2 telemetry",
+     "Kind": "Docs",
+     "Size": "M",
+     "Sprint": "S 2",
+     "Status": "Backlog"
+    },
+    "number": 106,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Stage 3 workloads",
+     "Epic": "Stage 3 workloads",
+     "Kind": "Decision",
+     "Size": "S",
+     "Sprint": "S 2",
+     "Status": "Next"
+    },
+    "number": 107,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Stage 3 workloads",
+     "Epic": "Stage 3 workloads",
+     "Kind": "Decision",
+     "Size": "S",
+     "Sprint": "S 4",
+     "Status": "Backlog"
+    },
+    "number": 108,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Stage 3 workloads",
+     "Epic": "Stage 3 workloads",
+     "Kind": "Decision",
+     "Size": "S",
+     "Sprint": "S 3",
+     "Status": "Backlog"
+    },
+    "number": 109,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 3 workloads",
+     "Epic": "Stage 3 workloads",
+     "Kind": "Chore",
+     "Size": "S",
+     "Sprint": "S 4",
+     "Status": "Done"
+    },
+    "number": 110,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 3 workloads",
+     "Epic": "Stage 3 workloads",
+     "Kind": "Feature",
+     "Size": "L",
+     "Sprint": "S 4",
+     "Status": "Backlog"
+    },
+    "number": 111,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 3 workloads",
+     "Epic": "Stage 3 workloads",
+     "Kind": "Feature",
+     "Size": "M",
+     "Sprint": "S 4",
+     "Status": "Backlog"
+    },
+    "number": 112,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 3 workloads",
+     "Epic": "Stage 3 workloads",
+     "Kind": "Feature",
+     "Size": "L",
+     "Sprint": "S 3",
+     "Status": "Backlog"
+    },
+    "number": 113,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 3 workloads",
+     "Epic": "Stage 3 workloads",
+     "Kind": "Feature",
+     "Size": "XL",
+     "Sprint": "S 5",
+     "Status": "Backlog"
+    },
+    "number": 114,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 3 workloads",
+     "Epic": "Stage 3 workloads",
+     "Kind": "Feature",
+     "Size": "L",
+     "Sprint": "S 5",
+     "Status": "Backlog"
+    },
+    "number": 115,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 3 workloads",
+     "Epic": "Stage 3 workloads",
+     "Kind": "Feature",
+     "Size": "XL",
+     "Sprint": "S 6",
+     "Status": "Backlog"
+    },
+    "number": 116,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Stage 3 workloads",
+     "Epic": "Stage 3 workloads",
+     "Kind": "Chore",
+     "Size": "S",
+     "Status": "Done"
+    },
+    "number": 117,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Edge and DMZ",
+     "Epic": "Edge and DMZ",
+     "Kind": "Decision",
+     "Size": "L",
+     "Sprint": "S 2",
+     "Status": "Backlog"
+    },
+    "number": 118,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Docs",
+     "Epic": "Edge and DMZ",
+     "Kind": "Docs",
+     "Size": "S",
+     "Status": "Done"
+    },
+    "number": 119,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Edge and DMZ",
+     "Epic": "Edge and DMZ",
+     "Kind": "Decision",
+     "Size": "M",
+     "Sprint": "S 2",
+     "Status": "Backlog"
+    },
+    "number": 120,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Edge and DMZ",
+     "Epic": "Edge and DMZ",
+     "Kind": "Decision",
+     "Size": "L",
+     "Sprint": "S 2",
+     "Status": "Backlog"
+    },
+    "number": 121,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Edge and DMZ",
+     "Epic": "Edge and DMZ",
+     "Kind": "Feature",
+     "Size": "XL",
+     "Sprint": "S 6",
+     "Status": "Backlog"
+    },
+    "number": 122,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Multi-cloud",
+     "Epic": "Multi-cloud",
+     "Kind": "Chore",
+     "Size": "L",
+     "Sprint": "S 5",
+     "Status": "Backlog"
+    },
+    "number": 123,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Multi-cloud",
+     "Epic": "Multi-cloud",
+     "Kind": "Chore",
+     "Size": "S",
+     "Sprint": "S 6",
+     "Status": "Backlog"
+    },
+    "number": 124,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Multi-cloud",
+     "Epic": "Multi-cloud",
+     "Kind": "Feature",
+     "Size": "XL",
+     "Sprint": "S 7",
+     "Status": "Backlog"
+    },
+    "number": 125,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Multi-cloud",
+     "Epic": "Multi-cloud",
+     "Kind": "Feature",
+     "Size": "XL",
+     "Sprint": "S 8",
+     "Status": "Backlog"
+    },
+    "number": 126,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Multi-cloud",
+     "Epic": "Multi-cloud",
+     "Kind": "Feature",
+     "Size": "L",
+     "Sprint": "S 7",
+     "Status": "Backlog"
+    },
+    "number": 127,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Learning and wiki",
+     "Epic": "Learning and wiki",
+     "Kind": "Feature",
+     "Size": "M",
+     "Sprint": "S 4",
+     "Status": "Done"
+    },
+    "number": 128,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Docs",
+     "Epic": "Learning and wiki",
+     "Kind": "Docs",
+     "Size": "S",
+     "Status": "Done"
+    },
+    "number": 129,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Docs",
+     "Epic": "Learning and wiki",
+     "Kind": "Docs",
+     "Size": "M",
+     "Sprint": "S 1",
+     "Status": "Backlog"
+    },
+    "number": 130,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Process",
+     "Epic": "Process",
+     "Kind": "Chore",
+     "Size": "M",
+     "Sprint": "S 1",
+     "Status": "Done"
+    },
+    "number": 131,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Docs",
+     "Epic": "Process",
+     "Kind": "Docs",
+     "Size": "M",
+     "Sprint": "S 1",
+     "Status": "Done"
+    },
+    "number": 132,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Process",
+     "Epic": "Process",
+     "Kind": "Chore",
+     "Size": "S",
+     "Sprint": "S 2",
+     "Status": "Next"
+    },
+    "number": 133,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "You",
+     "Area": "Process",
+     "Epic": "Process",
+     "Kind": "Chore",
+     "Size": "S",
+     "Sprint": "S 1",
+     "Status": "Next"
+    },
+    "number": 134,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Learning and wiki",
+     "Epic": "Learning and wiki",
+     "Kind": "Feature",
+     "Size": "M",
+     "Sprint": "S 1",
+     "Status": "Done"
+    },
+    "number": 149,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   },
+   {
+    "fields": {
+     "Agent": "Claude",
+     "Area": "Learning and wiki",
+     "Epic": "Learning and wiki",
+     "Kind": "Lesson",
+     "Size": "XL",
+     "Sprint": "S 1",
+     "Status": "In progress"
+    },
+    "number": 178,
+    "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+    "type": "Issue"
+   }
+  ],
+  "total": 71
+ },
+ "fetched_at": "2026-10-22T23:06:29Z",
+ "issues": [
+  {
+   "closedAt": "2026-10-22T23:02:26Z",
+   "createdAt": "2026-10-15T15:47:56Z",
+   "labels": [
+    "documentation",
+    "enhancement"
+   ],
+   "number": 21,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Expand GitHub Lessons"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-15T15:50:33Z",
+   "labels": [
+    "documentation",
+    "enhancement"
+   ],
+   "number": 22,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "AWS, Azure, and GCP Lessons"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:31:07Z",
+   "labels": [
+    "epic",
+    "ops-gate"
+   ],
+   "number": 68,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Epic: operations and gates"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:31:16Z",
+   "labels": [
+    "epic",
+    "hardening"
+   ],
+   "number": 69,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Epic: stage 1 hardening"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:31:24Z",
+   "labels": [
+    "epic",
+    "stage-2"
+   ],
+   "number": 70,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Epic: stage 2 telemetry"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:31:33Z",
+   "labels": [
+    "epic",
+    "stage-3"
+   ],
+   "number": 71,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Epic: stage 3 workloads"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:31:42Z",
+   "labels": [
+    "edge",
+    "epic"
+   ],
+   "number": 72,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Epic: edge and DMZ"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:31:51Z",
+   "labels": [
+    "epic",
+    "multi-cloud"
+   ],
+   "number": 73,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Epic: multi-cloud"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:32:00Z",
+   "labels": [
+    "epic",
+    "learning"
+   ],
+   "number": 74,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Epic: learning and wiki"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:32:09Z",
+   "labels": [
+    "epic",
+    "process"
+   ],
+   "number": 75,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Epic: process"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:32:19Z",
+   "labels": [
+    "needs-maintainer",
+    "ops-gate"
+   ],
+   "number": 76,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Check whether Spacelift's AWS integration is on the current plan"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:32:30Z",
+   "labels": [
+    "needs-maintainer",
+    "ops-gate"
+   ],
+   "number": 77,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Unlock the stacks and read the first tracked plans"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:32:40Z",
+   "labels": [
+    "needs-maintainer",
+    "ops-gate"
+   ],
+   "number": 78,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Confirm the Twingate API key expiry and put every secret expiry on a calendar"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:32:53Z",
+   "labels": [
+    "ops-gate"
+   ],
+   "number": 79,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Verify the Twingate plan limit on service accounts"
+  },
+  {
+   "closedAt": "2026-10-21T13:39:56Z",
+   "createdAt": "2026-10-17T14:33:06Z",
+   "labels": [
+    "ops-gate"
+   ],
+   "number": 80,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Verify Doppler short-lived token options for Spacelift runs"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:33:18Z",
+   "labels": [
+    "needs-maintainer",
+    "ops-gate"
+   ],
+   "number": 81,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Skim the live wiki: images render, diagrams are readable, Reading Order works"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:33:28Z",
+   "labels": [
+    "needs-maintainer",
+    "ops-gate"
+   ],
+   "number": 82,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Review the per-phase cost ceilings in docs/stages/approved.json"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:33:39Z",
+   "labels": [
+    "needs-maintainer",
+    "ops-gate"
+   ],
+   "number": 83,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Verify and delete unused Doppler secrets"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:33:49Z",
+   "labels": [
+    "needs-maintainer",
+    "ops-gate"
+   ],
+   "number": 84,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Rotate the DigitalOcean and Doppler tokens before 2027-01-08"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:34:01Z",
+   "labels": [
+    "ops-gate"
+   ],
+   "number": 85,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Update the pinned Twingate apt signing key fingerprint before it expires"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:34:12Z",
+   "labels": [
+    "needs-maintainer",
+    "ops-gate"
+   ],
+   "number": 86,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Attach the Spacelift push policy once the plan allows it"
+  },
+  {
+   "closedAt": "2026-10-17T20:26:30Z",
+   "createdAt": "2026-10-17T14:34:22Z",
+   "labels": [
+    "hardening"
+   ],
+   "number": 87,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Restrict the droplet metadata endpoint to root"
+  },
+  {
+   "closedAt": "2026-10-17T21:02:02Z",
+   "createdAt": "2026-10-17T14:34:33Z",
+   "labels": [
+    "hardening"
+   ],
+   "number": 88,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Plan policy that denies inbound rules on core tags"
+  },
+  {
+   "closedAt": "2026-10-17T20:57:23Z",
+   "createdAt": "2026-10-17T14:34:44Z",
+   "labels": [
+    "hardening"
+   ],
+   "number": 89,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "IPv6 exposure check"
+  },
+  {
+   "closedAt": "2026-10-17T21:47:07Z",
+   "createdAt": "2026-10-17T14:34:54Z",
+   "labels": [
+    "hardening"
+   ],
+   "number": 90,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Default-drop host firewall (nftables) on the core droplets"
+  },
+  {
+   "closedAt": "2026-10-22T23:02:10Z",
+   "createdAt": "2026-10-17T14:35:05Z",
+   "labels": [
+    "hardening"
+   ],
+   "number": 91,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "External zero-open-ports check"
+  },
+  {
+   "closedAt": "2026-10-17T21:23:05Z",
+   "createdAt": "2026-10-17T14:35:16Z",
+   "labels": [
+    "hardening"
+   ],
+   "number": 92,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Plan policies: destroy guard and autodeploy guard"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:35:25Z",
+   "labels": [
+    "hardening"
+   ],
+   "number": 93,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Optional: upgrade the Twingate provider from 3.x to 4.x or 5.x"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:35:36Z",
+   "labels": [
+    "hardening",
+    "needs-maintainer"
+   ],
+   "number": 94,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "First-run checks: log masking and the runner image"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:35:47Z",
+   "labels": [
+    "stage-2"
+   ],
+   "number": 95,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Audit logging on the droplets"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:35:58Z",
+   "labels": [
+    "hardening"
+   ],
+   "number": 96,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Create the private spacelift-stack-factory repository and adopt cah-00 by import"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:36:08Z",
+   "labels": [
+    "needs-maintainer",
+    "stage-2"
+   ],
+   "number": 97,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Home side: connector VLAN and firewall allow-list with a negative reachability test"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:36:18Z",
+   "labels": [
+    "needs-maintainer",
+    "stage-2"
+   ],
+   "number": 98,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Create the cah-20-telemetry Spacelift stack, locked, with the cah label"
+  },
+  {
+   "closedAt": "2026-10-20T04:23:38Z",
+   "createdAt": "2026-10-17T14:36:30Z",
+   "labels": [
+    "stage-2"
+   ],
+   "number": 99,
+   "state": "CLOSED",
+   "stateReason": "NOT_PLANNED",
+   "title": "Connector firewall rules for the metrics port"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:36:41Z",
+   "labels": [
+    "stage-2"
+   ],
+   "number": 100,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Enable connector telemetry one connector at a time"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:36:52Z",
+   "labels": [
+    "stage-2"
+   ],
+   "number": 101,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Prometheus scrapes the cloud connectors through a headless Twingate client"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:37:03Z",
+   "labels": [
+    "stage-2"
+   ],
+   "number": 102,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Wazuh agents push droplet logs home over a second service account"
+  },
+  {
+   "closedAt": "2026-10-22T23:02:24Z",
+   "createdAt": "2026-10-17T14:37:13Z",
+   "labels": [
+    "stage-2"
+   ],
+   "number": 103,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Home Grafana dashboards that work across sites (site label)"
+  },
+  {
+   "closedAt": "2026-10-22T23:02:22Z",
+   "createdAt": "2026-10-17T14:37:22Z",
+   "labels": [
+    "stage-2"
+   ],
+   "number": 104,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Per-site Twingate service accounts and TLS on the telemetry path"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:37:32Z",
+   "labels": [
+    "needs-maintainer",
+    "stage-2"
+   ],
+   "number": 105,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Confirm end to end, then add notes to siem-docker-stack"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:37:42Z",
+   "labels": [
+    "stage-2"
+   ],
+   "number": 106,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Stage 2 guide: verification section and wiki update"
+  },
+  {
+   "closedAt": "2026-10-22T21:48:40Z",
+   "createdAt": "2026-10-17T14:37:51Z",
+   "labels": [
+    "needs-maintainer",
+    "stage-3"
+   ],
+   "number": 107,
+   "state": "CLOSED",
+   "stateReason": "NOT_PLANNED",
+   "title": "Follow up with etke.cc on how the homeserver reaches a self-hosted bridge"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:38:03Z",
+   "labels": [
+    "needs-maintainer",
+    "stage-3"
+   ],
+   "number": 108,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Decide the Discord-to-Matrix bridge: self-host mautrix-discord or use etke.cc's"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:38:12Z",
+   "labels": [
+    "needs-maintainer",
+    "stage-3"
+   ],
+   "number": 109,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Approve the stage 3 cost and make stage-3 the current phase"
+  },
+  {
+   "closedAt": "2026-10-21T13:42:57Z",
+   "createdAt": "2026-10-17T14:38:23Z",
+   "labels": [
+    "stage-3"
+   ],
+   "number": 110,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Check droplet sizes and prices available in tor1 for the workload host"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:38:31Z",
+   "labels": [
+    "stage-3"
+   ],
+   "number": 111,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Workload stack: droplet, firewall and Twingate resources"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:38:40Z",
+   "labels": [
+    "stage-3"
+   ],
+   "number": 112,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Portainer CE: hardening and a check of git-stack behaviour"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:38:49Z",
+   "labels": [
+    "stage-3"
+   ],
+   "number": 113,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Spaces bucket with versioning and the state backend for the daemons"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:38:58Z",
+   "labels": [
+    "stage-3"
+   ],
+   "number": 114,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Cloud-optimized install for the five daemons (run-once mode, bucket state)"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:39:07Z",
+   "labels": [
+    "stage-3"
+   ],
+   "number": 115,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Functions for the timer jobs (penguin-overlord runners, solarstorm_scout)"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:39:16Z",
+   "labels": [
+    "stage-3"
+   ],
+   "number": 116,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "mautrix-discord with Postgres and a nightly dump to the bucket, restore tested"
+  },
+  {
+   "closedAt": "2026-10-19T20:32:12Z",
+   "createdAt": "2026-10-17T14:39:25Z",
+   "labels": [
+    "stage-3"
+   ],
+   "number": 117,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Mark the backups fraction verified in the price table"
+  },
+  {
+   "closedAt": "2026-10-22T23:02:12Z",
+   "createdAt": "2026-10-17T14:39:35Z",
+   "labels": [
+    "edge"
+   ],
+   "number": 118,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Edge design document with costed options"
+  },
+  {
+   "closedAt": "2026-10-21T13:42:57Z",
+   "createdAt": "2026-10-17T14:39:45Z",
+   "labels": [
+    "edge"
+   ],
+   "number": 119,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Wiki page: Why not private droplets (yet)"
+  },
+  {
+   "closedAt": "2026-10-22T23:02:15Z",
+   "createdAt": "2026-10-17T14:39:54Z",
+   "labels": [
+    "edge"
+   ],
+   "number": 120,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Honeypot design document (separate account, never in this apply path)"
+  },
+  {
+   "closedAt": "2026-10-22T23:02:17Z",
+   "createdAt": "2026-10-17T14:40:03Z",
+   "labels": [
+    "edge"
+   ],
+   "number": 121,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "PeerTube: costed stage design"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:40:13Z",
+   "labels": [
+    "edge"
+   ],
+   "number": 122,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "DMZ stack implementation"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:40:25Z",
+   "labels": [
+    "multi-cloud",
+    "needs-maintainer"
+   ],
+   "number": 123,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Throwaway AWS account (root MFA, budget first) and one real apply"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:40:35Z",
+   "labels": [
+    "multi-cloud",
+    "needs-maintainer"
+   ],
+   "number": 124,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Recruit Azure and GCP reviewers for the lessons"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:40:53Z",
+   "labels": [
+    "multi-cloud"
+   ],
+   "number": 125,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Azure modules and stacks with mocked tests"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:41:03Z",
+   "labels": [
+    "multi-cloud"
+   ],
+   "number": 126,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "GCP modules and stacks with mocked tests"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:41:12Z",
+   "labels": [
+    "multi-cloud"
+   ],
+   "number": 127,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Move the stage 3 timer jobs to AWS Lambda with scheduled triggers"
+  },
+  {
+   "closedAt": "2026-10-19T20:33:00Z",
+   "createdAt": "2026-10-17T14:41:22Z",
+   "labels": [
+    "learning"
+   ],
+   "number": 128,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Synthetic Grafana and Prometheus demo lab (labs/demo-monitoring)"
+  },
+  {
+   "closedAt": "2026-10-21T16:20:56Z",
+   "createdAt": "2026-10-17T14:41:32Z",
+   "labels": [
+    "learning"
+   ],
+   "number": 129,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Teardown page extras"
+  },
+  {
+   "closedAt": "2026-10-22T23:02:19Z",
+   "createdAt": "2026-10-17T14:41:41Z",
+   "labels": [
+    "learning"
+   ],
+   "number": 130,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Accessibility pass on the wiki (alt text, contrast, plain language)"
+  },
+  {
+   "closedAt": "2026-10-17T14:42:52Z",
+   "createdAt": "2026-10-17T14:41:50Z",
+   "labels": [
+    "process"
+   ],
+   "number": 131,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Set up the project board, labels, milestones and backlog"
+  },
+  {
+   "closedAt": "2026-10-17T20:08:42Z",
+   "createdAt": "2026-10-17T14:42:01Z",
+   "labels": [
+    "process"
+   ],
+   "number": 132,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Write the planning page: cadence, definition of done, sizes, agents, labels"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:42:12Z",
+   "labels": [
+    "needs-maintainer",
+    "process"
+   ],
+   "number": 133,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Keep the board current: a scheduled safo reconcile from the maintainer's login"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-17T14:42:23Z",
+   "labels": [
+    "needs-maintainer",
+    "process"
+   ],
+   "number": 134,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Sprint 1 review and re-plan"
+  },
+  {
+   "closedAt": "2026-10-18T03:09:00Z",
+   "createdAt": "2026-10-18T02:26:25Z",
+   "labels": [
+    "stage-2"
+   ],
+   "number": 149,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Ship Grafana dashboards in this repository (site-aware, modelled on the SIEM stacks)"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-21T19:34:22Z",
+   "labels": [
+    "documentation",
+    "enhancement",
+    "learning"
+   ],
+   "number": 178,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Honeypots/HoneyNet"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-21T23:22:22Z",
+   "labels": [
+    "documentation"
+   ],
+   "number": 196,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Check the DigitalOcean firewall docs: deny rules and rule precedence"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-22T19:32:40Z",
+   "labels": [
+    "documentation"
+   ],
+   "number": 214,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Mirror the Hammunition board layout and backfill every shipped and planned item (no hidden work)"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-22T19:45:58Z",
+   "labels": [
+    "documentation"
+   ],
+   "number": 221,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Security tools basics track: red and blue as yin and yang, Kali versus Parrot, Nmap, OpenVAS, Burp CE, Metasploit (basics only)"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-22T20:53:56Z",
+   "labels": [
+    "documentation"
+   ],
+   "number": 226,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Verify every lesson end to end: local exercises, then Spacelift scratch stacks, then optional cloud tiers, each torn down"
+  },
+  {
+   "closedAt": "2026-10-22T21:38:09Z",
+   "createdAt": "2026-10-22T21:01:29Z",
+   "labels": [
+    "documentation"
+   ],
+   "number": 227,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Start Here: say plainly that gaps are deliberate and AI is a tool, not a crutch"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-22T21:05:24Z",
+   "labels": [
+    "documentation"
+   ],
+   "number": 229,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Network and host defense track: packet filters, IDS/IPS, file integrity and alerting, rate limiting at every layer"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-22T21:15:15Z",
+   "labels": [
+    "documentation"
+   ],
+   "number": 230,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Explain security through obscurity honestly, and audit every page that suggests changing a port"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-22T21:19:20Z",
+   "labels": [
+    "documentation"
+   ],
+   "number": 232,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "First hour on a new system: updates, automatic updates and a baseline before anything else, on every OS"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-22T21:22:28Z",
+   "labels": [
+    "documentation"
+   ],
+   "number": 235,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Switch the cloud-init auditd rules from the deprecated -w form to -a rules (and regenerate the golden hashes)"
+  },
+  {
+   "closedAt": "2026-10-22T23:04:20Z",
+   "createdAt": "2026-10-22T21:25:19Z",
+   "labels": [
+    "documentation"
+   ],
+   "number": 236,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Secrets from day one: password manager, Doppler for every asset, .env rules, scanning and leak response"
+  },
+  {
+   "closedAt": "2026-10-22T22:41:05Z",
+   "createdAt": "2026-10-22T21:32:02Z",
+   "labels": [
+    "documentation"
+   ],
+   "number": 239,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Behind a CDN: real client IPs, why an IP is a weak identifier, OSI basics, and links to the on-prem SIEM stacks"
+  },
+  {
+   "closedAt": "2026-10-22T22:18:29Z",
+   "createdAt": "2026-10-22T21:35:12Z",
+   "labels": [
+    "bug"
+   ],
+   "number": 241,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Flaky test: test_proxy_forwards_loopback_and_refuses_everything_else in the S2 lesson tests"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-22T21:38:21Z",
+   "labels": [
+    "documentation"
+   ],
+   "number": 243,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Cross-tenant data flows, data governance and retention, and email and network DLP"
+  },
+  {
+   "closedAt": "2026-10-22T22:47:16Z",
+   "createdAt": "2026-10-22T21:41:22Z",
+   "labels": [
+    "enhancement"
+   ],
+   "number": 245,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Firewall module: address-aware extra outbound rules (prerequisite for the edge iperf3 egress rule)"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-22T21:41:28Z",
+   "labels": [
+    "enhancement"
+   ],
+   "number": 246,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Plan policy: allowlists keyed by stack id plus resource address, with per-entry direction, ports and source or destination scope"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-22T21:41:34Z",
+   "labels": [
+    "enhancement"
+   ],
+   "number": 247,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Rework the DMZ draft (#206) to the eleven DMZ rulings"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-22T21:41:38Z",
+   "labels": [
+    "documentation"
+   ],
+   "number": 248,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Verify Droplet Console and root password behavior on a throwaway droplet before the first edge droplet"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-22T21:43:16Z",
+   "labels": [
+    "documentation"
+   ],
+   "number": 249,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Wiki navigation: reorganize the sidebar, add a dedicated Contents page, and clean up"
+  },
+  {
+   "closedAt": "2026-10-22T22:36:35Z",
+   "createdAt": "2026-10-22T21:44:16Z",
+   "labels": [
+    "enhancement"
+   ],
+   "number": 250,
+   "state": "CLOSED",
+   "stateReason": "COMPLETED",
+   "title": "Cost gate: skip labs/ for the resource-type allowlist, still check syntax (option L1)"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-22T21:47:52Z",
+   "labels": [
+    "enhancement"
+   ],
+   "number": 253,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Plan policy: evaluate outbound firewall rules (world-open egress) once the firewall module is address-aware"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-22T21:49:06Z",
+   "labels": [
+    "documentation"
+   ],
+   "number": 254,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Remove the self-hosted Discord-to-Matrix bridge from the stage 3 plan (etke.cc hosts it)"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-22T23:03:02Z",
+   "labels": [
+    "documentation"
+   ],
+   "number": 259,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Project status page: one wiki page regenerated from SAFO's audit, so where we are is always visible"
+  },
+  {
+   "closedAt": null,
+   "createdAt": "2026-10-22T23:03:06Z",
+   "labels": [
+    "bug"
+   ],
+   "number": 260,
+   "state": "OPEN",
+   "stateReason": "",
+   "title": "Sweep every lab and lesson snippet for predictable shared temp paths and unsafe pid or kill handling"
+  }
+ ],
+ "project": {
+  "number": 4,
+  "owner": "ChiefGyk3D"
+ },
+ "prs": [
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-10T21:10:55Z",
+   "headRefName": "spacelift-doppler-hook",
+   "isDraft": false,
+   "mergedAt": "2026-10-10T21:14:24Z",
+   "number": 1,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat: load Doppler secrets into Spacelift runs"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-10T21:24:24Z",
+   "headRefName": "docs-trust-boundary",
+   "isDraft": false,
+   "mergedAt": "2026-10-10T21:36:38Z",
+   "number": 2,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: state where the secrets trust boundary actually is"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-10T21:29:27Z",
+   "headRefName": "stage1-two-connectors",
+   "isDraft": false,
+   "mergedAt": "2026-10-10T21:36:46Z",
+   "number": 3,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat: two Twingate connectors sharing one site"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-10T21:47:53Z",
+   "headRefName": "connector-hardening",
+   "isDraft": false,
+   "mergedAt": "2026-10-10T21:51:39Z",
+   "number": 4,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "fix: reuse the existing SSH key; harden the connector droplets"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-10T22:13:34Z",
+   "headRefName": "connector-rebuild",
+   "isDraft": false,
+   "mergedAt": "2026-10-10T22:18:17Z",
+   "number": 5,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "fix: retry the connector install, open outbound UDP, run on Eastern time"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-10T22:51:21Z",
+   "headRefName": "connector-stdin-fix",
+   "isDraft": false,
+   "mergedAt": "2026-10-10T22:53:23Z",
+   "number": 6,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "fix: install the connector the way Twingate's own Terraform does"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-10T23:11:23Z",
+   "headRefName": "connector-peer-ssh",
+   "isDraft": false,
+   "mergedAt": "2026-10-10T23:14:06Z",
+   "number": 7,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "fix: let the connectors reach each other's SSH inside the VPC"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-10T23:19:13Z",
+   "headRefName": "connector-peer-ssh-outbound",
+   "isDraft": false,
+   "mergedAt": "2026-10-10T23:21:46Z",
+   "number": 8,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "fix: let each connector open SSH to the other (outbound rule)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-11T00:24:19Z",
+   "headRefName": "docs/wiki-and-ztna",
+   "isDraft": false,
+   "mergedAt": "2026-10-11T00:25:43Z",
+   "number": 9,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: wiki with flowcharts, component rationale, and why ZTNA instead of a VPN"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-11T15:50:57Z",
+   "headRefName": "claude/sleepy-ramanujan-c6txlf",
+   "isDraft": false,
+   "mergedAt": "2026-10-11T17:02:01Z",
+   "number": 10,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: stage 3 design draft, workload host with Portainer, daemons and Matrix bridge"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-11T16:28:39Z",
+   "headRefName": "docs/do-token-scopes",
+   "isDraft": false,
+   "mergedAt": "2026-10-11T16:35:25Z",
+   "number": 11,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: exact DigitalOcean token scopes (Token A and B)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-11T18:34:38Z",
+   "headRefName": "docs/terraform-reference",
+   "isDraft": false,
+   "mergedAt": "2026-10-11T20:09:29Z",
+   "number": 12,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: wiki Terraform reference explaining every declaration"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-11T18:52:15Z",
+   "headRefName": "fix/connector-size-intel",
+   "isDraft": false,
+   "mergedAt": null,
+   "number": 13,
+   "reviewDecision": "",
+   "state": "CLOSED",
+   "title": "fix: use s-1vcpu-1gb-intel for the connectors"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-11T18:54:54Z",
+   "headRefName": "fix/region-toronto",
+   "isDraft": false,
+   "mergedAt": "2026-10-11T19:09:01Z",
+   "number": 14,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "fix: move the environment to Toronto (tor1)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-11T19:57:56Z",
+   "headRefName": "fix/vpc-range-10-78",
+   "isDraft": false,
+   "mergedAt": "2026-10-11T19:59:16Z",
+   "number": 15,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "fix: use 10.78.0.0/24 for the Toronto VPC"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-11T20:09:34Z",
+   "headRefName": "docs/redeploy-lessons",
+   "isDraft": false,
+   "mergedAt": "2026-10-11T20:10:53Z",
+   "number": 16,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: lessons from the account redeploy"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-11T20:53:16Z",
+   "headRefName": "docs/stage3-bridge-etke",
+   "isDraft": false,
+   "mergedAt": "2026-10-11T21:00:20Z",
+   "number": 17,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: stage 3 draft, self-hosted mautrix-discord (Go) bridge, backups, etke.cc alternative"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-11T22:43:19Z",
+   "headRefName": "docs/stage-2-logging-design",
+   "isDraft": false,
+   "mergedAt": "2026-10-12T03:08:51Z",
+   "number": 18,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "Stage 2 design: logging, metrics and the link home (draft)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-12T03:19:00Z",
+   "headRefName": "claude/sleepy-ramanujan-c6txlf",
+   "isDraft": false,
+   "mergedAt": "2026-10-12T04:17:29Z",
+   "number": 19,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: start-from-zero wiki track; Spacelift push policy; CI and wiki publishing on GYST only"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-12T15:08:52Z",
+   "headRefName": "docs/edge-dmz-handoff",
+   "isDraft": false,
+   "mergedAt": "2026-10-12T15:59:05Z",
+   "number": 20,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: add edge DMZ handoff to the plans and the roadmap"
+  },
+  {
+   "body": "Refs #21",
+   "ci": "none",
+   "createdAt": "2026-10-16T19:39:19Z",
+   "headRefName": "docs/wiki-fork-private-stacks",
+   "isDraft": false,
+   "mergedAt": "2026-10-16T19:47:38Z",
+   "number": 23,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): fork, private stacks and the pipeline (capstone page)"
+  },
+  {
+   "body": "Refs #22",
+   "ci": "none",
+   "createdAt": "2026-10-16T19:45:03Z",
+   "headRefName": "docs/multicloud-design",
+   "isDraft": false,
+   "mergedAt": "2026-10-16T19:47:41Z",
+   "number": 24,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: multi-cloud design for AWS, Azure and GCP (#22)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-16T19:54:19Z",
+   "headRefName": "docs/wiki-enterprise-landscape",
+   "isDraft": false,
+   "mergedAt": "2026-10-16T19:56:47Z",
+   "number": 25,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): enterprise landscape and detection (Wazuh) lessons"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-16T19:54:49Z",
+   "headRefName": "docs/multicloud-design-followup",
+   "isDraft": false,
+   "mergedAt": "2026-10-16T19:56:44Z",
+   "number": 26,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: address Copilot review of the multi-cloud design (#24 follow-up)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-16T19:59:19Z",
+   "headRefName": "docs/labs-and-build-track",
+   "isDraft": false,
+   "mergedAt": "2026-10-16T20:05:33Z",
+   "number": 27,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): labs, build-it track, and path-based navigation"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-16T20:06:33Z",
+   "headRefName": "docs/wiki-polish",
+   "isDraft": false,
+   "mergedAt": "2026-10-16T20:08:01Z",
+   "number": 28,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): one home for the push-policy caveat, Wazuh lesson fixes, heading links"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-16T20:11:08Z",
+   "headRefName": "docs/multicloud-decisions",
+   "isDraft": false,
+   "mergedAt": "2026-10-16T20:12:43Z",
+   "number": 29,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: record the maintainer's multi-cloud decisions (#22)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-16T20:21:15Z",
+   "headRefName": "docs/multicloud-phase0",
+   "isDraft": false,
+   "mergedAt": "2026-10-16T20:25:25Z",
+   "number": 30,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: multi-cloud phase 0 findings and evidence (#22)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-16T20:39:45Z",
+   "headRefName": "docs/aws-lessons",
+   "isDraft": false,
+   "mergedAt": "2026-10-16T23:21:46Z",
+   "number": 31,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): AWS lessons for phase 1 (#22)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-16T23:27:03Z",
+   "headRefName": "feat/shared-bootstrap",
+   "isDraft": false,
+   "mergedAt": "2026-10-16T23:32:43Z",
+   "number": 32,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "refactor(modules): shared Twingate bootstrap module (phase 2a of #22)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T00:24:51Z",
+   "headRefName": "feat/module-contract",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T00:31:03Z",
+   "number": 33,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(modules): the provider module contract (phase 2b of #22)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T00:35:42Z",
+   "headRefName": "feat/cost-gate-multicloud",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T00:44:32Z",
+   "number": 34,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(cost-gate): price more than one cloud (phase 2c-i of #22)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T00:40:46Z",
+   "headRefName": "feat/identifier-check",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T01:04:37Z",
+   "number": 35,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(ci): identifier check for cloud account ids (phase 2c-ii of #22)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T00:43:01Z",
+   "headRefName": "docs/stage2-settings-design",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T01:02:04Z",
+   "number": 36,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(design): stage 2 settings layer and mini cloud SOC"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T00:46:11Z",
+   "headRefName": "docs/threat-model-exercise",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T00:58:38Z",
+   "number": 37,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): threat-model exercise and a traced change"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T00:46:23Z",
+   "headRefName": "docs/glossary-troubleshooting",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T00:58:29Z",
+   "number": 38,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): glossary links and a troubleshooting index"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T00:46:43Z",
+   "headRefName": "feat/per-cloud-secrets",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T00:58:47Z",
+   "number": 39,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "test(secrets): per-cloud secret separation (phase 2c-iii of #22)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T00:59:09Z",
+   "headRefName": "docs/wire-threat-pages",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T01:01:59Z",
+   "number": 40,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): link the threat-model exercise and the traced change"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T01:03:54Z",
+   "headRefName": "fix/cost-gate-parser-hardening",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T01:20:41Z",
+   "number": 41,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "fix(cost-gate): close parser-differential bypasses found in review"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T01:11:10Z",
+   "headRefName": "docs/threat-dragon-exercise",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T01:20:45Z",
+   "number": 42,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): OWASP Threat Dragon exercise for trust boundaries"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T01:12:46Z",
+   "headRefName": "docs/gcp-lessons",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T01:23:10Z",
+   "number": 43,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): GCP lessons, unverified drafts (#22)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T01:14:09Z",
+   "headRefName": "docs/azure-lessons",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T01:26:28Z",
+   "number": 44,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): Azure lessons, unverified drafts (#22)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T01:21:19Z",
+   "headRefName": "feat/aws-modules",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T01:41:07Z",
+   "number": 45,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(aws): vpc, firewall and connector modules (phase 3a of #22)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T01:23:15Z",
+   "headRefName": "docs/threat-dragon-fixes",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T01:25:53Z",
+   "number": 46,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): Threat Dragon exercise fixes from review"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T01:23:37Z",
+   "headRefName": "docs/runbook-proposed-run-claim",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T01:25:59Z",
+   "number": 47,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: correct the proposed-run credential claim in the secrets runbook"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T01:27:22Z",
+   "headRefName": "feat/cost-gate-stack-instances",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T01:52:46Z",
+   "number": 48,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(cost-gate): stack instances for multi-site (step 2b of the stage 2 design)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T01:29:27Z",
+   "headRefName": "feat/settings-manifest",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T01:34:40Z",
+   "number": 49,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(settings): settings manifest, ignore rules and generated reference (step 1 of the stage 2 design)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T01:46:47Z",
+   "headRefName": "docs/reading-order",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T02:11:46Z",
+   "number": 50,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): reading order and navigation"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T01:47:13Z",
+   "headRefName": "feat/aws-stacks",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T02:11:26Z",
+   "number": 51,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(aws): foundation and access stacks (phase 3b of #22)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T01:50:18Z",
+   "headRefName": "docs/threat-frameworks",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T03:41:26Z",
+   "number": 52,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): threat frameworks (STRIDE, ATT&CK, ATLAS) with importable Threat Dragon models"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T01:52:24Z",
+   "headRefName": "feat/settings-variables",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T02:23:41Z",
+   "number": 53,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(settings): variables, examples and immutable keys (step 2 of the stage 2 design)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T02:27:38Z",
+   "headRefName": "feat/firewall-other-tags",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T02:46:44Z",
+   "number": 54,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(firewall): tag-sourced rules from other tags (additive, step 4.2 of the stage 2 design)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T02:31:16Z",
+   "headRefName": "feat/timezone-variable",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T02:48:06Z",
+   "number": 55,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(settings): timezone variable with a byte-identical default (step 3 of the stage 2 design)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T02:32:05Z",
+   "headRefName": "docs/telemetry-lessons",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T02:48:27Z",
+   "number": 56,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): cloud telemetry, multiple sites and a mini SOC (lessons, drafts)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T02:40:22Z",
+   "headRefName": "feat/stack-20-telemetry",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T03:04:18Z",
+   "number": 57,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(telemetry): stack 20 skeleton, everything off (step 4 of the stage 2 design)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T02:55:36Z",
+   "headRefName": "docs/consistency-sweep",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T03:04:43Z",
+   "number": 58,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: consistency sweep across the wiki after a day of changes"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T03:05:59Z",
+   "headRefName": "test/readme-layout-nested",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T03:15:25Z",
+   "number": 59,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "test: README layout check walks provider directories"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T03:19:25Z",
+   "headRefName": "docs/change-management",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T03:22:51Z",
+   "number": 60,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): enterprise change management for beginners (not used in this project)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T03:19:43Z",
+   "headRefName": "feat/connector-telemetry",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T03:33:44Z",
+   "number": 61,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(connector): Twingate connector telemetry in the access layer (default off)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T03:22:00Z",
+   "headRefName": "docs/enterprise-networks",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T03:32:40Z",
+   "number": 62,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): enterprise networks, infrastructure, identity and careers"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T03:23:49Z",
+   "headRefName": "docs/change-management-fixes",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T03:26:17Z",
+   "number": 63,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): change-management page corrections from review"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T03:29:03Z",
+   "headRefName": "feat/phase-cost-ceilings",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T04:06:29Z",
+   "number": 64,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(cost-gate): a ceiling per phase, raised deliberately"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T03:52:17Z",
+   "headRefName": "docs/wiki-screenshots",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T04:10:08Z",
+   "number": 65,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): screenshots, an image pipeline and a screenshots policy"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T13:05:39Z",
+   "headRefName": "docs/support-section",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T13:09:30Z",
+   "number": 66,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: Support this project section in the README and wiki"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T13:12:14Z",
+   "headRefName": "docs/author-socials",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T13:16:03Z",
+   "number": 67,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: Author and socials section in the README and wiki"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T14:42:23Z",
+   "headRefName": "docs/agile-planning",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T14:46:40Z",
+   "number": 135,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: project board as code and the planning page"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T16:15:42Z",
+   "headRefName": "fix/readme-mermaid-diagram",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T16:18:43Z",
+   "number": 136,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "Fix README mermaid flowchart rendering as raw code"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T19:17:45Z",
+   "headRefName": "docs/dark-diagrams",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T19:29:44Z",
+   "number": 137,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: every diagram is a dark-mode picture with its Mermaid source underneath"
+  },
+  {
+   "body": "Closes #87",
+   "ci": "none",
+   "createdAt": "2026-10-17T20:22:48Z",
+   "headRefName": "feat/metadata-lock-87-k7q2",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T20:26:29Z",
+   "number": 138,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(hardening): opt-in lock on the droplet metadata endpoint (#87)"
+  },
+  {
+   "body": "Closes #89",
+   "ci": "none",
+   "createdAt": "2026-10-17T20:53:26Z",
+   "headRefName": "feat/ipv6-check-89-k7q2",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T20:57:21Z",
+   "number": 139,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "test(hardening): fail the build if IPv6 is opened (#89)"
+  },
+  {
+   "body": "Closes #88",
+   "ci": "none",
+   "createdAt": "2026-10-17T20:57:57Z",
+   "headRefName": "feat/plan-policy-inbound-88-q7k2",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T21:02:01Z",
+   "number": 140,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(hardening): Spacelift plan policy denying inbound rules and IPv6 (#88)"
+  },
+  {
+   "body": "Closes #92",
+   "ci": "none",
+   "createdAt": "2026-10-17T21:19:14Z",
+   "headRefName": "feat/plan-guards-92-k7q2",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T21:23:04Z",
+   "number": 141,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(hardening): plan policy destroy guard and autodeploy guard (#92)"
+  },
+  {
+   "body": "Closes #90",
+   "ci": "none",
+   "createdAt": "2026-10-17T21:42:47Z",
+   "headRefName": "feat/host-firewall-90-k7q2",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T21:47:06Z",
+   "number": 142,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(hardening): opt-in default-drop host firewall on the connectors (#90)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T22:29:15Z",
+   "headRefName": "docs/access-group-not-deprecated",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T22:33:59Z",
+   "number": 143,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: access_group is not deprecated; correct four pages (#93)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-17T22:29:49Z",
+   "headRefName": "docs/zero-ports-design",
+   "isDraft": false,
+   "mergedAt": "2026-10-17T22:34:04Z",
+   "number": 144,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: design for the external zero-open-ports check (#91)"
+  },
+  {
+   "body": "Refs #106",
+   "ci": "none",
+   "createdAt": "2026-10-18T01:07:29Z",
+   "headRefName": "docs/stage2-verification-runbook",
+   "isDraft": false,
+   "mergedAt": "2026-10-18T01:15:06Z",
+   "number": 145,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: stage 2 verification section and home-side runbook (#106)"
+  },
+  {
+   "body": "Refs #99, #70",
+   "ci": "none",
+   "createdAt": "2026-10-18T01:26:31Z",
+   "headRefName": "feat/stage2-metrics-cloud-side",
+   "isDraft": false,
+   "mergedAt": "2026-10-18T01:53:09Z",
+   "number": 146,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(telemetry): opt-in node exporter and tag-sourced metrics firewall rules (step 5, #99)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-18T01:42:53Z",
+   "headRefName": "license-apache-2.0",
+   "isDraft": false,
+   "mergedAt": "2026-10-18T01:57:25Z",
+   "number": 147,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "Relicense from MIT to Apache-2.0"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-18T02:15:20Z",
+   "headRefName": "docs/why-these-tools",
+   "isDraft": false,
+   "mergedAt": "2026-10-18T02:26:07Z",
+   "number": 148,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: why I picked these tools"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-18T02:26:39Z",
+   "headRefName": "docs/support-section-formatting",
+   "isDraft": false,
+   "mergedAt": "2026-10-18T03:08:50Z",
+   "number": 150,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: carry the README Support and Socials formatting into the wiki Home page"
+  },
+  {
+   "body": "Refs #95, #102, #70",
+   "ci": "none",
+   "createdAt": "2026-10-18T02:26:44Z",
+   "headRefName": "feat/stage2-log-shipping",
+   "isDraft": false,
+   "mergedAt": "2026-10-18T03:32:33Z",
+   "number": 151,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(telemetry): opt-in Wazuh agent and auditd with a first-boot secret pull (step 7)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-18T02:29:11Z",
+   "headRefName": "docs/why-tools-grafana",
+   "isDraft": false,
+   "mergedAt": "2026-10-18T03:08:55Z",
+   "number": 152,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: add Grafana to why I picked these tools"
+  },
+  {
+   "body": "Closes #149\nRefs #103",
+   "ci": "none",
+   "createdAt": "2026-10-18T02:46:08Z",
+   "headRefName": "feat/grafana-dashboards",
+   "isDraft": false,
+   "mergedAt": "2026-10-18T03:08:59Z",
+   "number": 153,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(dashboards): site-aware Grafana dashboards, validation test and wiki page (#149)"
+  },
+  {
+   "body": "Refs #99, #70",
+   "ci": "none",
+   "createdAt": "2026-10-18T03:00:26Z",
+   "headRefName": "feat/aws-metrics-passthrough",
+   "isDraft": false,
+   "mergedAt": "2026-10-18T03:25:15Z",
+   "number": 154,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(telemetry): opt-in node exporter and security-group-sourced metrics rules on AWS (#99)"
+  },
+  {
+   "body": "Refs #91",
+   "ci": "none",
+   "createdAt": "2026-10-19T19:28:26Z",
+   "headRefName": "feat/zero-ports-check-91-k7q2",
+   "isDraft": false,
+   "mergedAt": "2026-10-19T20:36:09Z",
+   "number": 155,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat: external zero-open-ports check (#91)"
+  },
+  {
+   "body": "Closes #117",
+   "ci": "none",
+   "createdAt": "2026-10-19T19:28:54Z",
+   "headRefName": "chore/backups-fraction-117",
+   "isDraft": false,
+   "mergedAt": "2026-10-19T20:32:10Z",
+   "number": 156,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "chore(cost): mark the DO weekly backups fraction verified (#117)"
+  },
+  {
+   "body": "Refs #106",
+   "ci": "none",
+   "createdAt": "2026-10-19T19:31:20Z",
+   "headRefName": "docs/roadmap-stage2-106",
+   "isDraft": false,
+   "mergedAt": "2026-10-19T20:32:14Z",
+   "number": 157,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: bring the Roadmap stage 2 status up to date (#106)"
+  },
+  {
+   "body": "Closes #128",
+   "ci": "none",
+   "createdAt": "2026-10-19T19:38:28Z",
+   "headRefName": "feat/demo-dashboards",
+   "isDraft": false,
+   "mergedAt": "2026-10-19T20:32:59Z",
+   "number": 158,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(labs): synthetic Grafana and Prometheus demo lab (#128)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-19T20:12:04Z",
+   "headRefName": "docs/mfa-idp-guidance",
+   "isDraft": false,
+   "mergedAt": "2026-10-19T20:29:42Z",
+   "number": 159,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: MFA, hardware key and identity-provider guidance, plus springboards"
+  },
+  {
+   "body": "Refs #106",
+   "ci": "none",
+   "createdAt": "2026-10-19T20:35:22Z",
+   "headRefName": "docs/telemetry-banners",
+   "isDraft": false,
+   "mergedAt": "2026-10-19T21:22:31Z",
+   "number": 160,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): telemetry banners say built and merged, still unapplied"
+  },
+  {
+   "body": "Refs #103",
+   "ci": "none",
+   "createdAt": "2026-10-19T20:35:41Z",
+   "headRefName": "docs/dashboards-103",
+   "isDraft": false,
+   "mergedAt": "2026-10-19T21:29:43Z",
+   "number": 161,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): dashboards page reflects the merged demo lab (#103)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-19T21:55:46Z",
+   "headRefName": "docs/stale-lessons-pass",
+   "isDraft": false,
+   "mergedAt": "2026-10-19T22:11:29Z",
+   "number": 162,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs(wiki): stale-claims pass on the stage 2 lesson pages"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-19T21:56:24Z",
+   "headRefName": "feat/cost-gate-backup-plans",
+   "isDraft": false,
+   "mergedAt": "2026-10-19T22:16:33Z",
+   "number": 163,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(cost): refuse backup plans the gate cannot price"
+  },
+  {
+   "body": "Refs #103\nRefs #103",
+   "ci": "none",
+   "createdAt": "2026-10-19T22:02:27Z",
+   "headRefName": "feat/wazuh-lab-103",
+   "isDraft": false,
+   "mergedAt": "2026-10-19T22:25:13Z",
+   "number": 164,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(telemetry): Wazuh agent site label and an offline test of the Wazuh dashboard (#103)"
+  },
+  {
+   "body": "Refs #118",
+   "ci": "none",
+   "createdAt": "2026-10-19T22:02:29Z",
+   "headRefName": "docs/edge-design-118",
+   "isDraft": false,
+   "mergedAt": "2026-10-19T22:46:32Z",
+   "number": 165,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: edge and DMZ design with costed options (#118)"
+  },
+  {
+   "body": "Closes #119\nCloses #110",
+   "ci": "none",
+   "createdAt": "2026-10-21T13:05:07Z",
+   "headRefName": "docs/edge-rulings-119",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T13:42:55Z",
+   "number": 166,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: record edge rulings, add Why-Not-Private-Droplets-Yet, verify tor1 sizes"
+  },
+  {
+   "body": "Closes #80\nRefs #79",
+   "ci": "none",
+   "createdAt": "2026-10-21T13:05:28Z",
+   "headRefName": "docs/vendor-facts-79-80",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T13:39:55Z",
+   "number": 167,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: short-lived Doppler tokens and the Twingate service-account limit, re-checked"
+  },
+  {
+   "body": "Refs #121",
+   "ci": "none",
+   "createdAt": "2026-10-21T13:08:10Z",
+   "headRefName": "docs/peertube-design-121",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T16:14:17Z",
+   "number": 168,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: PeerTube stage design with costed options"
+  },
+  {
+   "body": "Refs #120",
+   "ci": "none",
+   "createdAt": "2026-10-21T13:08:26Z",
+   "headRefName": "docs/honeypot-design-120",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T16:19:20Z",
+   "number": 169,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: honeypot design in a separate account"
+  },
+  {
+   "body": "Refs #104",
+   "ci": "none",
+   "createdAt": "2026-10-21T13:10:01Z",
+   "headRefName": "feat/per-site-accounts-104",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T16:19:51Z",
+   "number": 170,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat(telemetry): per-site Twingate services via a sites map, TLS decision record"
+  },
+  {
+   "body": "Refs #130",
+   "ci": "none",
+   "createdAt": "2026-10-21T13:10:28Z",
+   "headRefName": "docs/accessibility-pass-130",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T16:20:23Z",
+   "number": 171,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: accessibility pass over the wiki, with a test that holds it"
+  },
+  {
+   "body": "Closes #129",
+   "ci": "none",
+   "createdAt": "2026-10-21T13:10:42Z",
+   "headRefName": "docs/teardown-extras-129",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T16:20:54Z",
+   "number": 172,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: teardown checklist (order, leftovers, zero proof, token revocation)"
+  },
+  {
+   "body": "Refs #93",
+   "ci": "none",
+   "createdAt": "2026-10-21T13:16:55Z",
+   "headRefName": "chore/twingate-provider-93",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T16:21:24Z",
+   "number": 173,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "chore: bump the Twingate provider from 3.x to 5.x"
+  },
+  {
+   "body": "Refs #106",
+   "ci": "none",
+   "createdAt": "2026-10-21T16:24:49Z",
+   "headRefName": "docs/roadmap-schedule",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T18:19:52Z",
+   "number": 174,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: sprint schedule on the roadmap"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-21T18:59:50Z",
+   "headRefName": "docs/doppler-token-fix",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T19:11:46Z",
+   "number": 175,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: Doppler expiring service tokens are documented, fix the UNVERIFIED claims"
+  },
+  {
+   "body": "Refs #21",
+   "ci": "none",
+   "createdAt": "2026-10-21T19:01:39Z",
+   "headRefName": "docs/zero-to-hero-git-21",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T19:18:51Z",
+   "number": 176,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: Git from zero, a beginner page for clone, commit and pull requests"
+  },
+  {
+   "body": "Refs #21",
+   "ci": "none",
+   "createdAt": "2026-10-21T19:12:09Z",
+   "headRefName": "docs/github-lessons-21",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T19:24:11Z",
+   "number": 177,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: deepen the GitHub lessons, fork steps, demo vs production, commit to pipeline"
+  },
+  {
+   "body": "Refs #21",
+   "ci": "none",
+   "createdAt": "2026-10-21T20:09:11Z",
+   "headRefName": "docs/gyst-reusable-workflows",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T20:28:42Z",
+   "number": 179,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: reusable workflows and Git Your Ship Together in the CI lessons"
+  },
+  {
+   "body": "Refs #106",
+   "ci": "none",
+   "createdAt": "2026-10-21T20:11:45Z",
+   "headRefName": "docs/stage2-guide-106",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T20:33:59Z",
+   "number": 180,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: one stage 2 verification checklist, with pay-to-play and the sites map"
+  },
+  {
+   "body": "Refs #96",
+   "ci": "none",
+   "createdAt": "2026-10-21T20:21:01Z",
+   "headRefName": "docs/stack-factory-96",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T20:39:23Z",
+   "number": 181,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: stack factory status and gap analysis"
+  },
+  {
+   "body": "Refs #178",
+   "ci": "none",
+   "createdAt": "2026-10-21T20:21:03Z",
+   "headRefName": "docs/honeypot-education-178",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T20:39:31Z",
+   "number": 182,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: honeypot and deception education plan"
+  },
+  {
+   "body": "Refs #21",
+   "ci": "none",
+   "createdAt": "2026-10-21T20:28:59Z",
+   "headRefName": "docs/about-why-this-exists",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T21:30:35Z",
+   "number": 183,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: Why this exists"
+  },
+  {
+   "body": "Refs #21",
+   "ci": "none",
+   "createdAt": "2026-10-21T20:49:20Z",
+   "headRefName": "docs/basics-api-tokens",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T21:04:36Z",
+   "number": 184,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: APIs and tokens from zero, a foundations side page"
+  },
+  {
+   "body": "Refs #21",
+   "ci": "none",
+   "createdAt": "2026-10-21T20:51:49Z",
+   "headRefName": "docs/foundations-audit",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T21:10:58Z",
+   "number": 185,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: foundations gap audit and proposed beginner lessons"
+  },
+  {
+   "body": "Refs #21",
+   "ci": "none",
+   "createdAt": "2026-10-21T20:52:30Z",
+   "headRefName": "docs/basics-linux-enterprise",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T21:36:46Z",
+   "number": 186,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: Linux for enterprise beginners, a foundations side page"
+  },
+  {
+   "body": "Refs #21",
+   "ci": "none",
+   "createdAt": "2026-10-21T21:11:15Z",
+   "headRefName": "docs/zero-trust-at-home",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T21:42:48Z",
+   "number": 187,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: zero trust at home, two connectors and failover"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-21T21:47:05Z",
+   "headRefName": "docs/american-english-sweep",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T22:04:02Z",
+   "number": 188,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: American English spelling sweep, style note and guard test"
+  },
+  {
+   "body": "Refs #21",
+   "ci": "none",
+   "createdAt": "2026-10-21T22:11:11Z",
+   "headRefName": "docs/foundations-f2-terminal-script",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T22:23:28Z",
+   "number": 189,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: foundations F2, the terminal and your first script"
+  },
+  {
+   "body": "Refs #21",
+   "ci": "none",
+   "createdAt": "2026-10-21T22:11:30Z",
+   "headRefName": "docs/foundations-f4-crypto-basics",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T22:40:31Z",
+   "number": 190,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: foundations F4, hashing, encryption and keys"
+  },
+  {
+   "body": "Refs #21",
+   "ci": "none",
+   "createdAt": "2026-10-21T22:17:11Z",
+   "headRefName": "docs/foundations-f3-web-request",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T22:47:47Z",
+   "number": 191,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: foundations F3, how a web request works"
+  },
+  {
+   "body": "Refs #21",
+   "ci": "none",
+   "createdAt": "2026-10-21T22:57:57Z",
+   "headRefName": "docs/foundations-f1-data-formats",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T23:10:44Z",
+   "number": 192,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: foundations F1, data formats and config files (JSON, YAML, HCL)"
+  },
+  {
+   "body": "Refs #21",
+   "ci": "none",
+   "createdAt": "2026-10-21T23:02:47Z",
+   "headRefName": "docs/foundations-f7-enterprise-identity",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T23:30:26Z",
+   "number": 193,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: foundations F7, enterprise identity (SSO, SAML, OAuth, OIDC)"
+  },
+  {
+   "body": "Refs #178",
+   "ci": "none",
+   "createdAt": "2026-10-21T23:10:50Z",
+   "headRefName": "docs/honeypot-track1-deception",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T23:57:01Z",
+   "number": 194,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: deception and honeypots track 1, concepts and honeytokens"
+  },
+  {
+   "body": "Refs #21",
+   "ci": "none",
+   "createdAt": "2026-10-21T23:22:17Z",
+   "headRefName": "docs/foundations-f5-subnets-nat-firewall",
+   "isDraft": false,
+   "mergedAt": "2026-10-21T23:49:16Z",
+   "number": 195,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: foundations F5, subnets, NAT and firewalls by hand"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-22T14:56:54Z",
+   "headRefName": "docs/twingate-service-accounts",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T15:07:16Z",
+   "number": 197,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: where CAH uses Twingate service accounts, and what plan they need"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-22T15:02:00Z",
+   "headRefName": "docs/foundations-f6-vms-containers-cloud",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T18:26:33Z",
+   "number": 198,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: foundations F6, virtual machines, containers and cloud service models"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-22T15:02:08Z",
+   "headRefName": "docs/foundations-f8-windows-ad-macos",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T18:31:30Z",
+   "number": 199,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: foundations F8, Windows, Active Directory and macOS in the enterprise"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-22T15:02:17Z",
+   "headRefName": "docs/foundations-f12-working-in-a-company",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T18:37:28Z",
+   "number": 200,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: foundations F12, working in a company (tickets, change, on-call, documentation)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-22T15:02:32Z",
+   "headRefName": "docs/foundations-f9-logs-siem-detection",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T15:30:01Z",
+   "number": 201,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: foundations F9, logs, SIEM and detection basics"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-22T15:07:23Z",
+   "headRefName": "docs/foundations-f10-backups-patching",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T18:42:12Z",
+   "number": 202,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: foundations F10, backups, recovery and patching"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-22T15:07:30Z",
+   "headRefName": "docs/foundations-f11-threats-plain-words",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T18:47:24Z",
+   "number": 203,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: foundations F11, threats in plain words"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-22T15:07:53Z",
+   "headRefName": "docs/honeypot-track3-tpot",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T18:51:46Z",
+   "number": 204,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: honeypot Track 3, honeynet design and T-Pot at home"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-22T15:22:33Z",
+   "headRefName": "docs/honeypot-track2-cloud-cowrie",
+   "isDraft": false,
+   "mergedAt": null,
+   "number": 205,
+   "reviewDecision": "",
+   "state": "CLOSED",
+   "title": "docs: honeypot Track 2, cloud sensor anatomy, a Cowrie weekend and reading the logs"
+  },
+  {
+   "body": "Refs #122",
+   "ci": "failing",
+   "createdAt": "2026-10-22T18:25:40Z",
+   "headRefName": "feat/dmz-stack-122",
+   "isDraft": true,
+   "mergedAt": null,
+   "number": 206,
+   "reviewDecision": "",
+   "state": "OPEN",
+   "title": "feat: DMZ edge stack and edge-host module, flag off (#122)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-22T19:03:30Z",
+   "headRefName": "docs/feedback-and-issues",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T19:07:47Z",
+   "number": 207,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: open calls for feedback and issues, with a how-to, issue forms and SECURITY.md"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-22T19:10:44Z",
+   "headRefName": "docs/stack-per-service-design",
+   "isDraft": false,
+   "mergedAt": null,
+   "number": 208,
+   "reviewDecision": "",
+   "state": "CLOSED",
+   "title": "docs: stack-per-service design note (maintainer ruling), cost shapes and open questions"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-22T19:16:21Z",
+   "headRefName": "docs/iac-3-spacelift-from-zero",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T20:26:59Z",
+   "number": 209,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: lesson I3, Spacelift from zero"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-22T19:19:34Z",
+   "headRefName": "docs/iac-1-opentofu-from-zero",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T20:17:53Z",
+   "number": 210,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: lesson I1, OpenTofu from zero (init, plan, apply, destroy)"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-22T19:21:02Z",
+   "headRefName": "docs/iac-4-stack-per-service",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T20:32:49Z",
+   "number": 211,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: lesson I4, build and destroy a bunch, one stack per service"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-22T19:21:17Z",
+   "headRefName": "docs/iac-2-plans-state-drift",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T20:22:05Z",
+   "number": 212,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: lesson I2, plans, state, drift and recovery"
+  },
+  {
+   "body": "",
+   "ci": "none",
+   "createdAt": "2026-10-22T19:27:01Z",
+   "headRefName": "docs/threat-model-coverage",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T20:49:16Z",
+   "number": 213,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: threat-model coverage audit and plan (TM-0 to TM-12)"
+  },
+  {
+   "body": "Refs #214",
+   "ci": "none",
+   "createdAt": "2026-10-22T19:33:56Z",
+   "headRefName": "docs/composable-labs-design",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T20:54:01Z",
+   "number": 215,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: composable labs design note (piecemeal or whole builds, cost transparency)"
+  },
+  {
+   "body": "Refs #214",
+   "ci": "none",
+   "createdAt": "2026-10-22T19:38:35Z",
+   "headRefName": "docs/web-1-lamp-lemp",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T20:38:43Z",
+   "number": 216,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: lesson W1, LAMP and LEMP from zero"
+  },
+  {
+   "body": "Refs #214",
+   "ci": "none",
+   "createdAt": "2026-10-22T19:38:41Z",
+   "headRefName": "docs/web-3-dns-cloudflare",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T20:43:28Z",
+   "number": 217,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: lesson W3, DNS, Cloudflare and hosting your own website"
+  },
+  {
+   "body": "Refs #214",
+   "ci": "none",
+   "createdAt": "2026-10-22T19:40:01Z",
+   "headRefName": "docs/board-mirror-hammunition",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T21:10:31Z",
+   "number": 218,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: mirror the Hammunition board layout in board.yaml (Kind, Epic, Decision, views, Security and Docs areas)"
+  },
+  {
+   "body": "Refs #214",
+   "ci": "none",
+   "createdAt": "2026-10-22T19:41:16Z",
+   "headRefName": "docs/web-2-wordpress-php-security",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T21:21:02Z",
+   "number": 219,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: lesson W2, WordPress and PHP security, WAFs, and why static sites win so often"
+  },
+  {
+   "body": "Refs #214",
+   "ci": "none",
+   "createdAt": "2026-10-22T19:44:00Z",
+   "headRefName": "docs/web-4-wordpress-at-scale",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T21:26:37Z",
+   "number": 220,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: lesson W4, WordPress at scale (CDN, WAF, caching and CI) with a local lab"
+  },
+  {
+   "body": "Refs #214",
+   "ci": "none",
+   "createdAt": "2026-10-22T19:49:15Z",
+   "headRefName": "docs/honeypot-track2-cloud-cowrie-v2",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T21:15:18Z",
+   "number": 222,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: honeypot Track 2, cloud sensor anatomy, a Cowrie weekend and reading the logs"
+  },
+  {
+   "body": "Refs #214",
+   "ci": "none",
+   "createdAt": "2026-10-22T19:51:02Z",
+   "headRefName": "docs/stack-per-service-design-v2",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T21:49:56Z",
+   "number": 223,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: stack-per-service design note (maintainer ruling), cost shapes and open questions"
+  },
+  {
+   "body": "Refs #221",
+   "ci": "none",
+   "createdAt": "2026-10-22T20:00:39Z",
+   "headRefName": "docs/sec-1-red-blue-lab-os",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T20:59:44Z",
+   "number": 224,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: lesson S1, red and blue as yin and yang, think in systems, and choosing your lab OS"
+  },
+  {
+   "body": "Refs #221",
+   "ci": "none",
+   "createdAt": "2026-10-22T20:13:41Z",
+   "headRefName": "docs/sec-2-security-tools-basics",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T21:04:44Z",
+   "number": 225,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: lesson S2, security tools basics (Nmap, OpenVAS, Burp CE, Metasploit and friends)"
+  },
+  {
+   "body": "Closes #227",
+   "ci": "none",
+   "createdAt": "2026-10-22T21:03:10Z",
+   "headRefName": "docs/start-here-ai-note",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T21:38:08Z",
+   "number": 228,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: Start Here says what is left out on purpose and where AI fits"
+  },
+  {
+   "body": "Refs #230",
+   "ci": "none",
+   "createdAt": "2026-10-22T21:18:06Z",
+   "headRefName": "docs/track2-port-wording",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T21:44:04Z",
+   "number": 231,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: Track 2 presents the separate SSH port as function, not protection"
+  },
+  {
+   "body": "Refs #226",
+   "ci": "none",
+   "createdAt": "2026-10-22T21:21:35Z",
+   "headRefName": "fix/sec-2-flaky-scan-test",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T21:32:21Z",
+   "number": 233,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "fix: remove a race that made the S2 nmap scan-log test flaky"
+  },
+  {
+   "body": "Refs #229",
+   "ci": "failing",
+   "createdAt": "2026-10-22T21:22:21Z",
+   "headRefName": "docs/def-3-file-integrity",
+   "isDraft": false,
+   "mergedAt": null,
+   "number": 234,
+   "reviewDecision": "",
+   "state": "OPEN",
+   "title": "docs: lesson D3, file integrity and alerting (Tripwire, AIDE, Wazuh, auditd, fail2ban)"
+  },
+  {
+   "body": "Refs #232",
+   "ci": "none",
+   "createdAt": "2026-10-22T21:27:44Z",
+   "headRefName": "docs/first-hour-updates-baseline",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T21:56:03Z",
+   "number": 237,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: first hour on a new system, updates, automatic updates and a baseline before anything else"
+  },
+  {
+   "body": "Refs #229",
+   "ci": "none",
+   "createdAt": "2026-10-22T21:30:13Z",
+   "headRefName": "docs/def-1-packet-filters",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T22:29:57Z",
+   "number": 238,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: lesson D1, packet filters compared (iptables and ipset, nftables, UFW, BSD pf)"
+  },
+  {
+   "body": "Refs #229",
+   "ci": "none",
+   "createdAt": "2026-10-22T21:33:38Z",
+   "headRefName": "docs/def-2-ids-ips",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T22:12:45Z",
+   "number": 240,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: lesson D2, IDS and IPS (Snort and Suricata)"
+  },
+  {
+   "body": "Refs #229",
+   "ci": "none",
+   "createdAt": "2026-10-22T21:36:52Z",
+   "headRefName": "docs/def-4-rate-limiting",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T22:24:14Z",
+   "number": 242,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: lesson D4, rate limiting at every layer"
+  },
+  {
+   "body": "Closes #241",
+   "ci": "none",
+   "createdAt": "2026-10-22T21:40:15Z",
+   "headRefName": "fix/sec-2-flaky-proxy-test",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T22:18:28Z",
+   "number": 244,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "fix: make the lab tests' ports collision-proof and clean up in finally (#241)"
+  },
+  {
+   "body": "Closes #239",
+   "ci": "none",
+   "createdAt": "2026-10-22T21:47:08Z",
+   "headRefName": "docs/cdn-real-client-ip",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T22:41:04Z",
+   "number": 251,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: lesson, behind a CDN: real client IPs, why an IP is a weak identifier, and OSI basics"
+  },
+  {
+   "body": "Closes #246",
+   "ci": "pending",
+   "createdAt": "2026-10-22T21:47:48Z",
+   "headRefName": "feat/plan-policy-keys-246",
+   "isDraft": false,
+   "mergedAt": null,
+   "number": 252,
+   "reviewDecision": "",
+   "state": "OPEN",
+   "title": "feat: plan policy allowlists keyed by stack id and resource, with per-entry scope (#246)"
+  },
+  {
+   "body": "Closes #236",
+   "ci": "none",
+   "createdAt": "2026-10-22T21:50:50Z",
+   "headRefName": "docs/secrets-from-day-one",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T23:04:19Z",
+   "number": 255,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "docs: lesson, secrets from day one (password manager, Doppler for every asset, .env rules, scanning, leak drill)"
+  },
+  {
+   "body": "Closes #245",
+   "ci": "none",
+   "createdAt": "2026-10-22T21:51:16Z",
+   "headRefName": "feat/firewall-address-aware-245",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T22:47:14Z",
+   "number": 256,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat: address-aware outbound rules in the DigitalOcean firewall module (#245)"
+  },
+  {
+   "body": "Closes #250",
+   "ci": "none",
+   "createdAt": "2026-10-22T21:52:55Z",
+   "headRefName": "feat/cost-gate-labs-l1-250",
+   "isDraft": false,
+   "mergedAt": "2026-10-22T22:36:33Z",
+   "number": 257,
+   "reviewDecision": "",
+   "state": "MERGED",
+   "title": "feat: cost gate skips labs/ for the type allowlist but still checks syntax (option L1, #250)"
+  },
+  {
+   "body": "Closes #243",
+   "ci": "pending",
+   "createdAt": "2026-10-22T21:53:56Z",
+   "headRefName": "docs/cross-tenant-dlp",
+   "isDraft": false,
+   "mergedAt": null,
+   "number": 258,
+   "reviewDecision": "",
+   "state": "OPEN",
+   "title": "docs: lesson, cross-tenant data flows, data governance and retention, and DLP"
+  }
+ ],
+ "repo": "ChiefGyk3D/Clouds-Against-Humanity",
+ "schema": 1
+}

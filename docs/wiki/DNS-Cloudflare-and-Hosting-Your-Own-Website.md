@@ -119,7 +119,7 @@ A website domain should still publish email records, **even if it never sends ma
 | **DKIM** (DomainKeys Identified Mail) | The sending server signs each message; the public key to check the signature is published in DNS. | A `TXT` record at `selector._domainkey.yourdomain` | [RFC 6376](https://www.rfc-editor.org/rfc/rfc6376) |
 | **DMARC** (Domain-based Message Authentication, Reporting and Conformance) | Tells receivers what to do when SPF and DKIM do not line up with the visible `From:` domain (nothing, quarantine, reject) and where to send reports. | A `TXT` record at `_dmarc.yourdomain` | [RFC 9989](https://www.rfc-editor.org/rfc/rfc9989) (with reporting in [RFC 9990](https://www.rfc-editor.org/rfc/rfc9990) and [RFC 9991](https://www.rfc-editor.org/rfc/rfc9991)); these obsolete [RFC 7489](https://www.rfc-editor.org/rfc/rfc7489), per the RFC Editor |
 
-For a domain that sends no mail, the safe set is: an SPF record that allows nothing (`v=spf1 -all`), a DMARC record that says reject, and a **null MX** (`MX 0 .`) that says "this domain accepts no mail" ([RFC 7505](https://www.rfc-editor.org/rfc/rfc7505)). Exercise 2 reads exactly that set from `example.com`. For a domain that does send mail, the exact values come from your mail provider, and SPF has a limit of ten DNS lookups while it is evaluated ([RFC 7208](https://www.rfc-editor.org/rfc/rfc7208), the "10 mechanisms/modifiers" limit), which is why people who keep adding `include:` entries one day find mail rejected. Email is a deep subject; this page covers only the DNS records.
+For a domain that sends no mail, the safe set is: an SPF record that allows nothing (`v=spf1 -all`), a DMARC record that says reject, and a **null MX** (`MX 0 .`) that says "this domain accepts no mail" ([RFC 7505](https://www.rfc-editor.org/rfc/rfc7505)). Exercise 2 reads exactly that set from `example.com`. For a domain that does send mail, the exact values come from your mail provider, and SPF has a limit of ten DNS lookups while it is evaluated ([RFC 7208](https://www.rfc-editor.org/rfc/rfc7208), the "10 mechanisms/modifiers" limit), which is why people who keep adding `include:` entries one day find mail rejected. Email is a deep subject; this page covers only the DNS records. For how mail flows, alignment, DMARC rollout, gateways and API-driven protection, and whether to run your own mail server, read [Email security: DNS records, gateways, API-driven protection, and running your own server](Email-Security-DNS-Gateways-and-API-Driven-Protection.md).
 
 ## DNSSEC at concept level
 
@@ -177,7 +177,7 @@ Cloudflare's page says other record types (MX, TXT) are always DNS-only, and rec
 - **Other records that point at the server.** A `mail` record, an `ssh` record, an `ftp` record, or a gray-cloud `dev` record on the same address gives it away. Cloudflare says the same: an origin address can be found "through historical DNS records or mail server configuration".
 - **The server's own behavior.** A certificate scan of the internet's address space can match your certificate to your address; a site that echoes its own address in a page or header gives it away.
 
-Once the address is known, an attacker connects straight to it and skips the proxy and its WAF. That is why the **origin must refuse everyone except the proxy**, the next section.
+Once the address is known, an attacker connects straight to it and skips the proxy and its WAF. That is why the **origin must refuse everyone except the proxy**, the next section. Once the origin does accept only the proxy, it sees only the proxy's address on every connection; [Behind a CDN: real client IPs, why an IP is a weak identifier, and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md) shows how to get the visitor's address back safely.
 
 ## TLS between the visitor, Cloudflare and your server
 
@@ -220,7 +220,7 @@ The pieces, in the order a visitor meets them: **domain** (registrar), **DNS zon
 2. **Create the Cloudflare account** (Free plan), turn on two-factor authentication there too, and onboard the domain ("full" setup). Review the scanned records and delete any you do not recognize.
 3. **Delegate DNS**: at the registrar, turn off DNSSEC if it is on, replace the nameservers with the two Cloudflare assigned, save, then wait until the domain shows **Active** and `dig NS yourdomain @1.1.1.1` shows Cloudflare's names.
 4. **Build the origin** (see below), with its cloud firewall **before** the first boot is exposed.
-5. **Add the records**: `A` for the apex and `www` pointing at the droplet's public address, **proxied**. No `AAAA` unless you have IPv6 on the droplet.
+5. **Add the records**: `A` for the apex and `www` pointing at the droplet's public address, **proxied**. No `AAAA` unless you have IPv6 on the droplet (and its firewall, logging and allowlists cover it: [the IPv6 lesson](IPv6-Adoption-and-Handling-It-Safely.md#turning-it-on-deliberately-everything-that-must-change-together) is the checklist).
 6. **TLS**: create an Origin CA certificate, install it, set the mode to **Full (strict)**.
 7. **Test**, with the commands below.
 8. **Tear down** in the order given in the teardown section.
@@ -548,7 +548,21 @@ Two `dnsmasq` programs on the loopback address (`127.0.0.1`, reachable only from
 Create a folder and the generator script (it writes the zone, so you can regenerate it with a different address later):
 
 ```bash
-mkdir -p ~/dns-lab && cd ~/dns-lab
+mkdir -p -m 700 ~/dns-lab && cd ~/dns-lab
+[ "$(stat -c %u .)" = "$(id -u)" ] && [ -z "$(find . -maxdepth 0 -perm /022)" ] || { echo "~/dns-lab is not private to you; stop" >&2; exit 1; }   # the pid files live here, so only you may write to it
+cat > stop-dns.sh <<'STOP_EOF'
+#!/usr/bin/env bash
+# stop-dns.sh NAME...: stop the dnsmasq started with NAME.conf (auth, resolver or tofu-auth).
+# It kills only when the pid file is ours, holds only digits, and that process is a dnsmasq using NAME.conf.
+for n in "$@"; do
+  case $n in tofu-auth) f="$PWD/tofu.pid" ;; *) f="$PWD/$n.pid" ;; esac
+  [ -f "$f" ] && [ -O "$f" ] || continue
+  pid="$(cat "$f")"
+  if [[ "$pid" =~ ^[0-9]+$ ]] && [[ "$(ps -o command= -p "$pid" 2>/dev/null)" == *"dnsmasq"*"$n.conf"* ]]; then kill "$pid"; fi
+  rm -f "$f"
+done
+STOP_EOF
+chmod +x stop-dns.sh
 cat > make-auth.sh <<'EOF'
 #!/usr/bin/env bash
 # make-auth.sh [IPV4_FOR_WWW] writes auth.conf: the zone example.test (www defaults to 192.0.2.10)
@@ -604,15 +618,15 @@ cat auth.pid resolver.pid
 
 `dnsmasq` is a small server that is not a full authoritative implementation (its zone support is a subset, so the apex must exist as a host record and the addresses must fall inside the subnets given to `auth-zone`), but it answers real DNS and is enough to teach every concept here. The lab's `dns-rr` line builds a `CAA` record's data from text at run time, so no opaque hex string is stored in the page. The addresses are RFC 5737 and RFC 3849 documentation ranges.
 
-**Stop it** whenever you finish (never `pkill -f`, which can match your own shell; the pid files name exactly the two processes you started):
+**Stop it** whenever you finish (never `pkill -f`, which can match your own shell; `stop-dns.sh` reads each pid file, checks that it holds only digits, belongs to you and names a `dnsmasq` running that config, and only then stops it):
 
 ```bash
-kill "$(cat ~/dns-lab/auth.pid)" "$(cat ~/dns-lab/resolver.pid)"
+cd ~/dns-lab && ./stop-dns.sh auth resolver
 ```
 
 ```powershell
 # Inside WSL, the same Bash commands; from Windows:
-wsl -e bash -c 'kill "$(cat ~/dns-lab/auth.pid)" "$(cat ~/dns-lab/resolver.pid)"'   # est.
+wsl -e bash -c 'cd ~/dns-lab && ./stop-dns.sh auth resolver'   # est.
 ```
 
 #### Exercise 3: ask every record type
@@ -685,7 +699,7 @@ echo "--- ask again 4 seconds later: the TTL has counted down"
 dig +noall +answer @127.0.0.1 -p 5301 www.example.test
 
 echo "--- BREAK: change www at the authoritative server"
-kill "$(cat auth.pid)"; sleep 1; ./make-auth.sh 192.0.2.99; dnsmasq -C auth.conf; sleep 1
+./stop-dns.sh auth; sleep 1; ./make-auth.sh 192.0.2.99; dnsmasq -C auth.conf; sleep 1
 echo "authoritative says:"; dig +short @127.0.0.1 -p 5300 www.example.test
 echo "resolver still says:"; dig +noall +answer @127.0.0.1 -p 5301 www.example.test
 
@@ -708,7 +722,7 @@ dig +noall +answer @127.0.0.1 -p 5301 www.example.test
 
 ```bash
 cd ~/dns-lab
-kill "$(cat auth.pid)"; sleep 1
+./stop-dns.sh auth; sleep 1
 ./make-auth.sh
 echo 'cname=old.example.test,gone.example.test' >> auth.conf
 dnsmasq -C auth.conf; sleep 1
@@ -742,7 +756,7 @@ EOF
 dnsmasq -C tofu-auth.conf
 dig +noall +answer @127.0.0.1 -p 5302 www.example.test
 dig +noall +answer @127.0.0.1 -p 5302 blog.example.test
-kill "$(cat tofu.pid)"
+./stop-dns.sh tofu-auth
 ```
 
 On 2026-10-22, `www` returned `192.0.2.10` and `blog` returned the CNAME to `www.example.test.` followed by that address. Edit a value in `main.tf`, run `tofu plan`, and read the one-line difference before you apply. **Undo:** `tofu destroy -auto-approve` and delete the folder.
@@ -811,7 +825,7 @@ A small loop in the local lab (nothing here touches a real domain).
 
 ```bash
 cd ~/dns-lab
-kill "$(cat auth.pid)"; sleep 1
+./stop-dns.sh auth; sleep 1
 ./make-auth.sh
 echo 'host-record=www.example.test,198.51.100.66' >> auth.conf
 dnsmasq -C auth.conf; sleep 1

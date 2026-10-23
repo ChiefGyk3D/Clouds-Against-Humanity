@@ -7,6 +7,7 @@
 The work is planned the way a small team plans software: a written backlog, a size on every item, two-week sprints, a review at the end of each, and a definition of done. The plan lives in GitHub, next to the code, so a change to the plan is as visible as a change to the code.
 
 - **The board:** the [Clouds Against Humanity project](https://github.com/users/ChiefGyk3D/projects/4) (All Items, Board, Roadmap, Sprint, Epics, Bugs, Blocked, By area, Security, Docs, Done log and Agents at work views, among others). It is laid out the same way as the board of the author's Hammunition suite, so one reading habit works for both.
+- **Where it stands today:** the generated [Project status](Project-Status.md) page counts and lists open issues by state, straight from GitHub.
 - **The backlog:** the repository's [issues](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues), grouped into epics and milestones.
 - **The board as code:** `board.yaml` in the repository root. It names every field, option, iteration and view, and [Scrum Around and Find Out](https://github.com/ChiefGyk3D/scrum-around-and-find-out) (SAFO) creates and checks the board from it.
 
@@ -154,6 +155,10 @@ American English spelling is the standard for everything written in this reposit
 Exceptions, kept exactly as written: direct quotes and vendor text, code and configuration (identifiers, keys, command and file names, URLs), and product or proper names. A status value that a tool returns, such as the `cancelled` result of a GitHub job, is a literal, not prose. Inside code fences and inline code the spelling is left alone.
 
 `tests/test_american_english.py` fails when a clear British spelling appears in any Markdown page, in a Python, HCL, YAML or shell comment or docstring, or in a threat-model description, outside code fences, inline code and URLs. `tests/test_markdown_anchors.py` checks that every link to a heading still points at one. If a page must keep one on purpose, add a line to `docs/american-english-allowlist.txt` with the page, the word and the reason.
+
+## Writing labs and lessons: no shared temp paths
+
+Every lab and every command block in a lesson follows one rule: state lives in a folder only you can use, never at a fixed name in a shared place such as `/tmp`. On a shared machine another local user can plant a file, a link or a pid file at a predictable path before your lab uses it. Make the folder with `mktemp -d`, or with `mkdir -m 700` under `$XDG_RUNTIME_DIR` or `$HOME/.cache`, and refuse a folder that already exists but is a symlink, is not yours or is writable by others. Before a script kills a process it started in an earlier run, read the pid file, check that it holds only digits, belongs to you and names the process you expect (`ps -o command=`), and never reach for `pkill` or `pgrep` with a literal name, which can match your own shell. Killing the pid in `$!` from the same shell is fine. `tests/test_no_shared_temp_paths.py` scans `labs/` and the code blocks in `docs/wiki/` for these patterns. A real exception, such as hostile text inside an invented log line, goes in `docs/shared-temp-allowlist.txt` with a reason.
 
 ## Feedback from readers
 

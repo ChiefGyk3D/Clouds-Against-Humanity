@@ -32,9 +32,15 @@ jobs:
       # The cost gate first: it is a script in this repository, so it rides the
       # Python job rather than needing a job of its own. The settings page check
       # fails when docs/wiki/Settings-Reference.md is stale against
-      # docs/settings.json. The identifier check (no cloud account ids in a
+      # docs/settings.json, and the project status check fails when
+      # docs/wiki/Project-Status.md does not match its committed snapshot (offline;
+      # no GitHub token in CI). The repository growth check is offline too: it
+      # compares the snapshot, its recorded hashes, the committed chart PNG and the
+      # growth page, with no token and no plotting library. The wiki navigation check
+      # fails when a page is missing from (or dead in) docs/wiki/_nav.yaml or when
+      # Contents.md or _Sidebar.md is stale against it. The identifier check (no cloud account ids in a
       # public repository) runs last.
-      test-command: bash scripts/ci_cost_gate.sh && python -I scripts/gen_settings_doc.py --check && python -I -m pytest tests -q && python -I scripts/identifier_check.py --root . && python -I scripts/threat_dragon_layout.py --check
+      test-command: bash scripts/ci_cost_gate.sh && python -I scripts/gen_settings_doc.py --check && python -I scripts/gen_project_status.py --check && python3 -I scripts/gen_repo_metrics.py --check && python -I scripts/gen_wiki_nav.py --check && python -I -m pytest tests -q && python -I scripts/identifier_check.py --root . && python -I scripts/threat_dragon_layout.py --check
       lint-install-command: pip install ruff==0.17.0
       lint-command: ruff check scripts tests
       workflow-lint: false

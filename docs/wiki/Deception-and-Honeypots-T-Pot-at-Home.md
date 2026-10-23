@@ -58,7 +58,7 @@ T-Pot's own doors are separate from the honeypots': **64295** (SSH to the host, 
 | **Elasticvue** | A web page for browsing Elasticsearch directly. |
 | **Attack Map** | An animated map of where attacks come from. On an internal-only decoy, every source is a private address, so a map has little to show (est.). |
 | **CyberChef, Spiderfoot** | Tools for decoding data and for gathering open-source intelligence about an address. Spiderfoot is an open-source intelligence tool that, as far as I know, looks things up on other services (est.); do not point it at anything you do not own. |
-| **Suricata, p0f, Fatt** | Network watchers: an intrusion-detection engine, a passive fingerprinting tool, and a tool that extracts connection fingerprints. |
+| **Suricata, p0f, Fatt** | Network watchers: an intrusion-detection engine (see [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md)), a passive fingerprinting tool, and a tool that extracts connection fingerprints. |
 | **`ewsposter`** | A service that sends your captured data to a community backend. See the next section. |
 
 ## Your data goes to a community project by default

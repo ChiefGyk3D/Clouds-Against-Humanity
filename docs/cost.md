@@ -126,6 +126,23 @@ The first line is a dry run: it starts with `EFFECTIVE CEILING: phase stage-1 $3
 
 The gate scans HCL with a small scanner that understands comments, quoted strings and heredocs, and does not execute it, so it is a guardrail, not a proof. The trusted-run plan check below, not the source scan, is the guarantee: it will not see a resource type built dynamically or a paid resource created outside this repo.
 
+### The labs/ exemption (option L1)
+
+The top-level `labs/` directory holds learner labs, which may create cloud resources the project's own deployment never would. The maintainer approved option L1 of the composable-labs design on 2026-10-22. Under `labs/` the gate:
+
+- still reads every `*.tf` and `*.tofu` file for syntax, and still refuses `*.tf.json`, `*.tofu.json`, symlinked files and symlinked directories;
+- skips the resource-type allowlist, the `count`/`for_each` rule on costed resources and the module-source rules.
+
+Everything else is unchanged: `stacks/` and `modules/` get exactly the rules above. The exemption applies only to a path whose first component is exactly `labs` (so not `Labs`, `labs2`, `stacks/labs` or `docs/labs`), with no `..`, whose real path resolves inside the real `labs/` directory of the repository root. A symlink from `labs/` into `stacks/` is not exempt, and a symlinked `labs/` is refused.
+
+A module block outside `labs/` may not take a source that points into `labs/` (by `..`, or through a symlink, checked with the resolved path), because lab files are not costed and the lab's resources would reach a stack unseen. A lab may call `modules/` by relative path: `modules/` is scanned in full wherever it is called from, so nothing is hidden.
+
+What the exemption is not:
+
+- It is not an approval. Nothing under `labs/` is priced, listed in `approved.json` `allowed_sources`, or counted in the project's spend or in any ceiling.
+- It is not applied by Spacelift. No `labs/` path may appear in `.spacelift/` or back a registered stack; `tests/test_cost_check_labs.py` fails if one does.
+- It does not make a lab safe to run. A learner's bill is the learner's, which is why each lab states its cost before the learner builds it.
+
 To add a paid resource, add it to a `cost.json`, raise that cloud's approved total on purpose in `approved.json`, and have the new total approved before the change merges.
 
 ### Costing a plan, not just the source

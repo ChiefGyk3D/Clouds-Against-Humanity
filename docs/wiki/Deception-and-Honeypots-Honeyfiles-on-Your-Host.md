@@ -171,6 +171,8 @@ rm -f ~/deception-lab/honeyfile/bait/'a|b"c,d' ~/deception-lab/honeyfile/bait/li
 
 ### In production: the audit framework (shown, not run)
 
+The `-w` form below is the older one; [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md#auditd-who-did-what) explains why the `auditctl` manual calls it deprecated and shows the recommended form.
+
 The Linux audit framework (`auditd`) can watch a path and record **who** did what and with which program. A watch rule has this shape (from the Wazuh documentation's example, which watches `/home` for reads with the tag `audit-wazuh-r`):
 
 ```bash

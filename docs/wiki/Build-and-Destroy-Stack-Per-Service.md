@@ -36,7 +36,7 @@ First the words. A **stack** is a folder of OpenTofu code that you plan and appl
 
 | Reason | What it buys | A small example |
 |---|---|---|
-| **Blast radius** | A mistake can only touch what is in that stack's state. | A bad edit to the web app's stack cannot plan a change to the network, because the network is not in that state. |
+| **Blast radius** ([what it means](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md#three-ideas-defined-once)) | A mistake can only touch what is in that stack's state. | A bad edit to the web app's stack cannot plan a change to the network, because the network is not in that state. |
 | **State isolation** | One state file, one lock, one thing to corrupt or lose. State often holds sensitive values, so fewer secrets per file is a smaller loss. | Two people can apply two services at the same time; only two applies to the same stack have to wait for each other. |
 | **Trust boundary** | Each stack runs with its own credentials and identity, so what one stack's credentials can reach is limited to what that stack needs. The maintainer's ruling for this project is that stack boundaries are trust boundaries: for example, the lxmd service and Reticulum get separate stacks and separate identities, so a mistake or a compromise in one does not carry into the other. | The token for the logging stack cannot touch the network. |
 | **Ownership** | A folder can have an owner, a reviewer and a set of permissions. | The team that runs the web app can change the web app, and is not able to change the network by accident. |

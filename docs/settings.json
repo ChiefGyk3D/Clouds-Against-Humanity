@@ -1316,13 +1316,13 @@
       },
       {
         "name": "extra_outbound_rules",
-        "type": "list(object({protocol=string,port_range=string}))",
-        "description": "Outbound rules appended to the defaults.",
+        "type": "list(object({protocol=string,port_range=string,destinations=optional(list(string),[]),allow_world_destinations=optional(bool,false)}))",
+        "description": "Outbound rules appended to the defaults. destinations (optional) lists the only addresses the rule may reach: IPv4 and IPv6 CIDRs or plain addresses. Empty or unset keeps the rule as it always was: 0.0.0.0/0 and ::/0. A list of IPv4 entries opens no IPv6 and the reverse. A /0 entry in the list is refused unless that rule sets allow_world_destinations = true.",
         "required": false,
         "default": [],
-        "validation": "none",
+        "validation": "each destinations entry an IPv4 or IPv6 address or CIDR, no repeats; a /0 entry (0.0.0.0/0, ::/0) or an unspecified address needs allow_world_destinations = true on that rule, and the flag is refused without such an entry",
         "set_where": "set by the calling stack (not a user setting)",
-        "example": "[{protocol=\"tcp\", port_range=\"30000-31000\"}]",
+        "example": "[{protocol=\"tcp\", port_range=\"5201\", destinations=[\"203.0.113.0/24\"]}]",
         "sensitivity": "public",
         "sensitive_in_code": false,
         "status": "exists"

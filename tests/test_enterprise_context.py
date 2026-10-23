@@ -110,9 +110,9 @@ def test_next_lines_follow_the_chain():
 
 
 def test_pages_are_in_sidebar_and_reading_order_under_enterprise_context():
-    for page, heading in (("_Sidebar", "Enterprise context"), ("Reading-Order", "## Enterprise context")):
+    for page, heading in (("_Sidebar", "Foundations: enterprise practice"), ("Reading-Order", "## Enterprise context")):
         body = text(page)
-        assert heading in body, f"{page}: no Enterprise context section"
+        assert heading in body, f"{page}: no enterprise section ({heading})"
         links = [t for t, _ in LINK.findall(body)]
         positions = [links.index(n) for n in ORDER]
         assert positions == sorted(positions), f"{page}: pages out of order"

@@ -12,7 +12,11 @@ It is a cloud extension of a homelab, and it exists to teach: this repository is
 > - **[Start here if you are new](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Start-Here-If-You-Are-New)**: cloud, Terraform and zero trust from zero.
 > - **[Why this exists](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Why-This-Exists)**: where this comes from and who it is for.
 > - **[Reading order](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Reading-Order)**: the paths, with time estimates.
+> - **[Contents](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Contents)**: every page once, grouped by theme, with what each is for.
 > - **[Git from zero](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Git-From-Zero)**: if you have never used git.
+> - **[Repository growth](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Repository-Growth)**: stars, forks and weekly work, drawn from GitHub data; the as-of date is printed in the picture, and stars measure attention, not use.
+>
+> **Who this assumes:** a basic power user. You know how a computer works, may have built or repaired one, and have set up a router and done basic networking. If you could work a help desk or a retail repair counter, you can start; if not, [IT 101 level material such as CompTIA A+ objectives](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Start-Here-If-You-Are-New#where-zero-is) is the benchmark (not an endorsement).
 >
 > **Cost:** the reading and the exercises are free and always will be, and nothing here is sold. Hands-on work uses your own accounts and your provider's bill, nothing you spend goes to the maintainer, and you choose what you can afford to run. The cost gates are explained in [docs/cost.md](docs/cost.md). If you open a DigitalOcean account, my [referral link](https://m.do.co/c/e3aaa65aed6b) is optional and nothing is gated behind it; the wiki says exactly what it is. The same pages are in [`docs/wiki/`](docs/wiki/Home.md) if you prefer reading them in the repo.
 
@@ -90,6 +94,12 @@ That is not "VPNs are always wrong". WireGuard is a very different animal from a
 
 Working ceiling: $30 per month in the current phase (stage 1), shared by every cloud; each phase carries its own ceiling in `docs/stages/approved.json`, so a later phase can raise it on purpose. A cost gate in CI fails any change that raises a cloud's planned total above its approved total, or the active clouds' approved totals above the current phase's ceiling (the AWS twin is marked inactive, because it does not fit beside stage 1). See the [roadmap](docs/wiki/Roadmap.md).
 
+### Growth
+
+Stars measure attention, not use, but the project is young enough that the curve is worth a look. The chart is drawn locally from GitHub data, and the as-of date is printed in the picture; the [Repository growth](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Repository-Growth) page has the numbers as a table.
+
+![Hand-drawn style chart: cumulative stars and forks since the repository was created, and weekly merged pull requests and closed issues](docs/wiki/images/repo-growth.png)
+
 ## Layout
 
 ```
@@ -111,6 +121,9 @@ Clouds-Against-Humanity/
   scripts/cost_raise.py                    proposes (dry run) or makes a per-phase ceiling change in approved.json
   scripts/identifier_check.py              fails on cloud account ids in tracked files (never prints them)
   scripts/gen_settings_doc.py              writes docs/wiki/Settings-Reference.md from docs/settings.json (--check fails when stale)
+  scripts/gen_project_status.py            writes docs/wiki/Project-Status.md from docs/wiki/.status-snapshot.json (--check fails when stale; --refresh fetches live data with the maintainer login)
+  scripts/gen_repo_metrics.py              draws docs/wiki/images/repo-growth.png and writes docs/wiki/Repository-Growth.md from docs/wiki/.metrics-snapshot.json (--check is offline and needs no plotting library; --refresh fetches per-day counts with gh and needs matplotlib; --repo, --snapshot, --out and --page reuse it for another repository)
+  scripts/gen_wiki_nav.py                  writes docs/wiki/Contents.md and docs/wiki/_Sidebar.md from docs/wiki/_nav.yaml (--check fails when stale or when a page is missing from the manifest)
   scripts/gen_example_tests.py             writes each live stack's example.tftest.hcl from its terraform.tfvars.example
   scripts/gen_timezones.py                 regenerates modules/twingate-bootstrap/timezones.txt from the local tz database
   scripts/hcl_variables.py                 helper module: a fail-closed reader of `variable` blocks (used by tests and the generators)
@@ -156,6 +169,7 @@ python3 -I scripts/cost_check.py --root .
 
 # the settings page must match docs/settings.json
 python3 -I scripts/gen_settings_doc.py --check
+python3 -I scripts/gen_project_status.py --check
 
 # the repository tests (needs a virtualenv with pytest and pyyaml installed)
 python3 -I -m pytest tests -q

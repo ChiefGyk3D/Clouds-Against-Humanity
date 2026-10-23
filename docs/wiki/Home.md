@@ -6,7 +6,7 @@ A small, cheap, locked-down DigitalOcean environment built with OpenTofu, applie
 
 Wondering why this exists, who it is for and where I am coming from? Read [Why this exists](Why-This-Exists.md) first; it is a short side page, not part of the core path.
 
-The full tables, with page order, time estimates and checkpoints, are on **[Reading order](Reading-Order.md)**. The short version:
+The full tables, with page order, time estimates and checkpoints, are on **[Reading order](Reading-Order.md)**. Every page of the wiki, grouped by theme with a line on what it is for, is on **[Contents](Contents.md)**. The short version:
 
 | You are... | Start with | Then |
 |---|---|---|
@@ -19,7 +19,7 @@ The full tables, with page order, time estimates and checkpoints, are on **[Read
 | Wanting the enterprise side: corporate networks, infrastructure, identity, and the careers around them | [Enterprise networks](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md) | [Enterprise infrastructure](Enterprise-Infrastructure-Differences.md), [identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md), [careers and what to learn next](Careers-Roles-and-What-to-Learn-Next.md) |
 | Wanting to understand cloud telemetry, run more than one site, or build a small cloud SOC (unverified drafts) | [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) | [Multiple sites](Multiple-Sites-and-Identity.md), [the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md), [reading a dashboard](Reading-a-Dashboard-as-an-Operator.md), the [synthetic monitoring lab](Lab-Demo-Monitoring-Stack.md), then [build your own mini SOC](Build-Your-Own-Mini-SOC.md) |
 | Curious how AWS, Azure and GCP differ (unverified drafts) | [Why the clouds differ](Why-the-Clouds-Differ.md) | [Other clouds](Reading-Order.md#other-clouds-unverified-drafts): AWS, then Azure, then GCP |
-| Looking something up | [Glossary](Glossary.md), [Troubleshooting index](Troubleshooting-Index.md) | [Settings reference](Settings-Reference.md), [Terraform reference](Terraform-Reference.md) |
+| Looking something up | [Glossary](Glossary.md), [Troubleshooting index](Troubleshooting-Index.md) | [Settings reference](Settings-Reference.md), [Terraform reference](Terraform-Reference.md), [Project status](Project-Status.md) (where the work stands now), [Repository growth](Repository-Growth.md) (stars, forks and weekly work) |
 
 If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md): it is the reason the whole thing is shaped the way it is. It is step 11 of the [core path](Reading-Order.md#the-core-path), long and opinionated, so newcomers are better off after the primers and the [Architecture overview](Architecture-Overview.md), which come first there.
 
@@ -70,7 +70,7 @@ Read these in this order. Each page ends with a **Next** line that names the fol
 | 20 | [Lessons learned](Lessons-Learned.md) | What broke and why |
 | 21 | [Roadmap](Roadmap.md) | Stages 0 through 4, the public edge (DMZ) and what is deliberately not planned |
 
-Then pick a track on [Reading order](Reading-Order.md): [build it yourself](Reading-Order.md#build-it-yourself) (fork, labs, build, settings), [understand the design](Reading-Order.md#understand-the-design) ([Terraform reference](Terraform-Reference.md), [trace one change](Trace-One-Change-End-to-End.md)), [security and threat modeling](Reading-Order.md#security-and-threat-modeling), [detection and monitoring](Reading-Order.md#detection-and-monitoring), or [other clouds](Reading-Order.md#other-clouds-unverified-drafts) (unverified drafts). For lookups: [Glossary](Glossary.md), [Troubleshooting index](Troubleshooting-Index.md), [Settings reference](Settings-Reference.md). How the work itself is organized (board, sprints, sizes, definition of done) is on [How this project is planned](How-This-Project-Is-Planned.md).
+Then pick a track on [Reading order](Reading-Order.md): [build it yourself](Reading-Order.md#build-it-yourself) (fork, labs, build, settings), [understand the design](Reading-Order.md#understand-the-design) ([Terraform reference](Terraform-Reference.md), [trace one change](Trace-One-Change-End-to-End.md)), [security and threat modeling](Reading-Order.md#security-and-threat-modeling), [detection and monitoring](Reading-Order.md#detection-and-monitoring), or [other clouds](Reading-Order.md#other-clouds-unverified-drafts) (unverified drafts). For lookups: [Glossary](Glossary.md), [Troubleshooting index](Troubleshooting-Index.md), [Settings reference](Settings-Reference.md), [Project status](Project-Status.md). How the work itself is organized (board, sprints, sizes, definition of done) is on [How this project is planned](How-This-Project-Is-Planned.md).
 
 ## The short version
 
@@ -119,6 +119,12 @@ The droplets dial out. You dial out. Twingate introduces the two of you, checks 
 | AWS twin of stages 0 and 1 | Written and tested with mocked providers, never applied; Azure and GCP have no code | $0 and $20.84, marked inactive in the cost gate because the ceiling cannot hold both clouds |
 
 Working ceiling: $30 per month in the current phase; every phase has its own ceiling that can be raised on purpose (the [Roadmap](Roadmap.md) has the per-phase table and says why the edge does not fit). The [cost gate](CI-Tests-and-Cost-Gate.md) fails any pull request that would push the planned bill above what was approved.
+
+### Growth
+
+![Hand-drawn style chart: cumulative stars and forks since the repository was created, and weekly merged pull requests and closed issues](images/repo-growth.png)
+
+*As of 2026-10-23 (UTC), drawn from GitHub data, which drifts. Stars measure attention, not use. The numbers and how to reproduce them are on [Repository growth](Repository-Growth.md).*
 
 ## Where this wiki comes from
 

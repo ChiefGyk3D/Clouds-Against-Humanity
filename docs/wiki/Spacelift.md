@@ -16,30 +16,45 @@ Spacelift is where `tofu plan` and `tofu apply` actually run. It holds the state
 <summary>Diagram source (Mermaid)</summary>
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 25, "rankSpacing": 40, "padding": 8}}}%%
 flowchart TD
-    pr["Pull request opened"]:::you
-    prop["Push policy: no Spacelift run<br/>for a pull request"]:::ctrl
-    ci["GitHub Actions<br/>tofu test with mocked providers,<br/>cost gate, scanners"]:::ctrl
-    green{"CI green?"}:::warn
-    merge["Merge to main"]:::you
-    affected{"Push policy: did the merge change<br/>this stack, modules/, the hook<br/>or .spacelift/?"}:::warn
-    skip["No run<br/>(docs-only change)"]:::ext
-    tracked["Tracked run on main"]:::ctrl
-    init["before_init hook<br/>fetch named secrets from Doppler"]:::secret
-    plan["tofu plan"]:::ctrl
-    wait{"Autodeploy is off:<br/>human reads the plan"}:::warn
-    again["before_apply hook<br/>fetch secrets again<br/>(fresh container)"]:::secret
-    apply["tofu apply"]:::cloud
-    discard["Discard: nothing changes"]:::ext
-
-    pr --> prop
-    pr --> ci --> green
-    green -- "yes" --> merge --> affected
-    affected -- "no" --> skip
-    affected -- "yes" --> tracked --> init --> plan --> wait
-    green -- "no" --> pr
-    wait -- "confirm" --> again --> apply
-    wait -- "discard" --> discard
+    subgraph A["Pull request"]
+        direction LR
+        pr["Pull request opened"]:::you
+        prop["Push policy: no Spacelift run<br/>for a pull request"]:::ctrl
+        ci["GitHub Actions<br/>tofu test with mocked providers,<br/>cost gate, scanners"]:::ctrl
+        green{{"CI green?"}}:::warn
+        pr --> prop
+        pr --> ci --> green
+        green -- "no" --> pr
+    end
+    subgraph B["Merge"]
+        direction LR
+        merge["Merge to main"]:::you
+        affected{{"Push policy: did the merge change<br/>this stack, modules/, the hook<br/>or .spacelift/?"}}:::warn
+        skip["No run<br/>(docs-only change)"]:::ext
+        merge --> affected
+        affected -- "no" --> skip
+    end
+    subgraph C["Spacelift run"]
+        direction LR
+        tracked["Tracked run on main"]:::ctrl
+        init["before_init hook<br/>fetch named secrets<br/>from Doppler"]:::secret
+        plan["tofu plan"]:::ctrl
+        tracked --> init --> plan
+    end
+    subgraph D["Human decision"]
+        direction LR
+        again["before_apply hook<br/>fetch secrets again<br/>(fresh container)"]:::secret
+        apply["tofu apply"]:::cloud
+        discard["Discard: nothing changes"]:::ext
+        wait{{"Autodeploy is off:<br/>human reads the plan"}}:::warn
+        wait -- "confirm" --> again --> apply
+        wait -- "discard" --> discard
+    end
+    A -- "CI green: yes" --> B
+    B -- "changed: yes" --> C
+    C --> D
 
     classDef you fill:#132a1f,stroke:#4ade80,color:#dcfce7
     classDef ext fill:#3b1d1d,stroke:#f87171,color:#fde2e2
@@ -93,13 +108,32 @@ This is the one place this wiki states the caveat in full; other pages link here
 
 A second policy, `.spacelift/policies/plan.rego`, reads the plan before an apply and denies it if it would open a port on a core machine: a firewall inbound rule with a source address or `0.0.0.0/0`, an AWS ingress rule from a CIDR range, or IPv6 turned on for a droplet or an AWS network. A rule that admits only a tag (the only kind the firewall module emits) passes. The firewall module's tests catch the same mistakes in CI; this catches them in the plan that is about to be applied.
 
-A deliberate exception is a reviewed code change: the exact resource address goes in an allowlist inside the policy file, with a threat-model note. A stack label or a plan field cannot grant one. It is written and tested but **not yet attached**, and it is a policy in Spacelift like the push policy, so the same paid-plan caveat applies; whether the plan policy type is available on the maintainer's plan is unconfirmed. The steps are in [section 9a of the secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#9a-the-plan-policy).
+A deliberate exception is a reviewed code change: an entry in an allowlist inside the policy file, with a threat-model note. A stack label or a plan field cannot grant one. How the allowlists work is in [the allowlist model](#the-plan-policy-the-allowlist-model) below. It is written and tested but **not yet attached**, and it is a policy in Spacelift like the push policy, so the same paid-plan caveat applies; whether the plan policy type is available on the maintainer's plan is unconfirmed. The steps are in [section 9a of the secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#9a-the-plan-policy).
 
 ### The plan policy: destroy and autodeploy guards
 
 The same policy also turns two conventions into rules. A plan that deletes or replaces a core network piece is denied: a VPC, a project, a firewall, a Twingate remote network, an AWS VPC or security group, or anything tagged `protected`. Connector droplets are deliberately not on that list, because replacing one is a normal, reviewed event. And a stack with autodeploy on is denied, since the plan input carries that setting.
 
-An exception to the destroy guard is a reviewed code change: the exact resource address goes in `destroy_allowlist` in the policy file, in a pull request, and comes out again once applied. The autodeploy guard has no exception; turn autodeploy off. The autodeploy check blocks an apply, it does not stop a stack being created with autodeploy on, so the stack factory (issue #96) should enforce that setting too. Same caveat as above: written and tested, not yet attached, and the paid-plan question is unconfirmed. Details are in [section 9a of the secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#9a-the-plan-policy).
+An exception to the destroy guard is a reviewed code change: the stack id and the resource address go in `destroy_allowlist` in the policy file, in a pull request, and come out again once applied. A stack that is torn down one whole service at a time can also opt in to one shortcut: a plan that deletes a firewall together with the droplet it protects is allowed there without an entry (see the allowlist model below). The autodeploy guard has no exception; turn autodeploy off. The autodeploy check blocks an apply, it does not stop a stack being created with autodeploy on, so the stack factory (issue #96) should enforce that setting too. Same caveat as above: written and tested, not yet attached, and the paid-plan question is unconfirmed. Details are in [section 9a of the secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#9a-the-plan-policy).
+
+### The plan policy: the allowlist model
+
+An address in a plan is relative to its stack. When one module is reused for several stacks (one stack per service), each stack has its own `module.service_host.digitalocean_firewall.this`, so an exception keyed only by address would cover all of them. The policy keys both allowlists by **stack id first, then resource address** (or a named group of addresses in that stack). The stack id comes from the plan input, not from anything the branch can set.
+
+What an entry allows depends on the device and the traffic, so an entry carries its own scope rather than one blanket exception per stack:
+
+| Field | Meaning |
+|---|---|
+| direction | `inbound` (the only direction the policy reads today) |
+| protocol | exact, for example `tcp` |
+| ports | exact port ranges, for example `5201` |
+| sources | every non-tag source address the rule has, for example one `/32`, or both `0.0.0.0/0` and `::/0` for a rule open to the world |
+
+Rules are judged one at a time, so a firewall with two public ports needs two entries. Anything missing or unknown (an unknown stack, a missing field, a port not listed) is denied. An entry is added only when that service's stack is approved, in the same pull request as the approval and its threat-model note.
+
+For the destroy guard, `destroy_allowlist` is keyed the same way. One opt-in shortcut exists for taking a service down: in a stack listed in `whole_service_teardown_stacks`, a plan that deletes a firewall and the droplet it protects (the two share a tag, or the firewall names the droplet) is allowed without an entry. A lone firewall delete or a replacement is still denied.
+
+All of these lists are empty today, so every current stack gets exactly the verdicts it had before; tests assert that. The stack id and the nested structure were written against the published policy contract and tested with fixtures, not against a real plan from the maintainer's account: compare with a real plan in the policy workbench when the policy is first attached. Details are in [section 9a of the secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#9a-the-plan-policy).
 
 ### Why autodeploy is off
 

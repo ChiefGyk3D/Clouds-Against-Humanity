@@ -11,7 +11,7 @@ Lesson 8 of the [deception and honeypots track](Deception-and-Honeypots-Start-He
 ## What you will be able to do
 
 - Write the teardown before you build, and use it.
-- Build a small server whose real SSH is on a port only you can reach, with a second firewall layer on the host, and outgoing traffic closed once it is built.
+- Build a small server whose real SSH is on a separate port that only your address can reach (the port is for function; the firewall rule and key-only login are the protection), with a second firewall layer on the host, and outgoing traffic closed once it is built.
 - Install and configure Cowrie from its own documentation, run it as an unprivileged user, and put it on the ports visitors try.
 - Plant a honeytoken (a decoy credential in a decoy file) inside Cowrie's fake file system.
 - Run it for a stated window, pull the logs out over your management port, and delete everything.
@@ -82,7 +82,7 @@ The addresses below are documentation placeholders. In your shell you will use y
 |---|---|---|
 | `SENSOR` | `192.0.2.10` | The server's public address, which the provider shows you once it exists. |
 | `YOU` | `203.0.113.10` | **Your** public address, the only one allowed to reach the management port. Your router's status page shows it. It may change (most homes have a changing address): if it does you are locked out until you edit the firewall from your account console. |
-| `MGMT_PORT` | `49152` | The port real SSH moves to. Pick your own between 1024 and 65535, not 22, 23, 2222 or 2223. |
+| `MGMT_PORT` | `49152` | The port real SSH uses, because Cowrie takes 22. It is a **function** choice, not a defense: a scanner finds any open port. The cloud firewall allowing only `YOU`, key-only login and no passwords are the controls; a different port at most makes your own logs quieter. Pick one between 1024 and 65535, not 22, 23, 2222 or 2223. |
 
 Two firewalls, by tag, on the **cloud** side. The provider's pages (read 2026-10-22) say that when more than one firewall applies to a droplet, "the rules from every one of those firewalls are combined into a single set", that allow rules are additive, and that a firewall blocks "all traffic that isn't expressly permitted by a rule". That makes the second firewall easy to remove:
 
@@ -242,7 +242,7 @@ adduser --disabled-password --gecos "" cowrie
 
 The package list is the Cowrie installation page's Debian list (`python3-pip python3-venv libssl-dev libffi-dev build-essential libpython3-dev`), minus `authbind` (the redirect does that job), plus `sudo` and `nftables`. `NOPASSWD` sudo is a convenience that is acceptable only because the box holds nothing and only your key reaches it. The `cowrie` user has no password and no login key: it only runs the honeypot.
 
-Now move real SSH. Do it in this order, and **do not close your first session until the new one works**:
+Now give real SSH its own port, since the imitation will take 22 (this is for function, not protection: the protection is that only `YOU` can reach it, with a key, and no passwords). Do it in this order, and **do not close your first session until the new one works**:
 
 ```bash
 # still on the server, as root
@@ -311,18 +311,24 @@ What each line does, from the default configuration file (read 2026-10-22): `hos
 The fake home and the lure. Cowrie's `HONEYFS` documentation says a file the visitor can read needs both an entry in the fake file system and content for it. The installation page says the bundled file system is read-only for operators: copy it out, point Cowrie at the copy, and edit the copy with `fsctl`. Copy the lure from your computer first (the `scp` runs on **your** side):
 
 ```bash
-scp -P 49152 -r lure admin@SENSOR:/tmp/lure
+scp -P 49152 -r lure admin@SENSOR:lure-incoming
 ```
 
 ```powershell
-scp -P 49152 -r lure admin@SENSOR:/tmp/lure
+scp -P 49152 -r lure admin@SENSOR:lure-incoming
 ```
 
-On the server, as `cowrie` (still in `~/my-honeypot` with the environment active; the `cowrie` user has no `sudo`, so these commands use only its own files and the copy in `/tmp` that `scp` left readable):
+`scp` put the copy in the `admin` home folder, not in the shared `/tmp`, where another local user could swap the file before you used it. On the server, as `admin` (the `cowrie` user has no `sudo`), hand the file to `cowrie` and remove the staging copy:
 
 ```bash
-mkdir -p /home/cowrie/lure
-cp /tmp/lure/deploy-notes-OLD.txt /home/cowrie/lure/
+sudo install -d -o cowrie -m 700 /home/cowrie/lure
+sudo install -o cowrie -m 600 lure-incoming/deploy-notes-OLD.txt /home/cowrie/lure/
+rm -r lure-incoming
+```
+
+Then as `cowrie` (still in `~/my-honeypot` with the environment active):
+
+```bash
 python -c "from cowrie.core.resources import read_data_bytes; open('var/lib/cowrie/fs.pickle', 'wb').write(read_data_bytes('fs.pickle'))"
 SIZE=$(wc -c < /home/cowrie/lure/deploy-notes-OLD.txt)
 echo "$SIZE"

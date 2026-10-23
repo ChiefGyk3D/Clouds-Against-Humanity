@@ -14,6 +14,8 @@ Twingate gave me a plan for free in exchange for a review. The free plan covers 
 
 I also have a DigitalOcean referral link ([https://m.do.co/c/e3aaa65aed6b](https://m.do.co/c/e3aaa65aed6b)). If you sign up through it and spend, DigitalOcean credits me; the program is described on its [referral page](https://www.digitalocean.com/referral-program) (read 2026-10-22). It is optional and the project works the same without it.
 
+I also have affiliate relationships with Proton and with Tuta, the two hosted email services the [email security lesson](Email-Security-DNS-Gateways-and-API-Driven-Protection.md#hosted-email-for-people-proton-and-tuta) recommends for an ordinary person who does not want to run a mail server. If someone signs up through my links, I may earn a commission, and that helps fund this research. I used and recommended both before I wrote this paragraph, and the recommendation is my own opinion, so weigh it accordingly. Both can be bought without my links, and the lesson says how to choose. My links are on one page, [links.chiefgyk3d.com/productrecs](https://links.chiefgyk3d.com/productrecs); this wiki embeds no individual affiliate address.
+
 If I ever have an affiliation or sponsorship with something I recommend, I will say so here and on the page, the way I did for Doppler and Twingate.
 
 ## Where each piece came from
@@ -31,7 +33,7 @@ If I ever have an affiliation or sponsorship with something I recommend, I will 
 
 ## What Twingate does not do
 
-Twingate's core product is zero trust network access, and that means it decides who can reach which host and port. It is not a secure web gateway or a CASB, and the access product does not do data loss prevention (DLP), so it does not read the content of what crosses it and stop a customer list leaving in a file upload. Twingate has been adding browser-side controls, so check what it offers today before you take my word for the gap. I would love to have that, and for these lessons it does not matter at all, which is why I am telling you now instead of letting you find out.
+Twingate's core product is zero trust network access, and that means it decides who can reach which host and port. It is not a secure web gateway or a CASB, and the access product does not do data loss prevention (DLP; [what that is, with a lab](Cross-Tenant-Data-Governance-Retention-and-DLP.md#dlp-in-plain-words)), so it does not read the content of what crosses it and stop a customer list leaving in a file upload. Twingate has been adding browser-side controls, so check what it offers today before you take my word for the gap. I would love to have that, and for these lessons it does not matter at all, which is why I am telling you now instead of letting you find out.
 
 DLP in a real company commonly works in three places. At the network or cloud edge a proxy inspects traffic and blocks content that matches a policy, at the endpoint an agent watches files, clipboard, USB and uploads, and in the SaaS and cloud apps themselves an API integration scans what is already stored and shared. Each one catches things the others miss, and all three need someone to write and tune the policies, which is the part that actually takes the time. The same vendors that do this are now also watching what AI agents do and letting you block them individually, and CrowdStrike and Zscaler both sell products in that space (check their current product names, they change). That is a whole lesson on its own and this repository does not cover it.
 
