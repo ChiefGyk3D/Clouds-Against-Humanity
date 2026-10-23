@@ -12,6 +12,7 @@
     - Foundations side page: [Behind a CDN: real client IPs, why an IP is a weak identifier, and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md)
     - Foundations side page: [Packet filters compared: iptables, nftables, UFW, pf](Packet-Filters-Compared-iptables-nftables-ufw-pf.md)
     - Foundations side page: [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md)
+    - Foundations side page: [IPv6: why adoption is slow, why this project is IPv4-only, and how to handle it safely](IPv6-Adoption-and-Handling-It-Safely.md)
 4. [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
     - Side page: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md)
     - Side page: [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md)

@@ -220,7 +220,7 @@ The pieces, in the order a visitor meets them: **domain** (registrar), **DNS zon
 2. **Create the Cloudflare account** (Free plan), turn on two-factor authentication there too, and onboard the domain ("full" setup). Review the scanned records and delete any you do not recognize.
 3. **Delegate DNS**: at the registrar, turn off DNSSEC if it is on, replace the nameservers with the two Cloudflare assigned, save, then wait until the domain shows **Active** and `dig NS yourdomain @1.1.1.1` shows Cloudflare's names.
 4. **Build the origin** (see below), with its cloud firewall **before** the first boot is exposed.
-5. **Add the records**: `A` for the apex and `www` pointing at the droplet's public address, **proxied**. No `AAAA` unless you have IPv6 on the droplet.
+5. **Add the records**: `A` for the apex and `www` pointing at the droplet's public address, **proxied**. No `AAAA` unless you have IPv6 on the droplet (and its firewall, logging and allowlists cover it: [the IPv6 lesson](IPv6-Adoption-and-Handling-It-Safely.md#turning-it-on-deliberately-everything-that-must-change-together) is the checklist).
 6. **TLS**: create an Origin CA certificate, install it, set the mode to **Full (strict)**.
 7. **Test**, with the commands below.
 8. **Tear down** in the order given in the teardown section.
