@@ -92,7 +92,7 @@ Why it comes first: NIST's current guidance for services that check passwords sa
 
 **In the vault:** the logins for your email, your GitHub account, your cloud and DNS accounts, Doppler, Spacelift; the recovery codes for each (with the caution below); your own notes of **token expiry dates**, which is where [Doppler and secrets](Doppler-and-Secrets.md#rotation-in-short) already says this project keeps them; the SSH key passphrase.
 
-**Not in the vault:** the runtime secrets a machine needs. A program should not read your password manager; it should read a secrets manager with a token of its own (step 2). The reason is accountability and blast radius: a human vault shared with a script means that script's compromise is a compromise of everything you own.
+**Not in the vault:** the runtime secrets a machine needs. A program should not read your password manager; it should read a secrets manager with a token of its own (step 2). The reason is accountability and [blast radius](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md#three-ideas-defined-once): a human vault shared with a script means that script's compromise is a compromise of everything you own.
 
 ### Several tools, no recommendation
 

@@ -14,6 +14,7 @@
     - Foundations side page: [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md)
     - Foundations side page: [IPv6: why adoption is slow, why this project is IPv4-only, and how to handle it safely](IPv6-Adoption-and-Handling-It-Safely.md)
 4. [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
+    - Foundations side page: [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md)
     - Side page: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md)
     - Side page: [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md)
     - Side page: [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md)

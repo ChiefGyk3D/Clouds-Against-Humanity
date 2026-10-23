@@ -106,7 +106,7 @@ A single window for everything is the easy plan and the wrong one. **Stagger** m
 - **Never take every instance of a service down together.** If two servers do the same job, update one, confirm it is healthy, then the other. Done in the same minute, one bad update or one slow reboot is a full outage.
 - **The first window is a canary for the rest.** A **canary** is the first, low-risk machine you update so that you learn about a problem before everyone has it. A staggered plan makes that automatic: whoever goes first is the test.
 - **Dependent services need an order.** A database that comes back after the application that needs it produces errors that look like an attack. Put the thing others depend on in a window of its own, with a gap.
-- **A bad update has a small blast radius.** The **blast radius** is how much a mistake can break. Staggering shrinks it from "everything" to "this group".
+- **A bad update has a small blast radius.** The **blast radius** ([plan for failure](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md#three-ideas-defined-once)) is how much a mistake can break. Staggering shrinks it from "everything" to "this group".
 - **Rollback and attention are finite.** One person on call can roll back one machine at a time. Ten machines failing at 04:00 are ten simultaneous problems.
 - **Capacity and load.** Machines that come back and all pull updates or rebuild caches at once can saturate a link or a mirror (est.; a general operations point, not a vendor statement). A sibling that stays idle can take the traffic of the one being updated.
 - **Avoid reboot storms.** Many machines rebooting in the same minute is a **reboot storm**: they hammer shared services such as DNS, directory logins and storage together, as they come up.

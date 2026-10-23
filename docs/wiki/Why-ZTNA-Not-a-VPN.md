@@ -159,7 +159,7 @@ Useful disagreement beats validation, including with myself.
 
 **Availability depends on the vendor.** If Twingate's control plane has a bad day, so does access to these droplets. Two connectors protect against a connector dying, not against the vendor. The recovery path documented in the [stage 1 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md) is to rebuild the stateless droplets through Spacelift, which does not need Twingate at all. That was an accepted trade for a lab; a production system might keep a tightly scoped break-glass path.
 
-**ZTNA does not fix a compromised laptop.** It shrinks the blast radius to what that user is allowed to reach. Endpoint security, patching and device posture still matter.
+**ZTNA does not fix a compromised laptop.** It shrinks the [blast radius](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md#three-ideas-defined-once) to what that user is allowed to reach. Endpoint security, patching and device posture still matter.
 
 ## Why Twingate specifically
 

@@ -52,7 +52,7 @@ flowchart LR
 
 | Reason | What it buys |
 |---|---|
-| **Blast radius** | A change to the access layer cannot plan a change to the VPC, because the VPC is not in that state. |
+| **Blast radius** ([what it means](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md#three-ideas-defined-once)) | A change to the access layer cannot plan a change to the VPC, because the VPC is not in that state. |
 | **Different change rates** | The foundation changes almost never; access changes whenever a person or host is added. |
 | **Different credentials** | Stack 00 only needs a DigitalOcean token. Only stack 10 receives the Twingate API token. Least privilege at the run level. |
 | **Readable plans** | A human confirms every apply, and a short plan gets read. A 300-line plan gets skimmed. |
