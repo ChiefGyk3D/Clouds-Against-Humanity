@@ -87,4 +87,4 @@ I am not anti AI. [Scrum Around and Find Out](https://github.com/ChiefGyk3D/scru
 
 If something here is wrong, confusing or does not work on your computer, please tell me: [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md) shows how, and it costs nothing.
 
-Next: [What is the cloud](What-Is-the-Cloud.md), the first primer. Every path through the wiki is laid out on the [Reading order](Reading-Order.md) page.
+Next: [What is the cloud](What-Is-the-Cloud.md), the first primer. Every path through the wiki is laid out on the [Reading order](Reading-Order.md) page, and [Contents](Contents.md) lists every page once, grouped by theme.
