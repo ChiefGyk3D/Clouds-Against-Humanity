@@ -116,25 +116,61 @@ def test_no_em_dash_and_no_forbidden_word():
     assert not re.search(r"\bpaid\b", text, re.IGNORECASE)
 
 
-def test_every_ipv6_address_in_the_page_is_a_documentation_ula_or_scope_address():
-    token = re.compile(r"(?<![\w:.])([0-9A-Fa-f]{0,4}(?::[0-9A-Fa-f]{0,4}){2,7}(?:/\d{1,3})?)(?![\w:])")
-    allowed = [
-        ipaddress.ip_network(n)
-        for n in ("2001:db8::/32", "fc00::/7", "fe80::/10", "ff00::/8", "::/128", "::1/128", "::ffff:0:0/96", "::/0", "2000::/3")
-    ]
+# Intended prefixes only. Nothing here may contain "any" address: ::/0 and 2000::/3 are NOT in this list,
+# because every global address is a subnet of them and the check would accept a real one.
+ALLOWED_V6 = [ipaddress.ip_network(n) for n in ("2001:db8::/32", "fc00::/7", "fe80::/10", "ff00::/8", "::/128", "::1/128")]
+# Route literals the page may show, matched as exact text and never by containment.
+ALLOWED_LITERALS = {"::/0", "2000::/3"}
+DOC_V4 = [ipaddress.ip_network(n) for n in ("192.0.2.0/24", "198.51.100.0/24", "203.0.113.0/24")]
+V6_TOKEN = re.compile(r"(?<![\w:.])([0-9A-Fa-f]{0,4}(?::[0-9A-Fa-f]{0,4}){2,7}(?:\.\d{1,3}){0,3}(?:/\d{1,3})?)(?![\w:])")
+
+
+def unapproved_v6(text: str) -> list[str]:
+    """IPv6 addresses outside the documentation, ULA, link-local and scope prefixes (fenced code is skipped)."""
     bad = []
-    for fence_free in re.split(r"(?m)^```.*?^```", page(), flags=re.DOTALL | re.MULTILINE):
-        for m in token.finditer(fence_free):
+    for part in re.split(r"(?m)^```.*?^```", text, flags=re.DOTALL | re.MULTILINE):
+        for m in V6_TOKEN.finditer(part):
             raw = m.group(1)
-            if raw.count(":") < 2 or raw.strip(":") == "":
+            if raw.count(":") < 2 or raw.strip(":") == "" or raw in ALLOWED_LITERALS:
                 continue
             try:
                 net = ipaddress.ip_network(raw, strict=False)
             except ValueError:
                 continue  # a time such as 22:09:47, or a MAC address
-            if not any(net.version == a.version and net.subnet_of(a) for a in allowed):
+            mapped = net.network_address.ipv4_mapped
+            if mapped is not None:  # ::ffff:a.b.c.d is fine only when a.b.c.d is an RFC 5737 address
+                if not any(mapped in n for n in DOC_V4):
+                    bad.append(raw)
+            elif not any(net.subnet_of(a) for a in ALLOWED_V6):
                 bad.append(raw)
-    assert not bad, f"not documentation, ULA, link-local or scope addresses: {bad}"
+    return bad
+
+
+def test_every_ipv6_address_in_the_page_is_a_documentation_ula_or_scope_address():
+    assert not unapproved_v6(page())
+
+
+def test_the_address_check_flags_real_looking_and_mistyped_addresses():
+    flagged = unapproved_v6(
+        "Real looking 2606:4700::1111 and 2a00:1450:4001::2004, mistyped 2001:db9::1, "
+        "a mapped one ::ffff:8.8.8.8, a /48 of 2001:db80::/32, and a loose 2000::/4 route."
+    )
+    assert flagged == ["2606:4700::1111", "2a00:1450:4001::2004", "2001:db9::1", "::ffff:8.8.8.8", "2001:db80::/32", "2000::/4"]
+    assert not unapproved_v6("Fine: 2001:db8::10, fd12:3456:789a::1, fe80::1, ff02::1, ::1, ::ffff:192.0.2.5, the route ::/0 and 2000::/3.")
+
+
+def test_the_page_never_shows_a_real_looking_ipv4_address():
+    # Every dotted quad in prose must be documentation (RFC 5737), private, loopback or a /0 literal.
+    quad = re.compile(r"(?<![\w.])(\d{1,3}(?:\.\d{1,3}){3})(?![\w.])")
+    ok = [ipaddress.ip_network(n) for n in ("192.0.2.0/24", "198.51.100.0/24", "203.0.113.0/24", "127.0.0.0/8", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16")]
+    bad = []
+    prose = re.sub(r"[Ss]ections? (?:\d+(?:\.\d+)*(?:, and |, | and )?)+", "section N", page())  # RFC section numbers look like dotted quads
+    for part in re.split(r"(?m)^```.*?^```", prose, flags=re.DOTALL | re.MULTILINE):
+        for m in quad.finditer(part):
+            addr = ipaddress.ip_address(m.group(1)) if all(int(x) < 256 for x in m.group(1).split(".")) else None
+            if addr is not None and str(addr) != "0.0.0.0" and not any(addr in n for n in ok):
+                bad.append(m.group(1))
+    assert not bad, bad
 
 
 def test_every_statistic_carries_a_retrieval_date_and_the_register_says_numbers_drift():
