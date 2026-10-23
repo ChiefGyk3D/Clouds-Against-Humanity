@@ -520,17 +520,43 @@ def check_files(snapshot_path: Path, png_path: Path, page_path: Path | None, ima
 
 
 def write_all(snap: dict, snapshot_path: Path, png_path: Path, page_path: Path | None, image_ref: str) -> None:
-    """Draw into a private temp directory first, so a drawing failure writes nothing."""
+    """Write picture, snapshot and page as one unit: all of them change, or none does.
+
+    The picture is drawn into a private temp directory first, then every output is
+    staged next to its target. Only when all staging succeeded are the targets
+    replaced; if a replace fails, the ones already replaced are put back.
+    """
     with tempfile.TemporaryDirectory() as tmp:
-        staged = Path(tmp) / "chart.png"
-        draw_png(snap, staged)
-        snap = {**snap, "source_sha256": source_digest(snap), "png_sha256": file_digest(staged)}
-        png_path.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(staged, png_path)
-    snapshot_path.parent.mkdir(parents=True, exist_ok=True)
-    snapshot_path.write_text(json.dumps(snap, indent=1, sort_keys=True) + "\n", encoding="utf-8")
-    if page_path is not None:
-        page_path.write_text(render_page(snap, image_ref), encoding="utf-8")
+        drawn = Path(tmp) / "chart.png"
+        draw_png(snap, drawn)
+        snap = {**snap, "source_sha256": source_digest(snap), "png_sha256": file_digest(drawn)}
+        outputs = {png_path: drawn.read_bytes(), snapshot_path: (json.dumps(snap, indent=1, sort_keys=True) + "\n").encode("utf-8")}
+        if page_path is not None:
+            outputs[page_path] = render_page(snap, image_ref).encode("utf-8")
+    staged: dict[Path, Path] = {}
+    originals: dict[Path, bytes | None] = {}
+    replaced: list[Path] = []
+    try:
+        for target, data in outputs.items():
+            target.parent.mkdir(parents=True, exist_ok=True)
+            originals[target] = target.read_bytes() if target.is_file() else None
+            tmp_path = target.with_name(f".{target.name}.new")
+            tmp_path.write_bytes(data)
+            staged[target] = tmp_path
+        for target, tmp_path in staged.items():
+            os.replace(tmp_path, target)
+            replaced.append(target)
+    except BaseException:
+        for target in reversed(replaced):
+            before = originals[target]
+            if before is None:
+                target.unlink(missing_ok=True)
+            else:
+                target.write_bytes(before)
+        raise
+    finally:
+        for tmp_path in staged.values():
+            tmp_path.unlink(missing_ok=True)
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -417,6 +417,36 @@ def test_traffic_flag_needs_refresh():
         grm.main(["--traffic"])
 
 
+def test_a_failing_second_or_third_write_leaves_all_three_files_unchanged(tmp_path, monkeypatch):
+    setup_tree(tmp_path)
+    before = snapshot_files(tmp_path)
+    fresh = fixture()
+    fresh["fetched_at"] = "2026-10-23T00:00:00Z"
+    monkeypatch.setattr(grm, "draw_png", lambda snap, out: out.write_bytes(png_bytes(color=7)))
+    real_replace = grm.os.replace
+    for failing in (2, 3):
+        calls = []
+
+        def flaky(src, dst, failing=failing, calls=calls):
+            calls.append(dst)
+            if len(calls) == failing:
+                raise OSError("disk full")
+            return real_replace(src, dst)
+
+        monkeypatch.setattr(grm.os, "replace", flaky)
+        with pytest.raises(OSError, match="disk full"):
+            grm.write_all(fresh, tmp_path / grm.SNAPSHOT, tmp_path / grm.PNG, tmp_path / grm.PAGE, "images/repo-growth.png")
+        assert len(calls) == failing
+        assert snapshot_files(tmp_path) == before  # same bytes, and no staging leftovers
+
+
+def test_home_embeds_the_chart_with_alt_text_and_the_current_as_of_date():
+    home = (ROOT / "docs" / "wiki" / "Home.md").read_text()
+    snap = json.loads((ROOT / grm.SNAPSHOT).read_text())
+    assert "![" + grm.ALT_TEXT + "](images/repo-growth.png)" in home
+    assert f"As of {snap['fetched_at'][:10]} (UTC)" in home, "refresh the as-of date on Home after a --refresh"
+
+
 # -- the wiki and README are wired up -----------------------------------------------
 
 
