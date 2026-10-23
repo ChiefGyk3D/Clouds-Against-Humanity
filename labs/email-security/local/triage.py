@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import re
 import sys
+from html import unescape
 from html.parser import HTMLParser
 from email import policy
 from email.parser import BytesParser
@@ -35,24 +36,43 @@ def distance(a, b):
 
 
 class Anchors(HTMLParser):
-    """Collect (href, visible text) for every <a>, whatever quote style the attribute uses."""
+    """Collect (href, visible text) for every <a>, whatever quote style or case the markup uses.
+
+    Browsers use the FIRST href of an anchor with several, a new <a> ends the one still open, and an
+    anchor left open at the end of the document still links; so does this parser (html.parser already
+    lowercases tag and attribute names)."""
 
     def __init__(self):
         super().__init__()
-        self.found, self._href, self._text = [], None, []
+        self.found, self.multi, self._href, self._text = [], [], None, []
+
+    def _flush(self):
+        if self._href is not None:
+            self.found.append((self._href, "".join(self._text).strip()))
+        self._href, self._text = None, []
 
     def handle_starttag(self, tag, attrs):
         if tag == "a":
-            self._href, self._text = dict(attrs).get("href"), []
+            self._flush()  # an unclosed anchor must not be lost when the next one starts
+            hrefs = [v for k, v in attrs if k == "href" and v is not None]
+            if len(hrefs) > 1:
+                self.multi.append(hrefs[0])
+            self._href = hrefs[0] if hrefs else None
 
     def handle_data(self, data):
         if self._href is not None:
             self._text.append(data)
 
     def handle_endtag(self, tag):
-        if tag == "a" and self._href is not None:
-            self.found.append((self._href, "".join(self._text).strip()))
-            self._href = None
+        if tag == "a":
+            self._flush()
+
+    def close(self):
+        super().close()
+        self._flush()  # an anchor still open at the end
+
+
+RAW_HREF = re.compile(r"""\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>"']+))""", re.IGNORECASE)
 
 
 def host(url):
@@ -96,11 +116,20 @@ def analyze(path, protect):
                 parser = Anchors()
                 parser.feed(text)
                 parser.close()
+                for href in parser.multi:
+                    flags.append(f"an anchor has more than one href attribute (browsers use the first, {href}); treat the message as hostile")
                 for href, label in parser.found:
                     links.append((href, label))
                     shown = re.search(r"https?://[^\s<]+", label)
                     if shown and host(shown.group(0)) != host(href):
                         flags.append(f"link text shows {host(shown.group(0))} but goes to {host(href)}")
+                listed = {h for h, _ in parser.found}
+                for m in RAW_HREF.finditer(text):
+                    raw = unescape(next(g for g in m.groups() if g is not None))
+                    if raw and raw not in listed:
+                        listed.add(raw)
+                        links.append((raw, ""))
+                        flags.append(f"link {raw} was found only by the raw scan of the HTML (not in an ordinary anchor); read it")
                 if re.search(r"<img\b", text, re.I) and len(re.sub(r"<[^>]+>", "", text).strip()) < 20:
                     flags.append("body is almost only an image: a QR code hides the destination from text scanners; do not scan it on a work phone")
             else:

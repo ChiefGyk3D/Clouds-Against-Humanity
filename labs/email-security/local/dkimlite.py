@@ -109,6 +109,9 @@ def verify(raw: bytes, lookup_txt):
             res["reason"] = "missing a required tag"
         elif "from" not in [n.strip().lower() for n in t["h"].split(":")]:
             res["reason"] = "From is not in h=: RFC 6376 section 5.4 requires the From field to be signed"
+        elif [n.strip().lower() for n in t["h"].split(":")].count("from") < sum(1 for n, _ in headers if n.lower() == "from"):
+            res["reason"] = ("more From headers than From entries in h=: a From was added after signing "
+                             "(RFC 6376 section 8.15; sign From twice to prevent it)")
         elif t["a"] != "rsa-sha256" or t.get("c", "simple/simple") != "relaxed/relaxed":
             res.update(result="neutral", reason="this teaching verifier only does rsa-sha256 with relaxed/relaxed")
         elif "l" in t:

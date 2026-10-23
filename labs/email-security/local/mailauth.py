@@ -255,11 +255,13 @@ def dmarc_policy(res, from_domain):
 
 def evaluate(res, raw, client_ip, mail_from):
     headers, _ = dkimlite.split_message(raw)
-    frm = next((r for n, r in headers if n.lower() == "from"), b"").decode("utf-8", "replace")
+    froms = [r for n, r in headers if n.lower() == "from"]
+    # DKIM picks the bottom-most instance of a header (RFC 6376 section 5.4.2); use the same one here
+    frm = (froms[-1] if froms else b"").decode("utf-8", "replace")
     from_addr = re.findall(r"[\w.+-]+@([\w.-]+)", frm.partition(":")[2])
     from_domain = (from_addr[-1] if from_addr else "").lower()
     mf_domain = mail_from.rpartition("@")[2].lower() if mail_from else ""
-    out = {"from_domain": from_domain, "mail_from_domain": mf_domain}
+    out = {"from_domain": from_domain, "mail_from_domain": mf_domain, "from_headers": len(froms)}
     out["spf"], st = spf(res, client_ip, mf_domain) if mf_domain else ("none", SpfState())
     out["spf_trace"], out["spf_lookups"] = st.trace, st.lookups
 
@@ -273,8 +275,11 @@ def evaluate(res, raw, client_ip, mail_from):
     if rec is None:
         out.update(dmarc="none", disposition="no DMARC policy", spf_aligned=False, dkim_aligned=False)
         return out
-    out["spf_aligned"] = out["spf"] == "pass" and aligned(mf_domain, from_domain, rec.get("aspf", "r").lower())
-    out["dkim_aligned"] = any(d["result"] == "pass" and aligned(d["d"], from_domain, rec.get("adkim", "r").lower()) for d in out["dkim"])
+    multi = len(froms) > 1  # RFC 7489 section 6.6.1 / RFC 9989: more than one From is not evaluated as a pass
+    out["spf_aligned"] = not multi and out["spf"] == "pass" and aligned(mf_domain, from_domain, rec.get("aspf", "r").lower())
+    out["dkim_aligned"] = not multi and any(d["result"] == "pass" and aligned(d["d"], from_domain, rec.get("adkim", "r").lower()) for d in out["dkim"])
+    if multi:
+        out["reason"] = f"{len(froms)} From headers: DMARC cannot evaluate an ambiguous author, so it fails"
     if out["spf_aligned"] or out["dkim_aligned"]:
         out.update(dmarc="pass", disposition="deliver")
     else:

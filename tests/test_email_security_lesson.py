@@ -208,6 +208,77 @@ def test_triage_reads_single_quoted_and_unquoted_hrefs(tmp_path, mods):
 
 
 @needs_openssl
+def test_added_from_header_breaks_the_signature_and_dmarc(built, mods):
+    """Parser differential: a second From added above the signed one. DKIM picks the bottom-most
+    instance, a mail client may show the top one; the verifier and DMARC must not disagree."""
+    ma, dk = mods["mailauth"], mods["dkimlite"]
+    res = ma.FileResolver(built / "zone.json")
+
+    def lookup(name):
+        _, vals = res.query(name, "TXT")
+        return vals[0] if vals else None
+
+    original = (built / "msgs" / "01-legit-internal-signed.eml").read_bytes()
+    body = original.split(b"DKIM-Signature:", 1)[1]
+    signed = b"DKIM-Signature:" + body  # drop the receiver's stamp lines above the signature
+    assert dk.verify(signed, lookup)[0]["result"] == "pass"
+    attacked = b"From: CEO <ceo@example.test>\r\n" + signed
+    r = ma.evaluate(res, attacked, "203.0.113.66", "ceo@example.test")
+    assert r["dkim"][0]["result"] == "fail" and "more From headers" in r["dkim"][0]["reason"]
+    assert r["from_headers"] == 2 and r["dmarc"] == "fail" and not r["dkim_aligned"] and not r["spf_aligned"]
+    # over-signing: h=from:from verifies with exactly one From, and refuses a From added on top
+    plain = (b"From: Alice <alice@example.test>\r\nTo: bob@receiver.test\r\nSubject: Hi\r\n"
+             b"Date: Thu, 22 Oct 2026 14:00:00 +0000\r\nMessage-ID: <o@lab.test>\r\n\r\nHello.\r\n")
+    key = built / "keys" / "org.pem"
+    over = (dk.sign(plain, "example.test", "s2026a", key, names=["from", "from", "subject", "date"]) + "\r\n").encode() + plain
+    assert "h=from:from:subject:date" in over.decode()
+    assert dk.verify(over, lookup)[0]["result"] == "pass"
+    assert ma.evaluate(res, over, "192.0.2.25", "alice@example.test")["dmarc"] == "pass"
+    assert dk.verify(b"From: CEO <ceo@example.test>\r\n" + over, lookup)[0]["result"] == "fail"
+    # a message that really carries two From headers is never a DMARC pass, even if both are signed
+    twice = b"From: Alice <alice@example.test>\r\n" + plain
+    both = (dk.sign(twice, "example.test", "s2026a", key, names=["from", "from", "subject"]) + "\r\n").encode() + twice
+    r2 = ma.evaluate(res, both, "192.0.2.25", "alice@example.test")
+    assert r2["dkim"][0]["result"] == "pass" and r2["dmarc"] == "fail" and r2["from_headers"] == 2
+
+
+def _eml(html):
+    return (b"From: A <a@random-host.test>\r\nTo: b@receiver.test\r\nSubject: s\r\nMIME-Version: 1.0\r\n"
+            b"Content-Type: text/html; charset=utf-8\r\n\r\n" + html.encode() + b"\r\n")
+
+
+def test_triage_link_list_cannot_lose_a_link(tmp_path, mods):
+    tr = mods["triage"]
+
+    def run(html):
+        eml = tmp_path / "t.eml"
+        eml.write_bytes(_eml(html))
+        a = tr.analyze(eml, ["example.test"])
+        return {u for u, _ in a["links"]}, a["flags"]
+
+    # duplicate href attributes: browsers use the first; the message is flagged
+    links, flags = run('<a href="https://first.invalid/" href="https://second.invalid/">https://example.com/</a>')
+    assert ("https://first.invalid/" in links) and any("more than one href" in f and "first.invalid" in f for f in flags)
+    assert "https://second.invalid/" in links  # not listed by the parser, so the raw scan reports it
+    assert any("raw scan" in f and "second.invalid" in f for f in flags)
+    # nested anchors: the open one is saved when the next starts
+    links, _ = run('<a href="https://one.invalid/">one<a href="https://two.invalid/">two</a>')
+    assert {"https://one.invalid/", "https://two.invalid/"} <= links
+    # an anchor still open at the end of the document
+    links, _ = run('<p>x</p><a href="https://open.invalid/">click')
+    assert "https://open.invalid/" in links
+    # uppercase tag and attribute
+    links, _ = run('<A HREF="https://UPPER.invalid/path">go</A>')
+    assert "https://UPPER.invalid/path" in links
+    # a link only the raw scan can reach (not an anchor), and an entity-escaped one
+    links, flags = run('<map><area href="https://hidden.invalid/x"></map><link href=https://bare.invalid/y>')
+    assert {"https://hidden.invalid/x", "https://bare.invalid/y"} <= links
+    assert any("hidden.invalid" in f and "raw scan" in f for f in flags)
+    links, _ = run('<a href="https://amp.invalid/?a=1&amp;b=2">x</a>')
+    assert "https://amp.invalid/?a=1&b=2" in links
+
+
+@needs_openssl
 def test_dmarc_report_parser_and_refusals(built, mods, tmp_path):
     rd = mods["dmarc_report"]
     rep = rd.parse(built / "report.xml")
