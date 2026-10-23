@@ -14,6 +14,8 @@ Twingate gave me a plan for free in exchange for a review. The free plan covers 
 
 I also have a DigitalOcean referral link ([https://m.do.co/c/e3aaa65aed6b](https://m.do.co/c/e3aaa65aed6b)). If you sign up through it and spend, DigitalOcean credits me; the program is described on its [referral page](https://www.digitalocean.com/referral-program) (read 2026-10-22). It is optional and the project works the same without it.
 
+I also have affiliate relationships with Proton and with Tuta, the two hosted email services the [email security lesson](Email-Security-DNS-Gateways-and-API-Driven-Protection.md#hosted-email-for-people-proton-and-tuta) recommends for an ordinary person who does not want to run a mail server. If someone signs up through my links, I may earn a commission, and that helps fund this research. I used and recommended both before I wrote this paragraph, and the recommendation is my own opinion, so weigh it accordingly. Both can be bought without my links, and the lesson says how to choose. My links are on one page, [links.chiefgyk3d.com/productrecs](https://links.chiefgyk3d.com/productrecs); this wiki embeds no individual affiliate address.
+
 If I ever have an affiliation or sponsorship with something I recommend, I will say so here and on the page, the way I did for Doppler and Twingate.
 
 ## Where each piece came from
