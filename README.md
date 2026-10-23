@@ -12,6 +12,7 @@ It is a cloud extension of a homelab, and it exists to teach: this repository is
 > - **[Start here if you are new](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Start-Here-If-You-Are-New)**: cloud, Terraform and zero trust from zero.
 > - **[Why this exists](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Why-This-Exists)**: where this comes from and who it is for.
 > - **[Reading order](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Reading-Order)**: the paths, with time estimates.
+> - **[Contents](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Contents)**: every page once, grouped by theme, with what each is for.
 > - **[Git from zero](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Git-From-Zero)**: if you have never used git.
 > - **[Repository growth](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Repository-Growth)**: stars, forks and weekly work, drawn from GitHub data; the as-of date is printed in the picture, and stars measure attention, not use.
 >
@@ -120,6 +121,7 @@ Clouds-Against-Humanity/
   scripts/gen_settings_doc.py              writes docs/wiki/Settings-Reference.md from docs/settings.json (--check fails when stale)
   scripts/gen_project_status.py            writes docs/wiki/Project-Status.md from docs/wiki/.status-snapshot.json (--check fails when stale; --refresh fetches live data with the maintainer login)
   scripts/gen_repo_metrics.py              draws docs/wiki/images/repo-growth.png and writes docs/wiki/Repository-Growth.md from docs/wiki/.metrics-snapshot.json (--check is offline and needs no plotting library; --refresh fetches per-day counts with gh and needs matplotlib; --repo, --snapshot, --out and --page reuse it for another repository)
+  scripts/gen_wiki_nav.py                  writes docs/wiki/Contents.md and docs/wiki/_Sidebar.md from docs/wiki/_nav.yaml (--check fails when stale or when a page is missing from the manifest)
   scripts/gen_example_tests.py             writes each live stack's example.tftest.hcl from its terraform.tfvars.example
   scripts/gen_timezones.py                 regenerates modules/twingate-bootstrap/timezones.txt from the local tz database
   scripts/hcl_variables.py                 helper module: a fail-closed reader of `variable` blocks (used by tests and the generators)
