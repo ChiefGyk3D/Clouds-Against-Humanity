@@ -16,30 +16,45 @@ Spacelift is where `tofu plan` and `tofu apply` actually run. It holds the state
 <summary>Diagram source (Mermaid)</summary>
 
 ```mermaid
+%%{init: {"flowchart": {"nodeSpacing": 25, "rankSpacing": 40, "padding": 8}}}%%
 flowchart TD
-    pr["Pull request opened"]:::you
-    prop["Push policy: no Spacelift run<br/>for a pull request"]:::ctrl
-    ci["GitHub Actions<br/>tofu test with mocked providers,<br/>cost gate, scanners"]:::ctrl
-    green{"CI green?"}:::warn
-    merge["Merge to main"]:::you
-    affected{"Push policy: did the merge change<br/>this stack, modules/, the hook<br/>or .spacelift/?"}:::warn
-    skip["No run<br/>(docs-only change)"]:::ext
-    tracked["Tracked run on main"]:::ctrl
-    init["before_init hook<br/>fetch named secrets from Doppler"]:::secret
-    plan["tofu plan"]:::ctrl
-    wait{"Autodeploy is off:<br/>human reads the plan"}:::warn
-    again["before_apply hook<br/>fetch secrets again<br/>(fresh container)"]:::secret
-    apply["tofu apply"]:::cloud
-    discard["Discard: nothing changes"]:::ext
-
-    pr --> prop
-    pr --> ci --> green
-    green -- "yes" --> merge --> affected
-    affected -- "no" --> skip
-    affected -- "yes" --> tracked --> init --> plan --> wait
-    green -- "no" --> pr
-    wait -- "confirm" --> again --> apply
-    wait -- "discard" --> discard
+    subgraph A["Pull request"]
+        direction LR
+        pr["Pull request opened"]:::you
+        prop["Push policy: no Spacelift run<br/>for a pull request"]:::ctrl
+        ci["GitHub Actions<br/>tofu test with mocked providers,<br/>cost gate, scanners"]:::ctrl
+        green{{"CI green?"}}:::warn
+        pr --> prop
+        pr --> ci --> green
+        green -- "no" --> pr
+    end
+    subgraph B["Merge"]
+        direction LR
+        merge["Merge to main"]:::you
+        affected{{"Push policy: did the merge change<br/>this stack, modules/, the hook<br/>or .spacelift/?"}}:::warn
+        skip["No run<br/>(docs-only change)"]:::ext
+        merge --> affected
+        affected -- "no" --> skip
+    end
+    subgraph C["Spacelift run"]
+        direction LR
+        tracked["Tracked run on main"]:::ctrl
+        init["before_init hook<br/>fetch named secrets<br/>from Doppler"]:::secret
+        plan["tofu plan"]:::ctrl
+        tracked --> init --> plan
+    end
+    subgraph D["Human decision"]
+        direction LR
+        again["before_apply hook<br/>fetch secrets again<br/>(fresh container)"]:::secret
+        apply["tofu apply"]:::cloud
+        discard["Discard: nothing changes"]:::ext
+        wait{{"Autodeploy is off:<br/>human reads the plan"}}:::warn
+        wait -- "confirm" --> again --> apply
+        wait -- "discard" --> discard
+    end
+    A -- "CI green: yes" --> B
+    B -- "changed: yes" --> C
+    C --> D
 
     classDef you fill:#132a1f,stroke:#4ade80,color:#dcfce7
     classDef ext fill:#3b1d1d,stroke:#f87171,color:#fde2e2

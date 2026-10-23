@@ -18,7 +18,7 @@
     "sha256": "ad44896c9bd9cf6d870396ee888b0fcba158f93f3dcad06f580a7b92e70bde23"
   },
   "docs/wiki/images/ci-tests-and-cost-gate-diagram-2.png": {
-    "sha256": "0abfae9a550e9d479144b3ef546e6aa5a41b06ae9db2fcfc33b3d9fe8e173722"
+    "sha256": "c6350213552bbeca820173dd2c983f3cfb86a98d4ea92b5a3f4a5a77aa9060f2"
   },
   "docs/wiki/images/containers-and-docker-basics-diagram-1.png": {
     "sha256": "ea2dc53f819ff0450c14ec57cd89fdd7c92a0d69aa2ddcb0153d30c6018d6c5f"
@@ -30,7 +30,7 @@
     "sha256": "3eaae25dd1055b1db027ee9662c4322542447dcbcda0c78e93acc9987349e587"
   },
   "docs/wiki/images/droplet-hardening-diagram-1.png": {
-    "sha256": "f0165943c5a24c1e3276be75779b6f202d2dcbbafe6236dea2e269e3c7ecb073"
+    "sha256": "be6f318a8b7c2ae652a2745ba5299522396a256a7deee2768815b0b2ac339136"
   },
   "docs/wiki/images/fork-private-stacks-and-the-pipeline-diagram-1.png": {
     "sha256": "d6290ae409d567181ef427a314e1a50b43d6c8dbe76770b3a49f181078b109dd"
@@ -60,7 +60,7 @@
     "sha256": "f847209ed7e31be8b9d5cdf7659d47876eba79a57c676a3e3210357ae700c73d"
   },
   "docs/wiki/images/spacelift-diagram-1.png": {
-    "sha256": "8c750ab350c2a14e2132f0fd1877d513dca6585e69e50a04df5eca56014a31ae"
+    "sha256": "1d327efc62d44ffed0cf714da7d41fae3707ed04d5b9e5d6e6600bf18b285f9b"
   },
   "docs/wiki/images/telemetry-crosses-the-trust-boundary-diagram-1.png": {
     "sha256": "24fed3e9d7a1872ea2e54ca3206b541060745f2a9b3db22eb1f86acc8c912183"
