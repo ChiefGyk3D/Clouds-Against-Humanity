@@ -70,7 +70,7 @@ A **secrets manager** stores values encrypted, controls who can read them, recor
 - **Sprawl:** secrets in code, chat, wikis and spreadsheets. Scanning tools in CI and on repositories look for them.
 - **Rotation:** changing a secret on a schedule or after an exposure without breaking its users. Easy for one token, hard for a password embedded in forty applications. **Dynamic secrets** avoid it by issuing a credential per request that expires on its own; Vault-class tools are known for this.
 - **Environments:** development, staging and production must hold different values and different access, not one shared set.
-- **Blast radius:** a leaked token should expose one thing. Scoping by project and config, as in this repository, is the mechanism.
+- **Blast radius** ([what it means](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md#three-ideas-defined-once)): a leaked token should expose one thing. Scoping by project and config, as in this repository, is the mechanism.
 - **Certificates** ([what one is and how it is checked](How-a-Web-Request-Works.md#certificates-and-trust-chains-in-plain-language)): a **PKI (public key infrastructure)** issues certificates for servers, devices and people. The failure mode is expiry: an unrenewed internal certificate can take down a service on an ordinary Tuesday. Automation (short-lived certificates, ACME-style renewal) is the cure; a certificate inventory is the minimum.
 
 ## Audit and access reviews
