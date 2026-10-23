@@ -14,6 +14,8 @@ It is a cloud extension of a homelab, and it exists to teach: this repository is
 > - **[Reading order](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Reading-Order)**: the paths, with time estimates.
 > - **[Git from zero](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Git-From-Zero)**: if you have never used git.
 >
+> **Who this assumes:** a basic power user. You know how a computer works, may have built or repaired one, and have set up a router and done basic networking. If you could work a help desk or a retail repair counter, you can start; if not, [IT 101 level material such as CompTIA A+ objectives](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Start-Here-If-You-Are-New#where-zero-is) is the benchmark (not an endorsement).
+>
 > **Cost:** the reading and the exercises are free and always will be, and nothing here is sold. Hands-on work uses your own accounts and your provider's bill, nothing you spend goes to the maintainer, and you choose what you can afford to run. The cost gates are explained in [docs/cost.md](docs/cost.md). If you open a DigitalOcean account, my [referral link](https://m.do.co/c/e3aaa65aed6b) is optional and nothing is gated behind it; the wiki says exactly what it is. The same pages are in [`docs/wiki/`](docs/wiki/Home.md) if you prefer reading them in the repo.
 
 > ### Found a mistake or have a question? Open an issue
