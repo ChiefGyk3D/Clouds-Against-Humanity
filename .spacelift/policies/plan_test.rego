@@ -61,8 +61,11 @@ denied_on(id, changes) := reasons if {
 
 # Clean plans.
 
+# The fixture also has the world-open outbound 443 rule the module renders, so
+# it passes only where an outbound entry covers it (issue #253).
 test_connector_firewall_with_zero_inbound_passes if {
-	count(denied([connector_firewall])) == 0
+	allow := allow_for("svc-a", fw, [out_entry({})])
+	count(reasons_with_outbound("svc-a", [connector_firewall], allow)) == 0
 }
 
 test_tag_scoped_inbound_rule_passes if {
@@ -332,6 +335,7 @@ test_groups_of_another_stack_do_not_apply if {
 
 test_allowlists_are_empty_by_default if {
 	count(spacelift.inbound_allowlist) == 0
+	count(object.keys(spacelift.outbound_allowlist)) == 2
 	count(spacelift.address_groups) == 0
 	count(spacelift.destroy_allowlist) == 0
 	count(spacelift.whole_service_teardown_stacks) == 0
@@ -344,7 +348,8 @@ current_stacks := ["cah-00-foundation", "cah-10-access", "cah-20-telemetry", "ca
 
 test_current_stacks_keep_their_verdicts if {
 	every id in current_stacks {
-		count(denied_on(id, [connector_firewall, firewall_with([tag_rule])])) == 0
+		count(denied_on(id, [firewall_with([tag_rule])])) == 0
+		count(denied_on(id, [connector_firewall])) == 1
 		count(denied_on(id, [firewall_with([bad_rule])])) == 1
 		count(denied_on(id, [firewall_with([with_source({"source_tags": [], "source_addresses": ["0.0.0.0/0"]})])])) == 1
 		count(denied_on(id, [sg_cidr])) == 1
@@ -816,4 +821,265 @@ test_aws_inline_block_with_two_ranges_needs_one_entry if {
 		aws_entry({"ports": ["22"], "sources": ["fd00::/8"]}),
 	]}}
 	count(reasons_with("aws-a", [sg], split)) == 1
+}
+
+# World-open outbound rules (issue #253).
+
+out_world := ["0.0.0.0/0", "::/0"]
+
+out_rule(protocol, port, destinations) := {
+	"protocol": protocol,
+	"port_range": port,
+	"destination_addresses": destinations,
+	"destination_tags": [],
+	"destination_droplet_ids": [],
+	"destination_load_balancer_uids": [],
+	"destination_kubernetes_ids": [],
+}
+
+firewall_out(rules) := create(fw, "digitalocean_firewall", {"inbound_rule": [], "outbound_rule": rules})
+
+out_entry(overrides) := object.union(
+	{
+		"direction": "outbound",
+		"protocol": "tcp",
+		"ports": ["443"],
+		"destinations": out_world,
+	},
+	overrides,
+)
+
+reasons_with_outbound(id, changes, allowlist) := reasons if {
+	reasons := spacelift.deny with input as on_stack(id, changes) with data.spacelift.outbound_allowlist as allowlist
+}
+
+test_world_open_outbound_is_denied_by_default if {
+	reasons := denied_on("svc-a", [firewall_out([out_rule("tcp", "443", out_world)])])
+	count(reasons) == 1
+	some reason in reasons
+	contains(reason, "outbound rule tcp/443 reaches the whole internet")
+}
+
+test_world_open_ipv4_only_outbound_is_denied if {
+	count(denied_on("svc-a", [firewall_out([out_rule("tcp", "443", ["0.0.0.0/0"])])])) == 1
+}
+
+test_world_open_ipv6_only_outbound_is_denied if {
+	count(denied_on("svc-a", [firewall_out([out_rule("tcp", "443", ["::/0"])])])) == 1
+}
+
+test_world_mixed_with_named_destination_is_denied if {
+	count(denied_on("svc-a", [firewall_out([out_rule("tcp", "443", ["203.0.113.0/24", "0.0.0.0/0"])])])) == 1
+}
+
+# Narrowed or tag-scoped outbound rules are not world-open.
+test_outbound_to_named_addresses_passes if {
+	rule := out_rule("tcp", "443", ["203.0.113.0/24", "198.51.100.7/32", "2001:db8::/32"])
+	count(denied_on("svc-a", [firewall_out([rule])])) == 0
+}
+
+test_outbound_to_tag_passes if {
+	rule := object.union(out_rule("tcp", "22", []), {"destination_tags": ["cah-access"]})
+	count(denied_on("svc-a", [firewall_out([rule])])) == 0
+}
+
+test_outbound_with_null_destinations_does_not_crash if {
+	rule := {"protocol": "tcp", "port_range": "22", "destination_addresses": null}
+	count(denied_on("svc-a", [firewall_out([rule])])) == 0
+	count(denied_on("svc-a", [create(fw, "digitalocean_firewall", {"inbound_rule": []})])) == 0
+}
+
+test_outbound_allowlisted_entry_passes_in_its_stack if {
+	allow := allow_for("svc-a", fw, [out_entry({})])
+	count(reasons_with_outbound("svc-a", [firewall_out([out_rule("tcp", "443", out_world)])], allow)) == 0
+}
+
+test_outbound_entry_is_keyed_by_stack if {
+	allow := allow_for("svc-a", fw, [out_entry({})])
+	count(reasons_with_outbound("svc-b", [firewall_out([out_rule("tcp", "443", out_world)])], allow)) == 1
+}
+
+test_outbound_entry_is_keyed_by_address if {
+	allow := allow_for("svc-a", fw, [out_entry({})])
+	other := create("module.other.digitalocean_firewall.this", "digitalocean_firewall", {"outbound_rule": [out_rule("tcp", "443", out_world)]})
+	count(reasons_with_outbound("svc-a", [other], allow)) == 1
+}
+
+test_outbound_plan_with_no_stack_id_gets_no_exception if {
+	allow := allow_for("svc-a", fw, [out_entry({})])
+	reasons := spacelift.deny with input as plan([firewall_out([out_rule("tcp", "443", out_world)])]) with data.spacelift.outbound_allowlist as allow
+	count(reasons) == 1
+}
+
+test_outbound_group_covers_its_members_in_its_stack_only if {
+	allow := allow_for("svc-a", "web", [out_entry({})])
+	changes := [firewall_out([out_rule("tcp", "443", out_world)])]
+	groups := {"svc-a": {"web": [fw]}}
+	covered := spacelift.deny with input as on_stack("svc-a", changes) with data.spacelift.outbound_allowlist as allow with data.spacelift.address_groups as groups
+	count(covered) == 0
+	elsewhere := spacelift.deny with input as on_stack("svc-b", changes) with data.spacelift.outbound_allowlist as allow with data.spacelift.address_groups as groups
+	count(elsewhere) == 1
+}
+
+# Each field narrows the entry.
+
+test_outbound_entry_for_another_port_denies if {
+	allow := allow_for("svc-a", fw, [out_entry({"ports": ["80"]})])
+	count(reasons_with_outbound("svc-a", [firewall_out([out_rule("tcp", "443", out_world)])], allow)) == 1
+}
+
+test_outbound_entry_for_another_protocol_denies if {
+	allow := allow_for("svc-a", fw, [out_entry({"protocol": "udp"})])
+	count(reasons_with_outbound("svc-a", [firewall_out([out_rule("tcp", "443", out_world)])], allow)) == 1
+}
+
+test_outbound_entry_for_another_destination_denies if {
+	allow := allow_for("svc-a", fw, [out_entry({"destinations": ["203.0.113.0/24"]})])
+	count(reasons_with_outbound("svc-a", [firewall_out([out_rule("tcp", "443", ["203.0.113.0/24", "0.0.0.0/0"])])], allow)) == 1
+}
+
+test_outbound_world_entry_must_list_both_ranges if {
+	rule := out_rule("tcp", "443", out_world)
+	only4 := allow_for("svc-a", fw, [out_entry({"destinations": ["0.0.0.0/0"]})])
+	count(reasons_with_outbound("svc-a", [firewall_out([rule])], only4)) == 1
+	only_v4_rule := out_rule("tcp", "443", ["0.0.0.0/0"])
+	both := allow_for("svc-a", fw, [out_entry({})])
+	count(reasons_with_outbound("svc-a", [firewall_out([only_v4_rule])], both)) == 0
+}
+
+test_outbound_entry_with_wrong_direction_denies if {
+	rule := out_rule("tcp", "443", out_world)
+	inbound := allow_for("svc-a", fw, [out_entry({"direction": "inbound"})])
+	count(reasons_with_outbound("svc-a", [firewall_out([rule])], inbound)) == 1
+	missing := allow_for("svc-a", fw, [object.remove(out_entry({}), ["direction"])])
+	count(reasons_with_outbound("svc-a", [firewall_out([rule])], missing)) == 1
+}
+
+test_outbound_entry_missing_a_field_denies if {
+	rule := out_rule("tcp", "443", out_world)
+	every field in ["protocol", "ports", "destinations"] {
+		allow := allow_for("svc-a", fw, [object.remove(out_entry({}), [field])])
+		count(reasons_with_outbound("svc-a", [firewall_out([rule])], allow)) == 1
+	}
+}
+
+test_outbound_entry_with_empty_lists_denies if {
+	rule := out_rule("tcp", "443", out_world)
+	count(reasons_with_outbound("svc-a", [firewall_out([rule])], allow_for("svc-a", fw, [out_entry({"ports": []})]))) == 1
+	count(reasons_with_outbound("svc-a", [firewall_out([rule])], allow_for("svc-a", fw, [out_entry({"destinations": []})]))) == 1
+}
+
+# An outbound entry never admits an inbound rule, and an inbound entry never
+# admits an outbound one.
+test_outbound_entry_does_not_cover_inbound_rules if {
+	allow := allow_for("svc-a", fw, [out_entry({"ports": ["8080"], "destinations": ["198.51.100.0/24"]})])
+	reasons := spacelift.deny with input as on_stack("svc-a", [firewall_with([bad_rule])]) with data.spacelift.outbound_allowlist as allow
+	count(reasons) == 1
+}
+
+test_inbound_entry_does_not_cover_outbound_rules if {
+	allow := allow_for("svc-a", fw, [entry({"ports": ["443"], "sources": out_world})])
+	reasons := spacelift.deny with input as on_stack("svc-a", [firewall_out([out_rule("tcp", "443", out_world)])]) with data.spacelift.inbound_allowlist as allow
+	count(reasons) == 1
+}
+
+test_outbound_rule_with_another_destination_kind_is_never_covered if {
+	allow := allow_for("svc-a", fw, [out_entry({})])
+	rule := object.union(out_rule("tcp", "443", out_world), {"destination_tags": ["cah-access"]})
+	count(reasons_with_outbound("svc-a", [firewall_out([rule])], allow)) == 1
+}
+
+test_outbound_rules_are_judged_one_by_one if {
+	allow := allow_for("svc-a", fw, [out_entry({})])
+	rules := [out_rule("tcp", "443", out_world), out_rule("tcp", "8443", out_world), out_rule("tcp", "22", ["203.0.113.7/32"])]
+	reasons := reasons_with_outbound("svc-a", [firewall_out(rules)], allow)
+	count(reasons) == 1
+	some reason in reasons
+	contains(reason, "tcp/8443")
+}
+
+# Decision: icmp and all-port rules are never allowlistable (issue #253).
+
+test_world_open_icmp_is_denied if {
+	count(denied_on("svc-a", [firewall_out([out_rule("icmp", "", out_world)])])) == 1
+	count(denied_on("svc-a", [firewall_out([{"protocol": "icmp", "destination_addresses": out_world}])])) == 1
+}
+
+test_icmp_is_never_covered_by_an_entry if {
+	allow := allow_for("svc-a", fw, [out_entry({"protocol": "icmp", "ports": ["", "all", "0"]})])
+	count(reasons_with_outbound("svc-a", [firewall_out([out_rule("icmp", "", out_world)])], allow)) == 1
+	count(reasons_with_outbound("svc-a", [firewall_out([out_rule("icmp", "0", out_world)])], allow)) == 1
+}
+
+test_all_port_rule_is_never_covered_by_an_entry if {
+	allow := allow_for("svc-a", fw, [out_entry({"ports": ["", "all", "443"]})])
+	count(reasons_with_outbound("svc-a", [firewall_out([out_rule("tcp", "all", out_world)])], allow)) == 1
+	count(reasons_with_outbound("svc-a", [firewall_out([out_rule("tcp", "", out_world)])], allow)) == 1
+	count(reasons_with_outbound("svc-a", [firewall_out([{"protocol": "tcp", "destination_addresses": out_world}])], allow)) == 1
+	udp_allow := allow_for("svc-a", fw, [out_entry({"protocol": "udp", "ports": ["", "all"]})])
+	count(reasons_with_outbound("svc-a", [firewall_out([out_rule("udp", null, out_world)])], udp_allow)) == 1
+}
+
+# A literal range is judged as written: the entry must name the exact string.
+test_explicit_full_range_needs_its_own_entry if {
+	rule := out_rule("udp", "1-65535", out_world)
+	count(reasons_with_outbound("svc-a", [firewall_out([rule])], allow_for("svc-a", fw, [out_entry({"protocol": "udp"})]))) == 1
+	count(reasons_with_outbound("svc-a", [firewall_out([rule])], allow_for("svc-a", fw, [out_entry({"protocol": "udp", "ports": ["1-65535"]})]))) == 0
+}
+
+# Outbound handling reads firewall create and update, like inbound.
+test_outbound_delete_and_noop_are_ignored if {
+	after := {"outbound_rule": [out_rule("tcp", "443", out_world)]}
+	count(denied_on("svc-a", [change(fw, "digitalocean_firewall", ["no-op"], after)])) == 0
+	count(denied_on("svc-a", [change(fw, "digitalocean_firewall", ["update"], after)])) == 1
+}
+
+# Today's stacks: the rules the firewall module renders for them pass with the
+# shipped entries, at their real addresses, and nothing wider does.
+
+default_outbound := [
+	out_rule("tcp", "443", out_world),
+	out_rule("tcp", "80", out_world),
+	out_rule("tcp", "53", out_world),
+	out_rule("udp", "53", out_world),
+	out_rule("udp", "123", out_world),
+]
+
+baseline_addr := "module.baseline_firewall.digitalocean_firewall.this"
+
+connector_addr := "module.connector_firewall.digitalocean_firewall.this"
+
+baseline_fw := create(baseline_addr, "digitalocean_firewall", {"inbound_rule": [], "outbound_rule": default_outbound})
+
+connector_extra := [out_rule("tcp", "30000-31000", out_world), out_rule("udp", "1-65535", out_world)]
+
+connector_fw := create(connector_addr, "digitalocean_firewall", {"inbound_rule": [], "outbound_rule": array.concat(default_outbound, connector_extra)})
+
+test_shipped_baseline_firewall_passes_in_foundation if {
+	count(denied_on("cah-00-foundation", [baseline_fw])) == 0
+}
+
+test_shipped_connector_firewall_passes_in_access if {
+	count(denied_on("cah-10-access", [connector_fw])) == 0
+}
+
+test_shipped_entries_do_not_cross_stacks_or_addresses if {
+	count(denied_on("cah-10-access", [baseline_fw])) == 5
+	count(denied_on("cah-00-foundation", [connector_fw])) == 7
+	count(denied_on("cah-20-telemetry", [baseline_fw])) == 5
+	count(denied_on("cah-20-telemetry", [connector_fw])) == 7
+}
+
+test_shipped_entries_do_not_allow_more_than_they_name if {
+	wider := [
+		out_rule("tcp", "8443", out_world),
+		out_rule("tcp", "1-65535", out_world),
+		out_rule("tcp", "all", out_world),
+		out_rule("udp", "30000-31000", out_world),
+		out_rule("icmp", "", out_world),
+	]
+	extra := create(connector_addr, "digitalocean_firewall", {"outbound_rule": wider})
+	count(denied_on("cah-10-access", [extra])) == 5
+	foundation_extra := create(baseline_addr, "digitalocean_firewall", {"outbound_rule": connector_extra})
+	count(denied_on("cah-00-foundation", [foundation_extra])) == 2
 }
