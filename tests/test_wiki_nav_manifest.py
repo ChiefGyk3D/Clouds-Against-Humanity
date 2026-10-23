@@ -344,3 +344,48 @@ def test_check_reports_a_stale_generated_file(tmp_path):
     assert gwn.main(["--root", str(tmp_path), "--check"]) == 1
     sidebar.unlink()
     assert gwn.main(["--root", str(tmp_path), "--check"]) == 1
+
+
+MALFORMED = {
+    "bad indentation": "groups:\n  - {id: a}\n pages:\n    x: 1\n",
+    "unterminated flow mapping": "groups:\n  - {id: a, title: \"x\"\npages: {}\n",
+    "tab character": "groups:\n\t- {id: a}\n",
+    "duplicate key": "groups: []\ngroups: []\n",
+    "not a mapping": "- just\n- a list\n",
+}
+
+
+@pytest.mark.parametrize("name", sorted(MALFORMED))
+def test_malformed_manifest_is_a_controlled_error_in_both_modes(name, tmp_path, capsys):
+    (tmp_path / "docs" / "wiki").mkdir(parents=True)
+    (tmp_path / "docs" / "wiki" / "_nav.yaml").write_text(MALFORMED[name])
+    for argv in (["--root", str(tmp_path), "--check"], ["--root", str(tmp_path)]):
+        assert gwn.main(argv) == 1
+        err = capsys.readouterr().err
+        assert "gen_wiki_nav:" in err and "Traceback" not in err
+    assert gwn.check(tmp_path)[0].startswith("cannot read")
+
+
+@pytest.mark.parametrize("name", sorted(MALFORMED))
+def test_malformed_manifest_prints_no_traceback_from_the_command_line(name, tmp_path):
+    (tmp_path / "docs" / "wiki").mkdir(parents=True)
+    (tmp_path / "docs" / "wiki" / "_nav.yaml").write_text(MALFORMED[name])
+    result = subprocess.run(
+        [sys.executable, "-I", str(ROOT / "scripts" / "gen_wiki_nav.py"), "--check", "--root", str(tmp_path)],
+        capture_output=True, text=True, check=False,
+    )
+    assert result.returncode == 1
+    assert "Traceback" not in result.stderr and "gen_wiki_nav:" in result.stderr
+
+
+def test_unreadable_bytes_are_a_controlled_error(tmp_path, capsys):
+    (tmp_path / "docs" / "wiki").mkdir(parents=True)
+    (tmp_path / "docs" / "wiki" / "_nav.yaml").write_bytes(b"groups: \xff\xfe\n")
+    assert gwn.main(["--root", str(tmp_path), "--check"]) == 1
+    assert "Traceback" not in capsys.readouterr().err
+
+
+def test_grafana_and_conceptual_pages_carry_no_status_their_banner_does_not_support():
+    status = {e["page"]: e.get("status") for pages in manifest()["pages"].values() for e in pages}
+    for page in ("Grafana-Dashboards", "Twingate-Service-Accounts-in-CAH", "Zero-Trust-at-Home-Two-Connectors-and-Failover"):
+        assert status[page] is None, page

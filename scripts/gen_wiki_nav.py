@@ -78,7 +78,10 @@ def load_manifest(text: str) -> dict:
         return yaml.SafeLoader.construct_mapping(loader, node, deep=deep)
 
     Strict.add_constructor(yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, construct)
-    loaded = yaml.load(text, Loader=Strict)  # a SafeLoader subclass: no Python tags
+    try:
+        loaded = yaml.load(text, Loader=Strict)  # a SafeLoader subclass: no Python tags
+    except yaml.YAMLError as exc:
+        raise ValueError(f"malformed YAML: {str(exc).splitlines()[0] if str(exc) else type(exc).__name__}") from exc
     if not isinstance(loaded, dict):
         raise TypeError("the manifest must be a mapping with groups, pages and links")
     return loaded

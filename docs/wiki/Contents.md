@@ -172,7 +172,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) | Ask what question each panel answers and what it would look like if the answer were bad; an unverified draft for operators. | operator | draft |
 | [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) | A springboard for building a small cloud security monitoring stack with a cost ceiling you set; an unverified draft for builders. | builder | draft |
 | [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) | What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied. | operator | unbuilt |
-| [Grafana dashboards](Grafana-Dashboards.md) | The three dashboards this repository ships and which question each answers; only tried with synthetic data. | operator | draft |
+| [Grafana dashboards](Grafana-Dashboards.md) | The three dashboards this repository ships and which question each answers; only tried with synthetic data. | operator |  |
 | [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) | A hands-on synthetic multi-site monitoring stack where you predict what a silent site does, for builders. | builder |  |
 
 ## Foundations: enterprise practice
@@ -201,8 +201,8 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) | The stage guides put in order, with accounts named early and a check at each step, ending in teardown; for learners replicating the build. | builder |  |
 | [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) | Where each value belongs: a variable, a tfvars file, Doppler or the cost file, for builders. | builder |  |
 | [Teardown checklist](Teardown-Checklist.md) | The order of destruction, what survives it and the checks that prove the bill is zero, for builders. | builder |  |
-| [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) | Where this project uses a Twingate service account and which plan each use needs; nothing was run against an account. | builder | est. steps |
-| [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) | A home lab with two outbound-only connectors that stays reachable when the internet fails over; nothing was tested for this page. | builder | est. steps |
+| [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) | Where this project uses a Twingate service account and which plan each use needs; nothing was run against an account. | builder |  |
+| [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) | A home lab with two outbound-only connectors that stays reachable when the internet fails over; nothing was tested for this page. | builder |  |
 | [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) | The honest reason the connector droplets have public addresses and what going private would change; an unverified draft. | engineer | draft |
 | [Why I picked these tools](Why-I-Picked-These-Tools.md) | Which tool choices are personal picks and where each would change at work, for engineers weighing alternatives. | engineer |  |
 | [From commit to pipeline](From-Commit-to-Pipeline.md) | What CI, CD, DevOps and DevSecOps mean here and which gate stops what, for engineers. | engineer |  |

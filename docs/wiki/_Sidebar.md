@@ -138,7 +138,7 @@ file does not match the manifest. -->
 - [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) (draft)
 - [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) (draft)
 - [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) (unbuilt)
-- [Grafana dashboards](Grafana-Dashboards.md) (draft)
+- [Grafana dashboards](Grafana-Dashboards.md)
 - [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md)
 
 </details>
@@ -170,8 +170,8 @@ file does not match the manifest. -->
 - [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md)
 - [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md)
 - [Teardown checklist](Teardown-Checklist.md)
-- [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) (est. steps)
-- [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) (est. steps)
+- [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md)
+- [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md)
 - [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) (draft)
 - [Why I picked these tools](Why-I-Picked-These-Tools.md)
 - [From commit to pipeline](From-Commit-to-Pipeline.md)
