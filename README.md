@@ -15,8 +15,6 @@ It is a cloud extension of a homelab, and it exists to teach: this repository is
 > - **[Git from zero](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Git-From-Zero)**: if you have never used git.
 > - **[Repository growth](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Repository-Growth)**: stars, forks and weekly work, drawn from GitHub data; the as-of date is printed in the picture, and stars measure attention, not use.
 >
-> ![Hand-drawn style chart: cumulative stars and forks since the repository was created, and weekly merged pull requests and closed issues](docs/wiki/images/repo-growth.png)
->
 > **Who this assumes:** a basic power user. You know how a computer works, may have built or repaired one, and have set up a router and done basic networking. If you could work a help desk or a retail repair counter, you can start; if not, [IT 101 level material such as CompTIA A+ objectives](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Start-Here-If-You-Are-New#where-zero-is) is the benchmark (not an endorsement).
 >
 > **Cost:** the reading and the exercises are free and always will be, and nothing here is sold. Hands-on work uses your own accounts and your provider's bill, nothing you spend goes to the maintainer, and you choose what you can afford to run. The cost gates are explained in [docs/cost.md](docs/cost.md). If you open a DigitalOcean account, my [referral link](https://m.do.co/c/e3aaa65aed6b) is optional and nothing is gated behind it; the wiki says exactly what it is. The same pages are in [`docs/wiki/`](docs/wiki/Home.md) if you prefer reading them in the repo.
@@ -94,6 +92,12 @@ That is not "VPNs are always wrong". WireGuard is a very different animal from a
 | AWS | The AWS twin of stages 0 and 1: `modules/aws/*`, `stacks/aws/*` | $0 and $20.84 | Written and tested with mocked providers, never applied. Azure and GCP have no code |
 
 Working ceiling: $30 per month in the current phase (stage 1), shared by every cloud; each phase carries its own ceiling in `docs/stages/approved.json`, so a later phase can raise it on purpose. A cost gate in CI fails any change that raises a cloud's planned total above its approved total, or the active clouds' approved totals above the current phase's ceiling (the AWS twin is marked inactive, because it does not fit beside stage 1). See the [roadmap](docs/wiki/Roadmap.md).
+
+### Growth
+
+Stars measure attention, not use, but the project is young enough that the curve is worth a look. The chart is drawn locally from GitHub data, and the as-of date is printed in the picture; the [Repository growth](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Repository-Growth) page has the numbers as a table.
+
+![Hand-drawn style chart: cumulative stars and forks since the repository was created, and weekly merged pull requests and closed issues](docs/wiki/images/repo-growth.png)
 
 ## Layout
 
