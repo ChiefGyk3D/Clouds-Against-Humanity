@@ -1,0 +1,78 @@
+# Refreshes the repository growth chart, its numbers table and its page once a day.
+#
+# docs/wiki/.metrics-snapshot.json, docs/wiki/images/repo-growth.png and
+# docs/wiki/Repository-Growth.md are one unit written by
+# scripts/gen_repo_metrics.py --refresh, which fetches live star, fork, pull
+# request and issue counts (per-day counts only, never a user name), draws the
+# chart and rewrites the page. Left alone they go stale: the chart only shows the
+# stars that existed on the day somebody last ran the script.
+#
+# The job opens (or updates) one pull request on a fixed branch rather than
+# pushing to main, so branch protection and review still apply. Merging it
+# publishes the page through wiki.yml.
+#
+# One-time setup: Settings > Actions > General > "Allow GitHub Actions to create
+# and approve pull requests" must be on. A pull request opened with the built-in
+# token does not start CI by itself, so a required check may show as pending;
+# a maintainer can run the Python job's checks locally or push to the branch.
+name: Repository growth
+
+on:
+  schedule:
+    - cron: "17 3 * * *"  # daily, 03:17 UTC (off the hour on purpose)
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: repo-metrics
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write       # push the refresh branch
+      pull-requests: write  # open or update the pull request
+      issues: read          # gh issue list
+    env:
+      GH_TOKEN: ${{ github.token }}
+      BRANCH: automation/repo-growth-refresh
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false  # the push below passes the token itself
+
+      - name: Install the plotting library (not a repository dependency)
+        run: |
+          python3 -m venv "$RUNNER_TEMP/plot-venv"
+          "$RUNNER_TEMP/plot-venv/bin/python" -m pip install --quiet matplotlib pillow
+
+      - name: Refresh snapshot, chart and page
+        run: '"$RUNNER_TEMP/plot-venv/bin/python" -I scripts/gen_repo_metrics.py --refresh'
+
+      - name: Check the three files agree
+        run: python3 -I scripts/gen_repo_metrics.py --check
+
+      - name: Open or update the pull request
+        run: |
+          paths="docs/wiki/.metrics-snapshot.json docs/wiki/images/repo-growth.png docs/wiki/Repository-Growth.md"
+          # shellcheck disable=SC2086
+          if git diff --quiet -- $paths; then
+            echo "No change in the counts; nothing to do."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          # shellcheck disable=SC2086
+          git add -- $paths
+          git commit -m "docs: refresh the repository growth chart ($(date -u +%F))"
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/${BRANCH}"
+          if [ -z "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')" ]; then
+            gh pr create --base main --head "$BRANCH" \
+              --title "docs: refresh the repository growth chart" \
+              --body "Daily refresh by \`.github/workflows/repo-metrics.yml\`: new snapshot, chart and numbers table from \`scripts/gen_repo_metrics.py --refresh\`. The offline check (\`--check\`) passed in the job. Merge to publish the page."
+          fi
