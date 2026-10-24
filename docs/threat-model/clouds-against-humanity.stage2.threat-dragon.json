@@ -1,0 +1,1109 @@
+{
+  "version": "2.0",
+  "summary": {
+    "title": "Clouds Against Humanity: stage 2 telemetry link (cloud to home)",
+    "owner": "Clouds Against Humanity maintainers",
+    "description": "Threat model of stacks/20-telemetry and the opt-in log shipping and metrics pieces in modules/twingate-bootstrap, read from the code on 2026-10-24. Stage 2 is written and mock-tested, not applied. Home-side components are outside the repository and marked UNVERIFIED. Boundaries SB1 to SB5 are specific to this model. A model records what someone believes; it does not verify the system. Generic names only.",
+    "id": 0
+  },
+  "detail": {
+    "contributors": [
+      {
+        "name": "Clouds Against Humanity contributors"
+      }
+    ],
+    "diagrams": [
+      {
+        "version": "2.0",
+        "title": "Stage 2: cloud connectors to the home SIEM",
+        "diagramType": "STRIDE",
+        "description": "Spacelift and Twingate create the cloud-to-home and home-to-cloud paths; the connector droplet ships logs and exposes metrics.",
+        "thumbnail": "./public/content/images/thumbnail.stride.jpg",
+        "id": 0,
+        "cells": [
+          {
+            "position": {
+              "x": 20.0,
+              "y": 500.0
+            },
+            "size": {
+              "width": 300,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Maintainer (A3)"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "actor",
+            "zIndex": 1,
+            "id": "node-s2-maintainer",
+            "data": {
+              "name": "Maintainer (A3)",
+              "description": "Whoever can push to main and confirm applies (one writer today). For stage 2 this person also issues Twingate service keys out of band, one per host (docs/stages/02-telemetry.md: the keys are not created by OpenTofu, so none is in state) and creates the short-lived Doppler hostboot token (modules/twingate-bootstrap/variables.tf, log_shipping_bootstrap_token: created out of band, not by OpenTofu).",
+              "type": "tm.Actor",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false,
+              "providesAuthentication": false
+            }
+          },
+          {
+            "position": {
+              "x": 1820.0,
+              "y": 1180.0
+            },
+            "size": {
+              "width": 300,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Wazuh apt repository"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "actor",
+            "zIndex": 2,
+            "id": "node-s2-upstream",
+            "data": {
+              "name": "Wazuh apt repository",
+              "description": "Wazuh's signed apt repository, the source of the agent package when log_shipping is on (modules/twingate-bootstrap/cloud-init.yaml.tftpl, runcmd section for log shipping). Untrusted until its key matches the pinned fingerprint.",
+              "type": "tm.Actor",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false,
+              "providesAuthentication": false
+            }
+          },
+          {
+            "position": {
+              "x": 680.0,
+              "y": 145.0
+            },
+            "size": {
+              "width": 180,
+              "height": 110
+            },
+            "attrs": {
+              "text": {
+                "text": "Spacelift tracked run"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "process",
+            "zIndex": 3,
+            "id": "node-s2-run",
+            "data": {
+              "name": "Spacelift tracked run",
+              "description": "Tracked run of the cah-20-telemetry stack (and of cah-10-access, which renders the connector cloud-init). .spacelift/config.yml loads only TWINGATE_API_TOKEN and TWINGATE_NETWORK for cah-20-telemetry. Stage 2 is written and mock-tested, not applied (docs/stages/02-telemetry.md: nothing here has been applied; both flags default to false and plan zero resources).",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": {
+              "x": 640.0,
+              "y": 840.0
+            },
+            "size": {
+              "width": 260,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "OpenTofu state"
+              },
+              "topLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              },
+              "bottomLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "store",
+            "zIndex": 4,
+            "id": "store-s2-state",
+            "data": {
+              "name": "OpenTofu state",
+              "description": "State of stacks 10 and 20 in Spacelift (the stacks declare no backend block; UNVERIFIED from the repository). Holds the connector tokens and, when log shipping is on, the hostboot token (a sensitive variable, so it is in state).",
+              "type": "tm.Store",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false,
+              "storesCredentials": true,
+              "isEncrypted": false,
+              "isSigned": false,
+              "isALog": false
+            }
+          },
+          {
+            "position": {
+              "x": 1280.0,
+              "y": 145.0
+            },
+            "size": {
+              "width": 180,
+              "height": 110
+            },
+            "attrs": {
+              "text": {
+                "text": "Twingate"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "process",
+            "zIndex": 5,
+            "id": "node-s2-twingate",
+            "data": {
+              "name": "Twingate",
+              "description": "Hosted Twingate control plane. Stack 20 creates service accounts telemetry-<key>-logging and telemetry-<key>-scrape and one resource per endpoint, each RESTRICTED to one port and protocol with UDP or TCP otherwise DENY_ALL and ICMP off (stacks/20-telemetry/main.tf).",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [],
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": {
+              "x": 1240.0,
+              "y": 1180.0
+            },
+            "size": {
+              "width": 260,
+              "height": 80
+            },
+            "attrs": {
+              "text": {
+                "text": "Doppler hostboot config"
+              },
+              "topLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              },
+              "bottomLine": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "store",
+            "zIndex": 6,
+            "id": "store-s2-hostboot",
+            "data": {
+              "name": "Doppler hostboot config",
+              "description": "A Doppler config named cah-<key>-hostboot holding WAZUH_ENROLLMENT_PASSWORD, read at first boot with a short-lived read-only service token (cloud-init first-boot script cah-log-shipping-firstboot). The config and token are created by hand; neither is in the repository. The shortest token lifetime Doppler allows is UNVERIFIED (variables.tf says so).",
+              "type": "tm.Store",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "threat-s2-hostboot-i",
+                  "number": 1,
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "Enrollment password readable with the hostboot token",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "Whoever holds the hostboot token until it expires or is revoked can read the Wazuh enrollment password from the hostboot config. The password enrolls any agent, so it is shared by every host that uses the config.",
+                  "mitigation": "Token is read-only and for one config by design (modules/twingate-bootstrap/variables.tf); the first-boot script deletes the token file before using it and the password file afterward (cah-log-shipping-firstboot cleanup; tests/test_log_shipping_script.py). Token lifetime and Doppler scoping are UNVERIFIED (vendor settings). Revoke the token after first boot."
+                }
+              ],
+              "hasOpenThreats": true,
+              "storesCredentials": true,
+              "isEncrypted": false,
+              "isSigned": false,
+              "isALog": false
+            }
+          },
+          {
+            "position": {
+              "x": 1880.0,
+              "y": 485.0
+            },
+            "size": {
+              "width": 180,
+              "height": 110
+            },
+            "attrs": {
+              "text": {
+                "text": "Connector droplet"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "process",
+            "zIndex": 7,
+            "id": "node-s2-droplet",
+            "data": {
+              "name": "Connector droplet",
+              "description": "Connector droplet running the opt-in stage 2 pieces: Wazuh agent and auditd (log_shipping), prometheus-node-exporter bound to the private address (node_exporter), connector metrics (connector_telemetry.metrics_port). All default off; user_data is byte-identical when off (golden hashes in tests). The Twingate headless client the agent needs to reach the home manager is NOT part of this change (variables.tf). The AWS stacks (stacks/aws/10-access) have no log_shipping input.",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "threat-s2-droplet-t",
+                  "number": 3,
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "Root on a compromised connector can stop the agent and silence its logs",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "The Wazuh agent and auditd run on the host they watch. An attacker with root can stop them, edit local logs before shipping or remove the audit rules.",
+                  "mitigation": "Detection only: the manager can notice a silent agent (UNVERIFIED, home side). Nothing in the cloud-init makes the audit rules immutable or ships to a write-only store."
+                },
+                {
+                  "id": "threat-s2-droplet-r",
+                  "number": 4,
+                  "status": "Open",
+                  "severity": "Low",
+                  "title": "Audit rules are watch-only, so commands are not recorded",
+                  "type": "Repudiation",
+                  "modelType": "STRIDE",
+                  "description": "The auditd rule set watches identity files, sudoers and /etc/twingate, with no syscall or execve rules (/etc/audit/rules.d/60-cah.rules in the template, chosen because the 1 GB droplets cannot take per-command auditing). After a compromise there is no record of what was run.",
+                  "mitigation": "Accepted trade-off stated in the template. sshd and sudo events go to the journal and are collected when log_shipping is on."
+                },
+                {
+                  "id": "threat-s2-droplet-d",
+                  "number": 5,
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "Agent and auditd memory on a 1 GB droplet could starve the connector",
+                  "type": "Denial of service",
+                  "modelType": "STRIDE",
+                  "description": "The log_shipping variable text says the 1 GB droplet's memory headroom with the agent is UNMEASURED. A starved or OOM-killed connector would take one of two access paths offline.",
+                  "mitigation": "Opt-in, rolled out one connector at a time (variables.tf); two connectors with staggered reboots. No measurement exists in the repository."
+                }
+              ],
+              "hasOpenThreats": true
+            }
+          },
+          {
+            "position": {
+              "x": 2480.0,
+              "y": 145.0
+            },
+            "size": {
+              "width": 180,
+              "height": 110
+            },
+            "attrs": {
+              "text": {
+                "text": "Home Wazuh manager"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "process",
+            "zIndex": 8,
+            "id": "node-s2-manager",
+            "data": {
+              "name": "Home Wazuh manager",
+              "description": "UNVERIFIED (outside the repository): the home-side Wazuh manager that receives agent enrollment and events through a Twingate logging resource. The repository holds only the Twingate objects that point at it (logging_servers, private input from Doppler).",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "threat-s2-manager-e",
+                  "number": 2,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "A compromised connector uses the logging resource to reach the home network",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "The logging Twingate resource gives the cloud side a path into the home network, to the manager's agent and enrollment ports. A foothold on a connector (a cheap droplet) becomes a foothold with a path home. The home VLAN, the manager's own hardening and the headless client that would carry the key are outside the repository and not built.",
+                  "mitigation": "In code: one resource per logging_servers element, one port and protocol, ICMP off, the other protocol DENY_ALL, access only for the per-site logging service account (stacks/20-telemetry/main.tf, tests/test_telemetry_stack.py). UNVERIFIED: home VLAN limits, manager hardening, Twingate policy as applied. Open until the home side is reviewed."
+                }
+              ],
+              "hasOpenThreats": true
+            }
+          },
+          {
+            "position": {
+              "x": 2480.0,
+              "y": 825.0
+            },
+            "size": {
+              "width": 180,
+              "height": 110
+            },
+            "attrs": {
+              "text": {
+                "text": "Home metrics scraper"
+              },
+              "body": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0"
+              }
+            },
+            "shape": "process",
+            "zIndex": 9,
+            "id": "node-s2-scraper",
+            "data": {
+              "name": "Home metrics scraper",
+              "description": "UNVERIFIED (outside the repository): the home-side Prometheus that scrapes connector metrics and node exporter through the scrape Twingate resources.",
+              "type": "tm.Process",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "threats": [
+                {
+                  "id": "threat-s2-scraper-t",
+                  "number": 6,
+                  "status": "Open",
+                  "severity": "Low",
+                  "title": "Port values kept in step by hand between stacks 10 and 20",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "node_exporter_port and metrics_port_connector in stack 20 must equal node_exporter.port and connector_telemetry.metrics_port in stack 10, but the two stacks are separate and nothing links the values (docs/stages/02-telemetry.md section 2). A mismatch gives a scrape resource that points at nothing, or at the wrong service.",
+                  "mitigation": "Stack 20 preconditions refuse 9100 for the connector port, require the two ports to differ, and require every scrape_allowlist port to be one of the two (stacks/20-telemetry/main.tf). The cross-stack match itself is not checked. Low impact."
+                }
+              ],
+              "hasOpenThreats": true
+            }
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 20,
+            "connector": "normal",
+            "data": {
+              "name": "Twingate API call",
+              "description": "Stack 20 creates the service accounts and resources with TWINGATE_API_TOKEN (.spacelift/config.yml, cah-20-telemetry).",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "threat-s2-api-e",
+                  "number": 7,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "The shared Twingate API key can grant any access, including to the home logging resources",
+                  "type": "Elevation of privilege",
+                  "modelType": "STRIDE",
+                  "description": "The same Read, Write and Provision key serves stacks 10 and 20 (.spacelift/config.yml). A run that executes hostile code, or a leaked key, can create a resource or service account pointing at any home address and grant itself access. docs/spacelift-secrets.md section 2 lists only stack 10 as a user of this key.",
+                  "mitigation": "Only tracked runs from main load the key (scripts/spacelift/doppler-env.sh). Key scope and rotation are Twingate settings, UNVERIFIED from the repository. After a leak, rotate it and look in the console for resources the code does not declare."
+                }
+              ],
+              "hasOpenThreats": true
+            },
+            "id": "flow-s2-api",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Twingate API call"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-s2-run"
+            },
+            "target": {
+              "cell": "node-s2-twingate"
+            },
+            "vertices": []
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 20,
+            "connector": "normal",
+            "data": {
+              "name": "State and tokens",
+              "description": "Plan and apply write state, including connector tokens and the hostboot token variable.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "internal",
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "threat-s2-state-i",
+                  "number": 8,
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "Hostboot token readable from state",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "log_shipping_bootstrap_token is a sensitive variable, which hides it in output, not in state. The variables.tf text says it stays in state, the provider API, the metadata endpoint and cloud-init's own copy of user_data until it expires or is revoked.",
+                  "mitigation": "Marked sensitive; short-lived and read-only by design. Accepted until the token expires or is revoked. State access is a Spacelift setting, UNVERIFIED from the repository."
+                }
+              ],
+              "hasOpenThreats": true
+            },
+            "id": "flow-s2-state",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "State and tokens"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-s2-run"
+            },
+            "target": {
+              "cell": "store-s2-state"
+            },
+            "vertices": []
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 20,
+            "connector": "normal",
+            "data": {
+              "name": "User-data with token",
+              "description": "When log_shipping is on, the droplet is created with the hostboot token in user_data (written to a root-only file, 0600).",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "threat-s2-userdata-i",
+                  "number": 9,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "Hostboot token readable from the metadata endpoint",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "While the token is valid, any local process on the droplet can read it from the metadata endpoint, and cloud-init keeps its own copy of user_data. With it, the enrollment password can be read from Doppler.",
+                  "mitigation": "The first-boot script deletes the token file before use. metadata_lock can restrict the endpoint but defaults to false and is not tested on a real machine (variables.tf). Open until the lock is rolled out or the token is revoked after first boot."
+                }
+              ],
+              "hasOpenThreats": true
+            },
+            "id": "flow-s2-userdata",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "User-data with token"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-s2-run"
+            },
+            "target": {
+              "cell": "node-s2-droplet"
+            },
+            "vertices": []
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 20,
+            "connector": "normal",
+            "data": {
+              "name": "Out-of-band service key",
+              "description": "Full label: Out-of-band service key (UNVERIFIED, not built). UNVERIFIED: the per-host Twingate service key that lets a connector reach the home logging resource is issued by hand and placed on the host. The headless client that uses it is not part of this repository's change.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "manual",
+              "isEncrypted": false,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "threat-s2-keys-s",
+                  "number": 10,
+                  "status": "Open",
+                  "severity": "High",
+                  "title": "A service key stolen from a connector is a credential for the path home",
+                  "type": "Spoofing",
+                  "modelType": "STRIDE",
+                  "description": "Whoever extracts the key from a host can present the logging service account to Twingate and reach the logging resources from anywhere. How the key is stored on the host is not defined in the repository.",
+                  "mitigation": "In code the account reaches only its own site's logging resources, one port each (stacks/20-telemetry/main.tf). Key storage, rotation and the headless client are UNVERIFIED. Open."
+                }
+              ],
+              "hasOpenThreats": true
+            },
+            "id": "flow-s2-keys",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Out-of-band service key"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-s2-maintainer"
+            },
+            "target": {
+              "cell": "node-s2-droplet"
+            },
+            "vertices": [
+              {
+                "x": 170,
+                "y": 20
+              },
+              {
+                "x": 1970,
+                "y": 20
+              }
+            ]
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 20,
+            "connector": "normal",
+            "data": {
+              "name": "Hostboot config pull",
+              "description": "Full label: Hostboot config pull (token on stdin, TLS). First boot pulls the hostboot config from Doppler over HTTPS (curl, TLS 1.2 or later), token passed on stdin.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "threat-s2-boot-i",
+                  "number": 11,
+                  "status": "Mitigated",
+                  "severity": "Medium",
+                  "title": "Token or password appears in a process list, a log or on disk afterward",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "The first-boot script handles the hostboot token and the pulled enrollment password.",
+                  "mitigation": "cah-log-shipping-firstboot passes the token to curl on stdin (-K -), never as an argument; removes the token file first; keeps only the one password value; removes the password file and the pulled config in its exit trap; has no set -x; fails closed and keeps the agent masked on any error. Checked by tests/test_log_shipping_script.py (stdin, deletion, no output of secrets). Not run on a real machine."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "flow-s2-boot",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Hostboot config pull"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-s2-droplet"
+            },
+            "target": {
+              "cell": "store-s2-hostboot"
+            },
+            "vertices": []
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 20,
+            "connector": "normal",
+            "data": {
+              "name": "Logs and enrollment",
+              "description": "Agent enrollment (enroll_port, default 1515) and event stream (manager_port, default 1514) to the home manager through the logging Twingate resource (UNVERIFIED end to end: stage 2 is not applied).",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "TCP",
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "threat-s2-logs-s",
+                  "number": 12,
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "A rogue agent enrolls with a leaked shared password",
+                  "type": "Spoofing",
+                  "modelType": "STRIDE",
+                  "description": "Enrollment uses one shared password. Anyone holding it, and a path to the enrollment port, can register an agent under any name that matches the manager's rules.",
+                  "mitigation": "The agent name format is validated in code (-connector-<instance>). Manager-side enrollment policy is UNVERIFIED (home side)."
+                },
+                {
+                  "id": "threat-s2-logs-t",
+                  "number": 13,
+                  "status": "Open",
+                  "severity": "Medium",
+                  "title": "Attacker-chosen text reaches the SIEM as log content",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "The agent ships journald units for ssh, sudo and the connector, plus auth.log and audit.log (/etc/cah/wazuh-localfile.xml in the template). Usernames and other fields in those lines are chosen by whoever talks to the host. They can be crafted to confuse decoders or analysts, or to flood the manager.",
+                  "mitigation": "No sanitization exists in the repository. Decoders, rules and rate limits are home-side, UNVERIFIED. The journald filter syntax itself is UNVERIFIED against the manager's agent version (template comment)."
+                }
+              ],
+              "hasOpenThreats": true
+            },
+            "id": "flow-s2-logs",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Logs and enrollment"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-s2-droplet"
+            },
+            "target": {
+              "cell": "node-s2-manager"
+            },
+            "vertices": []
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 20,
+            "connector": "normal",
+            "data": {
+              "name": "Metrics scrape",
+              "description": "The home scraper reads connector metrics and node exporter through scrape Twingate resources, one port each.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTP",
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "threat-s2-scrape-i",
+                  "number": 14,
+                  "status": "Mitigated",
+                  "severity": "Low",
+                  "title": "A stolen scrape key reads host and connector metrics",
+                  "type": "Information disclosure",
+                  "modelType": "STRIDE",
+                  "description": "The node exporter has no authentication (template comment); connector metrics are plain HTTP behind Twingate's encrypted tunnel.",
+                  "mitigation": "The exporter binds to a private address only and refuses to start without one (cah-node-exporter-run). The scrape service account reaches only allowlisted ports of its own site's connectors, TCP restricted, UDP denied (stacks/20-telemetry/main.tf; preconditions refuse a connector address shared by two sites). Impact is metrics only."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "flow-s2-scrape",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Metrics scrape"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-s2-scraper"
+            },
+            "target": {
+              "cell": "node-s2-droplet"
+            },
+            "vertices": []
+          },
+          {
+            "shape": "flow",
+            "attrs": {
+              "line": {
+                "stroke": "#333333",
+                "strokeWidth": 1,
+                "strokeDasharray": "0",
+                "targetMarker": {
+                  "name": "block"
+                },
+                "sourceMarker": ""
+              }
+            },
+            "width": 200,
+            "height": 100,
+            "zIndex": 20,
+            "connector": "normal",
+            "data": {
+              "name": "Signed apt packages",
+              "description": "The Wazuh agent package, installed from Wazuh's apt repository at first boot.",
+              "type": "tm.Flow",
+              "isTrustBoundary": false,
+              "outOfScope": false,
+              "reasonOutOfScope": "",
+              "protocol": "HTTPS",
+              "isEncrypted": true,
+              "isPublicNetwork": false,
+              "isBidirectional": false,
+              "threats": [
+                {
+                  "id": "threat-s2-apt-t",
+                  "number": 15,
+                  "status": "Mitigated",
+                  "severity": "High",
+                  "title": "Tampered agent package or repository key",
+                  "type": "Tampering",
+                  "modelType": "STRIDE",
+                  "description": "A modified agent would run as root on the connector.",
+                  "mitigation": "The key fingerprint is a required input with no default (log_shipping.apt_key_fingerprint); cah-wazuh-key-check accepts the file only when it holds exactly one primary key whose fingerprint equals the pin, so a bundle with an extra key is refused; apt verifies signatures. agent_version is an optional pin; empty takes the newest 4.x. Checked by tests/test_log_shipping_hardening.py and test_log_shipping_guard.py."
+                }
+              ],
+              "hasOpenThreats": false
+            },
+            "id": "flow-s2-apt",
+            "labels": [
+              {
+                "position": 0.5,
+                "attrs": {
+                  "label": {
+                    "text": "Signed apt packages"
+                  }
+                }
+              }
+            ],
+            "source": {
+              "cell": "node-s2-upstream"
+            },
+            "target": {
+              "cell": "node-s2-droplet"
+            },
+            "vertices": []
+          },
+          {
+            "position": {
+              "x": 1750.0,
+              "y": 410.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 230.0
+            },
+            "attrs": {
+              "body": {
+                "stroke": "#b45309",
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "SB1: cloud site",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
+              }
+            },
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-SB1",
+            "data": {
+              "type": "tm.BoundaryBox",
+              "name": "SB1: cloud site",
+              "description": "The connector droplet and everything on it. Inbound stays closed; stage 2 adds outbound paths only.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": {
+              "x": 1150.0,
+              "y": 70.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 230.0
+            },
+            "attrs": {
+              "body": {
+                "stroke": "#b45309",
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "SB2: service-account ACL",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
+              }
+            },
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-SB2",
+            "data": {
+              "type": "tm.BoundaryBox",
+              "name": "SB2: service-account ACL",
+              "description": "Twingate. Each logging or scrape resource is limited to one host and port and granted to one per-site, per-role service account.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": {
+              "x": 1150.0,
+              "y": 1105.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 200.0
+            },
+            "attrs": {
+              "body": {
+                "stroke": "#b45309",
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "SB3: hostboot secret",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
+              }
+            },
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-SB3",
+            "data": {
+              "type": "tm.BoundaryBox",
+              "name": "SB3: hostboot secret",
+              "description": "The Doppler hostboot config and its short-lived read-only token. Separate from the prd config.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": {
+              "x": 2350.0,
+              "y": 70.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 910.0
+            },
+            "attrs": {
+              "body": {
+                "stroke": "#b45309",
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "SB4: home network",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
+              }
+            },
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-SB4",
+            "data": {
+              "type": "tm.BoundaryBox",
+              "name": "SB4: home network",
+              "description": "UNVERIFIED: outside the repository. The manager and scraper must sit where they can reach only what they need.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            }
+          },
+          {
+            "position": {
+              "x": 550.0,
+              "y": 70.0
+            },
+            "size": {
+              "width": 440.0,
+              "height": 895.0
+            },
+            "attrs": {
+              "body": {
+                "stroke": "#b45309",
+                "strokeWidth": 3,
+                "strokeDasharray": "10 5",
+                "fill": "transparent",
+                "fillOpacity": 0
+              },
+              "label": {
+                "text": "SB5: tracked run on main",
+                "refX": 20,
+                "refY": 14,
+                "fontSize": 14
+              }
+            },
+            "shape": "trust-boundary-box",
+            "zIndex": -50,
+            "id": "boundary-SB5",
+            "data": {
+              "type": "tm.BoundaryBox",
+              "name": "SB5: tracked run on main",
+              "description": "Only a merged commit on main becomes a tracked run, as in the pipeline model.",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            }
+          }
+        ]
+      }
+    ],
+    "diagramTop": 1,
+    "reviewer": "",
+    "threatTop": 15
+  }
+}
