@@ -900,7 +900,7 @@
                   "type": "Tampering",
                   "modelType": "STRIDE",
                   "description": "A modified agent would run as root on the connector.",
-                  "mitigation": "The key fingerprint is a required input with no default (log_shipping.apt_key_fingerprint); cah-wazuh-key-check accepts the file only when it holds exactly one primary key whose fingerprint equals the pin, so a bundle with an extra key is refused; apt verifies signatures. agent_version is an optional pin; empty takes the newest 4.x. Checked by tests/test_log_shipping_hardening.py and test_log_shipping_guard.py."
+                  "mitigation": "The key fingerprint is a required input with no default (log_shipping.apt_key_fingerprint); cah-apt-key-check (shared with the Twingate connector install) accepts the file only when it holds exactly one primary key whose fingerprint equals the pin, so a bundle with an extra key is refused; apt verifies signatures. agent_version is an optional pin; empty takes the newest 4.x. Checked by tests/test_log_shipping_hardening.py and test_log_shipping_guard.py."
                 }
               ],
               "hasOpenThreats": false

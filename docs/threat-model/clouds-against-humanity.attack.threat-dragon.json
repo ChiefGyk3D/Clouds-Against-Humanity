@@ -139,8 +139,8 @@
                   "title": "T1195.002 Compromise Software Supply Chain: Tampered download or action",
                   "type": "Tampering",
                   "modelType": "STRIDE",
-                  "description": "T7, T8, T9: a compromised action, CLI binary or package is pulled into the pipeline or onto a droplet. Evidence: ci.yml and wiki.yml pin each reusable workflow by full commit SHA; scripts/spacelift/doppler-env.sh pins the Doppler CLI by SHA-256; modules/twingate-bootstrap/cloud-init.yaml.tftpl pins the Twingate apt key by fingerprint, but that check has a gap (see the tampered Twingate package threat). ATT&CK v20.0: T1195.002 Compromise Software Supply Chain [TA0001 Initial Access]; T1195.001 Compromise Software Dependencies and Development Tools [TA0001 Initial Access].",
-                  "mitigation": "Workflow references pinned by commit SHA (ci.yml, wiki.yml); Doppler CLI pinned by SHA-256 per architecture and fail closed (doppler-env.sh, cah_doppler_install). The Twingate apt key pin is weaker than it reads: the check accepts extra keys in the same file (see the tampered Twingate package threat), so this stays Open. Residual: a pinned commit that was already malicious; ci.yml installs pytest unpinned. Detection: a changed pin in a pull request diff, not a runtime log. Review the diff of any pin change."
+                  "description": "T7, T8, T9: a compromised action, CLI binary or package is pulled into the pipeline or onto a droplet. Evidence: ci.yml and wiki.yml pin each reusable workflow by full commit SHA; scripts/spacelift/doppler-env.sh pins the Doppler CLI by SHA-256; modules/twingate-bootstrap/cloud-init.yaml.tftpl pins the Twingate apt key by fingerprint and refuses any extra key in the file (cah-apt-key-check, see the tampered Twingate package threat). ATT&CK v20.0: T1195.002 Compromise Software Supply Chain [TA0001 Initial Access]; T1195.001 Compromise Software Dependencies and Development Tools [TA0001 Initial Access].",
+                  "mitigation": "Workflow references pinned by commit SHA (ci.yml, wiki.yml); Doppler CLI pinned by SHA-256 per architecture and fail closed (doppler-env.sh, cah_doppler_install). The Twingate apt key pin is now strict (cah-apt-key-check refuses extra keys; see the tampered Twingate package threat, Mitigated). The umbrella stays Open for the other causes: the unpinned weekly connector package update, ci.yml's unpinned pytest install, and a pinned commit that was already malicious. Residual: a pinned commit that was already malicious; ci.yml installs pytest unpinned. Detection: a changed pin in a pull request diff, not a runtime log. Review the diff of any pin change."
                 }
               ],
               "hasOpenThreats": true,
@@ -2133,16 +2133,16 @@
                 {
                   "id": "threat-f-up-apt-t",
                   "number": 46,
-                  "status": "Open",
+                  "status": "Mitigated",
                   "severity": "High",
                   "title": "T1195.002 Compromise Software Supply Chain: Tampered Twingate package",
                   "type": "Tampering",
                   "modelType": "STRIDE",
-                  "description": "T9: a modified package installs on a connector. Finding: the cloud-init check is a grep for the pinned fingerprint among the fingerprint lines of the downloaded key file, and the whole file is then dearmored into the apt keyring. A file holding the pinned key plus another key passes. The stricter cah-wazuh-key-check in the same template refuses extra keys; the Twingate check does not. ATT&CK v20.0: T1195.002 Compromise Software Supply Chain [TA0001 Initial Access].",
-                  "mitigation": "apt verifies package signatures against that keyring (signed-by), and the fingerprint pin is in modules/twingate-bootstrap/cloud-init.yaml.tftpl. The pin is weaker than intended (extra keys accepted); the fix is to reuse the strict key check. Residual: Twingate's own signing key, and a weekly unpinned apt-get install of the connector package (cron.d/twingate-connector-update). Detection: apt signature failures at install time, which fail closed."
+                  "description": "T9: a modified package installs on a connector. Finding (fixed, issue 288): the cloud-init check used to be a grep for the pinned fingerprint, so a key file holding the pinned key plus another key passed and the whole file was dearmored into the apt keyring. The connector install now calls /usr/local/sbin/cah-apt-key-check, the same strict helper the Wazuh agent install uses, which refuses any file that is not exactly one primary key with the pinned fingerprint. ATT&CK v20.0: T1195.002 Compromise Software Supply Chain [TA0001 Initial Access].",
+                  "mitigation": "The pinned key file must be exactly one key: modules/twingate-bootstrap/cloud-init.yaml.tftpl calls cah-apt-key-check before gpg --dearmor, and apt verifies package signatures against that keyring (signed-by). Tests: tests/test_log_shipping_hardening.py (test_twingate_install_refuses_the_pinned_key_plus_an_extra_key, test_twingate_install_refuses_a_stray_extra_fingerprint_record, test_the_twingate_install_block_uses_the_strict_key_check_not_a_grep). Residual: Twingate's own signing key, and a weekly unpinned apt-get install of the connector package (cron.d/twingate-connector-update). Detection: apt signature failures at install time, which fail closed."
                 }
               ],
-              "hasOpenThreats": true
+              "hasOpenThreats": false
             },
             "id": "flow-f-up-apt",
             "labels": [

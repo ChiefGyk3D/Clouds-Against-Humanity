@@ -40,8 +40,9 @@ and ATLAS models.
 
 ## Open High threats (STRIDE numbering)
 
-- Core: 4, 5, 6, 7, 12, 13, 16, 17, 20, 21, 27, 33, 34, 36, 37, 38, 40, 42, 43, 46, 47.
+- Core: 4, 5, 6, 7, 12, 13, 16, 17, 20, 21, 27, 33, 34, 36, 37, 38, 40, 42, 43, 47.
 - ATT&CK: the same numbers except 40. ATLAS: 1, 3, 5, 6, 8.
+- Threat 46 (Tampered Twingate package) moved to Mitigated by issue 288: `cah-apt-key-check` now refuses any extra key in the Twingate apt key file. Threat 4 (tampered download or action) stays Open for the other causes (unpinned weekly connector update, unpinned pytest in CI, a pinned commit that was already malicious).
 - Stage 2: 2 (path home), 7 (shared API key), 9 (hostboot token in metadata), 10 (service key on a host).
 
 ## UNVERIFIED items
