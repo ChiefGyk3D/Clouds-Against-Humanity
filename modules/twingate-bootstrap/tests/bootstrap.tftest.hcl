@@ -2436,3 +2436,11 @@ run "log_shipping_on_labels_the_agent_with_its_site" {
     error_message = "The agent must carry the label site=<site part of the agent name>."
   }
 }
+
+run "log_shipping_bootstrap_token_rejects_a_placeholder" {
+  command = plan
+  variables {
+    log_shipping_bootstrap_token = "changeme-changeme-changeme"
+  }
+  expect_failures = [var.log_shipping_bootstrap_token]
+}

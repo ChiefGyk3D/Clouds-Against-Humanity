@@ -16,6 +16,7 @@
 set -euo pipefail
 
 LAB="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+RULE="$(cd "$LAB/../.." && pwd)/scripts/secret_rule.py"
 EDGE="http://127.0.0.1:${EDGE_PORT:-8080}"
 NAIVE="http://127.0.0.1:${EDGE_NAIVE_PORT:-8081}"
 FAILS=0
@@ -39,11 +40,38 @@ reset() { curl -s -X POST "$EDGE/reset-stats" -o /dev/null || true; }
 dbq() { curl -s "$EDGE/stats?x=$RANDOM" | python3 -I -c 'import json,sys; print(json.load(sys.stdin).get("db_queries",-1))'; }
 finish() { [ "$FAILS" -eq 0 ] && echo "all checks passed" || { echo "$FAILS check(s) failed"; exit 1; }; }
 
+# ORIGIN_SECRET is required: it is what makes the origin refuse a request that
+# skipped the edge. A value from the shell environment (compose reads it first)
+# or from .env must pass the repository's one placeholder rule
+# (scripts/secret_rule.py) or the lab refuses to start. Only an empty or missing
+# value gets a random one. The value is never printed.
+ensure_origin_secret() {
+  local v="" new
+  if [ -n "${ORIGIN_SECRET:-}" ]; then
+    printf '%s' "$ORIGIN_SECRET" | python3 -I "$RULE" ORIGIN_SECRET >&2 ||
+      die "refusing to start: the ORIGIN_SECRET in your shell environment is not usable"
+    return 0
+  fi
+  if [ -f "$LAB/.env" ]; then v="$(sed -n 's/^ORIGIN_SECRET=//p' "$LAB/.env" | tail -n 1)"; fi
+  if [ -n "$v" ]; then
+    printf '%s' "$v" | python3 -I "$RULE" ORIGIN_SECRET >&2 ||
+      die "refusing to start: the ORIGIN_SECRET in $LAB/.env is not usable (clear it to get a random one)"
+    return 0
+  fi
+  new="$(python3 -I -c 'import secrets; print(secrets.token_hex(16))')"
+  if [ -f "$LAB/.env" ] && grep -q '^ORIGIN_SECRET=' "$LAB/.env"; then
+    sed -i "s/^ORIGIN_SECRET=.*/ORIGIN_SECRET=${new}/" "$LAB/.env"
+  else
+    (umask 077 && printf 'ORIGIN_SECRET=%s\n' "$new" >> "$LAB/.env")
+  fi
+}
+
+# Sourced by the tests: define the functions and stop before the command switch.
+if [ "${BASH_SOURCE[0]}" != "$0" ]; then return 0; fi
+
 case "${1:-}" in
   up)
-    if [ ! -f "$LAB/.env" ]; then
-      printf 'ORIGIN_SECRET=%s\n' "$(python3 -I -c 'import secrets; print(secrets.token_hex(16))')" > "$LAB/.env"
-    fi
+    ensure_origin_secret
     compose --env-file "$LAB/.env" up -d
     echo "edge (careful): $EDGE    edge (careless): $NAIVE"
     for _ in $(seq 1 30); do curl -sf "$EDGE/" -o /dev/null && break; sleep 1; done

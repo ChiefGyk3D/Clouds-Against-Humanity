@@ -41,6 +41,33 @@ cah_doppler_log() {
   printf 'doppler-env: %s\n' "$*"
 }
 
+# The placeholder rule of scripts/secret_rule.py (the one definition) as POSIX
+# shell: succeeds when the value is empty or a placeholder. tests/test_secret_rule.py
+# pins this copy to the Python one. Compared in lower case.
+cah_doppler_is_placeholder() {
+  case "$1" in
+    *[![:space:]]*) ;;
+    *) return 0 ;;
+  esac
+  _lc=$(printf '%s' "$1" | tr 'A-Z' 'a-z')
+  case "$_lc" in
+    your_* | your-* | changeme* | change-me* | replace-with* | replace_with* | xxx* | dp.st.your*) return 0 ;;
+    '<'*'>' | *example* | *placeholder* | *changeme*) return 0 ;;
+    todo | tbd | admin | password | secret | test) return 0 ;;
+  esac
+  return 1
+}
+
+# True for the Doppler names that hold a credential. A public value (an SSH
+# public key, a tenant name) may legitimately contain a word such as "example",
+# so the rule is applied to credentials only.
+cah_doppler_is_credential_name() {
+  case "$1" in
+    *_TOKEN | *_PASSWORD | *_PASSWD | *_SECRET | *_API_KEY | *_ACCESS_KEY | *_SECRET_KEY) return 0 ;;
+  esac
+  return 1
+}
+
 # Prints the name of the first failure and returns non-zero.
 cah_doppler_install() {
   _arch=$(uname -m)
@@ -127,6 +154,10 @@ cah_doppler_env() {
       return 1
     fi
   done
+  if cah_doppler_is_placeholder "$DOPPLER_TOKEN"; then
+    cah_doppler_log "DOPPLER_TOKEN is a placeholder; set the real read-only service token in the cah-doppler context"
+    return 1
+  fi
 
   cah_doppler_install || return 1
 
@@ -142,6 +173,11 @@ cah_doppler_env() {
     fi
     if [ -z "$_val" ]; then
       cah_doppler_log "$_src is empty in Doppler"
+      return 1
+    fi
+    if cah_doppler_is_credential_name "$_src" && cah_doppler_is_placeholder "$_val"; then
+      cah_doppler_log "$_src in Doppler is a placeholder; set the real value (the value is not shown)"
+      unset _val
       return 1
     fi
     echo "::add-mask $_val"

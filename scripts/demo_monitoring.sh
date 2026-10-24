@@ -47,19 +47,47 @@ load_ports() {
   fi
 }
 
+# The one placeholder rule lives in scripts/secret_rule.py. The value goes in on
+# standard input (never in a process list) and is never printed; a rejection
+# names the variable only.
+check_secret() {
+  command -v python3 >/dev/null 2>&1 || die "python3 is needed to check $1"
+  printf '%s' "$2" | python3 -I "$ROOT/scripts/secret_rule.py" "$1" >&2
+}
+
+# GRAFANA_ADMIN_PASSWORD is required. A value from the shell environment (which
+# compose reads first) or from the untracked .env must pass the rule or the demo
+# refuses to start; it is never rewritten. Only an empty or missing value gets a
+# random one, written to .env without touching the other lines in it.
 ensure_env() {
-  if [ -f "$LAB/.env" ] && grep -q '^GRAFANA_ADMIN_PASSWORD=.\+' "$LAB/.env"; then
+  local fileval=""
+  if [ -n "${GRAFANA_ADMIN_PASSWORD:-}" ]; then
+    check_secret GRAFANA_ADMIN_PASSWORD "$GRAFANA_ADMIN_PASSWORD" ||
+      die "refusing to start: the GRAFANA_ADMIN_PASSWORD in your shell environment is not usable"
     return 0
   fi
-  if [ -n "${GRAFANA_ADMIN_PASSWORD:-}" ]; then
+  if [ -f "$LAB/.env" ]; then
+    fileval="$(sed -n 's/^GRAFANA_ADMIN_PASSWORD=//p' "$LAB/.env" | tail -n 1)"
+  fi
+  if [ -n "$fileval" ]; then
+    check_secret GRAFANA_ADMIN_PASSWORD "$fileval" ||
+      die "refusing to start: the GRAFANA_ADMIN_PASSWORD in $LAB/.env is not usable (clear it to get a random one)"
     return 0
   fi
   local pw
   pw="$(head -c 24 /dev/urandom | base64 | tr -d '/+=\n' | head -c 24)"
-  (umask 077 && cp "$LAB/env.example" "$LAB/.env")
-  # Replace the empty value; the password is random and lives only in the untracked .env.
-  sed -i "s/^GRAFANA_ADMIN_PASSWORD=.*/GRAFANA_ADMIN_PASSWORD=${pw}/" "$LAB/.env"
-  echo "Wrote $LAB/.env (untracked) with a random Grafana admin password."
+  if [ -f "$LAB/.env" ]; then
+    if grep -q '^GRAFANA_ADMIN_PASSWORD=' "$LAB/.env"; then
+      sed -i "s/^GRAFANA_ADMIN_PASSWORD=.*/GRAFANA_ADMIN_PASSWORD=${pw}/" "$LAB/.env"
+    else
+      printf 'GRAFANA_ADMIN_PASSWORD=%s\n' "$pw" >>"$LAB/.env"
+    fi
+  else
+    (umask 077 && cp "$LAB/env.example" "$LAB/.env")
+    # Replace the empty value; the password is random and lives only in the untracked .env.
+    sed -i "s/^GRAFANA_ADMIN_PASSWORD=.*/GRAFANA_ADMIN_PASSWORD=${pw}/" "$LAB/.env"
+  fi
+  echo "Wrote a random Grafana admin password to $LAB/.env (untracked)."
 }
 
 # Say where the Grafana admin password comes from, never what it is. Compose
