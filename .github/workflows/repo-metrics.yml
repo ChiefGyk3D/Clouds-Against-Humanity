@@ -43,6 +43,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
+          persist-credentials: false  # the push below passes the token itself
 
       - name: Install the plotting library (not a repository dependency)
         run: |
@@ -69,7 +70,7 @@ jobs:
           # shellcheck disable=SC2086
           git add -- $paths
           git commit -m "docs: refresh the repository growth chart ($(date -u +%F))"
-          git push --force origin "$BRANCH"
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/${BRANCH}"
           if [ -z "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')" ]; then
             gh pr create --base main --head "$BRANCH" \
               --title "docs: refresh the repository growth chart" \
