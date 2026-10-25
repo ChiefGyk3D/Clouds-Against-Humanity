@@ -37,6 +37,12 @@ WIKI_DIR = Path("docs/wiki")
 LOGIN_LIKE = ("login", "user", "author", "owner", "email", "referrer", "path", "avatar", "node")
 
 
+@pytest.fixture(autouse=True)
+def _not_in_actions(monkeypatch):
+    """GITHUB_ACTIONS=true switches --refresh to CI mode; these tests mean the local path."""
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
+
+
 def png_bytes(color=0) -> bytes:
     def chunk(kind, body):
         return struct.pack(">I", len(body)) + kind + body + struct.pack(">I", zlib.crc32(kind + body) & 0xFFFFFFFF)

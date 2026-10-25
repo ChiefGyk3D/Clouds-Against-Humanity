@@ -5,15 +5,21 @@
 #
 # Two jobs, split by what they may do:
 #   render   contents: read. Runs scripts/gen_repo_metrics.py --refresh with the
-#            default GITHUB_TOKEN. It asks GitHub for time stamps and counts only,
-#            never a user name (the script validates that on every run). It draws
+#            default GITHUB_TOKEN. That token cannot read stargazer time stamps, so the
+#            run never asks for them: it reads the current star count and appends it to a
+#            ledger of one dated count per day, carried from the last published snapshot
+#            (the star history before the baseline date is committed in main). It never
+#            reads a user name (the script validates that on every run). It draws
 #            the picture with hash-pinned matplotlib, re-validates the two files and
 #            uploads them as a one-day artifact. It cannot push.
 #   publish  contents: write, no other secrets. Downloads the artifact, validates it
-#            again (it crossed an artifact boundary), builds a fresh one-commit
-#            orphan history and pushes it to `metrics` under a lease on the value it read (never a bare
-#            force). The push is skipped when the picture did not change.
-#            The first run creates the branch. main is never written, so its branch
+#            again (it crossed an artifact boundary; it must descend from the committed
+#            baseline and keep every earlier ledger point) and pushes a child commit of
+#            the exact metrics tip the render job read, with an exact lease
+#            (--force-with-lease=refs/heads/metrics:<that tip>), so it can only be a pure
+#            fast-forward from it. A moved branch fails the run. The first run creates the branch
+#            as an orphan root; history is kept, one small commit a day. The push is
+#            skipped when nothing changed. main is never written, so its branch
 #            protection is untouched.
 #
 # Residual risk: GITHUB_TOKEN cannot be scoped to one branch, so the publish job's
@@ -47,6 +53,8 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+    outputs:
+      tip: ${{ steps.carry.outputs.tip }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -57,13 +65,30 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/venv"
           "$RUNNER_TEMP/venv/bin/pip" install --require-hashes --no-deps -r scripts/growth-chart-requirements.txt
 
-      - name: Fetch per-day counts and draw the chart
+      # The star ledger lives in the previously published snapshot, and the metrics
+      # branch is mutable, so nothing from it is trusted. The script carries one file
+      # out (size read without writing it, regular file only, fail-closed on any read
+      # error; only "no such branch" starts a ledger from nothing) and prints the commit
+      # it read. That commit becomes a job output: the publish job may only push a child
+      # of exactly that tip. gen_repo_metrics.py then checks the file against the
+      # committed baseline and keeps every earlier ledger point.
+      - name: Carry the star ledger from the metrics branch
+        id: carry
+        run: |
+          bash scripts/carry_metrics_snapshot.sh "https://github.com/$GITHUB_REPOSITORY.git" carried >> "$GITHUB_OUTPUT"
+
+      # --no-star-times: the default token cannot read stargazer time stamps (REST and
+      # GraphQL are both refused), so the run reads only the current star count. The star
+      # history comes from the committed baseline snapshot; the ledger of daily counts
+      # comes from the carried snapshot. Forks, pull requests and issues are read fresh.
+      - name: Fetch counts and draw the chart
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir bundle
-          "$RUNNER_TEMP/venv/bin/python" -I scripts/gen_repo_metrics.py --refresh --no-page \
+          "$RUNNER_TEMP/venv/bin/python" -I scripts/gen_repo_metrics.py --refresh --no-page --no-star-times \
             --repo "$GITHUB_REPOSITORY" \
+            --baseline docs/wiki/.metrics-snapshot.json --ledger-from carried/metrics-snapshot.json \
             --snapshot bundle/metrics-snapshot.json --out bundle/repo-growth.png
 
       - name: Validate the bundle
@@ -99,4 +124,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           METRICS_MAX_AGE_HOURS: "3"
+          METRICS_EXPECTED_TIP: ${{ needs.render.outputs.tip }}
         run: bash scripts/publish_metrics_branch.sh bundle
