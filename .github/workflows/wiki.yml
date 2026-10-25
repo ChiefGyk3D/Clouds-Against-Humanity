@@ -32,7 +32,7 @@ permissions: {}
 
 jobs:
   wiki:
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/wiki-publish.yml@8fdb8d106b11aae0f37e893bb57e9bd8e8b0e7b7 # git-your-ship-together main at PR 151 (untagged; next release)
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/wiki-publish.yml@b9db99287236b19f0249f83b54acc5cc41126e42 # v1.25.0
     permissions:
       contents: write  # the publish job only, on main; the generate job holds contents: read
     with:
