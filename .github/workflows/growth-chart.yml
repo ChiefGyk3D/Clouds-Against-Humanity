@@ -5,8 +5,11 @@
 #
 # Two jobs, split by what they may do:
 #   render   contents: read. Runs scripts/gen_repo_metrics.py --refresh with the
-#            default GITHUB_TOKEN. It asks GitHub for time stamps and counts only,
-#            never a user name (the script validates that on every run). It draws
+#            default GITHUB_TOKEN. That token cannot read stargazer time stamps, so the
+#            run never asks for them: it reads the current star count and appends it to a
+#            ledger of one dated count per day, carried from the last published snapshot
+#            (the star history before the baseline date is committed in main). It never
+#            reads a user name (the script validates that on every run). It draws
 #            the picture with hash-pinned matplotlib, re-validates the two files and
 #            uploads them as a one-day artifact. It cannot push.
 #   publish  contents: write, no other secrets. Downloads the artifact, validates it
@@ -57,13 +60,38 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/venv"
           "$RUNNER_TEMP/venv/bin/pip" install --require-hashes --no-deps -r scripts/growth-chart-requirements.txt
 
-      - name: Fetch per-day counts and draw the chart
+      # The star ledger lives in the previously published snapshot. Carrying it is
+      # fail-closed: only "the metrics branch does not exist yet" (ls-remote exit 2)
+      # starts a ledger from nothing; any other failure stops the run, so a network
+      # error can never publish a ledger that lost its old points.
+      - name: Carry the star ledger from the metrics branch
+        run: |
+          mkdir carried
+          url="https://github.com/$GITHUB_REPOSITORY.git"
+          rc=0
+          git ls-remote --exit-code --heads "$url" metrics > /dev/null || rc=$?
+          if [ "$rc" -eq 0 ]; then
+            git fetch --depth=1 --no-tags "$url" refs/heads/metrics
+            git show FETCH_HEAD:metrics-snapshot.json > carried/metrics-snapshot.json
+          elif [ "$rc" -eq 2 ]; then
+            echo "no metrics branch yet; the ledger starts today"
+          else
+            echo "could not read the metrics branch (exit $rc)" >&2
+            exit "$rc"
+          fi
+
+      # --no-star-times: the default token cannot read stargazer time stamps (REST and
+      # GraphQL are both refused), so the run reads only the current star count. The star
+      # history comes from the committed baseline snapshot; the ledger of daily counts
+      # comes from the carried snapshot. Forks, pull requests and issues are read fresh.
+      - name: Fetch counts and draw the chart
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir bundle
-          "$RUNNER_TEMP/venv/bin/python" -I scripts/gen_repo_metrics.py --refresh --no-page \
+          "$RUNNER_TEMP/venv/bin/python" -I scripts/gen_repo_metrics.py --refresh --no-page --no-star-times \
             --repo "$GITHUB_REPOSITORY" \
+            --baseline docs/wiki/.metrics-snapshot.json --ledger-from carried/metrics-snapshot.json \
             --snapshot bundle/metrics-snapshot.json --out bundle/repo-growth.png
 
       - name: Validate the bundle

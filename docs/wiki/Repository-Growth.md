@@ -15,6 +15,12 @@ picture disagree. -->
 
 *The picture is redrawn every day by a workflow and shows its own as-of date. The table and totals below are the last committed snapshot, taken 2026-10-23.*
 
+## How the stars line is built
+
+GitHub does not let the workflow's built-in token read when each star happened, so the daily run cannot rebuild the star history. Instead the line has two parts. Up to the baseline date it comes from per-star times, read by the maintainer with their own login. After that date it is one point per day, the repository's star count that day, recorded by the workflow and joined by straight (dashed) segments. Those later points are daily counts, not per-star times, and the picture says so under the as-of date. Forks, merged pull requests and closed issues are read fresh every day.
+
+To backfill the baseline, run `python3 -I scripts/gen_repo_metrics.py --refresh` locally with your own login: it asks for every star's time stamp, moves the baseline date to today and drops the ledger it replaces. The workflow never asks for star times (`--no-star-times`, chosen automatically when `GITHUB_ACTIONS` is true).
+
 *As of 2026-10-23, 13 days after the repository was created: 465 stars, 21 forks, 165 pull requests merged and 35 issues closed.*
 
 ## How to read it honestly

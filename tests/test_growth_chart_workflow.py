@@ -229,3 +229,29 @@ def test_render_holds_no_write_permission_and_no_graphql_only_grant(doc):
     perms = doc["jobs"]["render"]["permissions"]
     assert perms == {"contents": "read"}
     assert all(v == "read" for v in perms.values())
+
+
+def render_script(doc):
+    return "\n".join(s for n, s in run_scripts(doc) if n == "render")
+
+
+def test_render_never_asks_for_star_times_and_carries_the_ledger(doc):
+    script = render_script(doc)
+    assert "--no-star-times" in script
+    assert "stargazers" not in script and "graphql" not in script
+    assert "--baseline docs/wiki/.metrics-snapshot.json" in script
+    assert "--ledger-from carried/metrics-snapshot.json" in script
+
+
+def test_a_failed_read_of_the_metrics_branch_stops_the_run(doc):
+    script = render_script(doc)
+    assert "ls-remote --exit-code" in script
+    assert '"$rc" -eq 2' in script and 'exit "$rc"' in script
+    assert "|| true" not in script
+
+
+def test_the_carry_step_runs_before_the_refresh(doc):
+    names = [s.get("name", "") for s in doc["jobs"]["render"]["steps"]]
+    carry = next(i for i, n in enumerate(names) if "ledger" in n)
+    fetch = next(i for i, n in enumerate(names) if n.startswith("Fetch"))
+    assert carry < fetch
