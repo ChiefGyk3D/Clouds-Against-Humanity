@@ -37,6 +37,12 @@ This table is the text version of the picture, one row per week (UTC, Monday to 
 
 Totals: 465 stars, 21 forks, 165 merged pull requests, 35 closed issues.
 
+## How the daily picture is published, and the risk that remains
+
+A workflow draws the picture every day and pushes it to an orphan branch named `metrics`, never to `main`. One job (read-only) fetches counts and draws; a second job validates the result again and pushes it. The second job needs `contents: write`, and GitHub cannot limit the built-in token to one branch, so that token is **repository-wide**. The workflow narrows what it does with it: the job holds no other secret and runs only the checked-in publish script, which refuses to write any ref but `refs/heads/metrics`, passes the token to the git commands that talk to GitHub and nowhere else, and never writes it to disk. That is a limit on this script, not access control.
+
+The control that holds is a repository ruleset: restrict creation and updates of the `metrics` branch to the GitHub Actions app, block deletion and keep `main` protected as it is (pull request, status checks, no force push). Without that ruleset, anything that can run code in the publish job could write any branch.
+
 ## Reproduce it
 
 Run these from a login that can read the repository. They show the same data without the script:

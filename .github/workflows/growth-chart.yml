@@ -16,6 +16,14 @@
 #            The first run creates the branch. main is never written, so its branch
 #            protection is untouched.
 #
+# Residual risk: GITHUB_TOKEN cannot be scoped to one branch, so the publish job's
+# token is repository-wide contents: write. What limits it: the job runs only
+# checkout, the artifact download and scripts/publish_metrics_branch.sh from main,
+# holds no other secret, hands the token to the three git commands that talk to the
+# remote (scoped to the remote URL, never written to disk, never seen by the
+# validator), and the script refuses any ref but refs/heads/metrics. The real
+# control is a repository ruleset; see docs/wiki/Repository-Growth.md.
+#
 # The committed docs/wiki/images/repo-growth.png and .metrics-snapshot.json stay in
 # main as the offline, hash-checked fallback that CI's --check compares; the daily
 # picture does not replace them. Only runs on main in this repository.

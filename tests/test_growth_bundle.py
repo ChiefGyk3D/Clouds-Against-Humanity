@@ -35,9 +35,9 @@ NOW = datetime.datetime(2026, 10, 25, 6, 0, 0, tzinfo=datetime.UTC)
 REPO = "Example/Repo"
 
 
-def make_bundle(path: Path, snap=None, png=None) -> Path:
+def make_bundle(path: Path, snap=None, png=None, fetched="2026-10-25T05:30:00Z") -> Path:
     snap = copy.deepcopy(snap or fixture())
-    snap["fetched_at"] = "2026-10-25T05:30:00Z"
+    snap["fetched_at"] = fetched
     snap["stars"] = {"2026-10-10": 2, "2026-10-12": 5}
     snap["forks"] = {"2026-10-13": 1}
     snap["merged_prs"] = {"2026-10-11": 3}
@@ -292,3 +292,99 @@ def test_the_script_never_uses_a_bare_force():
     assert "--force-with-lease=" in text
     assert not re.search(r"--force(?!-with-lease=)", text)
     assert not re.search(r"push\s+(-\w*f|\+)", text)
+
+
+def test_a_changed_snapshot_is_pushed_even_when_the_picture_is_identical(tmp_path, remote):
+    assert publish(make_bundle(tmp_path / "b"), remote).returncode == 0
+    first = git("rev-parse", "metrics", cwd=remote).stdout
+    newer = make_bundle(tmp_path / "c", fetched="2026-10-25T05:45:00Z")
+    assert (newer / grm.BUNDLE_PNG).read_bytes() == (tmp_path / "b" / grm.BUNDLE_PNG).read_bytes()
+    out = publish(newer, remote)
+    assert out.returncode == 0 and "pushed" in out.stdout
+    assert git("rev-parse", "metrics", cwd=remote).stdout != first
+    assert git("show", "metrics:as-of.txt", cwd=remote).stdout == "2026-10-25T05:45:00Z\n"
+    assert json.loads(git("show", "metrics:metrics-snapshot.json", cwd=remote).stdout)["fetched_at"] == "2026-10-25T05:45:00Z"
+
+
+def test_a_remote_branch_with_an_extra_file_is_replaced_not_skipped(tmp_path, remote):
+    b = make_bundle(tmp_path / "b")
+    assert publish(b, remote).returncode == 0
+    other = tmp_path / "other"
+    git("clone", "-q", "-b", "metrics", str(remote), str(other))
+    (other / "extra.txt").write_text("x\n")
+    git("-C", str(other), "add", "extra.txt")
+    git("-C", str(other), "-c", "user.name=t", "-c", "user.email=t@example.invalid", "commit", "-q", "-m", "x")
+    git("-C", str(other), "push", "-q", "origin", "metrics")
+    assert publish(b, remote).returncode == 0
+    assert branch_files(remote) == ["as-of.txt", "metrics-snapshot.json", "repo-growth.png"]
+
+
+@pytest.mark.parametrize("branch", ["main", "master", "metrics:main", "refs/heads/main", "../metrics", "metrics ", "-f", "", "metrics2", "HEAD"])
+def test_the_script_refuses_to_push_to_any_ref_but_metrics(tmp_path, remote, branch):
+    git("-C", str(remote), "symbolic-ref", "HEAD", "refs/heads/main")
+    out = publish(make_bundle(tmp_path / "b"), remote, METRICS_BRANCH=branch)
+    assert out.returncode != 0
+    assert "refs/heads/metrics" in out.stderr
+    assert git("branch", "--list", cwd=remote).stdout.strip() == ""
+
+
+def test_the_push_refspec_is_spelled_out_in_the_script():
+    text = PUBLISH.read_text()
+    assert "HEAD:refs/heads/metrics" in text
+    assert "refs/heads/metrics" in text.split("push")[-1]
+
+
+TOKEN = f"fixture-credential-{6 * 7}"  # built at run time: a fake with no literal for a secret scanner to flag
+
+
+def shimmed_publish(tmp_path, remote, bundle):
+    """Run the script with a git shim that logs, per call, the credential env and the work repo's config."""
+    import base64
+
+    real = shutil.which("git")
+    log = tmp_path / "gitcalls.log"
+    shim = tmp_path / "shim"
+    shim.mkdir()
+    (shim / "git").write_text(
+        "#!/bin/bash\n"
+        'sub=""; dir=""\n'
+        'args=("$@")\n'
+        'if [ "${args[0]}" = -C ]; then dir=${args[1]}; sub=${args[2]}; else sub=${args[0]}; fi\n'
+        f'{{ echo "CALL $sub count=${{GIT_CONFIG_COUNT:-}} key=${{GIT_CONFIG_KEY_0:-}} hasval=$([ -n "${{GIT_CONFIG_VALUE_0:-}}" ] && echo y || echo n) token=$([ -n "${{GH_TOKEN:-}}" ] && echo y || echo n)"; '
+        f'[ -n "$dir" ] && [ -f "$dir/.git/config" ] && sed "s/^/CONFIG /" "$dir/.git/config"; }} >> {log}\n'
+        f'exec {real} "$@"\n'
+    )
+    (shim / "git").chmod(0o755)
+    out = publish(bundle, remote, GH_TOKEN=TOKEN, PATH=f"{shim}:{os.environ['PATH']}")
+    return out, log.read_text(), base64.b64encode(f"x-access-token:{TOKEN}".encode()).decode()
+
+
+def test_the_token_header_is_scoped_to_the_remote_url_and_only_remote_commands(tmp_path, remote):
+    out, calls, b64 = shimmed_publish(tmp_path, remote, make_bundle(tmp_path / "b"))
+    assert out.returncode == 0, out.stderr
+    remote_calls = [ln for ln in calls.splitlines() if ln.startswith("CALL ") and "hasval=y" in ln]
+    assert remote_calls, "the header was never sent"
+    for ln in remote_calls:
+        assert ln.split()[1] in {"ls-remote", "fetch", "push"}, ln
+        assert f"key=http.{remote}.extraheader" in ln, ln
+        assert "count=1" in ln
+    local = [ln for ln in calls.splitlines() if ln.startswith("CALL ") and ln.split()[1] in {"init", "remote", "add", "commit", "show"}]
+    assert local and all("hasval=n" in ln and "count= " in ln for ln in local), local
+
+
+def test_no_file_and_no_output_ever_holds_the_token(tmp_path, remote):
+    out, calls, b64 = shimmed_publish(tmp_path, remote, make_bundle(tmp_path / "b"))
+    assert out.returncode == 0
+    for secret in (TOKEN, b64):
+        assert secret not in calls  # the work repo's .git/config, as seen at every call
+        assert secret not in out.stdout + out.stderr
+        for path in tmp_path.rglob("*"):
+            if path.is_file() and not path.is_symlink() and path != tmp_path / "gitcalls.log":
+                assert secret.encode() not in path.read_bytes(), path
+
+
+def test_the_python_validator_does_not_see_the_token(tmp_path, remote):
+    out, calls, _ = shimmed_publish(tmp_path, remote, make_bundle(tmp_path / "b"))
+    text = PUBLISH.read_text()
+    assert "env -u GH_TOKEN python3" in text or "unset GH_TOKEN" in text
+    assert "export GIT_CONFIG" not in text

@@ -208,3 +208,18 @@ def test_pages_reference_the_chart_from_the_metrics_branch(page):
     text = (ROOT / page).read_text()
     refs = re.findall(r"!\[[^\]]*\]\(([^)]*repo-growth\.png)\)", text)
     assert refs == [IMAGE_URL], page
+
+
+def test_publish_runs_only_checkout_download_and_the_verified_script(doc):
+    steps = doc["jobs"]["publish"]["steps"]
+    kinds = [s.get("uses", "").split("@")[0] or "run" for s in steps]
+    assert kinds == ["actions/checkout", "actions/download-artifact", "run"]
+    assert steps[-1]["run"].strip() == "bash scripts/publish_metrics_branch.sh bundle"
+    assert set(steps[-1]["env"]) == {"GH_TOKEN", "METRICS_MAX_AGE_HOURS"}
+
+
+def test_the_residual_risk_is_documented_in_the_workflow_and_the_page():
+    text = WORKFLOW.read_text()
+    assert "repository-wide" in text and "ruleset" in text
+    page = (ROOT / "docs/wiki/Repository-Growth.md").read_text()
+    assert "repository-wide" in page and "ruleset" in page and "metrics" in page
