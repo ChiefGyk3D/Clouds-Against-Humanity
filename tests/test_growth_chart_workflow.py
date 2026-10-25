@@ -223,3 +223,9 @@ def test_the_residual_risk_is_documented_in_the_workflow_and_the_page():
     assert "repository-wide" in text and "ruleset" in text
     page = (ROOT / "docs/wiki/Repository-Growth.md").read_text()
     assert "repository-wide" in page and "ruleset" in page and "metrics" in page
+
+
+def test_render_holds_no_write_permission_and_no_graphql_only_grant(doc):
+    perms = doc["jobs"]["render"]["permissions"]
+    assert perms == {"contents": "read"}
+    assert all(v == "read" for v in perms.values())

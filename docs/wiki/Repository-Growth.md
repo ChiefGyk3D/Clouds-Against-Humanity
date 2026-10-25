@@ -52,7 +52,7 @@ gh api repos/ChiefGyk3D/Clouds-Against-Humanity --jq .created_at
 gh api repos/ChiefGyk3D/Clouds-Against-Humanity/forks --paginate --jq '.[].created_at'
 gh pr list --repo ChiefGyk3D/Clouds-Against-Humanity --state merged --limit 5000 --json mergedAt
 gh issue list --repo ChiefGyk3D/Clouds-Against-Humanity --state closed --limit 5000 --json closedAt
-# stars: a GraphQL query for stargazers(first: 100, orderBy: {field: STARRED_AT, direction: ASC}) { edges { starredAt } }, paged
+gh api --paginate -X GET repos/ChiefGyk3D/Clouds-Against-Humanity/stargazers -H 'Accept: application/vnd.github.star+json' --jq '.[].starred_at'
 python3 -I scripts/gen_repo_metrics.py --refresh   # does all of the above, draws the chart and rewrites this page
 python3 -I scripts/gen_repo_metrics.py --check     # offline: the same check CI runs
 ```
