@@ -11,7 +11,9 @@ picture disagree. -->
 
 **Generated at:** 2026-10-23T00:14:32Z (UTC), from `ChiefGyk3D/Clouds-Against-Humanity`, which was created on 2026-10-10 (day 0 on the chart). The numbers come from GitHub and drift: this is a snapshot, not a live counter.
 
-![Hand-drawn style chart: cumulative stars and forks since the repository was created, and weekly merged pull requests and closed issues](images/repo-growth.png)
+![Hand-drawn style chart: cumulative stars and forks since the repository was created, and weekly merged pull requests and closed issues](https://raw.githubusercontent.com/ChiefGyk3D/Clouds-Against-Humanity/metrics/repo-growth.png)
+
+*The picture is redrawn every day by a workflow and shows its own as-of date. The table and totals below are the last committed snapshot, taken 2026-10-23.*
 
 *As of 2026-10-23, 13 days after the repository was created: 465 stars, 21 forks, 165 pull requests merged and 35 issues closed.*
 

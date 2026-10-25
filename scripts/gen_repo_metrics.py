@@ -3,8 +3,9 @@
 
 The chart is a hand-drawn-style PNG (matplotlib's xkcd mode): cumulative stars
 and forks since the repository was created, and weekly merged pull requests and
-closed issues underneath. It is made locally and committed as a local picture,
-never hotlinked from a chart service, so a reader's address is not sent anywhere.
+closed issues underneath. It is drawn by this script and served from this
+repository's own `metrics` branch (refreshed daily by .github/workflows/growth-chart.yml),
+never hotlinked from a chart service, so a reader's address goes to GitHub only.
 
 Parts, kept apart on purpose (the same shape as gen_project_status.py):
 
@@ -29,7 +30,14 @@ edit of the numbers is caught) and `png_sha256` of the picture drawn from them (
 a missing, stale or hand-edited picture is caught). --check recomputes both
 offline, the way docs/diagrams.json records a source hash next to each picture.
 
+The daily workflow runs --refresh into a bundle (snapshot + picture, nothing else),
+then --verify-bundle DIR re-checks it offline before anything is published: exact file
+set, regular files only, size caps, a real PNG, matching hashes, only per-day counts,
+the expected repository, and a time stamp that is neither stale nor from the future.
+
 Usage (from anywhere inside a clone):
+  python3 -I scripts/gen_repo_metrics.py --verify-bundle DIR --expect-repo OWNER/NAME
+                                                      [--max-age-hours N] [--print-as-of]
   python3 -I scripts/gen_repo_metrics.py --check      offline; exit 1 when stale
   python3 -I scripts/gen_repo_metrics.py              re-draw from the snapshot
                                                       (needs matplotlib)
@@ -79,6 +87,18 @@ DEFAULT_REPO = "ChiefGyk3D/Clouds-Against-Humanity"
 SNAPSHOT = Path("docs") / "wiki" / ".metrics-snapshot.json"
 PNG = Path("docs") / "wiki" / "images" / "repo-growth.png"
 PAGE = Path("docs") / "wiki" / "Repository-Growth.md"
+
+# The daily workflow (.github/workflows/growth-chart.yml) publishes a fresh picture to
+# an orphan branch; the pages show that one. The committed picture stays as the
+# hash-checked fallback that --check compares against the committed snapshot.
+DEFAULT_IMAGE_URL = f"https://raw.githubusercontent.com/{DEFAULT_REPO}/metrics/repo-growth.png"
+
+# A bundle is what the render job hands to the publish job: exactly these two files.
+BUNDLE_SNAPSHOT = "metrics-snapshot.json"
+BUNDLE_PNG = "repo-growth.png"
+MAX_SNAPSHOT_BYTES = 256 * 1024
+MAX_PNG_BYTES = 1024 * 1024
+MAX_DAY_COUNT = 1_000_000  # one day of stars, forks, pull requests or issues
 
 SERIES = ("stars", "forks", "merged_prs", "closed_issues")
 TRAFFIC_KINDS = ("views", "clones")
@@ -185,7 +205,7 @@ def md_table(headers: list[str], rows: list[list[str]]) -> list[str]:
     return ["| " + " | ".join(headers) + " |", "|" + "---|" * len(headers), *("| " + " | ".join(r) + " |" for r in rows), ""]
 
 
-def render_page(snapshot: dict, image: str = "images/repo-growth.png") -> str:
+def render_page(snapshot: dict, image: str = DEFAULT_IMAGE_URL) -> str:
     """The Markdown page for a snapshot. Pure: the same snapshot always gives the same page."""
     repo, created, fetched = snapshot["repo"], snapshot["created_on"], snapshot["fetched_at"]
     start, end = span(snapshot)
@@ -206,6 +226,8 @@ def render_page(snapshot: dict, image: str = "images/repo-growth.png") -> str:
         f"**Generated at:** {fetched} (UTC), from `{repo}`, which was created on {created} (day 0 on the chart). The numbers come from GitHub and drift: this is a snapshot, not a live counter.",
         "",
         f"![{ALT_TEXT}]({image})",
+        "",
+        f"*The picture is redrawn every day by a workflow and shows its own as-of date. The table and totals below are the last committed snapshot, taken {fetched[:10]}.*",
         "",
         f"*As of {fetched[:10]}, {age} days after the repository was created: {t['stars']} stars, {t['forks']} forks, {t['merged_prs']} pull requests merged and {t['closed_issues']} issues closed.*",
         "",
@@ -520,6 +542,80 @@ def check_files(snapshot_path: Path, png_path: Path, page_path: Path | None, ima
     return []
 
 
+def _no_duplicate_keys(pairs: list[tuple[str, object]]) -> dict:
+    out: dict = {}
+    for key, value in pairs:
+        if key in out:
+            raise ValueError(f"duplicate key {key!r}")
+        out[key] = value
+    return out
+
+
+def _refuse_constant(name: str) -> object:
+    raise ValueError(f"{name} is not valid JSON")
+
+
+def verify_bundle(
+    bundle: Path,
+    expect_repo: str | None = None,
+    max_age_hours: float | None = None,
+    now: datetime.datetime | None = None,
+) -> list[str]:
+    """Problems with a render-job bundle, offline. Treats every byte of it as untrusted.
+
+    The bundle is a directory holding exactly the snapshot and the picture, both
+    regular files under a size cap. The snapshot goes through the same validation as
+    the committed one, plus bounds on counts, the expected repository and a fresh
+    time stamp. Needs neither a token nor matplotlib.
+    """
+    now = now or datetime.datetime.now(datetime.UTC)
+    if bundle.is_symlink() or not bundle.is_dir():
+        return [f"{bundle} is not a directory"]
+    expected = {BUNDLE_SNAPSHOT: MAX_SNAPSHOT_BYTES, BUNDLE_PNG: MAX_PNG_BYTES}
+    names = sorted(entry.name for entry in bundle.iterdir())
+    extra = [n for n in names if n not in expected]
+    if extra:
+        return [f"unexpected entries in the bundle: {extra}"]
+    problems = []
+    for name, cap in expected.items():
+        path = bundle / name
+        try:
+            info = path.lstat()
+        except OSError:
+            problems.append(f"{name} is missing")
+            continue
+        if not stat.S_ISREG(info.st_mode):
+            problems.append(f"{name} is not a regular file")
+        elif info.st_size > cap:
+            problems.append(f"{name} is larger than {cap} bytes")
+        elif info.st_size == 0:
+            problems.append(f"{name} is empty")
+    if problems:
+        return problems
+    try:
+        snap = json.loads((bundle / BUNDLE_SNAPSHOT).read_bytes().decode("utf-8"), object_pairs_hook=_no_duplicate_keys, parse_constant=_refuse_constant)
+    except RecursionError:
+        return [f"{BUNDLE_SNAPSHOT} is nested too deeply"]
+    except (ValueError, OSError) as exc:  # includes UnicodeDecodeError and JSONDecodeError
+        return [f"{BUNDLE_SNAPSHOT} is not valid JSON: {exc}"]
+    problems = validate_snapshot(snap)
+    if problems:
+        return [f"{BUNDLE_SNAPSHOT}: {p}" for p in problems]
+    if expect_repo is not None and snap["repo"] != expect_repo:
+        return [f"{BUNDLE_SNAPSHOT}: repo is {snap['repo']}, expected {expect_repo}"]
+    for key in SERIES:
+        if any(v > MAX_DAY_COUNT for v in snap[key].values()):
+            problems.append(f"{key} has a count that is too large for one day")
+    if problems:
+        return problems
+    stamp = datetime.datetime.strptime(snap["fetched_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.UTC)
+    if stamp > now + datetime.timedelta(minutes=10):
+        return [f"{BUNDLE_SNAPSHOT}: fetched_at is in the future"]
+    if max_age_hours is not None and now - stamp > datetime.timedelta(hours=max_age_hours):
+        return [f"{BUNDLE_SNAPSHOT}: fetched_at is more than {max_age_hours:g} hours old"]
+    return check_files(bundle / BUNDLE_SNAPSHOT, bundle / BUNDLE_PNG, None, "")
+
+
 def write_all(snap: dict, snapshot_path: Path, png_path: Path, page_path: Path | None, image_ref: str) -> None:
     """Write picture, snapshot and page as one unit: all of them change, or none does.
 
@@ -578,13 +674,41 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", default=str(PNG), help="picture path, relative to --root")
     parser.add_argument("--page", default=str(PAGE), help="Markdown page path, relative to --root")
     parser.add_argument("--no-page", action="store_true", help="write and check no Markdown page")
+    parser.add_argument("--image-url", default=None, help="image reference written into the page (default: the metrics branch URL for this repository's own page, else a relative path)")
+    mode.add_argument("--verify-bundle", metavar="DIR", help="offline: validate a render-job bundle (snapshot + picture) before publishing it")
+    parser.add_argument("--expect-repo", default=None, help="with --verify-bundle: the owner/name the snapshot must be for")
+    parser.add_argument("--max-age-hours", type=float, default=None, help="with --verify-bundle: fail when fetched_at is older than this (0 or less: no limit)")
+    parser.add_argument("--print-as-of", action="store_true", help="with --verify-bundle: print fetched_at when the bundle is valid")
     args = parser.parse_args(argv)
     if args.traffic and not args.refresh:
         parser.error("--traffic needs --refresh")
+    if (args.expect_repo or args.print_as_of or args.max_age_hours is not None) and not args.verify_bundle:
+        parser.error("--expect-repo, --max-age-hours and --print-as-of need --verify-bundle")
+    if args.verify_bundle:
+        bundle = Path(args.verify_bundle)
+        limit = args.max_age_hours if args.max_age_hours and args.max_age_hours > 0 else None
+        problems = verify_bundle(bundle, args.expect_repo, limit)
+        for p in problems:
+            print(f"gen_repo_metrics: {p}", file=sys.stderr)
+        if problems:
+            return 1
+        if args.print_as_of:
+            print(json.loads((bundle / BUNDLE_SNAPSHOT).read_text(encoding="utf-8"))["fetched_at"])
+        else:
+            print(f"gen_repo_metrics: bundle {bundle} is valid")
+        return 0
     root = Path(args.root)
     snapshot_path, png_path = root / args.snapshot, root / args.out
     page_path = None if args.no_page else root / args.page
-    image_ref = Path(os.path.relpath(png_path, page_path.parent)).as_posix() if page_path else ""
+    own_page = args.repo == DEFAULT_REPO and args.page == str(PAGE) and args.out == str(PNG)
+    if not page_path:
+        image_ref = ""
+    elif args.image_url:
+        image_ref = args.image_url
+    elif own_page:
+        image_ref = DEFAULT_IMAGE_URL
+    else:
+        image_ref = Path(os.path.relpath(png_path, page_path.parent)).as_posix()
 
     if args.check:
         problems = check_files(snapshot_path, png_path, page_path, image_ref)
