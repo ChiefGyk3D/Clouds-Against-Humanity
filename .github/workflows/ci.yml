@@ -9,7 +9,7 @@ permissions: {}
 
 jobs:
   tofu:
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/tofu-ci.yml@b9db99287236b19f0249f83b54acc5cc41126e42 # v1.25.0
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/tofu-ci.yml@6f40107c2e05483f485452991e422f7f63886000 # v1.25.1
     permissions:
       contents: read
       id-token: write
@@ -22,7 +22,7 @@ jobs:
       policy-directories: .spacelift/policies
 
   python:
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/python-ci.yml@b9db99287236b19f0249f83b54acc5cc41126e42 # v1.25.0
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/python-ci.yml@6f40107c2e05483f485452991e422f7f63886000 # v1.25.1
     permissions:
       contents: read
       id-token: write
@@ -47,7 +47,7 @@ jobs:
       docker-build: false
 
   security:
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/security.yml@b9db99287236b19f0249f83b54acc5cc41126e42 # v1.25.0
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/security.yml@6f40107c2e05483f485452991e422f7f63886000 # v1.25.1
     permissions:
       contents: read
       security-events: write
