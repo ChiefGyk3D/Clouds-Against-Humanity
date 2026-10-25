@@ -360,7 +360,7 @@ def shimmed_publish(tmp_path, remote, bundle):
 
 
 def test_the_token_header_is_scoped_to_the_remote_url_and_only_remote_commands(tmp_path, remote):
-    out, calls, b64 = shimmed_publish(tmp_path, remote, make_bundle(tmp_path / "b"))
+    out, calls, _ = shimmed_publish(tmp_path, remote, make_bundle(tmp_path / "b"))
     assert out.returncode == 0, out.stderr
     remote_calls = [ln for ln in calls.splitlines() if ln.startswith("CALL ") and "hasval=y" in ln]
     assert remote_calls, "the header was never sent"
@@ -384,7 +384,13 @@ def test_no_file_and_no_output_ever_holds_the_token(tmp_path, remote):
 
 
 def test_the_python_validator_does_not_see_the_token(tmp_path, remote):
-    out, calls, _ = shimmed_publish(tmp_path, remote, make_bundle(tmp_path / "b"))
-    text = PUBLISH.read_text()
-    assert "env -u GH_TOKEN python3" in text or "unset GH_TOKEN" in text
-    assert "export GIT_CONFIG" not in text
+    real = shutil.which("python3")
+    shim = tmp_path / "pyshim"
+    shim.mkdir()
+    seen = tmp_path / "py-env.log"
+    (shim / "python3").write_text(f'#!/bin/bash\necho "GH_TOKEN=${{GH_TOKEN:-unset}} GITHUB_TOKEN=${{GITHUB_TOKEN:-unset}}" >> {seen}\nexec {real} "$@"\n')
+    (shim / "python3").chmod(0o755)
+    out = publish(make_bundle(tmp_path / "b"), remote, GH_TOKEN=TOKEN, GITHUB_TOKEN=TOKEN, PATH=f"{shim}:{os.environ['PATH']}")
+    assert out.returncode == 0, out.stderr
+    assert seen.read_text().strip() == "GH_TOKEN=unset GITHUB_TOKEN=unset"
+    assert "export GIT_CONFIG" not in PUBLISH.read_text()
