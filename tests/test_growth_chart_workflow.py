@@ -160,7 +160,9 @@ def test_render_never_pushes_and_publish_never_installs_packages(doc):
 def test_no_bare_force_push_anywhere():
     for path in (WORKFLOW, PUBLISH):
         assert bare_force(path.read_text()) == [], path
-    assert "--force" not in PUBLISH.read_text()  # history is kept and the push is fast-forward only
+    # history is kept and the push is an exact lease: the only "--force" spelling allowed
+    forces = re.findall(r"--force\S*", PUBLISH.read_text())
+    assert forces and all(re.match(r'--force-with-lease="?refs/heads/metrics:', f) for f in forces), forces
 
 
 @pytest.mark.parametrize("text", ["git push --force origin x", "git push -f origin x", "git push origin +x:y", "git push --force-with-lease origin x"])
