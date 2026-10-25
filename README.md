@@ -96,9 +96,9 @@ Working ceiling: $30 per month in the current phase (stage 1), shared by every c
 
 ### Growth
 
-Stars measure attention, not use, but the project is young enough that the curve is worth a look. The chart is drawn locally from GitHub data, and the as-of date is printed in the picture; the [Repository growth](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Repository-Growth) page has the numbers as a table.
+Stars measure attention, not use, but the project is young enough that the curve is worth a look. The chart is drawn by a daily workflow from GitHub data (no chart service), and the as-of date is printed in the picture; the [Repository growth](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Repository-Growth) page has the numbers as a table.
 
-![Hand-drawn style chart: cumulative stars and forks since the repository was created, and weekly merged pull requests and closed issues](docs/wiki/images/repo-growth.png)
+![Hand-drawn style chart: cumulative stars and forks since the repository was created, and weekly merged pull requests and closed issues](https://raw.githubusercontent.com/ChiefGyk3D/Clouds-Against-Humanity/metrics/repo-growth.png)
 
 ## Layout
 
@@ -120,7 +120,9 @@ Clouds-Against-Humanity/
   scripts/identifier_check.py              fails on cloud account ids in tracked files (never prints them)
   scripts/gen_settings_doc.py              writes docs/wiki/Settings-Reference.md from docs/settings.json (--check fails when stale)
   scripts/gen_project_status.py            writes docs/wiki/Project-Status.md from docs/wiki/.status-snapshot.json (--check fails when stale; --refresh fetches live data with the maintainer login)
-  scripts/gen_repo_metrics.py              draws docs/wiki/images/repo-growth.png and writes docs/wiki/Repository-Growth.md from docs/wiki/.metrics-snapshot.json (--check is offline and needs no plotting library; --refresh fetches per-day counts with gh and needs matplotlib; --repo, --snapshot, --out and --page reuse it for another repository)
+  scripts/gen_repo_metrics.py              draws docs/wiki/images/repo-growth.png and writes docs/wiki/Repository-Growth.md from docs/wiki/.metrics-snapshot.json (--check is offline and needs no plotting library; --refresh fetches per-day counts with gh and needs matplotlib; --verify-bundle checks what the daily workflow publishes; --repo, --snapshot, --out and --page reuse it for another repository)
+  scripts/publish_metrics_branch.sh        the publish half of the daily growth chart: re-verifies the bundle, then force-with-lease pushes it to the orphan `metrics` branch (never to main)
+  scripts/growth-chart-requirements.txt    hash-pinned matplotlib and Pillow for the daily growth chart (pip install --require-hashes)
   scripts/gen_wiki_nav.py                  writes docs/wiki/Contents.md and docs/wiki/_Sidebar.md from docs/wiki/_nav.yaml (--check fails when stale or when a page is missing from the manifest)
   scripts/gen_example_tests.py             writes each live stack's example.tftest.hcl from its terraform.tfvars.example
   scripts/gen_timezones.py                 regenerates modules/twingate-bootstrap/timezones.txt from the local tz database

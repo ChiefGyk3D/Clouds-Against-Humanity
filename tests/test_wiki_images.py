@@ -33,6 +33,14 @@ STRICT_IMAGE = re.compile(r"!\[([^\]\n]*)\]\(images/([a-z0-9]+(?:-[a-z0-9]+)*\.p
 RAW_HTML_MEDIA = re.compile(r"<\s*/?\s*(img|picture|source|video|audio|iframe|object|embed|svg|image)\b", re.IGNORECASE)
 REFERENCE_IMAGE = re.compile(r"!\[[^\]\n]*\]\s?\[[^\]\n]*\]")
 WIKI_IMAGE_SYNTAX = re.compile(r"\[\[[^\]\n]*\.(png|jpe?g|gif|svg|webp)[^\]\n]*\]\]", re.IGNORECASE)
+# The one image that is not in-tree: the daily growth chart (issue #294), drawn by
+# .github/workflows/growth-chart.yml and served from this repository's orphan
+# `metrics` branch. Exactly this address is allowed, nothing else off-site.
+METRICS_IMAGE_URL = "https://raw.githubusercontent.com/ChiefGyk3D/Clouds-Against-Humanity/metrics/repo-growth.png"
+METRICS_IMAGE = re.compile(r"!\[([^\]\n]*)\]\(" + re.escape(METRICS_IMAGE_URL) + r"\)")
+# Committed only as the offline fallback that gen_repo_metrics.py --check hashes
+# against the committed snapshot; pages show the metrics-branch copy instead.
+FALLBACK_IMAGES = {"repo-growth.png"}
 NAME = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\.png")
 
 
@@ -52,6 +60,11 @@ def page_problems(page: str, text: str) -> list[str]:
     if WIKI_IMAGE_SYNTAX.search(body):
         problems.append(f"{page}: wiki [[image]] syntax; use Markdown image syntax")
     for m in re.finditer(r"!\[", body):
+        metrics = METRICS_IMAGE.match(body, m.start())
+        if metrics:
+            if len(metrics.group(1).strip()) < MIN_ALT:
+                problems.append(f"{page}: alt text {metrics.group(1)!r} is shorter than {MIN_ALT} characters")
+            continue
         ok = STRICT_IMAGE.match(body, m.start())
         if not ok:
             problems.append(f"{page}: image not of the form ![alt](images/lowercase-name.png): {body[m.start():m.start() + 60]!r}")
@@ -118,7 +131,7 @@ def test_every_image_file_is_referenced():
     used = set()
     for page in WIKI.glob("*.md"):
         used |= referenced(page.read_text())
-    unused = [p.name for p in image_entries() if p.name not in used]
+    unused = [p.name for p in image_entries() if p.name not in used and p.name not in FALLBACK_IMAGES]
     assert not unused, f"in docs/wiki/images/ but on no page: {unused}"
 
 
@@ -260,3 +273,16 @@ def test_png_checks_reject_symlinks_bad_names_metadata_and_wide_files(tmp_path):
     broken = tmp_path / "broken.png"
     broken.write_bytes(png()[:-5])
     assert any("IEND" in p or "truncated" in p for p in png_problems(broken))
+
+
+def test_the_metrics_branch_image_is_the_only_off_site_image_allowed():
+    alt = "Hand-drawn style chart of stars and forks"
+    assert not page_problems("X.md", f"![{alt}]({METRICS_IMAGE_URL})\n")
+    assert page_problems("X.md", f"![{alt}]({METRICS_IMAGE_URL}?x=1)\n")
+    assert page_problems("X.md", f"![{alt}](https://example.invalid/repo-growth.png)\n")
+    assert page_problems("X.md", f"![{alt}](https://raw.githubusercontent.com/Other/Repo/metrics/repo-growth.png)\n")
+    assert page_problems("X.md", f"![short]({METRICS_IMAGE_URL})\n")
+
+
+def test_only_the_growth_chart_is_exempt_from_the_every_image_is_used_rule():
+    assert FALLBACK_IMAGES == {"repo-growth.png"}

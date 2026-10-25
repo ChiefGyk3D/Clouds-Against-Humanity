@@ -122,9 +122,9 @@ Working ceiling: $30 per month in the current phase; every phase has its own cei
 
 ### Growth
 
-![Hand-drawn style chart: cumulative stars and forks since the repository was created, and weekly merged pull requests and closed issues](images/repo-growth.png)
+![Hand-drawn style chart: cumulative stars and forks since the repository was created, and weekly merged pull requests and closed issues](https://raw.githubusercontent.com/ChiefGyk3D/Clouds-Against-Humanity/metrics/repo-growth.png)
 
-*As of 2026-10-23 (UTC), drawn from GitHub data, which drifts. Stars measure attention, not use. The numbers and how to reproduce them are on [Repository growth](Repository-Growth.md).*
+*Redrawn every day from GitHub data, which drifts; the as-of date is printed in the picture. Stars measure attention, not use. The numbers and how to reproduce them are on [Repository growth](Repository-Growth.md).*
 
 ## Where this wiki comes from
 

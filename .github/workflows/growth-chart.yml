@@ -1,0 +1,102 @@
+# Redraws the repository growth chart every day and publishes it to an orphan
+# branch named `metrics` (issue #294). The README and the wiki show
+# https://raw.githubusercontent.com/ChiefGyk3D/Clouds-Against-Humanity/metrics/repo-growth.png,
+# so the stars line never waits for a person to refresh a snapshot by hand.
+#
+# Two jobs, split by what they may do:
+#   render   contents: read. Runs scripts/gen_repo_metrics.py --refresh with the
+#            default GITHUB_TOKEN. It asks GitHub for time stamps and counts only,
+#            never a user name (the script validates that on every run). It draws
+#            the picture with hash-pinned matplotlib, re-validates the two files and
+#            uploads them as a one-day artifact. It cannot push.
+#   publish  contents: write, no other secrets. Downloads the artifact, validates it
+#            again (it crossed an artifact boundary), builds a fresh one-commit
+#            orphan history and pushes it to `metrics` under a lease on the value it read (never a bare
+#            force). The push is skipped when the picture did not change.
+#            The first run creates the branch. main is never written, so its branch
+#            protection is untouched.
+#
+# Residual risk: GITHUB_TOKEN cannot be scoped to one branch, so the publish job's
+# token is repository-wide contents: write. What limits it: the job runs only
+# checkout, the artifact download and scripts/publish_metrics_branch.sh from main,
+# holds no other secret, hands the token to the three git commands that talk to the
+# remote (scoped to the remote URL, never written to disk, never seen by the
+# validator), and the script refuses any ref but refs/heads/metrics. The real
+# control is a repository ruleset; see docs/wiki/Repository-Growth.md.
+#
+# The committed docs/wiki/images/repo-growth.png and .metrics-snapshot.json stay in
+# main as the offline, hash-checked fallback that CI's --check compares; the daily
+# picture does not replace them. Only runs on main in this repository.
+name: Growth chart
+
+on:
+  schedule:
+    - cron: "23 6 * * *" # daily, off the hour (UTC)
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: growth-chart
+  cancel-in-progress: false
+
+jobs:
+  render:
+    if: github.repository == 'ChiefGyk3D/Clouds-Against-Humanity' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the plotting libraries (every wheel pinned by hash)
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --require-hashes --no-deps -r scripts/growth-chart-requirements.txt
+
+      - name: Fetch per-day counts and draw the chart
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir bundle
+          "$RUNNER_TEMP/venv/bin/python" -I scripts/gen_repo_metrics.py --refresh --no-page \
+            --repo "$GITHUB_REPOSITORY" \
+            --snapshot bundle/metrics-snapshot.json --out bundle/repo-growth.png
+
+      - name: Validate the bundle
+        run: |
+          python3 -I scripts/gen_repo_metrics.py --verify-bundle bundle \
+            --expect-repo "$GITHUB_REPOSITORY" --max-age-hours 1
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: growth-chart-bundle
+          path: bundle
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    needs: render
+    if: github.repository == 'ChiefGyk3D/Clouds-Against-Humanity' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write # the metrics branch only; the script never writes main
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: growth-chart-bundle
+          path: bundle
+
+      - name: Validate again and push to the metrics branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          METRICS_MAX_AGE_HOURS: "3"
+        run: bash scripts/publish_metrics_branch.sh bundle

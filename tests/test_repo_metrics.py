@@ -504,11 +504,10 @@ def test_staged_files_keep_the_mode_of_the_file_they_replace(tmp_path, monkeypat
     assert (tmp_path / grm.PAGE).stat().st_mode & 0o777 == 0o640
 
 
-def test_home_embeds_the_chart_with_alt_text_and_the_current_as_of_date():
+def test_home_embeds_the_chart_with_alt_text_from_the_metrics_branch():
     home = (ROOT / "docs" / "wiki" / "Home.md").read_text()
-    snap = json.loads((ROOT / grm.SNAPSHOT).read_text())
-    assert "![" + grm.ALT_TEXT + "](images/repo-growth.png)" in home
-    assert f"As of {snap['fetched_at'][:10]} (UTC)" in home, "refresh the as-of date on Home after a --refresh"
+    assert "![" + grm.ALT_TEXT + "](" + grm.DEFAULT_IMAGE_URL + ")" in home
+    assert "the as-of date is printed in the picture" in home
 
 
 # -- the wiki and README are wired up -----------------------------------------------
@@ -516,7 +515,7 @@ def test_home_embeds_the_chart_with_alt_text_and_the_current_as_of_date():
 
 def test_the_chart_is_linked_and_embedded_with_alt_text():
     readme = (ROOT / "README.md").read_text()
-    assert "![" + grm.ALT_TEXT + "](docs/wiki/images/repo-growth.png)" in readme
+    assert "![" + grm.ALT_TEXT + "](" + grm.DEFAULT_IMAGE_URL + ")" in readme
     assert "scripts/gen_repo_metrics.py" in readme
     for name in ("Home.md", "_Sidebar.md", "Project-Status.md"):
         assert "(Repository-Growth.md)" in (ROOT / "docs" / "wiki" / name).read_text(), name
