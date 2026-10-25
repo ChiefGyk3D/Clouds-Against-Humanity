@@ -29,8 +29,8 @@ spec.loader.exec_module(sr)
 
 # Real-looking values are assembled at import time so no token-shaped literal sits
 # in the source for a secret scanner to flag. The pieces are short on purpose.
-REAL_SECRET = "".join(["k3Jf9Qw2", "Zr8LmN4p", "Xs7Tv1Ye"])
-HEX_SECRET = "".join(["3f9a1c07", "be52d648", "1a0c7e93", "d5b2f814"])
+REAL_SECRET = "k3Jf9Qw2" + "Zr8LmN4p" + "Xs7Tv1Ye"
+HEX_SECRET = "3f9a1c07" + "be52d648" + "1a0c7e93" + "d5b2f814"
 DOPPLER_TOKEN = ".".join(["dp", "st", "cah-ctx", "Zm9vYmFy" + "YmF6cXV4"])
 DOPPLER_SITE_TOKEN = ".".join(["dp", "st", "cah-site-hostboot", "Zm9vYmFy" + "YmF6cXV4"])
 
