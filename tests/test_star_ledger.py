@@ -301,3 +301,64 @@ def test_the_page_says_how_the_star_line_is_built():
     page = grm.render_page(fixture())
     assert "daily counts" in page and "per-star times" in page
     assert "--refresh" in page and "backfill" in page.lower()
+
+
+# -- a refresh that crosses UTC midnight ---------------------------------------------------
+
+
+class Clock:
+    def __init__(self, *stamps):
+        self.stamps = list(stamps)
+        self.calls = 0
+
+    def __call__(self):
+        self.calls += 1
+        return self.stamps.pop(0)
+
+
+def utc(day, hms):
+    h, m, sec = map(int, hms.split(":"))
+    return datetime.datetime(2026, 10, day, h, m, sec, tzinfo=datetime.UTC)
+
+
+class CountingGh(CiGh):
+    def __init__(self, *counts):
+        super().__init__()
+        self.counts = list(counts)
+        self.count_calls = 0
+
+    def __call__(self, args):
+        if args[:2] == ["api", f"repos/{REPO}"] and ".stargazers_count" in args:
+            self.calls.append(args)
+            self.count_calls += 1
+            return f"{self.counts.pop(0)}\n"
+        return super().__call__(args)
+
+
+def test_a_count_taken_across_midnight_is_requested_again_and_dated_by_the_second_request(monkeypatch):
+    # first request straddles midnight (23:59:59 -> 00:00:01); the retry is clean (day 25)
+    clock = Clock(utc(24, "23:58:00"), utc(24, "23:59:59"), utc(25, "00:00:01"), utc(25, "00:00:02"), utc(25, "00:00:03"))
+    gh = CountingGh(149, 150)
+    monkeypatch.setattr(grm, "_utcnow", clock)
+    with mock.patch.object(grm, "run_gh", gh):
+        snap = grm.fetch_snapshot(REPO, star_times=False, baseline=baseline())
+    assert gh.count_calls == 2
+    assert snap["star_ledger"] == {"2026-10-25": 150}  # the count from the clean request, on its own day
+    assert snap["fetched_at"] == "2026-10-25T00:00:03Z"
+
+
+def test_a_count_that_keeps_crossing_midnight_fails_closed(monkeypatch):
+    clock = Clock(utc(24, "23:58:00"), utc(24, "23:59:59"), utc(25, "00:00:01"), utc(25, "23:59:59"), utc(26, "00:00:01"))
+    gh = CountingGh(149, 150)
+    monkeypatch.setattr(grm, "_utcnow", clock)
+    with mock.patch.object(grm, "run_gh", gh), pytest.raises(RuntimeError, match="midnight"):
+        grm.fetch_snapshot(REPO, star_times=False, baseline=baseline())
+
+
+def test_a_clean_request_is_made_once(monkeypatch):
+    clock = Clock(utc(25, "09:59:00"), utc(25, "10:00:00"), utc(25, "10:00:01"))
+    gh = CountingGh(150)
+    monkeypatch.setattr(grm, "_utcnow", clock)
+    with mock.patch.object(grm, "run_gh", gh):
+        snap = grm.fetch_snapshot(REPO, star_times=False, baseline=baseline())
+    assert gh.count_calls == 1 and snap["fetched_at"] == "2026-10-25T10:00:01Z"

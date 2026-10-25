@@ -12,8 +12,13 @@
 #   2. the push is FAST-FORWARD ONLY: the commit is a child of the tip the render job
 #      fetched (METRICS_EXPECTED_TIP, passed as a job output), and the script refuses
 #      when the remote tip is anything else. A first run (empty tip, no branch) creates
-#      an orphan root. There is no force of any kind: a branch that moved makes the
-#      push fail, and the run fails with it;
+#      an orphan root. The push is an exact compare-and-swap,
+#      --force-with-lease=refs/heads/metrics:<expected tip> (empty on a first run: the
+#      branch must not exist), after the script has proved the new commit's only
+#      parent is exactly that tip. A branch that moved, was rewound to an ancestor,
+#      or was deleted and recreated makes the push fail, and the run with it. The
+#      lease can only succeed as a pure fast-forward from the expected tip; there is
+#      no other force, no -f and no +ref;
 #   3. nothing is pushed when the branch already holds exactly these three files,
 #      byte-identical (a changed snapshot or as-of file is published even when the
 #      picture did not change).
@@ -105,7 +110,7 @@ fi
 
 previous=()
 if [ -n "$expected_tip" ]; then
-  remote_git fetch -q --depth=1 origin "refs/heads/$branch"
+  remote_git fetch -q --no-tags origin "refs/heads/$branch"
   [ "$(git -C "$work" rev-parse FETCH_HEAD)" = "$expected_tip" ] || die "fetched a different commit than expected; nothing was pushed"
   size=$(git -C "$work" cat-file -s FETCH_HEAD:metrics-snapshot.json 2>/dev/null || echo 0)
   [ "$size" -gt 0 ] && [ "$size" -le 262144 ] || die "the snapshot on the branch is missing or over the size cap"
@@ -145,7 +150,18 @@ rm -f -- "$work/previous.json"
 git -C "$work" add -- repo-growth.png metrics-snapshot.json as-of.txt
 git -C "$work" -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
   commit -q -m "Growth chart as of $as_of"
-# A plain push: it is accepted only as a fast-forward of what is on the remote now, so a
-# branch that moved after the check above makes it fail, and so does the run.
-remote_git push -q origin HEAD:refs/heads/metrics
+
+# Prove the shape of what is about to be pushed: its only parent is exactly the expected
+# tip (a first run has no parent at all).
+parents=$(git -C "$work" rev-parse "HEAD^@" 2>/dev/null | tr '\n' ' ' | sed 's/ $//')
+[ "$parents" = "$expected_tip" ] || die "the new commit's parent ($parents) is not the expected tip; nothing was pushed"
+
+# An exact lease, not a plain push: the push succeeds only if the remote branch is STILL the
+# expected tip (or still absent on a first run), so it can only be a fast-forward from there.
+# A plain push would also accept a remote that was rewound to an ancestor in the meantime.
+if [ -n "$expected_tip" ]; then
+  remote_git push -q --force-with-lease="refs/heads/metrics:$expected_tip" origin HEAD:refs/heads/metrics
+else
+  remote_git push -q --force-with-lease="refs/heads/metrics:" origin HEAD:refs/heads/metrics
+fi
 echo "publish_metrics_branch: pushed refs/heads/metrics (as of $as_of)"

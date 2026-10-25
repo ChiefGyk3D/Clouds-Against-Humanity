@@ -265,7 +265,7 @@ def render_page(snapshot: dict, image: str = DEFAULT_IMAGE_URL) -> str:
         "",
         "GitHub does not let the workflow's built-in token read when each star happened, so the daily run cannot rebuild the star history. Instead the line has two parts. Up to the baseline date it comes from per-star times, read by the maintainer with their own login. After that date it is one point per day, the repository's star count that day, recorded by the workflow and joined by straight (dashed) segments. Those later points are daily counts, not per-star times, and the picture says so under the as-of date. Forks, merged pull requests and closed issues are read fresh every day.",
         "",
-        "The metrics branch is mutable, so nothing on it is trusted. Each run checks that its snapshot still has the committed baseline's star history, keeps every earlier daily point exactly (only today's point may be added or replaced), and descends from the exact branch commit it read; the push is a plain fast-forward, never a force, and the branch keeps one small commit per day. A branch that moved, lost a point, or went more than 14 days without an update makes the run fail instead of publishing. A deliberate reset, for example after a new baseline is committed, is a separate reviewed step: delete the `metrics` branch and the next run starts a ledger afresh from the new baseline date.",
+        "The metrics branch is mutable, so nothing on it is trusted. Each run checks that its snapshot still has the committed baseline's star history, keeps every earlier daily point exactly (only today's point may be added or replaced), and descends from the exact branch commit it read; the push is an exact compare-and-swap that can only succeed as a fast-forward from that commit (no other force), and the branch keeps one small commit per day. A branch that moved, lost a point, or went more than 14 days without an update makes the run fail instead of publishing. A deliberate reset, for example after a new baseline is committed, is a separate reviewed step: delete the `metrics` branch and the next run starts a ledger afresh from the new baseline date.",
         "",
         "To backfill the baseline, run `python3 -I scripts/gen_repo_metrics.py --refresh` locally with your own login: it asks for every star's time stamp, moves the baseline date to today and drops the ledger it replaces. The workflow never asks for star times (`--no-star-times`, chosen automatically when `GITHUB_ACTIONS` is true).",
         "",
@@ -582,6 +582,24 @@ def fetch_traffic(repo: str, previous: dict | None) -> dict | None:
     return merged or None
 
 
+def _utcnow() -> datetime.datetime:
+    """The clock, as a function so a test can move it."""
+    return datetime.datetime.now(datetime.UTC)
+
+
+def fetch_star_count(repo: str) -> tuple[int, datetime.datetime]:
+    """Today's star count and the UTC time it was taken. The clock is read before and after the
+    request; if the UTC date changed in between, the request is made once more, and a second
+    crossing fails closed, so a count is never recorded under the wrong day."""
+    for _ in range(2):
+        before = _utcnow()
+        count = int(run_gh(["api", f"repos/{repo}", "--jq", ".stargazers_count"]).strip())
+        after = _utcnow()
+        if before.date() == after.date():
+            return count, after
+    raise RuntimeError("the star count request kept crossing UTC midnight; try again")
+
+
 def fetch_snapshot(
     repo: str,
     traffic: bool = False,
@@ -600,7 +618,8 @@ def fetch_snapshot(
     today's cumulative count (stargazers_count) is added to a ledger carried from
     `ledger_from`: one point per UTC day, a same-day rerun replacing that day's point.
     """
-    now = now or datetime.datetime.now(datetime.UTC)
+    injected = now is not None
+    now = now or _utcnow()
     if not star_times and (not isinstance(baseline, dict) or baseline.get("repo") != repo or not isinstance(baseline.get("stars"), dict)):
         raise RuntimeError(f"CI mode needs a baseline snapshot of {repo} with star times (backfill it locally with --refresh)")
     created = run_gh(["api", f"repos/{repo}", "--jq", ".created_at"]).strip()
@@ -620,8 +639,12 @@ def fetch_snapshot(
         snap["stars"] = day_counts(fetch_stars(repo))
     else:
         as_of = stars_as_of(baseline).isoformat()
+        if injected:
+            count = int(run_gh(["api", f"repos/{repo}", "--jq", ".stargazers_count"]).strip())
+        else:
+            count, now = fetch_star_count(repo)
+            snap["fetched_at"] = now.strftime("%Y-%m-%dT%H:%M:%SZ")
         today = now.strftime("%Y-%m-%d")
-        count = int(run_gh(["api", f"repos/{repo}", "--jq", ".stargazers_count"]).strip())
         ledger = {d: c for d, c in ((ledger_from or {}).get("star_ledger") or {}).items() if isinstance(d, str) and d > as_of}
         if today > as_of:
             ledger[today] = count

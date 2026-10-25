@@ -15,8 +15,9 @@
 #   publish  contents: write, no other secrets. Downloads the artifact, validates it
 #            again (it crossed an artifact boundary; it must descend from the committed
 #            baseline and keep every earlier ledger point) and pushes a child commit of
-#            the exact metrics tip the render job read, with a plain fast-forward push
-#            (no force). A moved branch fails the run. The first run creates the branch
+#            the exact metrics tip the render job read, with an exact lease
+#            (--force-with-lease=refs/heads/metrics:<that tip>), so it can only be a pure
+#            fast-forward from it. A moved branch fails the run. The first run creates the branch
 #            as an orphan root; history is kept, one small commit a day. The push is
 #            skipped when nothing changed. main is never written, so its branch
 #            protection is untouched.

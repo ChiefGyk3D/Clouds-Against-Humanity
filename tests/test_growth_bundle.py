@@ -319,13 +319,18 @@ def test_a_branch_that_moved_under_the_publish_is_not_overwritten(tmp_path, remo
     assert git("rev-parse", "metrics", cwd=remote).stdout.strip() == moved
 
 
-def test_the_script_never_forces_anything():
+def test_the_script_has_no_force_except_the_exact_lease():
     import re
 
     text = PUBLISH.read_text()
-    assert "--force" not in text
-    assert not re.search(r"push\s+(-\w*f|\+)", text)
+    forces = re.findall(r"--force\S*", text)
+    assert forces, "the exact lease must be there"
+    # every use is the lease pinned to refs/heads/metrics; header prose uses the same spelling
+    assert all(re.match(r'--force-with-lease="?refs/heads/metrics:', f) for f in forces), forces
+    assert not re.search(r"push\s+(-\w*f\b|\+)", text)
     assert not re.search(r"\bpush\b[^\n]*\s\+\S", text)
+    assert not re.search(r"\bpush\b[^\n]*\s-\w*f\b", text)
+    assert text.count("push -q") == 2  # one child push, one first-run push, both leased
 
 
 def test_a_changed_snapshot_is_pushed_even_when_the_picture_is_identical(tmp_path, remote):
@@ -511,3 +516,75 @@ def test_a_ledger_that_extends_with_todays_point_is_pushed_as_a_child(tmp_path, 
 def test_the_first_run_ledger_may_hold_only_todays_point(tmp_path, remote):
     out = publish(ledger_bundle(tmp_path, "d1", {"2026-10-22": 6, "2026-10-23": 7}, 23), remote)
     assert out.returncode != 0 and "ledger" in out.stderr
+
+
+# -- the push is an exact compare-and-swap ------------------------------------------------
+
+
+def push_shim(tmp_path, remote, action):
+    """A git shim that runs `action` (shell, on the remote) right before the real push."""
+    real = shutil.which("git")
+    shim = tmp_path / "pushshim"
+    shim.mkdir(exist_ok=True)
+    (shim / "git").write_text(
+        "#!/bin/bash\n"
+        'for a in "$@"; do\n'
+        f'  if [ "$a" = push ]; then g() {{ {real} --git-dir={remote} "$@"; }}; {action}; break; fi\n'
+        "done\n"
+        f'exec {real} "$@"\n'
+    )
+    (shim / "git").chmod(0o755)
+    return f"{shim}:{os.environ['PATH']}"
+
+
+def test_a_remote_rewound_to_an_ancestor_before_the_push_fails(tmp_path, remote):
+    two_days(tmp_path, remote)
+    ancestor = git("rev-parse", "metrics~1", cwd=remote).stdout.strip()
+    path = push_shim(tmp_path, remote, f"g update-ref refs/heads/metrics {ancestor}")
+    out = publish(ledger_bundle(tmp_path, "d3", {"2026-10-23": 6, "2026-10-24": 7, "2026-10-25": 9}, 25, color=4), remote, PATH=path)
+    assert out.returncode != 0
+    assert git("rev-parse", "metrics", cwd=remote).stdout.strip() == ancestor  # untouched, not fast-forwarded
+
+
+def test_a_branch_deleted_before_the_push_fails(tmp_path, remote):
+    two_days(tmp_path, remote)
+    path = push_shim(tmp_path, remote, "g update-ref -d refs/heads/metrics")
+    out = publish(ledger_bundle(tmp_path, "d3", {"2026-10-23": 6, "2026-10-24": 7, "2026-10-25": 9}, 25, color=4), remote, PATH=path)
+    assert out.returncode != 0
+    assert git("branch", "--list", "metrics", cwd=remote).stdout.strip() == ""
+
+
+def test_a_first_run_where_the_branch_appears_meanwhile_fails(tmp_path, remote):
+    other = tmp_path / "other"
+    git("init", "-q", "-b", "metrics", str(other))
+    (other / "note.txt").write_text("someone else\n")
+    git("-C", str(other), "add", "note.txt")
+    git("-C", str(other), "-c", "user.name=t", "-c", "user.email=t@example.invalid", "commit", "-q", "-m", "x")
+    git("-C", str(other), "push", "-q", str(remote), "HEAD:refs/heads/side")
+    side = git("rev-parse", "side", cwd=remote).stdout.strip()
+    path = push_shim(tmp_path, remote, f"g update-ref refs/heads/metrics {side}")
+    out = publish(make_bundle(tmp_path / "b"), remote, PATH=path)
+    assert out.returncode != 0
+    assert git("rev-parse", "metrics", cwd=remote).stdout.strip() == side
+
+
+def test_the_normal_fast_forward_path_still_passes_through_the_shim(tmp_path, remote):
+    two_days(tmp_path, remote)
+    tip = git("rev-parse", "metrics", cwd=remote).stdout.strip()
+    path = push_shim(tmp_path, remote, "true")
+    out = publish(ledger_bundle(tmp_path, "d3", {"2026-10-23": 6, "2026-10-24": 7, "2026-10-25": 9}, 25, color=4), remote, PATH=path)
+    assert out.returncode == 0, out.stderr
+    assert git("rev-parse", "metrics~1", cwd=remote).stdout.strip() == tip
+
+
+def test_the_new_commit_has_exactly_the_expected_tip_as_its_only_parent(tmp_path, remote):
+    tip = two_days(tmp_path, remote)
+    assert publish(ledger_bundle(tmp_path, "d3", {"2026-10-23": 6, "2026-10-24": 7, "2026-10-25": 9}, 25, color=4), remote).returncode == 0
+    assert git("rev-list", "--parents", "-n1", "metrics", cwd=remote).stdout.split()[1:] == [tip]
+    first = git("rev-list", "--max-parents=0", "metrics", cwd=remote).stdout.split()
+    assert len(first) == 1  # one orphan root, ever
+
+
+def test_the_script_proves_the_parent_before_pushing():
+    text = PUBLISH.read_text()
+    assert 'rev-parse "HEAD^@"' in text and '[ "$parents" = "$expected_tip" ]' in text
