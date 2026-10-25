@@ -113,17 +113,6 @@ HASH_RE = re.compile(r"^[0-9a-f]{64}$")
 
 ALT_TEXT = "Hand-drawn style chart: cumulative stars and forks since the repository was created, and weekly merged pull requests and closed issues"
 
-STARS_QUERY = """
-query($owner: String!, $name: String!, $after: String) {
-  repository(owner: $owner, name: $name) {
-    stargazers(first: 100, after: $after, orderBy: {field: STARRED_AT, direction: ASC}) {
-      pageInfo { hasNextPage endCursor }
-      edges { starredAt }
-    }
-  }
-}
-"""
-
 
 # --- dates and series (pure) --------------------------------------------------
 
@@ -272,7 +261,7 @@ def render_page(snapshot: dict, image: str = DEFAULT_IMAGE_URL) -> str:
         f"gh api repos/{repo}/forks --paginate --jq '.[].created_at'",
         f"gh pr list --repo {repo} --state merged --limit 5000 --json mergedAt",
         f"gh issue list --repo {repo} --state closed --limit 5000 --json closedAt",
-        "# stars: a GraphQL query for stargazers(first: 100, orderBy: {field: STARRED_AT, direction: ASC}) { edges { starredAt } }, paged",
+        f"gh api --paginate -X GET repos/{repo}/stargazers -H 'Accept: application/vnd.github.star+json' --jq '.[].starred_at'",
         "python3 -I scripts/gen_repo_metrics.py --refresh   # does all of the above, draws the chart and rewrites this page",
         "python3 -I scripts/gen_repo_metrics.py --check     # offline: the same check CI runs",
         "```",
@@ -459,17 +448,11 @@ def run_gh(args: list[str]) -> str:
 
 
 def fetch_stars(repo: str) -> list[str]:
-    owner, name = repo.split("/")
-    stamps, after = [], None
-    while True:
-        args = ["api", "graphql", "-f", f"query={STARS_QUERY}", "-f", f"owner={owner}", "-f", f"name={name}"]
-        if after:
-            args += ["-f", f"after={after}"]
-        page = json.loads(run_gh(args))["data"]["repository"]["stargazers"]
-        stamps += [edge["starredAt"] for edge in page["edges"]]
-        if not page["pageInfo"]["hasNextPage"]:
-            return stamps
-        after = page["pageInfo"]["endCursor"]
+    """Time stamps of every star, over REST (the default Actions token is refused on the
+    GraphQL stargazers connection, issue #296). --jq keeps only starred_at, so no login
+    ever leaves the gh process."""
+    args = ["api", "--paginate", "-X", "GET", f"repos/{repo}/stargazers", "-H", "Accept: application/vnd.github.star+json", "-F", "per_page=100", "--jq", ".[].starred_at"]
+    return run_gh(args).split()
 
 
 def fetch_traffic(repo: str, previous: dict | None) -> dict | None:

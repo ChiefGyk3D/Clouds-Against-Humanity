@@ -204,12 +204,13 @@ class FakeGh:
     def __call__(self, args):
         self.calls.append(args)
         text = " ".join(args)
-        if args[:2] == ["api", "graphql"]:
-            query = next(a for a in args if a.startswith("query="))
-            assert "login" not in query and "STARRED_AT" in query
-            if any(a == "after=C1" for a in args):
-                return json.dumps({"data": {"repository": {"stargazers": {"pageInfo": {"hasNextPage": False, "endCursor": None}, "edges": [{"starredAt": "2026-10-11T01:00:00Z"}]}}}})
-            return json.dumps({"data": {"repository": {"stargazers": {"pageInfo": {"hasNextPage": True, "endCursor": "C1"}, "edges": [{"starredAt": "2026-10-10T01:00:00Z"}, {"starredAt": "2026-10-10T02:00:00Z"}]}}}})
+        if "/stargazers" in text:
+            # REST, not GraphQL: the default Actions token is refused on the GraphQL
+            # stargazers connection (issue #296). Only the time stamp may be selected.
+            assert args[:2] == ["api", "--paginate"] and "application/vnd.github.star+json" in text
+            jq = args[args.index("--jq") + 1]
+            assert jq == ".[].starred_at" and "login" not in text and "user" not in text
+            return "2026-10-10T01:00:00Z\n2026-10-10T02:00:00Z\n2026-10-11T01:00:00Z\n"
         if "traffic/views" in text:
             return json.dumps({"views": [{"timestamp": "2026-10-21T00:00:00Z", "count": 5, "uniques": 2}]})
         if "traffic/clones" in text:
@@ -223,6 +224,14 @@ class FakeGh:
         if args[:2] == ["issue", "list"]:
             return json.dumps([{"closedAt": "2026-10-12T05:00:00Z"}])
         raise AssertionError(text)
+
+
+def test_stars_are_fetched_over_rest_never_graphql():
+    fake = FakeGh()
+    with mock.patch.object(grm, "run_gh", fake):
+        assert grm.fetch_stars("Example/Repo") == ["2026-10-10T01:00:00Z", "2026-10-10T02:00:00Z", "2026-10-11T01:00:00Z"]
+    assert not any("graphql" in " ".join(c) for c in fake.calls)
+    assert not hasattr(grm, "STARS_QUERY")
 
 
 def test_fetch_builds_per_day_counts_pages_stars_and_asks_for_no_login():
