@@ -13,10 +13,12 @@
 #            the picture with hash-pinned matplotlib, re-validates the two files and
 #            uploads them as a one-day artifact. It cannot push.
 #   publish  contents: write, no other secrets. Downloads the artifact, validates it
-#            again (it crossed an artifact boundary), builds a fresh one-commit
-#            orphan history and pushes it to `metrics` under a lease on the value it read (never a bare
-#            force). The push is skipped when the picture did not change.
-#            The first run creates the branch. main is never written, so its branch
+#            again (it crossed an artifact boundary; it must descend from the committed
+#            baseline and keep every earlier ledger point) and pushes a child commit of
+#            the exact metrics tip the render job read, with a plain fast-forward push
+#            (no force). A moved branch fails the run. The first run creates the branch
+#            as an orphan root; history is kept, one small commit a day. The push is
+#            skipped when nothing changed. main is never written, so its branch
 #            protection is untouched.
 #
 # Residual risk: GITHUB_TOKEN cannot be scoped to one branch, so the publish job's
@@ -50,6 +52,8 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+    outputs:
+      tip: ${{ steps.carry.outputs.tip }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -60,25 +64,17 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/venv"
           "$RUNNER_TEMP/venv/bin/pip" install --require-hashes --no-deps -r scripts/growth-chart-requirements.txt
 
-      # The star ledger lives in the previously published snapshot. Carrying it is
-      # fail-closed: only "the metrics branch does not exist yet" (ls-remote exit 2)
-      # starts a ledger from nothing; any other failure stops the run, so a network
-      # error can never publish a ledger that lost its old points.
+      # The star ledger lives in the previously published snapshot, and the metrics
+      # branch is mutable, so nothing from it is trusted. The script carries one file
+      # out (size read without writing it, regular file only, fail-closed on any read
+      # error; only "no such branch" starts a ledger from nothing) and prints the commit
+      # it read. That commit becomes a job output: the publish job may only push a child
+      # of exactly that tip. gen_repo_metrics.py then checks the file against the
+      # committed baseline and keeps every earlier ledger point.
       - name: Carry the star ledger from the metrics branch
+        id: carry
         run: |
-          mkdir carried
-          url="https://github.com/$GITHUB_REPOSITORY.git"
-          rc=0
-          git ls-remote --exit-code --heads "$url" metrics > /dev/null || rc=$?
-          if [ "$rc" -eq 0 ]; then
-            git fetch --depth=1 --no-tags "$url" refs/heads/metrics
-            git show FETCH_HEAD:metrics-snapshot.json > carried/metrics-snapshot.json
-          elif [ "$rc" -eq 2 ]; then
-            echo "no metrics branch yet; the ledger starts today"
-          else
-            echo "could not read the metrics branch (exit $rc)" >&2
-            exit "$rc"
-          fi
+          bash scripts/carry_metrics_snapshot.sh "https://github.com/$GITHUB_REPOSITORY.git" carried >> "$GITHUB_OUTPUT"
 
       # --no-star-times: the default token cannot read stargazer time stamps (REST and
       # GraphQL are both refused), so the run reads only the current star count. The star
@@ -127,4 +123,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           METRICS_MAX_AGE_HOURS: "3"
+          METRICS_EXPECTED_TIP: ${{ needs.render.outputs.tip }}
         run: bash scripts/publish_metrics_branch.sh bundle

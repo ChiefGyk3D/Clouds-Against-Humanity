@@ -1,23 +1,26 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0
-# Publish the daily growth chart bundle to the orphan `metrics` branch (issue #294).
+# Publish the daily growth chart bundle to the `metrics` branch (issues #294, #296).
 #
 # The publish job of .github/workflows/growth-chart.yml runs this with
 # contents: write. It never touches main, so main's branch protection is
-# untouched. What it does:
-#   1. re-validates the bundle offline with gen_repo_metrics.py --verify-bundle
-#      (exact two files, size caps, real PNG, matching hashes, only per-day counts,
-#      the expected repository, a fresh time stamp), because the bundle crossed an
-#      artifact boundary;
-#   2. builds a fresh one-commit orphan history holding repo-growth.png,
-#      metrics-snapshot.json and as-of.txt;
-#   3. skips the push only when the remote branch holds exactly these three files,
-#      each byte-identical (a changed snapshot or as-of file is published even
-#      when the picture did not change);
-#   4. otherwise pushes with --force-with-lease=REF:SHA, naming the value it
-#      read, so a branch that moved in the meantime is not overwritten. A first run
-#      expects the branch not to exist and creates it.
-# No bare force, no merge, no history kept: the branch is a drop box for three files.
+# untouched. The branch is mutable, so it is never treated as authoritative:
+#   1. the bundle is re-validated offline with gen_repo_metrics.py --verify-bundle,
+#      which also checks that it descends from the committed baseline and from the
+#      snapshot currently on the branch (identity fields equal, every earlier ledger
+#      point kept in order; only today's point may be added or replaced);
+#   2. the push is FAST-FORWARD ONLY: the commit is a child of the tip the render job
+#      fetched (METRICS_EXPECTED_TIP, passed as a job output), and the script refuses
+#      when the remote tip is anything else. A first run (empty tip, no branch) creates
+#      an orphan root. There is no force of any kind: a branch that moved makes the
+#      push fail, and the run fails with it;
+#   3. nothing is pushed when the branch already holds exactly these three files,
+#      byte-identical (a changed snapshot or as-of file is published even when the
+#      picture did not change).
+# History is kept on purpose: one small commit per day, which also makes a bad
+# publish visible and revertible. A deliberate reset (a newer baseline, a lost
+# ledger) is a separate, reviewed action: delete the branch, and the next run starts
+# a ledger afresh.
 #
 # Residual risk, stated plainly: GITHUB_TOKEN cannot be limited to one branch, so
 # the publish job's token can write the whole repository. This script limits what
@@ -28,6 +31,9 @@
 #
 # Usage: publish_metrics_branch.sh BUNDLE_DIR
 # Environment:
+#   METRICS_EXPECTED_TIP      required: the metrics commit the render job fetched (40 hex),
+#                             or empty when it found no branch
+#   METRICS_BASELINE          committed baseline snapshot (default docs/wiki/.metrics-snapshot.json)
 #   METRICS_REMOTE            remote URL (default https://github.com/$GITHUB_REPOSITORY.git)
 #   METRICS_EXPECT_REPO       owner/name the snapshot must be for (default $GITHUB_REPOSITORY)
 #   METRICS_MAX_AGE_HOURS     reject a bundle older than this (default 6; 0 = no limit)
@@ -52,6 +58,12 @@ branch=${METRICS_BRANCH-metrics}
 [ "$branch" = metrics ] || die "refusing to publish to '$branch': only refs/heads/metrics is allowed" 2
 here=$(cd "$(dirname "$0")" && pwd)
 
+# The tip the render job read. It must be set (empty means "no branch yet") and well formed.
+[ "${METRICS_EXPECTED_TIP+set}" = set ] || die "METRICS_EXPECTED_TIP must be set (empty when the branch did not exist)" 2
+expected_tip=$METRICS_EXPECTED_TIP
+[[ -z $expected_tip || $expected_tip =~ ^[0-9a-f]{40}$ ]] || die "the expected tip is not a 40-character lowercase commit id" 2
+baseline=${METRICS_BASELINE:-$here/../docs/wiki/.metrics-snapshot.json}
+
 repo=${METRICS_EXPECT_REPO:-${GITHUB_REPOSITORY:-}}
 [[ $repo =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || die "METRICS_EXPECT_REPO or GITHUB_REPOSITORY is not an owner/repository name" 2
 remote=${METRICS_REMOTE:-https://github.com/$repo.git}
@@ -61,10 +73,6 @@ max_age=${METRICS_MAX_AGE_HOURS:-6}
 # Take the token out of the environment now; it is handed to git commands one at a time below.
 token=${GH_TOKEN:-}
 unset GH_TOKEN GITHUB_TOKEN
-
-as_of=$(python3 -I "$here/gen_repo_metrics.py" --verify-bundle "$bundle" --expect-repo "$repo" --max-age-hours "$max_age" --print-as-of) \
-  || die "the bundle failed validation; nothing was pushed"
-[[ $as_of =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$ ]] || die "unexpected as-of value"
 
 export GIT_TERMINAL_PROMPT=0
 [[ $remote != http://* ]] || die "refusing a plain http remote" 2
@@ -86,27 +94,58 @@ work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 git -C "$work" init -q -b "$branch"
 git -C "$work" remote add origin "$remote"
-cp -- "$bundle/repo-growth.png" "$bundle/metrics-snapshot.json" "$work/"
-printf '%s\n' "$as_of" >"$work/as-of.txt"
 
-# The value the lease protects: what the remote branch is right now (empty if absent).
+# What the remote branch is right now, compared with what the render job read.
 remote_sha=$(remote_git ls-remote origin "refs/heads/$branch" | cut -f1)
-if [ -n "$remote_sha" ]; then
-  remote_git fetch -q origin "refs/heads/$branch"
-  # Skip only when the remote tree is exactly these three files, byte for byte.
+if [ -z "$expected_tip" ]; then
+  [ -z "$remote_sha" ] || die "the metrics branch exists ($remote_sha) but the render job saw none; refusing to start a second history"
+else
+  [ "$remote_sha" = "$expected_tip" ] || die "the metrics branch moved since it was read (expected $expected_tip, found ${remote_sha:-none}); nothing was pushed"
+fi
+
+previous=()
+if [ -n "$expected_tip" ]; then
+  remote_git fetch -q --depth=1 origin "refs/heads/$branch"
+  [ "$(git -C "$work" rev-parse FETCH_HEAD)" = "$expected_tip" ] || die "fetched a different commit than expected; nothing was pushed"
+  size=$(git -C "$work" cat-file -s FETCH_HEAD:metrics-snapshot.json 2>/dev/null || echo 0)
+  [ "$size" -gt 0 ] && [ "$size" -le 262144 ] || die "the snapshot on the branch is missing or over the size cap"
+  git -C "$work" cat-file blob FETCH_HEAD:metrics-snapshot.json >"$work/previous.json"
+  previous=(--previous "$work/previous.json")
+fi
+
+as_of=$(env -u GH_TOKEN python3 -I "$here/gen_repo_metrics.py" --verify-bundle "$bundle" --expect-repo "$repo" \
+  --max-age-hours "$max_age" --baseline "$baseline" --root / ${previous[@]+"${previous[@]}"} --print-as-of) \
+  || die "the bundle failed validation; nothing was pushed"
+[[ $as_of =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$ ]] || die "unexpected as-of value"
+
+# Build the commit in a clean tree: a child of the tip, or an orphan root on a first run.
+if [ -n "$expected_tip" ]; then
+  git -C "$work" checkout -q -B "$branch" FETCH_HEAD
   same=1
-  [ "$(git -C "$work" ls-tree -r --name-only FETCH_HEAD | sort | tr '\n' ' ')" = "as-of.txt metrics-snapshot.json repo-growth.png " ] || same=0
+  [ "$(git -C "$work" ls-tree -r --name-only HEAD | sort | tr '\n' ' ')" = "as-of.txt metrics-snapshot.json repo-growth.png " ] || same=0
+  new_dir=$(mktemp -d)
+  trap 'rm -rf "$work" "$new_dir"' EXIT
+  cp -- "$bundle/repo-growth.png" "$bundle/metrics-snapshot.json" "$new_dir/"
+  printf '%s\n' "$as_of" >"$new_dir/as-of.txt"
   for f in repo-growth.png metrics-snapshot.json as-of.txt; do
-    git -C "$work" show "FETCH_HEAD:$f" 2>/dev/null | cmp -s - "$work/$f" || same=0
+    git -C "$work" show "HEAD:$f" 2>/dev/null | cmp -s - "$new_dir/$f" || same=0
   done
   if [ "$same" = 1 ]; then
     echo "publish_metrics_branch: everything is unchanged (as of $as_of); nothing pushed"
     exit 0
   fi
+  git -C "$work" rm -q -r --ignore-unmatch -- . >/dev/null
+  cp -- "$new_dir/repo-growth.png" "$new_dir/metrics-snapshot.json" "$new_dir/as-of.txt" "$work/"
+else
+  cp -- "$bundle/repo-growth.png" "$bundle/metrics-snapshot.json" "$work/"
+  printf '%s\n' "$as_of" >"$work/as-of.txt"
 fi
 
+rm -f -- "$work/previous.json"
 git -C "$work" add -- repo-growth.png metrics-snapshot.json as-of.txt
 git -C "$work" -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
   commit -q -m "Growth chart as of $as_of"
-remote_git push -q --force-with-lease="refs/heads/metrics:$remote_sha" origin HEAD:refs/heads/metrics
+# A plain push: it is accepted only as a fast-forward of what is on the remote now, so a
+# branch that moved after the check above makes it fail, and so does the run.
+remote_git push -q origin HEAD:refs/heads/metrics
 echo "publish_metrics_branch: pushed refs/heads/metrics (as of $as_of)"

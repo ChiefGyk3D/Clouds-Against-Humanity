@@ -147,7 +147,7 @@ def test_publish_has_no_secrets_and_only_the_default_token(doc):
     for step in publish["steps"]:
         for value in (step.get("env") or {}).values():
             if "${{" in str(value):
-                assert str(value).replace(" ", "") == "${{github.token}}"
+                assert str(value).replace(" ", "") in {"${{github.token}}", "${{needs.render.outputs.tip}}"}
 
 
 def test_render_never_pushes_and_publish_never_installs_packages(doc):
@@ -160,7 +160,7 @@ def test_render_never_pushes_and_publish_never_installs_packages(doc):
 def test_no_bare_force_push_anywhere():
     for path in (WORKFLOW, PUBLISH):
         assert bare_force(path.read_text()) == [], path
-    assert "--force-with-lease=" in PUBLISH.read_text()
+    assert "--force" not in PUBLISH.read_text()  # history is kept and the push is fast-forward only
 
 
 @pytest.mark.parametrize("text", ["git push --force origin x", "git push -f origin x", "git push origin +x:y", "git push --force-with-lease origin x"])
@@ -215,7 +215,8 @@ def test_publish_runs_only_checkout_download_and_the_verified_script(doc):
     kinds = [s.get("uses", "").split("@")[0] or "run" for s in steps]
     assert kinds == ["actions/checkout", "actions/download-artifact", "run"]
     assert steps[-1]["run"].strip() == "bash scripts/publish_metrics_branch.sh bundle"
-    assert set(steps[-1]["env"]) == {"GH_TOKEN", "METRICS_MAX_AGE_HOURS"}
+    assert set(steps[-1]["env"]) == {"GH_TOKEN", "METRICS_MAX_AGE_HOURS", "METRICS_EXPECTED_TIP"}
+    assert steps[-1]["env"]["METRICS_EXPECTED_TIP"] == "${{ needs.render.outputs.tip }}"
 
 
 def test_the_residual_risk_is_documented_in_the_workflow_and_the_page():
@@ -243,11 +244,17 @@ def test_render_never_asks_for_star_times_and_carries_the_ledger(doc):
     assert "--ledger-from carried/metrics-snapshot.json" in script
 
 
-def test_a_failed_read_of_the_metrics_branch_stops_the_run(doc):
-    script = render_script(doc)
-    assert "ls-remote --exit-code" in script
-    assert '"$rc" -eq 2' in script and 'exit "$rc"' in script
-    assert "|| true" not in script
+def test_the_carry_step_uses_the_script_and_exports_the_tip(doc):
+    steps = doc["jobs"]["render"]["steps"]
+    carry = next(st for st in steps if st.get("id") == "carry")
+    assert "scripts/carry_metrics_snapshot.sh" in carry["run"] and '>> "$GITHUB_OUTPUT"' in carry["run"]
+    assert doc["jobs"]["render"]["outputs"] == {"tip": "${{ steps.carry.outputs.tip }}"}
+
+
+def test_the_carry_script_fails_closed_on_every_read_problem():
+    text = (ROOT / "scripts" / "carry_metrics_snapshot.sh").read_text()
+    assert "ls-remote --exit-code" in text and '"$rc" -eq 2' in text
+    assert "|| true" not in text
 
 
 def test_the_carry_step_runs_before_the_refresh(doc):

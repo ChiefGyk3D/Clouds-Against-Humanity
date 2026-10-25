@@ -121,6 +121,10 @@ DATA_KEYS = ("schema", "repo", "created_on", "fetched_at", *SERIES, "traffic")
 OPTIONAL_KEYS = ("stars_as_of", "star_ledger")
 SNAPSHOT_KEYS = set(DATA_KEYS) | set(OPTIONAL_KEYS) | {"source_sha256", "png_sha256"}
 MAX_LEDGER_POINTS = 4000
+# A carried snapshot whose newest point is older than this (measured to the new snapshot's
+# time) is refused. A deliberate reset (a newer baseline, or a lost ledger) is a separate,
+# reviewed action: delete the `metrics` branch, and the next run starts a ledger afresh.
+MAX_CARRY_AGE_DAYS = 14
 MAX_STARS = 100_000_000
 LEDGER_DROP_SLACK = 5  # a count may fall by this much plus 5% between points (unstarring, spam removal)
 
@@ -260,6 +264,8 @@ def render_page(snapshot: dict, image: str = DEFAULT_IMAGE_URL) -> str:
         "## How the stars line is built",
         "",
         "GitHub does not let the workflow's built-in token read when each star happened, so the daily run cannot rebuild the star history. Instead the line has two parts. Up to the baseline date it comes from per-star times, read by the maintainer with their own login. After that date it is one point per day, the repository's star count that day, recorded by the workflow and joined by straight (dashed) segments. Those later points are daily counts, not per-star times, and the picture says so under the as-of date. Forks, merged pull requests and closed issues are read fresh every day.",
+        "",
+        "The metrics branch is mutable, so nothing on it is trusted. Each run checks that its snapshot still has the committed baseline's star history, keeps every earlier daily point exactly (only today's point may be added or replaced), and descends from the exact branch commit it read; the push is a plain fast-forward, never a force, and the branch keeps one small commit per day. A branch that moved, lost a point, or went more than 14 days without an update makes the run fail instead of publishing. A deliberate reset, for example after a new baseline is committed, is a separate reviewed step: delete the `metrics` branch and the next run starts a ledger afresh from the new baseline date.",
         "",
         "To backfill the baseline, run `python3 -I scripts/gen_repo_metrics.py --refresh` locally with your own login: it asks for every star's time stamp, moves the baseline date to today and drops the ledger it replaces. The workflow never asks for star times (`--no-star-times`, chosen automatically when `GITHUB_ACTIONS` is true).",
         "",
@@ -614,15 +620,18 @@ def fetch_snapshot(
         snap["stars"] = day_counts(fetch_stars(repo))
     else:
         as_of = stars_as_of(baseline).isoformat()
+        today = now.strftime("%Y-%m-%d")
         count = int(run_gh(["api", f"repos/{repo}", "--jq", ".stargazers_count"]).strip())
         ledger = {d: c for d, c in ((ledger_from or {}).get("star_ledger") or {}).items() if isinstance(d, str) and d > as_of}
-        today = now.strftime("%Y-%m-%d")
         if today > as_of:
             ledger[today] = count
         snap["stars"] = dict(baseline["stars"])
         snap["stars_as_of"] = as_of
         if ledger:
             snap["star_ledger"] = dict(sorted(ledger.items()))
+        extension = ledger_extension_problems((ledger_from or {}).get("star_ledger"), snap.get("star_ledger"), today)
+        if extension:
+            raise RuntimeError("; ".join(extension))
     kept = (previous or {}).get("traffic")
     snap["traffic"] = (fetch_traffic(repo, kept) if traffic else None) or kept
     if snap["traffic"] is None:
@@ -703,11 +712,61 @@ def load_snapshot_file(path: Path, what: str, repo: str | None = None) -> dict:
     return snap
 
 
+def load_baseline(path: Path, repo: str | None = None) -> dict:
+    """The committed snapshot that holds the star history. It must carry NO ledger (CI
+    records the ledger, never main) and must say how far its star times run."""
+    snap = load_snapshot_file(path, "the baseline snapshot", repo)
+    if "star_ledger" in snap:
+        raise RuntimeError("the baseline snapshot must not contain a star_ledger (the ledger is recorded by CI on the metrics branch)")
+    if "stars_as_of" not in snap:
+        raise RuntimeError("the baseline snapshot has no stars_as_of (backfill it with a local --refresh)")
+    return snap
+
+
+def last_point_day(snap: dict) -> datetime.date:
+    ledger = snap.get("star_ledger")
+    return to_date(list(ledger)[-1]) if ledger else to_date(snap["fetched_at"][:10])
+
+
+def load_carried(path: Path, repo: str, baseline: dict, reference: datetime.datetime) -> dict:
+    """The previously published snapshot whose ledger is carried forward.
+
+    Its identity fields must equal the baseline's exactly; it must hold a ledger (the one
+    exception: nothing could have been recorded yet, because it was taken on the very day
+    the baseline's star times end); and its newest point may not be older than
+    MAX_CARRY_AGE_DAYS before `reference`."""
+    snap = load_snapshot_file(path, "the carried snapshot", repo)
+    for key in ("created_on", "stars", "stars_as_of"):
+        if snap.get(key) != baseline.get(key):
+            raise RuntimeError(f"the carried snapshot's {key} differs from the baseline's (a newer baseline needs the metrics branch deleted, as a reviewed change)")
+    if not snap.get("star_ledger") and snap["fetched_at"][:10] != snap["stars_as_of"]:
+        raise RuntimeError("the carried snapshot has no star_ledger")
+    if reference.date() - last_point_day(snap) > datetime.timedelta(days=MAX_CARRY_AGE_DAYS):
+        raise RuntimeError(f"the carried snapshot is more than {MAX_CARRY_AGE_DAYS} days old (a reset is a separate, reviewed change)")
+    return snap
+
+
+def ledger_extension_problems(old: dict | None, new: dict | None, today: str) -> list[str]:
+    """`new` must keep every point of `old` exactly, in order; only `today` may be added or replaced."""
+    old, new = old or {}, new or {}
+    problems = []
+    kept = [d for d in old if d != today]
+    if [d for d in new if d != today] != kept:
+        problems.append("the star ledger does not keep every earlier point, in order (only today's may be added or replaced)")
+    elif any(new[d] != old[d] for d in kept):
+        problems.append("the star ledger changed an earlier point")
+    if any(d > today for d in new):
+        problems.append("the star ledger has a point after today")
+    return problems
+
+
 def verify_bundle(
     bundle: Path,
     expect_repo: str | None = None,
     max_age_hours: float | None = None,
     now: datetime.datetime | None = None,
+    baseline: Path | None = None,
+    previous: Path | None = None,
 ) -> list[str]:
     """Problems with a render-job bundle, offline. Treats every byte of it as untrusted.
 
@@ -761,7 +820,26 @@ def verify_bundle(
         return [f"{BUNDLE_SNAPSHOT}: fetched_at is in the future"]
     if max_age_hours is not None and now - stamp > datetime.timedelta(hours=max_age_hours):
         return [f"{BUNDLE_SNAPSHOT}: fetched_at is more than {max_age_hours:g} hours old"]
-    return check_files(bundle / BUNDLE_SNAPSHOT, bundle / BUNDLE_PNG, None, "")
+    chain = chain_problems(snap, stamp, expect_repo, baseline, previous)
+    return chain or check_files(bundle / BUNDLE_SNAPSHOT, bundle / BUNDLE_PNG, None, "")
+
+
+def chain_problems(snap: dict, stamp: datetime.datetime, repo: str | None, baseline_path: Path | None, previous_path: Path | None) -> list[str]:
+    """The new snapshot must descend from the committed baseline and, when there is one, from
+    the published snapshot it replaces: same identity fields, earlier ledger points kept."""
+    if baseline_path is None:
+        return [] if previous_path is None else ["--previous needs --baseline"]
+    try:
+        base = load_baseline(baseline_path, repo or snap["repo"])
+        for key in ("repo", "created_on", "stars", "stars_as_of"):
+            if snap.get(key) != base.get(key):
+                return [f"{BUNDLE_SNAPSHOT}: {key} differs from the committed baseline"]
+        old = None
+        if previous_path is not None:
+            old = load_carried(previous_path, base["repo"], base, stamp)
+        return ledger_extension_problems((old or {}).get("star_ledger"), snap.get("star_ledger"), stamp.strftime("%Y-%m-%d"))
+    except RuntimeError as exc:
+        return [str(exc)]
 
 
 def write_all(snap: dict, snapshot_path: Path, png_path: Path, page_path: Path | None, image_ref: str) -> None:
@@ -823,7 +901,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--page", default=str(PAGE), help="Markdown page path, relative to --root")
     parser.add_argument("--no-page", action="store_true", help="write and check no Markdown page")
     parser.add_argument("--no-star-times", action="store_true", help="with --refresh: do not request stargazer time stamps (the Actions token cannot read them); keep the baseline's star history and add today's count to the ledger. Chosen automatically when GITHUB_ACTIONS=true")
-    parser.add_argument("--baseline", default=str(SNAPSHOT), help="with --refresh in CI mode: the committed snapshot holding the star times, relative to --root")
+    parser.add_argument("--baseline", default=None, help=f"the committed snapshot holding the star times, relative to --root (--refresh in CI mode: default {SNAPSHOT}; --verify-bundle: the bundle must descend from it)")
+    parser.add_argument("--previous", default=None, metavar="FILE", help="with --verify-bundle and --baseline: the published snapshot being replaced; its ledger must be kept")
     parser.add_argument("--ledger-from", default=None, metavar="FILE", help="with --refresh in CI mode: the previously published snapshot whose star ledger is carried forward")
     parser.add_argument("--image-url", default=None, help="image reference written into the page (default: the metrics branch URL for this repository's own page, else a relative path)")
     mode.add_argument("--verify-bundle", metavar="DIR", help="offline: validate a render-job bundle (snapshot + picture) before publishing it")
@@ -833,12 +912,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.traffic and not args.refresh:
         parser.error("--traffic needs --refresh")
-    if (args.expect_repo or args.print_as_of or args.max_age_hours is not None) and not args.verify_bundle:
-        parser.error("--expect-repo, --max-age-hours and --print-as-of need --verify-bundle")
+    if (args.expect_repo or args.print_as_of or args.max_age_hours is not None or args.previous) and not args.verify_bundle:
+        parser.error("--expect-repo, --max-age-hours, --previous and --print-as-of need --verify-bundle")
     if args.verify_bundle:
         bundle = Path(args.verify_bundle)
         limit = args.max_age_hours if args.max_age_hours and args.max_age_hours > 0 else None
-        problems = verify_bundle(bundle, args.expect_repo, limit)
+        problems = verify_bundle(bundle, args.expect_repo, limit, baseline=(Path(args.root) / args.baseline) if args.baseline else None, previous=Path(args.previous) if args.previous else None)
         for p in problems:
             print(f"gen_repo_metrics: {p}", file=sys.stderr)
         if problems:
@@ -880,8 +959,8 @@ def main(argv: list[str] | None = None) -> int:
             if previous is not None and previous.get("repo") != args.repo:
                 previous = None
             if args.no_star_times or os.environ.get("GITHUB_ACTIONS") == "true":
-                base = load_snapshot_file(root / args.baseline, "the baseline snapshot", args.repo)
-                carried = load_snapshot_file(Path(args.ledger_from), "the carried snapshot", args.repo) if args.ledger_from and Path(args.ledger_from).is_file() else None
+                base = load_baseline(root / (args.baseline or str(SNAPSHOT)), args.repo)
+                carried = load_carried(Path(args.ledger_from), args.repo, base, datetime.datetime.now(datetime.UTC)) if args.ledger_from and Path(args.ledger_from).is_file() else None
                 snap = fetch_snapshot(args.repo, args.traffic, previous, star_times=False, baseline=base, ledger_from=carried)
             else:
                 snap = fetch_snapshot(args.repo, args.traffic, previous)

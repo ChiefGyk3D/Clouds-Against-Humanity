@@ -42,6 +42,9 @@ def make_bundle(path: Path, snap=None, png=None, fetched="2026-10-25T05:30:00Z")
     snap["forks"] = {"2026-10-13": 1}
     snap["merged_prs"] = {"2026-10-11": 3}
     snap["closed_issues"] = {"2026-10-13": 1}
+    if "star_ledger" not in snap:
+        snap["stars_as_of"] = "2026-10-20"
+        snap["star_ledger"] = {fetched[:10]: 8}
     path.mkdir(parents=True, exist_ok=True)
     (path / grm.BUNDLE_PNG).write_bytes(png if png is not None else png_bytes())
     snap["source_sha256"] = grm.source_digest(snap)
@@ -128,7 +131,7 @@ def test_a_png_that_does_not_match_its_hash_fails(tmp_path):
 
 def test_a_hand_edited_snapshot_fails(tmp_path):
     b = make_bundle(tmp_path / "b")
-    rewrite_snapshot(b, lambda s: s["stars"].update({"2026-10-12": 99999}), rehash=False)
+    rewrite_snapshot(b, lambda s: s["forks"].update({"2026-10-13": 99999}), rehash=False)
     assert any("source_sha256" in p for p in problems(b))
 
 
@@ -163,7 +166,7 @@ def test_no_age_limit_when_none_is_given(tmp_path):
 
 def test_an_absurd_count_fails(tmp_path):
     b = make_bundle(tmp_path / "b")
-    rewrite_snapshot(b, lambda s: s["stars"].update({"2026-10-12": grm.MAX_DAY_COUNT + 1}))
+    rewrite_snapshot(b, lambda s: s["merged_prs"].update({"2026-10-11": grm.MAX_DAY_COUNT + 1}))
     assert any("too large" in p for p in problems(b))
 
 
@@ -214,8 +217,37 @@ def remote(tmp_path):
     return r
 
 
-def publish(bundle, remote, **extra):
-    env = {**os.environ, "GIT_CONFIG_GLOBAL": "/dev/null", "GIT_CONFIG_SYSTEM": "/dev/null", "METRICS_REMOTE": str(remote), "METRICS_EXPECT_REPO": REPO, "METRICS_MAX_AGE_HOURS": "0", **extra}
+AUTO = object()
+
+
+def remote_tip(remote):
+    out = git("rev-parse", "--verify", "-q", "refs/heads/metrics", cwd=remote, check=False).stdout.strip()
+    return out
+
+
+def baseline_beside(bundle):
+    """A committed baseline for this bundle: same identity, no ledger, valid hashes."""
+    snap = json.loads((bundle / grm.BUNDLE_SNAPSHOT).read_text())
+    snap.pop("star_ledger", None)
+    snap["source_sha256"] = grm.source_digest(snap)
+    path = bundle.parent / f"{bundle.name}.baseline.json"
+    path.write_text(json.dumps(snap))
+    return path
+
+
+def publish(bundle, remote, tip=AUTO, **extra):
+    expected = remote_tip(remote) if tip is AUTO else tip
+    env = {
+        **os.environ,
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_CONFIG_SYSTEM": "/dev/null",
+        "METRICS_REMOTE": str(remote),
+        "METRICS_EXPECT_REPO": REPO,
+        "METRICS_MAX_AGE_HOURS": "0",
+        "METRICS_BASELINE": str(baseline_beside(bundle)),
+        "METRICS_EXPECTED_TIP": expected,
+        **extra,
+    }
     return subprocess.run(["bash", str(PUBLISH), str(bundle)], check=False, capture_output=True, text=True, env=env)
 
 
@@ -247,7 +279,9 @@ def test_a_changed_picture_replaces_the_branch(tmp_path, remote):
     first = git("rev-parse", "metrics", cwd=remote).stdout
     assert publish(make_bundle(tmp_path / "c", png=png_bytes(color=7)), remote).returncode == 0
     assert git("rev-parse", "metrics", cwd=remote).stdout != first
-    assert git("rev-list", "--count", "metrics", cwd=remote).stdout.strip() == "1"
+    # history is kept: the new commit is a child of the old tip, never a rewrite
+    assert git("rev-list", "--count", "metrics", cwd=remote).stdout.strip() == "2"
+    assert git("rev-parse", "metrics~1", cwd=remote).stdout == first
 
 
 def test_a_hostile_bundle_is_not_pushed(tmp_path, remote):
@@ -285,13 +319,13 @@ def test_a_branch_that_moved_under_the_publish_is_not_overwritten(tmp_path, remo
     assert git("rev-parse", "metrics", cwd=remote).stdout.strip() == moved
 
 
-def test_the_script_never_uses_a_bare_force():
+def test_the_script_never_forces_anything():
     import re
 
     text = PUBLISH.read_text()
-    assert "--force-with-lease=" in text
-    assert not re.search(r"--force(?!-with-lease=)", text)
+    assert "--force" not in text
     assert not re.search(r"push\s+(-\w*f|\+)", text)
+    assert not re.search(r"\bpush\b[^\n]*\s\+\S", text)
 
 
 def test_a_changed_snapshot_is_pushed_even_when_the_picture_is_identical(tmp_path, remote):
@@ -394,3 +428,86 @@ def test_the_python_validator_does_not_see_the_token(tmp_path, remote):
     assert out.returncode == 0, out.stderr
     assert seen.read_text().strip() == "GH_TOKEN=unset GITHUB_TOKEN=unset"
     assert "export GIT_CONFIG" not in PUBLISH.read_text()
+
+
+# -- fast-forward only: the metrics branch is mutable and never authoritative -------------
+
+
+def test_the_expected_tip_must_match_the_remote_tip(tmp_path, remote):
+    assert publish(make_bundle(tmp_path / "b"), remote).returncode == 0
+    stale = git("rev-parse", "metrics", cwd=remote).stdout.strip()
+    assert publish(make_bundle(tmp_path / "c", png=png_bytes(color=5)), remote).returncode == 0
+    moved = git("rev-parse", "metrics", cwd=remote).stdout.strip()
+    out = publish(make_bundle(tmp_path / "d", png=png_bytes(color=6)), remote, tip=stale)
+    assert out.returncode != 0 and "moved" in out.stderr
+    assert git("rev-parse", "metrics", cwd=remote).stdout.strip() == moved
+
+
+def test_an_empty_expected_tip_refuses_when_the_branch_exists(tmp_path, remote):
+    assert publish(make_bundle(tmp_path / "b"), remote).returncode == 0
+    tip = git("rev-parse", "metrics", cwd=remote).stdout.strip()
+    out = publish(make_bundle(tmp_path / "c", png=png_bytes(color=5)), remote, tip="")
+    assert out.returncode != 0 and "exists" in out.stderr
+    assert git("rev-parse", "metrics", cwd=remote).stdout.strip() == tip
+
+
+def test_an_expected_tip_with_no_branch_is_refused(tmp_path, remote):
+    out = publish(make_bundle(tmp_path / "b"), remote, tip="0123456789abcdef0123456789abcdef01234567")
+    assert out.returncode != 0
+    assert git("branch", "--list", "metrics", cwd=remote).stdout.strip() == ""
+
+
+@pytest.mark.parametrize("tip", ["main", "HEAD", "abc", "0123456789ABCDEF0123456789ABCDEF01234567", "g" * 40, "x; rm -rf /"])
+def test_a_malformed_expected_tip_is_refused(tmp_path, remote, tip):
+    out = publish(make_bundle(tmp_path / "b"), remote, tip=tip)
+    assert out.returncode != 0 and "expected tip" in out.stderr
+
+
+def test_the_expected_tip_must_be_set_at_all(tmp_path, remote):
+    b = make_bundle(tmp_path / "b")
+    env = {**os.environ, "METRICS_REMOTE": str(remote), "METRICS_EXPECT_REPO": REPO, "METRICS_MAX_AGE_HOURS": "0", "METRICS_BASELINE": str(baseline_beside(b))}
+    env.pop("METRICS_EXPECTED_TIP", None)
+    out = subprocess.run(["bash", str(PUBLISH), str(b)], check=False, capture_output=True, text=True, env=env)
+    assert out.returncode != 0 and "METRICS_EXPECTED_TIP" in out.stderr
+
+
+def ledger_bundle(tmp_path, name, ledger, day, color=0):
+    snap = fixture()
+    snap["stars_as_of"] = "2026-10-20"
+    snap["star_ledger"] = ledger
+    return make_bundle(tmp_path / name, snap=snap, png=png_bytes(color=color), fetched=f"2026-10-{day}T05:30:00Z")
+
+
+def two_days(tmp_path, remote):
+    assert publish(ledger_bundle(tmp_path, "d1", {"2026-10-23": 6}, 23), remote).returncode == 0
+    out = publish(ledger_bundle(tmp_path, "d2", {"2026-10-23": 6, "2026-10-24": 7}, 24, color=2), remote)
+    assert out.returncode == 0, out.stderr
+    return git("rev-parse", "metrics", cwd=remote).stdout.strip()
+
+
+def test_a_ledger_that_loses_an_earlier_point_is_not_pushed(tmp_path, remote):
+    tip = two_days(tmp_path, remote)
+    out = publish(ledger_bundle(tmp_path, "d3", {"2026-10-24": 7, "2026-10-25": 9}, 25, color=4), remote)
+    assert out.returncode != 0 and "ledger" in out.stderr
+    assert git("rev-parse", "metrics", cwd=remote).stdout.strip() == tip
+
+
+def test_a_ledger_that_changes_an_earlier_point_is_not_pushed(tmp_path, remote):
+    tip = two_days(tmp_path, remote)
+    out = publish(ledger_bundle(tmp_path, "d3", {"2026-10-23": 7, "2026-10-24": 7, "2026-10-25": 9}, 25, color=4), remote)
+    assert out.returncode != 0
+    assert git("rev-parse", "metrics", cwd=remote).stdout.strip() == tip
+
+
+def test_a_ledger_that_extends_with_todays_point_is_pushed_as_a_child(tmp_path, remote):
+    tip = two_days(tmp_path, remote)
+    out = publish(ledger_bundle(tmp_path, "d3", {"2026-10-23": 6, "2026-10-24": 7, "2026-10-25": 9}, 25, color=4), remote)
+    assert out.returncode == 0, out.stderr
+    assert git("rev-parse", "metrics~1", cwd=remote).stdout.strip() == tip
+    assert git("rev-list", "--count", "metrics", cwd=remote).stdout.strip() == "3"
+    assert list(json.loads(git("show", "metrics:metrics-snapshot.json", cwd=remote).stdout)["star_ledger"]) == ["2026-10-23", "2026-10-24", "2026-10-25"]
+
+
+def test_the_first_run_ledger_may_hold_only_todays_point(tmp_path, remote):
+    out = publish(ledger_bundle(tmp_path, "d1", {"2026-10-22": 6, "2026-10-23": 7}, 23), remote)
+    assert out.returncode != 0 and "ledger" in out.stderr

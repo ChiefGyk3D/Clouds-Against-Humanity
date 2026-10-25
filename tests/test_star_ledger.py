@@ -190,14 +190,13 @@ def test_a_same_day_rerun_replaces_that_days_point():
     assert snap["star_ledger"] == {"2026-10-21": 104, "2026-10-24": 151}
 
 
-def test_points_at_or_before_a_newer_baseline_are_dropped():
+def test_points_at_or_before_the_baseline_date_in_a_carried_ledger_fail_closed():
     newer = baseline()
     newer["stars_as_of"] = "2026-10-22"
     newer["stars"]["2026-10-22"] = 5
     prev = with_ledger({"2026-10-21": 104, "2026-10-22": 108, "2026-10-23": 140})
-    with mock.patch.object(grm, "run_gh", CiGh(150)):
-        snap = grm.fetch_snapshot(REPO, now=DAY, star_times=False, baseline=newer, ledger_from=prev)
-    assert snap["star_ledger"] == {"2026-10-23": 140, "2026-10-24": 150}
+    with mock.patch.object(grm, "run_gh", CiGh(150)), pytest.raises(RuntimeError, match="keep every earlier point"):
+        grm.fetch_snapshot(REPO, now=DAY, star_times=False, baseline=newer, ledger_from=prev)
 
 
 def test_ci_mode_without_a_baseline_fails_closed():
