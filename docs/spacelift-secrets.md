@@ -26,9 +26,9 @@ Values are never written here. This table is the inventory to check when a token
 | Secret | Lives in | Used by | Scope | Lifetime |
 |---|---|---|---|---|
 | `DIGITALOCEAN_TOKEN` | Doppler `prd` | stacks 00 and 10 (OpenTofu provider) | custom scopes, see [section 4a](#4a-digitalocean-token-scopes) | 90 days |
-| Doppler service token `spacelift` | Spacelift context `cah-doppler`, variable `DOPPLER_TOKEN` (write-only) | the hook script | read-only, config `prd` only | 90 days |
-| `TWINGATE_API_TOKEN` | Doppler `prd` | stack 10 | Twingate "Read, Write & Provision" key | 90 days |
-| `TWINGATE_NETWORK` | Doppler `prd` | stack 10 (also exported as `TF_VAR_twingate_network`) | not a credential; the tenant name | none |
+| Doppler service token `spacelift` | Spacelift context `cah-doppler`, variable `DOPPLER_TOKEN` (write-only) | the hook script, on stacks 00, 10 and 20 | read-only, config `prd` only | 90 days |
+| `TWINGATE_API_TOKEN` | Doppler `prd` | stacks 10 and 20 | Twingate "Read, Write & Provision" key | 90 days |
+| `TWINGATE_NETWORK` | Doppler `prd` | stacks 10 and 20 (stack 10 also exports it as `TF_VAR_twingate_network`) | not a credential; the tenant name | none |
 | `ADMIN_SSH_PUBLIC_KEY`, `ADMIN_SSH_KEY_NAME`, `ADMIN_USER_IDS` | Doppler `prd` | stack 10 (exported as `TF_VAR_admin_ssh_public_key`, `TF_VAR_admin_ssh_key_name` and `TF_VAR_admin_user_ids`) | not credentials, but account-specific | none |
 
 The context also holds two plain variables, `DOPPLER_PROJECT` and `DOPPLER_CONFIG`.
@@ -185,7 +185,7 @@ The names below are a **convention proposed here, not something already set up o
 
 | Cloud | Doppler project / config | Spacelift context | Stack names | Attached to |
 |---|---|---|---|---|
-| DigitalOcean | the existing `prd` setup, left as is | `cah-doppler` (existing, not renamed) | `cah-00-...`, `cah-10-...` | label `cah` today |
+| DigitalOcean | the existing `prd` setup, left as is | `cah-doppler` (existing, not renamed) | `cah-00-...`, `cah-10-...`, `cah-20-...` | label `cah` today |
 | AWS | project `cah`, config `dev_aws` | `cah-doppler-aws` | `cah-aws-...` | a cloud label such as `cah-aws`, not the DigitalOcean one |
 | Azure, GCP | same pattern: `dev_azure`, `dev_gcp` | `cah-doppler-azure`, `cah-doppler-gcp` | `cah-azure-...`, `cah-gcp-...` | their own labels |
 
@@ -241,6 +241,7 @@ Without a push policy, Spacelift's built-in behavior starts a stack's runs only 
 |---|---|---|
 | `cah-00-foundation` | `stacks/00-foundation` | `modules/**`, `scripts/spacelift/**`, `.spacelift/**` |
 | `cah-10-access` | `stacks/10-access` | `modules/**`, `scripts/spacelift/**`, `.spacelift/**` |
+| `cah-20-telemetry` | `stacks/20-telemetry` | `modules/**`, `scripts/spacelift/**`, `.spacelift/**` |
 
 Remove any other glob, such as `**`, `*` or one that covers `docs/`. Then a docs-only pull request or merge starts nothing. What this cannot do is the other half of the policy: a pull request that does change a stack still gets a proposed run, which still fails at the provider without credentials. On the free plan that red check is expected on those pull requests only; branch protection requires only `CI green`, so it does not block a merge, and `tofu test` in CI is the real test. The exposure in section 8 also remains: that proposed run executes the pull request's code with the Doppler context attached, so keep this repository single-writer.
 
@@ -248,7 +249,7 @@ Remove any other glob, such as `**`, `*` or one that covers `docs/`. Then a docs
 
 1. In Spacelift, open **Enforce Guardrails > Policies**, choose **Create policy**, name it `cah-push`, and pick the type **Git push**.
 2. Paste the contents of `.spacelift/policies/push.rego` as the body. Do not paste `push_test.rego`; it is only for CI.
-3. Add the label `autoattach:cah`, so it attaches to every stack labeled `cah`, the same way the Doppler context does. Or attach it by hand to `cah-00-foundation` and `cah-10-access`.
+3. Add the label `autoattach:cah`, so it attaches to every stack labeled `cah`, the same way the Doppler context does. Or attach it by hand to `cah-00-foundation`, `cah-10-access` and `cah-20-telemetry`.
 4. Detach any other Git push policy from those stacks. With more than one attached, the outcome is a combination of both and is no longer what the tests describe.
 5. When the policy changes in a pull request, paste the new body into the same policy after the merge. The file in the repository is the reviewed copy, not the live one; a check on the next tracked run is the only proof they match.
 

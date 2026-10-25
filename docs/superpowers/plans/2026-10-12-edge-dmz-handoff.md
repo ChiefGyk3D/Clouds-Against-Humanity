@@ -4,7 +4,7 @@ You are working in the Clouds-Against-Humanity repo (OpenTofu + DigitalOcean + S
 
 ## Ground rules
 
-- Never run `tofu apply` or trigger a tracked Spacelift run. PRs only; plans come from Spacelift on the PR.
+- Never run `tofu apply` or trigger a tracked Spacelift run. PRs only. Spacelift does not plan a pull request: `.spacelift/policies/push.rego` never proposes a run, so the plan appears only as a tracked run after the merge to `main` (it stops for a human to confirm). Before the merge, `tofu test` with mocked providers in GitHub Actions is the check.
 - One logical change per PR, in the order below. Design docs get their own PR and wait for my approval before any implementation PR.
 - Secrets come only from Doppler. Nothing secret in variables that land in state if avoidable, nothing in user-data that is not already covered by the metadata-endpoint restriction.
 - Do not raise the $30 cost ceiling yourself. If something exceeds it, the cost gate must fail and the design doc must lay out the options.

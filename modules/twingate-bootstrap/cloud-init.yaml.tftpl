@@ -234,6 +234,47 @@ ${telemetry_conf}%{ if metadata_lock ~}
       ExecStart=
       ExecStart=/usr/local/sbin/cah-node-exporter-run
 %{ endif ~}
+  # The pinned-key check, shared by every apt repository key this file trusts
+  # (the Twingate connector always, Wazuh with log shipping). gpg lists the
+  # downloaded key file; this accepts it only when it holds exactly ONE primary
+  # key (one pub record, no secret keys) whose primary fingerprint equals the
+  # pin. A subkey carries its own fpr record, so an
+  # fpr is accepted only directly after a sub record; a second fpr that follows
+  # no sub, or any second pub, is refused. So a bundle of the pinned key plus an
+  # attacker key is never trusted.
+  - path: /usr/local/sbin/cah-apt-key-check
+    permissions: "0755"
+    owner: root:root
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+      refuse() { echo "cah-apt-key-check: refusing: $1" >&2; exit 1; }
+      [ "$#" -eq 2 ] || refuse "usage: cah-apt-key-check <keyfile> <fingerprint>"
+      keyfile="$1"
+      pin="$2"
+      listing="$(gpg --show-keys --with-colons "$keyfile")" || refuse "gpg could not read the key file"
+      pubs=0
+      primary=""
+      prev=""
+      while IFS=: read -r rec _ _ _ _ _ _ _ _ f10 _; do
+        case "$rec" in
+          pub) pubs=$((pubs + 1)); prev=pub ;;
+          sub) prev=sub ;;
+          sec|ssb) refuse "the file holds a secret key" ;;
+          fpr)
+            if [ "$prev" = pub ] && [ -z "$primary" ]; then
+              primary="$f10"
+              prev=fpr
+            elif [ "$prev" = sub ]; then
+              prev=fpr
+            else
+              refuse "an unexpected extra fingerprint record"
+            fi
+            ;;
+        esac
+      done <<< "$listing"
+      [ "$pubs" -eq 1 ] || refuse "expected exactly one public key, found $pubs"
+      [ "$primary" = "$pin" ] || refuse "the key fingerprint is not the pinned one"
 %{ if log_shipping ~}
   # Log shipping (opt-in): the Wazuh agent and auditd. The ONLY secret-related
   # value in this file is the short-lived, read-only Doppler token for the
@@ -537,45 +578,6 @@ ${telemetry_conf}%{ if metadata_lock ~}
           except OSError:
               pass
           raise
-  # The pinned-key check. gpg lists the downloaded key file; this accepts it only
-  # when it holds exactly ONE primary key (one pub record, no secret keys) whose
-  # primary fingerprint equals the pin. A subkey carries its own fpr record, so an
-  # fpr is accepted only directly after a sub record; a second fpr that follows
-  # no sub, or any second pub, is refused. So a bundle of the pinned key plus an
-  # attacker key is never trusted.
-  - path: /usr/local/sbin/cah-wazuh-key-check
-    permissions: "0755"
-    owner: root:root
-    content: |
-      #!/usr/bin/env bash
-      set -euo pipefail
-      refuse() { echo "cah-wazuh-key-check: refusing: $1" >&2; exit 1; }
-      [ "$#" -eq 2 ] || refuse "usage: cah-wazuh-key-check <keyfile> <fingerprint>"
-      keyfile="$1"
-      pin="$2"
-      listing="$(gpg --show-keys --with-colons "$keyfile")" || refuse "gpg could not read the key file"
-      pubs=0
-      primary=""
-      prev=""
-      while IFS=: read -r rec _ _ _ _ _ _ _ _ f10 _; do
-        case "$rec" in
-          pub) pubs=$((pubs + 1)); prev=pub ;;
-          sub) prev=sub ;;
-          sec|ssb) refuse "the file holds a secret key" ;;
-          fpr)
-            if [ "$prev" = pub ] && [ -z "$primary" ]; then
-              primary="$f10"
-              prev=fpr
-            elif [ "$prev" = sub ]; then
-              prev=fpr
-            else
-              refuse "an unexpected extra fingerprint record"
-            fi
-            ;;
-        esac
-      done <<< "$listing"
-      [ "$pubs" -eq 1 ] || refuse "expected exactly one public key, found $pubs"
-      [ "$primary" = "$pin" ] || refuse "the key fingerprint is not the pinned one"
   # Belt and braces for a SIGKILL or power loss that skipped the first-boot
   # script's cleanup: remove a leftover token and password file at every boot,
   # before the agent starts. Enabled for the NEXT boot only (never --now), because
@@ -687,7 +689,8 @@ runcmd:
   # the way their Terraform guide does, instead of running their setup.sh (an
   # installer that is piped into bash can have its script swallowed by apt's
   # package configuration). The repository key is checked against a pinned
-  # fingerprint before it is trusted. Success means the service is active.
+  # fingerprint before it is trusted: the file must hold exactly one key, the
+  # pinned one (cah-apt-key-check). Success means the service is active.
   # Retry up to 10 times, 30 seconds apart. Never add set -x here.
   - - bash
     - -o
@@ -699,7 +702,7 @@ runcmd:
       FPR=EC952DEE4701A407A82B0C505C363F09A9174A9E
       for attempt in $(seq 1 10); do
         if curl -fsSL --proto '=https' --tlsv1.2 --retry 5 -o /root/twingate.gpg.key https://packages.twingate.com/apt/gpg.key \
-          && gpg --show-keys --with-colons /root/twingate.gpg.key | grep -q "^fpr:::::::::$FPR:" \
+          && /usr/local/sbin/cah-apt-key-check /root/twingate.gpg.key "$FPR" \
           && gpg --dearmor --yes -o "$KEYRING" /root/twingate.gpg.key \
           && echo "deb [signed-by=$KEYRING] https://packages.twingate.com/apt/ /" > /etc/apt/sources.list.d/twingate.list \
           && apt-get update -q \
@@ -734,7 +737,7 @@ runcmd:
       /usr/local/sbin/cah-agent-guard deny || { echo "cah: could not guard wazuh-agent; not installing it" >&2; exit 1; }
       for attempt in $(seq 1 10); do
         if curl -fsSL --proto '=https' --tlsv1.2 --retry 5 -o /root/wazuh.gpg.key https://packages.wazuh.com/key/GPG-KEY-WAZUH \
-          && /usr/local/sbin/cah-wazuh-key-check /root/wazuh.gpg.key "$FPR" \
+          && /usr/local/sbin/cah-apt-key-check /root/wazuh.gpg.key "$FPR" \
           && gpg --dearmor --yes -o "$KEYRING" /root/wazuh.gpg.key \
           && echo "deb [signed-by=$KEYRING] https://packages.wazuh.com/4.x/apt/ stable main" > /etc/apt/sources.list.d/wazuh.list \
           && apt-get update -q \

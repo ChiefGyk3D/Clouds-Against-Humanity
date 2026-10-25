@@ -35,7 +35,7 @@ LOCALFILE_PATH = "/etc/cah/wazuh-localfile.xml"
 RULES_PATH = "/etc/audit/rules.d/60-cah.rules"
 GUARD_PATH = "/usr/local/sbin/cah-agent-guard"
 INSERT_PATH = "/usr/local/sbin/cah-ossec-insert"
-KEYCHECK_PATH = "/usr/local/sbin/cah-wazuh-key-check"
+KEYCHECK_PATH = "/usr/local/sbin/cah-apt-key-check"
 SWEEP_UNIT_PATH = "/etc/systemd/system/cah-log-shipping-sweep.service"
 DROPIN_PATH = "/etc/systemd/system/wazuh-agent.service.d/10-cah-no-stale-password.conf"
 
@@ -535,7 +535,6 @@ def test_template_gates_every_log_shipping_piece_on_the_flag():
         GUARD_PATH,
         INSERT_PATH,
         "/var/lib/cah/agent-guard.state",
-        "/usr/local/sbin/cah-wazuh-key-check",
         "/etc/systemd/system/cah-log-shipping-sweep.service",
         "/etc/systemd/system/wazuh-agent.service.d/10-cah-no-stale-password.conf",
         "systemctl mask wazuh-agent",
@@ -554,7 +553,7 @@ def test_the_apt_key_is_checked_against_the_pinned_fingerprint_before_it_is_trus
     text = TEMPLATE.read_text(encoding="utf-8")
     start = text.index("packages.wazuh.com/key")
     block = text[start - 900 : start + 1400]
-    check = block.index('/usr/local/sbin/cah-wazuh-key-check /root/wazuh.gpg.key "$FPR"')
+    check = block.index('/usr/local/sbin/cah-apt-key-check /root/wazuh.gpg.key "$FPR"')
     dearmor = block.index("gpg --dearmor")
     sources = block.index("sources.list.d/wazuh.list")
     assert check < dearmor < sources

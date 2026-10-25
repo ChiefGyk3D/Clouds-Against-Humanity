@@ -3,7 +3,7 @@
   "summary": {
     "title": "Clouds Against Humanity: AI-assisted workflow mapped to MITRE ATLAS",
     "owner": "Clouds Against Humanity maintainers",
-    "description": "Teaching model of how AI tools touch this public repository: a coding agent, a hosted review assistant and a local model reading pull requests, plans and logs. Each threat cites MITRE ATLAS techniques (release 2026.09). Threat Dragon has no ATLAS threat type: the technique is in the threat title and description, and the STRIDE category in the type field is the nearest native label. Boundaries AB1 to AB5 are specific to this model. A model records what someone believes; it does not verify the system. Generic names only.",
+    "description": "Teaching model of how AI tools touch this public repository: a coding agent, a hosted review assistant and a local model reading pull requests, plans and logs. Each threat cites MITRE ATLAS techniques (release 2026.09). Threat Dragon has no ATLAS threat type: the technique is in the threat title and description, and the STRIDE category in the type field is the nearest native label. Boundaries AB1 to AB5 are specific to this model. A model records what someone believes; it does not verify the system. Generic names only. Audited against the repository code on 2026-10-24 (see docs/threat-model/README.md): a threat is Mitigated only when a control is visible in code or config, and anything that cannot be confirmed from the repository starts with UNVERIFIED.",
     "id": 0
   },
   "detail": {
@@ -147,7 +147,7 @@
             "id": "node-agent",
             "data": {
               "name": "AI coding agent session",
-              "description": "A coding agent, such as a CLI or editor assistant, running on the maintainer's machine with a set of tools (read files, run commands, git). Backed by a hosted model.",
+              "description": "UNVERIFIED (outside the repository): A coding agent, such as a CLI or editor assistant, running on the maintainer's machine with a set of tools (read files, run commands, git). Backed by a hosted model.",
               "type": "tm.Process",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -162,7 +162,7 @@
                   "type": "Elevation of privilege",
                   "modelType": "STRIDE",
                   "description": "Whatever the agent's tools can do, injected or mistaken text can make it do. A shell, a package installer, a git push or a cloud CLI each widen the blast radius. A tool that can delete is a data-destruction path. ATLAS 2026.09: AML.T0053 AI Agent Tool Invocation [AML.TA0005 Execution, AML.TA0012 Privilege Escalation, AML.TA0015 Lateral Movement]; AML.T0101 Data Destruction via AI Agent Tool Invocation [AML.TA0011 Impact].",
-                  "mitigation": "Least privilege for tool permissions, set outside the repository on the machine that runs the agent. The repository's own handoff prompt states the rule: pull requests only, never run tofu apply, never trigger a tracked run. That is a written instruction, which injected text can contradict, so also keep the credentials off the machine. Not verifiable from the repository."
+                  "mitigation": "Least privilege for tool permissions, set outside the repository on the machine that runs the agent. The repository's own handoff prompt (docs/superpowers/plans/2026-10-12-edge-dmz-handoff.md) states the rule: pull requests only, never run tofu apply, never trigger a tracked run. That is a written instruction, which injected text can contradict, so also keep the credentials off the machine. Not verifiable from the repository."
                 },
                 {
                   "id": "threat-a-agent-fork",
@@ -247,7 +247,7 @@
             "id": "node-reviewer",
             "data": {
               "name": "Hosted AI reviewer",
-              "description": "Full name: Hosted AI review assistant. A bot that reads a pull request diff and posts review comments. Advisory.",
+              "description": "Full name: Hosted AI review assistant. A bot that reads a pull request diff and posts review comments. Advisory. UNVERIFIED: no review-bot configuration exists in this repository.",
               "type": "tm.Process",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -280,7 +280,7 @@
             "id": "node-local",
             "data": {
               "name": "Local LLM",
-              "description": "Full name: Local LLM (text in, text out). A model served on the maintainer's own network and used for drafts and summaries only. No tools, no credentials.",
+              "description": "Full name: Local LLM (text in, text out). UNVERIFIED (outside the repository): a model served on the maintainer's own network and used for drafts and summaries only. No tools, no credentials.",
               "type": "tm.Process",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -289,13 +289,13 @@
                 {
                   "id": "threat-a-local-inject",
                   "number": 10,
-                  "status": "Mitigated",
+                  "status": "Open",
                   "severity": "Low",
                   "title": "AML.T0051.001 Indirect: Pull request text steers the local model's summary",
                   "type": "Tampering",
                   "modelType": "STRIDE",
                   "description": "The local model summarizes pull request text, logs and drafts. Injected text can change the summary. Because the model is used text in, text out, with no tools and no credentials, a bad summary is the whole impact. ATLAS 2026.09: AML.T0051.001 Indirect [AML.TA0005 Execution].",
-                  "mitigation": "Keep it tool-less. Counting, cost math and checks are done by code, not by the model. Read the diff itself before acting on a summary."
+                  "mitigation": "Tool-less use of the local model is a practice, not a control in the repository: the model server and its configuration are outside it (UNVERIFIED). Counting, cost math and checks are done by code, not by the model. Read the diff itself before acting on a summary."
                 },
                 {
                   "id": "threat-a-local-exposed",
@@ -306,7 +306,7 @@
                   "type": "Denial of service",
                   "modelType": "STRIDE",
                   "description": "A model server with no authentication on a flat network is an open compute and data service. Anyone who can reach it can use it and read what it is sent. ATLAS 2026.09: AML.T0132 Misconfigured or Publicly Exposed AI Services [AML.TA0004 Initial Access]; AML.T0006.002 Scan for Exposed AI Infrastructure [AML.TA0002 Reconnaissance].",
-                  "mitigation": "The stage 3 handoff plans a proxy with one key per client, each scoped to one model and rate limited, reached only through a ZTNA resource, never the model server directly. This is a design, not a built control, so it stays Open."
+                  "mitigation": "UNVERIFIED: this row once cited a stage 3 handoff that plans a proxy with one key per client, each scoped to one model. No such text was found in this repository (docs/ searched for proxy and per-client key wording), and no model server is built here. Treat the control as not built; the threat stays Open."
                 }
               ],
               "hasOpenThreats": true
@@ -848,7 +848,7 @@
                   "type": "Information disclosure",
                   "modelType": "STRIDE",
                   "description": "The repository is public. An agent that can push a branch, open a pull request or post a comment can put a secret, an account identifier or a private detail where everyone can read it, either by mistake or because injected text told it to. Rendered output that loads a remote image or link can also carry data out. ATLAS 2026.09: AML.T0086 Exfiltration via AI Agent Tool Invocation [AML.TA0010 Exfiltration]; AML.T0077 LLM Response Rendering [AML.TA0010 Exfiltration].",
-                  "mitigation": "Pushing a branch or posting a pull request or comment makes its contents public at once, even if CI later fails, so no check after the push can undo a disclosure. Prevent it before the push: keep secrets and private identifiers out of the agent's environment and context, and run the identifier check and secret scanning locally or in a pre-commit hook. CI secret scanning and the identifier check on every pull request then act as detection: they find what got through, so the secret is rotated and the history cleaned. Agents open pull requests and do not merge, and a person reads the diff before merge. Whether images in bot comments can leak data was not verified."
+                  "mitigation": "Pushing a branch or posting a pull request or comment makes its contents public at once, even if CI later fails, so no check after the push can undo a disclosure. Prevent it before the push: keep secrets and private identifiers out of the agent's environment and context, and run the identifier check and secret scanning locally or in a pre-commit hook (this repository has no pre-commit configuration, so UNVERIFIED that any hook is installed). CI secret scanning and the identifier check on every pull request then act as detection: they find what got through, so the secret is rotated and the history cleaned. Agents open pull requests and do not merge, and a person reads the diff before merge. Whether images in bot comments can leak data was not verified."
                 }
               ],
               "hasOpenThreats": true
@@ -915,7 +915,7 @@
                   "type": "Information disclosure",
                   "modelType": "STRIDE",
                   "description": "Anything the agent can read (environment variables, files, command output, a pasted log) can be sent to a hosted model provider and can be repeated in output. A token in context is a token that left the machine. ATLAS 2026.09: AML.T0057 LLM Data Leakage [AML.TA0010 Exfiltration]; AML.T0083 Credentials from AI Agent Configuration [AML.TA0013 Credential Access]; AML.T0055 Unsecured Credentials [AML.TA0013 Credential Access].",
-                  "mitigation": "Secrets live in Doppler and are fetched at run time; the repository keeps no secret in a committed file. That is not the same as nowhere on disk: the pipeline model records connector tokens in Spacelift state, in droplet user-data and in a root-only token file on the droplet, so a local agent run that can read state, plan output or a droplet can see them. Keep the agent's environment and working files free of them. The repository runs secret scanning and an identifier check in CI, which catch what reaches a commit, not what reaches a prompt. Use a local model for text that contains sensitive detail."
+                  "mitigation": "Secrets live in Doppler and are fetched at run time; the repository keeps no secret in a committed file. That is not the same as nowhere on disk: the pipeline model records connector tokens in Spacelift state, in droplet user-data and in a root-only token file on the droplet, so a local agent run that can read state, plan output or a droplet can see them. Keep the agent's environment and working files free of them. The repository runs secret scanning (gitleaks, on by default in the pinned security workflow called from ci.yml) and scripts/identifier_check.py in CI, which catch what reaches a commit, not what reaches a prompt. Use a local model for text that contains sensitive detail."
                 }
               ],
               "hasOpenThreats": true
@@ -982,7 +982,7 @@
                   "type": "Tampering",
                   "modelType": "STRIDE",
                   "description": "Research agents read vendor documentation and web pages. Content on those pages can contain instructions, or can simply be out of date or wrong, and the result is written into teaching material. ATLAS 2026.09: AML.T0099 AI Agent Tool Data Poisoning [AML.TA0006 Persistence]; AML.T0051.001 Indirect [AML.TA0005 Execution].",
-                  "mitigation": "The project records its source and retrieval date next to each fact and labels unconfirmed pages as drafts (the phase 0 evidence files and the provider pages say so). A reader can check the source. The label is only as good as the person who applies it."
+                  "mitigation": "The project records its source and retrieval date next to each fact and labels unconfirmed pages as drafts (the phase 0 evidence files under docs/superpowers/specs and the wiki's unverified-draft banners say so). A reader can check the source. The label is only as good as the person who applies it."
                 }
               ],
               "hasOpenThreats": false
@@ -1044,7 +1044,7 @@
                   "type": "Tampering",
                   "modelType": "STRIDE",
                   "description": "Models invent plausible package, action and URL names. An attacker who registers the invented name waits for the next person to install it. ATLAS 2026.09: AML.T0060 Publish Hallucinated Entities [AML.TA0003 Resource Development]; AML.T0011.001 Malicious Package [AML.TA0005 Execution].",
-                  "mitigation": "Every GitHub Action is pinned by commit, the Doppler CLI download by SHA-256, the Twingate apt key by fingerprint, and the YAML and lint packages by version (see the ci workflow; pytest itself is not pinned there). Check that a new dependency exists, who publishes it, and how old it is, before adding it. Mitigated for what exists today; every new dependency re-opens it."
+                  "mitigation": "Every GitHub Action is pinned by commit, the Doppler CLI download by SHA-256, the Twingate apt key by fingerprint, and the YAML and lint packages by version (see .github/workflows/ci.yml; pytest itself is not pinned there; the provider versions are locked by the .terraform.lock.hcl files in each stack and module). Check that a new dependency exists, who publishes it, and how old it is, before adding it. Mitigated for what exists today; every new dependency re-opens it."
                 }
               ],
               "hasOpenThreats": false
