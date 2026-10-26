@@ -188,3 +188,127 @@ def test_the_chart_draws_for_near_empty_empty_normal_and_schema_1_snapshots(tmp_
     grm.draw_png(snap, out)
     assert out.read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
     assert 5_000 < out.stat().st_size < grm.MAX_PNG_BYTES
+
+
+# -- round 2: the bar labels are drawn, the lists fail loudly, extremes stay readable ----------------------
+
+
+class StubAxes:
+    """Records every call; stands in for a matplotlib Axes so no plotting library is needed."""
+
+    def __init__(self):
+        self.calls = []
+
+    def __getattr__(self, name):
+        def record(*args, **kwargs):
+            self.calls.append((name, args, kwargs))
+
+        return record
+
+    def named(self, name):
+        return [c for c in self.calls if c[0] == name]
+
+
+def draw_stub(snap):
+    ax = StubAxes()
+    panel = grm.panel_model(snap)
+    grm.draw_work_panel(ax, panel, {"merged_prs": "g", "opened_issues": "y", "closed_issues": "p"}, patch=lambda **kw: kw)
+    return ax, panel
+
+
+def test_every_bar_gets_exactly_one_printed_count_including_zeros_at_its_own_position():
+    ax, panel = draw_stub(v2())
+    printed = ax.named("text")
+    bars = ax.named("bar")
+    assert len(bars) == len(panel["keys"])
+    assert len(printed) == len(panel["groups"]) * len(panel["keys"])
+    for j, bar in enumerate(bars):  # one bar() call per series, one height per group
+        for i, (x, h) in enumerate(zip(bar[1][0], bar[1][1], strict=True)):
+            mine = [t for t in printed if t[1][0] == x]
+            assert len(mine) == 1  # one label at this bar's x
+            _, y, text = mine[0][1]
+            assert text == str(h) == panel["groups"][i]["text"][j]
+            assert y >= h  # at or above the top of its own bar
+    assert [t[1][2] for t in printed].count("0") >= 3  # the explicit zeros are printed
+
+
+def test_zero_height_bars_are_labeled_with_a_0_above_the_axis():
+    ax, _ = draw_stub(v2(opened_issues={"2026-10-12": 2}, closed_issues={"2026-10-13": 1}, merged_prs={"2026-10-11": 3}))
+    zeros = [t for t in ax.named("text") if t[1][2] == "0"]
+    assert zeros and all(t[1][1] > 0 for t in zeros)
+
+
+def test_headroom_leaves_the_top_of_the_panel_for_the_legend_at_any_scale():
+    for tallest in (0, 1, 97, 123456):
+        assert grm.panel_ylim_top(tallest) >= max(tallest, 1) * 1.3
+    ax, _ = draw_stub(v2(opened_issues={"2026-10-12": 123456}))
+    assert ax.named("set_ylim")[0][1] == (0, grm.panel_ylim_top(123456))
+
+
+def test_legend_swatches_have_fixed_colors_not_taken_from_the_bars():
+    ax, panel = draw_stub(v2(opened_issues={"2026-10-12": 123456}))
+    legend = ax.named("legend")[0]
+    assert [h["facecolor"] for h in legend[2]["handles"]] == ["g", "y", "p"]
+    assert [h["label"] for h in legend[2]["handles"]] == panel["legend"]
+    assert all("label" not in c[2] for c in ax.named("bar"))  # nothing else can feed the legend
+
+
+def test_the_picture_palette_is_fixed_holds_every_series_color_and_fits_256():
+    palette = grm.chart_palette()
+    assert palette == grm.chart_palette() and 0 < len(palette) <= 256
+    for text in grm.CHART_COLORS:
+        assert tuple(int(text[i : i + 2], 16) for i in (1, 3, 5)) in palette  # exactly, so a swatch never shifts
+
+
+def test_opened_issues_per_day_cap_matches_the_bundle_cap():
+    assert grm.validate_snapshot({**v2(opened_issues={"2026-10-12": grm.MAX_DAY_COUNT}), **NO_HASHES}) == []
+    found = grm.validate_snapshot({**v2(opened_issues={"2026-10-12": grm.MAX_DAY_COUNT + 1}), **NO_HASHES})
+    assert any("bad value" in p for p in found)
+
+
+class ListGh(FakeGh):
+    """FakeGh, except the list call whose argument list holds `needle` answers with `size` rows."""
+
+    def __init__(self, needle=None, size=0, key="closedAt"):
+        super().__init__()
+        self.needle, self.size, self.key = needle, size, key
+
+    def __call__(self, args):
+        self.calls.append(args)
+        if self.needle and args[0] in ("pr", "issue") and args[1] == "list" and self.needle in args:
+            return json.dumps([{self.key: "2026-10-12T00:00:00Z"}] * self.size)
+        if args[:2] == ["issue", "list"] and "all" in args:
+            return json.dumps([{"createdAt": "2026-10-12T00:00:00Z"}])
+        return super().__call__(args)
+
+
+NOW = datetime.datetime(2026, 10, 22, 12, tzinfo=datetime.UTC)
+
+
+def test_every_list_call_is_pinned_to_the_list_limit():
+    gh = ListGh()
+    with mock.patch.object(grm, "run_gh", gh):
+        grm.fetch_snapshot("Example/Repo", now=NOW)
+    lists = {tuple(c) for c in gh.calls if c[:2] in (["pr", "list"], ["issue", "list"])}  # ListGh records some calls twice
+    limits = [c[c.index("--limit") + 1] for c in sorted(lists)]
+    assert grm.LIST_LIMIT == 5000 and limits == ["5000", "5000", "5000"]
+
+
+@pytest.mark.parametrize(("needle", "key"), [("merged", "mergedAt"), ("closed", "closedAt"), ("all", "createdAt")])
+def test_a_list_that_reaches_the_limit_fails_loudly_and_writes_nothing(tmp_path, monkeypatch, needle, key):
+    with mock.patch.object(grm, "run_gh", ListGh(needle, grm.LIST_LIMIT, key)), pytest.raises(RuntimeError, match="5000"):
+        grm.fetch_snapshot("Example/Repo", now=NOW)
+    with mock.patch.object(grm, "run_gh", ListGh(needle, grm.LIST_LIMIT - 1, key)):
+        grm.fetch_snapshot("Example/Repo", now=NOW)  # one short of the limit is fine
+    drawn = []
+    monkeypatch.setattr(grm, "draw_png", lambda *a: drawn.append(a))
+    with mock.patch.object(grm, "run_gh", ListGh(needle, grm.LIST_LIMIT, key)):
+        code = grm.main(["--refresh", "--root", str(tmp_path), "--repo", "Example/Repo"])
+    assert code == 1 and drawn == [] and not any(tmp_path.rglob("*"))
+
+
+def test_alt_text_and_wording_name_the_new_series_only_for_schema_2():
+    new, old = grm.render_page(v2()), grm.render_page(fixture())
+    assert "issues opened, issues closed and the last 7 days" in new
+    assert "Forks, merged pull requests, issues opened and closed issues are read fresh every day." in new
+    assert f"![{grm.ALT_TEXT}]" in old and "last 7 days" not in old
