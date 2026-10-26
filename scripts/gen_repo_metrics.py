@@ -94,7 +94,11 @@ import tempfile
 import time
 from pathlib import Path
 
-SCHEMA = 1
+# Schema 2 adds `opened_issues` (issue #301). Schema 1 snapshots (the committed baseline, and any
+# published before the change) stay valid and keep their hash: the new field is optional in the
+# hash and forbidden in a schema 1 file, and required in a schema 2 file.
+SCHEMA = 2
+SCHEMAS = (1, 2)
 DEFAULT_REPO = "ChiefGyk3D/Clouds-Against-Humanity"
 SNAPSHOT = Path("docs") / "wiki" / ".metrics-snapshot.json"
 PNG = Path("docs") / "wiki" / "images" / "repo-growth.png"
@@ -113,12 +117,14 @@ MAX_PNG_BYTES = 1024 * 1024
 MAX_DAY_COUNT = 1_000_000  # one day of stars, forks, pull requests or issues
 
 SERIES = ("stars", "forks", "merged_prs", "closed_issues")
+OPTIONAL_SERIES = ("opened_issues",)  # per-day series that only schema 2 snapshots carry
+ROLLING_DAYS = 7
 TRAFFIC_KINDS = ("views", "clones")
 DATA_KEYS = ("schema", "repo", "created_on", "fetched_at", *SERIES, "traffic")
 # Optional fields, covered by the source hash only when present (so a snapshot made before
 # they existed keeps its hash): the day the per-star times in `stars` run to, and a ledger of
 # dated cumulative star counts recorded by CI, which cannot read star times (issue #296).
-OPTIONAL_KEYS = ("stars_as_of", "star_ledger")
+OPTIONAL_KEYS = ("stars_as_of", "star_ledger", "opened_issues")
 SNAPSHOT_KEYS = set(DATA_KEYS) | set(OPTIONAL_KEYS) | {"source_sha256", "png_sha256"}
 MAX_LEDGER_POINTS = 4000
 # A carried snapshot whose newest point is older than this (measured to the new snapshot's
@@ -203,8 +209,54 @@ def star_note(snapshot: dict) -> str:
 
 def totals(snapshot: dict) -> dict[str, int]:
     out = {key: sum(snapshot[key].values()) for key in SERIES}
+    out.update({key: sum(snapshot[key].values()) for key in OPTIONAL_SERIES if key in snapshot})
     out["stars"] = current_stars(snapshot)
     return out
+
+
+# The bars of the weekly panel, in drawing order: (snapshot key, legend label, short name for the summary).
+PANEL_SERIES = (
+    ("merged_prs", "PRs merged", "PRs merged"),
+    ("opened_issues", "Issues opened", "issues opened"),
+    ("closed_issues", "Issues closed", "issues closed"),
+)
+
+
+def rolling_window(snapshot: dict, days: int = ROLLING_DAYS) -> tuple[datetime.date, datetime.date, dict[str, int]]:
+    """Counts for the last `days` UTC days ending on the snapshot date (that day included, so
+    on a Monday the previous six days still show what just happened). Pure."""
+    end = to_date(snapshot["fetched_at"][:10])
+    first = end - datetime.timedelta(days=days - 1)
+    counts = {}
+    for key, _, _ in PANEL_SERIES:
+        if key in snapshot:
+            counts[key] = sum(n for text, n in snapshot[key].items() if first <= to_date(text) <= end)
+    return first, end, counts
+
+
+def panel_model(snapshot: dict) -> dict:
+    """What the weekly panel shows, with no plotting library: the series drawn, one group per
+    Monday week and a last group for the rolling seven days, and the exact text printed on
+    every bar (a zero is printed as 0, never left blank)."""
+    start, end = span(snapshot)
+    keys = [key for key, _, _ in PANEL_SERIES if key in snapshot]
+    weeks = {key: weekly(snapshot[key], start, end) for key in keys}
+    first, last, rolling = rolling_window(snapshot)
+    partial = week_start(end) + datetime.timedelta(days=6) > end
+    groups = []
+    for i, (week, _) in enumerate(weeks[keys[0]]):
+        is_last = i == len(weeks[keys[0]]) - 1
+        label = week.strftime("%b %d") + ("\n(so far)" if is_last and partial else "")
+        groups.append({"label": label, "kind": "week", "counts": [weeks[key][i][1] for key in keys]})
+    groups.append({"label": f"Last {ROLLING_DAYS} days\n{first.strftime('%b %d')} to {last.strftime('%b %d')}", "kind": "rolling", "counts": [rolling[key] for key in keys]})
+    for group in groups:
+        group["text"] = [str(n) for n in group["counts"]]
+    return {
+        "keys": keys,
+        "legend": [label for key, label, _ in PANEL_SERIES if key in keys],
+        "groups": groups,
+        "summary": f"Last {ROLLING_DAYS} days ({first.isoformat()} to {last.isoformat()}): " + ", ".join(f"{rolling[key]} {name}" for key, _, name in PANEL_SERIES if key in keys),
+    }
 
 
 def source_digest(snapshot: dict) -> str:
@@ -223,13 +275,14 @@ def file_digest(path: Path) -> str:
 
 def weekly_rows(snapshot: dict) -> list[list[str]]:
     start, end = span(snapshot)
-    columns = {key: weekly(snapshot[key], start, end) for key in SERIES}
+    keys = [key for key in ("merged_prs", "opened_issues", "closed_issues") if key in snapshot]
+    columns = {key: weekly(snapshot[key], start, end) for key in ("stars", "forks", *keys)}
     rows, running = [], dict.fromkeys(("stars", "forks"), 0)
     for i, (week, _) in enumerate(columns["stars"]):
         running["stars"] += columns["stars"][i][1]
         running["forks"] += columns["forks"][i][1]
         label = week.isoformat() + (" (partial)" if i == len(columns["stars"]) - 1 and week_start(end) + datetime.timedelta(days=6) > end else "")
-        rows.append([label, *(str(columns[k][i][1]) for k in SERIES), str(running["stars"]), str(running["forks"])])
+        rows.append([label, *(str(columns[k][i][1]) for k in ("stars", "forks", *keys)), str(running["stars"]), str(running["forks"])])
     return rows
 
 
@@ -283,8 +336,8 @@ def render_page(snapshot: dict, image: str = DEFAULT_IMAGE_URL) -> str:
         "",
         "This table is the text version of the picture, one row per week (UTC, Monday to Sunday). The last two columns are running totals at the end of that week.",
         "",
-        *md_table(["Week of", "New stars", "New forks", "PRs merged", "Issues closed", "Stars so far", "Forks so far"], weekly_rows(snapshot)),
-        f"Totals: {t['stars']} stars, {t['forks']} forks, {t['merged_prs']} merged pull requests, {t['closed_issues']} closed issues.",
+        *md_table(["Week of", "New stars", "New forks", "PRs merged", *(["Issues opened"] if "opened_issues" in snapshot else []), "Issues closed", "Stars so far", "Forks so far"], weekly_rows(snapshot)),
+        f"Totals: {t['stars']} stars, {t['forks']} forks, {t['merged_prs']} merged pull requests, " + (f"{t['opened_issues']} opened issues, " if "opened_issues" in snapshot else "") + f"{t['closed_issues']} closed issues.",
         "",
     ]
     traffic = snapshot.get("traffic")
@@ -312,6 +365,7 @@ def render_page(snapshot: dict, image: str = DEFAULT_IMAGE_URL) -> str:
         f"gh api repos/{repo}/forks --paginate --jq '.[].created_at'",
         f"gh pr list --repo {repo} --state merged --limit 5000 --json mergedAt",
         f"gh issue list --repo {repo} --state closed --limit 5000 --json closedAt",
+        *([f"gh issue list --repo {repo} --state all --limit 5000 --json createdAt"] if "opened_issues" in snapshot else []),
         f"gh api --paginate -X GET repos/{repo}/stargazers -H 'Accept: application/vnd.github.star+json' --jq '.[].starred_at'",
         "python3 -I scripts/gen_repo_metrics.py --refresh   # does all of the above, draws the chart and rewrites this page",
         "python3 -I scripts/gen_repo_metrics.py --check     # offline: the same check CI runs",
@@ -384,8 +438,13 @@ def validate_snapshot(snap: object) -> list[str]:
     extra = sorted(set(snap) - SNAPSHOT_KEYS)
     if extra:
         problems.append(f"unknown field(s) {extra}: only per-day counts are allowed in the snapshot")
-    if snap.get("schema") != SCHEMA:
-        problems.append(f"schema is not {SCHEMA}")
+    schema = snap.get("schema")
+    if isinstance(schema, bool) or schema not in SCHEMAS:
+        problems.append(f"schema is not one of {list(SCHEMAS)}")
+    elif schema == 1 and "opened_issues" in snap:
+        problems.append("opened_issues needs schema 2")
+    elif schema == 2 and "opened_issues" not in snap:
+        problems.append("schema 2 needs opened_issues")
     repo = snap.get("repo")
     if not (isinstance(repo, str) and repo.count("/") == 1 and all(NAME_RE.match(x) for x in repo.split("/"))):
         problems.append("repo is not owner/name")
@@ -430,6 +489,8 @@ def validate_snapshot(snap: object) -> list[str]:
 
     for key in SERIES:
         check_days(key, snap.get(key), count)
+    if "opened_issues" in snap:
+        check_days("opened_issues", snap["opened_issues"], count)
     problems += ledger_problems(snap, lo, hi)
     traffic = snap.get("traffic")
     if traffic is not None:
@@ -482,8 +543,9 @@ def draw_png(snapshot: dict, out: Path) -> None:
     ledger_x = [(to_date(d) - start).days for d in ledger]
     ledger_y = list(ledger.values())
     forks = cumulative(snapshot["forks"], start, end)
-    prs, issues = weekly(snapshot["merged_prs"], start, end), weekly(snapshot["closed_issues"], start, end)
-    blue, orange, green, pink = "#0072B2", "#D55E00", "#009E73", "#CC79A7"
+    panel = panel_model(snapshot)
+    blue, orange, green, pink, yellow = "#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00"
+    colors = {"merged_prs": green, "opened_issues": yellow, "closed_issues": pink}
     note = star_note(snapshot)
     star_x, star_y = (ledger_x[-1], ledger_y[-1]) if ledger else (base_days[-1], stars[-1])
 
@@ -508,17 +570,29 @@ def draw_png(snapshot: dict, out: Path) -> None:
             top.spines[side].set_visible(False)
             bottom.spines[side].set_visible(False)
 
-        x = list(range(len(prs)))
-        width = 0.38
-        bottom.bar([i - width / 2 for i in x], [n for _, n in prs], width, color=green, label="PRs merged")
-        bottom.bar([i + width / 2 for i in x], [n for _, n in issues], width, color=pink, label="Issues closed")
-        step = max(1, len(x) // 8)
-        bottom.set_xticks(x[::step])
-        bottom.set_xticklabels([w.strftime("%b %d") for w, _ in prs][::step])
-        bottom.set_title("Work per week (weeks start on Monday, UTC)")
+        # One group of bars per Monday week, a gap, then the rolling last seven days, so the
+        # recent past is never blank on a Monday. Every bar prints its count, a zero included.
+        groups = panel["groups"]
+        n_weeks = len(groups) - 1
+        xs = [*range(n_weeks), n_weeks + 0.5]
+        width = 0.8 / len(panel["keys"])
+        tallest = max((n for g in groups for n in g["counts"]), default=0)
+        for j, key in enumerate(panel["keys"]):
+            offset = (j - (len(panel["keys"]) - 1) / 2) * width
+            heights = [g["counts"][j] for g in groups]
+            bottom.bar([x + offset for x in xs], heights, width, color=colors[key], label=panel["legend"][j])
+            for x, g in zip(xs, groups, strict=True):
+                bottom.text(x + offset, g["counts"][j] + tallest * 0.015, g["text"][j], ha="center", va="bottom", fontsize=8, color="#222222")
+        bottom.axvline(n_weeks - 0.25, color="#999999", linewidth=1, linestyle=":")
+        step = max(1, n_weeks // 8)
+        shown = [*xs[:n_weeks][::-1][::step][::-1], xs[-1]]  # keep the newest week labeled
+        bottom.set_xticks(shown)
+        bottom.set_xticklabels([groups[xs.index(x)]["label"] for x in shown], fontsize=8)
+        bottom.set_ylim(0, max(tallest, 1) * 1.15)
+        bottom.set_title("Work per week (weeks start on Monday, UTC), and the last 7 days")
         bottom.set_xlabel("Week of")
         bottom.set_ylabel("Count")
-        bottom.legend(loc="upper left", frameon=False)
+        bottom.legend(loc="upper left", frameon=False, ncol=len(panel["keys"]), fontsize=8)
         caption = f"As of {snapshot['fetched_at'][:10]} (UTC). Data: GitHub. Stars measure attention, not use."
         if note:
             caption = f"{caption}\n{note}"
@@ -626,6 +700,7 @@ def fetch_snapshot(
     forks = run_gh(["api", f"repos/{repo}/forks?per_page=100", "--paginate", "--jq", ".[].created_at"]).split()
     prs = json.loads(run_gh(["pr", "list", "--repo", repo, "--state", "merged", "--limit", "5000", "--json", "mergedAt"]))
     issues = json.loads(run_gh(["issue", "list", "--repo", repo, "--state", "closed", "--limit", "5000", "--json", "closedAt"]))
+    opened = json.loads(run_gh(["issue", "list", "--repo", repo, "--state", "all", "--limit", "5000", "--json", "createdAt"]))
     snap = {
         "schema": SCHEMA,
         "repo": repo,
@@ -634,6 +709,7 @@ def fetch_snapshot(
         "forks": day_counts(forks),
         "merged_prs": day_counts([p["mergedAt"] for p in prs if p.get("mergedAt")]),
         "closed_issues": day_counts([i["closedAt"] for i in issues if i.get("closedAt")]),
+        "opened_issues": day_counts([i["createdAt"] for i in opened if i.get("createdAt")]),
     }
     if star_times:
         snap["stars"] = day_counts(fetch_stars(repo))
@@ -833,7 +909,7 @@ def verify_bundle(
         return [f"{BUNDLE_SNAPSHOT}: {p}" for p in problems]
     if expect_repo is not None and snap["repo"] != expect_repo:
         return [f"{BUNDLE_SNAPSHOT}: repo is {snap['repo']}, expected {expect_repo}"]
-    for key in SERIES:
+    for key in (*SERIES, *(k for k in OPTIONAL_SERIES if k in snap)):
         if any(v > MAX_DAY_COUNT for v in snap[key].values()):
             problems.append(f"{key} has a count that is too large for one day")
     if problems:
