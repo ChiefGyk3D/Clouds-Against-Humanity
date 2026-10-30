@@ -19,6 +19,8 @@ Outputs: `scrape_targets` (sensitive; empty unless metrics are on), `site_identi
 
 ## 2. Settings
 
+Order: update, baseline, harden, then applications. This stage creates no host. The host-side pieces it connects to (the node exporter and the Wazuh agent with auditd, in stack 10) install into the connectors after the update and the hardening described in the [stage 1 guide](01-access.md#2a-droplet-hardening), and a new baseline is taken after they are added. See the [first-hour lesson](../wiki/First-Hour-on-a-New-System-Updates-and-Baseline.md).
+
 Every variable is typed, validated and listed in [the settings reference](../wiki/Settings-Reference.md) (generated from `docs/settings.json`). `terraform.tfvars.example` shows the shape with documentation-range values and both flags false.
 
 - `resource_key` builds names and is **immutable** for the life of the stack: changing it replaces every object. Use the same value as the site's stacks 00 and 10. Empty means the region.
