@@ -12,8 +12,6 @@ import ipaddress
 import re
 from pathlib import Path
 
-import pytest
-
 ROOT = Path(__file__).resolve().parent.parent
 WIKI = ROOT / "docs" / "wiki"
 PAGE = WIKI / "Grafana-Basics-From-a-Blank-Page.md"
@@ -48,7 +46,7 @@ def register_rows(body: str) -> list[str]:
 
 def test_page_exists_and_opens_with_an_honest_status_banner():
     body = text()
-    banner = [l for l in body.splitlines() if l.startswith("> **")][0]
+    banner = next(l for l in body.splitlines() if l.startswith("> **"))
     assert "written from reading" in banner.lower()
     assert "not run" in banner.lower()
 
