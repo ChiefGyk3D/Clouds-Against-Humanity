@@ -16,7 +16,7 @@ flowchart LR
     s0["Stage 0<br/>Foundation<br/>$0<br/>BUILT"]:::done
     s1["Stage 1<br/>Access: 2 Twingate connectors<br/>$12<br/>BUILT"]:::done
     s2["Stage 2<br/>Logs to the on-prem SIEM,<br/>cloud-to-home access<br/>IN PROGRESS, not applied"]:::wip
-    s3["Stage 3<br/>Workload host: Portainer,<br/>five daemons,<br/>Discord bridge, Spaces bucket, Functions<br/>est. $17<br/>PLANNED"]:::plan
+    s3["Stage 3<br/>Workload host: Portainer,<br/>five daemons,<br/>Spaces bucket, Functions<br/>est. $17<br/>PLANNED"]:::plan
     s4["Stage 4<br/>Grafana, runs on-prem<br/>PLANNED"]:::plan
     s0 --> s1 --> s2 --> s3 --> s4
 
@@ -36,9 +36,9 @@ Work runs in two-week sprints, S1 to S8, from 2026-10-20 to 2027-02-08. The boar
 | S1 | 2026-10-20 to 2026-11-02 | Maintainer: AWS integration check, unlock stacks and read the first plans, secret-expiry calendar. Review on 2026-11-02. |
 | S2 | 2026-11-03 to 2026-11-16 | Twingate 5.x plan read, per-site telemetry accounts, edge, honeypot and PeerTube designs approved or sent back, stage 2 guide. |
 | S3 | 2026-11-17 to 2026-11-30 | Stage 3 start: Spaces bucket and state backend, audit logging, cross-site dashboards, stack factory, stage 3 cost approval. |
-| S4 | 2026-12-01 to 2026-12-14 | Workload stack (flag off), Portainer hardening, headless client, Discord bridge decision. |
+| S4 | 2026-12-01 to 2026-12-14 | Workload stack (flag off), Portainer hardening, headless client. |
 | S5 | 2026-12-15 to 2026-12-28 | Cloud-optimized daemon install, Functions for timer jobs, throwaway AWS account. |
-| S6 | 2026-12-29 to 2027-01-11 | Discord bridge build, DMZ stack (flag off), cloud reviewer recruiting, Spacelift push policy if the plan allows it. |
+| S6 | 2026-12-29 to 2027-01-11 | DMZ stack (flag off), cloud reviewer recruiting, Spacelift push policy if the plan allows it. |
 | S7 | 2027-01-12 to 2027-01-25 | Azure and AWS Lambda work, Twingate apt key rotation, the cloud lessons. |
 | S8 | 2027-01-26 to 2027-02-08 | GCP modules with mocked tests, buffer and retro. |
 
@@ -100,7 +100,7 @@ One workload droplet in the VPC running Docker Engine and Portainer CE, hardened
 - [Boon-Tube-Daemon](https://github.com/ChiefGyk3D/Boon-Tube-Daemon), YouTube upload announcements.
 - [Stream-Daemon](https://github.com/ChiefGyk3D/Stream-Daemon), go-live announcements.
 - [Star-Daemon](https://github.com/ChiefGyk3D/Star-Daemon), GitHub star announcements.
-- The Discord-to-Matrix bridge: [mautrix-discord](https://github.com/mautrix/discord), a Go bridge, self-hosted next to the daemons with its own Postgres database and a nightly dump to the bucket. etke.cc, which hosts the Matrix homeserver, offers a bridge of its own as the alternative. How the homeserver reaches the bridge is an open decision; the design draft explains.
+- Not in this project: a Discord-to-Matrix bridge. The Matrix server is hosted by etke.cc, which also hosts the bridge (ruled 2026-10-22). Nothing in stage 3 hosts, backs up or opens a port for it.
 
 All of them are outbound-only pollers that read their secrets from Doppler, which is why they are a good first set. They were written for one Docker container on a Raspberry Pi, so the stage includes a "cloud-optimized install" for each: state moves from the container's disk into an S3-compatible bucket (DigitalOcean Spaces, $5 flat, versioning on), each gets a run-once mode, and the jobs that already run on a timer (the penguin-overlord runners, solarstorm_scout) move to DigitalOcean Functions, the Lambda equivalent, inside its free allowance. With state off the host the droplet is disposable and the thin size is enough.
 
@@ -119,7 +119,7 @@ Handoff: [2026-10-12 edge DMZ handoff](https://github.com/ChiefGyk3D/Clouds-Agai
 - A separate VPC (`rns-dmz`, no peering to core) with one immutable droplet and a reserved IP, no SSH and no connector. It would run Reticulum transport with an LXMF propagation node, i2pd, a private Meshtastic MQTT broker over TLS and an authenticated iperf3 server, behind a tag-based Cloud Firewall and host nftables.
 - iperf3 measured over two paths to the same endpoint, direct and through Twingate, cheap probes often and throughput tests rarely.
 - Stage 1 hardening first: nftables default-drop on core droplets, a plan policy denying inbound rules on core tags, destroys of protected resources and stacks with autodeploy on (written and tested in `.spacelift/policies/plan.rego`, not yet attached in Spacelift; see the secrets runbook, section 9a), an IPv6 check, an external zero-open-ports check and the metadata-endpoint restriction.
-- Stage 3 amendments: a cloud Uptime Kuma, the LLM contract through a LiteLLM proxy, the Discord bridge decision order, and webhook receivers on DigitalOcean Functions writing to the bucket so the workload host keeps zero inbound.
+- Stage 3 amendments: a cloud Uptime Kuma, the LLM contract through a LiteLLM proxy, and webhook receivers on DigitalOcean Functions writing to the bucket so the workload host keeps zero inbound.
 - Cost: this lands past the $30 ceiling (stage 3 is already at $29). The design must lay out raising it, deferring something or moving pieces; the ceiling is not raised by default. The `edge` phase holds a $35 placeholder (stage 3's $29 plus one $6 droplet) that the design replaces with a costed number.
 - Honeypot: a design doc only, on a separate account or provider, never in this project's apply path. Design draft (nothing built, own cost figure outside the ceiling, decisions owed): [2026-10-21 honeypot design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-21-honeypot-design.md).
 - PeerTube is a DMZ-class workload with its own costed stage. Design draft: [2026-10-21 PeerTube stage design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-21-peertube-stage-design.md); it recommends teaching it as a learner lesson and running nothing (+$0), and the maintainer has not decided.

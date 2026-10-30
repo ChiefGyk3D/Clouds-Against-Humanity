@@ -87,7 +87,7 @@ That is not "VPNs are always wrong". WireGuard is a very different animal from a
 | 0 | Foundation: project, VPC, baseline firewall with zero inbound rules | $0 | Built |
 | 1 | Access: two Twingate connectors, connector firewall, per-host SSH resources | $12 | Built |
 | 2 | Logs to the on-prem SIEM, cloud-to-home access | $0 in the cloud | In progress: the cloud-side code (settings layer, telemetry stack, opt-in node exporter, Wazuh agent and auditd, dashboards) is merged but nothing is applied |
-| 3 | Workload host: Portainer, five daemons, Discord-to-Matrix bridge, Spaces bucket, Functions | est. $17 | Planned |
+| 3 | Workload host: Portainer, five daemons, Spaces bucket, Functions | est. $17 | Planned |
 | 4 | Grafana, on-prem | $0 in the cloud | Planned (a cloud Grafana is a learner option, see [Build your own mini SOC](docs/wiki/Build-Your-Own-Mini-SOC.md)) |
 | Edge | Public edge (DMZ) and hardening | past the ceiling (design option A adds a $6 droplet) | Shared network code written, disabled by default and never applied (`stacks/50-edge` creates nothing until the stage is approved); each service becomes its own stack later ([stage page](docs/stages/05-edge.md)) |
 | AWS | The AWS twin of stages 0 and 1: `modules/aws/*`, `stacks/aws/*` | $0 and $20.84 | Written and tested with mocked providers, never applied. Azure and GCP have no code |

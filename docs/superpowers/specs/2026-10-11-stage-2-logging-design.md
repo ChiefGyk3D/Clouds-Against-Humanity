@@ -66,7 +66,7 @@ Both need pieces that do not exist yet:
 
 ### 4.0 Where each kind of segmentation is enforced
 
-Everything between the cloud and home travels over Twingate; there is no other path. pfSense therefore sees only the home connector's IP as the source. A droplet, the workload host and the bridge all look identical to it, so pfSense cannot tell cloud hosts apart.
+Everything between the cloud and home travels over Twingate; there is no other path. pfSense therefore sees only the home connector's IP as the source. A droplet and the workload host all look identical to it, so pfSense cannot tell cloud hosts apart.
 
 | Layer | Question it answers | Enforced by |
 |---|---|---|
