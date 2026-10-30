@@ -310,6 +310,8 @@ ${telemetry_conf}%{ if metadata_lock ~}
       OSSEC_INSERT=/usr/local/sbin/cah-ossec-insert
       OSSEC_CONF=/var/ossec/etc/ossec.conf
       LOCALFILE_XML=/etc/cah/wazuh-localfile.xml
+      RULES_B64=/etc/audit/rules.d/60-cah.rules
+      RULES_B32=/etc/audit/rules.d/61-cah-b32.rules
       AGENT_AUTH=/var/ossec/bin/agent-auth
       RUN_DIR=/run/cah-log-shipping
       manager="${log_shipping_manager_address}"
@@ -353,6 +355,17 @@ ${telemetry_conf}%{ if metadata_lock ~}
       rm -f "$TOKEN_FILE"
       [ -n "$token" ] || fail "the bootstrap token file was empty"
       [ -x "$AGENT_AUTH" ] || fail "the Wazuh agent is not installed ($AGENT_AUTH is missing)"
+      # The 60-cah.rules file watches 64-bit programs (arch=b64). A 32-bit
+      # program could still write the same files unseen, which the old -w watch
+      # would have caught, so on x86_64 (where 32-bit programs run) each rule is
+      # copied with arch=b32. Elsewhere (arm64 Graviton) an arch=b32 rule may not
+      # load, which would fail this script closed, so it is not written there.
+      if [ "$(uname -m)" = x86_64 ]; then
+        sed 's/arch=b64/arch=b32/' "$RULES_B64" > "$RULES_B32" || fail "could not write $RULES_B32"
+        chmod 0640 "$RULES_B32"
+      else
+        rm -f "$RULES_B32"
+      fi
       augenrules --load || fail "augenrules --load failed"
       mkdir -p "$RUN_DIR"
       work="$(mktemp -d "$RUN_DIR/pull.XXXXXX")"
@@ -432,8 +445,10 @@ ${telemetry_conf}%{ if metadata_lock ~}
   # configuration or the Twingate config), written as -a always,exit rules, the
   # form the auditctl man page recommends over the deprecated -w watch. Each rule
   # keeps the old watch's path, write and attribute-change (wa) permissions and
-  # key; dir= keeps a directory watch recursive. arch=b64 only: the connectors
-  # (amd64 and Graviton) run no 32-bit programs. No -S syscall filters and no
+  # key; dir= keeps a directory watch recursive. This file is the arch=b64 half;
+  # the first-boot script adds the arch=b32 twin of every rule on x86_64 only
+  # (61-cah-b32.rules), so a 32-bit program is seen as the old watch saw it.
+  # No -S syscall filters and no
   # execve, because per-command auditing is too noisy for the 1 GB droplets.
   - path: /etc/audit/rules.d/60-cah.rules
     permissions: "0640"

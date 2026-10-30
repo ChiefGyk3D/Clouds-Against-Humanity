@@ -33,6 +33,7 @@ SCRIPT_PATH = "/usr/local/sbin/cah-log-shipping-firstboot"
 TOKEN_PATH = "/etc/cah/hostboot.token"
 LOCALFILE_PATH = "/etc/cah/wazuh-localfile.xml"
 RULES_PATH = "/etc/audit/rules.d/60-cah.rules"
+RULES_B32_PATH = "/etc/audit/rules.d/61-cah-b32.rules"
 GUARD_PATH = "/usr/local/sbin/cah-agent-guard"
 INSERT_PATH = "/usr/local/sbin/cah-ossec-insert"
 KEYCHECK_PATH = "/usr/local/sbin/cah-apt-key-check"
@@ -114,6 +115,10 @@ class Box:
         self.unmask_rc = 0
         self.mask_rc = 0
         self.state_dir = tmp / "sb-state"
+        self.rules_dir = tmp / "sb-rules"
+        self.rules_dir.mkdir()
+        (self.rules_dir / "60-cah.rules").write_text(extract_file(TEMPLATE.read_text(encoding="utf-8"), RULES_PATH))
+        self.machine = "x86_64"
         self.ossec_insert = tmp / "sb-ossec-insert.py"
         self.policy = tmp / "sb-policy-rc.d"
         self.policy_orig = tmp / "sb-policy-rc.d.cah-orig"
@@ -141,9 +146,10 @@ class Box:
         text = text.replace("/var/ossec", str(self.ossec))
         text = text.replace("/usr/sbin/policy-rc.d", str(self.policy))
         text = text.replace("/var/lib/cah", str(self.state_dir))
+        text = text.replace("/etc/audit/rules.d", str(self.rules_dir))
         text = text.replace(GUARD_PATH, str(self.guard))
         text = text.replace(INSERT_PATH, str(self.ossec_insert))
-        for root in ("/etc/cah", "/var/ossec", "/run/cah-log-shipping", "/usr/sbin/policy-rc.d"):
+        for root in ("/etc/cah", "/var/ossec", "/run/cah-log-shipping", "/usr/sbin/policy-rc.d", "/etc/audit/rules.d"):
             assert root not in text
         return text
 
@@ -223,7 +229,8 @@ class Box:
             f"#!{BASH}\n" f'echo "augenrules $*" >> "{self.calls}"\n'
             f'exit "$(cat "{tmp}/augenrules.rc")"\n'
         )
-        for name in ("curl", "systemctl", "augenrules"):
+        (self.bin / "uname").write_text(f"#!{BASH}\n" f'cat "{tmp}/machine"\n')
+        for name in ("curl", "systemctl", "augenrules", "uname"):
             (self.bin / name).chmod(0o755)
 
     def run(self):
@@ -233,6 +240,7 @@ class Box:
         (self.tmp / "unmask.rc").write_text(str(self.unmask_rc))
         (self.tmp / "mask.rc").write_text(str(self.mask_rc))
         (self.tmp / "augenrules.rc").write_text(str(self.augenrules_rc))
+        (self.tmp / "machine").write_text(self.machine)
         text = extract(**self.over)
         text = self.sandboxed(text)
         script = self.tmp / "firstboot.sh"
@@ -508,30 +516,90 @@ def test_the_site_label_is_inserted_inside_the_single_root_element(tmp_path):
     assert box.conf.count("<ossec_config>") == 1
 
 
+RULE = re.compile(r"^-a always,exit -F arch=(b64|b32) -F (path|dir)=(\S+) -F perm=(\S+) -F key=(\S+)$")
+
+
+def check_rule_set(lines: list[str], arches: set[str]) -> None:
+    """The rule set must be the 7 watch-equivalent rules for each arch in `arches`, nothing else."""
+    parsed = [RULE.match(ln) for ln in lines]
+    assert lines and all(parsed), f"every rule must be an exact watch-equivalent -a rule: {lines}"
+    assert not any(re.match(r"\s*-w\s", ln) for ln in lines)
+    by_arch: dict[str, dict] = {}
+    for m in parsed:
+        by_arch.setdefault(m.group(1), {})[m.group(3)] = (m.group(2), m.group(4), m.group(5))
+    assert set(by_arch) == arches, f"arches {set(by_arch)} != {arches}"
+    assert len(lines) == 7 * len(arches), f"{len(lines)} rules for {arches}"
+    for watched in by_arch.values():
+        for f in ("/etc/passwd", "/etc/group", "/etc/shadow", "/etc/gshadow"):
+            assert watched[f] == ("path", "wa", "cah_identity")
+        assert watched["/etc/sudoers"] == ("path", "wa", "cah_sudo")
+        # A directory keeps the recursive meaning of the old -w on a directory.
+        assert watched["/etc/sudoers.d/"] == ("dir", "wa", "cah_sudo")
+        assert watched["/etc/twingate/"] == ("dir", "wa", "cah_twingate")
+        assert len(watched) == 7
+    text = "\n".join(lines)
+    # File rules only: no syscall filter (-S) and no execve, whatever the spelling.
+    assert "execve" not in text
+    assert not re.search(r"(?m)\s-S\s", text)
+
+
+def rule_lines(text: str) -> list[str]:
+    return [ln for ln in text.splitlines() if ln.strip()]
+
+
 def test_audit_rules_cover_identity_sudo_and_twingate_and_never_execve():
     rules = extract_file(TEMPLATE.read_text(encoding="utf-8"), RULES_PATH)
-    # The deprecated -w watch form is gone (#235); each path is an -a always,exit rule.
-    assert not re.search(r"(?m)^\s*-w\s", rules)
-    lines = [ln for ln in rules.splitlines() if ln.strip()]
-    pat = re.compile(r"^-a always,exit -F arch=b64 -F (path|dir)=(\S+) -F perm=(\S+) -F key=(\S+)$")
-    parsed = [pat.match(ln) for ln in lines]
-    assert lines and all(parsed), f"every rule must be an exact watch-equivalent -a rule: {lines}"
-    watched = {m.group(2): (m.group(1), m.group(3), m.group(4)) for m in parsed}
-    for f in ("/etc/passwd", "/etc/group", "/etc/shadow", "/etc/gshadow"):
-        assert watched[f] == ("path", "wa", "cah_identity")
-    assert watched["/etc/sudoers"] == ("path", "wa", "cah_sudo")
-    # A directory keeps the recursive meaning of the old -w on a directory.
-    assert watched["/etc/sudoers.d/"] == ("dir", "wa", "cah_sudo")
-    assert watched["/etc/twingate/"] == ("dir", "wa", "cah_twingate")
-    assert len(watched) == 7
-    # File rules only: no syscall filter (-S) and no execve, whatever the spelling.
-    assert "execve" not in rules
-    assert not re.search(r"(?m)\s-S\s", rules)
+    check_rule_set(rule_lines(rules), {"b64"})
 
 
-def test_audit_rule_check_bites_on_the_old_watch_form():
-    old = "-w /etc/passwd -p wa -k cah_identity\n"
-    assert re.search(r"(?m)^\s*-w\s", old)
+def test_b32_twins_are_written_on_x86_64_only(tmp_path):
+    for machine, expect in (("x86_64", True), ("aarch64", False)):
+        d = tmp_path / machine
+        d.mkdir()
+        box = Box(d)
+        box.machine = machine
+        done = box.run()
+        assert done.returncode == 0, done.stderr
+        twin = box.rules_dir / "61-cah-b32.rules"
+        assert twin.exists() == expect, machine
+        base = rule_lines((box.rules_dir / "60-cah.rules").read_text())
+        if expect:
+            both = base + rule_lines(twin.read_text())
+            check_rule_set(both, {"b64", "b32"})
+            assert len(both) == 14
+            assert oct(twin.stat().st_mode & 0o777) == "0o640"
+        else:
+            check_rule_set(base, {"b64"})
+            assert len(base) == 7
+        # The rules are loaded after the twin decision, in both cases.
+        assert "augenrules --load" in box.log()
+
+
+def test_a_stale_b32_file_is_removed_off_x86_64(tmp_path):
+    box = Box(tmp_path)
+    box.machine = "aarch64"
+    (box.rules_dir / "61-cah-b32.rules").write_text("stale\n")
+    assert box.run().returncode == 0
+    assert not (box.rules_dir / "61-cah-b32.rules").exists()
+
+
+def test_rule_set_check_bites():
+    good = rule_lines(extract_file(TEMPLATE.read_text(encoding="utf-8"), RULES_PATH))
+    twins = [ln.replace("arch=b64", "arch=b32") for ln in good]
+    check_rule_set(good + twins, {"b64", "b32"})
+    # b64 only where both were required: the regression the review found.
+    with pytest.raises(AssertionError):
+        check_rule_set(good, {"b64", "b32"})
+    # a missing twin, the old -w form, a syscall filter and a wrong key are all caught
+    with pytest.raises(AssertionError):
+        check_rule_set(good + twins[:-1], {"b64", "b32"})
+    with pytest.raises(AssertionError):
+        check_rule_set(["-w /etc/passwd -p wa -k cah_identity"], {"b64"})
+    with pytest.raises(AssertionError):
+        check_rule_set([ln + " -S execve" for ln in good], {"b64"})
+    with pytest.raises(AssertionError):
+        check_rule_set([ln.replace("cah_sudo", "cah_x") for ln in good], {"b64"})
+
 
 def test_template_gates_every_log_shipping_piece_on_the_flag():
     text = TEMPLATE.read_text(encoding="utf-8")
