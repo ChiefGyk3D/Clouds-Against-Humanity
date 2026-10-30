@@ -25,6 +25,11 @@
 #     entry for that stack and address (issue #253). Outbound rules to a tag,
 #     or to named addresses, are not judged. icmp rules and rules with no
 #     port range (or "all") are never allowlistable: see outbound_allowlist.
+#     "The whole internet" is judged by prefix length (0 or 1, IPv4 and IPv6),
+#     not by exact spelling; see wide_address.
+#   - a digitalocean_firewall whose inbound_rule or outbound_rule, or a rule's
+#     source or destination addresses, are unknown until apply. They could
+#     resolve to the whole internet, so they are denied; see unknown_in_rules.
 #   - an AWS security group rule that admits a CIDR range (IPv4 or IPv6). The
 #     AWS firewall module admits only a reference to the group itself. AWS
 #     egress rules are not judged here.
@@ -210,6 +215,24 @@ deny contains msg if {
 	msg := sprintf(
 		"%s: outbound rule %s reaches the whole internet (%s). Outbound world-open rules need an outbound_allowlist entry for this stack and address, naming the direction, protocol, port and destinations. icmp and all-port rules are never allowed: name destinations instead.",
 		[rc.address, rule_label(rule), destination_summary(rule)],
+	)
+}
+
+deny contains msg if {
+	some rc in changed_resources("digitalocean_firewall")
+	some where in unknown_in_rules(rc, "inbound_rule", non_tag_sources)
+	msg := sprintf(
+		"%s: %s is not known until apply, so the plan cannot show whether the rule is tag-scoped. Inbound sources must be known at plan time; make the value static. No allowlist entry covers an unknown value.",
+		[rc.address, where],
+	)
+}
+
+deny contains msg if {
+	some rc in changed_resources("digitalocean_firewall")
+	some where in unknown_in_rules(rc, "outbound_rule", {"destination_addresses"})
+	msg := sprintf(
+		"%s: %s is not known until apply, so the plan cannot show whether the rule reaches the whole internet. Outbound destinations must be known at plan time; make the value static. No allowlist entry covers an unknown value.",
+		[rc.address, where],
 	)
 }
 
@@ -476,16 +499,88 @@ filled_string(obj, key) if {
 	v != ""
 }
 
-world_addresses := {"0.0.0.0/0", "::/0"}
+# "The whole internet" is judged by prefix length, not by spelling: 0.0.0.0/0,
+# ::/0, 0::/0, ::0/0, 0.0.0.0/00 and the two halves 0.0.0.0/1 + 128.0.0.0/1 (or
+# ::/1 + 8000::/1) all count. An address with a prefix length of 0 or 1 is
+# world-open. Anything that does not parse as an address or a CIDR range, or
+# that is not text, fails closed and counts as world-open too. A rule listing
+# such an address can then never match an allowlist entry, which names exact
+# strings. Narrower splits (four /2 ranges and so on) are not detected: the
+# firewall module never renders them, and the allowlist is exact.
+wide_address(address) if not is_string(address)
+
+wide_address(address) if {
+	is_string(address)
+	not valid_address(address)
+}
+
+wide_address(address) if {
+	is_string(address)
+	net.cidr_is_valid(address)
+	to_number(split(address, "/")[1]) <= 1
+}
+
+# A CIDR range, or a bare address (a single host).
+valid_address(address) if net.cidr_is_valid(address)
+
+valid_address(address) if {
+	not contains(address, "/")
+	not contains(address, ":")
+	net.cidr_is_valid(concat("/", [address, "32"]))
+}
+
+valid_address(address) if {
+	not contains(address, "/")
+	contains(address, ":")
+	net.cidr_is_valid(concat("/", [address, "128"]))
+}
 
 world_open(rule) if {
 	some address in values(rule, "source_addresses")
-	address in world_addresses
+	wide_address(address)
 }
 
 world_open_outbound(rule) if {
 	some address in values(rule, "destination_addresses")
-	address in world_addresses
+	wide_address(address)
+}
+
+# Values that are not known until apply. A plan lists them in
+# change.after_unknown, which mirrors change.after: true for a value, or for a
+# whole list, and a list of objects (one per element) where only some fields
+# are unknown. An unknown rule list or address list may resolve to the whole
+# internet at apply time, so the policy cannot judge it: it is denied, and no
+# allowlist entry covers it.
+unknown_flag(v) if v == true
+
+unknown_flag(v) if {
+	is_array(v)
+	some x in v
+	x == true
+}
+
+after_unknown_of(rc) := u if {
+	u := object.get(object.get(rc, "change", {}), "after_unknown", {})
+	is_object(u)
+} else := {}
+
+# What is unknown in one rule list of a firewall: the whole list, a whole rule,
+# or one of the named address fields of a rule.
+unknown_in_rules(rc, list_key, address_keys) := (whole_list | whole_rules) | fields if {
+	unknown_rules := object.get(after_unknown_of(rc), list_key, false)
+	whole_list := {list_key | unknown_rules == true}
+	whole_rules := {sprintf("%s[%d]", [list_key, i]) |
+		is_array(unknown_rules)
+		some i, el in unknown_rules
+		el == true
+	}
+	fields := {sprintf("%s[%d].%s", [list_key, i, key]) |
+		is_array(unknown_rules)
+		some i, el in unknown_rules
+		is_object(el)
+		some key in address_keys
+		unknown_flag(object.get(el, key, false))
+	}
 }
 
 # The only sources the firewall module emits are tags. Any other kind of

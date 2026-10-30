@@ -1083,3 +1083,178 @@ test_shipped_entries_do_not_allow_more_than_they_name if {
 	foundation_extra := create(baseline_addr, "digitalocean_firewall", {"outbound_rule": connector_extra})
 	count(denied_on("cah-00-foundation", [foundation_extra])) == 2
 }
+
+# Review of PR #283: the whole internet is judged by prefix length, not by
+# exact spelling, and an unknown value never passes.
+
+# Spellings of "everything", split halves, and values that cannot be parsed.
+# Unparseable text fails closed: it is treated as the whole internet.
+world_spellings := [
+	["0.0.0.0/1", "128.0.0.0/1"],
+	["::/1", "8000::/1"],
+	["0::/0"],
+	["0:0:0:0:0:0:0:0/0"],
+	["::0/0"],
+	["::/00"],
+	["0.0.0.0/00"],
+	["0.0.0.0/01"],
+	["128.0.0.0/1"],
+	["203.0.113.0/24", "0.0.0.0/00"],
+	["banana"],
+	["0.0.0.0/"],
+	["0.0.0.0/33"],
+	["10.0.0.0/-1"],
+	[" 0.0.0.0/0"],
+	[""],
+]
+
+test_outbound_world_spellings_are_denied if {
+	every destinations in world_spellings {
+		reasons := denied_on("svc-a", [firewall_out([out_rule("tcp", "443", destinations)])])
+		count(reasons) == 1
+		some reason in reasons
+		contains(reason, "reaches the whole internet")
+	}
+}
+
+test_outbound_world_spelling_is_not_covered_by_an_exact_entry if {
+	allow := allow_for("svc-a", fw, [out_entry({})])
+	every destinations in world_spellings {
+		count(reasons_with_outbound("svc-a", [firewall_out([out_rule("tcp", "443", destinations)])], allow)) == 1
+	}
+
+	# ::/0 spelled differently next to the listed range is still not listed.
+	count(reasons_with_outbound("svc-a", [firewall_out([out_rule("tcp", "443", ["0.0.0.0/0", "0::/0"])])], allow)) == 1
+}
+
+test_outbound_narrow_destinations_are_not_world_open if {
+	every destinations in [
+		["64.0.0.0/2"],
+		["10.0.0.0/8"],
+		["203.0.113.0/24"],
+		["203.0.113.7"],
+		["203.0.113.7/32"],
+		["2001:db8::/32"],
+		["2001:db8::1"],
+		["2001:db8::1/128"],
+	] {
+		count(denied_on("svc-a", [firewall_out([out_rule("tcp", "443", destinations)])])) == 0
+	}
+}
+
+test_inbound_world_spellings_are_called_out_as_the_whole_internet if {
+	every sources in world_spellings {
+		reasons := denied([firewall_with([with_source({"source_tags": [], "source_addresses": sources})])])
+		count(reasons) == 1
+		some reason in reasons
+		contains(reason, "opens the port to the whole internet")
+	}
+}
+
+test_inbound_narrow_sources_are_not_called_the_whole_internet if {
+	reasons := denied([firewall_with([with_source({"source_tags": [], "source_addresses": ["198.51.100.0/24"]})])])
+	count(reasons) == 1
+	some reason in reasons
+	contains(reason, "is not tag-scoped")
+}
+
+test_inbound_world_spelling_is_not_covered_by_an_exact_entry if {
+	allow := allow_for("svc-a", fw, [entry({"sources": ["0.0.0.0/0", "::/0"]})])
+	rule := with_source({"source_tags": [], "source_addresses": ["0::/0"]})
+	count(reasons_with("svc-a", [firewall_with([rule])], allow)) == 1
+}
+
+# Unknown values. A real plan lists them in change.after_unknown, which mirrors
+# change.after: true for a value, or a list whose elements are objects.
+
+firewall_unknown(after, unknown) := {
+	"address": fw,
+	"type": "digitalocean_firewall",
+	"change": {"actions": ["create"], "after": after, "after_unknown": unknown},
+}
+
+test_unknown_outbound_rule_list_is_denied if {
+	reasons := denied([firewall_unknown({"inbound_rule": []}, {"outbound_rule": true})])
+	count(reasons) == 1
+	some reason in reasons
+	contains(reason, "outbound_rule")
+	contains(reason, "not known")
+}
+
+test_unknown_destination_addresses_in_one_rule_is_denied if {
+	after := {"inbound_rule": [], "outbound_rule": [out_rule("tcp", "443", ["203.0.113.0/24"]), out_rule("udp", "53", [])]}
+	reasons := denied([firewall_unknown(after, {"outbound_rule": [{}, {"destination_addresses": true}]})])
+	count(reasons) == 1
+	some reason in reasons
+	contains(reason, "outbound_rule")
+	contains(reason, "destination_addresses")
+}
+
+test_unknown_element_of_destination_addresses_is_denied if {
+	after := {"inbound_rule": [], "outbound_rule": [out_rule("tcp", "443", ["203.0.113.0/24"])]}
+	reasons := denied([firewall_unknown(after, {"outbound_rule": [{"destination_addresses": [false, true]}]})])
+	count(reasons) == 1
+}
+
+test_unknown_whole_outbound_rule_element_is_denied if {
+	after := {"inbound_rule": [], "outbound_rule": [out_rule("tcp", "443", ["203.0.113.0/24"])]}
+	count(denied([firewall_unknown(after, {"outbound_rule": [true]})])) == 1
+}
+
+test_unknown_outbound_is_not_allowlistable if {
+	allow := allow_for("svc-a", fw, [out_entry({})])
+	after := {"inbound_rule": [], "outbound_rule": [out_rule("tcp", "443", out_world)]}
+	changes := [firewall_unknown(after, {"outbound_rule": [{"destination_addresses": [true, false]}]})]
+	count(reasons_with_outbound("svc-a", changes, allow)) == 1
+}
+
+test_unknown_inbound_rule_list_is_denied if {
+	reasons := denied([firewall_unknown({"outbound_rule": []}, {"inbound_rule": true})])
+	count(reasons) == 1
+	some reason in reasons
+	contains(reason, "inbound_rule")
+	contains(reason, "not known")
+}
+
+test_unknown_inbound_sources_are_denied if {
+	after := {"outbound_rule": [], "inbound_rule": [tag_rule, tag_rule]}
+	every key in ["source_addresses", "source_droplet_ids", "source_load_balancer_uids", "source_kubernetes_ids"] {
+		reasons := denied([firewall_unknown(after, {"inbound_rule": [{}, {key: true}]})])
+		count(reasons) == 1
+		some reason in reasons
+		contains(reason, key)
+	}
+}
+
+test_unknown_on_update_is_denied_too if {
+	update := {
+		"address": fw,
+		"type": "digitalocean_firewall",
+		"change": {"actions": ["update"], "after": {"inbound_rule": []}, "after_unknown": {"outbound_rule": true}},
+	}
+	count(denied([update])) == 1
+}
+
+# Unknown values elsewhere are not this policy's business, and the empty and
+# absent shapes of after_unknown do not crash it.
+test_unrelated_and_empty_unknowns_pass if {
+	after := {"inbound_rule": [tag_rule], "outbound_rule": [out_rule("tcp", "443", ["203.0.113.0/24"])]}
+	count(denied([firewall_unknown(after, {"id": true, "droplet_ids": true, "outbound_rule": [{"protocol": false}], "inbound_rule": [{"source_tags": true}]})])) == 0
+	count(denied([firewall_unknown(after, {})])) == 0
+	count(denied([firewall_unknown(after, null)])) == 0
+	count(denied([firewall_unknown(after, {"outbound_rule": false, "inbound_rule": false})])) == 0
+}
+
+test_unknown_on_a_delete_is_ignored if {
+	gone := {
+		"address": fw,
+		"type": "digitalocean_firewall",
+		"change": {"actions": ["delete"], "before": {"inbound_rule": []}, "after": null, "after_unknown": {"outbound_rule": true}},
+	}
+	not any_not_known(denied([gone]))
+}
+
+any_not_known(reasons) if {
+	some reason in reasons
+	contains(reason, "not known")
+}
