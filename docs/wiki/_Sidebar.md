@@ -128,7 +128,7 @@ file does not match the manifest. -->
 </details>
 
 <details>
-<summary><b>Detection and monitoring</b> (11)</summary>
+<summary><b>Detection and monitoring</b> (12)</summary>
 
 - [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md)
 - [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) (unbuilt)
@@ -140,6 +140,7 @@ file does not match the manifest. -->
 - [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) (draft)
 - [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) (unbuilt)
 - [Grafana dashboards](Grafana-Dashboards.md)
+- [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) (est. steps)
 - [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md)
 
 </details>

@@ -6,6 +6,8 @@
 
 **Prerequisites:** [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) and [Multiple sites and identity](Multiple-Sites-and-Identity.md).
 
+Starting from an empty Grafana instead? [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) covers data sources, database connections, one panel and one alert.
+
 The repository keeps its own dashboards as JSON files in [`dashboards/`](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/tree/main/dashboards). They are modeled on the maintainer's home SIEM dashboards in layout and panel style only; no query, data source or label value was copied from them. Dashboards that are files in git can be reviewed, tested and rebuilt, which is the same reason the infrastructure is code.
 
 ## What is in the box
@@ -96,4 +98,4 @@ Pictures of the Sites overview dashboard (healthy, and with one site silenced) a
 - Run the [synthetic monitoring lab](Lab-Demo-Monitoring-Stack.md), add a third site to `labs/demo-monitoring/prometheus/targets.json` (Prometheus re-reads that file by itself) and a matching entry to `labs/demo-monitoring/prometheus/inventory.rules.yml`, then run `scripts/demo_monitoring.sh restart-prometheus`, which restarts only the Prometheus container so it re-reads the rule file (the lab has no reload endpoint). The generator answers for its four built-in hosts only, so the new site's targets will read as down. Did the dashboard need a change?
 - Change one panel's data source variable to a name that does not exist and read the error. Then run `python -I -m pytest tests/test_dashboards.py` and find which rule would catch it.
 
-Next: [Roadmap](Roadmap.md). Back to the [Reading order](Reading-Order.md).
+Next: [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md), then the [Roadmap](Roadmap.md). Back to the [Reading order](Reading-Order.md).

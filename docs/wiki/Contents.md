@@ -28,7 +28,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Foundations: security tools and threat modeling](#foundations-security-tools-and-threat-modeling) (6)
 - [Foundations: network and host defense](#foundations-network-and-host-defense) (5)
 - [Foundations: deception and honeypots](#foundations-deception-and-honeypots) (11)
-- [Detection and monitoring](#detection-and-monitoring) (11)
+- [Detection and monitoring](#detection-and-monitoring) (12)
 - [Foundations: enterprise practice](#foundations-enterprise-practice) (6)
 - [Foundations: data governance](#foundations-data-governance) (1)
 - [Stage guides and design](#stage-guides-and-design) (11)
@@ -174,6 +174,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) | A springboard for building a small cloud security monitoring stack with a cost ceiling you set; an unverified draft for builders. | builder | draft |
 | [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) | What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied. | operator | unbuilt |
 | [Grafana dashboards](Grafana-Dashboards.md) | The three dashboards this repository ships and which question each answers; only tried with synthetic data. | operator |  |
+| [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) | What a data source is, connecting Grafana to Prometheus, SQL and OpenSearch with a read-only account, then one panel and one alert; written from reading, not run. | builder | est. steps |
 | [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) | A hands-on synthetic multi-site monitoring stack where you predict what a silent site does, for builders. | builder |  |
 
 ## Foundations: enterprise practice
