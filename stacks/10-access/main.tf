@@ -67,6 +67,7 @@ data "digitalocean_ssh_key" "admin" {
   name = var.admin_ssh_key_name
 }
 
+# user_data comes from modules/twingate-bootstrap: a change to its cloud-init replaces the droplet. A push that changes only modules/ starts no run here until the stack has additional_project_globs (#326), so a stack-root change like this one is how the run starts.
 module "connector_a" {
   source              = "../../modules/twingate-connector"
   layer               = "access"
@@ -102,6 +103,7 @@ module "connector_a" {
   depends_on = [module.connector_firewall]
 }
 
+# user_data comes from modules/twingate-bootstrap: a change to its cloud-init replaces the droplet. A push that changes only modules/ starts no run here until the stack has additional_project_globs (#326), so a stack-root change like this one is how the run starts.
 module "connector_b" {
   source              = "../../modules/twingate-connector"
   layer               = "access"
