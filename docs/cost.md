@@ -1,6 +1,6 @@
 # Cost
 
-Working ceiling: $30 per month in the current phase (`stage-1`). The ceiling is a decision per phase, kept in `docs/stages/approved.json` (see "Ceilings per phase" below), and a later phase may raise it on purpose. Each stage must be costed and approved before it runs.
+Working ceiling: $30 per month in the current phase (`stage-2`). The ceiling is a decision per phase, kept in `docs/stages/approved.json` (see "Ceilings per phase" below), and a later phase may raise it on purpose. Each stage must be costed and approved before it runs.
 
 | Stage | Adds | Monthly | Running |
 |---|---|---|---|
@@ -55,9 +55,9 @@ With one droplet per service the cost is $6.00 per approved service. The `edge` 
 The ceiling is not one hard-coded number. `docs/stages/approved.json` holds an ordered map `phases`, one entry per phase of the project, and `current_phase` names the one the gate enforces:
 
 ```json
-"current_phase": "stage-1",
+"current_phase": "stage-2",
 "phases": {
-  "stage-1": { "ceiling": 30.0, "reason": "why this number", "decided": "2026-10-10", "status": "current" },
+  "stage-2": { "ceiling": 30.0, "reason": "why this number", "decided": "2026-10-30", "status": "current" },
   "stage-3": { "ceiling": 30.0, "reason": "...", "decided": "2026-10-16", "status": "planned" }
 }
 ```
@@ -65,8 +65,8 @@ The ceiling is not one hard-coded number. `docs/stages/approved.json` holds an o
 | Phase id | Ceiling | Status | What it covers |
 |---|---|---|---|
 | `stage-0` | $30 | done | Foundation, $0 |
-| `stage-1` | $30 | current | Two connectors, $12 |
-| `stage-2` | $30 | planned | Logs and the link home, $0 in the reference environment |
+| `stage-1` | $30 | done | Two connectors, $12 |
+| `stage-2` | $30 | current | Logs and the link home, $0 in the reference environment |
 | `stage-3` | $30 | planned | Workload host, bucket, Functions, $29 |
 | `stage-4` | $30 | planned | Grafana on-prem, $0 |
 | `aws-twin` | $30 | planned | The AWS twin of stage 1, $20.84, applied only while the DigitalOcean connectors are down |
@@ -88,7 +88,7 @@ The gate enforces, for the current phase:
 - the per-provider approvals and the sum of the `active` providers are checked against the current phase's ceiling (everything else in the next section is unchanged);
 - a top-level `ceiling` is read only when `phases` is absent (an older file); with both present, the file fails.
 
-The summary line names the phase: `cost-check: phase stage-1 ceiling $30.00 (reason: ...)`.
+The summary line names the phase: `cost-check: phase stage-2 ceiling $30.00 (reason: ...)`.
 
 One file cannot show history, so the lifecycle between versions is checked when the gate is given the base branch's copy: `python3 -I scripts/cost_check.py --root . --base-approved <base approved.json>`. CI does this on every pull request through `scripts/ci_cost_gate.sh`, which fetches the base branch tip (shallow, from the same host the checkout uses) and **fails** if it cannot get it; on a push to main it prints that there is no base and runs the plain gate. The gate then also fails when a phase of any status is removed, when a `done` phase changes or becomes current again (a large ceiling planted in a finished phase could otherwise be switched on without looking like a raise), when a status moves any way but planned, current, done, or when a new phase starts as `done`, and it prints `EFFECTIVE CEILING CHANGED: phase A $X -> phase B $Y` whenever the enforced number moves. `scripts/cost_raise.py` always runs the same check on its own edit.
 

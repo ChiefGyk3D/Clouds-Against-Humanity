@@ -1,6 +1,6 @@
 {
   "stage": 1,
-  "current_phase": "stage-1",
+  "current_phase": "stage-2",
   "hard_max": 60.0,
   "hard_max_reason": "Absolute monthly limit no phase ceiling may pass: just above the largest proposed phase ($53, the learner mini SOC). Raising it is its own reviewed edit.",
   "phases": {
@@ -14,13 +14,13 @@
       "ceiling": 30.0,
       "reason": "Two Twingate connector droplets at $6 each, $12 in all, approved under the original $30 working ceiling.",
       "decided": "2026-10-10",
-      "status": "current"
+      "status": "done"
     },
     "stage-2": {
       "ceiling": 30.0,
-      "reason": "Proposed in the stage design: the reference environment adds $0 to the cloud bill (logs go to the on-prem SIEM), so the ceiling stays equal. Needs the maintainer's approval before becoming current.",
-      "decided": "2026-10-16",
-      "status": "planned"
+      "reason": "Maintainer approval 2026-10-30: \"yes $30 should be fine\", answering: make stage-2 the current phase at its planned $30 ceiling. Stage 2 adds $0 to the cloud bill in the reference environment (logs go to the on-prem SIEM).",
+      "decided": "2026-10-30",
+      "status": "current"
     },
     "stage-3": {
       "ceiling": 30.0,

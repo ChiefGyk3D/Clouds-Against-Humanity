@@ -10,6 +10,9 @@ import cost_check
 import cost_raise
 
 ROOT = Path(__file__).resolve().parents[1]
+# Tests that need a known lifecycle state (stage-1 current, stage-2 planned) use a frozen
+# copy of approved.json, so advancing the real file's current phase does not break them.
+FIXTURE_STAGE1 = ROOT / "tests/fixtures/approved_stage1_current.json"
 
 
 def repo(tmp_path):
@@ -20,6 +23,7 @@ def repo(tmp_path):
             shutil.copytree(src, dst)
         else:
             shutil.copy(src, dst)
+    shutil.copy(FIXTURE_STAGE1, tmp_path / "docs/stages/approved.json")
     for rel in ("stacks", "modules", ".spacelift"):
         if (ROOT / rel).exists():
             shutil.copytree(

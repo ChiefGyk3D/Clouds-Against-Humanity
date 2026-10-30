@@ -13,6 +13,9 @@ import cost_check
 import cost_raise
 
 ROOT = Path(__file__).resolve().parents[1]
+# Tests that need a known lifecycle state (stage-1 current, stage-2 planned) use a frozen
+# copy of approved.json, so advancing the real file's current phase does not break them.
+FIXTURE_STAGE1 = ROOT / "tests/fixtures/approved_stage1_current.json"
 
 
 def phase(ceiling, status="planned", reason="because", decided="2026-10-10", **extra):
@@ -50,6 +53,7 @@ def repo(tmp_path, mutate=None, raw=None):
             shutil.copytree(src, dst)
         else:
             shutil.copy(src, dst)
+    shutil.copy(FIXTURE_STAGE1, tmp_path / "docs/stages/approved.json")
     for rel in ("stacks", "modules", ".spacelift"):
         if (ROOT / rel).exists():
             shutil.copytree(
@@ -167,7 +171,7 @@ def test_base_approved_fails_a_reactivated_done_phase_and_shows_the_change(
     tmp_path, capsys
 ):
     base = tmp_path / "base.json"
-    base.write_text((ROOT / "docs/stages/approved.json").read_text())
+    base.write_text(FIXTURE_STAGE1.read_text())
 
     def mutate(d):
         d["phases"]["stage-0"]["status"] = "current"
@@ -184,7 +188,7 @@ def test_base_approved_fails_a_reactivated_done_phase_and_shows_the_change(
 
 def test_base_approved_passes_when_nothing_changed(tmp_path, capsys):
     base = tmp_path / "base.json"
-    base.write_text((ROOT / "docs/stages/approved.json").read_text())
+    base.write_text(FIXTURE_STAGE1.read_text())
     code, out = gate(repo(tmp_path / "r"), capsys, "--base-approved", str(base))
     assert code == 0 and "EFFECTIVE" not in out.out
 
