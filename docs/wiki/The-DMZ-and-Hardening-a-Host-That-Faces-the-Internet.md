@@ -101,7 +101,7 @@ A host that faces the internet will be scanned within hours (design section 3.2 
 
 | Source | What it tells you | Status for the edge |
 |---|---|---|
-| Firewall drops and new connections | What reached the host, and what the host tried to reach | The design says dropped and new outbound connections are counted per user and shipped. **Design.** This repository configures no firewall logging in the connector module either ([Attack surface](Attack-Surface-List-Shrink-Measure.md#log-it-and-alert-on), searched 2026-10-30) |
+| Firewall drops and new connections | What reached the host, and what the host tried to reach | The design says dropped and new outbound connections are counted per user and shipped. **Design.** This repository configures no firewall logging in the connector module either ([Attack surface](Attack-Surface-List-Shrink-Measure.md#log-it-and-alert-on-it), searched 2026-10-30) |
 | Each service's own log | What it accepted, rejected or crashed on | No service exists yet. **Design** |
 | The system journal and the audit log | Logins (there are none by design), `sudo` (there is no user), service starts and stops, writes to watched files | On the connectors, the opt-in agent collects the journal and `auditd` watches account files; **not applied**, and not configured for the edge (`modules/twingate-bootstrap/cloud-init.yaml.tftpl`) |
 | A version report | Which package versions are running, so a missed patch is visible | The design lists "a version report in the log stream" as the check for risk 5. **Design** (design section 3.5) |
@@ -132,7 +132,7 @@ An alert is a request for a human to do something. A host with no admin path has
 
 ### How an alert reaches a person
 
-The design names one channel, ntfy, for the outage case (design section 3.5, risk 7). It does not describe any other route from the SIEM to a human for the edge, and the SIEM side is not built. So there is no complete path to describe, and I will not invent one. What you need, for any alert, is the sentence the earlier pages ask for ([Attack surface](Attack-Surface-List-Shrink-Measure.md#log-it-and-alert-on), [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md)): who gets it, what it means, and what to do next. On an immutable host the answer to "what to do next" is usually the same for a serious alert: preserve the logs that already left the machine, then rebuild from code, not repair. The design's relay has the same rule ("a suspect relay is replaced, not repaired", section 4.6.1).
+The design names one channel, ntfy, for the outage case (design section 3.5, risk 7). It does not describe any other route from the SIEM to a human for the edge, and the SIEM side is not built. So there is no complete path to describe, and I will not invent one. What you need, for any alert, is the sentence the earlier pages ask for ([Attack surface](Attack-Surface-List-Shrink-Measure.md#log-it-and-alert-on-it), [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md)): who gets it, what it means, and what to do next. On an immutable host the answer to "what to do next" is usually the same for a serious alert: preserve the logs that already left the machine, then rebuild from code, not repair. The design's relay has the same rule ("a suspect relay is replaced, not repaired", section 4.6.1).
 
 ## Free path: read the hardening in the code
 
