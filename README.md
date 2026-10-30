@@ -212,6 +212,23 @@ This repository is public from its first commit, so the GitHub code-scanning and
 
 Secrets live in Doppler; nothing in this repository is a credential. Spacelift holds one read-only Doppler token and fetches the rest at run time; see [Spacelift and Doppler secrets](docs/spacelift-secrets.md) for how that works and how to rotate it.
 
+### Required secrets
+
+A required secret that is empty, unset or a placeholder stops the thing that needs it. One rule decides what a placeholder is, in [`scripts/secret_rule.py`](scripts/secret_rule.py): empty, or starting with `your_`, `your-`, `changeme`, `change-me`, `replace-with`, `xxx` or `dp.st.your`, wrapped in `<...>`, containing `example`, `placeholder` or `changeme`, or exactly `todo`, `tbd`, `admin`, `password`, `secret` or `test` (case-insensitive). The error names the variable and never prints the value. No variable in the stacks or modules has a default that is a password or token.
+
+| Secret | Needed by | Without it, or with a placeholder | Where it goes |
+| --- | --- | --- | --- |
+| `GRAFANA_ADMIN_PASSWORD` | the monitoring demo (`scripts/demo_monitoring.sh`) | A placeholder in the shell or `.env` stops the demo. Empty or missing: the script writes a random one to the untracked `.env` (other lines kept). Direct `docker compose up` refuses empty but does not apply the placeholder rule. | shell environment, or the untracked `labs/demo-monitoring/.env` |
+| `ORIGIN_SECRET` | the WordPress-at-scale lab (`lab.sh up`, `lab.ps1 up`) | A placeholder or an empty shell value stops the lab. Empty or missing in `.env`: a random one is written. | shell environment, or the untracked `labs/wordpress-at-scale/.env` |
+| `DIGITALOCEAN_TOKEN`, `TWINGATE_API_TOKEN`, `TWINGATE_NETWORK` | stacks 00, 10 and 20 (the provider settings) | The Spacelift hook refuses an empty value, and refuses a placeholder for the two tokens. Outside Spacelift the provider itself fails on an empty token; the placeholder rule is not applied there. | Doppler, fetched by the hook ([how](docs/spacelift-secrets.md)) |
+| `DOPPLER_TOKEN` | the Spacelift hook | Empty or a placeholder: the hook refuses and fetches nothing. | the `cah-doppler` Spacelift context |
+| `log_shipping_bootstrap_token` (`TF_VAR_log_shipping_bootstrap_token`) | stack 10 when `log_shipping.enabled` | Empty with log shipping on: the plan fails. A placeholder-shaped value: the plan fails. Log shipping off: never rendered. | a sensitive Spacelift stack variable, never a value file |
+| `WAZUH_ENROLLMENT_PASSWORD` | each connector with log shipping on, pulled at first boot | Empty or missing: enrollment fails and the agent is never started. A placeholder is not checked on the droplet (the manager decides whether it matches). | the Doppler `cah-<resource_key>-hostboot` config |
+
+The loopback-only lab in `labs/cross-tenant-dlp` uses fixed labels (`lab-a`, `lab-b`) as the keys of two fake S3 servers on `127.0.0.1`. They protect nothing and are not secrets.
+
+`labs/demo-monitoring/env.example` ships `GRAFANA_ADMIN_PASSWORD=` empty on purpose. Never put a real value in an example file.
+
 ---
 
 ## 💝 Support This Project

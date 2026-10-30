@@ -335,6 +335,13 @@ variable "log_shipping_bootstrap_token" {
     error_message = "log_shipping_bootstrap_token must be empty or 16 to 512 characters of letters, digits, dot, underscore and hyphen."
   }
 
+  # The one placeholder rule of scripts/secret_rule.py, as an RE2 pattern
+  # (tests/test_secret_rule.py pins it to that file).
+  validation {
+    condition     = !can(regex("(?i)(^(your[_-]|changeme|change-me|replace[_-]with|xxx|dp[.]st[.]your|(todo|tbd|admin|password|secret|test)$)|^<.*>$|example|placeholder|changeme)", var.log_shipping_bootstrap_token))
+    error_message = "log_shipping_bootstrap_token looks like a placeholder (your_*, changeme*, replace-with*, xxx*, <...>, example, placeholder). Set the real short-lived Doppler token, or leave it empty when log_shipping is off."
+  }
+
   validation {
     condition     = var.log_shipping_bootstrap_token != "" || !var.log_shipping.enabled
     error_message = "log_shipping.enabled needs log_shipping_bootstrap_token (a short-lived, read-only Doppler token for the hostboot config)."
