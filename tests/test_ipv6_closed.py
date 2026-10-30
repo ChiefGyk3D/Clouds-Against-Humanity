@@ -173,8 +173,18 @@ def is_null(expr: str) -> bool:
     return expr == "null"
 
 
+# References that are provably IPv4-only because the variable's own validation
+# rejects any ':' and 0.0.0.0/0. Empty today (the edge firewall has no variable
+# source; iperf3 stays closed until its own stack). Adding a name here is a
+# reviewed decision, and the variable's validation needs a test beside it.
+IPV4_ONLY_REFERENCES: frozenset[str] = frozenset()
+
+
 def literal_without_ipv6(expr: str) -> bool:
-    """A literal list of strings, none of them an IPv6 range. A reference is unprovable."""
+    """A literal list of strings, none of them an IPv6 range. A reference is unprovable,
+    except the few in IPV4_ONLY_REFERENCES."""
+    if expr in IPV4_ONLY_REFERENCES:
+        return True
     strings = re.findall(r'"((?:[^"\\]|\\.)*)"', expr)
     rest = re.sub(r'"(?:[^"\\]|\\.)*"', "", expr)
     return not re.search(r"[A-Za-z_]", rest) and not any(IPV6_LITERAL.match(s) for s in strings)
@@ -309,6 +319,7 @@ BAD = {
     "droplet-ipv6-reference": 'resource "digitalocean_droplet" "x" {\n  ipv6 = var.v6\n}\n',
     "do-firewall-ipv6-any": 'resource "digitalocean_firewall" "x" {\n  inbound_rule {\n    protocol = "tcp"\n    source_addresses = ["::/0"]\n  }\n}\n',
     "do-firewall-ipv6-cidr-dynamic": 'resource "digitalocean_firewall" "x" {\n  dynamic "inbound_rule" {\n    for_each = []\n    content {\n      source_addresses = ["2001:db8::/32"]\n    }\n  }\n}\n',
+    "do-firewall-other-reference-in-dynamic": 'resource "digitalocean_firewall" "x" {\n  dynamic "inbound_rule" {\n    for_each = []\n    content {\n      source_addresses = var.iperf3_allowed_sources_v6\n    }\n  }\n}\n',
     "do-firewall-source-reference": 'resource "digitalocean_firewall" "x" {\n  inbound_rule {\n    source_addresses = var.sources\n  }\n}\n',
     "aws-sg-inline-ingress": 'resource "aws_security_group" "x" {\n  ingress {\n    ipv6_cidr_blocks = ["::/0"]\n  }\n}\n',
     "aws-ingress-rule": 'resource "aws_vpc_security_group_ingress_rule" "x" {\n  cidr_ipv6 = "::/0"\n}\n',

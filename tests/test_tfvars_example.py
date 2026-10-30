@@ -33,7 +33,7 @@ import gen_example_tests
 import hcl_variables
 import identifier_check
 
-STACKS = ("stacks/00-foundation", "stacks/10-access", "stacks/20-telemetry")
+STACKS = ("stacks/00-foundation", "stacks/10-access", "stacks/20-telemetry", "stacks/50-edge")
 EXAMPLE = "terraform.tfvars.example"
 
 DOC_NETS = [
@@ -90,6 +90,15 @@ NEED_NOT_SAY_EXAMPLE = {
     "logging_servers",
     "scrape_allowlist",
     "wazuh_agent_group",
+    # Stack 50 (edge): wiring, documented defaults, and documentation-range or
+    # private example addresses (the address checks above still apply).
+    "core_vpc_ip_range",
+    "droplet_size",
+    "edge_enabled",
+    "i2pd_port",
+    "iperf3_allowed_sources",
+    "reboot_time",
+    "reticulum_port",
 }
 
 

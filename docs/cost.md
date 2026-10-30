@@ -38,6 +38,18 @@ The stage 3 pick, `s-1vcpu-2gb` at $12, is verified available in tor1 on 2026-10
 
 The stage 3 phase exists in `approved.json` as a planned entry with a $30 placeholder ceiling, but nothing about it is approved. Droplet backups are off in every row; the bucket's versioning and a nightly copy off the account are the backups. Block storage is not needed. Approving the stage means picking one row, raising `approved_monthly_total` to its running total on purpose, adding the new module and the bucket's file to `allowed_sources`, and teaching the gate to price a `spaces` manifest entry as a flat amount.
 
+## Edge (DMZ) estimate (not approved)
+
+The shared edge network (VPC, tags, Cloud Firewall) is written as `stacks/50-edge`, disabled, unapplied and free. Edge services are one droplet each, built later from `modules/edge-host` in their own stacks ([stage page](stages/05-edge.md)). Design option A ([edge DMZ design](superpowers/specs/2026-10-19-edge-dmz-design.md), section 5.1) priced one droplet:
+
+| Line | Basis | Monthly |
+|---|---|---|
+| Edge droplet `s-1vcpu-1gb` | `docs/cost-prices.json`, retrieved 2026-10-21 | $6.00 each |
+| Reserved IP, assigned | DigitalOcean pricing page as read in the design, 2026-10-19: free when assigned | $0.00 |
+| `rns-dmz` VPC, Cloud Firewall | free types in the gate | $0.00 |
+
+With one droplet per service the cost is $6.00 per approved service. The `edge` ceiling stays at its existing placeholder and is raised one approved service at a time; nothing is approved yet. A reserved IP that is not assigned costs $5.00 a month ($0.01 an hour, same page), so a failed apply that leaves the IP behind costs money until someone notices. The DigitalOcean total stays $12, and no `cost.json` prices a droplet: the gate has no `reserved_ip` manifest kind yet, so no service stack can be switched on. Outbound transfer is not priced and is not seen by the gate; check the usage page once an edge service runs (design section 5.7), the same way as Functions.
+
 ## Ceilings per phase
 
 The ceiling is not one hard-coded number. `docs/stages/approved.json` holds an ordered map `phases`, one entry per phase of the project, and `current_phase` names the one the gate enforces:
@@ -58,7 +70,7 @@ The ceiling is not one hard-coded number. `docs/stages/approved.json` holds an o
 | `stage-3` | $30 | planned | Workload host, bucket, Functions, $29 |
 | `stage-4` | $30 | planned | Grafana on-prem, $0 |
 | `aws-twin` | $30 | planned | The AWS twin of stage 1, $20.84, applied only while the DigitalOcean connectors are down |
-| `edge` | $35 | planned | Public edge (DMZ); placeholder, not costed, the floor is stage 3 plus one $6 droplet |
+| `edge` | $35 | planned | Public edge (DMZ); design option A is stage 3 plus one $6 droplet, written but disabled and not approved |
 | `second-site` | $41 | planned | A second DigitalOcean site on top of stage 3: $29 + $12 |
 | `learner-soc` | $53 | planned | A learner's own cloud mini SOC on top of stage 3: $29 + $24 for the largest single-droplet option |
 
@@ -103,7 +115,7 @@ The first line is a dry run: it starts with `EFFECTIVE CEILING: phase stage-1 $3
 - a droplet's backups are on in any way but the basic weekly plan. A manifest entry with `backups: true` must also say `"backup_plan": "weekly"`; a missing or unknown plan, `daily`, any other `backup*` key (usage-based shapes, hours, a policy object) and a `backups` value that is not a real boolean are refused, because DigitalOcean defaults to the daily plan when none is stated. In `.tf` source a droplet may set `backups` only to the literal `false`, and may not carry a `backup_policy` block;
 - a cloud's approved total is itself above the current phase's ceiling;
 - the per-phase ceilings are malformed, a ceiling is lower than the phase before it without `lowers`, or a ceiling is above `hard_max` (see "Ceilings per phase");
-- a `digitalocean_*` resource type that is not on the free list appears in any `.tf` or `.tofu` file. The gate is an allowlist: `digitalocean_project`, `digitalocean_project_resources`, `digitalocean_tag`, `digitalocean_vpc`, `digitalocean_firewall` and `digitalocean_ssh_key` are free, and the droplet is allowed only in the file listed under `allowed_sources` (the connector module). Anything else, such as a NAT gateway, app, container registry, Kubernetes node pool or CDN, is refused by name and file;
+- a `digitalocean_*` resource type that is not on the free list appears in any `.tf` or `.tofu` file. The gate is an allowlist: `digitalocean_project`, `digitalocean_project_resources`, `digitalocean_tag`, `digitalocean_vpc`, `digitalocean_firewall`, `digitalocean_ssh_key` and `digitalocean_reserved_ip_assignment` are free, and the droplet and the reserved IP are allowed only in the files listed under `allowed_sources` (the connector module for the droplet; the edge host module for both). Each `digitalocean_reserved_ip` needs exactly one assignment in its file, because an unassigned reserved IP costs $5.00 a month, and the manifest cannot cost one yet. Anything else, such as a NAT gateway, app, container registry, Kubernetes node pool or CDN, is refused by name and file;
 - no `stacks/**/cost.json` manifest exists, or, in any one stack, the number of `twingate-connector` module blocks differs from the number of machine entries (`droplet` or `instance`) in that stack's manifest, or a connector module block uses `count` or `for_each` (each connector is costed as its own instance, so the gate wants one module block per manifest entry);
 - a module source is not local (`./` or `../`), goes through a dot-directory, or leaves the repository, or a `*.tf.json` or `*.tofu.json` file exists, because the gate cannot read them. `*.tf` and `*.tofu` files are both read, override files included;
 - a dot-directory exists anywhere under `stacks/` or `modules/` (only `.terraform` is ignored there, and `.git`, `.venv` and `.claude` at the repository top level), or a directory under `stacks/` is not named `NN-name` or exactly `aws`, `azure` or `gcp`, because the gate would not scan or classify it;
