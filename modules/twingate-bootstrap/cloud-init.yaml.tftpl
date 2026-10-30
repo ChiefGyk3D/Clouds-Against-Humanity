@@ -3,6 +3,11 @@
 # through Twingate (the DigitalOcean firewall allows no inbound traffic); the
 # sshd settings below are the second layer. Changing this file changes
 # user_data, which forces a droplet rebuild.
+# First-hour order (the same one the stage guides state): update, baseline,
+# harden, then applications. In this file: the package update, upgrade and
+# unattended-upgrades come first, the baseline (users, sshd settings, files) is
+# written next, the hardening is switched on (sshd restarted) before the
+# Twingate connector, which is installed last.
 disable_root: true
 # Local time, so the reboot window and the weekly update below are Eastern.
 timezone: ${timezone}
@@ -305,6 +310,8 @@ ${telemetry_conf}%{ if metadata_lock ~}
       OSSEC_INSERT=/usr/local/sbin/cah-ossec-insert
       OSSEC_CONF=/var/ossec/etc/ossec.conf
       LOCALFILE_XML=/etc/cah/wazuh-localfile.xml
+      RULES_B64=/etc/audit/rules.d/60-cah.rules
+      RULES_B32=/etc/audit/rules.d/61-cah-b32.rules
       AGENT_AUTH=/var/ossec/bin/agent-auth
       RUN_DIR=/run/cah-log-shipping
       manager="${log_shipping_manager_address}"
@@ -348,6 +355,17 @@ ${telemetry_conf}%{ if metadata_lock ~}
       rm -f "$TOKEN_FILE"
       [ -n "$token" ] || fail "the bootstrap token file was empty"
       [ -x "$AGENT_AUTH" ] || fail "the Wazuh agent is not installed ($AGENT_AUTH is missing)"
+      # The 60-cah.rules file watches 64-bit programs (arch=b64). A 32-bit
+      # program could still write the same files unseen, which the old -w watch
+      # would have caught, so on x86_64 (where 32-bit programs run) each rule is
+      # copied with arch=b32. Elsewhere (arm64 Graviton) an arch=b32 rule may not
+      # load, which would fail this script closed, so it is not written there.
+      if [ "$(uname -m)" = x86_64 ]; then
+        sed 's/arch=b64/arch=b32/' "$RULES_B64" > "$RULES_B32" || fail "could not write $RULES_B32"
+        chmod 0640 "$RULES_B32"
+      else
+        rm -f "$RULES_B32"
+      fi
       augenrules --load || fail "augenrules --load failed"
       mkdir -p "$RUN_DIR"
       work="$(mktemp -d "$RUN_DIR/pull.XXXXXX")"
@@ -423,20 +441,26 @@ ${telemetry_conf}%{ if metadata_lock ~}
         <log_format>audit</log_format>
         <location>/var/log/audit/audit.log</location>
       </localfile>
-  # A short auditd rule set: watches only (who changed identity files, sudo
-  # configuration or the Twingate config). No syscall rules, because per-command
-  # auditing is too noisy for the 1 GB droplets.
+  # A short auditd rule set: file watches only (who changed identity files, sudo
+  # configuration or the Twingate config), written as -a always,exit rules, the
+  # form the auditctl man page recommends over the deprecated -w watch. Each rule
+  # keeps the old watch's path, write and attribute-change (wa) permissions and
+  # key; dir= keeps a directory watch recursive. This file is the arch=b64 half;
+  # the first-boot script adds the arch=b32 twin of every rule on x86_64 only
+  # (61-cah-b32.rules), so a 32-bit program is seen as the old watch saw it.
+  # No -S syscall filters and no
+  # execve, because per-command auditing is too noisy for the 1 GB droplets.
   - path: /etc/audit/rules.d/60-cah.rules
     permissions: "0640"
     owner: root:root
     content: |
-      -w /etc/passwd -p wa -k cah_identity
-      -w /etc/group -p wa -k cah_identity
-      -w /etc/shadow -p wa -k cah_identity
-      -w /etc/gshadow -p wa -k cah_identity
-      -w /etc/sudoers -p wa -k cah_sudo
-      -w /etc/sudoers.d/ -p wa -k cah_sudo
-      -w /etc/twingate/ -p wa -k cah_twingate
+      -a always,exit -F arch=b64 -F path=/etc/passwd -F perm=wa -F key=cah_identity
+      -a always,exit -F arch=b64 -F path=/etc/group -F perm=wa -F key=cah_identity
+      -a always,exit -F arch=b64 -F path=/etc/shadow -F perm=wa -F key=cah_identity
+      -a always,exit -F arch=b64 -F path=/etc/gshadow -F perm=wa -F key=cah_identity
+      -a always,exit -F arch=b64 -F path=/etc/sudoers -F perm=wa -F key=cah_sudo
+      -a always,exit -F arch=b64 -F dir=/etc/sudoers.d/ -F perm=wa -F key=cah_sudo
+      -a always,exit -F arch=b64 -F dir=/etc/twingate/ -F perm=wa -F key=cah_twingate
   # The Wazuh deb may start its service when it is installed, before the agent is
   # enrolled. This script puts both guards in place (deny) or lifts them (allow):
   # the unit is masked, and a policy-rc.d answers 101 ("denied") for wazuh-agent

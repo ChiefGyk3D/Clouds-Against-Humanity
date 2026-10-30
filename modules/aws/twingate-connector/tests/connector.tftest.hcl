@@ -459,6 +459,9 @@ run "host_firewall_sources_reach_the_instance_user_data" {
 # A hash that changes after a later edit to the bootstrap template is a real
 # change to every live connector's user_data: review it, do not just paste the
 # new value.
+# Re-taken for #235 and #305 (the header comment in the bootstrap template; the
+# auditd rules render only with log_shipping, which is off here): both hashes
+# were read through nonsensitive(sha256(...)) on this tree.
 run "node_exporter_default_user_data_is_the_main_user_data_a" {
   command = plan
   override_resource {
@@ -469,7 +472,7 @@ run "node_exporter_default_user_data_is_the_main_user_data_a" {
     }
   }
   assert {
-    condition     = sha256(aws_instance.connector.user_data) == "8938f709421635218149415a7bac25c04832cde43165396eaec4a1e366f6bb85"
+    condition     = sha256(aws_instance.connector.user_data) == "a418679fd64cc74c1e9c21d071ddfb4616cabb06a12bf6741f6b9a756bfcb155"
     error_message = "With node_exporter unset the user_data must be exactly what main rendered (connector a)."
   }
 }
@@ -487,7 +490,7 @@ run "node_exporter_explicitly_off_is_the_main_user_data_a" {
     node_exporter = { enabled = false, port = 9101 }
   }
   assert {
-    condition     = sha256(aws_instance.connector.user_data) == "8938f709421635218149415a7bac25c04832cde43165396eaec4a1e366f6bb85"
+    condition     = sha256(aws_instance.connector.user_data) == "a418679fd64cc74c1e9c21d071ddfb4616cabb06a12bf6741f6b9a756bfcb155"
     error_message = "node_exporter disabled (whatever its port) must render exactly what main rendered."
   }
 }
@@ -534,7 +537,7 @@ run "node_exporter_default_user_data_is_the_main_user_data_b_with_host_firewall"
     host_firewall = true
   }
   assert {
-    condition     = sha256(aws_instance.connector.user_data) == "e314c7b9baa19fe8f4c21b66534b94e5b7ba61f8164631d0041b41468cbf454d"
+    condition     = sha256(aws_instance.connector.user_data) == "0ca2d47f3e4988506baa38c7f18ffaf371690e0882e194f8ef6c5b0630078db5"
     error_message = "With node_exporter unset the user_data must be exactly what main rendered (connector b, host firewall on)."
   }
 }

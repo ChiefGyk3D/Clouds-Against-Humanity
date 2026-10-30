@@ -300,7 +300,7 @@
                   "title": "Audit rules are watch-only, so commands are not recorded",
                   "type": "Repudiation",
                   "modelType": "STRIDE",
-                  "description": "The auditd rule set watches identity files, sudoers and /etc/twingate, with no syscall or execve rules (/etc/audit/rules.d/60-cah.rules in the template, chosen because the 1 GB droplets cannot take per-command auditing). After a compromise there is no record of what was run.",
+                  "description": "The auditd rule set watches identity files, sudoers and /etc/twingate, as file rules only, with no execve or per-command rules (/etc/audit/rules.d/60-cah.rules in the template, chosen because the 1 GB droplets cannot take per-command auditing). After a compromise there is no record of what was run.",
                   "mitigation": "Accepted trade-off stated in the template. sshd and sudo events go to the journal and are collected when log_shipping is on."
                 },
                 {
