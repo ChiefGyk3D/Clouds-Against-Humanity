@@ -147,7 +147,7 @@ One droplet, tagged `rns-dmz`, with a role tag as well (`rns-dmz-transport`) so 
 | Surface | Reachable from | How |
 |---|---|---|
 | Reticulum `TCPServerInterface` (4242 unless config says otherwise) | The internet | Cloud Firewall and nftables |
-| i2pd pinned inbound port, TCP and UDP | The internet | Same |
+| i2pd inbound port, TCP and UDP | Nobody until the i2pd stack is built (ruling 11); then the internet | Same. i2pd picks the port; it is not pinned |
 | Meshtastic MQTT over TLS, 8883 | The internet; authentication required, no anonymous access | Same |
 | iperf3, 5201 | The maintainer's home WAN IP and the core connectors' egress addresses only | Source-restricted rule; built-in iperf3 RSA auth on top |
 | SSH, any admin port | Nowhere | There is none |
@@ -179,7 +179,7 @@ Cloud Firewall limits that matter here, read from https://docs.digitalocean.com/
 
 ### 4.5 Services
 
-Per the handoff: `rnsd` with `enable_transport = Yes` and a `TCPServerInterface`; `lxmd` as a propagation node with storage and transfer limits; i2pd with SAM on loopback, a pinned inbound port and capped transit; Mosquitto with TLS and authentication, private broker for the maintainer's nodes by default; iperf3 with `--rsa-private-key-path` and `--authorized-users-path`, key material from Doppler. Option names for Reticulum, lxmd and i2pd have changed between releases, and whether the distro's iperf3 is built with OpenSSL auth support is UNVERIFIED. The implementation PR checks each against the version it pins and records the link, as the handoff requires.
+Per the handoff: `rnsd` with `enable_transport = Yes` and a `TCPServerInterface`; `lxmd` as a propagation node with storage and transfer limits; i2pd with SAM on loopback, an inbound port that stays closed until the i2pd stack is built and that i2pd then picks at random (ruling 11, not a security measure), and capped transit; Mosquitto with TLS and authentication, private broker for the maintainer's nodes by default; iperf3 with `--rsa-private-key-path` and `--authorized-users-path`, key material from Doppler. Option names for Reticulum, lxmd and i2pd have changed between releases, and whether the distro's iperf3 is built with OpenSSL auth support is UNVERIFIED. The implementation PR checks each against the version it pins and records the link, as the handoff requires.
 
 Memory is the open fact. Five daemons on 1 GiB, with no swap, has not been measured. It is the reason section 5 prices a 2 GiB variant.
 
@@ -443,6 +443,7 @@ Decisions the maintainer owed (my pick in the third column, his ruling in the fo
 | 8 | Transfer: accept it as a watched usage line, with a billing alert before the first apply | Accept, once Reticulum has a stated rate cap (section 5.7) | DECIDED 2026-10-19: tracked as a watched usage line plus a billing alert, once Reticulum has a rate cap |
 | 9 | Ingest protocol and relay controls (section 4.6.1) | Not mine to pick; the home-side design owns them, and approval waits for it | NOT ruled: owned by the home-side relay/ingest design |
 | 10 | The core connector firewall gets TCP 5201 outbound for the ZTNA path (section 4.3) | Accept in the implementation PR, with the ZTNA path conditional on the two checks there | DECIDED 2026-10-19: TCP 5201 outbound rule on the core connector firewall, added in the implementation PR |
+| 11 | The i2pd inbound port (issue #122, ruled 2026-10-22) | n/a | RULED 2026-10-22: the i2pd inbound port stays closed until the i2pd stack is built. Then i2pd picks a random port, as an I2P router does by design, and the firewall rule follows what it picked. This is not claimed as a security measure: a scanner finds any open port, so the controls are the ones in section 3 (patching by rebuild, least privilege, default-deny firewall, rate and transit caps, detection). See [What does not count as protection](../../wiki/Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md#what-does-not-count-as-protection) |
 
 Before decision 4 can be anything but provisional, these have to be confirmed: the price and limits of a separate DigitalOcean team; whether credentials and Spacelift contexts can be isolated per team; how transfer pooling works across teams; how DigitalOcean's abuse handling treats a team and what it can suspend; and how teardown of the edge team works. And an abuse-response runbook has to exist, with measurable thresholds. Proposed starting values, mine, not measured, for the maintainer to set: alert at 80 percent of the monthly transfer cap; alert if two consecutive days each exceed twice the daily share of that cap; alert at 80 percent of the `lxmd` storage cap; any provider abuse notice answered, and the named service switched off by a pull request and a rebuild, within a target of 24 hours (the provider's own response window is UNVERIFIED).
 
