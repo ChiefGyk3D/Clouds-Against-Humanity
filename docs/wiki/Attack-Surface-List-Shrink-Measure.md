@@ -1,6 +1,6 @@
 # Attack surface: list it, shrink it, measure it
 
-Side page to the security and defense pages. Read it after [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md) (which asks "what can this reach if it is compromised") and beside the [Threat model](Threat-Model.md) (which names the threats). This page asks the question that comes first: **what is there to attack at all**. Next: [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md).
+Side page to the security and defense pages. Read it after Plan for failure: blast radius and assuming breach (which asks "what can this reach if it is compromised") and beside the [Threat model](Threat-Model.md) (which names the threats). This page asks the question that comes first: **what is there to attack at all**. Next: [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
@@ -16,7 +16,7 @@ Side page to the security and defense pages. Read it after [Plan for failure: bl
 - List a system's surface in six categories: inbound ports, public addresses, accounts, keys and tokens, dependencies, and people.
 - Point to the choices in this project that remove items from that list, and say which are built, which are off by default and which are not applied.
 - Measure the surface from the outside, on addresses you own, and say what a clean result does not prove.
-- Say why moving a service to another port shrinks nothing.
+- Say why moving a service to another port is not protection and shrinks nothing.
 - Say, for each part of the surface, what should be logged and what should raise an alert.
 
 ## In plain words
@@ -87,7 +87,7 @@ An outside check is one instrument. The inside lists (firewall rules, the plan p
 
 ## The port-move rule
 
-Moving a service to a different port, for example SSH to a high number, does not shrink the attack surface. The service is still reachable and still has the same flaws, and a scanner tries every port in minutes. That is security through obscurity, and no page in this wiki counts it as protection. [What does not count as protection](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md#what-does-not-count-as-protection) gives the reasoning, [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) lets you run the scan yourself, and this project's sshd stays on port 22 for exactly that reason ([Droplet hardening](Droplet-Hardening.md#host-firewall-built-off-by-default)).
+Moving a service to a different port, for example SSH to a high number, does not shrink the attack surface. The service is still reachable and still has the same flaws, and a scanner tries every port in minutes. That is security through obscurity, and no page in this wiki counts it as protection. The section "What does not count as protection" on the Plan for failure page gives the reasoning, [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) lets you run the scan yourself, and this project's sshd stays on port 22 for exactly that reason ([Droplet hardening](Droplet-Hardening.md#host-firewall-built-off-by-default)).
 
 Two honest uses of a different port are not protection claims. It can make your logs quieter, because automated guessing aimed at the default port does not reach it, which is log noise and not a control. And it can be forced by function: a honeypot that needs port 22 for its lure pushes the real management service elsewhere. Say which of these it is, every time.
 
@@ -221,4 +221,4 @@ Every project claim above was read on 2026-10-30 in this repository. Nothing was
 | The loopback script output | Run once, Linux, Python 3.13, 2026-10-30 | Run |
 | macOS `lsof` command | Not run here | est. |
 
-Back to the [Threat model](Threat-Model.md), [Plan for failure](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md) or [Droplet hardening](Droplet-Hardening.md).
+Back to the [Threat model](Threat-Model.md), Plan for failure or [Droplet hardening](Droplet-Hardening.md).
