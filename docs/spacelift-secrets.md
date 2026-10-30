@@ -39,7 +39,7 @@ Record the real expiry dates in your password manager, not in this repository. A
 
 `scripts/spacelift/doppler-env.sh` is the only code that sees the token. It fails closed and does this:
 
-- **Only tracked and destroy runs, only on `main`.** A pull request produces a proposed run, and planning executes code from the pull request. This repository is public, so the script fetches no secret for a proposed run. That is not the same as the run holding no credential: the `cah-doppler` context is attached to every run type, so `DOPPLER_TOKEN` is present, and branch-controlled hook code could read it (section 8). The cost is that a pull request plan cannot talk to DigitalOcean; CI covers it with `tofu test` and mocked providers, and the real plan happens on `main` before you confirm. Once the push policy in section 9 is attached, Spacelift does not start a proposed run at all, so this rule becomes the second line of defense rather than the only one.
+- **Only tracked and destroy runs, only on `main`.** A pull request produces a proposed run, and planning executes code from the pull request. This repository is public, so the script fetches no secret for a proposed run. That is not the same as the run holding no credential: the `cah-doppler` context is attached to every run type, so `DOPPLER_TOKEN` is present, and branch-controlled hook code could read it (section 8). The cost is that a pull request plan cannot talk to DigitalOcean; CI covers it with `tofu test` and mocked providers, and the real plan happens on `main` before you confirm. The push policy in section 9 is live and attached to every stack labelled `cah`, so Spacelift does not start a proposed run at all and this rule is the second line of defense rather than the only one.
 - **Task runs get nothing.** A task runs an arbitrary command. If you need a task to hold a credential, add that deliberately and write it down here.
 - **Named secrets only.** Each stack lists the exact names it needs in `.spacelift/config.yml`. A name must be a plain identifier.
 - **Verified download.** The Doppler CLI is fetched from the official release over HTTPS and checked against the SHA-256 pinned in the script. A mismatch deletes the file and stops the run.
@@ -133,9 +133,14 @@ Both facts from the 2026-10-19 check hold on 2026-10-21: Doppler OIDC identities
 
 ### Add a stack
 
-1. Create the stack in Spacelift with the label `cah`, so the context attaches, and so does the push policy if it carries `autoattach:cah` (section 9).
+1. Create the stack in Spacelift with the label `cah`, so the context attaches, and so do the push policy and the plan policy (both carry `autoattach:cah`, sections 9 and 9a).
 2. Add its entry to `.spacelift/config.yml`, keyed by the stack id.
 3. Open a pull request.
+4. If the stack needs values another stack creates, add a Spacelift stack dependency on that stack and reference its outputs as `TF_VAR_*` variables. Do not copy them into Doppler.
+
+### Stack inputs from other stacks
+
+The stacks get `region`, `vpc_id`, `project_id` and `baseline_tag` from Spacelift stack dependencies on `cah-00-foundation` (`TF_VAR_*` references to its outputs), not from Doppler. Doppler holds only credentials and account-specific settings. The stack `cah-20-telemetry` exists (root `stacks/20-telemetry`, locked, labels `cah` and `stage-2`, context `cah-doppler` attached). It needs the same dependency on `cah-00-foundation` for `region`; that is pending and not yet done.
 
 ### Upgrade the pinned Doppler CLI
 
@@ -156,7 +161,7 @@ The script tests run it under plain `sh` with stubbed `doppler` and `curl`, and 
 
 | What you see in the run log | What it means | Fix |
 |---|---|---|
-| `run type 'PROPOSED' does not get secrets; skipping` | A pull request plan. Expected without the push policy. | Attach the push policy (section 9) and proposed runs stop happening. Without it, the plan fails at the provider, by design. |
+| `run type 'PROPOSED' does not get secrets; skipping` | A proposed run, which the push policy (section 9) should prevent on every stack labelled `cah`. | Check the stack has the label `cah`, so the policy attached. A proposed run that still starts fails at the provider, by design. |
 | `DOPPLER_TOKEN is not set; is the cah-doppler context attached?` | The context did not attach. | Check the stack has the label `cah` and the context has `autoattach:cah`. |
 | `could not read NAME from Doppler` | The service token is expired or revoked, or `NAME` is missing in `prd`. | Rotate the service token (section 5) or add the secret. |
 | `NAME is empty in Doppler` | The secret exists but has no value. | Set the value. |
@@ -167,7 +172,7 @@ The script tests run it under plain `sh` with stubbed `doppler` and `curl`, and 
 
 - **No OIDC on this plan.** Spacelift's run identity token is not issued to this account (checked with a task: the variable was absent). If the plan changes, the token fetch can switch to Doppler OIDC, so no long-lived token sits in Spacelift. Only the login step in `doppler-env.sh` would change.
 - **The real trust boundary is Spacelift, not the script.** The script and `.spacelift/config.yml` are read from the branch being run, and the `cah-doppler` context is attached to every run type. Anyone who can push a branch or open a pull request can change either file to read `$DOPPLER_TOKEN` directly, so the script's run-type and branch checks only guard honest code. Today the repository owner is the only writer, which keeps the risk low. Keep it that way by doing all of the following:
-  - **The push policy** in section 9, attached to every stack. It never proposes a run, so no pull request's code runs in Spacelift next to the context, from a fork or from a branch of this repository. Until it is attached, do not let anyone else open pull requests.
+  - **The push policy** in section 9, attached to every stack. It never proposes a run, so no pull request's code runs in Spacelift next to the context, from a fork or from a branch of this repository. It is live today (section 9); if a stack ever loses the `cah` label it loses the policy too, so do not let anyone else open pull requests until it is back.
   - **Branch protection** on `main` stays on (a pull request and `CI green` are required). Add a required review before giving anyone else write access.
   - **Keep the Doppler token read-only** and scoped to this one config, so a leak reaches only these secrets.
 - **Masking must be confirmed on the first tracked run.** The script masks each value with Spacelift's documented `echo "::add-mask <value>"` command, which the runner is meant to consume without showing it. The documentation does not say the mask line itself is hidden from the log. After the first tracked run, search that run's log for the token prefix (`dop_v1_`) and confirm it never appears. If it does, revoke the token at once, then remove the `echo "::add-mask"` line and replace it with a different masking approach.
@@ -229,11 +234,11 @@ What it decides:
 | A tag, or a push to any other branch, with or without a pull request | Nothing. |
 | A pull request from a fork | Nothing. Spacelift runs a fork's pull request only when a push policy defines `allow_fork`, and this one never does. |
 
-**Plan check first.** Spacelift's documentation (read 2026-10-12) says the Git push policy type is available only to paid Spacelift accounts, and that policies live under **Enforce Guardrails > Policies**, visible to Spacelift admins. On the free plan there is no Policies entry to find. The free-plan route is below; the policy file stays in the repository, tested, for the day the plan changes.
+**Plan check.** Spacelift's documentation (read 2026-10-12) says the Git push policy type is available only to paid Spacelift accounts, and that policies live under **Enforce Guardrails > Policies**, visible to Spacelift admins. The policy is live on this account, so the paid-plan route below is the one in use. The free-plan route stays documented in case the plan changes.
 
 **The rule (issue #306).** Only a push to the stack's tracked branch can start a run, and only a tracked one. Every other event is ignored: a push to any other branch (including one made before a pull request exists, which carries no pull request data at all), a tag push, and a pull request event. The policy never defines `propose` or `allow_fork`, so the ignored events start nothing and post no check. A merge to `main` that arrives with its pull request attached is still tracked, because the decision rests on the branch and the changed files, not on whether a pull request is present.
 
-**The live policy must be replaced by hand after this merges.** On 2026-10-30 the live policy `ignore-pull-requests` (a Git push policy, `autoattach:cah`) was read from the Spacelift account. Its body is one rule, `ignore if input.pull_request != null`. It ignores only events that carry a pull request, so a push to a feature branch before the pull request is opened was proposed anyway, and that proposed run failed in planning on unset required variables (run 01M5R8JTT6WNNBGV6ZWJ1CARJB, stack `cah-10-access`). That reading of the cause is an inference: the policy has not been replayed against a captured event. The repository's `push.rego` is a different, stricter policy. Until its body is pasted into the live policy (steps under "Paid plan" below), this section describes the reviewed copy, not what Spacelift runs.
+**The live policy matches the repository.** The policy `ignore-pull-requests` (a Git push policy, Rego v1, attached by the label `autoattach:cah`) is live in Spacelift, with the same body as `.spacelift/policies/push.rego` (checked 2026-10-30). Every stack labelled `cah` gets it. It replaced an earlier live policy that ignored only events carrying a pull request, so a push to a feature branch before the pull request was opened was proposed anyway and failed in planning on unset required variables. That reading of the cause is an inference: the old policy was not replayed against a captured event.
 
 Why it exists: on 2026-10-12 a pull request that changed only `docs/wiki/` and the README got a red `spacelift/cah-10-access` check. The proposed run had no credentials by design, so it could only fail. Pull requests are already covered by `tofu test` with mocked providers in GitHub Actions, so a proposed run adds a failure and nothing else. Never proposing also closes the gap described in section 8: no pull request's code ever runs in Spacelift next to the Doppler context.
 
@@ -243,17 +248,21 @@ Without a push policy, Spacelift's built-in behavior starts a stack's runs only 
 
 | Stack | Project root | Project globs |
 |---|---|---|
-| `cah-00-foundation` | `stacks/00-foundation` | `modules/**`, `scripts/spacelift/**`, `.spacelift/**` |
-| `cah-10-access` | `stacks/10-access` | `modules/**`, `scripts/spacelift/**`, `.spacelift/**` |
-| `cah-20-telemetry` | `stacks/20-telemetry` | `modules/**`, `scripts/spacelift/**`, `.spacelift/**` |
+| `cah-00-foundation` | `stacks/00-foundation` | `modules/vpc/**`, `modules/firewall/**`, `scripts/spacelift/**`, `.spacelift/**` |
+| `cah-10-access` | `stacks/10-access` | `modules/twingate-connector/**`, `modules/twingate-bootstrap/**`, `modules/firewall/**`, `scripts/spacelift/**`, `.spacelift/**` |
+| `cah-20-telemetry` | `stacks/20-telemetry` | `modules/**`, `scripts/spacelift/**`, `.spacelift/**` (not confirmed against Spacelift) |
+
+The globs for `cah-00-foundation` and `cah-10-access` are set in the stack factory, which is private; this repository does not hold them, so the table is the intended state, not something a test checks.
 
 Remove any other glob, such as `**`, `*` or one that covers `docs/`. Then a docs-only pull request or merge starts nothing. What this cannot do is the other half of the policy: a pull request that does change a stack still gets a proposed run, which still fails at the provider without credentials. On the free plan that red check is expected on those pull requests only; branch protection requires only `CI green`, so it does not block a merge, and `tofu test` in CI is the real test. The exposure in section 8 also remains: that proposed run executes the pull request's code with the Doppler context attached, so keep this repository single-writer.
 
-### Paid plan: attach the policy (once)
+### Paid plan: attach the policy (once, done)
 
-1. In Spacelift, open **Enforce Guardrails > Policies**, choose **Create policy**, name it `cah-push`, and pick the type **Git push**.
+The policy is already live (see above). These steps are for rebuilding it or changing its body.
+
+1. In Spacelift, open **Enforce Guardrails > Policies**, choose **Create policy**, name it `ignore-pull-requests` (the live name), and pick the type **Git push**.
 2. Paste the contents of `.spacelift/policies/push.rego` as the body. Do not paste `push_test.rego`; it is only for CI.
-3. Add the label `autoattach:cah`, so it attaches to every stack labeled `cah`, the same way the Doppler context does. Or attach it by hand to `cah-00-foundation`, `cah-10-access` and `cah-20-telemetry`.
+3. Add the label `autoattach:cah`, so it attaches to every stack labeled `cah`, the same way the Doppler context does. Or attach it by hand to each stack.
 4. Detach any other Git push policy from those stacks. With more than one attached, the outcome is a combination of both and is no longer what the tests describe.
 5. When the policy changes in a pull request, paste the new body into the same policy after the merge. The file in the repository is the reviewed copy, not the live one; a check on the next tracked run is the only proof they match.
 
@@ -303,11 +312,11 @@ For those rules, deletes and no-ops are ignored: removing a rule never opens any
 
 Each message names the resource address (or the stack) and says what a human must do. I have not seen a real plan input in Spacelift yet: the field paths follow the published policy contract, and the fixtures in `plan_test.rego` follow it too. Keep a real plan in the policy workbench (the `sample` rule) and compare the first time the policy is attached.
 
-**Plan check first.** Spacelift's documentation lists policies under **Enforce Guardrails > Policies**, and the push policy type is paid-plan only (section 9). I have not confirmed whether the plan policy type is available on the maintainer's plan; if **Create policy** offers no **Plan** type, the policy stays in the repository, tested, until the plan changes. Until it is attached, the firewall module's own tests in CI are the only check on inbound rules, and they run on the pull request, not on the plan Spacelift applies.
+**Live status.** The policy `cah-plan` is live in Spacelift and attached to the stacks labelled `cah` through `autoattach:cah` (checked 2026-10-30), with the world-open threshold of `/8` or shorter described above (PR #315). The firewall module's own tests in CI still run on the pull request; the plan policy adds the check on the plan Spacelift applies.
 
 ### Attach it (once)
 
-1. In Spacelift, open **Enforce Guardrails > Policies**, choose **Create policy**, name it `cah-plan`, and pick the type **Plan**.
+1. (Already done.) In Spacelift, open **Enforce Guardrails > Policies**, choose **Create policy**, name it `cah-plan`, and pick the type **Plan**.
 2. Paste the contents of `.spacelift/policies/plan.rego` as the body. Do not paste `plan_test.rego`.
 3. Add the label `autoattach:cah`, so it attaches to every stack labeled `cah`, or attach it by hand to each stack.
 4. When the policy changes in a pull request, paste the new body into the same policy after the merge. The file in the repository is the reviewed copy, not the live one.
@@ -370,4 +379,4 @@ Find that address in the plan, then change the code so the rule uses a tag sourc
 
 ### Verify it
 
-The input shape (`input.terraform.resource_changes`, each with `address`, `type`, and `change.actions` and `change.after`) comes from Spacelift's published plan-policy contract and the Terraform JSON plan format, not from a real run on this account. After attaching it, check those fields against a real run's plan input in the policy workbench (the policy sets `sample := true`, so Spacelift keeps recent inputs). Local tests are the same as section 9: `opa test .spacelift/policies -v`.
+The input shape (`input.terraform.resource_changes`, each with `address`, `type`, and `change.actions` and `change.after`) comes from Spacelift's published plan-policy contract and the Terraform JSON plan format, not from a real run on this account. Check those fields against a real run's plan input in the policy workbench (the policy sets `sample := true`, so Spacelift keeps recent inputs). Local tests are the same as section 9: `opa test .spacelift/policies -v`.
