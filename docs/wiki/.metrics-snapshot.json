@@ -32,7 +32,7 @@
  "png_sha256": "36800edb6ebfb3fec190edd1f37be4ccd282668ebbdf2167e7456aefdba2caac",
  "repo": "ChiefGyk3D/Clouds-Against-Humanity",
  "schema": 1,
- "source_sha256": "3f4c60599d03f453aa46b1712e073c6b0c5df18ff248e556323b8697b65ed2b2",
+ "source_sha256": "5e1c5a663ea6168e62563374f7882a0c49df4b35f1f0da01e87cea947fee654c",
  "stars": {
   "2026-10-11": 2,
   "2026-10-12": 1,
@@ -46,5 +46,6 @@
   "2026-10-20": 8,
   "2026-10-21": 80,
   "2026-10-22": 139
- }
+ },
+ "stars_as_of": "2026-10-23"
 }

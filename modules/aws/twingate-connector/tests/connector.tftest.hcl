@@ -450,6 +450,12 @@ run "host_firewall_sources_reach_the_instance_user_data" {
 #   error_message to "${nonsensitive(sha256(aws_instance.connector.user_data))}"
 #   (the user_data is sensitive, so the hash is read through nonsensitive);
 #   tofu test prints the hash in the failure message.
+# Re-taken for #288 (one-key apt key check): the only change to the rendered
+# user_data is the new /usr/local/sbin/cah-apt-key-check file and the Twingate
+# install step calling it. Both new hashes were taken on this tree and the
+# parent of the #288 template change (4b6fe25^) was re-rendered with the same
+# inputs and reproduced the two old hashes, so the harness is the same one;
+# a diff of the two renders shows only that file and the call to it.
 # A hash that changes after a later edit to the bootstrap template is a real
 # change to every live connector's user_data: review it, do not just paste the
 # new value.
@@ -463,7 +469,7 @@ run "node_exporter_default_user_data_is_the_main_user_data_a" {
     }
   }
   assert {
-    condition     = sha256(aws_instance.connector.user_data) == "59cc1dfc0a31f5fdec5c03be38420340325ec5ad6570ebe062cf75b1ff78af06"
+    condition     = sha256(aws_instance.connector.user_data) == "8938f709421635218149415a7bac25c04832cde43165396eaec4a1e366f6bb85"
     error_message = "With node_exporter unset the user_data must be exactly what main rendered (connector a)."
   }
 }
@@ -481,7 +487,7 @@ run "node_exporter_explicitly_off_is_the_main_user_data_a" {
     node_exporter = { enabled = false, port = 9101 }
   }
   assert {
-    condition     = sha256(aws_instance.connector.user_data) == "59cc1dfc0a31f5fdec5c03be38420340325ec5ad6570ebe062cf75b1ff78af06"
+    condition     = sha256(aws_instance.connector.user_data) == "8938f709421635218149415a7bac25c04832cde43165396eaec4a1e366f6bb85"
     error_message = "node_exporter disabled (whatever its port) must render exactly what main rendered."
   }
 }
@@ -528,7 +534,7 @@ run "node_exporter_default_user_data_is_the_main_user_data_b_with_host_firewall"
     host_firewall = true
   }
   assert {
-    condition     = sha256(aws_instance.connector.user_data) == "bdd9be07d3ea61f47d8f5ed4da066840142341e3d98eabd9436a00950a4f7332"
+    condition     = sha256(aws_instance.connector.user_data) == "e314c7b9baa19fe8f4c21b66534b94e5b7ba61f8164631d0041b41468cbf454d"
     error_message = "With node_exporter unset the user_data must be exactly what main rendered (connector b, host firewall on)."
   }
 }

@@ -3,7 +3,7 @@
   "summary": {
     "title": "Clouds Against Humanity: pipeline data flow diagram",
     "owner": "Clouds Against Humanity maintainers",
-    "description": "Teaching model for the Threat Dragon exercise. Trust boundaries B1 to B8 match docs/wiki/Threat-Model-Exercise.md; T-numbers match docs/wiki/Threat-Model.md. A model records what someone believes; it does not verify the system. Generic names only.",
+    "description": "Teaching model for the Threat Dragon exercise. Trust boundaries B1 to B8 match docs/wiki/Threat-Model-Exercise.md; T-numbers match docs/wiki/Threat-Model.md. A model records what someone believes; it does not verify the system. Generic names only. Audited against the repository code on 2026-10-24 (see docs/threat-model/README.md): a threat is Mitigated only when a control is visible in code or config, and anything that cannot be confirmed from the repository starts with UNVERIFIED.",
     "id": 0
   },
   "detail": {
@@ -60,7 +60,7 @@
                   "type": "Spoofing",
                   "modelType": "STRIDE",
                   "description": "T1: an anonymous party tries to talk to a connector as if it were a client.",
-                  "mitigation": "There is nothing to talk to: zero public inbound rules, connectors are outbound-only."
+                  "mitigation": "Zero public inbound rules. modules/firewall/main.tf emits inbound rules only from the firewall's own tag or one other group's tag, never an address; stacks/10-access/main.tf passes only connector-tag TCP 22 (plus metrics ports from a telemetry tag, empty by default). .spacelift/policies/plan.rego denies any non-tag inbound rule at plan time (UNVERIFIED: that this policy is attached in Spacelift). scripts/zero_ports_check.py is an external check run by hand, from one vantage point at one moment. Connectors dial out only."
                 }
               ],
               "hasOpenThreats": false,
@@ -100,13 +100,13 @@
                 {
                   "id": "threat-contributor-s",
                   "number": 2,
-                  "status": "Mitigated",
+                  "status": "Open",
                   "severity": "Medium",
                   "title": "Pull request made to look like a trusted change",
                   "type": "Spoofing",
                   "modelType": "STRIDE",
                   "description": "T3: a pull request edits a security-critical file (the secrets hook) alongside a harmless-looking test change.",
-                  "mitigation": "Branch protection plus a person reading the changed-file list; CI green is necessary but not sufficient."
+                  "mitigation": "Reading the changed-file list is a human step, not a control in the repository. Verified limits on the damage: .spacelift/policies/push.rego never proposes a run, scripts/spacelift/doppler-env.sh fetches secrets only for a tracked or destroy run on main, and .github/workflows/ci.yml gives CI no cloud credential. UNVERIFIED: branch protection and a required CI green check on main (GitHub settings, not readable from a clone). Open until the merge gate is checked in the repository settings."
                 },
                 {
                   "id": "threat-contributor-r",
@@ -157,16 +157,16 @@
                 {
                   "id": "threat-upstream-t",
                   "number": 4,
-                  "status": "Mitigated",
+                  "status": "Open",
                   "severity": "High",
                   "title": "Tampered download or action",
                   "type": "Tampering",
                   "modelType": "STRIDE",
-                  "description": "T7, T8, T9: a compromised action, CLI binary or package is pulled into the pipeline or onto a droplet.",
-                  "mitigation": "Actions pinned by commit SHA; Doppler CLI pinned by SHA-256 (fail closed); Twingate apt key checked against a pinned fingerprint; apt verifies signatures. Residual: a pinned commit that was already malicious."
+                  "description": "T7, T8, T9: a compromised action, CLI binary or package is pulled into the pipeline or onto a droplet. Evidence: ci.yml and wiki.yml pin each reusable workflow by full commit SHA; scripts/spacelift/doppler-env.sh pins the Doppler CLI by SHA-256; modules/twingate-bootstrap/cloud-init.yaml.tftpl pins the Twingate apt key by fingerprint and refuses any extra key in the file (cah-apt-key-check, see the tampered Twingate package threat).",
+                  "mitigation": "Workflow references pinned by commit SHA (ci.yml, wiki.yml); Doppler CLI pinned by SHA-256 per architecture and fail closed (doppler-env.sh, cah_doppler_install). The Twingate apt key pin is now strict (cah-apt-key-check refuses extra keys; see the tampered Twingate package threat, Mitigated). The umbrella stays Open for the other causes: the unpinned weekly connector package update, ci.yml's unpinned pytest install, and a pinned commit that was already malicious. Residual: a pinned commit that was already malicious; ci.yml installs pytest unpinned."
                 }
               ],
-              "hasOpenThreats": false,
+              "hasOpenThreats": true,
               "providesAuthentication": false
             }
           },
@@ -251,7 +251,7 @@
             "id": "node-gh_repo",
             "data": {
               "name": "Source repo",
-              "description": "Full name: Source repository and main branch. Public repository, branch protection on main, CI green required. Holds code and the pipeline definition. Holds no cloud credential.",
+              "description": "Full name: Source repository and main branch. Public repository. UNVERIFIED: branch protection on main and a required CI green check are GitHub settings, not readable from a clone (the job named CI green exists in .github/workflows/ci.yml). Holds code and the pipeline definition. Holds no cloud credential.",
               "type": "tm.Process",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -260,13 +260,13 @@
                 {
                   "id": "threat-ghrepo-t",
                   "number": 7,
-                  "status": "Mitigated",
+                  "status": "Open",
                   "severity": "High",
                   "title": "Malicious change to the secrets hook or .spacelift/config.yml",
                   "type": "Tampering",
                   "modelType": "STRIDE",
                   "description": "T3: a change makes the hook print the Doppler token. Every automated check can pass a few changed lines.",
-                  "mitigation": "Push policy never proposes a run; CI holds no cloud credential; branch protection; a person reads the diff."
+                  "mitigation": "Verifiable controls only narrow the harm: push.rego never proposes a run (UNVERIFIED: that it is attached in Spacelift), doppler-env.sh skips secrets unless the run is tracked on main, and ci.yml holds no cloud credential. Nothing in the repository stops a reviewed and merged change to the hook, which then runs on main next to DOPPLER_TOKEN; docs/spacelift-secrets.md section 8 says the script's checks only guard honest code. What is left is a person reading the diff and UNVERIFIED branch protection."
                 },
                 {
                   "id": "threat-ghrepo-i",
@@ -277,7 +277,7 @@
                   "type": "Information disclosure",
                   "modelType": "STRIDE",
                   "description": "T14: account ids, address ranges, names or machine identifiers end up in a commit, doc or issue.",
-                  "mitigation": "Identifiers live in Doppler; SSH key comment stripped; secret scanning in CI. Residual: human error in a commit message or doc."
+                  "mitigation": "Identifiers live in Doppler (docs/spacelift-secrets.md section 2). modules/twingate-bootstrap/main.tf drops the SSH key comment before it reaches cloud-init. scripts/identifier_check.py runs in the python job of ci.yml, and gitleaks runs in the pinned security workflow (on by default; ci.yml does not turn it off). Residual: human error in a commit message or doc, and anything the checks have no pattern for."
                 },
                 {
                   "id": "threat-ghrepo-r",
@@ -332,8 +332,8 @@
                   "title": "Hostile test prints a secret",
                   "type": "Information disclosure",
                   "modelType": "STRIDE",
-                  "description": "T3, T7: a pull request's code runs in CI and tries to read or print a secret.",
-                  "mitigation": "CI holds no cloud credential, so there is nothing to read. Worst case is wasted minutes."
+                  "description": "T3, T7: a pull request's code runs in CI and tries to read or print a secret. Evidence: ci.yml sets permissions to an empty block at the top level and grants contents: read per job; it passes no secret and no Doppler input to the reusable workflows.",
+                  "mitigation": "CI holds no cloud credential: ci.yml passes no secrets and no Doppler inputs. The reusable python and tofu workflows keep id-token out of the jobs that run repository code (read in their source at the pinned commit). Worst case is wasted minutes."
                 },
                 {
                   "id": "threat-ci-t",
@@ -389,7 +389,7 @@
                   "type": "Elevation of privilege",
                   "modelType": "STRIDE",
                   "description": "T3: until the push policy is attached in Spacelift, a same-repository pull request that changes a stack still gets a proposed run, and the hook script is read from the pull request's branch.",
-                  "mitigation": "Attach .spacelift/policies/push.rego in Spacelift (paid plan) or narrow project roots and globs (free plan); nobody else opens pull requests until then. Verify in the console."
+                  "mitigation": "UNVERIFIED (a Spacelift setting): whether .spacelift/policies/push.rego is attached. The repository keeps and tests the file (push_test.rego, run by the policy job of ci.yml). Attach it in Spacelift (paid plan) or narrow project roots and globs (free plan); nobody else opens pull requests until then. Verify in the console."
                 }
               ],
               "hasOpenThreats": true
@@ -419,7 +419,7 @@
             "id": "node-sl_track",
             "data": {
               "name": "Spacelift tracked run",
-              "description": "Full name: Spacelift tracked run (main). Runs plan and apply for a stack from main. Holds DOPPLER_TOKEN and the per-stack secrets loaded in before_init. Apply waits for a human confirm.",
+              "description": "Full name: Spacelift tracked run (main). Runs plan and apply for a stack from main. Holds DOPPLER_TOKEN and the per-stack secrets loaded in before_init. Apply waits for a human confirm (a Spacelift stack setting, UNVERIFIED from the repository; .spacelift/policies/plan.rego denies a plan from a stack with autodeploy on).",
               "type": "tm.Process",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -434,7 +434,7 @@
                   "type": "Elevation of privilege",
                   "modelType": "STRIDE",
                   "description": "T3, T4, T10: code that executes during init or plan runs before the confirm gate, with DOPPLER_TOKEN scoped to the whole prd config. The per-stack secret list is not isolation.",
-                  "mitigation": "Gates before main: pull request, CI green, branch protection, one writer. The confirm gate reviews the plan, it does not stop code that already ran."
+                  "mitigation": "Gates before main: pull request, CI green, branch protection (UNVERIFIED setting), one writer. The confirm gate reviews the plan; it does not stop code that already ran. .spacelift/policies/plan.rego checks the plan's resource changes, not code that executed during init or plan."
                 },
                 {
                   "id": "threat-sltrack-t",
@@ -445,7 +445,7 @@
                   "type": "Tampering",
                   "modelType": "STRIDE",
                   "description": "T11: autodeploy applies a bad plan.",
-                  "mitigation": "Autodeploy off; a person confirms every apply; cost gate and approved totals in review."
+                  "mitigation": "A person confirms every apply. .spacelift/policies/plan.rego denies any plan from a stack with autodeploy on (covered by plan_test.rego; UNVERIFIED: that the plan policy is attached). scripts/cost_check.py and scripts/ci_cost_gate.sh run in the python job of ci.yml against docs/stages/approved.json."
                 },
                 {
                   "id": "threat-sltrack-d",
@@ -456,7 +456,7 @@
                   "type": "Denial of service",
                   "modelType": "STRIDE",
                   "description": "T11: spend from resources created outside the repository or bandwidth overage is not covered by the cost gate.",
-                  "mitigation": "Billing alerts at $10 and $25. Residual: check the cloud account for undeclared resources."
+                  "mitigation": "Billing alerts at $10 and $25 are stated in docs/wiki/Threat-Model.md and cannot be confirmed from the repository (UNVERIFIED). The cost gate sees only resources the repository declares. Residual: check the cloud account for undeclared resources."
                 }
               ],
               "hasOpenThreats": true
@@ -491,7 +491,7 @@
             "id": "node-state",
             "data": {
               "name": "OpenTofu state",
-              "description": "Full name: OpenTofu state in Spacelift. State holds connector tokens and the full resource map. Stored only in Spacelift.",
+              "description": "Full name: OpenTofu state in Spacelift. State holds connector tokens and the full resource map. Stored only in Spacelift (the stacks declare no backend block; UNVERIFIED from the repository).",
               "type": "tm.Store",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -506,7 +506,7 @@
                   "type": "Information disclosure",
                   "modelType": "STRIDE",
                   "description": "T6: anyone who can read stack state sees the connector tokens.",
-                  "mitigation": "Marked sensitive; state lives only in Spacelift. Accepted: restrict state access in Spacelift."
+                  "mitigation": "The user_data output is marked sensitive (modules/twingate-bootstrap/outputs.tf). The stacks declare no backend block, so state is Spacelift-managed (UNVERIFIED: state access settings are not readable from the repository). Accepted: restrict state access in Spacelift."
                 }
               ],
               "hasOpenThreats": true,
@@ -545,7 +545,7 @@
             "id": "node-doppler",
             "data": {
               "name": "Doppler prd config",
-              "description": "Every runtime secret: cloud token, Twingate API token, tenant name, admin key name and user ids. Read through a read-only, single-config service token.",
+              "description": "Every runtime secret: cloud token, Twingate API token, tenant name, admin key name and user ids. Read through a read-only, single-config service token (docs/spacelift-secrets.md; a vendor setting, UNVERIFIED from the repository). .spacelift/config.yml loads names for stacks 00, 10 and 20.",
               "type": "tm.Store",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -560,7 +560,7 @@
                   "type": "Information disclosure",
                   "modelType": "STRIDE",
                   "description": "T4: the service token reads all prd secrets until revoked. Nothing records who read the config.",
-                  "mitigation": "Read-only, one config, 90-day expiry, write-only in Spacelift, masked in logs. Rotate every value it could read, not only the token."
+                  "mitigation": "Documented setup (docs/spacelift-secrets.md sections 2 and 4): read-only, one config, 90-day expiry, write-only in the Spacelift context. These are Doppler and Spacelift settings, UNVERIFIED from the repository. The same token also serves the telemetry stack (.spacelift/config.yml, cah-20-telemetry). Rotate every value it could read, not only the token."
                 },
                 {
                   "id": "threat-doppler-v",
@@ -605,7 +605,7 @@
             "id": "node-cloud_api",
             "data": {
               "name": "Cloud provider API",
-              "description": "The provider API that creates droplets and firewalls. Reached with a write-scoped token.",
+              "description": "The provider API that creates droplets and firewalls. Reached with a write-scoped token (custom scopes listed in docs/spacelift-secrets.md section 4a: project, vpc, firewall, tag, droplet, ssh_key read).",
               "type": "tm.Process",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -620,7 +620,7 @@
                   "type": "Denial of service",
                   "modelType": "STRIDE",
                   "description": "T11: an unreviewed or malicious apply creates expensive resources.",
-                  "mitigation": "Cost gate allowlist of free resource types; approved totals; billing alerts at $10 and $25."
+                  "mitigation": "scripts/cost_check.py allows only approved resource types and totals (docs/stages/approved.json) and runs in ci.yml. plan.rego denies world-open inbound rules and protected deletes, not cost. Billing alerts at $10 and $25 are UNVERIFIED."
                 },
                 {
                   "id": "threat-cloud-e",
@@ -631,7 +631,7 @@
                   "type": "Elevation of privilege",
                   "modelType": "STRIDE",
                   "description": "T10: a stolen write token can create, destroy or open anything in the account.",
-                  "mitigation": "Custom scopes limited to droplets, firewalls and tags; token held only by Spacelift runs. Accepted vendor trust."
+                  "mitigation": "Custom scopes (docs/spacelift-secrets.md section 4a): project, vpc, firewall, tag and droplet with create, read, update and delete; ssh_key read; image, region, size and actions read. That is wider than droplets, firewalls and tags: it includes the project and the VPC. plan.rego denies a plan that deletes or replaces a VPC, project or firewall (UNVERIFIED: attached). The token sits in Doppler and is loaded only on tracked or destroy runs from main. Accepted vendor trust."
                 }
               ],
               "hasOpenThreats": true
@@ -670,13 +670,13 @@
                 {
                   "id": "threat-tg-s",
                   "number": 21,
-                  "status": "Mitigated",
+                  "status": "Open",
                   "severity": "High",
                   "title": "Stolen Twingate credentials",
                   "type": "Spoofing",
                   "modelType": "STRIDE",
                   "description": "T2: an attacker presents the maintainer's identity to Twingate.",
-                  "mitigation": "Sign-in delegated to the identity provider (MFA there); access limited to one host and port per resource; SSH key still required."
+                  "mitigation": "Verified in code: stacks/10-access/main.tf defines two Twingate resources, TCP 22 only, UDP denied, ICMP off, granted to one admin group; cloud-init sshd hardening allows only cah-admin with a key and no password. UNVERIFIED: MFA at the identity provider and the Twingate sign-in policy (vendor settings). Open until those are checked in each console."
                 },
                 {
                   "id": "threat-tg-v",
@@ -717,7 +717,7 @@
             "id": "node-droplets",
             "data": {
               "name": "Connector droplets",
-              "description": "Full name: Connector droplets (two). Two outbound-only connector droplets. No public inbound rules. Hold their connector token in a root-only file.",
+              "description": "Full name: Connector droplets (two). Two outbound-only connector droplets. No public inbound rules. Outbound is open to any address on TCP 443, 80 and 53, UDP 53 and 123, TCP 30000 to 31000 and all UDP ports (modules/firewall/main.tf, stacks/10-access/main.tf); there is no outbound allowlist. Hold their connector token in a root-only file.",
               "type": "tm.Process",
               "isTrustBoundary": false,
               "outOfScope": false,
@@ -732,7 +732,7 @@
                   "type": "Information disclosure",
                   "modelType": "STRIDE",
                   "description": "T5: user-data is readable by any local process through the metadata endpoint.",
-                  "mitigation": "Token file is root-only 0600; one token per connector, revocable. Accepted: lockdown is a follow-up."
+                  "mitigation": "Token file is root-only 0600 (connector.conf in the cloud-init template). An opt-in lock exists: metadata_lock in modules/twingate-bootstrap limits the metadata endpoint to root and the monitoring agent user, but it defaults to false and its variable text says it is not tested on a real machine, so by default any local process can read user-data. AWS connectors require IMDSv2 with a hop limit of 1 (modules/aws/twingate-connector/main.tf), which does not stop a local process. Accepted until the lock is rolled out."
                 },
                 {
                   "id": "threat-drop-d",
@@ -743,7 +743,7 @@
                   "type": "Denial of service",
                   "modelType": "STRIDE",
                   "description": "T13: no console password by design.",
-                  "mitigation": "Two connectors with staggered reboots and updates. Accepted: recovery is a rebuild through Spacelift."
+                  "mitigation": "Two connectors with staggered reboots and updates (reboot_times in stacks/10-access, weekly update 30 minutes after the reboot time in modules/twingate-bootstrap/main.tf). Accepted: no console password by design (lock_passwd in cloud-init); recovery is a rebuild through Spacelift."
                 },
                 {
                   "id": "threat-drop-e",
@@ -753,8 +753,8 @@
                   "title": "Lateral movement between droplets",
                   "type": "Elevation of privilege",
                   "modelType": "STRIDE",
-                  "description": "T12: a compromised droplet moves to another.",
-                  "mitigation": "Provider firewalls: inbound only from the firewall's own tag, no address rules; tests pin the exact set."
+                  "description": "T12: a compromised droplet moves to another. Evidence: the connector firewall allows TCP 22 between members of the connector tag in both directions (stacks/10-access/main.tf), because Twingate may route a session to either connector.",
+                  "mitigation": "Cloud firewall: inbound only from the connector tag on TCP 22, same-tag outbound on 22, no address rules (modules/firewall/main.tf, tests/firewall.tftest.hcl); sshd allows only cah-admin with a key. The connector-to-connector SSH path is allowed on purpose, so this narrows lateral movement to SSH between the two; it does not remove it."
                 },
                 {
                   "id": "threat-drop-e1",
@@ -765,7 +765,7 @@
                   "type": "Elevation of privilege",
                   "modelType": "STRIDE",
                   "description": "T1: scanning, brute force or exploit of an exposed service.",
-                  "mitigation": "Zero public inbound rules attached by tag at creation; sshd keys only, one user."
+                  "mitigation": "Zero public inbound rules attached by tag at creation (see the scanner threat), plus sshd hardening in cloud-init: no root login, no passwords, AllowUsers cah-admin, MaxAuthTries 3. Unattended security upgrades are on. The host firewall (host_firewall) is an opt-in second layer, default false and untested on a real machine."
                 }
               ],
               "hasOpenThreats": true
@@ -863,7 +863,7 @@
                   "type": "Denial of service",
                   "modelType": "STRIDE",
                   "description": "T1: unsolicited traffic aimed at the droplets.",
-                  "mitigation": "Zero public inbound rules; connectors are outbound-only."
+                  "mitigation": "Zero public inbound rules (modules/firewall/main.tf; plan.rego denies non-tag inbound); connectors are outbound-only."
                 }
               ],
               "hasOpenThreats": false
@@ -930,7 +930,7 @@
                   "type": "Tampering",
                   "modelType": "STRIDE",
                   "description": "T3: the pull request changes scripts, workflows or stack definitions.",
-                  "mitigation": "CI only; branch protection; review of the changed-file list."
+                  "mitigation": "CI only for a pull request: ci.yml holds no credential, and push.rego proposes no Spacelift run (UNVERIFIED: attached; see the proposed-run threat). Review of the changed-file list is a human step."
                 }
               ],
               "hasOpenThreats": false
@@ -992,7 +992,7 @@
                   "type": "Elevation of privilege",
                   "modelType": "STRIDE",
                   "description": "T3, T7: hostile repository code runs in CI.",
-                  "mitigation": "permissions: {} by default; no cloud credential in CI."
+                  "mitigation": "ci.yml: permissions empty at the top level, contents: read per job, no secrets passed. The reusable workflows keep id-token out of jobs that run repository code (read at the pinned commit)."
                 }
               ],
               "hasOpenThreats": false
@@ -1114,7 +1114,7 @@
                   "type": "Tampering",
                   "modelType": "STRIDE",
                   "description": "T7: the pinned reference changes or the pinned commit was already malicious.",
-                  "mitigation": "Pin by full commit SHA; review pin changes."
+                  "mitigation": "Every reusable workflow reference in ci.yml and wiki.yml is a full commit SHA; changing the pin is a reviewed diff. Residual: a pin that was already malicious."
                 }
               ],
               "hasOpenThreats": false
@@ -1247,7 +1247,7 @@
                   "type": "Elevation of privilege",
                   "modelType": "STRIDE",
                   "description": "T3: without the push policy attached, a same-repository pull request gets a proposed run. A fork starts nothing unless a policy defines allow_fork.",
-                  "mitigation": "Attach the push policy in Spacelift; it is not read from the repository."
+                  "mitigation": "UNVERIFIED (a Spacelift setting): attach .spacelift/policies/push.rego. The repository keeps and tests it (push_test.rego, policy job in ci.yml); Spacelift does not read it from the repository."
                 }
               ],
               "hasOpenThreats": true
@@ -1371,7 +1371,7 @@
                   "type": "Tampering",
                   "modelType": "STRIDE",
                   "description": "T8: a modified binary runs next to the secrets.",
-                  "mitigation": "Pinned version and SHA-256 per architecture; mismatch deletes the file and stops the run."
+                  "mitigation": "Pinned version and SHA-256 per architecture; a mismatch deletes the file and stops the run (scripts/spacelift/doppler-env.sh, cah_doppler_install; tests/test_doppler_env.py)."
                 }
               ],
               "hasOpenThreats": false
@@ -1427,27 +1427,27 @@
                 {
                   "id": "threat-f-tok-i",
                   "number": 36,
-                  "status": "Mitigated",
+                  "status": "Open",
                   "severity": "High",
                   "title": "Service token appears in a log",
                   "type": "Information disclosure",
                   "modelType": "STRIDE",
                   "description": "T4: the token or a fetched value is printed in a run log.",
-                  "mitigation": "Each fetched value is masked with ::add-mask; whether masking works on a real run was still to be confirmed."
+                  "mitigation": "Each fetched value is passed to ::add-mask (doppler-env.sh). docs/spacelift-secrets.md section 8 says masking is not confirmed on a real run and that the mask line itself may appear in the log. UNVERIFIED. Open until the first tracked run's log is searched for the token prefix."
                 },
                 {
                   "id": "threat-f-tok-s",
                   "number": 47,
-                  "status": "Mitigated",
+                  "status": "Open",
                   "severity": "High",
                   "title": "Stolen service token used to ask Doppler for secrets",
                   "type": "Spoofing",
                   "modelType": "STRIDE",
                   "description": "T4: Doppler decides who is asking by one token, so whoever holds it is treated as the run.",
-                  "mitigation": "Read-only token, scoped to one config, 90-day expiry; revoke on suspicion."
+                  "mitigation": "Read-only, one config and 90-day expiry are documented (docs/spacelift-secrets.md sections 2 and 4) and are vendor settings, UNVERIFIED from the repository. Revoke on suspicion."
                 }
               ],
-              "hasOpenThreats": false
+              "hasOpenThreats": true
             },
             "id": "flow-f-tok",
             "labels": [
@@ -1511,7 +1511,7 @@
                   "type": "Information disclosure",
                   "modelType": "STRIDE",
                   "description": "T4: any code that executes in the run can read the environment.",
-                  "mitigation": "TLS to Doppler; masking; gates before main."
+                  "mitigation": "TLS to Doppler; values are masked (UNVERIFIED, see the service-token log threat). doppler-env.sh exports every fetched value into the run's environment before the plan, so any code in init or plan can read it. Gates before main."
                 }
               ],
               "hasOpenThreats": true
@@ -1758,16 +1758,16 @@
                 {
                   "id": "threat-f-apply-t",
                   "number": 40,
-                  "status": "Mitigated",
+                  "status": "Open",
                   "severity": "High",
                   "title": "Plan differs from what the code would do",
                   "type": "Tampering",
                   "modelType": "STRIDE",
                   "description": "T3, T11: code that ran during plan calls the provider directly, before any confirm.",
-                  "mitigation": "Gates before main. The confirm only reviews the plan through honest tooling."
+                  "mitigation": "plan.rego inspects the plan's resource changes (non-tag inbound rules, IPv6, protected deletes, autodeploy), which limits what an honest plan may contain. It cannot see code that already ran during init or plan, the same gap as the compromised tracked run threat. UNVERIFIED: that the plan policy is attached."
                 }
               ],
-              "hasOpenThreats": false
+              "hasOpenThreats": true
             },
             "id": "flow-f-apply",
             "labels": [
@@ -1826,7 +1826,7 @@
                   "type": "Information disclosure",
                   "modelType": "STRIDE",
                   "description": "T5, T6: the connector token travels in user-data and sits in state.",
-                  "mitigation": "Root-only file; revocable per connector. Accepted."
+                  "mitigation": "Root-only file; revocable per connector; metadata_lock exists but is off by default (see the metadata endpoint threat). Accepted."
                 }
               ],
               "hasOpenThreats": true
@@ -1888,7 +1888,7 @@
                   "type": "Elevation of privilege",
                   "modelType": "STRIDE",
                   "description": "T4: whoever holds the Twingate key can create a connector or issue tokens for an existing one.",
-                  "mitigation": "After a leak, rotate the key and look in the console for connectors the code does not declare."
+                  "mitigation": "After a leak, rotate the key and look in the console for connectors the code does not declare. .spacelift/config.yml loads the same TWINGATE_API_TOKEN for stacks 10 and 20, so its reach is the tenant, not one stack (docs/spacelift-secrets.md section 2 lists only stack 10)."
                 }
               ],
               "hasOpenThreats": true
@@ -1944,16 +1944,16 @@
                 {
                   "id": "threat-f-login-s",
                   "number": 43,
-                  "status": "Mitigated",
+                  "status": "Open",
                   "severity": "High",
                   "title": "Identity replayed or phished",
                   "type": "Spoofing",
                   "modelType": "STRIDE",
                   "description": "T2: stolen credentials or session.",
-                  "mitigation": "MFA at the identity provider; per-resource ACL."
+                  "mitigation": "Per-resource ACL and key-only sshd are verified in code (see the stolen Twingate credentials threat). UNVERIFIED: MFA at the identity provider. Open until checked."
                 }
               ],
-              "hasOpenThreats": false
+              "hasOpenThreats": true
             },
             "id": "flow-f-login",
             "labels": [
@@ -2019,16 +2019,16 @@
                 {
                   "id": "threat-f-relay-s",
                   "number": 44,
-                  "status": "Mitigated",
+                  "status": "Open",
                   "severity": "Medium",
                   "title": "Stolen connector token used to impersonate a connector",
                   "type": "Spoofing",
                   "modelType": "STRIDE",
                   "description": "T5: a token taken from the droplet or state is presented elsewhere.",
-                  "mitigation": "One token per connector; revocable."
+                  "mitigation": "One twingate_connector and one token pair per connector (modules/twingate-bootstrap/main.tf). Revocation is a Twingate console action, UNVERIFIED from the repository; nothing in the repository detects a second connector presenting a stolen token."
                 }
               ],
-              "hasOpenThreats": false
+              "hasOpenThreats": true
             },
             "id": "flow-f-connector-link",
             "labels": [
@@ -2146,8 +2146,8 @@
                   "title": "Move from one droplet to another",
                   "type": "Elevation of privilege",
                   "modelType": "STRIDE",
-                  "description": "T12: lateral movement.",
-                  "mitigation": "Firewall admits only connector-to-connector SSH by tag."
+                  "description": "T12: lateral movement. Evidence: see the lateral-movement threat on the connector droplets; the path between the two connectors is allowed on purpose.",
+                  "mitigation": "Firewall admits only connector-tagged SSH between the two droplets (stacks/10-access/main.tf) and sshd allows only cah-admin with a key. The path exists by design; this narrows it, it does not remove it."
                 }
               ],
               "hasOpenThreats": false
@@ -2208,8 +2208,8 @@
                   "title": "Tampered Twingate package",
                   "type": "Tampering",
                   "modelType": "STRIDE",
-                  "description": "T9: a modified package installs on a connector.",
-                  "mitigation": "Key checked against a pinned fingerprint; apt verifies signatures."
+                  "description": "T9: a modified package installs on a connector. Finding (fixed, issue 288): the cloud-init check used to be a grep for the pinned fingerprint, so a key file holding the pinned key plus another key passed and the whole file was dearmored into the apt keyring. The connector install now calls /usr/local/sbin/cah-apt-key-check, the same strict helper the Wazuh agent install uses, which refuses any file that is not exactly one primary key with the pinned fingerprint.",
+                  "mitigation": "The pinned key file must be exactly one key: modules/twingate-bootstrap/cloud-init.yaml.tftpl calls cah-apt-key-check before gpg --dearmor, and apt verifies package signatures against that keyring (signed-by). Tests: tests/test_log_shipping_hardening.py (test_twingate_install_refuses_the_pinned_key_plus_an_extra_key, test_twingate_install_refuses_a_stray_extra_fingerprint_record, test_the_twingate_install_block_uses_the_strict_key_check_not_a_grep). Residual: Twingate's own signing key, and a weekly unpinned apt-get install of the connector package (cron.d/twingate-connector-update)."
                 }
               ],
               "hasOpenThreats": false
