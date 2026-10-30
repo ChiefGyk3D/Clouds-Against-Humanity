@@ -25,7 +25,7 @@
 #     entry for that stack and address (issue #253). Outbound rules to a tag,
 #     or to named addresses, are not judged. icmp rules and rules with no
 #     port range (or "all") are never allowlistable: see outbound_allowlist.
-#     "The whole internet" is judged by prefix length (0 or 1, IPv4 and IPv6),
+#     "The whole internet" is judged by prefix length (/0 through /8, IPv4 and IPv6),
 #     not by exact spelling; see wide_address.
 #   - a digitalocean_firewall whose inbound_rule or outbound_rule, or a rule's
 #     source or destination addresses, are unknown until apply. They could
@@ -500,13 +500,15 @@ filled_string(obj, key) if {
 }
 
 # "The whole internet" is judged by prefix length, not by spelling: 0.0.0.0/0,
-# ::/0, 0::/0, ::0/0, 0.0.0.0/00 and the two halves 0.0.0.0/1 + 128.0.0.0/1 (or
-# ::/1 + 8000::/1) all count. An address with a prefix length of 0 or 1 is
-# world-open. Anything that does not parse as an address or a CIDR range, or
-# that is not text, fails closed and counts as world-open too. A rule listing
-# such an address can then never match an allowlist entry, which names exact
-# strings. Narrower splits (four /2 ranges and so on) are not detected: the
-# firewall module never renders them, and the allowlist is exact.
+# ::/0, 0::/0, ::0/0, 0.0.0.0/00, the two halves 0.0.0.0/1 + 128.0.0.0/1 (or
+# ::/1 + 8000::/1) and the four /2 ranges all count. Decision for issue #309
+# (maintainer, 2026-10-30): an address with a prefix length of 8 or smaller
+# (/0 through /8, IPv4 and IPv6, the same numeric rule) is world-open. Ranges
+# narrower than /8 (/9, /16, /24, 2001:db8::/32) are named addresses the policy
+# does not judge. Anything that does not parse as an address or a CIDR range,
+# or that is not text, fails closed and counts as world-open too. A rule
+# listing such an address can then never match an allowlist entry, which names
+# exact strings.
 wide_address(address) if not is_string(address)
 
 wide_address(address) if {
@@ -517,7 +519,7 @@ wide_address(address) if {
 wide_address(address) if {
 	is_string(address)
 	net.cidr_is_valid(address)
-	to_number(split(address, "/")[1]) <= 1
+	to_number(split(address, "/")[1]) <= 8
 }
 
 # A CIDR range, or a bare address (a single host).
