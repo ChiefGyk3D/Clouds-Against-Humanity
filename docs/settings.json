@@ -1052,6 +1052,100 @@
         "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers"
       }
     ],
+    "stacks/50-edge": [
+      {
+        "name": "edge_enabled",
+        "type": "bool",
+        "description": "Master switch for the shared edge network (VPC, tags, Cloud Firewall; no droplet). false creates nothing. The stage is not approved; turning it on also needs edge_network_approved = true in this stack's cost.json.",
+        "required": false,
+        "default": false,
+        "validation": "none beyond bool (nullable = false); an output precondition refuses true while cost.json does not carry edge_network_approved = true",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "false",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "region",
+        "type": "string",
+        "description": "DigitalOcean region slug, the same as core.",
+        "required": false,
+        "default": "tor1",
+        "validation": "^[a-z]{3}[0-9]$ (three lowercase letters and a digit); the pattern cannot know which sizes the account may use",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "resource_key",
+        "type": "string",
+        "description": "Key used in the names of the firewall and droplet in place of region; empty means region. The VPC and tags keep their fixed names (rns-dmz). IMMUTABLE for the life of a stack.",
+        "required": false,
+        "default": "",
+        "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$; immutable on a live stack",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "vpc_ip_range",
+        "type": "string",
+        "description": "Private CIDR of the rns-dmz VPC. Must not overlap core_vpc_ip_range or any reserved_ranges entry.",
+        "required": false,
+        "default": "10.30.0.0/24",
+        "validation": "private IPv4 CIDR; the network address; prefix length between /16 and /28; no overlap with core_vpc_ip_range or reserved_ranges (an output precondition, because OpenTofu 1.8 cannot compare two variables in a validation)",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "10.30.0.0/24",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "core_vpc_ip_range",
+        "type": "string",
+        "description": "The core VPC's range, used only to refuse an overlap. The edge is never peered with core.",
+        "required": false,
+        "default": "10.78.0.0/24",
+        "validation": "an IPv4 CIDR",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "10.78.0.0/24",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "reserved_ranges",
+        "type": "list(string)",
+        "description": "Private CIDRs the edge range must not overlap (your homelab, other VPCs). Optional; they identify your network, so they are never committed.",
+        "required": false,
+        "default": [],
+        "validation": "each entry an IPv4 CIDR; vpc_ip_range must not overlap any entry",
+        "set_where": "Spacelift stack environment (TF_VAR_reserved_ranges, a JSON list) or a private tfvars",
+        "example": "[\"10.50.0.0/16\", \"10.60.0.0/16\"]",
+        "sensitivity": "private",
+        "sensitive_in_code": true,
+        "status": "exists",
+        "readers": "UNVERIFIED: Doppler config members and Spacelift stack environment readers; filled in during step 2"
+      },
+      {
+        "name": "reticulum_port",
+        "type": "number",
+        "description": "Public TCP port of the Reticulum TCPServerInterface.",
+        "required": false,
+        "default": 4242,
+        "validation": "a whole port number from 1 to 65535",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "4242",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      }
+    ],
     "planned/optional-noc-soc (not built yet)": [
       {
         "name": "grafana_enabled",
@@ -1767,6 +1861,157 @@
         "sensitivity": "public",
         "sensitive_in_code": false,
         "status": "exists"
+      }
+    ],
+    "modules/edge-host": [
+      {
+        "name": "layer",
+        "type": "string",
+        "description": "Stack layer, used in names (for example edge).",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "edge",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "region",
+        "type": "string",
+        "description": "DigitalOcean region slug; the reserved IP is created in the same region as the droplet.",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "resource_key",
+        "type": "string",
+        "description": "Key used in resource names in place of region; empty means region.",
+        "required": false,
+        "default": "",
+        "validation": "empty, or ^[a-z][a-z0-9-]{1,23}$; immutable on a live stack",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "vpc_id",
+        "type": "string",
+        "description": "The edge VPC (rns-dmz). Never the core VPC.",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "example-vpc-id",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "tags",
+        "type": "list(string)",
+        "description": "Droplet tags, including the one the Cloud Firewall attaches to.",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "[\"rns-dmz\", \"rns-dmz-transport\"]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "size",
+        "type": "string",
+        "description": "Droplet size slug; the stack passes the size it checked against cost.json.",
+        "required": true,
+        "validation": "none",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "s-1vcpu-1gb",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "public_ports",
+        "type": "list(object({protocol=string,port_range=string}))",
+        "description": "Inbound ports open to the whole internet; the host firewall mirrors the Cloud Firewall.",
+        "required": false,
+        "default": [],
+        "validation": "protocol tcp or udp; a single port_range from 1 to 65535",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "[{ protocol = \"tcp\", port_range = \"4242\" }]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "restricted_ports",
+        "type": "list(object({protocol=string,port_range=string,sources=list(string)}))",
+        "description": "Inbound ports open only to the listed IPv4 ranges; no source means closed.",
+        "required": false,
+        "default": [],
+        "validation": "protocol tcp or udp; a single port_range from 1 to 65535; sources IPv4 ranges, never 0.0.0.0/0 or IPv6",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "[{ protocol = \"tcp\", port_range = \"5201\", sources = [\"203.0.113.10/32\"] }]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "timezone",
+        "type": "string",
+        "description": "IANA time zone name of the machine; also the zone reboot_time and reboot-slots.json are read in. Eastern, like the connectors.",
+        "required": false,
+        "default": "America/New_York",
+        "validation": "UTC or an IANA name such as America/New_York",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "America/New_York",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "service",
+        "type": "string",
+        "description": "The one edge service this droplet runs: a key of reboot-slots.json. Names the droplet, picks its reboot slot and its own Doppler config name.",
+        "required": true,
+        "validation": "must be a key of modules/edge-host/reboot-slots.json",
+        "example": "reticulum",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "set_where": "set by the calling stack (not a user setting)"
+      },
+      {
+        "name": "project_id",
+        "type": "string",
+        "description": "Id of the existing DigitalOcean project; the droplet and reserved IP are attached to it.",
+        "required": true,
+        "validation": "none",
+        "example": "project-example-0000",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "set_where": "set by the calling stack (not a user setting)"
+      },
+      {
+        "name": "reboot_time",
+        "type": "string",
+        "description": "HH:MM in timezone when unattended-upgrades may reboot this host. null takes the service's slot (01:00 to 03:00 Eastern).",
+        "required": false,
+        "default": null,
+        "validation": "null, or ^([01][0-9]|2[0-3]):[0-5][0-9]$",
+        "example": "02:30",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "set_where": "set by the calling stack (not a user setting)"
       }
     ],
     "modules/aws/vpc": [

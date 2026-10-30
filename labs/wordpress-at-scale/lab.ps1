@@ -26,10 +26,29 @@ function CountNodes {
 
 switch ($Cmd) {
     "up" {
-        if (-not (Test-Path "$Lab/.env")) {
+        # ORIGIN_SECRET is required. The shell environment wins over .env (as in compose). A value that is
+        # empty or a placeholder stops the lab; only a missing or empty one gets a random value. This pattern
+        # is the one rule of scripts/secret_rule.py (PLACEHOLDER_RE2); tests pin it. The value is never printed.
+        $pattern = '(?i)(^(your[_-]|changeme|change-me|replace[_-]with|xxx|dp[.]st[.]your|(todo|tbd|admin|password|secret|test)$)|^<.*>$|example|placeholder|changeme)'
+        $v = $env:ORIGIN_SECRET
+        $file = "$Lab/.env"
+        if (-not $v -and (Test-Path $file)) {
+            $m = Select-String -Path $file -Pattern '^ORIGIN_SECRET=(.*)$' | Select-Object -Last 1
+            if ($m) { $v = $m.Matches[0].Groups[1].Value }
+        }
+        if ($v) {
+            if ($v.Trim() -eq "" -or $v -match $pattern) {
+                throw "refusing to start: ORIGIN_SECRET is empty or a placeholder (clear it in .env to get a random one)"
+            }
+        } else {
             $bytes = New-Object byte[] 16
             [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
-            "ORIGIN_SECRET=" + (($bytes | ForEach-Object { $_.ToString("x2") }) -join "") | Set-Content "$Lab/.env" -Encoding ascii
+            $new = (($bytes | ForEach-Object { $_.ToString("x2") }) -join "")
+            if ((Test-Path $file) -and (Select-String -Path $file -Pattern '^ORIGIN_SECRET=' -Quiet)) {
+                (Get-Content $file) -replace '^ORIGIN_SECRET=.*$', "ORIGIN_SECRET=$new" | Set-Content $file -Encoding ascii
+            } else {
+                Add-Content -Path $file -Value "ORIGIN_SECRET=$new" -Encoding ascii
+            }
         }
         Compose up -d
         1..30 | ForEach-Object { if (curl.exe -sf "$Edge/" -o NUL) { return }; Start-Sleep 1 }

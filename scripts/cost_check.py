@@ -77,6 +77,9 @@ FREE_TYPES = {
             "digitalocean_vpc",
             "digitalocean_firewall",
             "digitalocean_ssh_key",
+            # No charge of its own; the reserved IP it assigns is the priced
+            # type, and reserved_ip_problems() pairs the two.
+            "digitalocean_reserved_ip_assignment",
         }
     ),
     "aws": frozenset(
@@ -100,7 +103,11 @@ FREE_TYPES = {
 
 # Costed types: allowed only in the files named in approved.json.
 COSTED_TYPES = {
-    "digitalocean": frozenset({"digitalocean_droplet"}),
+    # A reserved IP is free only while assigned ($5.00 a month when not, design
+    # section 5.1), so it is allowed in the files approved.json names, each paired
+    # with one assignment. The manifest has no `reserved_ip` kind yet, so a
+    # stack cannot cost one: that is the cost-gate follow-up.
+    "digitalocean": frozenset({"digitalocean_droplet", "digitalocean_reserved_ip"}),
     "aws": frozenset({"aws_instance", "aws_eip", "aws_ebs_volume"}),
     "azure": frozenset(),
     "gcp": frozenset(),
@@ -129,6 +136,19 @@ SITES_DIR = "stacks/sites"
 RESOURCE_KEY_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 STACK_NAME_RE = re.compile(r"^[0-9]+-[A-Za-z0-9][A-Za-z0-9_-]*$")
 CONNECTOR_SOURCE_SUFFIX = "twingate-connector"
+EDGE_SOURCE_SUFFIX = "edge-host"
+# The only count an edge-host module call may carry: the stack's own switch.
+EDGE_COUNT_RE = re.compile(r"local\.on")
+RESERVED_IP = "digitalocean_reserved_ip"
+RESERVED_IP_ASSIGNMENT = "digitalocean_reserved_ip_assignment"
+# The only shapes the scanner accepts for an assignment: a plain reference to a
+# reserved IP and to a droplet, both resources of the same file.
+RESERVED_IP_REF_RE = re.compile(
+    r"digitalocean_reserved_ip\.(?P<name>[A-Za-z_][A-Za-z0-9_-]*)\.ip_address"
+)
+DROPLET_ID_REF_RE = re.compile(
+    r"digitalocean_droplet\.[A-Za-z_][A-Za-z0-9_-]*\.id"
+)
 # Connector size attribute -> the manifest key its local must read.
 CONNECTOR_SIZE_ATTRS = {"size": "size", "instance_type": "type"}
 # Providers that create nothing billable. Any other prefix that is not a known
@@ -1155,6 +1175,128 @@ def module_problems(root):
     return problems, connectors
 
 
+EDGE_SWITCH_DEF_RE = re.compile(r"(?m)^\s*on\s*=\s*var\.(?P<var>[A-Za-z_][A-Za-z0-9_]*)\s*\?\s*1\s*:\s*0\s*$")
+
+
+def edge_switch_verified(root, stack):
+    """The stack defines `on = var.<x> ? 1 : 0` and an output precondition refuses
+    <x> being true unless the manifest (local.cost.resources) prices the edge."""
+    texts = []
+    for path in sorted(Path(root, stack).glob("*.tf")):
+        try:
+            texts.append(strip_comments(path.read_text(encoding="utf-8")))
+        except (OSError, UnicodeDecodeError, HclError):
+            return False
+    text = "\n".join(texts)
+    match = EDGE_SWITCH_DEF_RE.search(text)
+    if not match:
+        return False
+    var = match.group("var")
+    return bool(
+        re.search(r"precondition\s*\{[^{}]*?!var\." + re.escape(var) + r"\s*\|\|[^{}]*?local\.cost\.resources", text, re.DOTALL)
+    )
+
+
+def edge_module_problems(root):
+    """Hold modules/edge-host to the connector's rules (it may hold a droplet and
+    a reserved IP, both priced from a stack's cost.json).
+
+    Per stack: no for_each; count only as the plain switch `local.on`; size a
+    plain `local.<name>.size`; and the manifest's droplet entries and
+    reserved_ip entries each number either 0 (switched off, priced nothing) or
+    the number of edge-host module calls."""
+    problems, calls, switched = [], {}, {}
+    manifests = dict(stack_manifests(root))
+    for rel, block in file_blocks(root):
+        if block.kind != "module" or block.problem:
+            continue
+        source, problem = module_source_problem(root, rel, block)
+        if problem or not source.rstrip("/").endswith(EDGE_SOURCE_SUFFIX):
+            continue
+        name, stack = block.labels[0], str(Path(rel).parent.as_posix())
+        calls[stack] = calls.get(stack, 0) + 1
+        attrs = block.attrs()
+        counts = [v.strip() for k, v in attrs if k == "count"]
+        switched[stack] = switched.get(stack, True) and len(counts) == 1 and bool(
+            EDGE_COUNT_RE.fullmatch(counts[0])
+        )
+        for key, value in attrs:
+            if key == "for_each" or (key == "count" and not EDGE_COUNT_RE.fullmatch(value.strip())):
+                problems.append(
+                    f"{rel}: module {name!r} uses {key} {value.strip()!r}; the edge host is costed from "
+                    "the manifest, so only count = local.on (the stack's switch) is accepted"
+                )
+        sizes = [v for k, v in attrs if k == "size"]
+        if len(sizes) != 1 or not re.fullmatch(LOCAL_REF_RE.format(key="size"), sizes[0]):
+            problems.append(
+                f"{rel}:{block.line}: edge-host module {name!r} must set size to a plain reference such "
+                "as local.edge_droplet.size, tied to cost.json (see docs/cost.md)"
+            )
+    for stack in sorted(calls):
+        if stack not in manifests:
+            continue
+        entries = load_json(manifests[stack])["resources"]
+        off_ok = switched[stack] and edge_switch_verified(root, stack)
+        for kind in ("droplet", "reserved_ip"):
+            have = sum(1 for r in entries if r.get("kind") == kind)
+            if have != calls[stack] and not (have == 0 and off_ok):
+                problems.append(
+                    f"{stack}: {have} {kind} manifest entr(ies) but {calls[stack]} edge-host module call(s); "
+                    "they must match (0 is accepted only when every call is count = local.on and the "
+                    "stack defines that switch and ties it to the manifest)"
+                )
+    return problems, calls
+
+
+def reserved_ip_problems(root):
+    """Each reserved IP is assigned exactly once, in the file that declares it.
+
+    An unassigned reserved IP costs $5.00 a month, so the scanner wants, per
+    file, as many assignments as reserved IPs, each assignment's ip_address a
+    plain reference to a distinct reserved IP of that file and its droplet_id a
+    plain reference to a droplet. A shape it cannot read fails. The scanner does
+    not execute HCL; the end-state check on a plan is a later change (design
+    section 5.6 item 4)."""
+    problems, per_file = [], {}
+    for rel, block in file_blocks(root):
+        if block.kind != "resource" or block.problem:
+            continue
+        if block.labels[0] in (RESERVED_IP, RESERVED_IP_ASSIGNMENT):
+            per_file.setdefault(rel, {RESERVED_IP: [], RESERVED_IP_ASSIGNMENT: []})[
+                block.labels[0]
+            ].append(block)
+    for rel, found in sorted(per_file.items()):
+        ips, assigns = found[RESERVED_IP], found[RESERVED_IP_ASSIGNMENT]
+        names = {b.labels[1] for b in ips}
+        if len(ips) != len(assigns):
+            problems.append(
+                f"{rel}: {len(ips)} {RESERVED_IP} block(s) but {len(assigns)} "
+                f"{RESERVED_IP_ASSIGNMENT} block(s); an unassigned reserved IP costs money, "
+                "so each needs exactly one assignment in the same file"
+            )
+        seen = []
+        for block in assigns:
+            attrs = dict(block.attrs())
+            ip = RESERVED_IP_REF_RE.fullmatch(attrs.get("ip_address", "").strip())
+            if not ip or ip.group("name") not in names:
+                problems.append(
+                    f"{rel}:{block.line}: assignment {block.labels[1]!r} must set ip_address to a plain "
+                    f"reference to a {RESERVED_IP} of this file"
+                )
+                continue
+            if ip.group("name") in seen:
+                problems.append(
+                    f"{rel}:{block.line}: reserved IP {ip.group('name')!r} is assigned more than once"
+                )
+            seen.append(ip.group("name"))
+            if not DROPLET_ID_REF_RE.fullmatch(attrs.get("droplet_id", "").strip()):
+                problems.append(
+                    f"{rel}:{block.line}: assignment {block.labels[1]!r} must set droplet_id to a plain "
+                    "reference to a droplet of the same file"
+                )
+    return problems
+
+
 STATEMENT_START_RE = re.compile(r"\s*(?P<name>[A-Za-z_][A-Za-z0-9_-]*)\s*(?P<next>[={]?)")
 
 
@@ -1289,12 +1431,23 @@ def structure_problems(root):
                 f"{rel}: instances carry no code; stacks/sites holds data (cost.json) only"
             )
     problems += block_problems(root)
+    problems += reserved_ip_problems(root)
     mod_problems, connectors = module_problems(root)
     problems += mod_problems
+    edge_problems, edge_calls = edge_module_problems(root)
+    problems += edge_problems
     for stack in sorted(set(connectors) | set(bases)):
         machines = 0
         if stack in bases:
             machines = machine_count(bases[stack])
+            if stack in edge_calls:
+                # The edge-host droplets are reconciled by edge_module_problems.
+                # Only as many as there are edge-host calls: any other droplet
+                # is still counted and must match a connector module block.
+                machines -= min(
+                    edge_calls[stack],
+                    sum(1 for r in load_json(bases[stack])["resources"] if r.get("kind") == "droplet"),
+                )
         have = connectors.get(stack, 0)
         if have != machines:
             problems.append(

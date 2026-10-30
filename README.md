@@ -89,7 +89,7 @@ That is not "VPNs are always wrong". WireGuard is a very different animal from a
 | 2 | Logs to the on-prem SIEM, cloud-to-home access | $0 in the cloud | In progress: the cloud-side code (settings layer, telemetry stack, opt-in node exporter, Wazuh agent and auditd, dashboards) is merged but nothing is applied |
 | 3 | Workload host: Portainer, five daemons, Discord-to-Matrix bridge, Spaces bucket, Functions | est. $17 | Planned |
 | 4 | Grafana, on-prem | $0 in the cloud | Planned (a cloud Grafana is a learner option, see [Build your own mini SOC](docs/wiki/Build-Your-Own-Mini-SOC.md)) |
-| Edge | Public edge (DMZ) and hardening | past the ceiling | Planned, design first |
+| Edge | Public edge (DMZ) and hardening | past the ceiling (design option A adds a $6 droplet) | Shared network code written, disabled by default and never applied (`stacks/50-edge` creates nothing until the stage is approved); each service becomes its own stack later ([stage page](docs/stages/05-edge.md)) |
 | AWS | The AWS twin of stages 0 and 1: `modules/aws/*`, `stacks/aws/*` | $0 and $20.84 | Written and tested with mocked providers, never applied. Azure and GCP have no code |
 
 Working ceiling: $30 per month in the current phase (stage 1), shared by every cloud; each phase carries its own ceiling in `docs/stages/approved.json`, so a later phase can raise it on purpose. A cost gate in CI fails any change that raises a cloud's planned total above its approved total, or the active clouds' approved totals above the current phase's ceiling (the AWS twin is marked inactive, because it does not fit beside stage 1). See the [roadmap](docs/wiki/Roadmap.md).
@@ -107,11 +107,13 @@ Clouds-Against-Humanity/
   stacks/00-foundation/                    project, tag, VPC, baseline firewall
   stacks/10-access/                        site, SSH key lookup, two connectors, connector firewall, group, SSH resources
   stacks/20-telemetry/                     stage 2 telemetry settings layer (see docs/stages/02-telemetry.md)
+  stacks/50-edge/                          the shared edge network (DMZ): VPC, tags, Cloud Firewall; disabled by default, never applied (see docs/stages/05-edge.md)
   stacks/aws/{00-foundation,10-access}     the AWS twin of stages 0 and 1 (mocked tests only, never applied)
   modules/vpc/                             per-region VPC
   modules/firewall/                        tag-based deny-inbound firewall
   modules/twingate-bootstrap/              shared connector boot script and tokens, called by every provider's connector
   modules/twingate-connector/              connector, its tokens, its droplet and cloud-init
+  modules/edge-host/                       reusable edge host: droplet, reserved IP, project attachment and a small cloud-init (no SSH, no connector, no service)
   modules/aws/{vpc,firewall,twingate-connector}  the AWS versions of those modules
   dashboards/                              importable Grafana dashboards (sites overview, droplet health, Wazuh agents); see docs/wiki/Grafana-Dashboards.md
   scripts/cost_check.py                    cost gate
@@ -186,7 +188,7 @@ tofu -chdir=modules/firewall init -backend=false
 tofu -chdir=modules/firewall test
 ```
 
-Run the last pair for each directory in the `directories` list of the tofu job in `.github/workflows/ci.yml`: `modules/vpc`, `modules/firewall`, `modules/twingate-bootstrap`, `modules/twingate-connector`, `modules/aws/vpc`, `modules/aws/firewall`, `modules/aws/twingate-connector`, `stacks/00-foundation`, `stacks/10-access`, `stacks/20-telemetry`, `stacks/aws/00-foundation` and `stacks/aws/10-access`. CI runs all of it through git-your-ship-together's shared workflows; the only job this repository defines itself is the `CI green` gate.
+Run the last pair for each directory in the `directories` list of the tofu job in `.github/workflows/ci.yml`: `modules/vpc`, `modules/firewall`, `modules/twingate-bootstrap`, `modules/twingate-connector`, `modules/edge-host`, `modules/aws/vpc`, `modules/aws/firewall`, `modules/aws/twingate-connector`, `stacks/00-foundation`, `stacks/10-access`, `stacks/20-telemetry`, `stacks/50-edge`, `stacks/aws/00-foundation` and `stacks/aws/10-access`. CI runs all of it through git-your-ship-together's shared workflows; the only job this repository defines itself is the `CI green` gate.
 
 ## Documentation
 
@@ -209,6 +211,23 @@ This repository is public from its first commit, so the GitHub code-scanning and
 ## Secrets
 
 Secrets live in Doppler; nothing in this repository is a credential. Spacelift holds one read-only Doppler token and fetches the rest at run time; see [Spacelift and Doppler secrets](docs/spacelift-secrets.md) for how that works and how to rotate it.
+
+### Required secrets
+
+A required secret that is empty, unset or a placeholder stops the thing that needs it. One rule decides what a placeholder is, in [`scripts/secret_rule.py`](scripts/secret_rule.py): empty, or starting with `your_`, `your-`, `changeme`, `change-me`, `replace-with`, `xxx` or `dp.st.your`, wrapped in `<...>`, containing `example`, `placeholder` or `changeme`, or exactly `todo`, `tbd`, `admin`, `password`, `secret` or `test` (case-insensitive). The error names the variable and never prints the value. No variable in the stacks or modules has a default that is a password or token.
+
+| Secret | Needed by | Without it, or with a placeholder | Where it goes |
+| --- | --- | --- | --- |
+| `GRAFANA_ADMIN_PASSWORD` | the monitoring demo (`scripts/demo_monitoring.sh`) | A placeholder in the shell or `.env` stops the demo. Empty or missing: the script writes a random one to the untracked `.env` (other lines kept). Direct `docker compose up` refuses empty but does not apply the placeholder rule. | shell environment, or the untracked `labs/demo-monitoring/.env` |
+| `ORIGIN_SECRET` | the WordPress-at-scale lab (`lab.sh up`, `lab.ps1 up`) | A placeholder or an empty shell value stops the lab. Empty or missing in `.env`: a random one is written. | shell environment, or the untracked `labs/wordpress-at-scale/.env` |
+| `DIGITALOCEAN_TOKEN`, `TWINGATE_API_TOKEN`, `TWINGATE_NETWORK` | stacks 00, 10 and 20 (the provider settings) | The Spacelift hook refuses an empty value, and refuses a placeholder for the two tokens. Outside Spacelift the provider itself fails on an empty token; the placeholder rule is not applied there. | Doppler, fetched by the hook ([how](docs/spacelift-secrets.md)) |
+| `DOPPLER_TOKEN` | the Spacelift hook | Empty or a placeholder: the hook refuses and fetches nothing. | the `cah-doppler` Spacelift context |
+| `log_shipping_bootstrap_token` (`TF_VAR_log_shipping_bootstrap_token`) | stack 10 when `log_shipping.enabled` | Empty with log shipping on: the plan fails. A placeholder-shaped value: the plan fails. Log shipping off: never rendered. | a sensitive Spacelift stack variable, never a value file |
+| `WAZUH_ENROLLMENT_PASSWORD` | each connector with log shipping on, pulled at first boot | Empty or missing: enrollment fails and the agent is never started. A placeholder is not checked on the droplet (the manager decides whether it matches). | the Doppler `cah-<resource_key>-hostboot` config |
+
+The loopback-only lab in `labs/cross-tenant-dlp` uses fixed labels (`lab-a`, `lab-b`) as the keys of two fake S3 servers on `127.0.0.1`. They protect nothing and are not secrets.
+
+`labs/demo-monitoring/env.example` ships `GRAFANA_ADMIN_PASSWORD=` empty on purpose. Never put a real value in an example file.
 
 ---
 
