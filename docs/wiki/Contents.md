@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (121 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (123 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -23,7 +23,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Foundations: OS and Linux](#foundations-os-and-linux) (7)
 - [Foundations: networking](#foundations-networking) (5)
 - [Foundations: identity and secrets](#foundations-identity-and-secrets) (5)
-- [Foundations: infrastructure as code](#foundations-infrastructure-as-code) (6)
+- [Foundations: infrastructure as code](#foundations-infrastructure-as-code) (7)
 - [Foundations: web hosting](#foundations-web-hosting) (3)
 - [Foundations: security tools and threat modeling](#foundations-security-tools-and-threat-modeling) (6)
 - [Foundations: network and host defense](#foundations-network-and-host-defense) (5)
@@ -113,6 +113,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [OpenTofu from zero](OpenTofu-From-Zero.md) | Lesson 1 of the infrastructure as code track: init, plan, apply and destroy on your own machine, for first-time users. | learner |  |
 | [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) | Reading a plan like a reviewer, what state is, how drift happens and how to recover, for learners after OpenTofu from zero. | learner |  |
 | [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md) | Why a bigger environment is split into one stack per service, with its costs and benefits, for learners finishing the infrastructure as code track. | learner |  |
+| [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) | What local dev, staging and production are for, why each gets its own stack, secrets and cost ceiling, and how a change is promoted; staging is planned and not built. | engineer | unbuilt |
 | [Spacelift from zero](Spacelift-From-Zero.md) | What a hosted infrastructure runner adds to plan and apply, its plan limits and a first stack run and teardown, for learners. | learner |  |
 
 ## Foundations: web hosting

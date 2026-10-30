@@ -94,6 +94,7 @@ pages:
     - {page: OpenTofu-From-Zero, title: "OpenTofu from zero", audience: "learner", desc: "Lesson 1 of the infrastructure as code track: init, plan, apply and destroy on your own machine, for first-time users."}
     - {page: Plans-State-Drift-and-Recovery, title: "OpenTofu plans, state, drift and recovery", audience: "learner", desc: "Reading a plan like a reviewer, what state is, how drift happens and how to recover, for learners after OpenTofu from zero."}
     - {page: Build-and-Destroy-Stack-Per-Service, title: "Build and destroy: one stack per service", audience: "learner", desc: "Why a bigger environment is split into one stack per service, with its costs and benefits, for learners finishing the infrastructure as code track."}
+    - {page: Environments-and-Promotion-Dev-Staging-Production, title: "Environments and promotion", audience: "engineer", status: "unbuilt", desc: "What local dev, staging and production are for, why each gets its own stack, secrets and cost ceiling, and how a change is promoted; staging is planned and not built."}
     - {page: Spacelift-From-Zero, title: "Spacelift from zero", audience: "learner", desc: "What a hosted infrastructure runner adds to plan and apply, its plan limits and a first stack run and teardown, for learners."}
   web:
     - {page: LAMP-and-LEMP-From-Zero, title: "LAMP and LEMP from zero", audience: "learner", desc: "What a web server, an application runtime and a database each do in a LAMP or LEMP stack, for readers who are new to web hosting."}
