@@ -12,7 +12,7 @@ Looking for one page rather than a path? [Contents](Contents.md) lists every pag
 |---|---|---|---|
 | [The core path](#the-core-path) | Everyone, and anyone unsure where to start. | 21 | about 3 h 15 min of reading |
 | [Build it yourself](#build-it-yourself) | A learner replicating the build in their own accounts. | 6 | about 1 h 20 min of reading |
-| [Understand the design](#understand-the-design) | An engineer who wants the design without the primers. | 13 | about 1 h 55 min of reading |
+| [Understand the design](#understand-the-design) | An engineer who wants the design without the primers. | 14 | about 2 h 20 min of reading |
 | [Security and threat modeling](#security-and-threat-modeling) | A security-minded reader. | 5 | about 1 h 15 min of reading |
 | [Detection and monitoring](#detection-and-monitoring) | Someone asking how it would be watched, and who wants to build a small version. | 11 | about 2 h 20 min of reading, plus a 30 min hands-on lab |
 | [Enterprise context](#enterprise-context) | A reader who wants to see how companies build networks, run infrastructure and handle identity, how they run changes, and what roles and skills surround that work. | 5 | about 1 h 30 min of reading |
@@ -89,6 +89,7 @@ The settings reference is a lookup page: it is generated from one manifest and m
 | 11 | [Twingate](Twingate.md) | 10 min |  |
 | 12 | [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) | 5 min |  |
 | 13 | [Droplet hardening](Droplet-Hardening.md) | 5 min |  |
+| 14 | [Environments and promotion: local dev, staging and production (staging planned, not built)](Environments-and-Promotion-Dev-Staging-Production.md) | 25 min | You can say why each environment gets its own stack, secrets and cost ceiling, why this repository uses one trunk, and what a mocked test cannot prove. |
 
 ## Security and threat modeling
 

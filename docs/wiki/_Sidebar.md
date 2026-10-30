@@ -67,13 +67,14 @@ file does not match the manifest. -->
 </details>
 
 <details>
-<summary><b>Foundations: infrastructure as code</b> (6)</summary>
+<summary><b>Foundations: infrastructure as code</b> (7)</summary>
 
 - [Git from zero](Git-From-Zero.md)
 - [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md)
 - [OpenTofu from zero](OpenTofu-From-Zero.md)
 - [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md)
 - [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md)
+- [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) (unbuilt)
 - [Spacelift from zero](Spacelift-From-Zero.md)
 
 </details>
