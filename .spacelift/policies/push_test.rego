@@ -121,3 +121,72 @@ test_a_push_with_no_changed_files_is_ignored if {
 test_policy_never_allows_forks if {
 	not spacelift.allow_fork with input as pr_event("main", ["stacks/10-access/main.tf"])
 }
+
+# Issue #306: only a push to the stack's tracked branch may start a run. The
+# live policy once ignored only events that carried a pull request, so a push
+# to a feature branch before any pull request existed was proposed, got no
+# secrets and failed in planning. Each event below must end as `ignore`, with
+# no track, no propose and no allow_fork.
+
+# A branch push has no pull_request key at all before the pull request exists.
+branch_push_without_pr(branch, files) := {
+	"push": {"branch": branch, "tag": "", "affected_files": files},
+	"stack": stack_10,
+}
+
+is_silent(input_doc) if {
+	not spacelift.track with input as input_doc
+	not spacelift.propose with input as input_doc
+	not spacelift.allow_fork with input as input_doc
+	spacelift.ignore with input as input_doc
+}
+
+test_branch_push_before_any_pull_request_is_silent if {
+	is_silent(branch_push_without_pr("docs/required-secrets-clean", ["stacks/10-access/main.tf"]))
+}
+
+test_branch_push_before_any_pull_request_touching_docs_is_silent if {
+	is_silent(branch_push_without_pr("docs/required-secrets-clean", ["docs/spacelift-secrets.md"]))
+}
+
+test_tag_push_without_a_branch_is_silent if {
+	is_silent({
+		"push": {"branch": "", "tag": "v1.0.0", "affected_files": ["stacks/10-access/main.tf"]},
+		"stack": stack_10,
+	})
+}
+
+# A tag whose push also reports the tracked branch name must still be silent.
+test_tag_push_reporting_the_tracked_branch_is_silent if {
+	is_silent({
+		"push": {"branch": "main", "tag": "v1.0.0", "affected_files": ["modules/firewall/main.tf"]},
+		"pull_request": null,
+		"stack": stack_10,
+	})
+}
+
+# A pull request event may carry no push object.
+test_pull_request_event_without_a_push_is_silent if {
+	is_silent({
+		"pull_request": {"action": "opened", "head_owner": "ChiefGyk3D", "labels": []},
+		"stack": stack_10,
+	})
+}
+
+test_pull_request_event_from_a_feature_branch_is_silent if {
+	is_silent(pr_event("feature/x", ["stacks/10-access/main.tf", "modules/firewall/main.tf"]))
+}
+
+# The other half: the tracked branch keeps its behavior, with the tag empty
+# and no pull_request key.
+test_tracked_branch_push_without_a_pull_request_key_is_tracked if {
+	input_doc := branch_push_without_pr("main", ["stacks/10-access/main.tf"])
+	spacelift.track with input as input_doc
+	not spacelift.ignore with input as input_doc
+	not spacelift.propose with input as input_doc
+}
+
+# Guard check: is_silent must be able to fail, or the tests above prove nothing.
+test_is_silent_rejects_a_tracked_event if {
+	not is_silent(branch_push_without_pr("main", ["stacks/10-access/main.tf"]))
+}
