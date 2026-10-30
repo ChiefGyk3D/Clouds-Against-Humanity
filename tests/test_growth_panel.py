@@ -310,5 +310,5 @@ def test_a_list_that_reaches_the_limit_fails_loudly_and_writes_nothing(tmp_path,
 def test_alt_text_and_wording_name_the_new_series_only_for_schema_2():
     new, old = grm.render_page(v2()), grm.render_page(fixture())
     assert "issues opened, issues closed and the last 7 days" in new
-    assert "Forks, merged pull requests, issues opened and closed issues are read fresh every day." in new
+    assert "Forks, merged pull requests, issues opened and closed issues are read fresh on every run." in new
     assert f"![{grm.ALT_TEXT}]" in old and "last 7 days" not in old
