@@ -58,3 +58,22 @@ def test_slot_window_is_before_the_connector_windows():
     hardening = read(ROOT / "docs" / "wiki" / "Droplet-Hardening.md")
     assert "04:00" in hardening and "05:00" in hardening
     assert "between 01:00 and 03:00 Eastern" in read(LESSON)
+
+
+def header_comment(text: str) -> str:
+    head = text.split("\ndisable_root:")[0]
+    return re.sub(r"\s+", " ", re.sub(r"(?m)^#\s?", "", head))
+
+
+def test_the_template_states_the_order_in_a_comment():
+    """#305: the order is written into the template, as a comment, in the order the file follows."""
+    t = read(TEMPLATE)
+    assert ORDER in header_comment(t), f"the template header must carry: {ORDER}"
+    # A comment is not rendered config: no template syntax inside it.
+    assert "${" not in t.split("\ntimezone:")[0] and "%{" not in t.split("\ntimezone:")[0]
+    assert t.index("\n# First-hour order") < t.index("package_update: true")
+
+
+def test_the_order_check_bites_when_the_comment_is_missing():
+    stripped = read(TEMPLATE).replace("update, baseline,", "something, else,")
+    assert ORDER not in header_comment(stripped)

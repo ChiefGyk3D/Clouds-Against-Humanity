@@ -510,16 +510,28 @@ def test_the_site_label_is_inserted_inside_the_single_root_element(tmp_path):
 
 def test_audit_rules_cover_identity_sudo_and_twingate_and_never_execve():
     rules = extract_file(TEMPLATE.read_text(encoding="utf-8"), RULES_PATH)
-    watched = re.findall(r"(?m)^-w (\S+) -p (\S+) -k (\S+)$", rules)
-    paths = {p for p, _, _ in watched}
-    assert {"/etc/passwd", "/etc/group", "/etc/shadow", "/etc/gshadow"} <= paths
-    assert {"/etc/sudoers", "/etc/sudoers.d/"} <= paths
-    assert "/etc/twingate/" in paths
-    assert all("w" in perms for _, perms, _ in watched)
-    # No syscall rules at all, so no execve, whatever the spelling.
+    # The deprecated -w watch form is gone (#235); each path is an -a always,exit rule.
+    assert not re.search(r"(?m)^\s*-w\s", rules)
+    lines = [ln for ln in rules.splitlines() if ln.strip()]
+    pat = re.compile(r"^-a always,exit -F arch=b64 -F (path|dir)=(\S+) -F perm=(\S+) -F key=(\S+)$")
+    parsed = [pat.match(ln) for ln in lines]
+    assert lines and all(parsed), f"every rule must be an exact watch-equivalent -a rule: {lines}"
+    watched = {m.group(2): (m.group(1), m.group(3), m.group(4)) for m in parsed}
+    for f in ("/etc/passwd", "/etc/group", "/etc/shadow", "/etc/gshadow"):
+        assert watched[f] == ("path", "wa", "cah_identity")
+    assert watched["/etc/sudoers"] == ("path", "wa", "cah_sudo")
+    # A directory keeps the recursive meaning of the old -w on a directory.
+    assert watched["/etc/sudoers.d/"] == ("dir", "wa", "cah_sudo")
+    assert watched["/etc/twingate/"] == ("dir", "wa", "cah_twingate")
+    assert len(watched) == 7
+    # File rules only: no syscall filter (-S) and no execve, whatever the spelling.
     assert "execve" not in rules
-    assert not re.search(r"(?m)^\s*-a\s", rules)
+    assert not re.search(r"(?m)\s-S\s", rules)
 
+
+def test_audit_rule_check_bites_on_the_old_watch_form():
+    old = "-w /etc/passwd -p wa -k cah_identity\n"
+    assert re.search(r"(?m)^\s*-w\s", old)
 
 def test_template_gates_every_log_shipping_piece_on_the_flag():
     text = TEMPLATE.read_text(encoding="utf-8")
