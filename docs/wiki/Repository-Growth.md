@@ -13,13 +13,13 @@ picture disagree. -->
 
 ![Hand-drawn style chart: cumulative stars and forks since the repository was created, and weekly merged pull requests and closed issues](https://raw.githubusercontent.com/ChiefGyk3D/Clouds-Against-Humanity/metrics/repo-growth.png)
 
-*The picture is redrawn every day by a workflow and shows its own as-of date. The table and totals below are the last committed snapshot, taken 2026-10-23.*
+*The picture is redrawn every three hours by a workflow and shows its own as-of date. The table and totals below are the last committed snapshot, taken 2026-10-23.*
 
 ## How the stars line is built
 
-GitHub does not let the workflow's built-in token read when each star happened, so the daily run cannot rebuild the star history. Instead the line has two parts. Up to the baseline date it comes from per-star times, read by the maintainer with their own login. After that date it is one point per day, the repository's star count that day, recorded by the workflow and joined by straight (dashed) segments. Those later points are daily counts, not per-star times, and the picture says so under the as-of date. Forks, merged pull requests and closed issues are read fresh every day.
+GitHub does not let the workflow's built-in token read when each star happened, so the scheduled run cannot rebuild the star history. Instead the line has two parts. Up to the baseline date it comes from per-star times, read by the maintainer with their own login. After that date it is one point per day, the repository's star count that day, recorded by the workflow and joined by straight (dashed) segments. Those later points are daily counts, not per-star times, and the picture says so under the as-of date. Forks, merged pull requests and closed issues are read fresh on every run.
 
-The metrics branch is mutable, so nothing on it is trusted. Each run checks that its snapshot still has the committed baseline's star history, keeps every earlier daily point exactly (only today's point may be added or replaced), and descends from the exact branch commit it read; the push is an exact compare-and-swap that can only succeed as a fast-forward from that commit (no other force), and the branch keeps one small commit per day. A branch that moved, lost a point, or went more than 14 days without an update makes the run fail instead of publishing. A deliberate reset, for example after a new baseline is committed, is a separate reviewed step: delete the `metrics` branch and the next run starts a ledger afresh from the new baseline date.
+The metrics branch is mutable, so nothing on it is trusted. Each run checks that its snapshot still has the committed baseline's star history, keeps every earlier daily point exactly (only today's point may be added or replaced), and descends from the exact branch commit it read; the push is an exact compare-and-swap that can only succeed as a fast-forward from that commit (no other force), and the branch keeps at most one small commit per run (a run every three hours, and none is pushed when the bundle is byte-identical to the branch). A branch that moved, lost a point, or went more than 14 days without an update makes the run fail instead of publishing. A deliberate reset, for example after a new baseline is committed, is a separate reviewed step: delete the `metrics` branch and the next run starts a ledger afresh from the new baseline date.
 
 To backfill the baseline, run `python3 -I scripts/gen_repo_metrics.py --refresh` locally with your own login: it asks for every star's time stamp, moves the baseline date to today and drops the ledger it replaces. The workflow never asks for star times (`--no-star-times`, chosen automatically when `GITHUB_ACTIONS` is true).
 
@@ -45,9 +45,9 @@ This table is the text version of the picture, one row per week (UTC, Monday to 
 
 Totals: 465 stars, 21 forks, 165 merged pull requests, 35 closed issues.
 
-## How the daily picture is published, and the risk that remains
+## How the picture is published every three hours, and the risk that remains
 
-A workflow draws the picture every day and pushes it to an orphan branch named `metrics`, never to `main`. One job (read-only) fetches counts and draws; a second job validates the result again and pushes it. The second job needs `contents: write`, and GitHub cannot limit the built-in token to one branch, so that token is **repository-wide**. The workflow narrows what it does with it: the job holds no other secret and runs only the checked-in publish script, which refuses to write any ref but `refs/heads/metrics`, passes the token to the git commands that talk to GitHub and nowhere else, and never writes it to disk. That is a limit on this script, not access control.
+A workflow draws the picture every three hours and pushes it to an orphan branch named `metrics`, never to `main`. One job (read-only) fetches counts and draws; a second job validates the result again and pushes it. The second job needs `contents: write`, and GitHub cannot limit the built-in token to one branch, so that token is **repository-wide**. The workflow narrows what it does with it: the job holds no other secret and runs only the checked-in publish script, which refuses to write any ref but `refs/heads/metrics`, passes the token to the git commands that talk to GitHub and nowhere else, and never writes it to disk. That is a limit on this script, not access control.
 
 The control that holds is a repository ruleset: restrict creation and updates of the `metrics` branch to the GitHub Actions app, block deletion and keep `main` protected as it is (pull request, status checks, no force push). Without that ruleset, anything that can run code in the publish job could write any branch.
 
