@@ -14,6 +14,9 @@ import cost_check
 import cost_raise
 
 ROOT = Path(__file__).resolve().parents[1]
+# Tests that need a known lifecycle state (stage-1 current, stage-2 planned) use a frozen
+# copy of approved.json, so advancing the real file's current phase does not break them.
+FIXTURE_STAGE1 = ROOT / "tests/fixtures/approved_stage1_current.json"
 GIT_ENV = {
     "GIT_AUTHOR_NAME": "t",
     "GIT_AUTHOR_EMAIL": "t@example.invalid",
@@ -30,6 +33,7 @@ def copy_repo(dest):
             shutil.copytree(src, dst)
         else:
             shutil.copy(src, dst)
+    shutil.copy(FIXTURE_STAGE1, dest / "docs/stages/approved.json")
     for rel in ("stacks", "modules", ".spacelift"):
         if (ROOT / rel).exists():
             shutil.copytree(
@@ -178,7 +182,7 @@ def test_ci_runs_this_script_not_the_bare_gate():
 
 
 def real():
-    return json.loads((ROOT / "docs/stages/approved.json").read_text())
+    return json.loads(FIXTURE_STAGE1.read_text())
 
 
 @pytest.mark.parametrize("key", ["stage-0", "stage-1", "stage-2", "learner-soc"])

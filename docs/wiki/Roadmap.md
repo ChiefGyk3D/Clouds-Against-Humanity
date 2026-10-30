@@ -44,13 +44,13 @@ Work runs in two-week sprints, S1 to S8, from 2026-10-20 to 2027-02-08. The boar
 
 ## Cost per phase
 
-The gate enforces the ceiling of the current phase (`stage-1`, $30). The other rows are proposals from the stage designs; none is approved until its phase becomes current. "Reference spend" is what the reference environment adds to the cloud bill; "extras" are optional builds for a learner or a later decision. Prices are in `docs/cost-prices.json` (DigitalOcean, retrieved 2026-10-10), `docs/cost-prices/aws.json` (retrieved 2026-10-16) and the Spaces price read 2026-10-11 in `docs/cost.md`.
+The gate enforces the ceiling of the current phase (`stage-2`, $30). The other rows are proposals from the stage designs; none is approved until its phase becomes current. "Reference spend" is what the reference environment adds to the cloud bill; "extras" are optional builds for a learner or a later decision. Prices are in `docs/cost-prices.json` (DigitalOcean, retrieved 2026-10-10), `docs/cost-prices/aws.json` (retrieved 2026-10-16) and the Spaces price read 2026-10-11 in `docs/cost.md`.
 
 | Phase id | Status | Ceiling | Reference spend, with arithmetic | Optional extras |
 |---|---|---|---|---|
 | `stage-0` | done | $30 | $0 | none |
-| `stage-1` | current | $30 | two `s-1vcpu-1gb` connectors, $6 + $6 = $12 | none |
-| `stage-2` | planned | $30 | $0 added: logs go to the on-prem SIEM, so still $12 | none |
+| `stage-1` | done | $30 | two `s-1vcpu-1gb` connectors, $6 + $6 = $12 | none |
+| `stage-2` | current | $30 | $0 added: logs go to the on-prem SIEM, so still $12 | none |
 | `stage-3` | planned | $30 | $12 connectors + $12 `s-1vcpu-2gb` droplet + $5 bucket = $29 ($1 left) | a larger droplet or no bucket: $30 to $41 (see [cost](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md#stage-3-estimate-not-approved)) |
 | `stage-4` | planned | $30 | $0 added: Grafana runs on-prem, so still $29 | none |
 | `aws-twin` | planned | $30 | two `t4g.micro`: 2 x (730 h x $0.0084 + 730 h x $0.005 + 8 GiB x $0.08) = 2 x $10.42 = $20.84, applied only while the DigitalOcean connectors are torn down | none |

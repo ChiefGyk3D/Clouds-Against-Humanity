@@ -11,6 +11,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import cost_check
 
 ROOT = Path(__file__).resolve().parents[1]
+# Tests that need a known lifecycle state (stage-1 current, stage-2 planned) use a frozen
+# copy of approved.json, so advancing the real file's current phase does not break them.
+FIXTURE_STAGE1 = ROOT / "tests/fixtures/approved_stage1_current.json"
 
 
 def phase(ceiling, status="planned", reason="because", decided="2026-10-10", **extra):
@@ -232,7 +235,7 @@ def test_the_real_file_is_valid_and_keeps_todays_behaviour():
     assert "ceiling" not in doc
     assert problems(doc) == []
     pid, ceiling, _ = cost_check.current_ceiling(doc)
-    assert (pid, ceiling) == ("stage-1", 30.0)
+    assert (pid, ceiling) == ("stage-2", 30.0)
     assert doc["providers"]["digitalocean"]["active"] is True
     assert doc["providers"]["aws"]["active"] is False
 
@@ -242,7 +245,7 @@ def run_main(root, capsys):
     return code, capsys.readouterr()
 
 
-def copy_real_repo(tmp_path, mutate=None):
+def copy_real_repo(tmp_path, mutate=None, frozen=True):
     for rel in ("docs/stages/approved.json", "docs/cost-prices.json", "docs/cost-prices"):
         src, dst = ROOT / rel, tmp_path / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
@@ -250,6 +253,8 @@ def copy_real_repo(tmp_path, mutate=None):
             shutil.copytree(src, dst)
         else:
             shutil.copy(src, dst)
+    if frozen:
+        shutil.copy(FIXTURE_STAGE1, tmp_path / "docs/stages/approved.json")
     for rel in ("stacks", "modules", ".spacelift"):
         if (ROOT / rel).exists():
             shutil.copytree(
@@ -264,9 +269,9 @@ def copy_real_repo(tmp_path, mutate=None):
 
 
 def test_the_real_repo_passes_and_names_the_phase(tmp_path, capsys):
-    code, out = run_main(copy_real_repo(tmp_path), capsys)
+    code, out = run_main(copy_real_repo(tmp_path, frozen=False), capsys)
     assert code == 0, out.err
-    assert "cost-check: phase stage-1 ceiling $30.00 (reason: " in out.out
+    assert "cost-check: phase stage-2 ceiling $30.00 (reason: " in out.out
     assert "shared ceiling $" not in out.out
 
 
