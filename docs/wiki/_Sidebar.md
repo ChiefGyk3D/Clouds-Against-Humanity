@@ -32,11 +32,12 @@ file does not match the manifest. -->
 </details>
 
 <details>
-<summary><b>Foundations: OS and Linux</b> (7)</summary>
+<summary><b>Foundations: OS and Linux</b> (8)</summary>
 
 - [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
 - [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md)
 - [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) (est. steps)
+- [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md)
 - [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md)
 - [The terminal and your first script](Terminal-and-Your-First-Script.md)
 - [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md)
