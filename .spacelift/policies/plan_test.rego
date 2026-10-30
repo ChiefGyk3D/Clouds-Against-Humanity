@@ -1129,8 +1129,8 @@ test_outbound_world_spelling_is_not_covered_by_an_exact_entry if {
 
 test_outbound_narrow_destinations_are_not_world_open if {
 	every destinations in [
-		["64.0.0.0/2"],
-		["10.0.0.0/8"],
+		["10.0.0.0/9"],
+		["172.16.0.0/12"],
 		["203.0.113.0/24"],
 		["203.0.113.7"],
 		["203.0.113.7/32"],
@@ -1139,6 +1139,83 @@ test_outbound_narrow_destinations_are_not_world_open if {
 		["2001:db8::1/128"],
 	] {
 		count(denied_on("svc-a", [firewall_out([out_rule("tcp", "443", destinations)])])) == 0
+	}
+}
+
+# Issue #309: a prefix length of 8 or smaller (/0 through /8) is world-open,
+# so four /2 ranges, or any short prefix, cannot slip past. /9 and narrower
+# stay named addresses the policy does not judge.
+four_v4_slash2 := ["0.0.0.0/2", "64.0.0.0/2", "128.0.0.0/2", "192.0.0.0/2"]
+
+four_v6_slash2 := ["::/2", "4000::/2", "8000::/2", "c000::/2"]
+
+short_prefixes := [
+	["0.0.0.0/2"],
+	["64.0.0.0/2"],
+	["10.0.0.0/8"],
+	["8.0.0.0/8"],
+	["0.0.0.0/08"],
+	["::/2"],
+	["4000::/2"],
+	["2000::/3"],
+	["ff00::/8"],
+	["fd00::/8"],
+	four_v4_slash2,
+	four_v6_slash2,
+	["203.0.113.0/24", "0.0.0.0/2"],
+	["10.0.0.0/8", "203.0.113.7/32"],
+	["2001:db8::/32", "2000::/3"],
+]
+
+not_world_prefixes := [
+	["10.0.0.0/9"],
+	["128.0.0.0/9"],
+	["172.16.0.0/12"],
+	["192.168.0.0/16"],
+	["203.0.113.0/24"],
+	["2001:db8::/32"],
+	["fe80::/10"],
+	["8000::/9"],
+	["203.0.113.0/24", "2001:db8::/32", "10.0.0.0/9"],
+]
+
+test_outbound_short_prefixes_are_world_open if {
+	every destinations in short_prefixes {
+		reasons := denied_on("svc-a", [firewall_out([out_rule("tcp", "443", destinations)])])
+		count(reasons) == 1
+		some reason in reasons
+		contains(reason, "reaches the whole internet")
+	}
+}
+
+test_outbound_prefixes_beyond_eight_are_not_world_open if {
+	every destinations in not_world_prefixes {
+		count(denied_on("svc-a", [firewall_out([out_rule("tcp", "443", destinations)])])) == 0
+	}
+}
+
+test_inbound_short_prefixes_are_world_open if {
+	every sources in short_prefixes {
+		reasons := denied([firewall_with([with_source({"source_tags": [], "source_addresses": sources})])])
+		count(reasons) == 1
+		some reason in reasons
+		contains(reason, "opens the port to the whole internet")
+	}
+}
+
+test_inbound_prefixes_beyond_eight_are_not_called_the_whole_internet if {
+	every sources in not_world_prefixes {
+		reasons := denied([firewall_with([with_source({"source_tags": [], "source_addresses": sources})])])
+		count(reasons) == 1
+		some reason in reasons
+		contains(reason, "is not tag-scoped")
+	}
+}
+
+test_outbound_short_prefix_is_not_covered_by_an_exact_entry if {
+	allow := allow_for("svc-a", fw, [out_entry({})])
+	every destinations in short_prefixes {
+		count(reasons_with_outbound("svc-a", [firewall_out([out_rule("tcp", "443", destinations)])], allow)) == 1
 	}
 }
 
