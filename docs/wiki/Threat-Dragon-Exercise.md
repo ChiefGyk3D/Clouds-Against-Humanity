@@ -210,7 +210,7 @@ A model also gets stale. The file in this repository has no way to notice that a
 ## Try it yourself
 
 - Find one flow in the model with no threat attached (for example "CI status check") and decide whether that is a gap or a correct "nothing to add". Say why.
-- Pick one threat that is **Mitigated** in the model (for example the log-leak threat on "Service token read") and change its status to Open in your copy. Which element turns red? Then find a threat the model records as Open because the risk is accepted (the mitigation text starts with "Accepted") and ask what control would let you move it to Mitigated, and where you would verify that control.
+- Pick one threat that is **Mitigated** in the model (for example the tampered Doppler CLI threat on "Doppler CLI download"; the log-leak threat on "Service token read" is Open because masking is not yet confirmed on a real run) and change its status to Open in your copy. Which element turns red? Then find a threat the model records as Open because the risk is accepted (the mitigation text starts with "Accepted") and ask what control would let you move it to Mitigated, and where you would verify that control.
 - Run `python3 -m pytest tests/test_threat_dragon_model.py -q`, then, on a scratch branch, rename the boundary `B3` in the committed JSON and run it again (`git restore` afterwards). Which test notices, and what does that tell you about what the tests can and cannot see?
 - Open the ATT&CK model and the STRIDE model side by side and pick one threat. Which of the two helps you decide where to put a detection, and which helps you decide how to change the design? Then read [Threat frameworks](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md) for the third view, the AI tools around this repository.
 

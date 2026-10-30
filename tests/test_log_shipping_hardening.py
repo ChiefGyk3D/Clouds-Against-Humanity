@@ -34,7 +34,7 @@ from test_log_shipping_script import (
 )
 
 GUARD_PATH = "/usr/local/sbin/cah-agent-guard"
-KEYCHECK_PATH = "/usr/local/sbin/cah-wazuh-key-check"
+KEYCHECK_PATH = "/usr/local/sbin/cah-apt-key-check"
 SWEEP_UNIT_PATH = "/etc/systemd/system/cah-log-shipping-sweep.service"
 DROPIN_PATH = "/etc/systemd/system/wazuh-agent.service.d/10-cah-no-stale-password.conf"
 
@@ -348,10 +348,113 @@ def test_key_check_refuses_a_missing_argument(tmp_path):
 def test_the_install_block_uses_the_key_check_not_a_grep():
     text = TEMPLATE.read_text(encoding="utf-8")
     block = next(e for e in runcmd_entries() if "packages.wazuh.com" in e)
-    assert re.search(r'cah-wazuh-key-check /root/wazuh\.gpg\.key "\$FPR"', block)
+    assert re.search(r'cah-apt-key-check /root/wazuh\.gpg\.key "\$FPR"', block)
     assert 'grep -q "^fpr' not in block
-    assert block.index("cah-wazuh-key-check") < block.index("gpg --dearmor")
-    assert text.count("cah-wazuh-key-check") >= 2
+    assert block.index("cah-apt-key-check") < block.index("gpg --dearmor")
+    assert text.count("cah-apt-key-check") >= 2
+
+
+# --- the Twingate connector install uses the same strict check ------------------
+
+TWINGATE_SHARED_CHECK = "/usr/local/sbin/cah-apt-key-check"
+
+
+def twingate_block() -> str:
+    return next(e for e in runcmd_entries() if "packages.twingate.com" in e)
+
+
+def test_the_twingate_install_block_uses_the_strict_key_check_not_a_grep():
+    block = twingate_block()
+    assert re.search(r'cah-apt-key-check /root/twingate\.gpg\.key "\$FPR"', block)
+    assert 'grep -q "^fpr' not in block
+    assert block.index("cah-apt-key-check") < block.index("gpg --dearmor")
+    # The helper is written whatever the feature flags are, so a connector with
+    # log shipping off still has it.
+    for flags in (set(), {"log_shipping"}, {"node_exporter"}):
+        doc = yaml.safe_load(render(flags))
+        assert any(f["path"] == TWINGATE_SHARED_CHECK for f in doc["write_files"]), flags
+
+
+def run_twingate_block(tmp: Path, listing: str):
+    """Run the Twingate install block with fake curl, gpg, apt-get and systemctl.
+
+    The helper is the one extracted from the template. Every absolute path the
+    block writes is redirected into tmp. Returns (process, log of fake calls).
+    """
+    block = twingate_block()
+    helper = tmp / "apt-key-check"
+    helper.write_text(extract_file(TEMPLATE.read_text(encoding="utf-8"), TWINGATE_SHARED_CHECK))
+    helper.chmod(0o755)
+    for d in ("root", "keyrings", "sources"):
+        (tmp / d).mkdir()
+    block = block.replace(TWINGATE_SHARED_CHECK, str(helper))
+    block = block.replace("/root/", f"{tmp}/root/")
+    block = block.replace("/usr/share/keyrings/", f"{tmp}/keyrings/")
+    block = block.replace("/etc/apt/sources.list.d/", f"{tmp}/sources/")
+    block = block.replace("seq 1 10", "seq 1 1")
+    bindir = tmp / "fbin"
+    bindir.mkdir()
+    for name in ("bash", "cat", "grep", "seq", "env"):
+        src = shutil.which(name)
+        if src:
+            (bindir / name).symlink_to(src)
+    (tmp / "listing").write_text(listing)
+    log = tmp / "calls.log"
+    fakes = {
+        "curl": 'while [ "$#" -gt 0 ]; do [ "$1" = -o ] && out="$2"; shift; done; echo key > "$out"',
+        "gpg": f'if [ "$1" = --show-keys ]; then cat "{tmp}/listing"; else echo "gpg $*" >> "{log}"; : > "${{@: -2:1}}"; fi',
+        "apt-get": f'echo "apt-get $*" >> "{log}"',
+        "systemctl": f'echo "systemctl $*" >> "{log}"',
+        "sleep": "true",
+    }
+    for name, body in fakes.items():
+        (bindir / name).write_text(f"#!{BASH}\n{body}\n")
+        (bindir / name).chmod(0o755)
+    proc = subprocess.run(
+        [BASH, "-o", "pipefail", "-c", block_body(block)],
+        env={"PATH": str(bindir)},
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=False,
+    )
+    return proc, (log.read_text() if log.exists() else "")
+
+
+def block_body(block: str) -> str:
+    """The script text of a joined `bash -o pipefail -c <script>` runcmd entry."""
+    prefix = "bash -o pipefail -c "
+    assert block.startswith(prefix)
+    return block[len(prefix) :]
+
+
+def twingate_pin() -> str:
+    return re.search(r"FPR=([0-9A-F]{40})", twingate_block()).group(1)
+
+
+def test_twingate_install_proceeds_for_exactly_the_pinned_key(tmp_path):
+    proc, calls = run_twingate_block(tmp_path, colons(PUB, fpr(twingate_pin()), UID, SUB, fpr(ATTACKER)))
+    assert "gpg --dearmor" in calls, proc.stderr
+    assert "apt-get install -yq twingate-connector" in calls
+
+
+@pytest.mark.parametrize("order", ["pinned-first", "pinned-second"])
+def test_twingate_install_refuses_the_pinned_key_plus_an_extra_key(tmp_path, order):
+    pin = twingate_pin()
+    pair = [(PUB, fpr(pin)), (PUB, fpr(ATTACKER))]
+    if order == "pinned-second":
+        pair.reverse()
+    proc, calls = run_twingate_block(tmp_path, colons(*[r for p in pair for r in p]))
+    assert proc.returncode != 0
+    assert "refusing" in proc.stderr
+    assert "gpg --dearmor" not in calls
+    assert "apt-get" not in calls
+
+
+def test_twingate_install_refuses_a_stray_extra_fingerprint_record(tmp_path):
+    proc, calls = run_twingate_block(tmp_path, colons(PUB, fpr(twingate_pin()), fpr(ATTACKER)))
+    assert proc.returncode != 0
+    assert "gpg --dearmor" not in calls
 
 
 # --- real gpg: the check against real key files ---------------------------------
