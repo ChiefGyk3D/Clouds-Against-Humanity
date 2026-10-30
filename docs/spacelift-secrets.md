@@ -140,7 +140,7 @@ Both facts from the 2026-10-19 check hold on 2026-10-21: Doppler OIDC identities
 
 ### Stack inputs from other stacks
 
-The stacks get `region`, `vpc_id`, `project_id` and `baseline_tag` from Spacelift stack dependencies on `cah-00-foundation` (`TF_VAR_*` references to its outputs), not from Doppler. Doppler holds only credentials and account-specific settings. The stack `cah-20-telemetry` exists (root `stacks/20-telemetry`, locked, labels `cah` and `stage-2`, context `cah-doppler` attached). It needs the same dependency on `cah-00-foundation` for `region`; that is pending and not yet done.
+The stacks get `region`, `vpc_id`, `project_id` and `baseline_tag` from Spacelift stack dependencies on `cah-00-foundation` (`TF_VAR_*` references to its outputs), not from Doppler. Doppler holds only credentials and account-specific settings. The stack `cah-20-telemetry` exists (root `stacks/20-telemetry`, locked, labels `cah` and `stage-2`, context `cah-doppler` attached). It depends on `cah-00-foundation` for `region` (reference `region` to `TF_VAR_region`; read back 2026-10-30). Only `region` is wired; the other three inputs are not.
 
 ### Upgrade the pinned Doppler CLI
 
@@ -310,7 +310,7 @@ For those rules, deletes and no-ops are ignored: removing a rule never opens any
 | Destroy | The plan deletes, or replaces (the delete half counts, in either order), a `digitalocean_vpc`, `digitalocean_project`, `digitalocean_firewall`, `twingate_remote_network`, `aws_vpc` or `aws_security_group`, or any resource whose tags contain `protected` (a DigitalOcean tag list, or an AWS tag map with that key; the tags are read from the values being destroyed). Droplets are deliberately not protected: a connector replace is a normal, reviewed event. Creates, updates and no-ops never trigger it. |
 | Autodeploy | The stack has autodeploy on. Spacelift's plan policy input documents `input.spacelift.stack.autodeploy` (a required field), so this is a real check on the stack the plan belongs to. It blocks the apply; it cannot stop someone creating a stack with autodeploy on, so the setting is also enforced where stacks are made (the stack factory, issue #96). |
 
-Each message names the resource address (or the stack) and says what a human must do. I have not seen a real plan input in Spacelift yet: the field paths follow the published policy contract, and the fixtures in `plan_test.rego` follow it too. Keep a real plan in the policy workbench (the `sample` rule) and compare the first time the policy is attached.
+Each message names the resource address (or the stack) and says what a human must do. Real push and plan inputs were captured and used to simulate the live policies on 2026-10-30; the field paths follow the published policy contract and the fixtures in `plan_test.rego` follow it too. Whether the fixtures match those captured inputs field for field is unverified. Keep the `sample` rule on so the workbench holds recent inputs.
 
 **Live status.** The policy `cah-plan` is live in Spacelift and attached to the stacks labeled `cah` through `autoattach:cah` (checked 2026-10-30), with the world-open threshold of `/8` or shorter described above (PR #315). The firewall module's own tests in CI still run on the pull request; the plan policy adds the check on the plan Spacelift applies.
 
