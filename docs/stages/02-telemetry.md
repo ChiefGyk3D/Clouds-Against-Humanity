@@ -210,7 +210,7 @@ Set the flags back to false and apply: the Twingate objects are destroyed and no
 
 ## 7. Verification after an apply (every item is "not run yet")
 
-Nothing in stage 2 is applied, so **every check below is marked `not run yet`**. Change a mark to a dated result only when you have run the command and read the output. All checks are read-only: none changes a stack, a firewall, an agent or a rule. Addresses and names are placeholders from the documentation ranges (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`) and `example.com`; replace them with your own, and keep your real values out of this file, issues and pull requests.
+Nothing in stage 2 is applied, so **every check below is marked `not run yet`**. The one exception is section 7.4, the offline checks, which carry a dated result. Change a mark to a dated result only when you have run the command and read the output. All checks are read-only: none changes a stack, a firewall, an agent or a rule. Addresses and names are placeholders from the documentation ranges (`192.0.2.0/24`, `198.51.100.0/24`, `203.0.113.0/24`) and `example.com`; replace them with your own, and keep your real values out of this file, issues and pull requests.
 
 Three facts are **UNVERIFIED** and change what a pass looks like, so settle them first. The connector's metrics bind address is not documented: test it on one connector before relying on the metrics checks. Whether the Wazuh agent can read journald on the version your manager runs is not known: if it cannot, the log checks pass only for file sources such as `/var/log/auth.log`. The Twingate service limit is not published (pages read 2026-10-21); read it in the console before any apply that enables a flag (section 3, step 1).
 
@@ -349,3 +349,21 @@ tofu plan -detailed-exitcode
 ```
 
 Pass with both flags false: exit code `0` (nothing to do). With one flag on and not yet applied: exit code `2`, and the plan lists exactly the objects in the table in section 1. After that flag is applied, a second plan returns `0`.
+
+### 7.4 Measured today, with no infrastructure
+
+Everything above waits for an apply. This part is the opposite: the checks this repository can run on a laptop today, with no account, no credential and no cost. They prove the code does what sections 1 to 6 say. They do **not** prove anything about a live Twingate network, a droplet, Prometheus or Wazuh. A pass here is not a pass for M1 to X4.
+
+Measured on 2026-10-30 from a clean checkout of `main` (commit `15e8bc7`), OpenTofu v1.12.6:
+
+| # | Command | Result |
+|---|---|---|
+| T1 | `tofu init -backend=false && tofu test` in `stacks/20-telemetry` | 62 passed, 0 failed (providers are mocked; the three test files hold 39, 22 and 1 runs) |
+| T2 | `python3 -I -m pytest tests/test_telemetry_stack.py tests/test_golden_telemetry.py tests/test_plan_noop_check.py tests/test_zero_ports_check.py tests/test_metrics_chain.py tests/test_telemetry_lessons.py -q` | 575 passed |
+
+What each covers, so you know what is left:
+
+- T1 is the "both flags false plan zero resources" claim from section 6, the exact-objects claim for each flag, and every validation and precondition. It is the offline form of checks 1 and 2 of section 4 and of the X4 expectation (the live `tofu plan -detailed-exitcode` in X4 is **not verified here**).
+- T2 includes the golden address file for stack 20 (`docs/golden-addresses/20-telemetry.json`) and the checker that X3 uses (`scripts/plan_noop_check.py`), and the zero-open-ports script's tests. The scripts' logic is tested against fixtures. Running `plan_noop_check.py` against a real saved plan of stacks 00, 10 or 20 is **not verified here**, and neither is `scripts/zero_ports_check.py` against a real connector.
+
+Not verified here, because each needs live infrastructure or a person: the Twingate service limit (section 3, step 1), the Twingate 5.x provider refresh plan (P0), the home-side firewall and negative tests, the connector metrics bind address, Wazuh agent journald support, and every item in M1 to X4. Those stay `not run yet`.
