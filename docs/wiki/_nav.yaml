@@ -134,6 +134,7 @@ pages:
     - {page: Build-Your-Own-Mini-SOC, title: "Build your own mini SOC", audience: "builder", status: "draft", desc: "A springboard for building a small cloud security monitoring stack with a cost ceiling you set; an unverified draft for builders."}
     - {page: Stage-2-Home-Side-Runbook, title: "Stage 2 home-side runbook", audience: "operator", status: "unbuilt", desc: "What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied."}
     - {page: Grafana-Dashboards, title: "Grafana dashboards", audience: "operator", desc: "The three dashboards this repository ships and which question each answers; only tried with synthetic data."}
+    - {page: Grafana-Basics-From-a-Blank-Page, title: "Grafana basics from a blank page", audience: "builder", status: "est. steps", desc: "What a data source is, connecting Grafana to Prometheus, SQL and OpenSearch with a read-only account, then one panel and one alert; written from reading, not run."}
     - {page: Lab-Demo-Monitoring-Stack, title: "Lab: synthetic multi-site monitoring stack", audience: "builder", desc: "A hands-on synthetic multi-site monitoring stack where you predict what a silent site does, for builders."}
   enterprise:
     - {page: Enterprise-Networks-Campus-Branch-Datacenter-Cloud, title: "Enterprise networks: campus, branch, data center, cloud", audience: "engineer", desc: "How companies build campus, branch, data center and cloud networks compared with this one VPC, for engineers."}
