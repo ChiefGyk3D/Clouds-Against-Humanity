@@ -177,7 +177,9 @@ Reused unchanged where it applies: one non-root user, no password auth, unattend
 
 Cloud Firewall limits that matter here, read from https://docs.digitalocean.com/products/networking/firewalls/details/limits/ on 2026-10-19: 50 rules per firewall, 10 droplets and 5 tags per firewall, and the firewall is free. One droplet is far under all three. The same page says cloud firewalls cannot be applied to load balancers, which matters for option B.
 
-### 4.4.1 Install order, pins and reboot slots (maintainer ruling 2026-10-22, issue #232)
+### 4.4.1 Install order, pins and reboot slots (maintainer ruling 2026-10-22, recorded here 2026-10-23, issue #232)
+
+> **Supersedes the single-module text.** Where this design describes one `modules/edge-host` with cloud-init and pinned packages for all five daemons (the host description and the file list in section 10), that text is superseded by this per-service ruling: the edge host installs no daemon, and each service arrives through its own stack. Those sections are left as written.
 
 The order on every host is the one in [First hour on a new system](../wiki/First-Hour-on-a-New-System-Updates-and-Baseline.md): update (and switch on unattended security updates), take a baseline, harden, then applications. For the edge that means:
 

@@ -21,10 +21,16 @@ def read(p: Path) -> str:
     return p.read_text(encoding="utf-8")
 
 
+SHORT = ORDER
+LONG = "update (and switch on unattended security updates), take a baseline, harden, then applications"
+REQUIRED = {**{g: SHORT for g in GUIDES}, EDGE: LONG}
+
+
 def test_every_guide_and_the_edge_design_state_the_order():
-    for p in GUIDES + [EDGE]:
+    assert len(REQUIRED) == len(GUIDES) + 1
+    for p, phrase in REQUIRED.items():
         flat = re.sub(r"\s+", " ", read(p)).lower()
-        assert ORDER in flat or "update (and switch on unattended security updates), take a baseline, harden, then applications" in flat, p.name
+        assert phrase in flat, f"{p.name} must carry: {phrase}"
 
 
 def test_the_template_follows_the_order():
