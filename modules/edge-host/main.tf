@@ -58,6 +58,12 @@ resource "digitalocean_project_resources" "edge" {
 
 # No ssh_keys on purpose: there is no admin path. The cloud-init locks the root
 # password and stops sshd; the Droplet Console is not part of this design.
+#
+# Trivy DIG-0004 flags a droplet with no SSH key. It is accepted here: the
+# design (section 4.2) removes the admin path, so a key would only add one.
+# Every change is a pull request, a plan and a rebuild, and a rebuild is the
+# only recovery. Scoped to this resource and rule only.
+#trivy:ignore:AVD-DIG-0004
 resource "digitalocean_droplet" "edge" {
   name       = "${var.layer}-${local.name_key}-${var.service}"
   region     = var.region
