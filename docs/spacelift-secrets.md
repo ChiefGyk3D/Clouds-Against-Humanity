@@ -226,10 +226,14 @@ What it decides:
 | Push or merge to `main` that changes the stack's project root, `modules/`, `scripts/spacelift/` or `.spacelift/` | Tracked run. It stops after the plan for you to confirm, as before. |
 | Push or merge to `main` that changes only other files (docs, the wiki, the README, another stack) | Nothing. |
 | Any pull request, whatever it changes | Nothing. No proposed run, so no red check from a plan that could only fail without credentials. |
-| A tag, or a push to any other branch | Nothing. |
+| A tag, or a push to any other branch, with or without a pull request | Nothing. |
 | A pull request from a fork | Nothing. Spacelift runs a fork's pull request only when a push policy defines `allow_fork`, and this one never does. |
 
 **Plan check first.** Spacelift's documentation (read 2026-10-12) says the Git push policy type is available only to paid Spacelift accounts, and that policies live under **Enforce Guardrails > Policies**, visible to Spacelift admins. On the free plan there is no Policies entry to find. The free-plan route is below; the policy file stays in the repository, tested, for the day the plan changes.
+
+**The rule (issue #306).** Only a push to the stack's tracked branch can start a run, and only a tracked one. Every other event is ignored: a push to any other branch (including one made before a pull request exists, which carries no pull request data at all), a tag push, and a pull request event. The policy never defines `propose` or `allow_fork`, so the ignored events start nothing and post no check. A merge to `main` that arrives with its pull request attached is still tracked, because the decision rests on the branch and the changed files, not on whether a pull request is present.
+
+**The live policy must be replaced by hand after this merges.** On 2026-10-30 the live policy `ignore-pull-requests` (a Git push policy, `autoattach:cah`) was read from the Spacelift account. Its body is one rule, `ignore if input.pull_request != null`. It ignores only events that carry a pull request, so a push to a feature branch before the pull request is opened was proposed anyway, and that proposed run failed in planning on unset required variables (run 01M5R8JTT6WNNBGV6ZWJ1CARJB, stack `cah-10-access`). That reading of the cause is an inference: the policy has not been replayed against a captured event. The repository's `push.rego` is a different, stricter policy. Until its body is pasted into the live policy (steps under "Paid plan" below), this section describes the reviewed copy, not what Spacelift runs.
 
 Why it exists: on 2026-10-12 a pull request that changed only `docs/wiki/` and the README got a red `spacelift/cah-10-access` check. The proposed run had no credentials by design, so it could only fail. Pull requests are already covered by `tofu test` with mocked providers in GitHub Actions, so a proposed run adds a failure and nothing else. Never proposing also closes the gap described in section 8: no pull request's code ever runs in Spacelift next to the Doppler context.
 
