@@ -24,6 +24,8 @@ DigitalOcean droplets always have a public address. You cannot remove it. So the
 
 ## 2a. Droplet hardening
 
+Order: update, baseline, harden, then applications. This is the order in the [first-hour lesson](../wiki/First-Hour-on-a-New-System-Updates-and-Baseline.md), and the cloud-init template follows it (the template's own text is not changed to say so: a comment would change the rendered user-data, and a golden-hash test in `modules/twingate-bootstrap/tests/bootstrap.tftest.hcl` pins the live connectors' user-data byte for byte, because a change replaces the droplets. A comment can go in with the next deliberate template change and its new golden hash; that leftover is tracked in issue #305). Step 1 is the first-boot `package_update` and `package_upgrade` plus `unattended-upgrades`. Step 2 is a baseline you take by hand right after first boot (cloud-init does not record one; the lesson has a read-only script for it). Step 3 is the list below. Step 4 is the connector, installed last. Cloud-init runs its modules in its own order, not file order: `write_files` places files first, the package update runs next, and `runcmd` switches the hardening on and then installs the connector, so nothing is active before the update and the hardening is on before the connector arrives.
+
 Each connector's cloud-init (`modules/twingate-bootstrap/cloud-init.yaml.tftpl`) sets up:
 
 - One login user, `cah-admin`, with the admin public key and passwordless sudo. No password exists (`lock_passwd`), root is disabled (`disable_root`) and the default `ubuntu` user is not created.

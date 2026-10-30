@@ -265,8 +265,8 @@ run "user_data_is_byte_identical_to_the_live_connector_a" {
     reboot_time = "04:00"
   }
   assert {
-    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
-    error_message = "user_data for connector a changed. The golden hash was taken on origin/main; a different value means droplets would be replaced."
+    condition     = sha256(output.user_data) == "5d22cff1b0d63101a183dd71d4ee6ff35a1c8f261628377f5144e129cbbd1b60"
+    error_message = "user_data for connector a changed. The golden hash was re-taken for the one-key apt key check (#288); a different value means droplets would be replaced."
   }
 }
 
@@ -284,8 +284,8 @@ run "user_data_is_byte_identical_to_the_live_connector_b" {
     reboot_time = "05:00"
   }
   assert {
-    condition     = sha256(output.user_data) == "de2de6286f955100f199779f2b8a4d0a194b72f28619965c80f858061742790b"
-    error_message = "user_data for connector b changed. The golden hash was taken on origin/main; a different value means droplets would be replaced."
+    condition     = sha256(output.user_data) == "4a3c21024ad3142ee37effc561ddf1fc3e242f4e7626051ffcbc84dd6f307007"
+    error_message = "user_data for connector b changed. The golden hash was re-taken for the one-key apt key check (#288); a different value means droplets would be replaced."
   }
 }
 
@@ -303,7 +303,7 @@ run "user_data_with_a_comment_matches_the_golden_hash" {
     admin_ssh_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAItest laptop-2026"
   }
   assert {
-    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    condition     = sha256(output.user_data) == "5d22cff1b0d63101a183dd71d4ee6ff35a1c8f261628377f5144e129cbbd1b60"
     error_message = "A key with a comment must render the same user_data as the key without one."
   }
 }
@@ -494,10 +494,17 @@ run "repository_key_is_pinned_and_service_is_verified" {
   assert {
     condition = alltrue([
       for c in yamldecode(output.user_data).runcmd :
-      strcontains(jsonencode(c), "FPR=EC952DEE4701A407A82B0C505C363F09A9174A9E") && strcontains(jsonencode(c), "gpg --show-keys --with-colons") && strcontains(jsonencode(c), "signed-by=$KEYRING") && strcontains(jsonencode(c), "https://packages.twingate.com/apt/")
+      strcontains(jsonencode(c), "FPR=EC952DEE4701A407A82B0C505C363F09A9174A9E") && strcontains(jsonencode(c), "cah-apt-key-check /root/twingate.gpg.key") && strcontains(jsonencode(c), "signed-by=$KEYRING") && strcontains(jsonencode(c), "https://packages.twingate.com/apt/")
       if strcontains(jsonencode(c), "apt-get install -yq twingate-connector")
     ])
     error_message = "The Twingate repository key must be checked against the pinned fingerprint and the repository must be signed-by that key."
+  }
+  assert {
+    condition = anytrue([
+      for f in yamldecode(output.user_data).write_files :
+      f.path == "/usr/local/sbin/cah-apt-key-check" && strcontains(f.content, "gpg --show-keys --with-colons")
+    ])
+    error_message = "The shared key check must list the key file with gpg and compare its fingerprint."
   }
   assert {
     condition = alltrue([
@@ -698,7 +705,7 @@ run "default_timezone_renders_the_golden_user_data" {
     timezone    = "America/New_York"
   }
   assert {
-    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    condition     = sha256(output.user_data) == "5d22cff1b0d63101a183dd71d4ee6ff35a1c8f261628377f5144e129cbbd1b60"
     error_message = "Passing the default timezone explicitly must render the golden user_data."
   }
 }
@@ -721,7 +728,7 @@ run "another_timezone_changes_only_the_timezone_line" {
     error_message = "The machine timezone must be the one given."
   }
   assert {
-    condition     = sha256(replace(output.user_data, "\ntimezone: Europe/Paris\n", "\ntimezone: America/New_York\n")) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    condition     = sha256(replace(output.user_data, "\ntimezone: Europe/Paris\n", "\ntimezone: America/New_York\n")) == "5d22cff1b0d63101a183dd71d4ee6ff35a1c8f261628377f5144e129cbbd1b60"
     error_message = "Changing the timezone must change nothing but the timezone line."
   }
 }
@@ -868,7 +875,7 @@ run "explicit_default_telemetry_renders_the_golden_user_data_a" {
     connector_telemetry = {}
   }
   assert {
-    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    condition     = sha256(output.user_data) == "5d22cff1b0d63101a183dd71d4ee6ff35a1c8f261628377f5144e129cbbd1b60"
     error_message = "An empty connector_telemetry must render the golden user_data of connector a."
   }
 }
@@ -892,7 +899,7 @@ run "explicit_default_telemetry_renders_the_golden_user_data_b" {
     }
   }
   assert {
-    condition     = sha256(output.user_data) == "de2de6286f955100f199779f2b8a4d0a194b72f28619965c80f858061742790b"
+    condition     = sha256(output.user_data) == "4a3c21024ad3142ee37effc561ddf1fc3e242f4e7626051ffcbc84dd6f307007"
     error_message = "The spelled-out defaults must render the golden user_data of connector b."
   }
 }
@@ -915,7 +922,7 @@ run "status_updates_is_provider_side_and_never_changes_user_data" {
     error_message = "status_updates_enabled must reach the Twingate connector."
   }
   assert {
-    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    condition     = sha256(output.user_data) == "5d22cff1b0d63101a183dd71d4ee6ff35a1c8f261628377f5144e129cbbd1b60"
     error_message = "status_updates_enabled must not touch user_data."
   }
 }
@@ -953,7 +960,7 @@ run "an_empty_telemetry_object_plans_and_renders_the_golden_user_data" {
     connector_telemetry = {}
   }
   assert {
-    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    condition     = sha256(output.user_data) == "5d22cff1b0d63101a183dd71d4ee6ff35a1c8f261628377f5144e129cbbd1b60"
     error_message = "{} must render the golden user_data."
   }
 }
@@ -976,7 +983,7 @@ run "explicit_null_fields_plan_and_render_the_golden_user_data" {
     }
   }
   assert {
-    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    condition     = sha256(output.user_data) == "5d22cff1b0d63101a183dd71d4ee6ff35a1c8f261628377f5144e129cbbd1b60"
     error_message = "Explicit nulls must behave as unset."
   }
 }
@@ -997,7 +1004,7 @@ run "a_null_telemetry_object_means_off_not_a_crash" {
     connector_telemetry = null
   }
   assert {
-    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    condition     = sha256(output.user_data) == "5d22cff1b0d63101a183dd71d4ee6ff35a1c8f261628377f5144e129cbbd1b60"
     error_message = "A null connector_telemetry must behave as {} and render the golden user_data."
   }
 }
@@ -1048,7 +1055,7 @@ run "every_telemetry_setting_renders_exactly_its_lines_in_connector_conf" {
   }
   # Nothing else changed: take the five lines out and the golden hash comes back.
   assert {
-    condition     = sha256(replace(output.user_data, "      TWINGATE_LOG_LEVEL=5\n      TWINGATE_LOG_ANALYTICS=v3\n      TWINGATE_METRICS_PORT=9999\n      TWINGATE_LABEL_DEPLOYED_BY=opentofu\n      TWINGATE_LABEL_SITE=tor1\n", "")) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    condition     = sha256(replace(output.user_data, "      TWINGATE_LOG_LEVEL=5\n      TWINGATE_LOG_ANALYTICS=v3\n      TWINGATE_METRICS_PORT=9999\n      TWINGATE_LABEL_DEPLOYED_BY=opentofu\n      TWINGATE_LABEL_SITE=tor1\n", "")) == "5d22cff1b0d63101a183dd71d4ee6ff35a1c8f261628377f5144e129cbbd1b60"
     error_message = "Telemetry may add lines to connector.conf and nothing else to user_data."
   }
   assert {
@@ -1088,7 +1095,7 @@ run "telemetry_user_data_is_still_valid_yaml_with_the_other_files_intact" {
     }
   }
   assert {
-    condition     = length(yamldecode(output.user_data).write_files) == 7
+    condition     = length(yamldecode(output.user_data).write_files) == 8
     error_message = "The extra lines must stay inside connector.conf and not start another file."
   }
 }
@@ -1217,7 +1224,7 @@ run "metadata_lock_false_is_the_golden_user_data" {
     metadata_lock = false
   }
   assert {
-    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    condition     = sha256(output.user_data) == "5d22cff1b0d63101a183dd71d4ee6ff35a1c8f261628377f5144e129cbbd1b60"
     error_message = "metadata_lock = false must render the same user_data as before the setting existed."
   }
 }
@@ -1298,7 +1305,7 @@ run "host_firewall_false_is_the_golden_user_data" {
     host_firewall = false
   }
   assert {
-    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    condition     = sha256(output.user_data) == "5d22cff1b0d63101a183dd71d4ee6ff35a1c8f261628377f5144e129cbbd1b60"
     error_message = "host_firewall = false must render the same user_data as before the setting existed."
   }
 }
@@ -1582,7 +1589,7 @@ run "node_exporter_default_is_the_golden_user_data_a" {
     node_exporter = { enabled = false, port = 9100 }
   }
   assert {
-    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    condition     = sha256(output.user_data) == "5d22cff1b0d63101a183dd71d4ee6ff35a1c8f261628377f5144e129cbbd1b60"
     error_message = "node_exporter disabled must render the golden user_data of connector a."
   }
 }
@@ -1602,7 +1609,7 @@ run "node_exporter_default_is_the_golden_user_data_b" {
     node_exporter = {}
   }
   assert {
-    condition     = sha256(output.user_data) == "de2de6286f955100f199779f2b8a4d0a194b72f28619965c80f858061742790b"
+    condition     = sha256(output.user_data) == "4a3c21024ad3142ee37effc561ddf1fc3e242f4e7626051ffcbc84dd6f307007"
     error_message = "An empty node_exporter must render the golden user_data of connector b."
   }
 }
@@ -1621,7 +1628,7 @@ run "node_exporter_port_alone_does_not_enable_it" {
     node_exporter = { port = 9200 }
   }
   assert {
-    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    condition     = sha256(output.user_data) == "5d22cff1b0d63101a183dd71d4ee6ff35a1c8f261628377f5144e129cbbd1b60"
     error_message = "Setting only the port must not change user_data."
   }
 }
@@ -1640,7 +1647,7 @@ run "node_exporter_null_object_means_off_not_a_crash" {
     node_exporter = null
   }
   assert {
-    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    condition     = sha256(output.user_data) == "5d22cff1b0d63101a183dd71d4ee6ff35a1c8f261628377f5144e129cbbd1b60"
     error_message = "A null node_exporter must behave as {} and render the golden user_data."
   }
 }
@@ -1832,8 +1839,8 @@ run "host_firewall_true_exporter_off_is_the_main_user_data_a" {
     host_firewall = true
   }
   assert {
-    condition     = sha256(output.user_data) == "2cbd81c5de0b470fb9e75d6e926c987492a9f2c6823c8ebe01fa8316d6a34a07"
-    error_message = "host_firewall = true with the node exporter off must render exactly what origin/main rendered."
+    condition     = sha256(output.user_data) == "1988179a15deccb2f20547b6500e0c92bf40b253c54c57b0e8fc558688d998eb"
+    error_message = "host_firewall = true with the node exporter off must render the golden user_data (re-taken for #288)."
   }
 }
 
@@ -1854,8 +1861,8 @@ run "host_firewall_true_exporter_off_with_metrics_port_is_the_main_user_data_b" 
     node_exporter       = { enabled = false }
   }
   assert {
-    condition     = sha256(output.user_data) == "fb047dee8fbaf79aa36b8b223e13ba03d963c42bd40fe5123e194d525a1e13b9"
-    error_message = "host_firewall = true with a metrics port and the node exporter off must render exactly what origin/main rendered."
+    condition     = sha256(output.user_data) == "1a3a68745356e36adfa972b29db6f5d0184490d4db08ed7ae70d1cf2483aff89"
+    error_message = "host_firewall = true with a metrics port and the node exporter off must render the golden user_data (re-taken for #288)."
   }
 }
 
@@ -1882,7 +1889,7 @@ run "log_shipping_default_is_the_golden_user_data_a" {
     log_shipping = { enabled = false }
   }
   assert {
-    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    condition     = sha256(output.user_data) == "5d22cff1b0d63101a183dd71d4ee6ff35a1c8f261628377f5144e129cbbd1b60"
     error_message = "log_shipping disabled must render the golden user_data of connector a."
   }
 }
@@ -1902,7 +1909,7 @@ run "log_shipping_default_is_the_golden_user_data_b" {
     log_shipping = {}
   }
   assert {
-    condition     = sha256(output.user_data) == "de2de6286f955100f199779f2b8a4d0a194b72f28619965c80f858061742790b"
+    condition     = sha256(output.user_data) == "4a3c21024ad3142ee37effc561ddf1fc3e242f4e7626051ffcbc84dd6f307007"
     error_message = "An empty log_shipping must render the golden user_data of connector b."
   }
 }
@@ -1922,7 +1929,7 @@ run "log_shipping_default_with_host_firewall_is_the_golden_user_data_a" {
     log_shipping  = {}
   }
   assert {
-    condition     = sha256(output.user_data) == "2cbd81c5de0b470fb9e75d6e926c987492a9f2c6823c8ebe01fa8316d6a34a07"
+    condition     = sha256(output.user_data) == "1988179a15deccb2f20547b6500e0c92bf40b253c54c57b0e8fc558688d998eb"
     error_message = "host_firewall = true with log_shipping off must render the golden user_data of connector a."
   }
 }
@@ -1944,7 +1951,7 @@ run "log_shipping_default_with_host_firewall_is_the_golden_user_data_b" {
     log_shipping        = {}
   }
   assert {
-    condition     = sha256(output.user_data) == "fb047dee8fbaf79aa36b8b223e13ba03d963c42bd40fe5123e194d525a1e13b9"
+    condition     = sha256(output.user_data) == "1a3a68745356e36adfa972b29db6f5d0184490d4db08ed7ae70d1cf2483aff89"
     error_message = "host_firewall = true with log_shipping off must render the golden user_data of connector b."
   }
 }
@@ -1972,7 +1979,7 @@ run "log_shipping_off_ignores_its_other_settings_and_a_stray_token" {
     log_shipping_bootstrap_token = "fixture-bootstrap-token-0001"
   }
   assert {
-    condition     = sha256(output.user_data) == "3689d9b99f43d41e827f92b183a7ad2f57b5356587060de66bbd1084c0056e0e"
+    condition     = sha256(output.user_data) == "5d22cff1b0d63101a183dd71d4ee6ff35a1c8f261628377f5144e129cbbd1b60"
     error_message = "With log_shipping off no setting and no token may reach user_data."
   }
 }

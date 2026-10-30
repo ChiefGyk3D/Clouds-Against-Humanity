@@ -37,6 +37,12 @@ WIKI_DIR = Path("docs/wiki")
 LOGIN_LIKE = ("login", "user", "author", "owner", "email", "referrer", "path", "avatar", "node")
 
 
+@pytest.fixture(autouse=True)
+def _not_in_actions(monkeypatch):
+    """GITHUB_ACTIONS=true switches --refresh to CI mode; these tests mean the local path."""
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
+
+
 def png_bytes(color=0) -> bytes:
     def chunk(kind, body):
         return struct.pack(">I", len(body)) + kind + body + struct.pack(">I", zlib.crc32(kind + body) & 0xFFFFFFFF)
@@ -204,12 +210,13 @@ class FakeGh:
     def __call__(self, args):
         self.calls.append(args)
         text = " ".join(args)
-        if args[:2] == ["api", "graphql"]:
-            query = next(a for a in args if a.startswith("query="))
-            assert "login" not in query and "STARRED_AT" in query
-            if any(a == "after=C1" for a in args):
-                return json.dumps({"data": {"repository": {"stargazers": {"pageInfo": {"hasNextPage": False, "endCursor": None}, "edges": [{"starredAt": "2026-10-11T01:00:00Z"}]}}}})
-            return json.dumps({"data": {"repository": {"stargazers": {"pageInfo": {"hasNextPage": True, "endCursor": "C1"}, "edges": [{"starredAt": "2026-10-10T01:00:00Z"}, {"starredAt": "2026-10-10T02:00:00Z"}]}}}})
+        if "/stargazers" in text:
+            # REST, not GraphQL: the default Actions token is refused on the GraphQL
+            # stargazers connection (issue #296). Only the time stamp may be selected.
+            assert args[:2] == ["api", "--paginate"] and "application/vnd.github.star+json" in text
+            jq = args[args.index("--jq") + 1]
+            assert jq == ".[].starred_at" and "login" not in text and "user" not in text
+            return "2026-10-10T01:00:00Z\n2026-10-10T02:00:00Z\n2026-10-11T01:00:00Z\n"
         if "traffic/views" in text:
             return json.dumps({"views": [{"timestamp": "2026-10-21T00:00:00Z", "count": 5, "uniques": 2}]})
         if "traffic/clones" in text:
@@ -223,6 +230,14 @@ class FakeGh:
         if args[:2] == ["issue", "list"]:
             return json.dumps([{"closedAt": "2026-10-12T05:00:00Z"}])
         raise AssertionError(text)
+
+
+def test_stars_are_fetched_over_rest_never_graphql():
+    fake = FakeGh()
+    with mock.patch.object(grm, "run_gh", fake):
+        assert grm.fetch_stars("Example/Repo") == ["2026-10-10T01:00:00Z", "2026-10-10T02:00:00Z", "2026-10-11T01:00:00Z"]
+    assert not any("graphql" in " ".join(c) for c in fake.calls)
+    assert not hasattr(grm, "STARS_QUERY")
 
 
 def test_fetch_builds_per_day_counts_pages_stars_and_asks_for_no_login():
@@ -504,11 +519,10 @@ def test_staged_files_keep_the_mode_of_the_file_they_replace(tmp_path, monkeypat
     assert (tmp_path / grm.PAGE).stat().st_mode & 0o777 == 0o640
 
 
-def test_home_embeds_the_chart_with_alt_text_and_the_current_as_of_date():
+def test_home_embeds_the_chart_with_alt_text_from_the_metrics_branch():
     home = (ROOT / "docs" / "wiki" / "Home.md").read_text()
-    snap = json.loads((ROOT / grm.SNAPSHOT).read_text())
-    assert "![" + grm.ALT_TEXT + "](images/repo-growth.png)" in home
-    assert f"As of {snap['fetched_at'][:10]} (UTC)" in home, "refresh the as-of date on Home after a --refresh"
+    assert "![" + grm.ALT_TEXT + "](" + grm.DEFAULT_IMAGE_URL + ")" in home
+    assert "the as-of date is printed in the picture" in home
 
 
 # -- the wiki and README are wired up -----------------------------------------------
@@ -516,7 +530,7 @@ def test_home_embeds_the_chart_with_alt_text_and_the_current_as_of_date():
 
 def test_the_chart_is_linked_and_embedded_with_alt_text():
     readme = (ROOT / "README.md").read_text()
-    assert "![" + grm.ALT_TEXT + "](docs/wiki/images/repo-growth.png)" in readme
+    assert "![" + grm.ALT_TEXT + "](" + grm.DEFAULT_IMAGE_URL + ")" in readme
     assert "scripts/gen_repo_metrics.py" in readme
     for name in ("Home.md", "_Sidebar.md", "Project-Status.md"):
         assert "(Repository-Growth.md)" in (ROOT / "docs" / "wiki" / name).read_text(), name

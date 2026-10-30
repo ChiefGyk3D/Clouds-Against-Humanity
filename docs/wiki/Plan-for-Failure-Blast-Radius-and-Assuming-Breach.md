@@ -97,7 +97,20 @@ Not every choice here shrinks the radius. [Fork private stacks and the pipeline]
 
 ## What does not count as protection
 
-Changing a service to a nonstandard port, hiding a version banner, or renaming an admin page do not shrink a blast radius and do not stop an attack. They make casual scanning a little less noisy. They are **security through obscurity**: relying on the attacker not knowing a fact. An attacker who finds the service gets the same reach as before. Treat these as, at most, small noise reduction, never as one of the layers. [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md) makes the same point about banners and PHP.
+Changing a service to a nonstandard port, hiding a version banner, or renaming an admin page do not shrink a blast radius and do not stop an attack. They are **security through obscurity**: relying on the attacker not knowing a fact. The maintainer's position is that this is a flawed, one-trick idea. It works only until the attacker learns the fact, and learning it is cheap: a port scanner can try all 65,535 ports of a host (a default full-range scan takes minutes; a fast scanner on a good link can do it in seconds), and once it finds the service the attacker goes straight to it with the same reach as before. [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md) makes the same point about banners and PHP, and [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) runs the scan so you can watch it.
+
+Measures that work the same way every time, whether or not the attacker knows how you set things up:
+
+- **Patching.** The flaw is gone, so there is nothing left to find behind any port.
+- **Least privilege.** An account or service that can do little limits what a break-in buys.
+- **Key-only authentication.** There is no password to guess; see [Droplet hardening](Droplet-Hardening.md#login).
+- **A default-deny firewall.** Nothing is reachable unless a rule says who may reach it; see [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md).
+- **Rate limiting.** Guessing is slowed whatever it targets; see [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md).
+- **Detection.** Someone has to notice; see [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md).
+
+A non-default port can make your logs quieter, because the automated guessing aimed at the default port does not reach it. That is a log-noise effect and not a security control, and no page here counts it as a layer. Some software picks a random port by design, for example an I2P router, which chooses one when it is first set up. That is how the software works, and it is not claimed as protection either.
+
+Sometimes a port move is **functional**, and then the page says that is the reason. A honeypot needs port 22 for its lure, so the real management SSH has to live on another port ([Cloud Cowrie for a weekend](Deception-and-Honeypots-Cloud-Cowrie-Weekend.md)). The new number protects nothing; the protection is that only your address can reach it, with a key and no passwords.
 
 ## Honest limits
 

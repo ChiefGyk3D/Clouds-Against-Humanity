@@ -72,6 +72,8 @@ NODE_NAMES = {
     "node-twingate": "Twingate",
     "node-droplets": "Connector droplets",
     "node-resources": "Protected resources",
+    "node-s2-upstream": "Wazuh apt repository",
+    "store-s2-hostboot": "Doppler hostboot config",
 }
 NODE_NAME_MAX = 24
 
@@ -202,10 +204,44 @@ ATLAS = {
     "label_at": {"flow-a-web": 0.7, "flow-a-summary": 0.3},
 }
 
+STAGE2 = {
+    "nodes": {
+        "node-s2-maintainer": (0, 1),
+        "node-s2-run": (1, 0),
+        "store-s2-state": (1, 2),
+        "node-s2-twingate": (2, 0),
+        "store-s2-hostboot": (2, 3),
+        "node-s2-droplet": (3, 1),
+        "node-s2-upstream": (3, 3),
+        "node-s2-manager": (4, 0),
+        "node-s2-scraper": (4, 2),
+    },
+    "boxes": {
+        "boundary-SB1": ["node-s2-droplet"],
+        "boundary-SB2": ["node-s2-twingate"],
+        "boundary-SB3": ["store-s2-hostboot"],
+        "boundary-SB4": ["node-s2-manager", "node-s2-scraper"],
+        "boundary-SB5": ["node-s2-run", "store-s2-state"],
+    },
+    "labels": {
+        "flow-s2-api": "Twingate API call",
+        "flow-s2-state": "State and tokens",
+        "flow-s2-userdata": "User-data with token",
+        "flow-s2-keys": "Out-of-band service key",
+        "flow-s2-boot": "Hostboot config pull",
+        "flow-s2-logs": "Logs and enrollment",
+        "flow-s2-scrape": "Metrics scrape",
+        "flow-s2-apt": "Signed apt packages",
+    },
+    "vertices": {"flow-s2-keys": [(140, 20), (1940, 20)]},
+    "label_at": {"flow-s2-keys": 0.5},
+}
+
 LAYOUTS = {
     "clouds-against-humanity.threat-dragon.json": PIPELINE,
     "clouds-against-humanity.attack.threat-dragon.json": PIPELINE,
     "clouds-against-humanity.atlas.threat-dragon.json": ATLAS,
+    "clouds-against-humanity.stage2.threat-dragon.json": STAGE2,
 }
 
 
