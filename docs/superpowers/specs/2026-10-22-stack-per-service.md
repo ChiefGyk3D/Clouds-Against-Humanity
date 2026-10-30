@@ -33,7 +33,7 @@ Read on 2026-10-22:
 | Telemetry | `stacks/20-telemetry` | Twingate service accounts and resources (logging and scrape), per site | `{ stage 2, resources [] }`, $0 |
 | AWS twins | `stacks/aws/00-foundation`, `stacks/aws/10-access` | The AWS version of stages 0 and 1 | Priced from `docs/cost-prices/aws.json` |
 | Edge (draft, branch only) | `stacks/50-edge` plus `modules/edge-host` | One VPC, tags, a Cloud Firewall, one droplet, one reserved IP; every daemon would be in one cloud-init | Empty until approved |
-| Workloads (design only) | `stacks/30-workloads` in the stage 3 design | One Docker host, Portainer, five daemons, a bridge, a Spaces bucket | Not written |
+| Workloads (design only) | `stacks/30-workloads` in the stage 3 design | One Docker host, Portainer, five daemons, a Spaces bucket | Not written |
 
 Two facts shape everything below.
 
@@ -51,7 +51,6 @@ Two facts shape everything below.
 | Edge | Mosquitto (private MQTT over TLS) | Yes | Holds credentials and a TLS key |
 | Edge | iperf3 | Yes | Source-restricted; the only edge port core connectors reach (design 4.3) |
 | Workloads | penguin-overlord, solarstorm_scout, Boon-Tube-Daemon, Stream-Daemon, Star-Daemon | Yes, each | Outbound-only pollers per the stage 3 design. Some may become scheduled DigitalOcean Functions instead, which the design leaves open. The stage 3 design deploys Functions with `doctl serverless`, outside OpenTofu and outside the cost gate, so a Function is not an OpenTofu stack and this ruling cannot cover it as written. Question 10 asks whether Functions are an exception (their own repository path and a hand-checked usage line) or are dropped in favor of the shared host |
-| Workloads | mautrix-discord bridge (with its Postgres) | Yes | The only workload with an inbound path (from the homeserver) and real state |
 | Workloads | Docker host, Portainer, Spaces bucket | Yes, as shared "host" stacks | Not services; see section 4 |
 | Honeypot | Cowrie sensor | Yes | Lives in a separate cloud account by its own design (honeypot design, section 3), so its stack needs its own provider credentials. It never shares a stack, a state or a Doppler config with core |
 | Telemetry | Logging paths, scrape paths | Not now | `stacks/20-telemetry` creates only Twingate access objects, costs $0, and already has `logging_enabled` and `metrics_enabled` switches. It is access policy, not a running service. Splitting it into a logging stack and a scrape stack is possible and small but buys little; defer, and say so in the lesson |
@@ -106,7 +105,7 @@ So on the edge, "several stacks on one host" has only two honest forms, both of 
 **Isolation follows exposure.** One rule, applied twice:
 
 1. **Edge services: one droplet per service stack.** They face the internet, they run five different daemons with five different CVE histories, and the edge design's top-ranked risk is remote code execution in any one of them followed by theft of the log credential (risk 1). One service per machine is the cheapest control that shrinks that: a compromised iperf3 no longer shares a disk and a process space with the MQTT broker's passwords and TLS key. The design already says "the edge can be compromised; limit what that buys". Per-service machines are that sentence made structural. Each machine still has no SSH, no admin path and cloud-init only, exactly as the draft's host module does today.
-2. **Workload daemons: separate stacks, one shared host stack.** The five daemons are outbound-only pollers at one trust level with their state in a bucket, and the host is already managed through Portainer over Twingate. Each daemon is its own stack that deploys one container through Portainer onto the shared host stack's Docker. The bridge is its own stack too, because it is the only one with an inbound path. Giving every poller its own droplet buys little isolation (they hold the same kind of social-API tokens) and costs $24 to $36 more a month.
+2. **Workload daemons: separate stacks, one shared host stack.** The five daemons are outbound-only pollers at one trust level with their state in a bucket, and the host is already managed through Portainer over Twingate. Each daemon is its own stack that deploys one container through Portainer onto the shared host stack's Docker. Giving every poller its own droplet buys little isolation (they hold the same kind of social-API tokens) and costs $24 to $36 more a month.
 3. **Shared free things stay shared, in their own network stack.** VPC, tags, project resource lists and the bucket cost nothing or a flat fee and are used by many services. They are a stack of their own (`50-edge-network`, and a workloads host/bucket stack), built first and destroyed last.
 4. **Honeypot: its own account, its own stacks, never shared.** Unchanged from its design.
 
@@ -136,7 +135,7 @@ The cost gate and the secret-separation tests constrain the choice, so the optio
 
 | Scheme | Example | For | Against |
 |---|---|---|---|
-| A. Flat, one decade per zone (recommended) | `50-edge-network`, `51-edge-iperf3`, `52-edge-mosquitto`, `53-edge-i2pd`, `54-edge-reticulum`, `55-edge-lxmd`; `30-workloads-host`, `31-workloads-bridge`, `32-...` | Works with the gate and the tests as written; the number is the build order inside the zone, so the teardown order is the reverse; one stack, one directory, one Spacelift stanza | Ten slots per zone; a zone that outgrows its decade needs a renumber (which changes Spacelift stack ids, so it is expensive) |
+| A. Flat, one decade per zone (recommended) | `50-edge-network`, `51-edge-iperf3`, `52-edge-mosquitto`, `53-edge-i2pd`, `54-edge-reticulum`, `55-edge-lxmd`; `30-workloads-host`, `31-...` | Works with the gate and the tests as written; the number is the build order inside the zone, so the teardown order is the reverse; one stack, one directory, one Spacelift stanza | Ten slots per zone; a zone that outgrows its decade needs a renumber (which changes Spacelift stack ids, so it is expensive) |
 | B. Nested | `stacks/50-edge/network`, `stacks/50-edge/iperf3` | Groups a zone in the file tree | The gate's stack-name check expects the number on the first path level and treats `stacks/aws/...` as a provider directory; nested service directories would need new code in `cost_check.py`, the sites logic and the tests for no functional gain. The stack id (`cah-50-edge-iperf3`) is the same either way |
 | C. Names only, no numbers | `edge-iperf3` | Nothing to renumber | Loses the build-order meaning the repository uses everywhere (00, 10, 20) and fails `STACK_NAME_RE` as written |
 
@@ -214,7 +213,7 @@ Build order, lowest number first. Everything in a row may be built in any order 
 | 2 | `10-access` | foundation |
 | 3 | `50-edge-network` (separate VPC, no peering; independent of core) | nothing in core |
 | 4 | `51-edge-iperf3`, `52-edge-mosquitto`, `53-edge-i2pd`, `54-edge-reticulum`, `55-edge-lxmd` | edge network; lxmd also needs a reachable Reticulum (section 9a) |
-| 5 | `30-workloads-host`, then the daemon stacks (the container-based ones) and the bridge | foundation, access (Twingate path), bucket |
+| 5 | `30-workloads-host`, then the daemon stacks (the container-based ones) | foundation, access (Twingate path), bucket |
 | 6 | `20-telemetry` | access, plus the home side |
 | separate | the honeypot stacks | nothing in core; separate account |
 
@@ -289,7 +288,7 @@ Each line is one pull request or one maintainer action. Nothing in the first nin
 | 12 | Approve edge service 3 (`53-edge-i2pd`), same checklist, own change; ceiling edit by the step only | +$6 | Same |
 | 13 | Approve edge service 4 (`54-edge-reticulum`), same | +$6 | Same |
 | 14 | Approve edge service 5 (`55-edge-lxmd`), same checklist, own change | +$6 | Same |
-| later (before or after step 10, question 12) | Stage 3: the workloads host stack, then each daemon stack through Portainer, then the bridge | per the stage 3 design | Stage 3's own approval |
+| later (before or after step 10, question 12) | Stage 3: the workloads host stack, then each daemon stack through Portainer | per the stage 3 design | Stage 3's own approval |
 
 The sizes of steps 1 and 2 are the point: the two repository-wide changes (cost gate, plan policy) land first, once, with no stack in flight, so no service stack ever lands on a gate that cannot price it or a policy that cannot tell it from its neighbor.
 

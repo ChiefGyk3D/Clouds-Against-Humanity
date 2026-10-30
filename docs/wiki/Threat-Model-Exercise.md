@@ -198,7 +198,7 @@ A threat model that does not say what it left out is selling comfort. This one, 
 - **Anything configured outside the repository.** Branch protection, the Spacelift push policy, autodeploy off, deletion protection, state access, Doppler token scopes: all settings in vendor consoles. This exercise cannot verify them, and a diff cannot show a change to them.
 - **Live state.** Nothing here ran against a real environment. The answer key cites files, not observed behavior; where a claim needs a real run (masking, the metadata endpoint) it says so.
 - **Vendor compromise.** Accepted as T10, not mitigated.
-- **Stage 2 and stage 3.** Logging, the link home, workloads, Portainer, the Matrix bridge and daemon tokens do not exist yet. The worked example lists how each would widen the model; do not treat the current answer key as covering them.
+- **Stage 2 and stage 3.** Logging, the link home, workloads, Portainer and daemon tokens do not exist yet. The worked example lists how each would widen the model; do not treat the current answer key as covering them.
 - **Physical, legal and availability risks** beyond the lockout in T13, and **targeted attackers with real resources**, which the worked example puts out of scope on purpose.
 - **Completeness.** This is a learning exercise, not an audit. If you find a threat the key misses, you did the exercise right.
 

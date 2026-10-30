@@ -88,10 +88,7 @@ Amend the existing Stage 3 draft; do not start a new one.
 - LLM access: the Twingate resource for the daemons points at a LiteLLM proxy on the home AI VLAN, never at Ollama directly. One virtual key per daemon, scoped to one model and rate limited. LiteLLM itself is on-prem and out of scope; document the contract (host, port, key per daemon in Doppler).
 - Discord: penguin-overlord uses the gateway (outbound websocket, slash commands included), so no inbound.
 - Stream-Daemon follow-up issue: Twitch EventSub over the WebSocket transport (outbound) instead of webhooks. VERIFY current EventSub WebSocket support for `stream.online`.
-- Discord-to-Matrix bridge, decision order:
-  1. etke.cc's hosted bridge (no inbound, preferred).
-  2. Self-hosted mautrix-discord using mautrix-wsproxy, so the bridge dials out. VERIFY that etke.cc will run wsproxy.
-  3. Self-hosted behind DMZ ingress: TLS, inbound restricted to etke.cc server IPs, `hs_token` checked. Last resort.
+- Discord-to-Matrix bridge: decided 2026-10-22 (closing #107). etke.cc hosts it on the Matrix server it already runs, so there is no bridge in this project and no decision order left (the self-hosted options were dropped, #254).
 
 ### 6. Webhook receivers on DO Functions (not a droplet)
 
