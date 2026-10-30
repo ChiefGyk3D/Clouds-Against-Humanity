@@ -43,7 +43,7 @@ The edge ceiling stays at its existing value in `approved.json` and is raised on
 5. The plan-policy allowlist entry (after #246), the Spacelift stanza and Doppler names.
 6. The switch.
 
-Planned service stacks, with their slots: Reticulum (01:00), lxmd (01:30), i2pd (02:00, random port), Mosquitto (02:30), iperf3 (03:00, after observed connector addresses and #245). Only the shared network stack exists today.
+Planned service stacks, with their slots: Reticulum (01:00), lxmd (01:30), i2pd (02:00, random port by design, which is not a protection), Mosquitto (02:30), iperf3 (03:00, after observed connector addresses and #245). Only the shared network stack exists today.
 
 ## 4. Gates and what is not built
 
