@@ -330,5 +330,5 @@ def test_the_committed_snapshot_is_a_valid_baseline():
 
 def test_the_page_documents_history_the_prefix_rule_and_the_reset():
     page = (ROOT / "docs" / "wiki" / "Repository-Growth.md").read_text()
-    for needle in ("fast-forward", "compare-and-swap", "one small commit per day", "14 days", "delete the `metrics` branch", "reviewed"):
+    for needle in ("fast-forward", "compare-and-swap", "at most one small commit per run", "14 days", "delete the `metrics` branch", "reviewed"):
         assert needle in page, needle

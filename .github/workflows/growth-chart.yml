@@ -1,4 +1,4 @@
-# Redraws the repository growth chart every day and publishes it to an orphan
+# Redraws the repository growth chart every three hours and publishes it to an orphan
 # branch named `metrics` (issue #294). The README and the wiki show
 # https://raw.githubusercontent.com/ChiefGyk3D/Clouds-Against-Humanity/metrics/repo-growth.png,
 # so the stars line never waits for a person to refresh a snapshot by hand.
@@ -18,8 +18,10 @@
 #            the exact metrics tip the render job read, with an exact lease
 #            (--force-with-lease=refs/heads/metrics:<that tip>), so it can only be a pure
 #            fast-forward from it. A moved branch fails the run. The first run creates the branch
-#            as an orphan root; history is kept, one small commit a day. The push is
-#            skipped when nothing changed. main is never written, so its branch
+#            as an orphan root; history is kept, at most one small commit per run (eight a
+#            day). The push is skipped only when the bundle is byte-identical to the branch
+#            (as-of.txt carries the fetch time, so in practice every run pushes); the ledger still keeps one
+#            point per UTC day, and a rerun on the same day replaces that day's point. main is never written, so its branch
 #            protection is untouched.
 #
 # Residual risk: GITHUB_TOKEN cannot be scoped to one branch, so the publish job's
@@ -31,13 +33,13 @@
 # control is a repository ruleset; see docs/wiki/Repository-Growth.md.
 #
 # The committed docs/wiki/images/repo-growth.png and .metrics-snapshot.json stay in
-# main as the offline, hash-checked fallback that CI's --check compares; the daily
+# main as the offline, hash-checked fallback that CI's --check compares; the scheduled
 # picture does not replace them. Only runs on main in this repository.
 name: Growth chart
 
 on:
   schedule:
-    - cron: "23 6 * * *" # daily, off the hour (UTC)
+    - cron: "23 */3 * * *" # every three hours, off the hour (UTC)
   workflow_dispatch:
 
 permissions: {}

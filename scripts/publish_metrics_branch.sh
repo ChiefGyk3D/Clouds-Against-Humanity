@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: Apache-2.0
-# Publish the daily growth chart bundle to the `metrics` branch (issues #294, #296).
+# Publish the growth chart bundle (drawn every three hours) to the `metrics` branch (issues #294, #296).
 #
 # The publish job of .github/workflows/growth-chart.yml runs this with
 # contents: write. It never touches main, so main's branch protection is
@@ -22,7 +22,7 @@
 #   3. nothing is pushed when the branch already holds exactly these three files,
 #      byte-identical (a changed snapshot or as-of file is published even when the
 #      picture did not change).
-# History is kept on purpose: one small commit per day, which also makes a bad
+# History is kept on purpose: at most one small commit per run (every three hours), which also makes a bad
 # publish visible and revertible. A deliberate reset (a newer baseline, a lost
 # ledger) is a separate, reviewed action: delete the branch, and the next run starts
 # a ledger afresh.

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """Structure of .github/workflows/growth-chart.yml (issue #294).
 
-The daily growth chart is rendered in one job that can only read, and published
+The growth chart (redrawn every three hours) is rendered in one job that can only read, and published
 by a second job that can write but runs nothing it did not validate. These tests
 read the workflow as data and pin the properties that make that true: permissions
 per job, commit-pinned actions with a version comment, no expression inside a run
@@ -68,14 +68,14 @@ def test_the_workflow_exists_and_has_two_jobs(doc):
     assert set(doc["jobs"]) == {"render", "publish"}
 
 
-def test_triggers_are_a_daily_schedule_off_the_hour_and_a_manual_run(doc):
+def test_triggers_are_a_three_hourly_schedule_off_the_hour_and_a_manual_run(doc):
     on = triggers(doc)
     assert set(on) == {"schedule", "workflow_dispatch"}
     crons = [s["cron"] for s in on["schedule"]]
     assert len(crons) == 1
     minute, hour, dom, month, dow = crons[0].split()
     assert minute.isdigit() and minute not in {"0", "00", "30", "15", "45"}
-    assert hour.isdigit() and (dom, month, dow) == ("*", "*", "*")
+    assert hour == "*/3" and (dom, month, dow) == ("*", "*", "*")
 
 
 def test_workflow_default_permissions_are_empty_and_jobs_name_their_own(doc):

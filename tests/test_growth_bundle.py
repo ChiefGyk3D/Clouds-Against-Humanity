@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""The daily growth chart bundle (issue #294): hostile input, and the publish script.
+"""The growth chart bundle (issue #294): hostile input, and the publish script.
 
 The render job hands a bundle (snapshot JSON + PNG) to the publish job as an
 artifact. The publish job holds contents: write, so it re-validates the bundle
