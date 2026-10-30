@@ -26,7 +26,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Foundations: infrastructure as code](#foundations-infrastructure-as-code) (7)
 - [Foundations: web hosting](#foundations-web-hosting) (3)
 - [Foundations: security tools and threat modeling](#foundations-security-tools-and-threat-modeling) (6)
-- [Foundations: network and host defense](#foundations-network-and-host-defense) (5)
+- [Foundations: network and host defense](#foundations-network-and-host-defense) (6)
 - [Foundations: deception and honeypots](#foundations-deception-and-honeypots) (11)
 - [Detection and monitoring](#detection-and-monitoring) (12)
 - [Foundations: enterprise practice](#foundations-enterprise-practice) (6)
@@ -144,6 +144,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) | Lesson D3: file integrity monitoring, baselines and what to watch, with Tripwire, AIDE, Wazuh, auditd and fail2ban, for learners. | learner |  |
 | [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md) | Lesson D4: the main limiting algorithms, what to count by and what each layer can see, for learners who run a service. | learner |  |
 | [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) | How to list every inbound port, address, account, token, dependency and person, how this project shrinks each, how to measure from outside, and what to log and alert on. | learner | draft |
+| [The DMZ and hardening an internet-facing host](The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet.md) | What a DMZ is, what may talk to what in this project's unbuilt edge design, how to harden a public host, and what to log and alert on. | learner | draft |
 
 ## Foundations: deception and honeypots
 
