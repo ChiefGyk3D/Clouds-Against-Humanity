@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (132 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (133 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -20,7 +20,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 
 - [Start here](#start-here) (5)
 - [Core path: read in this order](#core-path-read-in-this-order) (21)
-- [Foundations: OS and Linux](#foundations-os-and-linux) (10)
+- [Foundations: OS and Linux](#foundations-os-and-linux) (11)
 - [Foundations: networking](#foundations-networking) (5)
 - [Foundations: identity and secrets](#foundations-identity-and-secrets) (6)
 - [Foundations: infrastructure as code](#foundations-infrastructure-as-code) (7)
@@ -76,6 +76,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 
 | Page | What it is for and who it is for | Audience | Status |
 | --- | --- | --- | --- |
+| [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md) | 3-2-1-1-0, immutable and offline copies, backup key custody, restore testing and what this project would have to back up, with a free restore drill. | learner | draft |
 | [Backups, recovery and patching](Backups-Recovery-and-Patching.md) | Snapshot versus backup, RPO and RTO, the 3-2-1 rule and patch cadence, for beginners deciding what to protect and how. | learner |  |
 | [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) | BCP versus DR, business impact analysis, RTO and RPO per system, recovery strategies, runbooks, tabletop exercises, postmortems and a worked plan for this project, for learners planning for the day something big breaks. | learner | draft |
 | [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md) | The order of a new machine's first hour: updates, automatic updates, a baseline, then everything else, for anyone setting up a system. | learner |  |
