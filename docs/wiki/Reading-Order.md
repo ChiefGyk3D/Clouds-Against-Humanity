@@ -126,7 +126,8 @@ The exercise page tells you to stop after step 3 and read the threat model only 
 | 9 | [Grafana dashboards (unverified draft)](Grafana-Dashboards.md) | 10 min | You can say which of the three dashboards answers "is a site up", "is a droplet healthy" and "did anyone log in", and which panels' field names are still UNVERIFIED. |
 | 10 | [Grafana basics from a blank page (written from reading)](Grafana-Basics-From-a-Blank-Page.md) | 25 min | You can say what Save & test does not prove, why the database account must be read-only, and what a pending period is. |
 | 11 | [Lab: a synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) | 30 min, hands on | You predicted what a silent site does to each panel, then ran `silent-site` and compared. |
-| 12 | [Roadmap](Roadmap.md) | 10 min | You know stage 2 is merged on the cloud side and not applied, and that the home side is not done. |
+| 12 | [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) | 30 min, hands on | You can name the stage a missing alert points at and you ran the toy pipeline to see an undecoded line raise no error. |
+| 13 | [Roadmap](Roadmap.md) | 10 min | You know stage 2 is merged on the cloud side and not applied, and that the home side is not done. |
 
 Nothing on these pages is deployed. The cloud hosts do not ship logs anywhere yet; the detection page says so at the top. Doing, not just reading: each telemetry page ends with a predict-then-check set; the times above are reading only.
 
