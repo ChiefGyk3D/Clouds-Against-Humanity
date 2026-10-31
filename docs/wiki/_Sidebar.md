@@ -133,7 +133,7 @@ file does not match the manifest. -->
 </details>
 
 <details>
-<summary><b>Detection and monitoring</b> (12)</summary>
+<summary><b>Detection and monitoring</b> (13)</summary>
 
 - [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md)
 - [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) (unbuilt)
