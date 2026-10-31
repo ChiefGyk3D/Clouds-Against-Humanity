@@ -219,14 +219,20 @@ ${telemetry_conf}%{ if metadata_lock ~}
       #!/usr/bin/env bash
       set -euo pipefail
       port="${node_exporter_port}"
-      addr=""
-      # The first RFC 1918 IPv4 address of any interface (DigitalOcean's VPC
-      # address, AWS's primary address).
-      while read -r cand; do
-        case "$cand" in
-          10.*|192.168.*|172.1[6-9].*|172.2[0-9].*|172.3[01].*) addr="$cand"; break ;;
-        esac
-      done < <(ip -4 -o addr show scope global | awk '{ split($4, a, "/"); print a[1] }')
+      # The first RFC 1918 IPv4 address on an interface that holds no public
+      # IPv4 address. On DigitalOcean eth0 holds the public address plus a legacy
+      # private one, and the VPC address is on eth1; AWS's primary interface
+      # holds one private address. Fields of `ip -o`: the interface name and the
+      # CIDR. Pass 1 marks interfaces with a public address, pass 2 picks.
+      addr="$(ip -4 -o addr show scope global | awk '
+        function priv(a) {
+          return (a ~ /^10\./ || a ~ /^192\.168\./ || a ~ /^172\.(1[6-9]|2[0-9]|3[01])\./)
+        }
+        { split($4, c, "/"); n++; ifn[n] = $2; ip[n] = c[1]; if (!priv(c[1])) pub[$2] = 1 }
+        END {
+          for (i = 1; i <= n; i++)
+            if (priv(ip[i]) && !(ifn[i] in pub)) { print ip[i]; exit }
+        }')"
       if [ -z "$addr" ]; then
         echo "cah-node-exporter-run: no private IPv4 address found; refusing to start the node exporter" >&2
         exit 1
@@ -651,6 +657,7 @@ ${telemetry_conf}%{ if metadata_lock ~}
   - path: /etc/apt/apt.conf.d/52cah-unattended-upgrades
     permissions: "0644"
     content: |
+      #clear Unattended-Upgrade::Allowed-Origins;
       Unattended-Upgrade::Allowed-Origins {
           "$${distro_id}:$${distro_codename}-security";
           "$${distro_id}ESMApps:$${distro_codename}-apps-security";
