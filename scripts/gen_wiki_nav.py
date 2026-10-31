@@ -7,7 +7,18 @@ are generated from it, so adding a page is one line in one file:
 
   docs/wiki/Contents.md   every page, grouped, one line each, with its status marker
   docs/wiki/_Sidebar.md   a compact sidebar: top links, then one collapsible group each,
-                          with only the core path open by default
+                          with only the core path open by default. A group lists only its
+                          key pages, then a "Full list" link to its section of Contents.md
+                          (issue #362), so the sidebar stops growing with every new page.
+
+Which pages a group shows in the sidebar (the sidebar line budget is a test, not a goal):
+  - the numbered core path is listed in full (it is the fixed reading path);
+  - any other group shows the entries marked `sidebar: true` in the manifest, in display order;
+  - a group with none marked shows its first DEFAULT_SIDEBAR_PAGES (3) entries in display
+    order, so a new group works with no extra field;
+  - every group ends with "Full list (N)", linking to its heading in Contents.md. The
+    section headings of Contents.md are the group titles, so group titles must make
+    distinct anchors (validate checks this). Every page stays in Contents.md.
 
 Parts, kept apart on purpose (the same shape as gen_project_status.py):
 
@@ -45,6 +56,8 @@ STATUSES = ("draft", "est. steps", "unbuilt")
 ORDERS = ("curated", "sorted")
 MAX_DESC = 220
 MAX_TITLE = 80
+# A group with no entry marked `sidebar: true` shows this many entries (display order) in the sidebar.
+DEFAULT_SIDEBAR_PAGES = 3
 # The group the sidebar shows as a row of links across the top instead of a collapsible block.
 TOP_GROUP = "start"
 TOP_BAR_LABELS = {"Give-Feedback-and-Open-an-Issue": "Give feedback"}
@@ -173,7 +186,7 @@ def validate(manifest: dict, pages: set[str]) -> list[str]:
                 continue
             name = e.get("page")
             where = f"pages.{gid}.{name}"
-            extra = set(e) - {"page", "title", "audience", "status", "desc"}
+            extra = set(e) - {"page", "title", "audience", "status", "desc", "sidebar"}
             if extra:
                 problems.append(f"{where}: unknown field(s) {sorted(extra)}")
             if not isinstance(name, str) or not PAGE_NAME.match(name):
@@ -190,6 +203,8 @@ def validate(manifest: dict, pages: set[str]) -> list[str]:
                 problems.append(f"{where}: audience {e.get('audience')!r} is not one of {AUDIENCES}")
             if "status" in e and e["status"] not in STATUSES:
                 problems.append(f"{where}: status {e['status']!r} is not one of {STATUSES}")
+            if "sidebar" in e and not isinstance(e["sidebar"], bool):
+                problems.append(f"{where}: sidebar must be true or false")
 
     for gid, group_links in (manifest.get("links") or {}).items():
         for e in group_links or []:
@@ -201,6 +216,16 @@ def validate(manifest: dict, pages: set[str]) -> list[str]:
             problems += _text_problems(where, "desc", e.get("desc"), MAX_DESC)
             if e.get("audience") not in AUDIENCES:
                 problems.append(f"{where}: audience {e.get('audience')!r} is not one of {AUDIENCES}")
+            if "sidebar" in e and not isinstance(e["sidebar"], bool):
+                problems.append(f"{where}: sidebar must be true or false")
+
+    anchors: dict[str, str] = {}
+    for g in groups:
+        if isinstance(g, dict) and isinstance(g.get("title"), str) and isinstance(g.get("id"), str):
+            anchor = slug(g["title"])
+            if anchor in anchors:
+                problems.append(f"groups {anchors[anchor]} and {g['id']} have the same Contents anchor #{anchor}")
+            anchors.setdefault(anchor, g["id"])
 
     for name in sorted(pages - set(seen)):
         problems.append(f"orphan: {name}.md is a wiki page but has no manifest entry")
@@ -236,6 +261,16 @@ def _sidebar_item(entry: dict) -> str:
     return f"[{entry['title']}]({entry['page']}.md){_suffix(entry)}"
 
 
+def sidebar_entries(manifest: dict, group: dict) -> list[dict]:
+    """The entries a group shows in the sidebar: see the module docstring for the rule."""
+    gid = group["id"]
+    pages, extra = entries(manifest, gid), link_entries(manifest, gid)
+    if group.get("numbered"):
+        return pages + extra
+    marked = [e for e in pages + extra if e.get("sidebar")]
+    return marked or pages[:DEFAULT_SIDEBAR_PAGES]
+
+
 def render_sidebar(manifest: dict) -> str:
     lines = [
         "<!-- GENERATED from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py. Do not edit this",
@@ -248,16 +283,13 @@ def render_sidebar(manifest: dict) -> str:
     for group in groups_of(manifest):
         if group["id"] == TOP_GROUP:
             continue
-        pages = entries(manifest, group["id"])
-        extra = link_entries(manifest, group["id"])
-        count = len(pages) + len(extra)
+        count = len(entries(manifest, group["id"])) + len(link_entries(manifest, group["id"]))
         lines += ["", "<details open>" if group.get("open") else "<details>"]
         lines += [f"<summary><b>{group['title']}</b> ({count})</summary>", ""]
-        for number, e in enumerate(pages, start=1):
-            bullet = f"{number}." if group.get("numbered") else "-"
-            lines.append(f"{bullet} {_sidebar_item(e)}")
-        for e in extra:
-            lines.append(f"- {_sidebar_item(e)}")
+        for number, e in enumerate(sidebar_entries(manifest, group), start=1):
+            numbered = group.get("numbered") and "url" not in e
+            lines.append(f"{f'{number}.' if numbered else '-'} {_sidebar_item(e)}")
+        lines.append(f"- [Full list ({count})](Contents.md#{slug(group['title'])})")
         lines += ["", "</details>"]
     return "\n".join(lines) + "\n"
 

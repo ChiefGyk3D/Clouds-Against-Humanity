@@ -28,22 +28,17 @@ file does not match the manifest. -->
 19. [Threat model](Threat-Model.md)
 20. [Lessons learned](Lessons-Learned.md)
 21. [Roadmap](Roadmap.md)
+- [Full list (21)](Contents.md#core-path-read-in-this-order)
 
 </details>
 
 <details>
-<summary><b>Foundations: OS and Linux</b> (10)</summary>
+<summary><b>Foundations: OS and Linux</b> (9)</summary>
 
-- [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
-- [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) (draft)
-- [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md)
 - [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) (est. steps)
-- [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md)
-- [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md)
 - [The terminal and your first script](Terminal-and-Your-First-Script.md)
 - [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) (draft)
-- [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md)
-- [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md)
+- [Full list (9)](Contents.md#foundations-os-and-linux)
 
 </details>
 
@@ -51,10 +46,9 @@ file does not match the manifest. -->
 <summary><b>Foundations: networking</b> (5)</summary>
 
 - [How a web request works](How-a-Web-Request-Works.md)
-- [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md)
 - [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md)
-- [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md)
 - [IPv6 adoption and handling it safely](IPv6-Adoption-and-Handling-It-Safely.md)
+- [Full list (5)](Contents.md#foundations-networking)
 
 </details>
 
@@ -62,10 +56,9 @@ file does not match the manifest. -->
 <summary><b>Foundations: identity and secrets</b> (5)</summary>
 
 - [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md)
-- [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md)
 - [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md)
-- [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md)
 - [Secrets from day one](Secrets-From-Day-One.md)
+- [Full list (5)](Contents.md#foundations-identity-and-secrets)
 
 </details>
 
@@ -73,12 +66,9 @@ file does not match the manifest. -->
 <summary><b>Foundations: infrastructure as code</b> (7)</summary>
 
 - [Git from zero](Git-From-Zero.md)
-- [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md)
 - [OpenTofu from zero](OpenTofu-From-Zero.md)
-- [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md)
-- [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md)
 - [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) (unbuilt)
-- [Spacelift from zero](Spacelift-From-Zero.md)
+- [Full list (7)](Contents.md#foundations-infrastructure-as-code)
 
 </details>
 
@@ -88,7 +78,7 @@ file does not match the manifest. -->
 - [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md)
 - [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md)
 - [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) (draft)
-- [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
+- [Full list (4)](Contents.md#foundations-web-hosting)
 
 </details>
 
@@ -97,10 +87,8 @@ file does not match the manifest. -->
 
 - [Threats in plain words](Threats-in-Plain-Words.md)
 - [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md)
-- [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md)
-- [Threat model exercise](Threat-Model-Exercise.md)
-- [Threat Dragon exercise](Threat-Dragon-Exercise.md)
 - [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
+- [Full list (6)](Contents.md#foundations-security-tools-and-threat-modeling)
 
 </details>
 
@@ -109,12 +97,8 @@ file does not match the manifest. -->
 
 - [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md)
 - [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md)
-- [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md)
-- [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md)
-- [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) (draft)
-- [Attack surface map: layer by layer](Attack-Surface-Map-Layer-by-Layer.md) (draft)
 - [The DMZ and hardening an internet-facing host](The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet.md) (draft)
-- [DMZ hardening checklist](DMZ-Hardening-Checklist.md) (draft)
+- [Full list (8)](Contents.md#foundations-network-and-host-defense)
 
 </details>
 
@@ -123,34 +107,18 @@ file does not match the manifest. -->
 
 - [Deception and honeypots: start here](Deception-and-Honeypots-Start-Here.md)
 - [What deception is](Deception-and-Honeypots-What-Deception-Is.md) (est. steps)
-- [Deception safety and law](Deception-and-Honeypots-Safety-and-Law.md) (est. steps)
 - [Plant a canary token](Deception-and-Honeypots-Plant-a-Canary.md)
-- [Honeyfiles on a host you own](Deception-and-Honeypots-Honeyfiles-on-Your-Host.md)
-- [Deception alerts in the SIEM](Deception-and-Honeypots-Alerts-in-the-SIEM.md)
-- [Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md)
-- [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md) (est. steps)
-- [Anatomy of a cloud honeypot](Deception-and-Honeypots-Cloud-Sensor-Anatomy.md) (est. steps)
-- [Cloud Cowrie for a weekend](Deception-and-Honeypots-Cloud-Cowrie-Weekend.md) (est. steps)
-- [Read what arrived: Cowrie logs](Deception-and-Honeypots-Read-the-Sensor-Logs.md)
+- [Full list (11)](Contents.md#foundations-deception-and-honeypots)
 
 </details>
 
 <details>
 <summary><b>Detection and monitoring</b> (13)</summary>
 
-- [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md)
-- [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) (unbuilt)
 - [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md)
-- [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) (est. steps)
-- [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) (draft)
-- [Multiple sites and identity](Multiple-Sites-and-Identity.md) (draft)
-- [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) (draft)
-- [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) (draft)
 - [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) (draft)
-- [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) (unbuilt)
-- [Grafana dashboards](Grafana-Dashboards.md)
 - [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) (est. steps)
-- [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md)
+- [Full list (13)](Contents.md#detection-and-monitoring)
 
 </details>
 
@@ -159,10 +127,8 @@ file does not match the manifest. -->
 
 - [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md)
 - [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md)
-- [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md)
-- [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md)
 - [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md)
-- [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
+- [Full list (6)](Contents.md#foundations-enterprise-practice)
 
 </details>
 
@@ -170,6 +136,7 @@ file does not match the manifest. -->
 <summary><b>Foundations: data governance</b> (1)</summary>
 
 - [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md)
+- [Full list (1)](Contents.md#foundations-data-governance)
 
 </details>
 
@@ -179,14 +146,7 @@ file does not match the manifest. -->
 - [Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md)
 - [Labs: break it on purpose](Labs-Break-It-on-Purpose.md)
 - [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md)
-- [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md)
-- [Teardown checklist](Teardown-Checklist.md)
-- [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md)
-- [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md)
-- [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) (draft)
-- [Why I picked these tools](Why-I-Picked-These-Tools.md)
-- [From commit to pipeline](From-Commit-to-Pipeline.md)
-- [Trace one change end to end](Trace-One-Change-End-to-End.md)
+- [Full list (11)](Contents.md#stage-guides-and-design)
 
 </details>
 
@@ -195,14 +155,9 @@ file does not match the manifest. -->
 
 - [Why the clouds differ](Why-the-Clouds-Differ.md) (draft)
 - [AWS: account preparation](Provider-AWS-Account-Preparation.md) (draft)
-- [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) (draft)
-- [AWS: where the money goes](Provider-AWS-Cost-Lesson.md) (draft)
 - [Azure: account preparation](Provider-Azure-Account-Preparation.md) (draft)
-- [Azure: the same four pieces](Provider-Azure-The-Same-Four-Pieces.md) (draft)
-- [Azure: where the money goes](Provider-Azure-Cost-Lesson.md) (draft)
 - [GCP: account preparation](Provider-GCP-Account-Preparation.md) (draft)
-- [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md) (draft)
-- [GCP: where the money goes](Provider-GCP-Cost-Lesson.md) (draft)
+- [Full list (10)](Contents.md#other-clouds)
 
 </details>
 
@@ -211,21 +166,17 @@ file does not match the manifest. -->
 
 - [Glossary](Glossary.md)
 - [Settings reference](Settings-Reference.md)
-- [Terraform reference](Terraform-Reference.md)
 - [Troubleshooting index](Troubleshooting-Index.md)
-- [Cost](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md)
-- [Secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md)
-- [Stage 0 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/00-foundation.md)
-- [Stage 1 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md)
+- [Full list (8)](Contents.md#reference)
 
 </details>
 
 <details>
 <summary><b>Project process</b> (4)</summary>
 
-- [How this project is planned](How-This-Project-Is-Planned.md)
 - [Project status](Project-Status.md)
 - [Repository growth](Repository-Growth.md)
 - [Screenshots policy](Screenshots-Policy.md)
+- [Full list (4)](Contents.md#project-process)
 
 </details>

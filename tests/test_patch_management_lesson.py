@@ -200,7 +200,7 @@ def test_the_script_is_read_only(triage):
 
 def test_registered_everywhere():
     name = "Patch-Management-and-Automatic-Security-Updates.md"
-    for page in ("_Sidebar.md", "Contents.md", "Reading-Order.md", "Droplet-Hardening.md"):
+    for page in ("Contents.md", "Reading-Order.md", "Droplet-Hardening.md"):
         assert name in (WIKI / page).read_text(), page
     assert "Patch-Management-and-Automatic-Security-Updates" in (WIKI / "_nav.yaml").read_text()
     glossary = (WIKI / "Glossary.md").read_text()
