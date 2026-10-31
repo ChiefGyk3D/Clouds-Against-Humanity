@@ -16,6 +16,9 @@ locals {
   name_key = var.resource_key != "" ? var.resource_key : var.region
 }
 
+# Every rule below is an allow rule: `action` is never set and the provider's
+# default is allow (DigitalOcean also supports deny rules, which take
+# precedence over allow rules, even across firewalls; not used here).
 # Inbound is deny-all: DigitalOcean denies all inbound traffic that no rule
 # allows, and inbound_from_tag_rules is empty by default. When it lists
 # something, each rule admits only droplets that carry this firewall's own tag
