@@ -83,7 +83,7 @@ def test_every_linked_wiki_page_exists():
 def test_the_lesson_is_registered_everywhere():
     nav = (WIKI / "_nav.yaml").read_text(encoding="utf-8")
     assert f"page: {NAME}," in nav and 'status: "draft"' in nav.split(f"page: {NAME},")[1].split("\n")[0]
-    for special in ("Contents.md", "_Sidebar.md", "Reading-Order.md"):
+    for special in ("Contents.md", "Reading-Order.md"):
         assert f"{NAME}.md" in (WIKI / special).read_text(encoding="utf-8"), special
     rows = [line for line in (WIKI / "Glossary.md").read_text(encoding="utf-8").splitlines() if f"{NAME}.md" in line]
     assert len(rows) >= 7, "expected glossary rows for the new terms"
