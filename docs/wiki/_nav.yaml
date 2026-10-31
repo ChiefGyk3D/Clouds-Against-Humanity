@@ -74,6 +74,7 @@ pages:
     - {page: Lessons-Learned, title: "Lessons learned", audience: "everyone", desc: "What broke during the build, what was really going on and what fixed it, for anyone who wants to skip the lost evenings."}
     - {page: Roadmap, title: "Roadmap", audience: "everyone", desc: "The stages from 0 onward, what is built and applied, what is built but unapplied and what is deliberately not planned."}
   os:
+    - {page: Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing, title: "Backups deep dive", audience: "learner", status: "draft", desc: "3-2-1-1-0, immutable and offline copies, backup key custody, restore testing and what this project would have to back up, with a free restore drill."}
     - {page: Backups-Recovery-and-Patching, title: "Backups, recovery and patching", audience: "learner", desc: "Snapshot versus backup, RPO and RTO, the 3-2-1 rule and patch cadence, for beginners deciding what to protect and how."}
     - {page: First-Hour-on-a-New-System-Updates-and-Baseline, title: "First hour on a new system", audience: "learner", desc: "The order of a new machine's first hour: updates, automatic updates, a baseline, then everything else, for anyone setting up a system."}
     - {page: Linux-for-Enterprise-Beginners, title: "Linux for enterprise beginners", audience: "learner", status: "est. steps", desc: "The Linux families, package managers, services, permissions and logs you meet at work, for beginners; commands were not run by the author.", sidebar: true}
