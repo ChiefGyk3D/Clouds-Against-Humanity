@@ -741,10 +741,16 @@ DOCKER_MODULE_TF = {
     "modules/ok/main.tf": 'resource "digitalocean_droplet" "a" {}\n',
     "modules/docker-host/main.tf": 'resource "digitalocean_droplet" "workload" {\n  name = "x"\n}\n',
 }
+DOCKER_FILTER = '[for r in local.cost.resources : r if r.name == "workload" && r.kind == "droplet"]'
+DOCKER_SIZE_EXPR = (
+    "length(local.priced_workload) == 1 ? local.priced_workload[0].size"
+    " : local.cost.planned.workload.size"
+)
 DOCKER_LOCALS = (
     "locals {\n  on = var.workload_enabled ? 1 : 0\n"
     '  cost = jsondecode(file("${path.module}/cost.json"))\n'
-    "  workload_size = \"s-1vcpu-2gb\"\n}\n"
+    f"  priced_workload = {DOCKER_FILTER}\n"
+    f"  workload_size = {DOCKER_SIZE_EXPR}\n}}\n"
 )
 DOCKER_OUT = (
     'output "workload_enabled" {\n  value = var.workload_enabled\n  precondition {\n'
@@ -935,3 +941,144 @@ def test_the_committed_workload_stack_is_off_and_adds_nothing():
     assert prices["droplets"]["s-1vcpu-2gb"] == 12
     assert cost_check.docker_module_problems(REPO)[0] == []
     assert cost_check.edge_switch_verified(REPO, "stacks/30-workloads", kind="docker")
+
+
+# ---- docker-host review fixes: size from the manifest, exact precondition ----
+
+
+def _with_locals(**changes):
+    text = DOCKER_LOCALS
+    for old, new in changes.items():
+        text = text.replace(DOCKER_FILTER if old == "filter" else DOCKER_SIZE_EXPR, new, 1)
+    return text
+
+
+@pytest.mark.parametrize(
+    "locals_",
+    [
+        # a literal
+        DOCKER_LOCALS.replace(DOCKER_SIZE_EXPR, '"s-1vcpu-2gb"'),
+        # a variable
+        DOCKER_LOCALS.replace(DOCKER_SIZE_EXPR, "var.size"),
+        # derived from the manifest's planned block only (never the priced entry)
+        DOCKER_LOCALS.replace(DOCKER_SIZE_EXPR, "local.cost.planned.workload.size"),
+        # a literal fallback
+        DOCKER_LOCALS.replace("local.cost.planned.workload.size", '"s-1vcpu-2gb"'),
+        # wrong entry index or attribute
+        DOCKER_LOCALS.replace("priced_workload[0].size", "priced_workload[0].name"),
+        # a different local than the filtered manifest list
+        DOCKER_LOCALS.replace("length(local.priced_workload) == 1", "length(local.other) == 1"),
+        # the filter does not select the workload droplet
+        DOCKER_LOCALS.replace('r.name == "workload" && r.kind == "droplet"', "true"),
+        DOCKER_LOCALS.replace('r.kind == "droplet"', 'r.kind == "spaces"'),
+        # the filter list is not derived from the manifest
+        DOCKER_LOCALS.replace("local.cost.resources", "var.resources"),
+    ],
+)
+def test_the_docker_size_must_derive_from_the_manifest_entry(tmp_path, capsys, locals_):
+    root = docker_repo(tmp_path, locals_=locals_)
+    problems = cost_check.docker_module_problems(root)[0]
+    assert any("size" in p and "manifest" in p for p in problems), problems
+    code, err = run_main(root, capsys)
+    assert code == 1 and "docker-host" in err
+
+
+def test_a_size_local_defined_only_in_a_comment_does_not_count(tmp_path):
+    locals_ = DOCKER_LOCALS.replace(
+        f"  workload_size = {DOCKER_SIZE_EXPR}\n",
+        f'  workload_size = "s-1vcpu-2gb"\n  # workload_size = {DOCKER_SIZE_EXPR}\n',
+    )
+    root = docker_repo(tmp_path, locals_=locals_)
+    assert any("size" in p for p in cost_check.docker_module_problems(root)[0])
+
+
+def test_a_size_local_defined_twice_is_refused(tmp_path):
+    locals_ = DOCKER_LOCALS + 'locals {\n  workload_size = "s-1vcpu-1gb"\n}\n'
+    root = docker_repo(tmp_path, locals_=locals_)
+    assert any("size" in p for p in cost_check.docker_module_problems(root)[0])
+
+
+def test_a_planned_size_missing_from_the_price_table_is_refused(tmp_path, capsys):
+    root = docker_repo(tmp_path)
+    manifest = root / "stacks/10-access/cost.json"
+    data = json.loads(manifest.read_text())
+    data["planned"] = {"workload": {"size": "s-99vcpu-1tb"}}
+    manifest.write_text(json.dumps(data))
+    problems = cost_check.docker_module_problems(root)[0]
+    assert any("planned" in p and "s-99vcpu-1tb" in p for p in problems), problems
+
+
+def test_a_planned_size_in_the_price_table_passes(tmp_path):
+    root = docker_repo(tmp_path)
+    manifest = root / "stacks/10-access/cost.json"
+    data = json.loads(manifest.read_text())
+    data["planned"] = {"workload": {"size": "s-1vcpu-2gb"}}
+    manifest.write_text(json.dumps(data))
+    assert cost_check.docker_module_problems(root)[0] == []
+
+
+def _out(condition, extra="", where="output"):
+    return (
+        f'{where} "workload_enabled" {{\n  value = var.workload_enabled\n{extra}'
+        f"  precondition {{\n    condition = {condition}\n"
+        '    error_message = "price it"\n  }\n}\n'
+    )
+
+
+GOOD_COND = f"!var.workload_enabled || length({DOCKER_FILTER}) == 1"
+
+
+def test_the_exact_condition_forms_are_accepted(tmp_path):
+    for cond in (
+        GOOD_COND,
+        f"!var.workload_enabled || (\n      length({DOCKER_FILTER}) == 1\n    )",
+        (
+            '!var.workload_enabled||length( [ for q in local.cost.resources : q if q.name == "workload" '
+            '&& q.kind == "droplet" ] )==1'
+        ),
+    ):
+        root = docker_repo(tmp_path / str(abs(hash(cond))), out=_out(cond))
+        assert cost_check.docker_module_problems(root)[0] == [], cond
+
+
+@pytest.mark.parametrize(
+    "out",
+    [
+        # tokens only in an error message or another attribute; condition is true
+        _out("true").replace('"price it"', f'"length({DOCKER_FILTER}) == 1 !var.workload_enabled ||"'),
+        # tokens only in a comment
+        _out("true").replace("value =", f"# !var.workload_enabled || length({DOCKER_FILTER}) == 1\n  value ="),
+        # tokens in the value attribute of the output
+        _out("true", extra=f"  description = \"!var.workload_enabled || length({DOCKER_FILTER}) == 1\"\n"),
+        # the right text, but in a resource lifecycle precondition, not an output
+        _out(GOOD_COND, where="resource \"terraform_data\"").replace(
+            'resource "terraform_data" "workload_enabled"', 'resource "terraform_data" "x"'
+        ),
+        # the condition is weakened or reshaped
+        _out(GOOD_COND + " || true"),
+        _out("true && " + GOOD_COND),
+        _out(GOOD_COND.replace("== 1", "== 2")),
+        _out(GOOD_COND.replace("== 1", ">= 0")),
+        _out(GOOD_COND.replace("!var.workload_enabled", "var.workload_enabled")),
+        _out(GOOD_COND.replace("||", "&&")),
+        _out(GOOD_COND.replace("!var.workload_enabled", "!var.other")),
+        _out(GOOD_COND.replace('&& r.kind == "droplet"', '|| r.kind == "droplet"')),
+        _out(GOOD_COND.replace("local.cost.resources", "local.priced_workload")),
+        _out(GOOD_COND.replace("[for r in", "[for q in")),
+    ],
+)
+def test_the_docker_precondition_must_be_the_exact_condition(tmp_path, out):
+    root = docker_repo(tmp_path, out=out)
+    assert any("0 workload" in p for p in cost_check.docker_module_problems(root)[0])
+    assert not cost_check.edge_switch_verified(root, "stacks/10-access", kind="docker")
+
+
+def test_the_precondition_of_another_output_does_not_count_for_the_switch_output(tmp_path):
+    other = _out(GOOD_COND).replace('"workload_enabled"', '"somewhere_else"')
+    root = docker_repo(tmp_path, out=other)
+    # The condition is exact but guards another output, which is still a plan-time check on the
+    # same switch variable, so it counts; a condition on a different variable does not.
+    assert cost_check.docker_module_problems(root)[0] == []
+    bad = other.replace("!var.workload_enabled", "!var.other_flag")
+    root = docker_repo(tmp_path / "b", out=bad)
+    assert cost_check.docker_module_problems(root)[0]
