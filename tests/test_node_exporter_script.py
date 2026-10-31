@@ -94,6 +94,68 @@ def test_every_rfc1918_block_is_accepted(tmp_path, addr):
     assert args == f"--web.listen-address={addr}:9100\n"
 
 
+# DigitalOcean for real: eth0 holds the public address AND a legacy private
+# 10.x address; the VPC address is on eth1. Documentation range for the public
+# address. The exporter must bind the VPC address (#340).
+DO_REAL = (
+    "2: eth0    inet 203.0.113.10/20 brd 203.0.113.255 scope global eth0\\       valid_lft forever\n"
+    "2: eth0    inet 10.20.0.5/16 brd 10.20.255.255 scope global eth0\\       valid_lft forever\n"
+    "3: eth1    inet 10.78.0.4/24 brd 10.78.0.255 scope global eth1\\       valid_lft forever\n"
+)
+# AWS: one interface, one private address.
+AWS_LIKE = "2: ens5    inet 10.0.1.23/24 metric 100 brd 10.0.1.255 scope global dynamic ens5\\       valid_lft 3000sec\n"
+
+
+def test_digitalocean_binds_the_vpc_address_not_the_legacy_private_one(tmp_path):
+    proc, args = run_script(tmp_path, DO_REAL)
+    assert proc.returncode == 0, proc.stderr
+    assert args == "--web.listen-address=10.78.0.4:9100\n"
+
+
+def test_aws_single_interface_single_private_address(tmp_path):
+    proc, args = run_script(tmp_path, AWS_LIKE)
+    assert proc.returncode == 0, proc.stderr
+    assert args == "--web.listen-address=10.0.1.23:9100\n"
+
+
+def test_private_address_on_a_public_interface_alone_is_refused(tmp_path):
+    out = DO_REAL.splitlines(keepends=True)[:2]
+    proc, args = run_script(tmp_path, "".join(out))
+    assert proc.returncode != 0
+    assert args is None
+    assert "refusing to start" in proc.stderr
+
+
+def test_old_first_private_logic_fails_the_digitalocean_case(tmp_path):
+    # Mutation check: put the old selection back into the extracted script and
+    # the DigitalOcean case must bind the wrong address, so the test bites.
+    old = (
+        'addr=""; while read -r cand; do case "$cand" in '
+        '10.*|192.168.*|172.1[6-9].*|172.2[0-9].*|172.3[01].*) addr="$cand"; break ;; esac; '
+        "done < <(ip -4 -o addr show scope global | awk '{ split($4, a, \"/\"); print a[1] }')\n"
+    )
+    text = extract()
+    start = text.index('addr="$(ip -4')
+    end = text.index('if [ -z "$addr" ]')
+    mutated = text[:start] + old + text[end:]
+    bindir = tmp_path / "bin"
+    bindir.mkdir()
+    (tmp_path / "ip.out").write_text(DO_REAL)
+    fake_ip = bindir / "ip"
+    fake_ip.write_text(f'#!{BASH}\ncat "{tmp_path / "ip.out"}"\n')
+    fake_ip.chmod(0o755)
+    (bindir / "awk").symlink_to(AWK)
+    (bindir / "cat").symlink_to(shutil.which("cat"))
+    args_file = tmp_path / "args"
+    fake_exp = tmp_path / "fake-exporter"
+    fake_exp.write_text(f'#!{BASH}\nprintf \'%s\\n\' "$@" > "{args_file}"\n')
+    fake_exp.chmod(0o755)
+    script = tmp_path / "old.sh"
+    script.write_text(mutated.replace(EXPORTER, str(fake_exp)))
+    subprocess.run([BASH, str(script)], env={"PATH": str(bindir)}, check=False, timeout=30)
+    assert args_file.read_text() == "--web.listen-address=10.20.0.5:9100\n"
+
+
 # Negative cases: the guard bites. With no private address the script fails and
 # never execs the exporter, so the unit fails and there is no wildcard fallback.
 @pytest.mark.parametrize(
