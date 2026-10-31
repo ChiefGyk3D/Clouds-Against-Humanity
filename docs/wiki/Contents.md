@@ -28,7 +28,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Foundations: security tools and threat modeling](#foundations-security-tools-and-threat-modeling) (6)
 - [Foundations: network and host defense](#foundations-network-and-host-defense) (8)
 - [Foundations: deception and honeypots](#foundations-deception-and-honeypots) (11)
-- [Detection and monitoring](#detection-and-monitoring) (12)
+- [Detection and monitoring](#detection-and-monitoring) (13)
 - [Foundations: enterprise practice](#foundations-enterprise-practice) (6)
 - [Foundations: data governance](#foundations-data-governance) (1)
 - [Stage guides and design](#stage-guides-and-design) (11)
@@ -173,6 +173,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md) | What this two-machine example leaves out and how a company would answer the same questions, for readers asking how it would be watched. | everyone |  |
 | [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) | Detection after prevention fails, with Wazuh and the wider tool landscape; shipping logs is stage 2 and not built. | engineer | unbuilt |
 | [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) | What a log, a metric, a trace and an alert are, and how a log line becomes a rule, for learners new to detection. | learner |  |
+| [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) | What the Wazuh agent, server, indexer and dashboard each do and how a log line becomes an alert, with a free toy pipeline; the Wazuh parts were written from reading. | learner | est. steps |
 | [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) | Logs, metrics and traces, and why telemetry crosses a trust boundary; an unverified draft for engineers planning stage 2. | engineer | draft |
 | [Multiple sites and identity](Multiple-Sites-and-Identity.md) | What a site is, what breaks at two, and why a new site should be a settings file and not new code; an unverified draft for engineers. | engineer | draft |
 | [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) | How telemetry moves between the cloud and the home SIEM without breaking the no-listener promise; an unverified draft for engineers. | engineer | draft |
