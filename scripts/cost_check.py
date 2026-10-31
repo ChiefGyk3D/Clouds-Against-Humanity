@@ -150,6 +150,10 @@ CONNECTOR_SOURCE_SUFFIX = "twingate-connector"
 EDGE_SOURCE_SUFFIX = "edge-host"
 SPACES_SOURCE_SUFFIX = "spaces-bucket"
 SPACES_MODULE_DIR = "modules/spaces-bucket"
+DOCKER_SOURCE_SUFFIX = "docker-host"
+DOCKER_MODULE_DIR = "modules/docker-host"
+# The manifest entry the workload droplet is priced from (kind droplet, this name).
+DOCKER_ENTRY_NAME = "workload"
 # The only count an edge-host module call may carry: the stack's own switch.
 EDGE_COUNT_RE = re.compile(r"local\.on")
 RESERVED_IP = "digitalocean_reserved_ip"
@@ -1213,7 +1217,10 @@ def edge_switch_verified(root, stack, kind="edge"):
 
     The proof is per kind: for kind "spaces" the precondition must count the
     manifest's entries of kind "spaces", so a switch that only proves the edge
-    host's droplet and reserved IP does not stand in for the bucket."""
+    host's droplet and reserved IP does not stand in for the bucket. For kind
+    "docker" the proof is structural and exact (see docker_switch_verified)."""
+    if kind == "docker":
+        return docker_switch_verified(root, stack)
     texts = []
     for path in sorted(Path(root, stack).glob("*.tf")):
         try:
@@ -1231,6 +1238,119 @@ def edge_switch_verified(root, stack, kind="edge"):
     return bool(
         re.search(r"precondition\s*\{[^{}]*?!var\." + re.escape(var) + r"\s*\|\|" + middle, text, re.DOTALL)
     )
+
+
+DOCKER_FILTER_RE = (
+    r"\[\s*for\s+(?P<r>[A-Za-z_]\w*)\s+in\s+local\.cost\.resources\s*:\s*(?P=r)\s+"
+    r"if\s+(?P=r)\.name\s*==\s*\"" + DOCKER_ENTRY_NAME + r"\"\s*&&\s*(?P=r)\.kind\s*==\s*\"droplet\"\s*\]"
+)
+# The one condition form accepted for the switch: the negated switch, or exactly one
+# workload droplet entry in the manifest. Matched against the whole `condition` value.
+DOCKER_CONDITION_RE = re.compile(
+    r"!var\.(?P<var>[A-Za-z_]\w*)\s*\|\|\s*(?:length\(\s*" + DOCKER_FILTER_RE + r"\s*\)\s*==\s*1"
+    r"|\(\s*length\(\s*" + DOCKER_FILTER_RE.replace("(?P<r>", "(?P<r2>").replace("(?P=r)", "(?P=r2)")
+    + r"\s*\)\s*==\s*1\s*\))"
+)
+# local.priced_workload and local.workload_size: the only way the size reaches the module.
+DOCKER_PRICED_LOCAL_RE = re.compile(DOCKER_FILTER_RE)
+DOCKER_SIZE_LOCAL_RE = re.compile(
+    r"length\(\s*local\.(?P<p>[A-Za-z_]\w*)\s*\)\s*==\s*1\s*\?\s*"
+    r"local\.(?P=p)\[0\]\.size\s*:\s*local\.cost\.planned\.workload\.size"
+)
+
+
+def _stack_text(root, stack):
+    """The comment-free text of a stack's *.tf files, or None when unreadable."""
+    texts = []
+    for path in sorted(Path(root, stack).glob("*.tf")):
+        try:
+            texts.append(strip_comments(path.read_text(encoding="utf-8")))
+        except (OSError, UnicodeDecodeError, HclError):
+            return None
+    return "\n".join(texts)
+
+
+def _top_level_blocks(text, header):
+    """[body] of every block whose header matches `header` (a regex ending at the
+    opening brace) and that sits at brace depth 0 of `text`."""
+    bodies = []
+    try:
+        for match in re.finditer(header, text):
+            if _depth_at(text, match.start()) != 0:
+                continue
+            bodies.append(text[match.end() : block_end(text, match.end())])
+    except HclError:
+        return []
+    return bodies
+
+
+def _depth_at(text, pos):
+    depth, i = 0, 0
+    while i < pos:
+        c = text[i]
+        if c == '"':
+            i = skip_string(text, i)
+            continue
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+        i += 1
+    return depth
+
+
+def stack_locals(text):
+    """{name: expression} for every top-level `locals` block; a name defined twice
+    maps to None (ambiguous, so never trusted)."""
+    found = {}
+    for body in _top_level_blocks(text, r"(?m)^[ \t]*locals[ \t]*\{"):
+        for name, value in top_level_attrs(body):
+            found[name] = None if name in found else value.strip()
+    return found
+
+
+def docker_switch_verified(root, stack):
+    """Structural proof for the workload switch: the stack defines
+    `on = var.<x> ? 1 : 0`, and some output's `precondition` block has a
+    `condition` attribute (its own, at the top of that block, not text elsewhere)
+    that is exactly `!var.<x> || length([for r in local.cost.resources : r if
+    r.name == "workload" && r.kind == "droplet"]) == 1`."""
+    text = _stack_text(root, stack)
+    if text is None:
+        return False
+    match = EDGE_SWITCH_DEF_RE.search(text)
+    if not match:
+        return False
+    var = match.group("var")
+    for out in _top_level_blocks(text, r"(?m)^[ \t]*output[ \t]+\"[^\"\n]*\"[ \t]*\{"):
+        for pre in _top_level_blocks(out, r"(?m)^[ \t]*precondition[ \t]*\{"):
+            for name, value in top_level_attrs(pre):
+                cond = DOCKER_CONDITION_RE.fullmatch(value.strip()) if name == "condition" else None
+                if cond and cond.group("var") == var:
+                    return True
+    return False
+
+
+def docker_size_problem(root, stack, size_expr):
+    """None when `size_expr` is `local.<n>` and local.<n> is defined once as the
+    manifest-derived form; otherwise a reason."""
+    ref = re.fullmatch(r"local\.([A-Za-z_]\w*)", size_expr)
+    text = _stack_text(root, stack)
+    if not ref or text is None:
+        return "is not a plain local reference"
+    defs = stack_locals(text)
+    expr = defs.get(ref.group(1))
+    sized = DOCKER_SIZE_LOCAL_RE.fullmatch(expr) if expr else None
+    if not sized:
+        return f"local.{ref.group(1)} is not defined once as the manifest-derived size"
+    priced = defs.get(sized.group("p"))
+    if not priced or not DOCKER_PRICED_LOCAL_RE.fullmatch(priced):
+        return f"local.{sized.group('p')} is not the filtered cost.json workload droplet list"
+    if defs.get("cost") is None or not re.fullmatch(
+        r'jsondecode\(\s*file\(\s*"\$\{path\.module\}/cost\.json"\s*\)\s*\)', defs["cost"]
+    ):
+        return "local.cost is not jsondecode(file(\"${path.module}/cost.json\"))"
+    return None
 
 
 def edge_module_problems(root):
@@ -1339,6 +1459,86 @@ def spaces_module_problems(root):
                 "stack defines that switch and ties it to the manifest)"
             )
     return problems
+
+
+def docker_module_problems(root):
+    """Hold modules/docker-host to the edge host's off-switch rule.
+
+    The workload droplet is priced from the stack's cost.json entry named
+    "workload" (kind droplet, a size from docs/cost-prices.json) and counted only
+    when the manifest carries it. Per stack: the module path must be exactly
+    modules/docker-host; no for_each; count only as `local.on`; size a plain
+    local reference; the caller's directory must have a cost.json; and the
+    manifest's "workload" entries number the module calls, or 0 (switched off,
+    priced nothing) only when every call is `count = local.on` and the stack
+    defines that switch and ties it to the "workload" droplet entry.
+
+    Returns (problems, {stack dir: docker-host module call count})."""
+    problems, calls, switched = [], {}, {}
+    manifests = dict(stack_manifests(root))
+    for rel, block in file_blocks(root):
+        if block.kind != "module" or block.problem:
+            continue
+        source, problem = module_source_problem(root, rel, block)
+        # Collect loosely (any source that names a docker-host directory once
+        # normalized), then assert strictly below.
+        if problem or posixpath.basename(posixpath.normpath(source)) != DOCKER_SOURCE_SUFFIX:
+            continue
+        name, stack = block.labels[0], str(Path(rel).parent.as_posix())
+        target = posixpath.normpath(posixpath.join(posixpath.dirname(rel), source))
+        if target != DOCKER_MODULE_DIR or source != posixpath.normpath(source):
+            problems.append(
+                f"{rel}:{block.line}: module {name!r} source {source!r} resolves to {target!r}; a "
+                f"docker-host call must use the plain relative path to {DOCKER_MODULE_DIR} "
+                "(no dotted, doubled or trailing-slash alias, no copy of the module elsewhere)"
+            )
+        calls[stack] = calls.get(stack, 0) + 1
+        attrs = block.attrs()
+        counts = [v.strip() for k, v in attrs if k == "count"]
+        switched[stack] = switched.get(stack, True) and len(counts) == 1 and bool(
+            EDGE_COUNT_RE.fullmatch(counts[0])
+        )
+        for key, value in attrs:
+            if key == "for_each" or (key == "count" and not EDGE_COUNT_RE.fullmatch(value.strip())):
+                problems.append(
+                    f"{rel}: module {name!r} (docker-host) uses {key} {value.strip()!r}; the workload "
+                    "droplet is costed from the manifest, so only count = local.on (the stack's switch) "
+                    "is accepted"
+                )
+        sizes = [v.strip() for k, v in attrs if k == "size"]
+        why = "is missing or set more than once" if len(sizes) != 1 else docker_size_problem(root, stack, sizes[0])
+        if why:
+            problems.append(
+                f"{rel}:{block.line}: docker-host module {name!r} size {why}; it must be a plain "
+                "local reference derived from the priced workload entry of the stack's cost.json "
+                "manifest (see docs/cost.md), never a literal or a variable"
+            )
+    for stack in sorted(calls):
+        if stack not in manifests:
+            problems.append(
+                f"{stack}: calls {DOCKER_MODULE_DIR} but has no cost.json; the workload droplet is priced "
+                "from a stack's manifest, so a wrapper module or a directory without one is refused"
+            )
+            continue
+        have = sum(
+            1
+            for r in load_json(manifests[stack])["resources"]
+            if r.get("kind") == "droplet" and r.get("name") == DOCKER_ENTRY_NAME
+        )
+        planned = (load_json(manifests[stack]).get("planned") or {}).get(DOCKER_ENTRY_NAME) or {}
+        if "size" in planned and planned["size"] not in load_prices(root, "digitalocean").get("droplets", {}):
+            problems.append(
+                f"{stack}: planned {DOCKER_ENTRY_NAME} size {planned['size']!r} is not in "
+                "docs/cost-prices.json; the planned droplet must be priced"
+            )
+        off_ok = switched[stack] and edge_switch_verified(root, stack, kind="docker")
+        if have != calls[stack] and not (have == 0 and off_ok):
+            problems.append(
+                f"{stack}: {have} {DOCKER_ENTRY_NAME} manifest entr(ies) but {calls[stack]} docker-host "
+                "module call(s); they must match (0 is accepted only when every call is count = local.on "
+                "and the stack defines that switch and ties it to the manifest)"
+            )
+    return problems, calls
 
 
 def reserved_ip_problems(root):
@@ -1530,6 +1730,8 @@ def structure_problems(root):
     edge_problems, edge_calls = edge_module_problems(root)
     problems += edge_problems
     problems += spaces_module_problems(root)
+    docker_problems, docker_calls = docker_module_problems(root)
+    problems += docker_problems
     for stack in sorted(set(connectors) | set(bases)):
         machines = 0
         if stack in bases:
@@ -1541,6 +1743,16 @@ def structure_problems(root):
                 machines -= min(
                     edge_calls[stack],
                     sum(1 for r in load_json(bases[stack])["resources"] if r.get("kind") == "droplet"),
+                )
+            if stack in docker_calls:
+                # The workload droplet is reconciled by docker_module_problems.
+                machines -= min(
+                    docker_calls[stack],
+                    sum(
+                        1
+                        for r in load_json(bases[stack])["resources"]
+                        if r.get("kind") == "droplet" and r.get("name") == DOCKER_ENTRY_NAME
+                    ),
                 )
         have = connectors.get(stack, 0)
         if have != machines:
