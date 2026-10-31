@@ -1,0 +1,8 @@
+{
+  "stage": 3,
+  "workload_approved": false,
+  "planned": {
+    "workload": { "kind": "droplet", "size": "s-1vcpu-2gb", "backups": false }
+  },
+  "resources": []
+}
