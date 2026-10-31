@@ -41,6 +41,19 @@ real machine.
 `instance_id`, `instance_name`, `droplet_urn`, `private_ip`, `size`,
 `portainer_port`. `user_data` is never an output.
 
+## Verified claims
+
+- **Docker apt signing key fingerprint, checked 2026-10-31.** The default
+  `docker_apt_key_fingerprint` is `9DC858229FC7DD38854AE2D88D81803C0EBFCD88`.
+  The key file at `https://download.docker.com/linux/ubuntu/gpg` was downloaded
+  with plain curl, the page `https://docs.docker.com/engine/install/ubuntu/`
+  (which points apt at that exact URL) was fetched the same day, and
+  `gpg --show-keys --with-colons` in an Ubuntu 24.04 container listed one
+  primary key (`Docker Release (CE deb) <docker@docker.com>`) with exactly this
+  fingerprint. It matched what was first written from memory, so nothing
+  changed. The published install page itself does not print the fingerprint;
+  the proof is the downloaded key.
+
 ## Not verified on a real machine
 
 Docker's apt origin spelling for unattended upgrades, the metadata path for the
