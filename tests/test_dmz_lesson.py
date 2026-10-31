@@ -35,7 +35,7 @@ def commands() -> list[str]:
 
 
 def shown() -> str:
-    found = [b for b in blocks() if b.startswith("92:")]
+    found = [b for b in blocks() if b.startswith("93:")]
     assert len(found) == 1, "expected one output block"
     return found[0].strip()
 
