@@ -1,0 +1,14 @@
+{
+  "module": "spaces-bucket",
+  "approved": true,
+  "active": false,
+  "note": "Approved by the maintainer on 2026-10-31 as part of the full stage 3 scope, but not built and not priced anywhere yet. The gate reads only stacks/**/cost.json: a stack that calls this module with count = local.on adds a spaces entry (priced at the flat amount in docs/cost-prices.json) to its own cost.json in the pull request that switches it on. This file is the reference copy of that entry.",
+  "resources": [
+    {
+      "name": "state-bucket",
+      "kind": "spaces",
+      "monthly": 5.0,
+      "basis": "docs/cost.md stage 3 estimate: $5 flat per account for 250 GiB stored and 1 TiB outbound transfer, read 2026-10-11"
+    }
+  ]
+}

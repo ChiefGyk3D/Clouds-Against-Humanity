@@ -24,6 +24,12 @@ It is a cloud extension of a homelab, and it exists to teach: this repository is
 >
 > Something wrong, a command that failed, a confusing explanation, or a topic you wish was here? Please say so. Feedback is free, and it is how the lessons get better. **[Give feedback and open an issue](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Give-Feedback-and-Open-an-Issue)** walks through it for a first-timer. Never paste tokens, keys, account names, real IP addresses or hostnames, or anything that identifies you. Security problems go through [SECURITY.md](SECURITY.md), not a public issue. See also [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Free, and not for sale
+
+I grew up in a divorced home, struggling to find resources to level up my tech knowledge, and my whole career was built on second hand machines. My first brand new computer, a System76 Pangolin I still have, came roughly ten years in. If knowledge is power and getting to it costs money, then the power is only available to people who can afford it, and I refuse to be selfish and enrich myself by gatekeeping what everyone has a right to know. No bullshit, no "90K in 90 days" lies, no "you need this cert or degree." Just knowledge.
+
+You can tip, donate or support me financially through [Patreon](https://patreon.com/chiefgyk3d), [StreamElements](https://streamelements.com/chiefgyk3d/tip) or the [cryptocurrency section](#cryptocurrency-tips), but you are under no obligation. The biggest way to support this project is to share it with everyone who needs it. The full version, including what I think of college and certs, is [Why this is free and not for sale](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/wiki/Why-This-Exists#why-this-is-free-and-not-for-sale).
+
 Recommending other springboards is encouraged throughout this project. The point is to get you thinking in different ways and outside the box, not to hand you one path to copy, so expect pages to point at things to try beyond what they cover.
 
 ## How it fits together
@@ -92,7 +98,7 @@ That is not "VPNs are always wrong". WireGuard is a very different animal from a
 | Edge | Public edge (DMZ) and hardening | past the ceiling (design option A adds a $6 droplet) | Shared network code written, disabled by default and never applied (`stacks/50-edge` creates nothing until the stage is approved); each service becomes its own stack later ([stage page](docs/stages/05-edge.md)) |
 | AWS | The AWS twin of stages 0 and 1: `modules/aws/*`, `stacks/aws/*` | $0 and $20.84 | Written and tested with mocked providers, never applied. Azure and GCP have no code |
 
-Working ceiling: $30 per month in the current phase (stage 2), shared by every cloud; each phase carries its own ceiling in `docs/stages/approved.json`, so a later phase can raise it on purpose. A cost gate in CI fails any change that raises a cloud's planned total above its approved total, or the active clouds' approved totals above the current phase's ceiling (the AWS twin is marked inactive, because it does not fit beside stage 1). See the [roadmap](docs/wiki/Roadmap.md).
+Working ceiling: $30 per month in the current phase (stage 3), shared by every cloud; each phase carries its own ceiling in `docs/stages/approved.json`, so a later phase can raise it on purpose. A cost gate in CI fails any change that raises a cloud's planned total above its approved total, or the active clouds' approved totals above the current phase's ceiling (the AWS twin is marked inactive, because it does not fit beside stage 1). See the [roadmap](docs/wiki/Roadmap.md).
 
 ### Growth
 
@@ -116,6 +122,7 @@ Clouds-Against-Humanity/
   modules/twingate-connector/              connector, its tokens, its droplet and cloud-init
   modules/edge-host/                       reusable edge host: droplet, reserved IP, project attachment and a small cloud-init (no SSH, no connector, no service)
   modules/docker-host/                     hardened Docker host: one droplet, Docker Engine and Portainer CE from cloud-init (no connector, no public inbound)
+  modules/spaces-bucket/                   private versioned Spaces bucket for daemon state, off by default, not approved
   modules/aws/{vpc,firewall,twingate-connector}  the AWS versions of those modules
   dashboards/                              importable Grafana dashboards (sites overview, droplet health, Wazuh agents); see docs/wiki/Grafana-Dashboards.md
   scripts/cost_check.py                    cost gate
@@ -190,7 +197,7 @@ tofu -chdir=modules/firewall init -backend=false
 tofu -chdir=modules/firewall test
 ```
 
-Run the last pair for each directory in the `directories` list of the tofu job in `.github/workflows/ci.yml`: `modules/vpc`, `modules/firewall`, `modules/twingate-bootstrap`, `modules/twingate-connector`, `modules/edge-host`, `modules/docker-host`, `modules/aws/vpc`, `modules/aws/firewall`, `modules/aws/twingate-connector`, `stacks/00-foundation`, `stacks/10-access`, `stacks/20-telemetry`, `stacks/30-workloads`, `stacks/50-edge`, `stacks/aws/00-foundation` and `stacks/aws/10-access`. CI runs all of it through git-your-ship-together's shared workflows; the only job this repository defines itself is the `CI green` gate.
+Run the last pair for each directory in the `directories` list of the tofu job in `.github/workflows/ci.yml`: `modules/vpc`, `modules/firewall`, `modules/twingate-bootstrap`, `modules/twingate-connector`, `modules/edge-host`, `modules/docker-host`, `modules/spaces-bucket`, `modules/aws/vpc`, `modules/aws/firewall`, `modules/aws/twingate-connector`, `stacks/00-foundation`, `stacks/10-access`, `stacks/20-telemetry`, `stacks/30-workloads`, `stacks/50-edge`, `stacks/aws/00-foundation` and `stacks/aws/10-access`. CI runs all of it through git-your-ship-together's shared workflows; the only job this repository defines itself is the `CI green` gate.
 
 ## Documentation
 

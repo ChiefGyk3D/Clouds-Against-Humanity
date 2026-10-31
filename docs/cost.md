@@ -1,6 +1,6 @@
 # Cost
 
-Working ceiling: $30 per month in the current phase (`stage-2`). The ceiling is a decision per phase, kept in `docs/stages/approved.json` (see "Ceilings per phase" below), and a later phase may raise it on purpose. Each stage must be costed and approved before it runs.
+Working ceiling: $30 per month in the current phase (`stage-3`). The ceiling is a decision per phase, kept in `docs/stages/approved.json` (see "Ceilings per phase" below), and a later phase may raise it on purpose. Each stage must be costed and approved before it runs.
 
 | Stage | Adds | Monthly | Running |
 |---|---|---|---|
@@ -36,7 +36,7 @@ Droplet sizes verified available in tor1 on 2026-10-21 (read live from the Digit
 
 The stage 3 pick, `s-1vcpu-2gb` at $12, is verified available in tor1 on 2026-10-21 and stays valid.
 
-The stage 3 phase exists in `approved.json` as a planned entry with a $30 placeholder ceiling, but nothing about it is approved. Droplet backups are off in every row; the bucket's versioning and a nightly copy off the account are the backups. Block storage is not needed. Approving the stage means picking one row, raising `approved_monthly_total` to its running total on purpose, adding the new module and the bucket's file to `allowed_sources`, and teaching the gate to price a `spaces` manifest entry as a flat amount.
+Status on 2026-10-31: the maintainer approved the full stage 3 scope ("Yes, full stage 3 scope"), so `stage-3` is the current phase at its planned $30 ceiling, the gate prices a `spaces` manifest entry as a flat $5.00 read from `docs/cost-prices.json` (source page and retrieval date are in that entry), and `approved.json` allows `modules/spaces-bucket/main.tf` for `digitalocean_spaces_bucket`. Nothing is built: the DigitalOcean `approved_monthly_total` stays $12.00 because no `cost.json` prices a Spaces entry yet and the module is switched off, so the bucket adds $0. The pull request that switches the bucket on adds the `spaces` entry to the stack's `cost.json` and raises `approved_monthly_total` to cover it ($17.00 with the bucket alone, $29.00 with the workload droplet, never above $29.00). Droplet backups are off in every row; the bucket's versioning and a nightly copy off the account are the backups. Block storage is not needed. The workload droplet's module is not allowed yet.
 
 ## Edge (DMZ) estimate (not approved)
 
@@ -55,10 +55,10 @@ With one droplet per service the cost is $6.00 per approved service. The `edge` 
 The ceiling is not one hard-coded number. `docs/stages/approved.json` holds an ordered map `phases`, one entry per phase of the project, and `current_phase` names the one the gate enforces:
 
 ```json
-"current_phase": "stage-2",
+"current_phase": "stage-3",
 "phases": {
-  "stage-2": { "ceiling": 30.0, "reason": "why this number", "decided": "2026-10-30", "status": "current" },
-  "stage-3": { "ceiling": 30.0, "reason": "...", "decided": "2026-10-16", "status": "planned" }
+  "stage-3": { "ceiling": 30.0, "reason": "why this number", "decided": "2026-10-31", "status": "current" },
+  "stage-4": { "ceiling": 30.0, "reason": "...", "decided": "2026-10-16", "status": "planned" }
 }
 ```
 
@@ -66,8 +66,8 @@ The ceiling is not one hard-coded number. `docs/stages/approved.json` holds an o
 |---|---|---|---|
 | `stage-0` | $30 | done | Foundation, $0 |
 | `stage-1` | $30 | done | Two connectors, $12 |
-| `stage-2` | $30 | current | Logs and the link home, $0 in the reference environment |
-| `stage-3` | $30 | planned | Workload host, bucket, Functions, $29 |
+| `stage-2` | $30 | done | Logs and the link home, $0 in the reference environment |
+| `stage-3` | $30 | current | Workload host, bucket, Functions, $29 |
 | `stage-4` | $30 | planned | Grafana on-prem, $0 |
 | `aws-twin` | $30 | planned | The AWS twin of stage 1, $20.84, applied only while the DigitalOcean connectors are down |
 | `edge` | $35 | planned | Public edge (DMZ); design option A is stage 3 plus one $6 droplet, written but disabled and not approved |
@@ -88,7 +88,7 @@ The gate enforces, for the current phase:
 - the per-provider approvals and the sum of the `active` providers are checked against the current phase's ceiling (everything else in the next section is unchanged);
 - a top-level `ceiling` is read only when `phases` is absent (an older file); with both present, the file fails.
 
-The summary line names the phase: `cost-check: phase stage-2 ceiling $30.00 (reason: ...)`.
+The summary line names the phase: `cost-check: phase stage-3 ceiling $30.00 (reason: ...)`.
 
 One file cannot show history, so the lifecycle between versions is checked when the gate is given the base branch's copy: `python3 -I scripts/cost_check.py --root . --base-approved <base approved.json>`. CI does this on every pull request through `scripts/ci_cost_gate.sh`, which fetches the base branch tip (shallow, from the same host the checkout uses) and **fails** if it cannot get it; on a push to main it prints that there is no base and runs the plain gate. The gate then also fails when a phase of any status is removed, when a `done` phase changes or becomes current again (a large ceiling planted in a finished phase could otherwise be switched on without looking like a raise), when a status moves any way but planned, current, done, or when a new phase starts as `done`, and it prints `EFFECTIVE CEILING CHANGED: phase A $X -> phase B $Y` whenever the enforced number moves. `scripts/cost_raise.py` always runs the same check on its own edit.
 
@@ -115,12 +115,13 @@ The first line is a dry run: it starts with `EFFECTIVE CEILING: phase stage-1 $3
 - a droplet's backups are on in any way but the basic weekly plan. A manifest entry with `backups: true` must also say `"backup_plan": "weekly"`; a missing or unknown plan, `daily`, any other `backup*` key (usage-based shapes, hours, a policy object) and a `backups` value that is not a real boolean are refused, because DigitalOcean defaults to the daily plan when none is stated. In `.tf` source a droplet may set `backups` only to the literal `false`, and may not carry a `backup_policy` block;
 - a cloud's approved total is itself above the current phase's ceiling;
 - the per-phase ceilings are malformed, a ceiling is lower than the phase before it without `lowers`, or a ceiling is above `hard_max` (see "Ceilings per phase");
-- a `digitalocean_*` resource type that is not on the free list appears in any `.tf` or `.tofu` file. The gate is an allowlist: `digitalocean_project`, `digitalocean_project_resources`, `digitalocean_tag`, `digitalocean_vpc`, `digitalocean_firewall`, `digitalocean_ssh_key` and `digitalocean_reserved_ip_assignment` are free, and the droplet and the reserved IP are allowed only in the files listed under `allowed_sources` (the connector module for the droplet; the edge host module for both). Each `digitalocean_reserved_ip` needs exactly one assignment in its file, because an unassigned reserved IP costs $5.00 a month, and the manifest cannot cost one yet. Anything else, such as a NAT gateway, app, container registry, Kubernetes node pool or CDN, is refused by name and file;
+- a `digitalocean_*` resource type that is not on the free list appears in any `.tf` or `.tofu` file. The gate is an allowlist: `digitalocean_project`, `digitalocean_project_resources`, `digitalocean_tag`, `digitalocean_vpc`, `digitalocean_firewall`, `digitalocean_ssh_key`, `digitalocean_reserved_ip_assignment` and `digitalocean_spaces_key` are free, and the droplet, the reserved IP and the Spaces bucket are allowed only in the files listed under `allowed_sources` (the connector module for the droplet; the edge host module for the droplet and the reserved IP; `modules/spaces-bucket` for the bucket). Each `digitalocean_reserved_ip` needs exactly one assignment in its file, because an unassigned reserved IP costs $5.00 a month, and the manifest cannot cost one yet. Anything else, such as a NAT gateway, app, container registry, Kubernetes node pool or CDN, is refused by name and file;
 - no `stacks/**/cost.json` manifest exists, or, in any one stack, the number of `twingate-connector` module blocks differs from the number of machine entries (`droplet` or `instance`) in that stack's manifest, or a connector module block uses `count` or `for_each` (each connector is costed as its own instance, so the gate wants one module block per manifest entry);
 - a module source is not local (`./` or `../`), goes through a dot-directory, or leaves the repository, or a `*.tf.json` or `*.tofu.json` file exists, because the gate cannot read them. `*.tf` and `*.tofu` files are both read, override files included;
 - a dot-directory exists anywhere under `stacks/` or `modules/` (only `.terraform` is ignored there, and `.git`, `.venv` and `.claude` at the repository top level), or a directory under `stacks/` is not named `NN-name` or exactly `aws`, `azure` or `gcp`, because the gate would not scan or classify it;
 - a resource type's provider prefix is neither a known cloud nor one of the non-cloud prefixes in `SAFE_PREFIXES` (`twingate_`, `terraform_`, `null_`, `random_`, `time_`, `tls_`, `local_`). A new provider has to be added there deliberately;
-- a resource of a costed type (`digitalocean_droplet`, `aws_instance`, `aws_eip`, `aws_ebs_volume`) uses `count` or `for_each`, because the manifest cannot be reconciled with it without a plan;
+- a Spaces bucket is a flat monthly subscription, priced from a `spaces` manifest entry (`{"name": ..., "kind": "spaces"}`; the amount is read only from the `spaces` entry of `docs/cost-prices.json`, never from the manifest). The bucket resource may not use `count` (it is a costed type), so, like the edge host, a stack switches `modules/spaces-bucket` with a module-call `count = local.on` and nothing else (no `for_each`, no other count). In any one stack the number of `spaces` manifest entries must equal the number of module calls, or be 0 only when every call is `count = local.on` and the stack defines `on = var.<flag> ? 1 : 0` and an output precondition that refuses the flag unless `local.cost.resources` prices the bucket. The call's source must resolve (after normalizing the path) to exactly `modules/spaces-bucket` and be written in its plain relative form: a dotted, doubled-slash or trailing-slash alias, or a copy of the module under another directory, is refused. A call in a directory with no `cost.json` (a wrapper module) is refused, because nothing could price it. The off-switch precondition is proved per kind: it must count the manifest's `spaces` entries, so a switch written for the edge host does not count. A switched-off module therefore adds $0;
+- a resource of a costed type (`digitalocean_droplet`, `digitalocean_spaces_bucket`, `aws_instance`, `aws_eip`, `aws_ebs_volume`) uses `count` or `for_each`, because the manifest cannot be reconciled with it without a plan;
 - a label of a `resource` or `module` block contains a backslash (the gate does not decode escapes), or a block header is not understood;
 - a `twingate-connector` module block does not set `size` (or `instance_type`) to a plain `local.<name>.size` (or `local.<name>.type`) reference. The machine size is the one number a typo could change without touching `cost.json`, so the source must read it from the manifest locals. The gate checks the shape of that reference; the stack's own test ties the local to `cost.json` (see `stacks/10-access/tests/access.tftest.hcl`), and the plan check in the trusted run is what proves the size that will actually be created.
 

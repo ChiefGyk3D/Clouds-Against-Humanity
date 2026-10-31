@@ -8,6 +8,20 @@ I built this because I was sick of zero trust knowledge being locked behind the 
 
 This is me distilling and condensing what I learned over almost four years of working with zero trust network access and enterprise networks, into something you can read for free and try in your own accounts.
 
+## Why this is free and not for sale
+
+I grew up in a divorced home, struggling to find anything I could use to level up my tech knowledge. My whole career was built on second hand machines. I bought my first brand new computer, a System76 Pangolin I still have, roughly ten years into my career. Aside from desktops I have built from new here and there, about 90% of my PC collection is second hand.
+
+Here is where that leaves me. If knowledge is power, and getting to the knowledge costs money, then the power is only available to people who can afford it. I have to be able to look in the mirror and be proud of myself, whether that is me today or the me from 15 years ago who needed these exact lessons.
+
+So: no bullshit. No "90K in 90 days" lies, no "you need this cert or degree." Just knowledge.
+
+I do not have a four-year degree, and I earned the CISSP about twelve years into my career. I am also in WGU, and I have seen first hand how bad it is. The Python class was laughably horrible: it taught bad habits and wrong approaches to version control, among other things. That is not an indictment of WGU, it is an indictment of college as a whole. Too many people think going to college for cybersecurity will be enough. It is not, and you will be horribly unprepared. I have seen it first hand, in the people coming in and the people around me. I have met people with master's degrees in cybersecurity who could not figure out how to open PowerShell, and went looking for it through the Okta tiles in their web browser. I wish I were joking.
+
+So if you want to succeed, stop chasing the next cert or piece of paper and go after real knowledge. I hope some of you reading this get a wakeup call. The open source revolution is here, knowledge is power, and I refuse to be selfish and enrich myself by gatekeeping what everyone has a right to know.
+
+You can tip, donate or support me financially in a few ways, through my content, cryptocurrency or Patreon, but you are under no obligation. The options are on the [Home](Home.md#support-this-project) page. The biggest way to support this project is to share it with everyone who needs this knowledge to level up.
+
 ## Where I am coming from
 
 Zero trust took me around six months to learn, and that was with the advantage of administering Zscaler at work, with architects whiteboarding it for me and spending hours with me, plus a lot of documentation. But zero trust was only one piece. It took me around three years to get comfortable with Terraform, with the ways around an enterprise, with infrastructure as code, and with shifting everything left the way I do, which is pretty much everything this project talks about. I am not saying that was three years of full-time study, only that this is how long it took before it felt like mine.

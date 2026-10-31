@@ -275,6 +275,17 @@ Stack variables are the settings you set per site. Module variables are filled i
 | `portainer_version`<br>Exact Portainer CE image tag (an LTS release, read 2026-10-31). Never latest or a range. Bumping it replaces the droplet. | `string` | `"2.45.3"` | an exact version such as 2.45.3; never latest, a range or a variant | set by the calling stack (not a user setting) | `2.45.3` | public | exists |
 | `portainer_port`<br>Host port Portainer's HTTPS UI is published on, bound to the private address only. | `number` | `9443` | a whole port from 1024 to 65535, never 22; non-nullable | set by the calling stack (not a user setting) | `9443` | public | exists |
 
+### modules/spaces-bucket
+
+| Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
+|---|---|---|---|---|---|---|---|
+| `name`<br>Bucket name, unique across Spaces in the region. | `string` | required | 3 to 63 characters: lowercase letters, digits and hyphens, starting and ending with a letter or digit | set by the calling stack (not a user setting) | `cah-state-tor1` | public | exists |
+| `region`<br>Spaces region slug. | `string` | required | ^[a-z]{3}[0-9]\$ | set by the calling stack (not a user setting) | `tor1` | public | exists |
+| `acl`<br>Bucket ACL. Only private is accepted, so the bucket is never publicly listable or readable. | `string` | `"private"` | must be private | set by the calling stack (not a user setting) | `private` | public | exists |
+| `noncurrent_version_expiration_days`<br>Days after which a noncurrent object version expires; how long a restore from a previous version stays possible. | `number` | `90` | a whole number from 1 to 3650 | set by the calling stack (not a user setting) | `90` | public | exists |
+| `create_access_keys`<br>Create the access keys in access_key_names. Off by default because a key secret lands in OpenTofu state. | `bool` | `false` | none | set by the calling stack (not a user setting) | `false` | public | exists |
+| `access_key_names`<br>Names of the access keys to create, one per daemon, each readwrite on this one bucket only. | `list(string)` | `[]` | unique names, 1 to 63 characters: lowercase letters, digits and hyphens | set by the calling stack (not a user setting) | `["penguin-overlord"]` | public | exists |
+
 ### modules/aws/vpc
 
 | Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |

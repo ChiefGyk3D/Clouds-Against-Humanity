@@ -23,7 +23,7 @@ Most people meet the word "environment" as a rule: "never test in production." T
 |---|---|---|---|
 | **Local dev** | Write and break things fast. Your computer, your editor, tests with mocked providers. | $0 | Exists. `tofu test` with mocked providers, the Python tests and the [labs](Labs-Break-It-on-Purpose.md) run on a laptop (`docs/stages/approved.json` holds no entry for it because it costs nothing). |
 | **Staging** | A real, small copy of the production shape in a separate cloud project, to try a change against the real cloud API before production. | Its own ceiling: $20 per month, by decision | **Planned, not built.** Issue #310. Nothing is built until the maintainer signs in and sets up the accounts. |
-| **Production** | The environment that is the point of the project. | The current phase's ceiling: $30 per month in `stage-2` | Exists. The stacks `cah-00-foundation` and `cah-10-access` are built, and `cah-20-telemetry` is written and locked, not applied. |
+| **Production** | The environment that is the point of the project. | The current phase's ceiling: $30 per month in `stage-3` | Exists. The stacks `cah-00-foundation` and `cah-10-access` are built, and `cah-20-telemetry` is written and locked, not applied. |
 
 The names are a convention, not a law. Some teams have four or five environments. What matters is the question each one answers: "does it work?" (local), "does it work against the real cloud?" (staging) and "is it running for real?" (production).
 
@@ -94,7 +94,7 @@ Cost is the fourth separation. The mechanism that exists today is the cost gate,
 
 What is built:
 
-- A **ceiling per project phase** in `docs/stages/approved.json`. `current_phase` is `stage-2` at $30, with a `hard_max` of $60 above which no phase may go without editing that number in the same reviewed change (`docs/cost.md`, "Ceilings per phase").
+- A **ceiling per project phase** in `docs/stages/approved.json`. `current_phase` is `stage-3` at $30, with a `hard_max` of $60 above which no phase may go without editing that number in the same reviewed change (`docs/cost.md`, "Ceilings per phase").
 - A **cost manifest per stack** (`cost.json`) that lists the planned machines and sizes. The gate adds them up per cloud and fails if the total passes that cloud's approved figure or if the active clouds together pass the phase ceiling. A stack directory without a `cost.json` fails the gate.
 - It is checked on every pull request. A change that would raise the bill cannot merge unless the number in `approved.json` is raised in the same pull request, where a reviewer can see it.
 
@@ -170,7 +170,7 @@ Three design points hold regardless of what is built:
 1. State (one state would let a staging destroy plan against production) and secrets (one config means the staging run holds production's token). Also the cost ceiling and the cloud project's resource list.
 2. The hook skips any branch that is not `main`, so the run gets no secrets and fails at the provider. Changing the script to allow `staging` would make secrets reachable from whoever can push that branch, so that branch would need `main`'s protection and `CI green` first.
 3. Any provider-side surprise: a missing token scope (`403`), a size unavailable in the region (`422`), a name that already exists. The three real ones are in the section on tests.
-4. The current phase's ceiling, $30 in `stage-2`. How the gate would hold a separate $20 for staging is not designed.
+4. The current phase's ceiling, $30 in `stage-3`. How the gate would hold a separate $20 for staging is not designed.
 5. Better only if the staging token is a different token that can reach only staging's config and project. If it is the same token or the same permissions, it is the same incident.
 
 </details>
@@ -193,7 +193,7 @@ All entries are repository files read on **2026-10-30**. No vendor page was read
 |---|---|---|
 | Staging is a separate stack tracking `main` (not a branch), with a $20 per month ceiling in `approved.json` and `cost.json` before any resource exists, its own Doppler config, project and state, confirmed by hand and destroyed after each test, covered by `cah-plan` and the push policy, with a threat-model note; cannot test Twingate and the home network; a separate dev stack is an option; `main` plus short-lived feature branches; `dev`, `staging`, `main` only for the lesson | GitHub issue #310 (read 2026-10-30) | Read. Planned, not built |
 | The staging ceiling is not yet written into `approved.json`; stage 2 and the S7 and S8 sprint items | `docs/wiki/Roadmap.md`; `docs/stages/approved.json` has no staging phase | Read |
-| Phases, ceilings, `hard_max` $60, `current_phase` `stage-2` at $30, the cost gate's rules, the `nyc3` region `422` | `docs/stages/approved.json`; `docs/cost.md` | Read; `scripts/cost_check.py` run on 2026-10-30 |
+| Phases, ceilings, `hard_max` $60, `current_phase` `stage-3` at $30, the cost gate's rules, the `nyc3` region `422` | `docs/stages/approved.json`; `docs/cost.md` | Read; `scripts/cost_check.py` run on 2026-10-30 |
 | One Doppler config `prd`, one context `cah-doppler`, hook rules, the token reads the whole config, per-cloud contexts convention (proposed, not set up), two tokens on one stack warning, what the secret-separation test does not prove | `docs/spacelift-secrets.md` sections 1 to 4, 8, 8a; `.spacelift/config.yml` | Read |
 | The hook fetches only on a tracked or destroy run on `main` | `scripts/spacelift/doppler-env.sh` lines 24 and 117 to 127 | Read |
 | Push policy: a tracked run only for a push to the stack's tracked branch that changes the stack; nothing for pull requests, tags, other branches or forks | `.spacelift/policies/push.rego`; `docs/spacelift-secrets.md` section 9 | Read |
