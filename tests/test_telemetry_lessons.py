@@ -140,8 +140,8 @@ def test_next_lines_follow_the_dependency_order():
         assert f"({later}.md)" in next_line, f"{earlier}: Next should name {later}"
 
 
-def test_lessons_are_in_sidebar_and_reading_order_in_order():
-    for page in ("_Sidebar", "Reading-Order"):
+def test_lessons_are_in_contents_and_reading_order_in_order():
+    for page in ("Contents", "Reading-Order"):
         links = [t for t, _ in LINK.findall(text(page))]
         positions = [links.index(n) for n in LESSONS]  # raises if missing
         assert positions == sorted(positions), f"{page}: lessons out of order"
