@@ -111,6 +111,7 @@ file does not match the manifest. -->
 - [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) (draft)
 - [Attack surface map: layer by layer](Attack-Surface-Map-Layer-by-Layer.md) (draft)
 - [The DMZ and hardening an internet-facing host](The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet.md) (draft)
+- [DMZ hardening checklist](DMZ-Hardening-Checklist.md) (draft)
 
 </details>
 

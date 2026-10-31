@@ -147,6 +147,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) | How to list every inbound port, address, account, token, dependency and person, how this project shrinks each, how to measure from outside, and what to log and alert on. | learner | draft |
 | [Attack surface map: layer by layer](Attack-Surface-Map-Layer-by-Layer.md) | The cloud account, Spacelift and CI, Doppler, Twingate, droplets, telemetry, edge and web tier: what to aim at, the control, the test, and what to log. | learner | draft |
 | [The DMZ and hardening an internet-facing host](The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet.md) | What a DMZ is, what may talk to what in this project's unbuilt edge design, how to harden a public host, and what to log and alert on. | learner | draft |
+| [DMZ hardening checklist](DMZ-Hardening-Checklist.md) | A one-page printable checklist for hardening an internet-facing host, each line naming the repository check that covers it, plus what to log and what should alert. | learner | draft |
 
 ## Foundations: deception and honeypots
 
