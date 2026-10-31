@@ -1,6 +1,6 @@
 # Evaluation: Cisco ai-defense-hybrid as a reference lesson
 
-Status: DRAFT for the maintainer's decision. Date: 2026-10-31. Issue: #303 (related: #304, the AI-security lesson track).
+Status: DRAFT for the maintainer's decision. Date: 2026-10-30. Issue: #303 (related: #304, the AI-security lesson track).
 Tooling: none. This note adds no lesson page, stack, workflow or cost entry. Nothing from the evaluated repository was run, installed or deployed; its files were read only. No Cisco account, token or paid service was used.
 
 Facts carry a source and the date they were read. "Read" means a plain `git clone --depth 1` of the repository and the GitHub REST API (read-only metadata calls through `gh api`), both on the dates in the table. Anything I could not check is marked UNVERIFIED.
@@ -28,9 +28,9 @@ It is a deployment kit, not a security tool. It stands up the infrastructure for
 
 | Item | Finding | Source, read |
 |---|---|---|
-| Repository license | Apache-2.0 (GitHub reports `Apache-2.0`; the `LICENSE` file is the standard Apache text, 11,367 bytes) | GitHub API `repos/cisco-ai-defense/ai-defense-hybrid` and the clone, 2026-10-31 |
-| Vendored chart | `charts/redis` carries its own `LICENSE` and `NOTICE`, so it has its own terms, separate from the repository's | clone, 2026-10-31 |
-| The product it deploys | Commercial and proprietary. The repository's license covers the templates, not the connector, the installer script or the AI Defense service. | README and the installer-script README in the clone, 2026-10-31; product terms UNVERIFIED (not read) |
+| Repository license | Apache-2.0 (GitHub reports `Apache-2.0`; the `LICENSE` file is the standard Apache text, 11,367 bytes) | GitHub API `repos/cisco-ai-defense/ai-defense-hybrid` and the clone, 2026-10-30 |
+| Vendored chart | `charts/redis` carries its own `LICENSE` and `NOTICE`, so it has its own terms, separate from the repository's | clone, 2026-10-30 |
+| The product it deploys | Commercial and proprietary. The repository's license covers the templates, not the connector, the installer script or the AI Defense service. | README and the installer-script README in the clone, 2026-10-30; product terms UNVERIFIED (not read) |
 
 Legal notes for any future lesson:
 
@@ -42,19 +42,19 @@ Legal notes for any future lesson:
 
 | Measure | Value | Source, read |
 |---|---|---|
-| Created | 2025-10-22 | GitHub API, 2026-10-31 |
-| Last commit on default branch | 2026-07-29 ("Merge pull request #13 ...") | clone `git log -1` and GitHub API commits, 2026-10-31 |
+| Created | 2025-10-22 | GitHub API, 2026-10-30 |
+| Last commit on default branch | 2026-07-29 ("Merge pull request #13 ...") | clone `git log -1` and GitHub API commits, 2026-10-30 |
 | Age of last commit at reading | about 3 months | arithmetic from the two dates above |
-| Commits in history | 31 | GitHub API commits list (per_page 100 returned 31), 2026-10-31 |
-| Releases | 0 | GitHub API `releases`, 2026-10-31 |
-| Tags | none returned | GitHub API `tags`, 2026-10-31 |
-| Archived | no | GitHub API, 2026-10-31 |
-| Stars / open issues | 7 / 5 (the open-issues figure includes pull requests) | GitHub API, 2026-10-31 |
-| Security policy | `SECURITY.md` exists; uses GitHub private reporting and a Cisco open-source security mailbox | clone, 2026-10-31 |
+| Commits in history | 31 | GitHub API commits list (per_page 100 returned 31), 2026-10-30 |
+| Releases | 0 | GitHub API `releases`, 2026-10-30 |
+| Tags | none returned | GitHub API `tags`, 2026-10-30 |
+| Archived | no | GitHub API, 2026-10-30 |
+| Stars / open issues | 7 / 5 (the open-issues figure includes pull requests) | GitHub API, 2026-10-30 |
+| Security policy | `SECURITY.md` exists; uses GitHub private reporting and a Cisco open-source security mailbox | clone, 2026-10-30 |
 
 Reading: alive but small and slow, with no release or version to pin. Its own module examples tell users to pin `?ref=v1.0.0`, but no such tag exists. A lesson would have to pin a commit, and commits like this move without notice.
 
-Signs that the repository is a working export of an internal project rather than a polished teaching asset (all read in the clone, 2026-10-31):
+Signs that the repository is a working export of an internal project rather than a polished teaching asset (all read in the clone, 2026-10-30):
 
 - `terraform/cloud-providers/README.md` documents a "Module Structure" (`terraform-modules/`, `examples/`, `gv-k8-az-lab-ai-def-cisco/`, `gv-k8-gcp-lab-ai-def-cisco/`) that does not match the tracked files, and tells readers to look under `terraform-modules/{aws,azure,gcp}-modules/ai-defense`, which are not at those paths. The real modules are under `terraform/cloud-providers/<cloud>/ai-defense-connector/module`.
 - The Terraform Cloud workspace manager is hard-wired to one internal organization and project names (`SBG-AITeam`, `NonProd AWS AI Defence`) and a fixed list of environments. Nobody else can run it without editing it.
@@ -76,11 +76,11 @@ None of the five needs this repository. Each is already covered, or can be taugh
 
 | Need | Detail | Source, read |
 |---|---|---|
-| Cisco AI Defense tenant | A console login is required to download `aidefense-connector-installation.sh` and to copy the API key. Licensing, trial availability and cost: UNVERIFIED (not found in the repository; I did not read Cisco's site). | installer-script README, 2026-10-31 |
-| Cloud account | AWS, Azure, GCP or an OpenShift-on-AWS account. No DigitalOcean module exists, and CAH runs OpenTofu on DigitalOcean. | README and file tree, 2026-10-31 |
-| GPU capacity | Defaults: `gpu_model = "H100"` and `gpu_node_count = 4`. The README's table maps H100 to `p5.48xlarge` (8x H100 80 GB) on AWS and `a3-highgpu-8g` (8x H100) on GCP. By the README's own table, the default is 4 nodes of 8 H100 GPUs on AWS, so 32 GPUs. L40S (`g6e.xlarge`) is the smallest option and AWS-only. GPU quota approval is normally needed for such instances (general cloud practice, UNVERIFIED for these accounts). | `terraform/cloud-providers/README.md`, 2026-10-31 |
-| Broad cloud permissions | Create VPC, EKS/AKS/GKE, IAM, DNS. The simple route is `IAMFullAccess` plus VPC and Route 53 full access on AWS. | same README, 2026-10-31 |
-| Terraform tooling | Terraform; the workspace manager pins `terraform_version = "1.14.5"` and uses the `tfe` provider. CAH uses OpenTofu, so version and registry behavior would need checking. UNVERIFIED. | `workspaces/` files, 2026-10-31 |
+| Cisco AI Defense tenant | A console login is required to download `aidefense-connector-installation.sh` and to copy the API key. Licensing, trial availability and cost: UNVERIFIED (not found in the repository; I did not read Cisco's site). | installer-script README, 2026-10-30 |
+| Cloud account | AWS, Azure, GCP or an OpenShift-on-AWS account. No DigitalOcean module exists, and CAH runs OpenTofu on DigitalOcean. | README and file tree, 2026-10-30 |
+| GPU capacity | Defaults: `gpu_model = "H100"` and `gpu_node_count = 4`. The README's table maps H100 to `p5.48xlarge` (8x H100 80 GB) on AWS and `a3-highgpu-8g` (8x H100) on GCP. By the README's own table, the default is 4 nodes of 8 H100 GPUs on AWS, so 32 GPUs. L40S (`g6e.xlarge`) is the smallest option and AWS-only. GPU quota approval is normally needed for such instances (general cloud practice, UNVERIFIED for these accounts). | `terraform/cloud-providers/README.md`, 2026-10-30 |
+| Broad cloud permissions | Create VPC, EKS/AKS/GKE, IAM, DNS. The simple route is `IAMFullAccess` plus VPC and Route 53 full access on AWS. | same README, 2026-10-30 |
+| Terraform tooling | Terraform; the workspace manager pins `terraform_version = "1.14.5"` and uses the `tfe` provider. CAH uses OpenTofu, so version and registry behavior would need checking. UNVERIFIED. | `workspaces/` files, 2026-10-30 |
 
 Cost: no price figure is given here because I did not read any provider price page or Cisco quote; any figure would be invented. The kit's own defaults (multi-GPU nodes) put a hands-on run far outside what a learner can be asked to pay under the pay-to-play principle (theory free, hands-on paid and optional by the person doing it). A smaller single L40S run on AWS is possible by the README's table, but still needs a paid Cisco tenant.
 
@@ -145,7 +145,7 @@ Revisit if any of these change: a DigitalOcean or generic Kubernetes module appe
 
 | Source | Read |
 |---|---|
-| Issue #303 and #304 in this repository (`gh issue view`) | 2026-10-31 |
-| Clone of `github.com/cisco-ai-defense/ai-defense-hybrid` at commit `e48fc08`, files: `README.md`, `LICENSE`, `SECURITY.md`, `terraform/cloud-providers/README.md`, `terraform/cloud-providers/common/prerequisites/aidef-install-script/README.md`, `terraform/cloud-providers/common/workspaces/*.tf`, `terraform/cloud-providers/aws/ai-defense-connector/module/templates/script-eks-ai-def-install.sh.tftpl`, and the file listing | 2026-10-31 |
-| GitHub REST API: `repos/cisco-ai-defense/ai-defense-hybrid`, `/commits`, `/releases`, `/tags` | 2026-10-31 |
-| Local prose draft of the summary: `llm-local`, task label `eval303-summary`, then rewritten and checked claim by claim against the sources above (the draft misdescribed the license as "free" and added "on top of" wording; both were replaced) | 2026-10-31 |
+| Issue #303 and #304 in this repository (`gh issue view`) | 2026-10-30 |
+| Clone of `github.com/cisco-ai-defense/ai-defense-hybrid` at commit `e48fc08`, files: `README.md`, `LICENSE`, `SECURITY.md`, `terraform/cloud-providers/README.md`, `terraform/cloud-providers/common/prerequisites/aidef-install-script/README.md`, `terraform/cloud-providers/common/workspaces/*.tf`, `terraform/cloud-providers/aws/ai-defense-connector/module/templates/script-eks-ai-def-install.sh.tftpl`, and the file listing | 2026-10-30 |
+| GitHub REST API: `repos/cisco-ai-defense/ai-defense-hybrid`, `/commits`, `/releases`, `/tags` | 2026-10-30 |
+| Local prose draft of the summary: `llm-local`, task label `eval303-summary`, then rewritten and checked claim by claim against the sources above (the draft misdescribed the license as "free" and added "on top of" wording; both were replaced) | 2026-10-30 |
