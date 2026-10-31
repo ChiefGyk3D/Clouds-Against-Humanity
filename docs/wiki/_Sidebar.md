@@ -102,13 +102,14 @@ file does not match the manifest. -->
 </details>
 
 <details>
-<summary><b>Foundations: network and host defense</b> (6)</summary>
+<summary><b>Foundations: network and host defense</b> (7)</summary>
 
 - [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md)
 - [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md)
 - [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md)
 - [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md)
 - [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) (draft)
+- [Attack surface map: layer by layer](Attack-Surface-Map-Layer-by-Layer.md) (draft)
 - [The DMZ and hardening an internet-facing host](The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet.md) (draft)
 
 </details>
