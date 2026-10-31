@@ -58,7 +58,7 @@ What breaks it: a disk dies, a region goes dark, a bill is not paid and the acco
 
 ### The same three, side by side
 
-| | Question | A loss looks like | Typical protections |
+| Property | Question | A loss looks like | Typical protections |
 |---|---|---|---|
 | Confidentiality | Who can read it? | Someone unauthorized has a copy | Access rules, encryption, secrets kept out of code, no open doors |
 | Integrity | Is it still what it should be? | Content changed or destroyed without permission | Hashes and signatures, review before change, versioning, least privilege to write |
