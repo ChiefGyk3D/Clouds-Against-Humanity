@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (128 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (129 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -24,7 +24,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Foundations: networking](#foundations-networking) (5)
 - [Foundations: identity and secrets](#foundations-identity-and-secrets) (5)
 - [Foundations: infrastructure as code](#foundations-infrastructure-as-code) (7)
-- [Foundations: web hosting](#foundations-web-hosting) (3)
+- [Foundations: web hosting](#foundations-web-hosting) (4)
 - [Foundations: security tools and threat modeling](#foundations-security-tools-and-threat-modeling) (6)
 - [Foundations: network and host defense](#foundations-network-and-host-defense) (8)
 - [Foundations: deception and honeypots](#foundations-deception-and-honeypots) (11)
@@ -123,6 +123,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | --- | --- | --- | --- |
 | [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md) | What a web server, an application runtime and a database each do in a LAMP or LEMP stack, for readers who are new to web hosting. | learner |  |
 | [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) | Why plugins carry most of a WordPress site's risk, what to harden and what a web application firewall does; also why static sites often win. | learner |  |
+| [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) | A static and a dynamic site that look the same, how to tell them apart from outside with curl, page source and WhatWeb, what each leaks, and a career note on public work. | learner | draft |
 | [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md) | The path from one web server to a scaled design, with caches, a CDN, a WAF and a pipeline, for engineers who run web fleets. | engineer |  |
 
 ## Foundations: security tools and threat modeling
