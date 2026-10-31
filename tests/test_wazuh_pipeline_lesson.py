@@ -39,7 +39,7 @@ def blocks(text, lang):
 
 def one_block(text, lang, marker):
     found = [body for body in blocks(text, lang) if marker in body]
-    assert len(found) == 1, "expected one %s block with %r, found %d" % (lang, marker, len(found))
+    assert len(found) == 1, f"expected one {lang} block with {marker!r}, found {len(found)}"
     return found[0]
 
 
