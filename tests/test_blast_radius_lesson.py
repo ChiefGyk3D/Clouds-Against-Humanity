@@ -138,8 +138,8 @@ def test_at_least_four_existing_pages_link_the_lesson_at_first_use():
     assert 4 <= len(users) <= 9, users
 
 
-def test_the_lesson_is_in_the_sidebar_and_reading_order():
-    assert PAGE.name in (WIKI / "_Sidebar.md").read_text()
+def test_the_lesson_is_in_contents_and_reading_order():
+    assert PAGE.name in (WIKI / "Contents.md").read_text()
     assert PAGE.name in (WIKI / "Reading-Order.md").read_text()
 
 

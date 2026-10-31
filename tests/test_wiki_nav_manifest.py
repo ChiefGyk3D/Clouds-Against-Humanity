@@ -199,7 +199,9 @@ def test_sidebar_keeps_the_links_the_other_tests_and_pages_rely_on():
     text = (WIKI / "_Sidebar.md").read_text()
     for page in ("Home", "Contents", "Reading-Order", "Why-This-Exists", "Screenshots-Policy", "Repository-Growth", "Glossary"):
         assert f"({page}.md)" in text, page
-    assert "docs/stages/00-foundation.md" in text and "docs/cost.md" in text
+    # The outside links are not key pages; they stay one click away on the Contents page (issue #362).
+    contents = (WIKI / "Contents.md").read_text()
+    assert "docs/stages/00-foundation.md" in contents and "docs/cost.md" in contents
 
 
 def test_every_group_in_the_sidebar_is_a_details_block_with_a_summary():
@@ -223,6 +225,134 @@ def test_the_publisher_copies_the_generated_pages_unchanged_in_kind():
     script = (ROOT / "scripts" / "gen-wiki.sh").read_text()
     assert 'for page in "$src"/*.md' in script
     assert not (WIKI / "_nav.yaml").name.endswith(".md")
+
+
+# -- the collapsed sidebar (issue #362) ----------------------------------------------------------
+
+SIDEBAR_HEADROOM = 40  # lines the committed sidebar must leave under the budget
+SIDEBAR_GROUP_LINK = re.compile(r"\]\(Contents\.md#([a-z0-9-]+)\)")
+SIDEBAR_ITEM = re.compile(r"^(- |\d+\. )")
+
+
+def bulk_group(pages: int, **marks) -> dict:
+    """A manifest whose 'ref' group has `pages` entries named P00, P01, ... (sorted order = write order)."""
+    m = minimal()
+    m["pages"]["ref"] = [
+        {"page": f"P{i:02d}", "title": f"P{i:02d}", "audience": "everyone", "desc": "A page.", **marks.get(f"P{i:02d}", {})}
+        for i in range(pages)
+    ]
+    return m
+
+
+def ref_block(sidebar: str) -> str:
+    return sidebar.split("<summary><b>Reference</b>", 1)[1].split("</details>", 1)[0]
+
+
+def test_the_sidebar_leaves_room_for_forty_more_pages_under_the_budget():
+    lines = (WIKI / "_Sidebar.md").read_text().splitlines()
+    assert len(lines) <= SIDEBAR_LINE_BUDGET - SIDEBAR_HEADROOM, f"{len(lines)} lines"
+
+
+def test_forty_more_unmarked_pages_do_not_grow_the_committed_sidebar():
+    m = manifest()
+    before = len(gwn.render_sidebar(m).splitlines())
+    m["pages"]["os"] += [
+        {"page": f"Extra{i}", "title": f"Extra {i:02d}", "audience": "learner", "desc": "x"} for i in range(40)
+    ]
+    after = len(gwn.render_sidebar(m).splitlines())
+    assert after == before, "unmarked pages must not add sidebar lines once a group already shows its key pages"
+    assert after <= SIDEBAR_LINE_BUDGET
+
+
+def test_the_sidebar_never_lists_a_page_the_nav_does_not_know():
+    listed = set(PAGE_LINK.findall((WIKI / "_Sidebar.md").read_text()))
+    known = set(gwn.all_page_names(manifest())) | {"Contents"}
+    assert listed, "expected the sidebar to link pages"
+    assert listed <= known, f"sidebar links unknown pages: {sorted(listed - known)}"
+
+
+def test_every_page_is_in_contents_and_every_sidebar_page_is_a_contents_row():
+    in_contents = set(PAGE_LINK.findall((WIKI / "Contents.md").read_text()))
+    assert pages_on_disk() - {"Contents"} <= in_contents
+    sidebar_pages = set(PAGE_LINK.findall((WIKI / "_Sidebar.md").read_text()))
+    assert sidebar_pages - {"Contents"} <= in_contents
+
+
+def test_every_sidebar_group_ends_with_a_link_to_its_contents_anchor_and_the_anchor_exists():
+    sidebar = (WIKI / "_Sidebar.md").read_text()
+    contents = (WIKI / "Contents.md").read_text()
+    headings = {gwn.slug(line[3:]) for line in contents.splitlines() if line.startswith("## ")}
+    blocks = sidebar.split("<details")[1:]
+    shown = [g for g in gwn.groups_of(manifest()) if g["id"] != gwn.TOP_GROUP]
+    assert len(blocks) == len(shown) >= 10
+    for group, block in zip(shown, blocks, strict=True):
+        items = [line for line in block.split("</details>")[0].splitlines() if SIDEBAR_ITEM.match(line)]
+        found = SIDEBAR_GROUP_LINK.findall(items[-1])
+        assert found == [gwn.slug(group["title"])], f"{group['id']}: last item is {items[-1]!r}"
+        assert found[0] in headings, f"{group['id']}: no Contents heading for #{found[0]}"
+
+
+def test_group_titles_make_distinct_contents_anchors():
+    slugs = [gwn.slug(g["title"]) for g in gwn.groups_of(manifest())]
+    assert len(slugs) == len(set(slugs))
+
+
+def test_a_group_with_no_marked_page_shows_its_first_pages_by_the_documented_default():
+    m = bulk_group(12)
+    shown = re.findall(r"\]\((P\d\d)\.md\)", ref_block(gwn.render_sidebar(m)))
+    assert shown == [f"P{i:02d}" for i in range(gwn.DEFAULT_SIDEBAR_PAGES)]
+    assert 1 <= gwn.DEFAULT_SIDEBAR_PAGES <= 6
+
+
+def test_the_default_follows_display_order_for_a_sorted_group():
+    m = bulk_group(8)
+    m["pages"]["ref"].reverse()  # written out of order; a sorted group still shows the first in title order
+    shown = re.findall(r"\]\((P\d\d)\.md\)", ref_block(gwn.render_sidebar(m)))
+    assert shown == [f"P{i:02d}" for i in range(gwn.DEFAULT_SIDEBAR_PAGES)]
+
+
+def test_marked_pages_replace_the_default_and_keep_display_order():
+    m = bulk_group(12, P09={"sidebar": True}, P04={"sidebar": True})
+    shown = re.findall(r"\]\((P\d\d)\.md\)", ref_block(gwn.render_sidebar(m)))
+    assert shown == ["P04", "P09"]
+
+
+def test_the_group_link_counts_every_page_and_points_at_the_contents_heading():
+    m = bulk_group(12)
+    sidebar = gwn.render_sidebar(m)
+    last = [line for line in ref_block(sidebar).splitlines() if SIDEBAR_ITEM.match(line)][-1]
+    assert "(Contents.md#reference)" in last and "12" in last
+    assert "<b>Reference</b> (12)" in sidebar
+
+
+def test_the_numbered_core_path_is_listed_in_full_with_its_contents_link():
+    m = minimal()
+    m["pages"]["core"] += [
+        {"page": f"Step{i}", "title": f"Step {i}", "audience": "newcomer", "desc": "x"} for i in range(8)
+    ]
+    block = gwn.render_sidebar(m).split("<summary><b>Core path</b>", 1)[1].split("</details>", 1)[0]
+    assert len(re.findall(r"^\d+\. \[", block, flags=re.MULTILINE)) == 9
+    assert "(Contents.md#core-path)" in block
+
+
+def test_a_sidebar_flag_must_be_true_or_false():
+    m = minimal()
+    m["pages"]["ref"][0]["sidebar"] = "yes"
+    assert any("sidebar must be true or false" in p for p in gwn.validate(m, MINIMAL_PAGES))
+    m["pages"]["ref"][0]["sidebar"] = True
+    assert gwn.validate(m, MINIMAL_PAGES) == []
+
+
+def test_two_groups_with_the_same_contents_anchor_are_refused():
+    m = minimal()
+    m["groups"].append({"id": "ref2", "title": "reference!", "order": "sorted"})
+    assert any("same Contents anchor" in p for p in gwn.validate(m, MINIMAL_PAGES))
+
+
+def test_the_committed_manifest_marks_key_pages():
+    marked = [e["page"] for pages in manifest()["pages"].values() for e in pages if e.get("sidebar")]
+    assert marked, "expected key pages to be marked"
+    assert set(marked) <= pages_on_disk()
 
 
 # -- the checks bite --------------------------------------------------------------------------

@@ -110,5 +110,5 @@ def test_the_page_uses_no_real_address():
 
 
 def test_the_page_is_registered_everywhere_pages_are():
-    for name in ("_Sidebar.md", "Contents.md", "Reading-Order.md", "Glossary.md", "_nav.yaml"):
+    for name in ("Contents.md", "Reading-Order.md", "Glossary.md", "_nav.yaml"):
         assert NAME in (WIKI / name).read_text(encoding="utf-8"), name

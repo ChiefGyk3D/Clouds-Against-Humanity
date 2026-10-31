@@ -206,7 +206,7 @@ def test_exercise_page_points_at_the_model():
 
 
 def test_wiki_pages_link_the_exercise():
-    for name in ("_Sidebar.md", "Home.md"):
+    for name in ("Contents.md", "Home.md"):
         text = (WIKI / name).read_text(encoding="utf-8")
         assert "(Threat-Dragon-Exercise.md)" in text, name
 

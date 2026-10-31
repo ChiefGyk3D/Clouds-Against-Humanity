@@ -157,5 +157,5 @@ def test_the_checklist_is_honest_about_the_edge_and_leaks_nothing():
 
 
 def test_the_checklist_is_registered_and_the_lesson_still_names_its_rows():
-    for name in ("_Sidebar.md", "Contents.md", "Reading-Order.md", "_nav.yaml"):
+    for name in ("Contents.md", "Reading-Order.md", "_nav.yaml"):
         assert "DMZ-Hardening-Checklist" in (WIKI / name).read_text(encoding="utf-8"), name
