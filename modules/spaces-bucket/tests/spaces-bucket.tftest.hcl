@@ -76,7 +76,7 @@ run "rejects_zero_lifecycle_days" {
 run "rejects_public_read_acl" {
   command = plan
   variables {
-    acl     = "public-read"
+    acl = "public-read"
   }
   expect_failures = [var.acl]
 }
