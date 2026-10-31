@@ -53,12 +53,12 @@ file does not match the manifest. -->
 </details>
 
 <details>
-<summary><b>Foundations: identity and secrets</b> (5)</summary>
+<summary><b>Foundations: identity and secrets</b> (6)</summary>
 
 - [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md)
 - [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md)
 - [Secrets from day one](Secrets-From-Day-One.md)
-- [Full list (5)](Contents.md#foundations-identity-and-secrets)
+- [Full list (6)](Contents.md#foundations-identity-and-secrets)
 
 </details>
 
