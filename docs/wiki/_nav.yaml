@@ -98,7 +98,8 @@ pages:
   web:
     - {page: LAMP-and-LEMP-From-Zero, title: "LAMP and LEMP from zero", audience: "learner", desc: "What a web server, an application runtime and a database each do in a LAMP or LEMP stack, for readers who are new to web hosting."}
     - {page: WordPress-and-PHP-Security-WAF-and-Static-Sites, title: "WordPress and PHP security, WAFs and static sites", audience: "learner", desc: "Why plugins carry most of a WordPress site's risk, what to harden and what a web application firewall does; also why static sites often win."}
-    - {page: WordPress-at-Scale-CDN-WAF-and-CI, title: "WordPress at scale: CDN, WAF, caching and CI", audience: "engineer", desc: "The path from one web server to a scaled design, with caches, a CDN, a WAF and a pipeline, for engineers who run web fleets."}
+    - {page: Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon, title: "Static against dynamic: Hugo, WordPress and recon", audience: "learner", status: "draft", desc: "A static and a dynamic site that look the same, how to tell them apart from outside with curl, page source and WhatWeb, what each leaks, and a career note on public work."}
+    - {page: WordPress-at-Scale-CDN-WAF-and-CI,title: "WordPress at scale: CDN, WAF, caching and CI", audience: "engineer", desc: "The path from one web server to a scaled design, with caches, a CDN, a WAF and a pipeline, for engineers who run web fleets."}
   tools:
     - {page: Threats-in-Plain-Words, title: "Threats in plain words", audience: "learner", desc: "Vulnerabilities, exploits, phishing, malware and compliance told apart with real dated cases, for readers who meet these words as noise."}
     - {page: Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit, title: "Security tools: Nmap, OpenVAS, Burp, Metasploit", audience: "learner", desc: "The rules for using Nmap, OpenVAS, Wireshark, Burp, ZAP and Metasploit, and what each one is for, for learners in an isolated lab."}

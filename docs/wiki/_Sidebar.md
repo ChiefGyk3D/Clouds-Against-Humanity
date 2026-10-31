@@ -79,10 +79,11 @@ file does not match the manifest. -->
 </details>
 
 <details>
-<summary><b>Foundations: web hosting</b> (3)</summary>
+<summary><b>Foundations: web hosting</b> (4)</summary>
 
 - [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md)
 - [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md)
+- [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) (draft)
 - [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
 
 </details>
