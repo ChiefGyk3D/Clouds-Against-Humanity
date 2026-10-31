@@ -98,7 +98,7 @@ That is not "VPNs are always wrong". WireGuard is a very different animal from a
 | Edge | Public edge (DMZ) and hardening | past the ceiling (design option A adds a $6 droplet) | Shared network code written, disabled by default and never applied (`stacks/50-edge` creates nothing until the stage is approved); each service becomes its own stack later ([stage page](docs/stages/05-edge.md)) |
 | AWS | The AWS twin of stages 0 and 1: `modules/aws/*`, `stacks/aws/*` | $0 and $20.84 | Written and tested with mocked providers, never applied. Azure and GCP have no code |
 
-Working ceiling: $30 per month in the current phase (stage 2), shared by every cloud; each phase carries its own ceiling in `docs/stages/approved.json`, so a later phase can raise it on purpose. A cost gate in CI fails any change that raises a cloud's planned total above its approved total, or the active clouds' approved totals above the current phase's ceiling (the AWS twin is marked inactive, because it does not fit beside stage 1). See the [roadmap](docs/wiki/Roadmap.md).
+Working ceiling: $30 per month in the current phase (stage 3), shared by every cloud; each phase carries its own ceiling in `docs/stages/approved.json`, so a later phase can raise it on purpose. A cost gate in CI fails any change that raises a cloud's planned total above its approved total, or the active clouds' approved totals above the current phase's ceiling (the AWS twin is marked inactive, because it does not fit beside stage 1). See the [roadmap](docs/wiki/Roadmap.md).
 
 ### Growth
 
@@ -120,6 +120,7 @@ Clouds-Against-Humanity/
   modules/twingate-bootstrap/              shared connector boot script and tokens, called by every provider's connector
   modules/twingate-connector/              connector, its tokens, its droplet and cloud-init
   modules/edge-host/                       reusable edge host: droplet, reserved IP, project attachment and a small cloud-init (no SSH, no connector, no service)
+  modules/spaces-bucket/                   private versioned Spaces bucket for daemon state, off by default, not approved
   modules/aws/{vpc,firewall,twingate-connector}  the AWS versions of those modules
   dashboards/                              importable Grafana dashboards (sites overview, droplet health, Wazuh agents); see docs/wiki/Grafana-Dashboards.md
   scripts/cost_check.py                    cost gate
@@ -194,7 +195,7 @@ tofu -chdir=modules/firewall init -backend=false
 tofu -chdir=modules/firewall test
 ```
 
-Run the last pair for each directory in the `directories` list of the tofu job in `.github/workflows/ci.yml`: `modules/vpc`, `modules/firewall`, `modules/twingate-bootstrap`, `modules/twingate-connector`, `modules/edge-host`, `modules/aws/vpc`, `modules/aws/firewall`, `modules/aws/twingate-connector`, `stacks/00-foundation`, `stacks/10-access`, `stacks/20-telemetry`, `stacks/50-edge`, `stacks/aws/00-foundation` and `stacks/aws/10-access`. CI runs all of it through git-your-ship-together's shared workflows; the only job this repository defines itself is the `CI green` gate.
+Run the last pair for each directory in the `directories` list of the tofu job in `.github/workflows/ci.yml`: `modules/vpc`, `modules/firewall`, `modules/twingate-bootstrap`, `modules/twingate-connector`, `modules/edge-host`, `modules/spaces-bucket`, `modules/aws/vpc`, `modules/aws/firewall`, `modules/aws/twingate-connector`, `stacks/00-foundation`, `stacks/10-access`, `stacks/20-telemetry`, `stacks/50-edge`, `stacks/aws/00-foundation` and `stacks/aws/10-access`. CI runs all of it through git-your-ship-together's shared workflows; the only job this repository defines itself is the `CI green` gate.
 
 ## Documentation
 

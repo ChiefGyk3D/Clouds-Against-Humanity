@@ -70,6 +70,9 @@
         ],
         "digitalocean_reserved_ip": [
           "modules/edge-host/main.tf"
+        ],
+        "digitalocean_spaces_bucket": [
+          "modules/spaces-bucket/main.tf"
         ]
       }
     },

@@ -28,6 +28,7 @@ def make_repo(
     ceiling=30.0,
     prices=None,
     connector_modules=None,
+    allowed=None,
 ):
     (tmp_path / "docs/stages").mkdir(parents=True)
     (tmp_path / "stacks/10-access").mkdir(parents=True)
@@ -41,7 +42,8 @@ def make_repo(
                         "approved_monthly_total": approved_total,
                         "active": True,
                         "allowed_sources": {
-                            "digitalocean_droplet": ["modules/ok/main.tf"]
+                            "digitalocean_droplet": ["modules/ok/main.tf"],
+                            **(allowed or {}),
                         },
                     }
                 },
@@ -496,3 +498,234 @@ def test_real_backup_syntax_is_still_refused(tmp_path, body):
     root = make_repo(tmp_path, [droplet()], tf_files=droplet_tf(body))
     found = cost_check.block_problems(root)
     assert any("backup" in p for p in found), found
+
+
+# ---- Spaces: a flat, manifest-priced bucket behind a stack switch (#113) ----
+
+SPACES_PRICES = {**PRICES, "spaces": {"monthly": 5.0}}
+SPACES_ALLOWED = {"digitalocean_spaces_bucket": ["modules/spaces-bucket/main.tf"]}
+SPACES_MODULE_TF = {
+    "modules/ok/main.tf": 'resource "digitalocean_droplet" "a" {}\n',
+    "modules/spaces-bucket/main.tf": (
+        'resource "digitalocean_spaces_bucket" "this" {\n  name = "x"\n}\n'
+        'resource "digitalocean_spaces_key" "this" {\n  name = "k"\n}\n'
+    ),
+}
+SPACES_LOCALS = (
+    "locals {\n  on = var.spaces_enabled ? 1 : 0\n"
+    '  cost = jsondecode(file("${path.module}/cost.json"))\n}\n'
+)
+SPACES_OUT = (
+    'output "spaces_enabled" {\n  value = var.spaces_enabled\n  precondition {\n'
+    "    condition = !var.spaces_enabled || (\n"
+    '      length([for r in local.cost.resources : r if r.kind == "spaces"]) == 1\n    )\n'
+    '    error_message = "price it"\n  }\n}\n'
+)
+SPACES_CALL = 'module "state" {\n  source = "../../modules/spaces-bucket"\n%s}\n'
+SPACES_ENTRY = {"name": "state-bucket", "kind": "spaces"}
+
+
+def spaces_repo(tmp_path, entries=(), body="  count = local.on\n", locals_=SPACES_LOCALS,
+                out=SPACES_OUT, approved_total=6.0, extra=None,
+                source="../../modules/spaces-bucket"):
+    files = {
+        **SPACES_MODULE_TF,
+        "stacks/10-access/spaces.tf": locals_ + (SPACES_CALL % body).replace(
+            "../../modules/spaces-bucket", source
+        ),
+        "stacks/10-access/spaces_out.tf": out,
+        **(extra or {}),
+    }
+    return make_repo(
+        tmp_path, [droplet(), *entries], approved_total=approved_total,
+        tf_files=files, prices=SPACES_PRICES, allowed=SPACES_ALLOWED,
+    )
+
+
+def test_a_spaces_entry_is_priced_flat_from_the_price_table(tmp_path):
+    root = make_repo(tmp_path, [droplet(), SPACES_ENTRY], prices=SPACES_PRICES)
+    assert cost_check.total_cost(root, SPACES_PRICES) == 11.0
+
+
+def test_a_spaces_entry_cannot_set_its_own_price(tmp_path):
+    root = make_repo(
+        tmp_path, [{**SPACES_ENTRY, "monthly": 0.01, "price": 0}], prices=SPACES_PRICES
+    )
+    assert cost_check.total_cost(root, SPACES_PRICES) == 5.0
+
+
+def test_a_spaces_entry_without_a_table_price_fails_closed(tmp_path):
+    root = make_repo(tmp_path, [SPACES_ENTRY])
+    with pytest.raises(ValueError, match="no price for spaces"):
+        cost_check.total_cost(root, PRICES)
+
+
+@pytest.mark.parametrize("bad", [-1, "five", None, float("nan"), True])
+def test_a_malformed_spaces_price_fails_closed(tmp_path, bad):
+    prices = {**PRICES, "spaces": {"monthly": bad}}
+    root = make_repo(tmp_path, [SPACES_ENTRY], prices=prices)
+    with pytest.raises(ValueError):
+        cost_check.total_cost(root, prices)
+
+
+def test_spaces_is_not_priced_on_another_cloud(tmp_path):
+    with pytest.raises(ValueError, match="no price model"):
+        cost_check.resource_cost(SPACES_ENTRY, SPACES_PRICES, provider="aws")
+
+
+def test_spaces_key_is_a_free_type(tmp_path, capsys):
+    root = make_repo(
+        tmp_path, [droplet()],
+        tf_files={**OK_DROPLET, "stacks/10-access/x.tf": 'resource "digitalocean_spaces_key" "x" {}\n'},
+    )
+    code, err = run_main(root, capsys)
+    assert code == 0, err
+
+
+def test_spaces_bucket_outside_the_allowed_file_fails(tmp_path, capsys):
+    root = make_repo(
+        tmp_path, [droplet()],
+        tf_files={**OK_DROPLET, "stacks/10-access/x.tf": 'resource "digitalocean_spaces_bucket" "x" {}\n'},
+        allowed=SPACES_ALLOWED,
+    )
+    code, err = run_main(root, capsys)
+    assert code == 1
+    assert "stacks/10-access/x.tf" in err and "digitalocean_spaces_bucket" in err
+
+
+def test_spaces_bucket_with_no_allowed_file_at_all_fails(tmp_path, capsys):
+    root = make_repo(
+        tmp_path, [droplet()],
+        tf_files={**OK_DROPLET, "modules/spaces-bucket/main.tf": 'resource "digitalocean_spaces_bucket" "x" {}\n'},
+    )
+    code, err = run_main(root, capsys)
+    assert code == 1 and "digitalocean_spaces_bucket" in err
+
+
+@pytest.mark.parametrize("meta", ["count = 1", "count = var.n", 'for_each = toset(["a"])'])
+def test_count_or_for_each_on_the_bucket_resource_is_refused(tmp_path, capsys, meta):
+    root = make_repo(
+        tmp_path, [droplet()],
+        tf_files={
+            **OK_DROPLET,
+            "modules/spaces-bucket/main.tf": f'resource "digitalocean_spaces_bucket" "this" {{\n  {meta}\n}}\n',
+        },
+        allowed=SPACES_ALLOWED,
+    )
+    code, err = run_main(root, capsys)
+    assert code == 1 and "digitalocean_spaces_bucket" in err and ("count" in err or "for_each" in err)
+
+
+def test_an_inactive_bucket_module_adds_nothing(tmp_path, capsys):
+    root = spaces_repo(tmp_path)
+    assert cost_check.total_cost(root, SPACES_PRICES) == 6.0
+    code, err = run_main(root, capsys)
+    assert code == 0, err
+
+
+def test_an_active_bucket_module_is_priced_and_held_to_the_approved_total(tmp_path, capsys):
+    root = spaces_repo(tmp_path, entries=[SPACES_ENTRY], approved_total=6.0)
+    code, err = run_main(root, capsys)
+    assert code == 1 and "approved" in err
+    root = spaces_repo(tmp_path / "ok", entries=[SPACES_ENTRY], approved_total=11.0)
+    code, err = run_main(root, capsys)
+    assert code == 0, err
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        "  count = 2\n",
+        "  count = var.n\n",
+        '  for_each = toset(["a"])\n',
+        "",
+    ],
+)
+def test_a_bucket_module_call_must_use_the_stack_switch(tmp_path, capsys, body):
+    root = spaces_repo(tmp_path, body=body)
+    code, err = run_main(root, capsys)
+    assert code == 1 and ("spaces-bucket" in err or "state" in err)
+
+
+def test_the_switch_must_be_a_variable_ternary(tmp_path, capsys):
+    root = spaces_repo(tmp_path, locals_=SPACES_LOCALS.replace("var.spaces_enabled ? 1 : 0", "1"))
+    code, err = run_main(root, capsys)
+    assert code == 1 and "0 spaces" in err
+
+
+def test_the_switch_needs_the_manifest_precondition(tmp_path, capsys):
+    root = spaces_repo(tmp_path, out=SPACES_OUT.replace("!var.spaces_enabled ||", "true ||"))
+    code, err = run_main(root, capsys)
+    assert code == 1 and "0 spaces" in err
+
+
+def test_spaces_entries_must_match_the_module_calls(tmp_path, capsys):
+    root = spaces_repo(
+        tmp_path, entries=[SPACES_ENTRY, {**SPACES_ENTRY, "name": "b"}], approved_total=16.0
+    )
+    code, err = run_main(root, capsys)
+    assert code == 1 and "2 spaces manifest entr" in err
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "../../modules/./spaces-bucket",
+        "../../modules//spaces-bucket",
+        "../../modules/spaces-bucket/",
+        "../../modules/spaces-bucket/.",
+        "../../modules/x/../spaces-bucket",
+        "./../../modules/spaces-bucket",
+        "../../modules/copy/spaces-bucket",
+        "../10-access/../../modules/other/spaces-bucket",
+    ],
+)
+def test_a_bucket_module_source_must_be_the_one_canonical_path(tmp_path, capsys, source):
+    root = spaces_repo(tmp_path, source=source)
+    assert cost_check.spaces_module_problems(root), source
+    code, err = run_main(root, capsys)
+    assert code == 1 and "modules/spaces-bucket" in err
+
+
+def test_the_canonical_source_still_passes(tmp_path):
+    assert cost_check.spaces_module_problems(spaces_repo(tmp_path)) == []
+
+
+def test_a_bucket_call_in_a_wrapper_module_without_a_manifest_is_refused(tmp_path, capsys):
+    wrapper = {
+        "modules/wrapper/main.tf": (
+            'module "state" {\n  source = "../spaces-bucket"\n  count  = local.on\n}\n'
+        )
+    }
+    root = spaces_repo(tmp_path, extra=wrapper)
+    problems = cost_check.spaces_module_problems(root)
+    assert any("modules/wrapper" in p and "no cost.json" in p for p in problems), problems
+    code, err = run_main(root, capsys)
+    assert code == 1 and "modules/wrapper" in err
+
+
+def test_a_switch_proved_for_the_edge_kind_does_not_satisfy_spaces(tmp_path):
+    edge_out = SPACES_OUT.replace('r.kind == "spaces"', 'r.kind == "droplet"')
+    root = spaces_repo(tmp_path, out=edge_out)
+    assert any("0 spaces" in p for p in cost_check.spaces_module_problems(root))
+    assert cost_check.edge_switch_verified(root, "stacks/10-access")
+    assert not cost_check.edge_switch_verified(root, "stacks/10-access", kind="spaces")
+
+
+# ---- the committed files carry the Spaces price and approval (#113) ----
+
+REPO = Path(__file__).resolve().parents[1]
+
+
+def test_committed_spaces_price_is_five_dollars_with_a_source_and_date():
+    spaces = json.loads((REPO / "docs/cost-prices.json").read_text())["spaces"]
+    assert spaces["monthly"] == 5.0
+    assert spaces["source"].startswith("https://docs.digitalocean.com/products/spaces/")
+    assert len(spaces["retrieved"]) == 10 and spaces["retrieved"].startswith("2026-")
+
+
+def test_committed_approval_allows_only_the_bucket_module_for_spaces():
+    do = json.loads((REPO / "docs/stages/approved.json").read_text())["providers"]["digitalocean"]
+    assert do["allowed_sources"]["digitalocean_spaces_bucket"] == ["modules/spaces-bucket/main.tf"]
+    assert "digitalocean_spaces_key" not in do["allowed_sources"]
+    assert do["approved_monthly_total"] <= 29.0

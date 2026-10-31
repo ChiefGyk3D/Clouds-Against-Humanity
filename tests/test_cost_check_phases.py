@@ -235,7 +235,7 @@ def test_the_real_file_is_valid_and_keeps_todays_behaviour():
     assert "ceiling" not in doc
     assert problems(doc) == []
     pid, ceiling, _ = cost_check.current_ceiling(doc)
-    assert (pid, ceiling) == ("stage-2", 30.0)
+    assert (pid, ceiling) == ("stage-3", 30.0)
     assert doc["providers"]["digitalocean"]["active"] is True
     assert doc["providers"]["aws"]["active"] is False
 
@@ -271,7 +271,7 @@ def copy_real_repo(tmp_path, mutate=None, frozen=True):
 def test_the_real_repo_passes_and_names_the_phase(tmp_path, capsys):
     code, out = run_main(copy_real_repo(tmp_path, frozen=False), capsys)
     assert code == 0, out.err
-    assert "cost-check: phase stage-2 ceiling $30.00 (reason: " in out.out
+    assert "cost-check: phase stage-3 ceiling $30.00 (reason: " in out.out
     assert "shared ceiling $" not in out.out
 
 

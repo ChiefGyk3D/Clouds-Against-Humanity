@@ -1,6 +1,6 @@
 {
   "stage": 1,
-  "current_phase": "stage-2",
+  "current_phase": "stage-3",
   "hard_max": 60.0,
   "hard_max_reason": "Absolute monthly limit no phase ceiling may pass: just above the largest proposed phase ($53, the learner mini SOC). Raising it is its own reviewed edit.",
   "phases": {
@@ -20,13 +20,13 @@
       "ceiling": 30.0,
       "reason": "Maintainer approval 2026-10-30: \"yes $30 should be fine\", answering: make stage-2 the current phase at its planned $30 ceiling. Stage 2 adds $0 to the cloud bill in the reference environment (logs go to the on-prem SIEM).",
       "decided": "2026-10-30",
-      "status": "current"
+      "status": "done"
     },
     "stage-3": {
       "ceiling": 30.0,
-      "reason": "Proposed in the stage design: needs $29 (connectors $12, s-1vcpu-2gb droplet $12, Spaces bucket $5); the ceiling stays at $30 and leaves $1. No bridge is costed: etke.cc hosts the Discord-to-Matrix bridge (2026-10-22, #254), and recomputing without it leaves $29 unchanged. Needs the maintainer's approval before becoming current.",
-      "decided": "2026-10-16",
-      "status": "planned"
+      "reason": "Maintainer approval 2026-10-31: \"Yes, full stage 3 scope\", answering: make stage-3 the current phase at its planned $30 ceiling (#109), price Spaces at a flat $5 in the cost gate and allow the Spaces bucket module, and raise the DigitalOcean approved total only as far as the gate needs, never above $29 (connectors $12 + workload droplet $12 + bucket $5). Nothing is built live by this; the stack and the bucket stay switched off. The planned arithmetic is $12 + $12 + $5 = $29, leaving $1.",
+      "decided": "2026-10-31",
+      "status": "current"
     },
     "stage-4": {
       "ceiling": 30.0,
@@ -70,6 +70,9 @@
         ],
         "digitalocean_reserved_ip": [
           "modules/edge-host/main.tf"
+        ],
+        "digitalocean_spaces_bucket": [
+          "modules/spaces-bucket/main.tf"
         ]
       }
     },
