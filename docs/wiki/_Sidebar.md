@@ -102,7 +102,7 @@ file does not match the manifest. -->
 </details>
 
 <details>
-<summary><b>Foundations: network and host defense</b> (7)</summary>
+<summary><b>Foundations: network and host defense</b> (8)</summary>
 
 - [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md)
 - [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md)
