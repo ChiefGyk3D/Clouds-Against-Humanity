@@ -151,14 +151,14 @@ grep -c "dport 22" modules/edge-host/cloud-init.yaml.tftpl
 Output, from one run on Linux on 2026-10-30:
 
 ```text
-92:          type filter hook input priority 0; policy drop;
-154:  - [systemctl, disable, --now, ssh.service, ssh.socket]
-155:  - [systemctl, mask, ssh.service, ssh.socket]
-156:  - [passwd, -l, root]
+93:          type filter hook input priority 0; policy drop;
+155:  - [systemctl, disable, --now, ssh.service, ssh.socket]
+156:  - [systemctl, mask, ssh.service, ssh.socket]
+157:  - [passwd, -l, root]
 0
 ```
 
-**Check.** Line 92 is the default-drop policy. Lines 154 to 156 stop and mask sshd and lock the root password. The count of rules naming port 22 is zero. Compare with your prediction. Then ask the harder question: this shows what the template **declares**. It does not show that a droplet built from it behaves that way, because none has been built. The tests named in the hardening table are checks of the same kind, on the code, with mocked providers. A passing test is evidence about the repository, and not about a running host. When the stage is eventually applied, the outside check described in [Droplet hardening](Droplet-Hardening.md#the-outside-check-zero-open-ports) is the kind of measurement that answers the second question, and the design says any such check on a live host runs only against your own resources, in a window the maintainer sets (design section 3).
+**Check.** Line 93 is the default-drop policy. Lines 155 to 157 stop and mask sshd and lock the root password. The count of rules naming port 22 is zero. Compare with your prediction. Then ask the harder question: this shows what the template **declares**. It does not show that a droplet built from it behaves that way, because none has been built. The tests named in the hardening table are checks of the same kind, on the code, with mocked providers. A passing test is evidence about the repository, and not about a running host. When the stage is eventually applied, the outside check described in [Droplet hardening](Droplet-Hardening.md#the-outside-check-zero-open-ports) is the kind of measurement that answers the second question, and the design says any such check on a live host runs only against your own resources, in a window the maintainer sets (design section 3).
 
 ## Checkpoint
 
@@ -194,8 +194,8 @@ Every project claim above was read on 2026-10-30 in this repository. Nothing was
 | Trust boundaries, including no shared tag, secret or Doppler config | design section 3.3 | Read |
 | The design accepts compromise and bounds it | design section 3.6 | Read |
 | Network stack opens TCP 4242 and 8883 inbound; outbound is DNS, HTTP, HTTPS, NTP; no SSH rule | `stacks/50-edge/main.tf`, `stacks/50-edge/tests/edge.tftest.hcl`, `docs/stages/05-edge.md` section 1 | Read; tests not run on a real account |
-| Host firewall is `policy drop` on input only, mirrors the Cloud Firewall ports, no port 22 rule | `modules/edge-host/cloud-init.yaml.tftpl` (line 92), the exercise output | Read, and the greps run |
-| sshd stopped and masked, root password locked, no key or admin user | `modules/edge-host/cloud-init.yaml.tftpl` (lines 154 to 156), `tests/test_edge_stack.py` | Read, and the greps run |
+| Host firewall is `policy drop` on input only, mirrors the Cloud Firewall ports, no port 22 rule | `modules/edge-host/cloud-init.yaml.tftpl` (line 93), the exercise output | Read, and the greps run |
+| sshd stopped and masked, root password locked, no key or admin user | `modules/edge-host/cloud-init.yaml.tftpl` (lines 155 to 157), `tests/test_edge_stack.py` | Read, and the greps run |
 | Unattended security updates, reboot slots 01:00 to 03:00 Eastern before 04:00 and 05:00 | `modules/edge-host/cloud-init.yaml.tftpl`, `modules/edge-host/reboot-slots.json`, `docs/stages/05-edge.md` ruling 5 | Read |
 | Only three OS packages, no daemon | `tests/test_edge_stack.py` (`test_the_cloud_init_installs_only_os_packages_and_no_service`) | Read |
 | Metadata lock in the edge template; no test names it | template read; `tests/test_edge_stack.py` and the module tests searched 2026-10-30 | Read; searched, nothing found |
