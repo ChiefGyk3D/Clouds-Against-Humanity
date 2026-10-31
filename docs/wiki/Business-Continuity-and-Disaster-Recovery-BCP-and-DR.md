@@ -268,7 +268,7 @@ The checker in [Exercise 1](#exercise-1-check-a-recovery-table-for-contradiction
 
 ### 1. The repository
 
-| | |
+| Item | This project |
 |---|---|
 | **Protects** | The code, the documents, the tests and the CI definitions: everything that rebuilds the rest. Also the issues, the project board and the pull-request history, which are not in a clone of the code. |
 | **Tier** | 0 |
@@ -279,7 +279,7 @@ The checker in [Exercise 1](#exercise-1-check-a-recovery-table-for-contradiction
 
 ### 2. The secret store (Doppler)
 
-| | |
+| Item | This project |
 |---|---|
 | **Protects** | The values every run needs: the DigitalOcean token, the Twingate API token, the tenant name and the administrator key values. The inventory table in the [secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md) (section 2) lists them and their 90-day lifetimes. |
 | **Tier** | 0 |
@@ -290,7 +290,7 @@ The checker in [Exercise 1](#exercise-1-check-a-recovery-table-for-contradiction
 
 ### 3. Spacelift state (and the Spacelift account)
 
-| | |
+| Item | This project |
 |---|---|
 | **Protects** | The OpenTofu **state**: the record of which real droplet, firewall, network and Twingate object each resource in the code corresponds to. Also the stack settings, contexts and policies, which are not in the code (the policy bodies are, the live copy is a paste). |
 | **Tier** | 0 |
@@ -301,7 +301,7 @@ The checker in [Exercise 1](#exercise-1-check-a-recovery-table-for-contradiction
 
 ### 4. Twingate (the account and the access layer)
 
-| | |
+| Item | This project |
 |---|---|
 | **Protects** | The only way in. The droplets have no public SSH, and the stage 1 guide says the account has no console password by design, so with Twingate down there is no remote access to them. |
 | **Tier** | 0 |
@@ -312,7 +312,7 @@ The checker in [Exercise 1](#exercise-1-check-a-recovery-table-for-contradiction
 
 ### 5. The connectors
 
-| | |
+| Item | This project |
 |---|---|
 | **Protects** | Private access to the droplets. They hold no data of their own: the stage 1 guide calls them stateless. |
 | **Tier** | 1 |
@@ -323,7 +323,7 @@ The checker in [Exercise 1](#exercise-1-check-a-recovery-table-for-contradiction
 
 ### 6. The wiki
 
-| | |
+| Item | This project |
 |---|---|
 | **Protects** | The lessons, published to the repository's GitHub wiki. |
 | **Tier** | 3 |
@@ -333,7 +333,7 @@ The checker in [Exercise 1](#exercise-1-check-a-recovery-table-for-contradiction
 
 ### 7. The home logging server
 
-| | |
+| Item | This project |
 |---|---|
 | **Protects** | A place for the connectors' logs to go (a log manager at home that is not part of this repository). Convenience and, later, detection. |
 | **Tier** | 3 |
