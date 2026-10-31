@@ -11,7 +11,7 @@ output "workload_enabled" {
   }
 
   precondition {
-    condition     = !var.workload_enabled || length(local.priced_workload) == 1
+    condition     = !var.workload_enabled || length([for r in local.cost.resources : r if r.name == "workload" && r.kind == "droplet"]) == 1
     error_message = "workload_enabled needs exactly one priced droplet entry named workload in this stack's cost.json, so the cost gate sees the host."
   }
 }

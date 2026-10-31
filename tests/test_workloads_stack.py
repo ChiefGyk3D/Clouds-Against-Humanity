@@ -131,8 +131,12 @@ def test_the_cost_manifest_prices_nothing_and_the_stage_is_not_approved():
     assert manifest["planned"]["workload"]["kind"] == "droplet"
     assert manifest["planned"]["workload"]["backups"] is False
     approved = json.loads(read(ROOT / "docs/stages/approved.json"))
-    assert approved["current_phase"] != "stage-3"
-    assert approved["phases"]["stage-3"]["status"] == "planned"
+    # Stage 3 is the current phase (maintainer approval 2026-10-31), but the
+    # stack stays off: the DigitalOcean total is not raised to cover the droplet
+    # until the switching-on pull request, which sets workload_approved.
+    assert approved["current_phase"] == "stage-3"
+    total = approved["providers"]["digitalocean"]["approved_monthly_total"]
+    assert total == 12.0  # the two connectors only; the switching-on PR raises it to 24 (29 with the bucket)
 
 
 def test_the_planned_size_is_priced_in_the_price_table():
