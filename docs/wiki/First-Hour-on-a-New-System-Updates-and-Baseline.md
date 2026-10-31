@@ -182,7 +182,7 @@ Read these in the repository; I read them on 2026-10-22.
 
 Cost: $0. Everything below runs in a throwaway container or virtual machine, or only reads your machine.
 
-You need Podman or Docker (`podman` and `docker` commands are interchangeable below; Docker may need `sudo`, Podman rootless does not) or a virtual machine you can delete. You do **not** run these on your real computer's system packages.
+You need Podman or Docker (`podman` and `docker` commands are interchangeable below; Docker may need `sudo`, Podman rootless does not) or a virtual machine you can delete ([how to make one for free](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md)). You do **not** run these on your real computer's system packages.
 
 ### Exercise 1: automatic updates on Debian or Ubuntu (dry run)
 

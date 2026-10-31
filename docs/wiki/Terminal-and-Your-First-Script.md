@@ -45,7 +45,7 @@ A command line is read left to right and split on spaces. That one fact explains
 
 | System | How | Shell you get (est.) |
 |---|---|---|
-| Windows | Press the Windows key, type `PowerShell`, press Enter. For WSL, see [Microsoft's WSL install page](https://learn.microsoft.com/en-us/windows/wsl/install) and choose the Bash track afterwards. | PowerShell |
+| Windows | Press the Windows key, type `PowerShell`, press Enter. For WSL, see [Microsoft's WSL install page](https://learn.microsoft.com/en-us/windows/wsl/install) and choose the Bash track afterwards. No Linux machine at all? A free Linux virtual machine is another route ([Virtual machines and hypervisors](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md)). | PowerShell |
 | macOS | Press Command and Space, type `Terminal`, press Enter. | zsh; type `bash` for Bash |
 | Linux | Ctrl, Alt and T on most desktops, or search the applications menu for Terminal. | Usually Bash |
 

@@ -313,7 +313,7 @@ For a real machine with systemd, a firewall and SELinux or AppArmor, rent a smal
 
 ## Build it, break it, detect it, defend it
 
-A small loop in a throwaway Ubuntu or Alma container (or a VM, if you want the service steps).
+A small loop in a throwaway Ubuntu or Alma container (or a VM, if you want the service steps; [Virtual machines and hypervisors](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) shows how to get one for free).
 
 **Build.** Create a service user and a file only it should read, in a folder others can enter (home folders are often closed to other users, which would hide the problem). In the container:
 
