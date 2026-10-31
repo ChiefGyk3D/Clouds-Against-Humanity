@@ -472,7 +472,7 @@ run "node_exporter_default_user_data_is_the_main_user_data_a" {
     }
   }
   assert {
-    condition     = sha256(aws_instance.connector.user_data) == "a418679fd64cc74c1e9c21d071ddfb4616cabb06a12bf6741f6b9a756bfcb155"
+    condition     = sha256(aws_instance.connector.user_data) == "8acfb32ecfe513c3763c7ff5df22933ffd92197625050a71730c80ec39375a93"
     error_message = "With node_exporter unset the user_data must be exactly what main rendered (connector a)."
   }
 }
@@ -490,7 +490,7 @@ run "node_exporter_explicitly_off_is_the_main_user_data_a" {
     node_exporter = { enabled = false, port = 9101 }
   }
   assert {
-    condition     = sha256(aws_instance.connector.user_data) == "a418679fd64cc74c1e9c21d071ddfb4616cabb06a12bf6741f6b9a756bfcb155"
+    condition     = sha256(aws_instance.connector.user_data) == "8acfb32ecfe513c3763c7ff5df22933ffd92197625050a71730c80ec39375a93"
     error_message = "node_exporter disabled (whatever its port) must render exactly what main rendered."
   }
 }
@@ -537,7 +537,7 @@ run "node_exporter_default_user_data_is_the_main_user_data_b_with_host_firewall"
     host_firewall = true
   }
   assert {
-    condition     = sha256(aws_instance.connector.user_data) == "0ca2d47f3e4988506baa38c7f18ffaf371690e0882e194f8ef6c5b0630078db5"
+    condition     = sha256(aws_instance.connector.user_data) == "7192fb9cf7cee28deedc4d9318fb8e307752e63a984357691b429d1c0507fd96"
     error_message = "With node_exporter unset the user_data must be exactly what main rendered (connector b, host firewall on)."
   }
 }

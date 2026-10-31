@@ -143,7 +143,7 @@ This section is a tour. Nothing here is run: the project's stacks are locked, an
 
 Everything above scales up, with a few more decisions to make early because they are painful to change later.
 
-- **Environments.** Keep development, staging and production apart with **separate state and separate accounts or projects**, not only a variable that says which. A shared account means a shared blast radius and a shared bill. The same code, called with different inputs, builds each environment.
+- **Environments.** Keep development, staging and production apart with **separate state and separate accounts or projects**, not only a variable that says which. A shared account means a shared blast radius and a shared bill. The same code, called with different inputs, builds each environment. The lesson [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) applies this to the project's own plan for staging.
 - **Naming.** Pick one scheme and use it everywhere, such as `<org>-<env>-<region>-<service>`. Short, lowercase, no personal names, no account numbers. A script that tears down or audits an environment depends on being able to match names.
 - **Accounts and projects.** Use the provider's boundary (a project, a team, an account, an organization) as an access boundary, and put resources in the right one at creation. This project puts everything in one DigitalOcean project created by stack 00.
 - **A shared network stack.** Networks, shared DNS, logging and identity change rarely and many things depend on them. Give them their own stacks, early in the order, owned by the people who can answer for them, and publish only identifiers.

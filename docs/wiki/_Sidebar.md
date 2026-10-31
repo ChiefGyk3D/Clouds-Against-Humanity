@@ -32,11 +32,12 @@ file does not match the manifest. -->
 </details>
 
 <details>
-<summary><b>Foundations: OS and Linux</b> (7)</summary>
+<summary><b>Foundations: OS and Linux</b> (8)</summary>
 
 - [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
 - [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md)
 - [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) (est. steps)
+- [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md)
 - [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md)
 - [The terminal and your first script](Terminal-and-Your-First-Script.md)
 - [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md)
@@ -67,13 +68,14 @@ file does not match the manifest. -->
 </details>
 
 <details>
-<summary><b>Foundations: infrastructure as code</b> (6)</summary>
+<summary><b>Foundations: infrastructure as code</b> (7)</summary>
 
 - [Git from zero](Git-From-Zero.md)
 - [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md)
 - [OpenTofu from zero](OpenTofu-From-Zero.md)
 - [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md)
 - [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md)
+- [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) (unbuilt)
 - [Spacelift from zero](Spacelift-From-Zero.md)
 
 </details>
@@ -100,12 +102,16 @@ file does not match the manifest. -->
 </details>
 
 <details>
-<summary><b>Foundations: network and host defense</b> (4)</summary>
+<summary><b>Foundations: network and host defense</b> (8)</summary>
 
 - [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md)
 - [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md)
 - [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md)
 - [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md)
+- [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) (draft)
+- [Attack surface map: layer by layer](Attack-Surface-Map-Layer-by-Layer.md) (draft)
+- [The DMZ and hardening an internet-facing host](The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet.md) (draft)
+- [DMZ hardening checklist](DMZ-Hardening-Checklist.md) (draft)
 
 </details>
 
@@ -140,6 +146,7 @@ file does not match the manifest. -->
 - [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) (draft)
 - [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) (unbuilt)
 - [Grafana dashboards](Grafana-Dashboards.md)
+- [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) (est. steps)
 - [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md)
 
 </details>

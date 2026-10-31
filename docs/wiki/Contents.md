@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (121 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (128 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -20,15 +20,15 @@ A page with no marker has no such banner. It may still say what was and was not 
 
 - [Start here](#start-here) (5)
 - [Core path: read in this order](#core-path-read-in-this-order) (21)
-- [Foundations: OS and Linux](#foundations-os-and-linux) (7)
+- [Foundations: OS and Linux](#foundations-os-and-linux) (8)
 - [Foundations: networking](#foundations-networking) (5)
 - [Foundations: identity and secrets](#foundations-identity-and-secrets) (5)
-- [Foundations: infrastructure as code](#foundations-infrastructure-as-code) (6)
+- [Foundations: infrastructure as code](#foundations-infrastructure-as-code) (7)
 - [Foundations: web hosting](#foundations-web-hosting) (3)
 - [Foundations: security tools and threat modeling](#foundations-security-tools-and-threat-modeling) (6)
-- [Foundations: network and host defense](#foundations-network-and-host-defense) (4)
+- [Foundations: network and host defense](#foundations-network-and-host-defense) (8)
 - [Foundations: deception and honeypots](#foundations-deception-and-honeypots) (11)
-- [Detection and monitoring](#detection-and-monitoring) (12)
+- [Detection and monitoring](#detection-and-monitoring) (13)
 - [Foundations: enterprise practice](#foundations-enterprise-practice) (6)
 - [Foundations: data governance](#foundations-data-governance) (1)
 - [Stage guides and design](#stage-guides-and-design) (11)
@@ -79,6 +79,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [Backups, recovery and patching](Backups-Recovery-and-Patching.md) | Snapshot versus backup, RPO and RTO, the 3-2-1 rule and patch cadence, for beginners deciding what to protect and how. | learner |  |
 | [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md) | The order of a new machine's first hour: updates, automatic updates, a baseline, then everything else, for anyone setting up a system. | learner |  |
 | [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) | The Linux families, package managers, services, permissions and logs you meet at work, for beginners; commands were not run by the author. | learner | est. steps |
+| [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md) | What unattended-upgrades does, how to configure it, where updates are logged, which four events deserve an alert, reboots, testing and rollback, for anyone running a Debian or Ubuntu host. | learner |  |
 | [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md) | Red, blue and purple teams, the written permission you need before any test, and setting up a lab computer you can safely break. | learner |  |
 | [The terminal and your first script](Terminal-and-Your-First-Script.md) | What a terminal, shell and command are, moving around files safely and chaining commands into a first script, for beginners on any operating system. | learner |  |
 | [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md) | What a virtual machine and a container each isolate, and who patches what under IaaS, PaaS and SaaS, for readers whose terms blur. | learner |  |
@@ -113,6 +114,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [OpenTofu from zero](OpenTofu-From-Zero.md) | Lesson 1 of the infrastructure as code track: init, plan, apply and destroy on your own machine, for first-time users. | learner |  |
 | [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) | Reading a plan like a reviewer, what state is, how drift happens and how to recover, for learners after OpenTofu from zero. | learner |  |
 | [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md) | Why a bigger environment is split into one stack per service, with its costs and benefits, for learners finishing the infrastructure as code track. | learner |  |
+| [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) | What local dev, staging and production are for, why each gets its own stack, secrets and cost ceiling, and how a change is promoted; staging is planned and not built. | engineer | unbuilt |
 | [Spacelift from zero](Spacelift-From-Zero.md) | What a hosted infrastructure runner adds to plan and apply, its plan limits and a first stack run and teardown, for learners. | learner |  |
 
 ## Foundations: web hosting
@@ -142,6 +144,10 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md) | Lesson D2: what an IDS and an IPS are, where a sensor can watch and why an IPS is riskier, for learners. | learner |  |
 | [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) | Lesson D3: file integrity monitoring, baselines and what to watch, with Tripwire, AIDE, Wazuh, auditd and fail2ban, for learners. | learner |  |
 | [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md) | Lesson D4: the main limiting algorithms, what to count by and what each layer can see, for learners who run a service. | learner |  |
+| [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) | How to list every inbound port, address, account, token, dependency and person, how this project shrinks each, how to measure from outside, and what to log and alert on. | learner | draft |
+| [Attack surface map: layer by layer](Attack-Surface-Map-Layer-by-Layer.md) | The cloud account, Spacelift and CI, Doppler, Twingate, droplets, telemetry, edge and web tier: what to aim at, the control, the test, and what to log. | learner | draft |
+| [The DMZ and hardening an internet-facing host](The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet.md) | What a DMZ is, what may talk to what in this project's unbuilt edge design, how to harden a public host, and what to log and alert on. | learner | draft |
+| [DMZ hardening checklist](DMZ-Hardening-Checklist.md) | A one-page printable checklist for hardening an internet-facing host, each line naming the repository check that covers it, plus what to log and what should alert. | learner | draft |
 
 ## Foundations: deception and honeypots
 
@@ -174,6 +180,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) | A springboard for building a small cloud security monitoring stack with a cost ceiling you set; an unverified draft for builders. | builder | draft |
 | [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) | What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied. | operator | unbuilt |
 | [Grafana dashboards](Grafana-Dashboards.md) | The three dashboards this repository ships and which question each answers; only tried with synthetic data. | operator |  |
+| [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) | What a data source is, connecting Grafana to Prometheus, SQL and OpenSearch with a read-only account, then one panel and one alert; written from reading, not run. | builder | est. steps |
 | [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) | A hands-on synthetic multi-site monitoring stack where you predict what a silent site does, for builders. | builder |  |
 
 ## Foundations: enterprise practice

@@ -156,7 +156,7 @@ The documentation names three parts: scanner applications that run **vulnerabili
 
 ## Attack surface, in one table
 
-The earlier lessons can be read as a list of ways to make this table smaller. (A fuller attack-surface table is planned for another lesson; I did not find one in the wiki on 2026-10-22, so this is a small one of my own.)
+The earlier lessons can be read as a list of ways to make this table smaller. (A fuller attack-surface lesson, with an inventory of this project, is [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md); this is the small table that came first.)
 
 | What an outsider can reach | Tool that finds it | The build choice that shrinks it |
 |---|---|---|
