@@ -1,0 +1,14 @@
+{
+  "module": "spaces-bucket",
+  "approved": false,
+  "active": false,
+  "note": "Planned, not approved. Nothing in this module is applied while enabled is false. The gate does not yet read this file or price a spaces entry; approving it means the steps in README.md.",
+  "resources": [
+    {
+      "name": "state-bucket",
+      "kind": "spaces",
+      "monthly": 5.0,
+      "basis": "docs/cost.md stage 3 estimate: $5 flat per account for 250 GiB stored and 1 TiB outbound transfer, read 2026-10-11"
+    }
+  ]
+}
