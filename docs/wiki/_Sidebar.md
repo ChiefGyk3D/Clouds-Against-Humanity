@@ -32,7 +32,7 @@ file does not match the manifest. -->
 </details>
 
 <details>
-<summary><b>Foundations: OS and Linux</b> (8)</summary>
+<summary><b>Foundations: OS and Linux</b> (9)</summary>
 
 - [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
 - [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md)
@@ -40,6 +40,7 @@ file does not match the manifest. -->
 - [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md)
 - [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md)
 - [The terminal and your first script](Terminal-and-Your-First-Script.md)
+- [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) (draft)
 - [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md)
 - [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md)
 

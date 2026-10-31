@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (129 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (130 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -20,7 +20,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 
 - [Start here](#start-here) (5)
 - [Core path: read in this order](#core-path-read-in-this-order) (21)
-- [Foundations: OS and Linux](#foundations-os-and-linux) (8)
+- [Foundations: OS and Linux](#foundations-os-and-linux) (9)
 - [Foundations: networking](#foundations-networking) (5)
 - [Foundations: identity and secrets](#foundations-identity-and-secrets) (5)
 - [Foundations: infrastructure as code](#foundations-infrastructure-as-code) (7)
@@ -82,6 +82,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md) | What unattended-upgrades does, how to configure it, where updates are logged, which four events deserve an alert, reboots, testing and rollback, for anyone running a Debian or Ubuntu host. | learner |  |
 | [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md) | Red, blue and purple teams, the written permission you need before any test, and setting up a lab computer you can safely break. | learner |  |
 | [The terminal and your first script](Terminal-and-Your-First-Script.md) | What a terminal, shell and command are, moving around files safely and chaining commands into a first script, for beginners on any operating system. | learner |  |
+| [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) | What a virtual machine is, type 1 and type 2 hypervisors, the desktop and server options, a dated account of the VMware licensing changes, and a first VM with QEMU, for learners who need a lab. | learner | draft |
 | [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md) | What a virtual machine and a container each isolate, and who patches what under IaaS, PaaS and SaaS, for readers whose terms blur. | learner |  |
 | [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md) | Domains, Active Directory, Group Policy, Kerberos and managed Macs, for readers heading to help desk or systems administration. | learner |  |
 

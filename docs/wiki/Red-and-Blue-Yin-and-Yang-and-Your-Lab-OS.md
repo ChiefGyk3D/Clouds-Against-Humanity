@@ -205,7 +205,7 @@ The judgment, which is the author's reasoning and not either project's claim: ev
 
 ## Where to run it: five small explainers
 
-The lab OS runs in a **virtual machine** (a computer simulated by software, with its own virtual disk, memory and network card) on your real computer. A **hypervisor** is the software that makes and runs virtual machines. [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md#virtual-machines) explains both properly; this page does not repeat it. Five ways to do it, each with when to choose it. All are free for you to use for this lesson unless the explainer says otherwise.
+The lab OS runs in a **virtual machine** (a computer simulated by software, with its own virtual disk, memory and network card) on your real computer. A **hypervisor** is the software that makes and runs virtual machines. [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md#virtual-machines) explains both properly; this page does not repeat it. If you have never set one up, [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) covers the tools, the network modes and a first VM. Five ways to do it, each with when to choose it. All are free for you to use for this lesson unless the explainer says otherwise.
 
 ### VirtualBox
 
