@@ -81,10 +81,11 @@ file does not match the manifest. -->
 </details>
 
 <details>
-<summary><b>Foundations: web hosting</b> (3)</summary>
+<summary><b>Foundations: web hosting</b> (4)</summary>
 
 - [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md)
 - [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md)
+- [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) (draft)
 - [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
 
 </details>
@@ -133,11 +134,12 @@ file does not match the manifest. -->
 </details>
 
 <details>
-<summary><b>Detection and monitoring</b> (12)</summary>
+<summary><b>Detection and monitoring</b> (13)</summary>
 
 - [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md)
 - [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) (unbuilt)
 - [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md)
+- [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) (est. steps)
 - [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) (draft)
 - [Multiple sites and identity](Multiple-Sites-and-Identity.md) (draft)
 - [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) (draft)

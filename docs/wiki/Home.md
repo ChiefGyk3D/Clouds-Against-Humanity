@@ -130,6 +130,12 @@ Working ceiling: $30 per month in the current phase; every phase has its own cei
 
 These pages live in the main repository under `docs/wiki/` and are published to the GitHub wiki by the Wiki workflow (`.github/workflows/wiki.yml`, which calls git-your-ship-together's `wiki-publish.yml`) on every merge to `main`. That is deliberate: edits go through a pull request, so the same secret scanning and review that guard the code also guard the documentation. Edits made directly in the GitHub wiki editor are overwritten on the next publish, so send a pull request instead.
 
+## Why this is free and not for sale
+
+I grew up in a divorced home, and my whole career was built on second hand machines. My first brand new computer, a System76 Pangolin I still have, came roughly ten years in. If knowledge is power and getting to it costs money, then the power is only available to people who can afford it, and I refuse to be selfish and enrich myself by gatekeeping what everyone has a right to know. No bullshit, no "90K in 90 days" lies, no "you need this cert or degree." Just knowledge.
+
+You can tip or donate, but you are under no obligation. The biggest way to support this project is to share it with everyone who needs it. The full version, including what I think of college and certs, is in [Why this exists](Why-This-Exists.md#why-this-is-free-and-not-for-sale).
+
 ## Support this project
 
 If Clouds Against Humanity is useful to you, consider supporting continued development. Everything is also collected at **[support.chiefgyk3d.com](https://support.chiefgyk3d.com)**.
