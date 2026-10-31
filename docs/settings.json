@@ -2014,6 +2014,97 @@
         "set_where": "set by the calling stack (not a user setting)"
       }
     ],
+    "modules/spaces-bucket": [
+      {
+        "name": "enabled",
+        "type": "bool",
+        "description": "Master switch. False plans nothing, so merging a call changes no infrastructure; stays false until the Spaces cost is approved.",
+        "required": false,
+        "default": false,
+        "validation": "none",
+        "example": "false",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "set_where": "set by the calling stack (not a user setting)"
+      },
+      {
+        "name": "name",
+        "type": "string",
+        "description": "Bucket name, unique across Spaces in the region.",
+        "required": true,
+        "validation": "3 to 63 characters: lowercase letters, digits and hyphens, starting and ending with a letter or digit",
+        "example": "cah-state-tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "set_where": "set by the calling stack (not a user setting)"
+      },
+      {
+        "name": "region",
+        "type": "string",
+        "description": "Spaces region slug.",
+        "required": true,
+        "validation": "^[a-z]{3}[0-9]$",
+        "example": "tor1",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "set_where": "set by the calling stack (not a user setting)"
+      },
+      {
+        "name": "acl",
+        "type": "string",
+        "description": "Bucket ACL. Only private is accepted, so the bucket is never publicly listable or readable.",
+        "required": false,
+        "default": "private",
+        "validation": "must be private",
+        "example": "private",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "set_where": "set by the calling stack (not a user setting)"
+      },
+      {
+        "name": "noncurrent_version_expiration_days",
+        "type": "number",
+        "description": "Days after which a noncurrent object version expires; how long a restore from a previous version stays possible.",
+        "required": false,
+        "default": 90,
+        "validation": "a whole number from 1 to 3650",
+        "example": "90",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "set_where": "set by the calling stack (not a user setting)"
+      },
+      {
+        "name": "create_access_keys",
+        "type": "bool",
+        "description": "Create the access keys in access_key_names. Off by default because a key secret lands in OpenTofu state.",
+        "required": false,
+        "default": false,
+        "validation": "none",
+        "example": "false",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "set_where": "set by the calling stack (not a user setting)"
+      },
+      {
+        "name": "access_key_names",
+        "type": "list(string)",
+        "description": "Names of the access keys to create, one per daemon, each readwrite on this one bucket only.",
+        "required": false,
+        "default": [],
+        "validation": "unique names, 1 to 63 characters: lowercase letters, digits and hyphens",
+        "example": "[\"penguin-overlord\"]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists",
+        "set_where": "set by the calling stack (not a user setting)"
+      }
+    ],
     "modules/aws/vpc": [
       {
         "name": "layer",
