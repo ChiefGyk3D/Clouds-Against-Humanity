@@ -87,8 +87,11 @@ def test_the_bootstrap_template_is_the_only_cloud_init():
     )
     # The edge host is a different machine role (no Twingate connector, no admin
     # path), so it has its own, much smaller template and does not use the
-    # connector bootstrap. It is named here on purpose: a third copy fails.
+    # connector bootstrap. The workload host (docker-host) is a third machine
+    # role: a Docker host with no Twingate connector, key-only SSH and Portainer.
+    # Both are named here on purpose: a fourth copy fails.
     assert found == [
+        "modules/docker-host/cloud-init.yaml.tftpl",
         "modules/edge-host/cloud-init.yaml.tftpl",
         f"modules/{BOOTSTRAP}/cloud-init.yaml.tftpl",
     ], found
