@@ -1,6 +1,6 @@
 """Navigation checks for the wiki pages in docs/wiki/.
 
-A page nobody links to is a page nobody reads. These tests keep the sidebar,
+A page nobody links to is a page nobody reads. These tests keep Contents (every page),
 the Reading-Order page and the "Next:" lines honest as pages are added.
 """
 
@@ -20,10 +20,10 @@ def linked(name: str) -> list[str]:
     return PAGE_LINK.findall((WIKI / f"{name}.md").read_text())
 
 
-def test_every_page_is_in_the_sidebar_or_reading_order():
-    reachable = set(linked("_Sidebar")) | set(linked("Reading-Order"))
+def test_every_page_is_in_contents_or_reading_order():
+    reachable = set(linked("Contents")) | set(linked("Reading-Order"))
     missing = sorted(pages() - EXEMPT - reachable)
-    assert not missing, f"not in the sidebar or Reading-Order: {missing}"
+    assert not missing, f"not in Contents or Reading-Order: {missing}"
 
 
 def test_every_page_the_sidebar_links_exists():
