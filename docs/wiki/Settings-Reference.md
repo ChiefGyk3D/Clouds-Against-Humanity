@@ -242,7 +242,6 @@ Stack variables are the settings you set per site. Module variables are filled i
 
 | Setting | Type | Default | Validation | Set where | Example | Sensitivity | Status |
 |---|---|---|---|---|---|---|---|
-| `enabled`<br>Master switch. False plans nothing, so merging a call changes no infrastructure; stays false until the Spaces cost is approved. | `bool` | `false` | none | set by the calling stack (not a user setting) | `false` | public | exists |
 | `name`<br>Bucket name, unique across Spaces in the region. | `string` | required | 3 to 63 characters: lowercase letters, digits and hyphens, starting and ending with a letter or digit | set by the calling stack (not a user setting) | `cah-state-tor1` | public | exists |
 | `region`<br>Spaces region slug. | `string` | required | ^[a-z]{3}[0-9]\$ | set by the calling stack (not a user setting) | `tor1` | public | exists |
 | `acl`<br>Bucket ACL. Only private is accepted, so the bucket is never publicly listable or readable. | `string` | `"private"` | must be private | set by the calling stack (not a user setting) | `private` | public | exists |

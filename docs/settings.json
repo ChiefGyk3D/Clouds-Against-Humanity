@@ -2016,19 +2016,6 @@
     ],
     "modules/spaces-bucket": [
       {
-        "name": "enabled",
-        "type": "bool",
-        "description": "Master switch. False plans nothing, so merging a call changes no infrastructure; stays false until the Spaces cost is approved.",
-        "required": false,
-        "default": false,
-        "validation": "none",
-        "example": "false",
-        "sensitivity": "public",
-        "sensitive_in_code": false,
-        "status": "exists",
-        "set_where": "set by the calling stack (not a user setting)"
-      },
-      {
         "name": "name",
         "type": "string",
         "description": "Bucket name, unique across Spaces in the region.",

@@ -5,6 +5,11 @@
   "backups_fraction_verified": true,
   "backups_source": "https://docs.digitalocean.com/products/backups/details/pricing/ (basic plans: weekly 20.0 percent, daily 30.0 percent of the Droplet cost per month)",
   "backups_retrieved": "2026-10-19",
+  "spaces": {
+    "monthly": 5.0,
+    "source": "https://docs.digitalocean.com/products/spaces/details/pricing/ (Spaces Standard Storage subscription: $5.00 per month, includes 250 GiB of storage across all buckets; usage above the included amounts is billed and is not priced here)",
+    "retrieved": "2026-10-31"
+  },
   "droplets": {
     "s-1vcpu-512mb-10gb": 4,
     "s-1vcpu-1gb": 6,

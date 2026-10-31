@@ -6,57 +6,26 @@ variables {
   region = "tor1"
 }
 
-run "flag_off_plans_nothing" {
+run "plans_a_private_versioned_bucket" {
   command = plan
   assert {
-    condition     = length(digitalocean_spaces_bucket.this) == 0
-    error_message = "With enabled left at its default (false) no bucket may be planned."
+    condition     = output.bucket_name == "cah-state-tor1" && output.region == "tor1"
+    error_message = "A call to the module plans exactly one bucket (the switch is the caller's count)."
   }
   assert {
-    condition     = length(digitalocean_spaces_key.this) == 0
-    error_message = "With enabled left at its default (false) no access key may be planned."
-  }
-  assert {
-    condition     = output.bucket_name == null && output.endpoint == null
-    error_message = "Outputs must be null while the module is off."
-  }
-}
-
-run "flag_off_ignores_key_request" {
-  command = plan
-  variables {
-    create_access_keys = true
-    access_key_names   = ["penguin-overlord"]
-  }
-  assert {
-    condition     = length(digitalocean_spaces_key.this) == 0
-    error_message = "Keys must not be planned while enabled is false, whatever else is set."
-  }
-}
-
-run "flag_on_plans_a_private_versioned_bucket" {
-  command = plan
-  variables {
-    enabled = true
-  }
-  assert {
-    condition     = length(digitalocean_spaces_bucket.this) == 1
-    error_message = "enabled = true must plan exactly one bucket."
-  }
-  assert {
-    condition     = digitalocean_spaces_bucket.this[0].versioning[0].enabled == true
+    condition     = digitalocean_spaces_bucket.this.versioning[0].enabled == true
     error_message = "Versioning must be on."
   }
   assert {
-    condition     = digitalocean_spaces_bucket.this[0].acl == "private"
+    condition     = digitalocean_spaces_bucket.this.acl == "private"
     error_message = "The bucket ACL must be private."
   }
   assert {
-    condition     = digitalocean_spaces_bucket.this[0].name == "cah-state-tor1" && digitalocean_spaces_bucket.this[0].region == "tor1"
+    condition     = digitalocean_spaces_bucket.this.name == "cah-state-tor1" && digitalocean_spaces_bucket.this.region == "tor1"
     error_message = "Name and region must come from the variables."
   }
   assert {
-    condition     = digitalocean_spaces_bucket.this[0].force_destroy == false
+    condition     = digitalocean_spaces_bucket.this.force_destroy == false
     error_message = "The bucket must not be force-destroyable."
   }
   assert {
@@ -67,23 +36,20 @@ run "flag_on_plans_a_private_versioned_bucket" {
 
 run "lifecycle_expires_old_versions_after_90_days_by_default" {
   command = plan
-  variables {
-    enabled = true
-  }
   assert {
-    condition     = length(digitalocean_spaces_bucket.this[0].lifecycle_rule) == 1
+    condition     = length(digitalocean_spaces_bucket.this.lifecycle_rule) == 1
     error_message = "Exactly one lifecycle rule is expected."
   }
   assert {
-    condition     = digitalocean_spaces_bucket.this[0].lifecycle_rule[0].enabled == true
+    condition     = digitalocean_spaces_bucket.this.lifecycle_rule[0].enabled == true
     error_message = "The lifecycle rule must be enabled."
   }
   assert {
-    condition     = one([for n in digitalocean_spaces_bucket.this[0].lifecycle_rule[0].noncurrent_version_expiration : n.days]) == 90
+    condition     = one([for n in digitalocean_spaces_bucket.this.lifecycle_rule[0].noncurrent_version_expiration : n.days]) == 90
     error_message = "Noncurrent versions must expire after 90 days by default."
   }
   assert {
-    condition     = digitalocean_spaces_bucket.this[0].lifecycle_rule[0].prefix == ""
+    condition     = digitalocean_spaces_bucket.this.lifecycle_rule[0].prefix == ""
     error_message = "The rule must cover the whole bucket."
   }
 }
@@ -91,11 +57,10 @@ run "lifecycle_expires_old_versions_after_90_days_by_default" {
 run "lifecycle_days_are_configurable" {
   command = plan
   variables {
-    enabled                            = true
     noncurrent_version_expiration_days = 30
   }
   assert {
-    condition     = one([for n in digitalocean_spaces_bucket.this[0].lifecycle_rule[0].noncurrent_version_expiration : n.days]) == 30
+    condition     = one([for n in digitalocean_spaces_bucket.this.lifecycle_rule[0].noncurrent_version_expiration : n.days]) == 30
     error_message = "noncurrent_version_expiration_days must reach the rule."
   }
 }
@@ -111,7 +76,6 @@ run "rejects_zero_lifecycle_days" {
 run "rejects_public_read_acl" {
   command = plan
   variables {
-    enabled = true
     acl     = "public-read"
   }
   expect_failures = [var.acl]
@@ -184,7 +148,6 @@ run "rejects_a_bad_region" {
 run "keys_are_scoped_to_the_one_bucket" {
   command = plan
   variables {
-    enabled            = true
     create_access_keys = true
     access_key_names   = ["penguin-overlord", "star-daemon"]
   }
@@ -204,7 +167,6 @@ run "keys_are_scoped_to_the_one_bucket" {
 run "keys_cannot_be_fullaccess_or_empty_grant" {
   command = plan
   variables {
-    enabled            = true
     create_access_keys = true
     access_key_names   = ["penguin-overlord"]
   }
@@ -217,7 +179,6 @@ run "keys_cannot_be_fullaccess_or_empty_grant" {
 run "secret_outputs_are_sensitive" {
   command = plan
   variables {
-    enabled            = true
     create_access_keys = true
     access_key_names   = ["penguin-overlord"]
   }

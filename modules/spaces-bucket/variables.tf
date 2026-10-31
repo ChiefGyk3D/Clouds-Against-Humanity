@@ -1,9 +1,3 @@
-variable "enabled" {
-  type        = bool
-  default     = false
-  description = "Master switch. False (the default) plans nothing at all, so merging a call to this module changes no infrastructure. It must stay false until the maintainer approves the Spaces cost (see cost.json in this directory)."
-}
-
 variable "name" {
   type        = string
   description = "Bucket name. Unique across all of Spaces in the region. 3 to 63 characters: lowercase letters, digits and hyphens, starting and ending with a letter or digit."
@@ -49,13 +43,13 @@ variable "noncurrent_version_expiration_days" {
 variable "create_access_keys" {
   type        = bool
   default     = false
-  description = "Create the Spaces access keys named in access_key_names. Off by default: a key's secret lands in OpenTofu state, which the stage 3 design accepts only once state access is restricted; until then create keys by hand and keep them in Doppler. Needs enabled = true as well."
+  description = "Create the Spaces access keys named in access_key_names. Off by default: a key's secret lands in OpenTofu state, which the stage 3 design accepts only once state access is restricted; until then create keys by hand and keep them in Doppler."
 }
 
 variable "access_key_names" {
   type        = list(string)
   default     = []
-  description = "Names of the access keys to create, one per daemon. Each key gets readwrite on this one bucket and nothing else. Only used when create_access_keys and enabled are both true."
+  description = "Names of the access keys to create, one per daemon. Each key gets readwrite on this one bucket and nothing else. Only used when create_access_keys is true."
 
   validation {
     condition     = alltrue([for n in var.access_key_names : can(regex("^[a-z0-9][a-z0-9-]{0,62}$", n))])

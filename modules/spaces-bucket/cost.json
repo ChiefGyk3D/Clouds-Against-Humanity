@@ -1,8 +1,8 @@
 {
   "module": "spaces-bucket",
-  "approved": false,
+  "approved": true,
   "active": false,
-  "note": "Planned, not approved. Nothing in this module is applied while enabled is false. The gate does not yet read this file or price a spaces entry; approving it means the steps in README.md.",
+  "note": "Approved by the maintainer on 2026-10-31 as part of the full stage 3 scope, but not built and not priced anywhere yet. The gate reads only stacks/**/cost.json: a stack that calls this module with count = local.on adds a spaces entry (priced at the flat amount in docs/cost-prices.json) to its own cost.json in the pull request that switches it on. This file is the reference copy of that entry.",
   "resources": [
     {
       "name": "state-bucket",

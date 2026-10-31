@@ -80,6 +80,8 @@ FREE_TYPES = {
             # No charge of its own; the reserved IP it assigns is the priced
             # type, and reserved_ip_problems() pairs the two.
             "digitalocean_reserved_ip_assignment",
+            # An access key is free; the bucket it reaches is the priced type.
+            "digitalocean_spaces_key",
         }
     ),
     "aws": frozenset(
@@ -107,7 +109,16 @@ COSTED_TYPES = {
     # section 5.1), so it is allowed in the files approved.json names, each paired
     # with one assignment. The manifest has no `reserved_ip` kind yet, so a
     # stack cannot cost one: that is the cost-gate follow-up.
-    "digitalocean": frozenset({"digitalocean_droplet", "digitalocean_reserved_ip"}),
+    # A Spaces bucket is a flat monthly subscription (docs/cost-prices.json
+    # "spaces"), priced from a `spaces` manifest entry; its module is reconciled
+    # against the stack's manifest by spaces_module_problems().
+    "digitalocean": frozenset(
+        {
+            "digitalocean_droplet",
+            "digitalocean_reserved_ip",
+            "digitalocean_spaces_bucket",
+        }
+    ),
     "aws": frozenset({"aws_instance", "aws_eip", "aws_ebs_volume"}),
     "azure": frozenset(),
     "gcp": frozenset(),
@@ -137,6 +148,7 @@ RESOURCE_KEY_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 STACK_NAME_RE = re.compile(r"^[0-9]+-[A-Za-z0-9][A-Za-z0-9_-]*$")
 CONNECTOR_SOURCE_SUFFIX = "twingate-connector"
 EDGE_SOURCE_SUFFIX = "edge-host"
+SPACES_SOURCE_SUFFIX = "spaces-bucket"
 # The only count an edge-host module call may carry: the stack's own switch.
 EDGE_COUNT_RE = re.compile(r"local\.on")
 RESERVED_IP = "digitalocean_reserved_ip"
@@ -303,6 +315,20 @@ def droplet_cost(res, prices):
     return cost
 
 
+def spaces_cost(res, prices):
+    """A Spaces subscription is a flat monthly price read only from the price
+    table: an entry in a manifest cannot state its own amount."""
+    entry = prices.get("spaces")
+    if not isinstance(entry, dict) or "monthly" not in entry:
+        raise ValueError(
+            f"no price for spaces ({res.get('name')}); docs/cost-prices.json needs a "
+            '"spaces" entry with a "monthly" amount'
+        )
+    if type(entry["monthly"]) is bool:
+        raise ValueError("price of spaces: a boolean is not a number")
+    return num(entry["monthly"], "price of spaces")
+
+
 def aws_instance_cost(itype, root_gb, public_ip, prices, name="instance"):
     table = prices["instances"]
     if itype not in table:
@@ -322,6 +348,8 @@ def resource_cost(res, prices, provider="digitalocean"):
     kind = res.get("kind")
     if provider == "digitalocean" and kind == "droplet":
         return droplet_cost(res, prices)
+    if provider == "digitalocean" and kind == "spaces":
+        return spaces_cost(res, prices)
     if provider == "aws":
         if kind == "instance":
             if "root_gb" not in res or "public_ip" not in res:
@@ -1248,6 +1276,50 @@ def edge_module_problems(root):
     return problems, calls
 
 
+def spaces_module_problems(root):
+    """Hold modules/spaces-bucket to the edge host's off-switch rule.
+
+    The bucket resource may not use count (it is a costed type), so a stack
+    switches the whole module with `count = local.on`, the same plain switch the
+    edge host uses. Per stack: no for_each; count only as `local.on`; and the
+    manifest's `spaces` entries number the module calls, or 0 (switched off,
+    priced nothing) only when every call is `count = local.on` and the stack
+    defines that switch and ties it to the manifest."""
+    problems, calls, switched = [], {}, {}
+    manifests = dict(stack_manifests(root))
+    for rel, block in file_blocks(root):
+        if block.kind != "module" or block.problem:
+            continue
+        source, problem = module_source_problem(root, rel, block)
+        if problem or not source.rstrip("/").endswith(SPACES_SOURCE_SUFFIX):
+            continue
+        name, stack = block.labels[0], str(Path(rel).parent.as_posix())
+        calls[stack] = calls.get(stack, 0) + 1
+        attrs = block.attrs()
+        counts = [v.strip() for k, v in attrs if k == "count"]
+        switched[stack] = switched.get(stack, True) and len(counts) == 1 and bool(
+            EDGE_COUNT_RE.fullmatch(counts[0])
+        )
+        for key, value in attrs:
+            if key == "for_each" or (key == "count" and not EDGE_COUNT_RE.fullmatch(value.strip())):
+                problems.append(
+                    f"{rel}: module {name!r} (spaces-bucket) uses {key} {value.strip()!r}; the bucket is "
+                    "costed from the manifest, so only count = local.on (the stack's switch) is accepted"
+                )
+    for stack in sorted(calls):
+        if stack not in manifests:
+            continue
+        have = sum(1 for r in load_json(manifests[stack])["resources"] if r.get("kind") == "spaces")
+        off_ok = switched[stack] and edge_switch_verified(root, stack)
+        if have != calls[stack] and not (have == 0 and off_ok):
+            problems.append(
+                f"{stack}: {have} spaces manifest entr(ies) but {calls[stack]} spaces-bucket module call(s); "
+                "they must match (0 is accepted only when every call is count = local.on and the "
+                "stack defines that switch and ties it to the manifest)"
+            )
+    return problems
+
+
 def reserved_ip_problems(root):
     """Each reserved IP is assigned exactly once, in the file that declares it.
 
@@ -1436,6 +1508,7 @@ def structure_problems(root):
     problems += mod_problems
     edge_problems, edge_calls = edge_module_problems(root)
     problems += edge_problems
+    problems += spaces_module_problems(root)
     for stack in sorted(set(connectors) | set(bases)):
         machines = 0
         if stack in bases:

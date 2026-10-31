@@ -1,26 +1,26 @@
 output "bucket_name" {
-  value       = one(digitalocean_spaces_bucket.this[*].name)
-  description = "The bucket name, or null while the module is off."
+  value       = digitalocean_spaces_bucket.this.name
+  description = "The bucket name."
 }
 
 output "region" {
-  value       = one(digitalocean_spaces_bucket.this[*].region)
-  description = "The bucket region, or null while the module is off."
+  value       = digitalocean_spaces_bucket.this.region
+  description = "The bucket region."
 }
 
 output "endpoint" {
-  value       = one(digitalocean_spaces_bucket.this[*].endpoint)
-  description = "The S3-compatible endpoint, or null while the module is off."
+  value       = digitalocean_spaces_bucket.this.endpoint
+  description = "The S3-compatible endpoint."
 }
 
 output "bucket_domain_name" {
-  value       = one(digitalocean_spaces_bucket.this[*].bucket_domain_name)
-  description = "The bucket's domain name, or null while the module is off."
+  value       = digitalocean_spaces_bucket.this.bucket_domain_name
+  description = "The bucket's domain name."
 }
 
 output "urn" {
-  value       = one(digitalocean_spaces_bucket.this[*].urn)
-  description = "The bucket's URN, or null while the module is off."
+  value       = digitalocean_spaces_bucket.this.urn
+  description = "The bucket's URN."
 }
 
 output "access_keys" {

@@ -1,18 +1,17 @@
 # SPDX-License-Identifier: Apache-2.0
 # A private, versioned DigitalOcean Spaces bucket for the daemons' state
-# (issue #113, stage 3 design section 3b). Unapplied and off: every resource is
-# count 0 unless enabled is true, and the Spaces cost is not approved.
+# (issue #113, stage 3 design section 3b). Unapplied and off. The off switch is
+# the caller's: a stack calls this module with `count = local.on`, the same plain
+# switch modules/edge-host uses, because the cost gate refuses count on the
+# bucket resource itself (a costed type) and prices the bucket from the stack's
+# cost.json instead. Called with count 0, nothing here is planned at all.
 
 locals {
-  on = var.enabled ? 1 : 0
-
-  # Keys are a second opt-in on top of the master switch.
-  key_names = var.enabled && var.create_access_keys ? toset(var.access_key_names) : toset([])
+  # Keys are a second opt-in on top of the module call itself.
+  key_names = var.create_access_keys ? toset(var.access_key_names) : toset([])
 }
 
 resource "digitalocean_spaces_bucket" "this" {
-  count = local.on
-
   name   = var.name
   region = var.region
 
@@ -47,7 +46,7 @@ resource "digitalocean_spaces_key" "this" {
   name = each.key
 
   grant {
-    bucket     = digitalocean_spaces_bucket.this[0].name
+    bucket     = digitalocean_spaces_bucket.this.name
     permission = "readwrite"
   }
 }

@@ -5,10 +5,13 @@ A private, versioned DigitalOcean Spaces bucket for the daemons' state
 sections 3b and 7, issue #113). Moving state off the host makes the droplet
 disposable; versioning makes the bucket the first backup.
 
-**Off by default.** `enabled = false` plans no resource at all, so merging a
-call to this module changes nothing. The $5 a month Spaces cost is not approved.
+**Off by default.** A stack switches the whole module with `count = local.on`
+(the edge host's pattern); with the count at 0 nothing is planned, so merging a
+call changes nothing. The module has no switch of its own, because the cost gate
+refuses `count` on the bucket resource. The $5 a month Spaces cost is approved
+in the full stage 3 scope (2026-10-31) but nothing is built.
 
-## What it makes (when `enabled = true`)
+## What it makes (when called)
 
 | Resource | Setting |
 |---|---|
@@ -29,7 +32,6 @@ bucket. The prefix per daemon is a convention, not a boundary.
 
 | Name | Default | Meaning |
 |---|---|---|
-| `enabled` | `false` | Master switch |
 | `name` | required | Bucket name, 3 to 63 characters, lowercase letters, digits, hyphens |
 | `region` | required | Spaces region slug, such as `tor1` |
 | `acl` | `"private"` | Only `private` is accepted |
@@ -39,8 +41,8 @@ bucket. The prefix per daemon is a convention, not a boundary.
 
 ## Outputs
 
-`bucket_name`, `region`, `endpoint`, `bucket_domain_name` and `urn` are null
-while the module is off. `access_keys` and `secret_keys` are maps by key name
+`bucket_name`, `region`, `endpoint`, `bucket_domain_name` and `urn` are plain
+strings (the module has no off state: switch it with `count` on the call). `access_keys` and `secret_keys` are maps by key name
 and are marked sensitive. Do not print them; put them in Doppler.
 
 ## Restore
@@ -55,15 +57,16 @@ Spaces implements; they have not been run against a live bucket yet.
 
 ## Cost and approval
 
-`cost.json` here records the planned $5 flat price and is marked not approved
-and inactive. The cost gate today reads `stacks/**/cost.json` and has no price
-model for `digitalocean_spaces_bucket`, so a stack cannot call this module until
-the maintainer approves the stage and the gate learns a `spaces` entry. That
-needs, on purpose and in one reviewed change: a `digitalocean_spaces_bucket`
-(and `digitalocean_spaces_key`) price model in `scripts/cost_check.py`, this
-module's `main.tf` in `allowed_sources` of `docs/stages/approved.json`, the
-DigitalOcean `approved_monthly_total` raised, and a `spaces` entry in
-`docs/cost-prices.json`.
+The maintainer approved the full stage 3 scope on 2026-10-31. The cost gate
+prices a `{"kind": "spaces"}` entry in a stack's `cost.json` at the flat amount
+in `docs/cost-prices.json` ($5.00 a month, source page and date in that entry),
+allows `digitalocean_spaces_bucket` only in this module's `main.tf`, and treats
+`digitalocean_spaces_key` as free. A stack that calls this module must use
+`count = local.on`, define `on = var.<flag> ? 1 : 0`, and refuse the flag with an
+output precondition unless its `cost.json` prices the bucket (see `docs/cost.md`).
+Switching it on means adding the `spaces` entry to that `cost.json` and raising
+the DigitalOcean `approved_monthly_total` to cover it, in the same reviewed
+change. `cost.json` here is the reference copy of the entry.
 
 ## Provider extensions
 
