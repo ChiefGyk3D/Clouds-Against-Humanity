@@ -43,6 +43,8 @@ The allowlist applies to every stack the policy is attached to, so keep it as sh
 
 ## 2. What survives a destroy
 
+These are also the pieces a recovery plan has to cover separately; [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md#a-worked-plan-for-this-project) puts them in a recovery order.
+
 Some things were never in the stacks, or are kept on purpose. Destroying everything will not remove them, and some are the reason a "clean" account is not empty.
 
 | Left behind | Why | Costs money? | What to do |

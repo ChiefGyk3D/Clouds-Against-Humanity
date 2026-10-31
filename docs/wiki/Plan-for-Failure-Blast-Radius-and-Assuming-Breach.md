@@ -60,7 +60,7 @@ Four jobs, in the order you would do them to a single system:
 | **Prevent** | Can I stop the attack from working at all? | Patches, closed ports, strong login, least privilege. The most valuable job and the one that never reaches 100%. |
 | **Contain** | If it works, how far does it get? | Separate accounts, separate machines, narrow credentials, narrow network paths. This is blast radius work. |
 | **Detect** | How soon do I know? | Logs, alerts, file integrity checks, decoys. |
-| **Recover** | How do I get back to a known good state? | Rebuild from code, restore from a backup you have tested, rotate what leaked. |
+| **Recover** | How do I get back to a known good state? | Rebuild from code, restore from a backup you have tested, rotate what leaked. The plan, roles and rehearsal for that are in [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md). |
 
 The jobs are not alternatives. Prevention is first because it is cheapest per attack stopped. The other three exist because prevention fails sometimes, and a system with only the first has no plan for that day.
 
