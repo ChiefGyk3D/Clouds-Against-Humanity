@@ -45,8 +45,8 @@ The result you want: you can destroy staging in full, at any hour, and productio
 Promotion means moving the same change from a safer place to a more important one, with a check at each step. In this repository the path is:
 
 1. **Local.** You change code on a branch, run the tests on your computer (see [Tests: mocked providers and real applies](#tests-mocked-providers-and-real-applies)).
-2. **Pull request.** Opening one runs the checks in GitHub Actions. The single required check is `CI green`, and `main` requires a pull request ([Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md#branch-protection-and-one-writer)). The push policy makes Spacelift ignore the pull request: no proposed run, so no pull request code runs in Spacelift next to the Doppler context (`docs/spacelift-secrets.md`, section 9).
-3. **Merge to `main`.** If the merge changes a stack's project root, `modules/`, `scripts/spacelift/` or `.spacelift/`, the push policy starts a **tracked run** on that stack. A merge that changes only docs starts nothing (section 9).
+2. **Pull request.** Opening one runs the checks in GitHub Actions. The single required check is `CI green`, and `main` requires a pull request ([Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md#branch-protection-and-one-writer)). The push policy is written to make Spacelift ignore the pull request, but it is inert on the free plan (corrected 2026-10-31). A pull request that changes a stack's files gets a proposed run with no secrets, which fails and shows a red `spacelift/cah-<stack>` check: known noise, not required (`docs/spacelift-secrets.md`, section 9).
+3. **Merge to `main`.** If the merge changes a stack's project root, `modules/`, `scripts/spacelift/` or `.spacelift/`, Spacelift starts a **tracked run** on that stack (its default behavior; the push policy would say the same but is inert on the free plan). A merge that changes only docs starts nothing (section 9).
 4. **Plan, then a human.** The run plans and stops. The plan policy `cah-plan` can deny it before anyone confirms (`docs/spacelift-secrets.md`, section 9a). Autodeploy is off, so a human reads the plan and presses Confirm ([Spacelift](Spacelift.md#why-autodeploy-is-off)).
 5. **Apply.** The apply phase reloads the secrets, because it can start in a fresh container (`docs/spacelift-secrets.md`, section 3).
 
@@ -62,7 +62,7 @@ The reason is the secrets. A tracked run loads secrets from Doppler, and this re
 
 - The Doppler hook fetches secrets only for a tracked or destroy run **on `main`**. It checks the branch: any other branch gets "is not main; skipping" (`scripts/spacelift/doppler-env.sh`, around line 126).
 - `main` is branch-protected: a pull request and `CI green` are required (`docs/spacelift-secrets.md`, section 8).
-- The push policy starts a tracked run only on the stack's tracked branch, and ignores every other branch, every tag and every pull request (`.spacelift/policies/push.rego`; `docs/spacelift-secrets.md`, section 9, issue #306).
+- The push policy is written to start a tracked run only on the stack's tracked branch, and to ignore every other branch, every tag and every pull request (`.spacelift/policies/push.rego`; `docs/spacelift-secrets.md`, section 9, issue #306). It is inert on the free plan, so today Spacelift's default applies: a tracked run for a push to `main`, and a proposed run (no secrets, fails) for a pull request that changes a stack.
 
 Now suppose a `staging` branch existed, tracked by a staging stack. A push to it would start a run that reads code from that branch and, if the hook allowed it, loads staging's secrets. Anyone who could push to the branch could change the hook script or `.spacelift/config.yml` and read the token (this is the trust-boundary point in `docs/spacelift-secrets.md`, section 8). So the branch would need everything `main` has: the same protection, the same required `CI green` check, and no direct pushes. And `dev` would need it too if it also ran tracked. That is three protected branches to keep honest, and a `dev` to `staging` to `main` merge flow that adds ceremony and a merge conflict risk without adding a reader. For a one-maintainer project, issue #310 sets `main` plus short-lived feature branches. The `dev`, `staging`, `main` flow is described there as "only for the lesson".
 
@@ -145,7 +145,7 @@ Three design points hold regardless of what is built:
 | Local tests with mocked providers | Built | `stacks/*/tests/`, [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) |
 | Production stacks 00 and 10 | Built; stage 1 connectors redeployed 2026-10-11 | `docs/spacelift-secrets.md` (section 4a), [Roadmap](Roadmap.md) |
 | Stack 20 (telemetry) | Written, locked, not applied | `docs/spacelift-secrets.md` (section 6) |
-| Push policy and plan policy | Built and live | `docs/spacelift-secrets.md` (sections 9 and 9a) |
+| Push policy and plan policy | Plan policy built and live; push policy written and attached but inert on the free plan (corrected 2026-10-31) | `docs/spacelift-secrets.md` (sections 9 and 9a) |
 | Cost gate with a ceiling per phase | Built | `docs/cost.md` |
 | Staging stack | **Planned, not built** | Issue #310 |
 | $20 staging ceiling in `approved.json` and `cost.json` | **Planned, not written** | Issue #310; `docs/wiki/Roadmap.md` |
@@ -196,7 +196,7 @@ All entries are repository files read on **2026-10-30**. No vendor page was read
 | Phases, ceilings, `hard_max` $60, `current_phase` `stage-3` at $30, the cost gate's rules, the `nyc3` region `422` | `docs/stages/approved.json`; `docs/cost.md` | Read; `scripts/cost_check.py` run on 2026-10-30 |
 | One Doppler config `prd`, one context `cah-doppler`, hook rules, the token reads the whole config, per-cloud contexts convention (proposed, not set up), two tokens on one stack warning, what the secret-separation test does not prove | `docs/spacelift-secrets.md` sections 1 to 4, 8, 8a; `.spacelift/config.yml` | Read |
 | The hook fetches only on a tracked or destroy run on `main` | `scripts/spacelift/doppler-env.sh` lines 24 and 117 to 127 | Read |
-| Push policy: a tracked run only for a push to the stack's tracked branch that changes the stack; nothing for pull requests, tags, other branches or forks | `.spacelift/policies/push.rego`; `docs/spacelift-secrets.md` section 9 | Read |
+| Push policy (written to start a tracked run only for a push to the stack's tracked branch that changes the stack, and nothing for pull requests, tags, other branches or forks; inert on the free plan, so it does not hold today) | `.spacelift/policies/push.rego`; `docs/spacelift-secrets.md` section 9 | Read; Spacelift's API on 2026-10-31 showed no evaluations |
 | Plan policy `cah-plan`, autodeploy guard, destroy guard | `docs/spacelift-secrets.md` section 9a; [Spacelift](Spacelift.md) | Read |
 | `main` requires a pull request and `CI green` | [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) (Branch protection) | Read |
 | `ssh_key: read` scope proven by the 2026-10-11 redeploy | `docs/spacelift-secrets.md` section 4a | Read |

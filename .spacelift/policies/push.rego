@@ -7,7 +7,19 @@
 # label autoattach:cah, the same label the Doppler context uses). The tests
 # next to it run in CI on every pull request.
 #
-# What it decides:
+# STATUS (2026-10-31): written and attached, but INERT on this account's free
+# plan. Spacelift never evaluates a push policy here (zero evaluation records,
+# no captured push inputs, no policy receipt on a pull request's proposed run;
+# the tier is V5_FREE). This file and its tests are correct and take effect on
+# a plan that includes push policies; nothing below is true today. What
+# happens today is Spacelift's default behavior: a push to main that changes a
+# stack's project root or globs starts a tracked run, and a pull request that
+# changes them gets a proposed run that fails for want of credentials (the
+# Doppler hook gives it none), showing a red spacelift/cah-<stack> check. That
+# check is known noise: it is not required (CI green is) and no secret is
+# fetched for it. See docs/spacelift-secrets.md, section 9.
+#
+# What it decides, once Spacelift evaluates it:
 #
 #   - A push to the stack's tracked branch that changes a file the stack's
 #     plan depends on starts a tracked run. A human still confirms the apply;

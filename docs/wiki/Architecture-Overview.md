@@ -116,7 +116,7 @@ flowchart LR
 
 </details>
 
-Full detail on [Spacelift](Spacelift.md).
+**Correction (2026-10-31): the pull request branch of the diagrams above and in the overview shows the design with a working push policy.** On this account's free plan the push policy is attached but inert, so a pull request that changes a stack's files does get a Spacelift proposed run. It gets no secrets and fails, which shows as a red `spacelift/cah-<stack>` check: known noise, not required. The pictures are not redrawn because the tool that renders them was not available for this change. Full detail on [Spacelift](Spacelift.md#push-policies-paid-plan-versus-free-plan).
 
 ### Path 2: an SSH session to a droplet
 

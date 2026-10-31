@@ -24,8 +24,8 @@ and ATLAS models.
 
 ## Trust boundaries
 
-- B1: nothing from the internet reaches a connector. B2: a pull request reaches the repository and CI only.
-- B3: the push policy never proposes a Spacelift run. B4: branch protection and CI green guard `main`.
+- B1: nothing from the internet reaches a connector. B2: a pull request reaches the repository and CI only (corrected 2026-10-31: it also gets a Spacelift proposed run when it changes a stack, because the push policy is inert on the free plan; the models below still show the intended design).
+- B3: the push policy is written to never propose a Spacelift run, but is attached and inert on the free plan (2026-10-31). B4: branch protection and CI green guard `main`.
 - B5: only a merged commit becomes a tracked run. B6: read-only Doppler token, secrets fetched by name.
 - B7: a person confirms every apply. B8: identity provider sign-in and per-resource ACL.
 - AB1 to AB5: untrusted text, agent tool permissions, prompts leave the machine, no secrets in agent context, a person reads the diff.

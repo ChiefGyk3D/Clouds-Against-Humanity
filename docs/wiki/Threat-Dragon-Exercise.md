@@ -123,7 +123,7 @@ For each of these three flows, write down which STRIDE letters you expect and *w
 
 **Flow 3: "PR push event" (the commit ref; the policy decides) from the repository to the Spacelift proposed run.**
 
-*Reference answer.* Elevation of privilege (T3). A pull request gains the standing of a run next to the secrets if the push policy is missing. High, Open, because the policy is not read from the repository and nothing here shows it is attached. Without the policy, a same-repository pull request still gets a proposed run, and a fork's pull request starts nothing unless a policy defines `allow_fork`.
+*Reference answer.* Elevation of privilege (T3). A pull request gains the standing of a run next to the secrets if the push policy is missing. High, Open, because the policy is not read from the repository, and on this project's free plan it is attached but never evaluated (2026-10-31). Without an evaluated policy, a same-repository pull request still gets a proposed run, and a fork's pull request starts nothing unless a policy defines `allow_fork`.
 
 **Score yourself.**
 

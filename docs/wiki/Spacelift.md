@@ -10,6 +10,8 @@ Spacelift is where `tofu plan` and `tofu apply` actually run. It holds the state
 
 ## The run lifecycle
 
+> **The diagram shows the design with a working push policy, which this account does not have.** The push policy is written and attached but inert on the free plan (see [Push policies: paid plan versus free plan](#push-policies-paid-plan-versus-free-plan)). Today a pull request that changes a stack's files does get a proposed run, which fails for want of credentials and shows a red check. The picture is not redrawn because the pictures are rendered by a tool that was not available when this was corrected.
+
 ![Diagram, The run lifecycle: Pull request opened; Push policy: no Spacelift run for a pull request; and more in the source below](images/spacelift-diagram-1.png)
 
 <details>
@@ -89,12 +91,14 @@ This repository is public. A Spacelift proposed run (the plan for a pull request
 
 So the Doppler hook refuses to fetch anything unless the run is a **tracked or destroy run on `main`**. The cost: a pull request plan cannot talk to DigitalOcean and fails at the provider. That is covered by `tofu test` with mocked providers in CI, and the real plan is read on `main` before anyone confirms it.
 
-### Why a pull request gets no Spacelift run at all
+### Why a pull request should get no Spacelift run at all (and does, today)
 
-A proposed run that can only fail is noise: it posts a red check on every pull request, and people learn to ignore red checks, which is worse than having none. It is also code from the pull request running in Spacelift with the Doppler context attached, which is the risk in the next section. So a **push policy** (`.spacelift/policies/push.rego`) decides which Git events start runs:
+A proposed run that can only fail is noise: it posts a red check on every pull request, and people learn to ignore red checks, which is worse than having none. It is also code from the pull request running in Spacelift with the Doppler context attached, which is the risk in the next section. So a **push policy** (`.spacelift/policies/push.rego`) is written to decide which Git events start runs:
 
 - a push or merge to `main` that changes the stack's own directory, `modules/`, the secrets hook or `.spacelift/` starts a tracked run;
 - everything else starts nothing: pull requests, docs-only merges, tags, other branches, forks.
+
+**That is the design, not what happens on this account.** The policy is attached to the stacks but inert on the free plan (decided 2026-10-31, from Spacelift's own API: tier `V5_FREE`, zero evaluations of the policy, no policy receipt on a pull request's proposed run). What happens instead is Spacelift's default: a merge to `main` that changes a stack's files starts a tracked run that waits for confirmation, and a pull request that changes those files gets a proposed run. The Doppler hook gives it no secrets, so it fails at the provider and the check `spacelift/cah-<stack>` is red. That red check is known noise: it is not a required check (`CI green` is), it fails for a known reason, and no secret is fetched for it. Earlier versions of this page said the policy was live and that no pull request ran in Spacelift; that was wrong, and the [correction record](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#9-the-push-policy) in the secrets runbook says how it was found.
 
 The policy is written in Rego, the language of [Open Policy Agent](https://www.openpolicyagent.org/), and has its own tests (`push_test.rego`) that CI runs on every pull request. Spacelift does not read it from the repository: it is created once in Spacelift with the file as its body, and updated by hand after a change merges.
 
@@ -102,7 +106,7 @@ The policy is written in Rego, the language of [Open Policy Agent](https://www.o
 
 This is the one place this wiki states the caveat in full; other pages link here.
 
-**Push policies are a paid Spacelift feature.** On the free plan the same effect is only half available. Spacelift's built-in behavior already ignores changes outside a stack's project root and project globs, so setting those narrowly (the stack's own directory plus `modules/**`, `scripts/spacelift/**` and `.spacelift/**`) stops docs-only pull requests and merges from starting anything. A pull request that changes a stack still gets a proposed run that fails without credentials. That is a real limit of the free plan, written down rather than hidden. The steps are in [section 9 of the secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#9-the-push-policy). [Lessons learned, "A red check from a run that could never pass"](Lessons-Learned.md#10-a-red-check-from-a-run-that-could-never-pass) is the story of the red check that prompted it.
+**Push policies need a plan that includes them, and this account's free plan does not.** The policy here is attached but never evaluated (checked through Spacelift's API on 2026-10-31). Plan policies do work on the free plan; push policies do not. The maintainer chose to accept this and document it. On the free plan the same effect is only half available. Spacelift's built-in behavior already ignores changes outside a stack's project root and project globs, so setting those narrowly (the stack's own directory plus `modules/**`, `scripts/spacelift/**` and `.spacelift/**`) stops docs-only pull requests and merges from starting anything. A pull request that changes a stack still gets a proposed run that fails without credentials. That is a real limit of the free plan, written down rather than hidden. The steps are in [section 9 of the secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#9-the-push-policy). [Lessons learned, "A red check from a run that could never pass"](Lessons-Learned.md#10-a-red-check-from-a-run-that-could-never-pass) is the story of the red check that prompted it.
 
 ### The plan policy: no open ports in a plan
 
@@ -153,7 +157,7 @@ The hook script's checks only protect against honest mistakes. The script and `.
 
 - one writer on the repository;
 - branch protection on `main` (pull request plus `CI green` required);
-- the push policy above, which never proposes a run, so no pull request's code runs next to the context (it must be attached in Spacelift to count; see the runbook);
+- the push policy above, which is written to never propose a run so that no pull request's code runs next to the context, but is inert on the free plan today, so this protects nothing yet; fork pull requests still do not run, because Spacelift runs those only when a push policy defines `allow_fork` (its default; not tested on this account);
 - the Doppler token being read-only and scoped to one config, so a leak reaches only these secrets.
 
 This is written down because "the script checks the run type" sounds like a security control and is not one on its own. See [Threat model](Threat-Model.md).

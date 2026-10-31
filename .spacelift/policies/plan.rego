@@ -80,9 +80,10 @@
 #     created with autodeploy on; it blocks the apply it would have made. The
 #     setting itself is enforced where stacks are made (issue #96).
 #
-# Plan policies run on tracked runs here, before the apply. Proposed runs do
-# not exist in this repository (see push.rego), so this is the gate on the
-# plan a human is about to confirm.
+# Plan policies run on tracked runs here, before the apply, and this is the
+# gate on the plan a human is about to confirm. Proposed runs can exist too:
+# the push policy (see push.rego) is inert on the free plan, so a pull request
+# that changes a stack gets one, which fails for want of credentials.
 
 package spacelift
 

@@ -44,7 +44,7 @@ flowchart LR
 
 </details>
 
-The "gets" lines are the names each stack **asks Doppler for**, which is least privilege for honest code, not isolation. `DOPPLER_TOKEN` itself is present in every run through the attached context, so code that someone can get into a run could read it directly and fetch every secret in the config, including the ones stack 00 never asked for. What actually keeps that code out of a run is the push policy and who can push, covered in [section 8 of the secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#8-known-limits-and-open-checks) and on the [Spacelift](Spacelift.md) page.
+The "gets" lines are the names each stack **asks Doppler for**, which is least privilege for honest code, not isolation. `DOPPLER_TOKEN` itself is present in every run through the attached context, so code that someone can get into a run could read it directly and fetch every secret in the config, including the ones stack 00 never asked for. What actually keeps that code out of a run is who can push (the push policy is meant to help, but it is inert on the free plan as of 2026-10-31), covered in [section 8 of the secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md#8-known-limits-and-open-checks) and on the [Spacelift](Spacelift.md) page.
 
 Some of these are not secrets in the "attacker can log in with it" sense (the tenant name, the user ids, the SSH key name), but they identify an account, and this repository is public. They go in Doppler too.
 

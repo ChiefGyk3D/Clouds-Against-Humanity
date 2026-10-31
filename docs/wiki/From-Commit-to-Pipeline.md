@@ -95,7 +95,7 @@ A human reads what a machine cannot judge: is this a good idea? Do the files in 
 
 ### 6. Merge
 
-The merge puts the change on `main`. A change to a stack, a module or the Spacelift setup now matters to Spacelift. A change to documentation only does not start a run. (The [push policy](Spacelift.md#push-policies-paid-plan-versus-free-plan) that narrows this exists in the repository but only takes effect once attached in Spacelift, and it needs a paid plan; on the free plan the narrow project roots do the docs-only half.)
+The merge puts the change on `main`. A change to a stack, a module or the Spacelift setup now matters to Spacelift. A change to documentation only does not start a run. (The [push policy](Spacelift.md#push-policies-paid-plan-versus-free-plan) that narrows this exists in the repository and is attached in Spacelift, but it is inert on this account's free plan, which does not evaluate push policies; the narrow project roots do the docs-only half.)
 
 ### 7. Plan in Spacelift
 
