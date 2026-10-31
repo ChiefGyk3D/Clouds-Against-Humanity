@@ -149,6 +149,7 @@ STACK_NAME_RE = re.compile(r"^[0-9]+-[A-Za-z0-9][A-Za-z0-9_-]*$")
 CONNECTOR_SOURCE_SUFFIX = "twingate-connector"
 EDGE_SOURCE_SUFFIX = "edge-host"
 SPACES_SOURCE_SUFFIX = "spaces-bucket"
+SPACES_MODULE_DIR = "modules/spaces-bucket"
 # The only count an edge-host module call may carry: the stack's own switch.
 EDGE_COUNT_RE = re.compile(r"local\.on")
 RESERVED_IP = "digitalocean_reserved_ip"
@@ -1206,9 +1207,13 @@ def module_problems(root):
 EDGE_SWITCH_DEF_RE = re.compile(r"(?m)^\s*on\s*=\s*var\.(?P<var>[A-Za-z_][A-Za-z0-9_]*)\s*\?\s*1\s*:\s*0\s*$")
 
 
-def edge_switch_verified(root, stack):
+def edge_switch_verified(root, stack, kind="edge"):
     """The stack defines `on = var.<x> ? 1 : 0` and an output precondition refuses
-    <x> being true unless the manifest (local.cost.resources) prices the edge."""
+    <x> being true unless the manifest (local.cost.resources) prices the module.
+
+    The proof is per kind: for kind "spaces" the precondition must count the
+    manifest's entries of kind "spaces", so a switch that only proves the edge
+    host's droplet and reserved IP does not stand in for the bucket."""
     texts = []
     for path in sorted(Path(root, stack).glob("*.tf")):
         try:
@@ -1220,8 +1225,11 @@ def edge_switch_verified(root, stack):
     if not match:
         return False
     var = match.group("var")
+    middle = r"[^{}]*?local\.cost\.resources"
+    if kind == "spaces":
+        middle += r"[^{}]*?\bkind\s*==\s*\"spaces\""
     return bool(
-        re.search(r"precondition\s*\{[^{}]*?!var\." + re.escape(var) + r"\s*\|\|[^{}]*?local\.cost\.resources", text, re.DOTALL)
+        re.search(r"precondition\s*\{[^{}]*?!var\." + re.escape(var) + r"\s*\|\|" + middle, text, re.DOTALL)
     )
 
 
@@ -1291,9 +1299,18 @@ def spaces_module_problems(root):
         if block.kind != "module" or block.problem:
             continue
         source, problem = module_source_problem(root, rel, block)
-        if problem or not source.rstrip("/").endswith(SPACES_SOURCE_SUFFIX):
+        # Collect loosely (any source that names a spaces-bucket directory once
+        # normalized), then assert strictly below.
+        if problem or posixpath.basename(posixpath.normpath(source)) != SPACES_SOURCE_SUFFIX:
             continue
         name, stack = block.labels[0], str(Path(rel).parent.as_posix())
+        target = posixpath.normpath(posixpath.join(posixpath.dirname(rel), source))
+        if target != SPACES_MODULE_DIR or source != posixpath.normpath(source):
+            problems.append(
+                f"{rel}:{block.line}: module {name!r} source {source!r} resolves to {target!r}; a "
+                f"spaces-bucket call must use the plain relative path to {SPACES_MODULE_DIR} "
+                "(no dotted, doubled or trailing-slash alias, no copy of the module elsewhere)"
+            )
         calls[stack] = calls.get(stack, 0) + 1
         attrs = block.attrs()
         counts = [v.strip() for k, v in attrs if k == "count"]
@@ -1308,9 +1325,13 @@ def spaces_module_problems(root):
                 )
     for stack in sorted(calls):
         if stack not in manifests:
+            problems.append(
+                f"{stack}: calls {SPACES_MODULE_DIR} but has no cost.json; the bucket is priced from a "
+                "stack's manifest, so a wrapper module or a directory without one is refused"
+            )
             continue
         have = sum(1 for r in load_json(manifests[stack])["resources"] if r.get("kind") == "spaces")
-        off_ok = switched[stack] and edge_switch_verified(root, stack)
+        off_ok = switched[stack] and edge_switch_verified(root, stack, kind="spaces")
         if have != calls[stack] and not (have == 0 and off_ok):
             problems.append(
                 f"{stack}: {have} spaces manifest entr(ies) but {calls[stack]} spaces-bucket module call(s); "

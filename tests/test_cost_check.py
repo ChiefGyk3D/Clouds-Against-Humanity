@@ -526,10 +526,13 @@ SPACES_ENTRY = {"name": "state-bucket", "kind": "spaces"}
 
 
 def spaces_repo(tmp_path, entries=(), body="  count = local.on\n", locals_=SPACES_LOCALS,
-                out=SPACES_OUT, approved_total=6.0, extra=None):
+                out=SPACES_OUT, approved_total=6.0, extra=None,
+                source="../../modules/spaces-bucket"):
     files = {
         **SPACES_MODULE_TF,
-        "stacks/10-access/spaces.tf": locals_ + (SPACES_CALL % body),
+        "stacks/10-access/spaces.tf": locals_ + (SPACES_CALL % body).replace(
+            "../../modules/spaces-bucket", source
+        ),
         "stacks/10-access/spaces_out.tf": out,
         **(extra or {}),
     }
@@ -662,6 +665,51 @@ def test_spaces_entries_must_match_the_module_calls(tmp_path, capsys):
     )
     code, err = run_main(root, capsys)
     assert code == 1 and "2 spaces manifest entr" in err
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "../../modules/./spaces-bucket",
+        "../../modules//spaces-bucket",
+        "../../modules/spaces-bucket/",
+        "../../modules/spaces-bucket/.",
+        "../../modules/x/../spaces-bucket",
+        "./../../modules/spaces-bucket",
+        "../../modules/copy/spaces-bucket",
+        "../10-access/../../modules/other/spaces-bucket",
+    ],
+)
+def test_a_bucket_module_source_must_be_the_one_canonical_path(tmp_path, capsys, source):
+    root = spaces_repo(tmp_path, source=source)
+    assert cost_check.spaces_module_problems(root), source
+    code, err = run_main(root, capsys)
+    assert code == 1 and "modules/spaces-bucket" in err
+
+
+def test_the_canonical_source_still_passes(tmp_path):
+    assert cost_check.spaces_module_problems(spaces_repo(tmp_path)) == []
+
+
+def test_a_bucket_call_in_a_wrapper_module_without_a_manifest_is_refused(tmp_path, capsys):
+    wrapper = {
+        "modules/wrapper/main.tf": (
+            'module "state" {\n  source = "../spaces-bucket"\n  count  = local.on\n}\n'
+        )
+    }
+    root = spaces_repo(tmp_path, extra=wrapper)
+    problems = cost_check.spaces_module_problems(root)
+    assert any("modules/wrapper" in p and "no cost.json" in p for p in problems), problems
+    code, err = run_main(root, capsys)
+    assert code == 1 and "modules/wrapper" in err
+
+
+def test_a_switch_proved_for_the_edge_kind_does_not_satisfy_spaces(tmp_path):
+    edge_out = SPACES_OUT.replace('r.kind == "spaces"', 'r.kind == "droplet"')
+    root = spaces_repo(tmp_path, out=edge_out)
+    assert any("0 spaces" in p for p in cost_check.spaces_module_problems(root))
+    assert cost_check.edge_switch_verified(root, "stacks/10-access")
+    assert not cost_check.edge_switch_verified(root, "stacks/10-access", kind="spaces")
 
 
 # ---- the committed files carry the Spaces price and approval (#113) ----
