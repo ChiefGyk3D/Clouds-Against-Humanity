@@ -38,6 +38,14 @@
 #
 # Pure deletes and no-ops are ignored: removing a rule never opens anything.
 #
+# The policy does not read a rule's `action`. DigitalOcean rules can allow or
+# deny, and a deny rule takes precedence over an allow rule (Configure
+# Firewall Rules page, last verified 4 Aug 2026, read 2026-10-30). This module
+# only emits allow rules, so every rule is judged as if it opens something. A
+# deny rule by address or with a world-wide destination is therefore refused
+# like an allow rule would be (it fails closed, and it is not tested); if
+# deny rules are ever used on purpose, teach the checks to read `action` first.
+#
 # The escape hatch is this file. A deliberate inbound rule is allowed only by
 # an entry in inbound_allowlist below, and a deliberate world-open outbound
 # rule only by an entry in outbound_allowlist, in a pull request that gets
