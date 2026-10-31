@@ -90,6 +90,7 @@ pages:
     - {page: Hashing-Encryption-and-Keys, title: "Hashing, encryption and keys", audience: "learner", desc: "What encoding, hashing, encryption and signing each give you and what they do not, for readers who lump them together."}
     - {page: Plan-for-Failure-Blast-Radius-and-Assuming-Breach, title: "Plan for failure: blast radius and assuming breach", audience: "learner", desc: "Blast radius, assume breach and defense in depth as one mindset question to ask of any system."}
     - {page: Secrets-From-Day-One, title: "Secrets from day one", audience: "learner", desc: "A password manager, Doppler for every asset and the .env rules, as personal habits for anyone about to start writing code."}
+    - {page: The-CIA-Triad-Confidentiality-Integrity-Availability, title: "The CIA triad", audience: "learner", status: "draft", desc: "Confidentiality, integrity and availability in plain words, how real failures map to each, and this project's controls checked against all three."}
   iac:
     - {page: Git-From-Zero, title: "Git from zero", audience: "learner", desc: "Make an account with a second factor, then clone, branch, commit, push and open your first pull request; for people who have never used git."}
     - {page: Data-Formats-JSON-YAML-HCL, title: "Data formats: JSON, YAML, HCL", audience: "learner", desc: "How to recognize, read and write JSON, YAML and HCL and spot the classic mistakes, for readers before the code starts to look like noise."}

@@ -58,13 +58,14 @@ file does not match the manifest. -->
 </details>
 
 <details>
-<summary><b>Foundations: identity and secrets</b> (5)</summary>
+<summary><b>Foundations: identity and secrets</b> (6)</summary>
 
 - [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md)
 - [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md)
 - [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md)
 - [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md)
 - [Secrets from day one](Secrets-From-Day-One.md)
+- [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) (draft)
 
 </details>
 
