@@ -243,15 +243,6 @@ PiNodeXMR is an open-source suite that sets up a Monero node on a small computer
 
 What the project's documents do **not** say: they do not claim PiNodeXMR makes you anonymous, and nothing I read describes testing that the Tor or I2P modes hide a broadcast from a real adversary. I did not evaluate PiNodeXMR's own security and do not claim anything about it.
 
-### The maintainer's contributions, from public history only
-
-I looked at the public history of the upstream repository on 2026-10-31, using read-only GitHub queries for the handle `ChiefGyk3D`:
-
-- The commit list of the upstream repository's default branch, which has about 958 commits, shows **no commits attributed to that handle**. (GitHub attributes a commit to a handle by the author's email address, so this tells you about attribution, not about whether the work exists.)
-- The repository's public pull request list shows **pull requests opened under that handle from a fork**, going back to 2020 and including recent ones in 2026. One body of recent work is a security review. This page says nothing further about it.
-
-I describe contributions this way, in general terms and without names or titles, at the maintainer's request.
-
 ### Where privacy and security overlap and differ
 
 | Question | Privacy | Security |
