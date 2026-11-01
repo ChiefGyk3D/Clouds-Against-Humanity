@@ -2,6 +2,10 @@
 
 > Nothing to read first. This page is opinion, my own, and it says so. If a word is new, the [Glossary](Glossary.md) defines it. For the tool choices specifically, [Why I picked these tools](Why-I-Picked-These-Tools.md) goes piece by piece.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Start here](Contents.md#start-here) > Why this exists
+<!-- END GENERATED PAGE NAV top -->
+
 Consider this my manifesto. The ramblings of a mad man.
 
 I built this because I was sick of zero trust knowledge being locked behind the companies that sell it, where you can only find out how a ZTNA platform really works by paying for the platform and then sitting through a sales pitch while you do. Every vendor says they are the right answer, and Zero Trust is still poorly understood until you are inside an enterprise, so the people who most need to learn it (the ones who are not inside one yet) get the marketing version.
@@ -100,3 +104,18 @@ The order below is the order I would do them in: build first, and only then swit
 | 6. Flip the board, again | [Trace one change end to end](Trace-One-Change-End-to-End.md) | Follow one real pull request through every gate, read three bad variants and which gate would stop each, then trace a different change yourself. |
 
 I have not measured what anyone gets out of this, and I am not claiming a result. If a page is wrong, or the board needs flipping somewhere I have not thought of, say so; suggestions are welcome anywhere in the project, and [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md) shows how to send them.
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Start here](Contents.md#start-here) > Why this exists
+
+In this group: [Start here](Contents.md#start-here), 5 pages
+
+- [Home](Home.md) / [Contents](Contents.md) / [Reading order](Reading-Order.md) / **Why this exists** / [Give feedback](Give-Feedback-and-Open-an-Issue.md)
+
+Related pages:
+
+- [Reading order](Reading-Order.md)
+- [Give feedback](Give-Feedback-and-Open-an-Issue.md)
+- [Contents](Contents.md)
+- [Home](Home.md)
+<!-- END GENERATED PAGE NAV bottom -->

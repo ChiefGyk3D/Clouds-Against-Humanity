@@ -1,5 +1,11 @@
 # Blockchain fundamentals: hashes, blocks, nodes, consensus and forks, and what a blockchain is not
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 3: Privacy, anonymity and cryptocurrency](Contents.md#track-3-privacy-anonymity-and-cryptocurrency) > Blockchain fundamentals
+
+Previous: [The darknet landscape: markets, OPSEC and layering](The-Darknet-Landscape-Markets-OPSEC-Clearnet-and-Layering-Tor-I2P-and-VPN.md) / Next: [How Bitcoin works](How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Page one of five in the cryptocurrency set. Read it when "blockchain" is only a word to you, or when you work in security or IT and cryptocurrency keeps turning up in your job (a ransomware payment, an investigation, a custody question, a threat report) and you want the mechanics before the stories. It explains what a blockchain is, how a block, a hash and a Merkle tree fit together, what a node does, how a transaction becomes part of the record, how a network agrees on one history, what a fork is, what "decentralized" does and does not mean, why running your own full node matters, and what a blockchain is not. It also states the stance of this set and the background the lessons come from, once, here.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -378,3 +384,25 @@ Every row carries a status: **Read** means the statement is on the page named, r
 | The PiNodeXMR facts, and the sibling pages named in the set | The author's own check that the existing overview lesson carries the PiNodeXMR section and that issues 397 to 400 exist | General knowledge (a pointer, not a source claim; the overview lesson's own register has the sources) |
 | A satoshi is one hundred-millionth of a bitcoin; a block's timestamp is the miner's claim; a confirmation count starts at one when a transaction is in a block; "six confirmations" is a rule of thumb; block 170's transfer is commonly called the first between two people | General knowledge | General knowledge; not read on a page today |
 | Laws and reporting rules for cryptocurrency differ by place | General knowledge | General knowledge; no country checked |
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 3: Privacy, anonymity and cryptocurrency](Contents.md#track-3-privacy-anonymity-and-cryptocurrency) > Blockchain fundamentals
+
+Previous: [The darknet landscape: markets, OPSEC and layering](The-Darknet-Landscape-Markets-OPSEC-Clearnet-and-Layering-Tor-I2P-and-VPN.md) / Next: [How Bitcoin works](How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable.md)
+
+In this track: [Track 3: Privacy, anonymity and cryptocurrency](Contents.md#track-3-privacy-anonymity-and-cryptocurrency), 15 pages
+
+- Cryptography and privacy: [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md) / [Privacy, security and anonymity](Privacy-Security-and-Anonymity-Three-Different-Things-and-Why-There-Is-No-Silver-Bullet.md) / [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md)
+- Tor, I2P, VPN and browsing: [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) / [How a VPN works](How-a-VPN-Works-Tunnels-What-It-Hides-What-It-Does-Not-and-What-an-Audit-Proves.md) / [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md) / [How I2P works](How-I2P-Works-Tunnels-Garlic-Routing-and-the-Network-Database.md) / [The browsing setups compared](The-Browsing-Setups-Compared-Tor-Browser-Brave-Whonix-Tails-and-Qubes-with-Whonix.md) / [The darknet landscape: markets, OPSEC and layering](The-Darknet-Landscape-Markets-OPSEC-Clearnet-and-Layering-Tor-I2P-and-VPN.md)
+- Cryptocurrency: **Blockchain fundamentals** / [How Bitcoin works](How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable.md) / [How Monero works](How-Monero-Works-Compared-with-Bitcoin-and-Ethereum-DeFi-Mixers-Swaps-and-Ransomware.md) / [Wallets and key custody](Wallets-and-Key-Custody-Hot-and-Cold-Hardware-Wallets-Recovery-Shamir-and-Multisig.md) / [Running Monero properly](Running-Monero-Properly-Hardware-Wallet-Qubes-and-Whonix-Offline-Wallet-and-PiNodeXMR.md)
+- Radio and off-grid: [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md)
+
+Related pages:
+
+- [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md)
+- [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md)
+- [How Bitcoin works](How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable.md)
+- [How Monero works](How-Monero-Works-Compared-with-Bitcoin-and-Ethereum-DeFi-Mixers-Swaps-and-Ransomware.md)
+- [Wallets and key custody](Wallets-and-Key-Custody-Hot-and-Cold-Hardware-Wallets-Recovery-Shamir-and-Multisig.md)
+- [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md)
+<!-- END GENERATED PAGE NAV bottom -->

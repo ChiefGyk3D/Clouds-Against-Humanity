@@ -14,6 +14,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from wikitext import page_text
+
 ROOT = Path(__file__).resolve().parent.parent
 WIKI = ROOT / "docs" / "wiki"
 NAME = "How-a-VPN-Works-Tunnels-What-It-Hides-What-It-Does-Not-and-What-an-Audit-Proves"
@@ -45,7 +47,7 @@ OTHER_BRANDS = ("nordvpn", "proton vpn", "protonvpn", "surfshark", "private inte
 
 
 def text() -> str:
-    return PAGE.read_text(encoding="utf-8")
+    return page_text(PAGE)  # without the generated navigation blocks (issue #417)
 
 
 def register_rows(body: str) -> list[list[str]]:

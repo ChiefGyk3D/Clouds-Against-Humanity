@@ -1,5 +1,11 @@
 # RAID: levels, parity, rebuilds, and why it is continuity and not a backup
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 4: GRC and law](Contents.md#track-4-grc-and-law) > RAID: continuity, not a backup
+
+Previous: [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Side page to the backup and continuity pages. **RAID is a business continuity control, not a backup.** It keeps a system running through some drive failures, which is availability, the third letter of [the CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md#availability) and a piece of the plan in [business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md). A backup is a separate, restorable copy that survives deletion, corruption, ransomware and the loss of the site, which an array does not. This page teaches RAID in that order: first what it is for and what it cannot do, then how the levels work (striping, mirroring and parity), what a small write costs, what happens when a drive fails and a replacement is rebuilt, why a power cut can leave a silent error, how hardware, software and filesystem RAID differ, where an array belongs in a plan, and a paper exercise with every answer computed. Read it after [Backups, recovery and patching](Backups-Recovery-and-Patching.md) and next to [the backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md), which says an array counts as at most one copy of your data.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -500,3 +506,24 @@ Sources were downloaded and read on **2026-11-01**. Status words: **Read** means
 | RAID 0, 6 and 10 came after the 1987 levels; a double-parity small write costs 3 reads and 3 writes; battery-backed caches; `/proc/mdstat` shows rebuild progress | General knowledge | **est.**; not run |
 | The Python drill and its output | The author's own run of the free path | **Observed** 2026-11-01, CPython 3.13, Linux |
 | The drill on macOS or Windows | The author's own: not run | **Not run** |
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 4: GRC and law](Contents.md#track-4-grc-and-law) > RAID: continuity, not a backup
+
+Previous: [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md)
+
+In this track: [Track 4: GRC and law](Contents.md#track-4-grc-and-law), 9 pages
+
+- Also here: [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md)
+- GRC, privacy law and data governance: [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md) / [US privacy law and the patchwork](US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers.md) / [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md) / [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md)
+- Continuity, backups and recovery: [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) / [Backups, recovery and patching](Backups-Recovery-and-Patching.md) / [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md) / **RAID: continuity, not a backup**
+
+Related pages:
+
+- [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md)
+- [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md)
+- [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
+- [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md)
+- [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md)
+- [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md)
+<!-- END GENERATED PAGE NAV bottom -->

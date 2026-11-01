@@ -1,5 +1,11 @@
 # Packet filters compared: iptables and ipset, nftables, UFW, and BSD pf (pfSense and OPNsense)
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect) > Packet filters compared
+
+Next: [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Side page to the start-from-zero pages. Read it after [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md), which teaches the ideas (default deny, stateful, allow by source and port) with one tool, `nft`. This page keeps those ideas and compares the tools that carry them out: the Linux family (`iptables` with `ipset`, `nftables`, UFW, firewalld) and the BSD family (`pf`, and the pfSense and OPNsense firewalls built around it). Next: [Detection and monitoring: Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md).
 
 This is the first of four lessons in a network and host defense track. The other three are [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md), [File integrity and alerting: Tripwire, AIDE, Wazuh](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) and [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md). They are being written at the same time as this page, so those three links may not resolve until they are merged.
@@ -1015,3 +1021,22 @@ All read-only requests; retrieved 2026-10-22 unless stated. "Read" means I read 
 ## Where to next
 
 The next lesson in this track, [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md), adds the layer that reads what a packet filter cannot; [rate limiting at every layer](Rate-Limiting-at-Every-Layer.md) takes the one rule you wrote here and puts it at the CDN, the proxy, the application and the kernel (those links may not resolve until the pages are merged). In the core path, [Detection and monitoring](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) shows where firewall logs end up.
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect) > Packet filters compared
+
+Next: [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md)
+
+In this track: [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect), 33 pages
+
+- Network and host defense: **Packet filters compared** / [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md) / [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) / [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md) / [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md) / [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) / [Attack surface map: layer by layer](Attack-Surface-Map-Layer-by-Layer.md) / [The DMZ and hardening an internet-facing host](The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet.md) / [DMZ hardening checklist](DMZ-Hardening-Checklist.md)
+- Deception and honeypots: [Deception and honeypots: start here](Deception-and-Honeypots-Start-Here.md) / [What deception is](Deception-and-Honeypots-What-Deception-Is.md) / [Deception safety and law](Deception-and-Honeypots-Safety-and-Law.md) / [Plant a canary token](Deception-and-Honeypots-Plant-a-Canary.md) / [Honeyfiles on a host you own](Deception-and-Honeypots-Honeyfiles-on-Your-Host.md) / [Deception alerts in the SIEM](Deception-and-Honeypots-Alerts-in-the-SIEM.md) / [Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md) / [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md) / [Anatomy of a cloud honeypot](Deception-and-Honeypots-Cloud-Sensor-Anatomy.md) / [Cloud Cowrie for a weekend](Deception-and-Honeypots-Cloud-Cowrie-Weekend.md) / [Read what arrived: Cowrie logs](Deception-and-Honeypots-Read-the-Sensor-Logs.md)
+- Detection and monitoring: [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md) / [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) / [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) / [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) / [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) / [Multiple sites and identity](Multiple-Sites-and-Identity.md) / [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) / [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) / [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) / [Grafana dashboards](Grafana-Dashboards.md) / [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) / [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) / [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md)
+
+Related pages:
+
+- [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md)
+- [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md)
+- [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md)
+- [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md)
+<!-- END GENERATED PAGE NAV bottom -->

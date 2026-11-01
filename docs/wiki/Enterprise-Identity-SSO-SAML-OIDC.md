@@ -1,5 +1,11 @@
 # Enterprise identity: directories, SSO, SAML, OAuth and OIDC
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > Enterprise identity: SSO, SAML and OIDC
+
+Previous: [Secrets from day one](Secrets-From-Day-One.md) / Next: [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Side page to the start-from-zero pages. Read it after [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) (core step 4) when "single sign-on", "SAML", "OIDC" or "identity provider" are only words to you, and before [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md), which assumes you know them. It does not repeat the token lesson: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) covers what a token, a scope and a JWT are, and [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) covers what a signature is. This page is about the sign-in itself: who vouches for you, how an application is told, and how that breaks. Next: [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -924,3 +930,24 @@ All read-only requests; retrieved **2026-10-21** unless stated.
 Not verified, plainly: the whole PowerShell track; macOS and Windows behavior of the scripts (including the `0o600` file mode, which Windows ignores); the entire Keycloak path from container start to a real sign-in; the console menu names and the token-mapper steps; the Docker `-e NAME` pass-through; whether any vendor's plan includes a given sign-in method.
 
 Next: [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md), then core step 11 on the [Reading order](Reading-Order.md) page, [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > Enterprise identity: SSO, SAML and OIDC
+
+Previous: [Secrets from day one](Secrets-From-Day-One.md) / Next: [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md)
+
+In this track: [Track 1: Foundations](Contents.md#track-1-foundations), 28 pages
+
+- OS and Linux, git and the terminal: [Git from zero](Git-From-Zero.md) / [The terminal and your first script](Terminal-and-Your-First-Script.md) / [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) / [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md) / [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md) / [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md) / [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) / [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md) / [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md)
+- Networking: [How a web request works](How-a-Web-Request-Works.md) / [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) / [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) / [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md) / [IPv6 adoption and handling it safely](IPv6-Adoption-and-Handling-It-Safely.md)
+- Identity and secrets: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) / [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) / [Secrets from day one](Secrets-From-Day-One.md) / **Enterprise identity: SSO, SAML and OIDC**
+- Infrastructure as code: [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md) / [OpenTofu from zero](OpenTofu-From-Zero.md) / [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) / [Spacelift from zero](Spacelift-From-Zero.md) / [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md) / [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md)
+- Web hosting: [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md) / [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) / [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) / [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
+
+Related pages:
+
+- [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md)
+- [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md)
+- [OpenTofu from zero](OpenTofu-From-Zero.md)
+- [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md)
+<!-- END GENERATED PAGE NAV bottom -->

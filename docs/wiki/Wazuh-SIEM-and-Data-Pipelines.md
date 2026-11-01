@@ -1,5 +1,11 @@
 # Wazuh SIEM and data pipelines: from a log line to an alert
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect) > Wazuh SIEM and data pipelines
+
+Previous: [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) / Next: [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md)
+<!-- END GENERATED PAGE NAV top -->
+
 A foundations side page in the detection group, for issue #321. Read it after [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) and [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md), and before you build anything in [Build your own mini SOC](Build-Your-Own-Mini-SOC.md). It starts on the **cloud side** (what a connector writes and how it would reach a manager) and only at the end looks at the logging server at home. Next: [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -402,3 +408,22 @@ Retrieved **2026-10-30** unless stated. "Read" means the page text was read; not
 Not verified, plainly: every behavior of a running Wazuh; the draft decoder and rules in a manager; the journald path on a connector; Windows (the commands are not given); any metric of memory or cost.
 
 Next: [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md). Back to the [Reading order](Reading-Order.md).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect) > Wazuh SIEM and data pipelines
+
+Previous: [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) / Next: [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md)
+
+In this track: [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect), 33 pages
+
+- Network and host defense: [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md) / [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md) / [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) / [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md) / [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md) / [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) / [Attack surface map: layer by layer](Attack-Surface-Map-Layer-by-Layer.md) / [The DMZ and hardening an internet-facing host](The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet.md) / [DMZ hardening checklist](DMZ-Hardening-Checklist.md)
+- Deception and honeypots: [Deception and honeypots: start here](Deception-and-Honeypots-Start-Here.md) / [What deception is](Deception-and-Honeypots-What-Deception-Is.md) / [Deception safety and law](Deception-and-Honeypots-Safety-and-Law.md) / [Plant a canary token](Deception-and-Honeypots-Plant-a-Canary.md) / [Honeyfiles on a host you own](Deception-and-Honeypots-Honeyfiles-on-Your-Host.md) / [Deception alerts in the SIEM](Deception-and-Honeypots-Alerts-in-the-SIEM.md) / [Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md) / [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md) / [Anatomy of a cloud honeypot](Deception-and-Honeypots-Cloud-Sensor-Anatomy.md) / [Cloud Cowrie for a weekend](Deception-and-Honeypots-Cloud-Cowrie-Weekend.md) / [Read what arrived: Cowrie logs](Deception-and-Honeypots-Read-the-Sensor-Logs.md)
+- Detection and monitoring: [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md) / [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) / [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) / **Wazuh SIEM and data pipelines** / [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) / [Multiple sites and identity](Multiple-Sites-and-Identity.md) / [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) / [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) / [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) / [Grafana dashboards](Grafana-Dashboards.md) / [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) / [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) / [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md)
+
+Related pages:
+
+- [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md)
+- [Multiple sites and identity](Multiple-Sites-and-Identity.md)
+- [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md)
+- [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md)
+<!-- END GENERATED PAGE NAV bottom -->

@@ -17,6 +17,8 @@ import tempfile
 import textwrap
 from pathlib import Path
 
+from wikitext import page_text
+
 ROOT = Path(__file__).resolve().parent.parent
 WIKI = ROOT / "docs" / "wiki"
 NAME = "Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys"
@@ -45,7 +47,7 @@ TOPICS = (
 
 
 def text() -> str:
-    return PAGE.read_text(encoding="utf-8")
+    return page_text(PAGE)  # without the generated navigation blocks (issue #417)
 
 
 def section(body: str, start: str, end: str) -> str:

@@ -1,5 +1,11 @@
 # Git, GitHub and pull requests
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Git and pull requests
+
+Previous: [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / Next: [Containers and Docker (optional)](Containers-and-Docker-Basics.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Start-from-zero page 5 of 8. If git, a terminal or GitHub Desktop are new to you, do [Git from zero: your first change](Git-From-Zero.md) first. Previous: [What is infrastructure as code](What-Is-Infrastructure-as-Code.md). Next: [Containers and Docker basics](Containers-and-Docker-Basics.md).
 
 Infrastructure as code only works if the code is kept somewhere with history, review and automatic checks. That place is git, and in this project it is GitHub. This page is the minimum you need to follow how a change travels from an idea to a running droplet, and to send a correction to this wiki yourself.
@@ -119,3 +125,20 @@ Two rules from the project's own guidelines: never include anything that identif
 - Find a typo on any page of this wiki and send a pull request to fix it. The first one is the hardest; after that it is a habit.
 
 Next: [Containers and Docker basics](Containers-and-Docker-Basics.md).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Git and pull requests
+
+Previous: [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / Next: [Containers and Docker (optional)](Containers-and-Docker-Basics.md)
+
+In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
+
+- [Start here if you are new](Start-Here-If-You-Are-New.md) / [What is the cloud](What-Is-the-Cloud.md) / [Networking basics](Networking-Basics-for-This-Project.md) / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / **Git and pull requests** / [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / [How money works](How-Money-Works-in-the-Cloud.md) / [Enterprise habits](Enterprise-Engineering-Habits.md) / [Architecture overview](Architecture-Overview.md) / [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / [Twingate](Twingate.md) / [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / [Droplet hardening](Droplet-Hardening.md) / [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / [Spacelift](Spacelift.md) / [Doppler and secrets](Doppler-and-Secrets.md) / [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / [Threat model](Threat-Model.md) / [Lessons learned](Lessons-Learned.md) / [Roadmap](Roadmap.md)
+
+Related pages:
+
+- [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
+- [How money works](How-Money-Works-in-the-Cloud.md)
+- [Networking basics](Networking-Basics-for-This-Project.md)
+- [Enterprise habits](Enterprise-Engineering-Habits.md)
+<!-- END GENERATED PAGE NAV bottom -->

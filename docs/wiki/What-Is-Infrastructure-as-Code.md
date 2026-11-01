@@ -2,6 +2,12 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Infrastructure as code
+
+Previous: [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / Next: [Git and pull requests](Git-GitHub-and-Pull-Requests.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Start-from-zero page 4 of 8. Previous: [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md). Next: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md).
 
 If you have ever rebuilt a Raspberry Pi from scratch and tried to remember every package you installed and every config file you edited, you already understand the problem that infrastructure as code solves.
@@ -149,3 +155,20 @@ tofu -chdir=modules/vpc test
 You should see tests pass, including one that proves a public address range is rejected. Change the range in a test to `8.8.8.0/24`, run again, watch it fail, and you have just experienced what "validation at the edge" means. Then repeat for `modules/firewall` and read `modules/firewall/tests/` to see what a security property looks like when it is written as a test.
 
 Next: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Infrastructure as code
+
+Previous: [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / Next: [Git and pull requests](Git-GitHub-and-Pull-Requests.md)
+
+In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
+
+- [Start here if you are new](Start-Here-If-You-Are-New.md) / [What is the cloud](What-Is-the-Cloud.md) / [Networking basics](Networking-Basics-for-This-Project.md) / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / **Infrastructure as code** / [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / [How money works](How-Money-Works-in-the-Cloud.md) / [Enterprise habits](Enterprise-Engineering-Habits.md) / [Architecture overview](Architecture-Overview.md) / [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / [Twingate](Twingate.md) / [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / [Droplet hardening](Droplet-Hardening.md) / [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / [Spacelift](Spacelift.md) / [Doppler and secrets](Doppler-and-Secrets.md) / [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / [Threat model](Threat-Model.md) / [Lessons learned](Lessons-Learned.md) / [Roadmap](Roadmap.md)
+
+Related pages:
+
+- [Networking basics](Networking-Basics-for-This-Project.md)
+- [Containers and Docker (optional)](Containers-and-Docker-Basics.md)
+- [What is the cloud](What-Is-the-Cloud.md)
+- [How money works](How-Money-Works-in-the-Cloud.md)
+<!-- END GENERATED PAGE NAV bottom -->

@@ -6,6 +6,12 @@
 
 > Want to build and destroy a stack of your own first, in your own account, before reading how this project runs its stacks? [Spacelift from zero](Spacelift-From-Zero.md) is a hands-on side page for that.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Spacelift
+
+Previous: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / Next: [Doppler and secrets](Doppler-and-Secrets.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Spacelift is where `tofu plan` and `tofu apply` actually run. It holds the state, waits for a human to approve every apply, and is the reason nothing ever applies from a laptop or from GitHub Actions.
 
 ## The run lifecycle
@@ -176,3 +182,20 @@ When AWS, Azure or GCP stacks are added, each cloud gets its own Doppler config 
 Full step-by-step for secrets is on [Doppler and secrets](Doppler-and-Secrets.md) and in [docs/spacelift-secrets.md](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md).
 
 Next: [Doppler and secrets](Doppler-and-Secrets.md), step 17 of the core path on the [Reading order](Reading-Order.md) page.
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Spacelift
+
+Previous: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / Next: [Doppler and secrets](Doppler-and-Secrets.md)
+
+In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
+
+- [Start here if you are new](Start-Here-If-You-Are-New.md) / [What is the cloud](What-Is-the-Cloud.md) / [Networking basics](Networking-Basics-for-This-Project.md) / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / [How money works](How-Money-Works-in-the-Cloud.md) / [Enterprise habits](Enterprise-Engineering-Habits.md) / [Architecture overview](Architecture-Overview.md) / [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / [Twingate](Twingate.md) / [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / [Droplet hardening](Droplet-Hardening.md) / [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / **Spacelift** / [Doppler and secrets](Doppler-and-Secrets.md) / [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / [Threat model](Threat-Model.md) / [Lessons learned](Lessons-Learned.md) / [Roadmap](Roadmap.md)
+
+Related pages:
+
+- [Droplet hardening](Droplet-Hardening.md)
+- [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md)
+- [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md)
+- [Threat model](Threat-Model.md)
+<!-- END GENERATED PAGE NAV bottom -->

@@ -4,6 +4,12 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > Patch management and automatic security updates
+
+Previous: [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md) / Next: [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md)
+<!-- END GENERATED PAGE NAV top -->
+
 **Prerequisites:** [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md) (why updates come first, the table of mechanisms for every system, and the staggered windows) and [Backups, recovery and patching](Backups-Recovery-and-Patching.md) (cadence, emergency patches, and a backup you have restored). [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) helps with the alerting half. To run the exercises you need Podman or Docker on a Linux or macOS computer; they cost nothing and touch no cloud.
 
 Those two pages say *that* you should patch and give the vocabulary. This page is about the machinery on one Debian or Ubuntu host and the part people leave out: how you find out that it worked, that it broke, or that it quietly stopped.
@@ -381,3 +387,24 @@ Vendor pages were read on **2026-10-30** (read-only fetches). The Debian wiki pa
 | `journalctl -u apt-daily-upgrade.service`, `systemctl list-timers`, `apt install package=version`, `apt-mark hold`, log rotation, "apt has no transaction undo", the stale-metric expression, "weeks" of exposure | Author's general knowledge | **est.**; not run, not read on a page |
 
 Next: [Backups, recovery and patching](Backups-Recovery-and-Patching.md), then the [Reading order](Reading-Order.md).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > Patch management and automatic security updates
+
+Previous: [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md) / Next: [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md)
+
+In this track: [Track 1: Foundations](Contents.md#track-1-foundations), 28 pages
+
+- OS and Linux, git and the terminal: [Git from zero](Git-From-Zero.md) / [The terminal and your first script](Terminal-and-Your-First-Script.md) / [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) / [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md) / **Patch management and automatic security updates** / [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md) / [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) / [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md) / [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md)
+- Networking: [How a web request works](How-a-Web-Request-Works.md) / [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) / [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) / [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md) / [IPv6 adoption and handling it safely](IPv6-Adoption-and-Handling-It-Safely.md)
+- Identity and secrets: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) / [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) / [Secrets from day one](Secrets-From-Day-One.md) / [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md)
+- Infrastructure as code: [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md) / [OpenTofu from zero](OpenTofu-From-Zero.md) / [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) / [Spacelift from zero](Spacelift-From-Zero.md) / [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md) / [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md)
+- Web hosting: [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md) / [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) / [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) / [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
+
+Related pages:
+
+- [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md)
+- [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md)
+- [The terminal and your first script](Terminal-and-Your-First-Script.md)
+- [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md)
+<!-- END GENERATED PAGE NAV bottom -->

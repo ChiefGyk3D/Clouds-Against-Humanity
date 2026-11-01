@@ -4,6 +4,12 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Why ZTNA and not a VPN
+
+Previous: [Architecture overview](Architecture-Overview.md) / Next: [Twingate](Twingate.md)
+<!-- END GENERATED PAGE NAV top -->
+
 The obvious way to reach a few cloud droplets from home is a VPN: stand up WireGuard or OpenVPN, open one UDP port, done in an afternoon. This project does not do that, on purpose. This page explains why, where that reasoning holds, and where it does not, because "VPNs bad, zero trust good" is a slogan, and slogans are how people end up buying a zero trust sticker for their old VPN appliance.
 
 ## TL;DR
@@ -223,3 +229,20 @@ flowchart TD
 - [CISA Known Exploited Vulnerabilities catalog](https://www.cisa.gov/known-exploited-vulnerabilities-catalog): search for your own VPN vendor and see how long the list is
 
 Next: [Twingate](Twingate.md), step 12 of the core path on the [Reading order](Reading-Order.md) page.
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Why ZTNA and not a VPN
+
+Previous: [Architecture overview](Architecture-Overview.md) / Next: [Twingate](Twingate.md)
+
+In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
+
+- [Start here if you are new](Start-Here-If-You-Are-New.md) / [What is the cloud](What-Is-the-Cloud.md) / [Networking basics](Networking-Basics-for-This-Project.md) / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / [How money works](How-Money-Works-in-the-Cloud.md) / [Enterprise habits](Enterprise-Engineering-Habits.md) / [Architecture overview](Architecture-Overview.md) / **Why ZTNA and not a VPN** / [Twingate](Twingate.md) / [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / [Droplet hardening](Droplet-Hardening.md) / [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / [Spacelift](Spacelift.md) / [Doppler and secrets](Doppler-and-Secrets.md) / [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / [Threat model](Threat-Model.md) / [Lessons learned](Lessons-Learned.md) / [Roadmap](Roadmap.md)
+
+Related pages:
+
+- [Enterprise habits](Enterprise-Engineering-Habits.md)
+- [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md)
+- [How money works](How-Money-Works-in-the-Cloud.md)
+- [Droplet hardening](Droplet-Hardening.md)
+<!-- END GENERATED PAGE NAV bottom -->

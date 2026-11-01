@@ -4,6 +4,12 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Threat model
+
+Previous: [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / Next: [Lessons learned](Lessons-Learned.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Security controls only make sense against named threats. This page lists what is worth protecting, who might go after it, where the trust boundaries are, what stops each threat, and what is left over and accepted on purpose.
 
 It is a lab with a $30 budget and one operator, and the threat model is sized to that. Nation-state targeting of a hobby cloud account is out of scope; the internet's background noise, credential theft and supply-chain mistakes are very much in scope.
@@ -109,3 +115,20 @@ Accepting a risk is a decision, so each one is written down where a reviewer wil
 - **Anyone else getting write access** to the repository makes T3 real for `main` itself, and required reviews become mandatory first. The push policy already keeps pull requests out of Spacelift once attached.
 
 Next: [Lessons learned](Lessons-Learned.md), step 20 of the core path on the [Reading order](Reading-Order.md) page. To build a threat model yourself, the security track starts at the [Threat model exercise](Threat-Model-Exercise.md).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Threat model
+
+Previous: [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / Next: [Lessons learned](Lessons-Learned.md)
+
+In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
+
+- [Start here if you are new](Start-Here-If-You-Are-New.md) / [What is the cloud](What-Is-the-Cloud.md) / [Networking basics](Networking-Basics-for-This-Project.md) / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / [How money works](How-Money-Works-in-the-Cloud.md) / [Enterprise habits](Enterprise-Engineering-Habits.md) / [Architecture overview](Architecture-Overview.md) / [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / [Twingate](Twingate.md) / [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / [Droplet hardening](Droplet-Hardening.md) / [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / [Spacelift](Spacelift.md) / [Doppler and secrets](Doppler-and-Secrets.md) / [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / **Threat model** / [Lessons learned](Lessons-Learned.md) / [Roadmap](Roadmap.md)
+
+Related pages:
+
+- [Doppler and secrets](Doppler-and-Secrets.md)
+- [Roadmap](Roadmap.md)
+- [Spacelift](Spacelift.md)
+- [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
+<!-- END GENERATED PAGE NAV bottom -->

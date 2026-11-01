@@ -1,5 +1,11 @@
 # Business continuity and disaster recovery: BCP, DR and a plan for this project
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 4: GRC and law](Contents.md#track-4-grc-and-law) > Business continuity and disaster recovery
+
+Previous: [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md) / Next: [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Side page to the backup and recovery pages. Read it after [Backups, recovery and patching](Backups-Recovery-and-Patching.md), which teaches you to take a backup, lose the original and time the restore, and after [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md), which teaches you to recover from a lost state file. This page zooms out: when something big breaks, **what must keep working, who does what, and in what order does it come back**. It does not repeat the table on the Enterprise page about [high availability, disaster recovery and backups](Enterprise-Infrastructure-Differences.md#high-availability-disaster-recovery-and-backups); it builds a plan on top of those words and applies it to this project's own pieces.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -563,3 +569,24 @@ Every vendor and standards claim on this page, with where it was read. Statuses:
 - [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md), for a contact tree whose second channel needs neither the internet nor the mains.
 - [Teardown checklist](Teardown-Checklist.md), which is a recovery plan for a planned ending.
 - [Threat model](Threat-Model.md), to ask which of these scenarios are the likely ones.
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 4: GRC and law](Contents.md#track-4-grc-and-law) > Business continuity and disaster recovery
+
+Previous: [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md) / Next: [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
+
+In this track: [Track 4: GRC and law](Contents.md#track-4-grc-and-law), 9 pages
+
+- Also here: [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md)
+- GRC, privacy law and data governance: [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md) / [US privacy law and the patchwork](US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers.md) / [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md) / [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md)
+- Continuity, backups and recovery: **Business continuity and disaster recovery** / [Backups, recovery and patching](Backups-Recovery-and-Patching.md) / [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md) / [RAID: continuity, not a backup](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md)
+
+Related pages:
+
+- [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
+- [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md)
+- [RAID: continuity, not a backup](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md)
+- [Teardown checklist](Teardown-Checklist.md)
+- [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md)
+- [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md)
+<!-- END GENERATED PAGE NAV bottom -->

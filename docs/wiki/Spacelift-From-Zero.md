@@ -2,6 +2,12 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > Spacelift from zero
+
+Previous: [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) / Next: [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Lesson I3 of the four-lesson infrastructure-as-code track. The track: I1 "OpenTofu from zero: init, plan, apply, destroy" (`OpenTofu-From-Zero`), I2 "Plans, state, drift and recovery" (`Plans-State-Drift-and-Recovery`), **I3 this page**, I4 "Build and destroy a stack per service" (`Build-and-Destroy-Stack-Per-Service`). The other three are written at the same time and are plain text here until they merge; the names in code are their page names. A foundations side page to [Spacelift](Spacelift.md); no step of the core path is renumbered.
 
 > **Status: written from vendor documentation; the free local exercises were run once, the Spacelift console exercises were not.** On **2026-10-22** the author read the Spacelift pricing and documentation pages listed in the [claims register](#claims-register) with read-only `curl`, and ran the free local exercises (Exercises 1 and 2) on Linux with OpenTofu 1.12.6, pasting trimmed output from that run. The own-account path (Exercises 3 to 11) uses menu names as the documentation gave them that day; **nobody has run it against a real Spacelift account for this page**, so every console step, every message it shows and every statement about what the free plan lets you do is marked **est.** unless the claims register says it was read. Vendor pages change; if your screen disagrees, trust your screen and the vendor's current page, and tell the project (see [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md)). Windows PowerShell commands are **est.** (not run; no PowerShell was available when this was written).
@@ -625,3 +631,24 @@ Read-only requests with `curl`; all retrieved **2026-10-22** unless stated. "Rea
 Lesson I4, "Build and destroy a stack per service", takes the same loop and makes it repeatable. Meanwhile, [Spacelift](Spacelift.md) shows the real run lifecycle this project uses, and [Teardown checklist](Teardown-Checklist.md) shows the same destroy-before-delete order applied to the project's own stacks.
 
 Next: lesson I4, Build and destroy a stack per service (planned; its page name is `Build-and-Destroy-Stack-Per-Service`, not linked until it merges).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > Spacelift from zero
+
+Previous: [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) / Next: [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md)
+
+In this track: [Track 1: Foundations](Contents.md#track-1-foundations), 28 pages
+
+- OS and Linux, git and the terminal: [Git from zero](Git-From-Zero.md) / [The terminal and your first script](Terminal-and-Your-First-Script.md) / [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) / [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md) / [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md) / [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md) / [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) / [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md) / [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md)
+- Networking: [How a web request works](How-a-Web-Request-Works.md) / [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) / [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) / [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md) / [IPv6 adoption and handling it safely](IPv6-Adoption-and-Handling-It-Safely.md)
+- Identity and secrets: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) / [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) / [Secrets from day one](Secrets-From-Day-One.md) / [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md)
+- Infrastructure as code: [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md) / [OpenTofu from zero](OpenTofu-From-Zero.md) / [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) / **Spacelift from zero** / [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md) / [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md)
+- Web hosting: [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md) / [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) / [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) / [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
+
+Related pages:
+
+- [OpenTofu from zero](OpenTofu-From-Zero.md)
+- [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md)
+- [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md)
+- [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md)
+<!-- END GENERATED PAGE NAV bottom -->

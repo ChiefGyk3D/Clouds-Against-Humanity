@@ -1,5 +1,11 @@
 # Backups deep dive: 3-2-1-1-0, immutable copies, key custody and restore testing
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 4: GRC and law](Contents.md#track-4-grc-and-law) > Backups deep dive
+
+Previous: [Backups, recovery and patching](Backups-Recovery-and-Patching.md) / Next: [RAID: continuity, not a backup](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Side page to the start-from-zero pages. **A RAID array is a business continuity solution, not a backup:** it keeps a system running through some drive failures, and it counts as at most one copy of your data, so none of the digits below is met by adding drives to an array. Read it after [Backups, recovery and patching](Backups-Recovery-and-Patching.md), which teaches snapshot versus backup, RPO and RTO, the plain 3-2-1 rule and a first timed restore, and after [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md), because availability is the property all of this protects. This page does not repeat them. It takes up what they leave open: why RAID is not one of the copies, the two extra digits of 3-2-1-1-0, what an immutable copy really protects against, who holds the key to an encrypted backup, backing up the backup system itself, how often to test a restore, how long to keep copies, the ransomware angle, the traps in cloud backups, and what this project would have to back up. Next: the lesson on [business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md), which covers how the work carries on and how the systems come back, and the lesson on [RAID](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md), which covers how arrays work and why they are a continuity control.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -427,3 +433,24 @@ Standards and vendor pages were downloaded and read on **2026-10-31**; repositor
 | Disk unreliability "forces computer systems managers to make backup versions of all information every night"; arrays proposed to keep running through a disk failure | [Patterson, Gibson and Katz, *A Case for Redundant Arrays of Inexpensive Disks (RAID)*, Berkeley report CSD-87-391, 1987](https://www2.eecs.berkeley.edu/Pubs/TechRpts/1987/CSD-87-391.pdf) (a scan; report pages 1 to 9 and 14 to 17 read) | Read 2026-11-01 |
 | The Bash script and its output | The free path | **Observed** 2026-10-31, GNU bash 5.2.37, coreutils 9.7, tar 1.35, OpenSSL 3.5.7, Linux |
 | The script on macOS, or under another shell | | **Not run** |
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 4: GRC and law](Contents.md#track-4-grc-and-law) > Backups deep dive
+
+Previous: [Backups, recovery and patching](Backups-Recovery-and-Patching.md) / Next: [RAID: continuity, not a backup](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md)
+
+In this track: [Track 4: GRC and law](Contents.md#track-4-grc-and-law), 9 pages
+
+- Also here: [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md)
+- GRC, privacy law and data governance: [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md) / [US privacy law and the patchwork](US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers.md) / [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md) / [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md)
+- Continuity, backups and recovery: [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) / [Backups, recovery and patching](Backups-Recovery-and-Patching.md) / **Backups deep dive** / [RAID: continuity, not a backup](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md)
+
+Related pages:
+
+- [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
+- [RAID: continuity, not a backup](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md)
+- [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md)
+- [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md)
+- [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md)
+- [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md)
+<!-- END GENERATED PAGE NAV bottom -->

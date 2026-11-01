@@ -1,5 +1,11 @@
 # Static against dynamic: Hugo and WordPress that look the same, and how to tell them apart
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > Static against dynamic: Hugo, WordPress and recon
+
+Previous: [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) / Next: [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Side page to the web pages. Read it after [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) (which argues why a static site often wins) and beside [Security tools basics](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) (which has the rules for using any recon tool). The WordPress lab it points to is [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md). The red and blue tools track is issue [#221](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues/221). Next: [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -315,3 +321,24 @@ Pages read on 2026-10-30 and 2026-10-31 (UTC dates vary by a day). "Run" means I
 Not verified, plainly: any real Hugo or WordPress site (none built); the real WordPress lab (not run); every `openssl` and `dig` command; Wappalyzer; whether InfoSecMap lists what the maintainer says; cost and speed figures (none measured); WhatWeb 0.6.4 behavior; anything on Windows or macOS.
 
 Next: [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > Static against dynamic: Hugo, WordPress and recon
+
+Previous: [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) / Next: [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
+
+In this track: [Track 1: Foundations](Contents.md#track-1-foundations), 28 pages
+
+- OS and Linux, git and the terminal: [Git from zero](Git-From-Zero.md) / [The terminal and your first script](Terminal-and-Your-First-Script.md) / [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) / [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md) / [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md) / [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md) / [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) / [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md) / [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md)
+- Networking: [How a web request works](How-a-Web-Request-Works.md) / [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) / [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) / [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md) / [IPv6 adoption and handling it safely](IPv6-Adoption-and-Handling-It-Safely.md)
+- Identity and secrets: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) / [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) / [Secrets from day one](Secrets-From-Day-One.md) / [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md)
+- Infrastructure as code: [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md) / [OpenTofu from zero](OpenTofu-From-Zero.md) / [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) / [Spacelift from zero](Spacelift-From-Zero.md) / [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md) / [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md)
+- Web hosting: [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md) / [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) / **Static against dynamic: Hugo, WordPress and recon** / [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
+
+Related pages:
+
+- [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md)
+- [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md)
+- [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md)
+- [Spacelift from zero](Spacelift-From-Zero.md)
+<!-- END GENERATED PAGE NAV bottom -->

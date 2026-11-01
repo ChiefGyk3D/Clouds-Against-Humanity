@@ -4,6 +4,12 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > AWS: where the money goes
+
+Previous: [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) / Next: [Azure: account preparation](Provider-Azure-Account-Preparation.md)
+<!-- END GENERATED PAGE NAV top -->
+
 The most common way a learner is surprised by AWS is not an attack or a mistake in the code. It is a charge for something they did not know was billed. This page names the charges that matter for a project like this one, shows the arithmetic, and ends with how to prove the bill is back to zero.
 
 All figures: US East (N. Virginia), on-demand list prices, 730 hours in a month, as of 2026-10-16.
@@ -78,3 +84,23 @@ The same discipline as the DigitalOcean teardown, with the AWS names:
 - Look at the [cost gate](CI-Tests-and-Cost-Gate.md). Which of the charges on this page would it catch today, and which would pass silently?
 
 Next: [Azure account preparation](Provider-Azure-Account-Preparation.md), the same three lessons for Azure (unverified drafts). Back to [Why the clouds differ](Why-the-Clouds-Differ.md) or the [Reading order](Reading-Order.md).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > AWS: where the money goes
+
+Previous: [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) / Next: [Azure: account preparation](Provider-Azure-Account-Preparation.md)
+
+In this track: [Track 5: Build and operate](Contents.md#track-5-build-and-operate), 31 pages
+
+- Stage guides and design: [Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md) / [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) / [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) / [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) / [Teardown checklist](Teardown-Checklist.md) / [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) / [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) / [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) / [Why I picked these tools](Why-I-Picked-These-Tools.md) / [From commit to pipeline](From-Commit-to-Pipeline.md) / [Trace one change end to end](Trace-One-Change-End-to-End.md)
+- Other clouds: [Why the clouds differ](Why-the-Clouds-Differ.md) / [AWS: account preparation](Provider-AWS-Account-Preparation.md) / [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) / **AWS: where the money goes** / [Azure: account preparation](Provider-Azure-Account-Preparation.md) / [Azure: the same four pieces](Provider-Azure-The-Same-Four-Pieces.md) / [Azure: where the money goes](Provider-Azure-Cost-Lesson.md) / [GCP: account preparation](Provider-GCP-Account-Preparation.md) / [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md) / [GCP: where the money goes](Provider-GCP-Cost-Lesson.md)
+- Enterprise practice: [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md) / [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md) / [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md) / [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md) / [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md) / [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
+- Project process: [How this project is planned](How-This-Project-Is-Planned.md) / [Project status](Project-Status.md) / [Repository growth](Repository-Growth.md) / [Screenshots policy](Screenshots-Policy.md)
+
+Related pages:
+
+- [AWS: account preparation](Provider-AWS-Account-Preparation.md)
+- [Azure: the same four pieces](Provider-Azure-The-Same-Four-Pieces.md)
+- [Why the clouds differ](Why-the-Clouds-Differ.md)
+- [Azure: where the money goes](Provider-Azure-Cost-Lesson.md)
+<!-- END GENERATED PAGE NAV bottom -->

@@ -4,6 +4,10 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Threat model exercise
+<!-- END GENERATED PAGE NAV top -->
+
 Reading a threat model teaches you what its author thought of. Building one teaches you how to think of things. This page walks you through making your own for this repository, then asks three "what if" questions and has you commit to an answer before you look at ours.
 
 The format is the one from the other exercise pages: **predict, then check**. Write your answer down first. If your answer differs from the reference one, that gap is the lesson, and sometimes it means your answer was better, in which case say so in a pull request.
@@ -221,3 +225,18 @@ A threat model that does not say what it left out is selling comfort. This one, 
 - Re-do scenario 2 for `cah-00-foundation`. What changes about the answer to "what does the run hold", and what does not?
 
 Next: [Threat Dragon exercise: trust boundaries](Threat-Dragon-Exercise.md), which draws the same system as a diagram. Back to the [Reading order](Reading-Order.md).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Threat model exercise
+
+In this group: [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling), 6 pages
+
+- [Threats in plain words](Threats-in-Plain-Words.md) / [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) / [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md) / **Threat model exercise** / [Threat Dragon exercise](Threat-Dragon-Exercise.md) / [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
+
+Related pages:
+
+- [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md)
+- [Threat Dragon exercise](Threat-Dragon-Exercise.md)
+- [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md)
+- [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
+<!-- END GENERATED PAGE NAV bottom -->

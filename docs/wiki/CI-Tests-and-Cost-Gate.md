@@ -6,6 +6,12 @@
 
 > Exit codes, `&&` and pipes are how every check here passes or fails; if they are new, read [The terminal and your first script](Terminal-and-Your-First-Script.md) first.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > CI, tests and the cost gate
+
+Previous: [Doppler and secrets](Doppler-and-Secrets.md) / Next: [Threat model](Threat-Model.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Every pull request runs the same set of checks, and the merge button stays disabled until a single job called `CI green` passes. CI never holds a cloud credential and never applies anything; applying is [Spacelift](Spacelift.md)'s job.
 
 ## What runs
@@ -185,3 +191,20 @@ opa test .spacelift/policies -v
 `.github/workflows/wiki.yml` calls GYST's `wiki-publish.yml`. On a pull request that touches `docs/wiki/` it runs `scripts/gen-wiki.sh`, which copies the pages and rewrites their links for the flat wiki, so a broken page fails review. On `main` it also publishes: a separate job with `contents: write`, which runs none of this repository's code, replaces every page in the GitHub wiki with the generated set. Nothing is published from a laptop and no personal token is involved. Pictures live in `docs/wiki/images/`; the script copies them flat into the wiki and rewrites `images/NAME.png` links to the raw URL the wiki serves (rules in the [Screenshots policy](Screenshots-Policy.md)). A page that exists only in the wiki editor is removed on the next publish, which is the point: `docs/wiki/` is the only place a page is written.
 
 Next: [Threat model](Threat-Model.md), step 19 of the core path on the [Reading order](Reading-Order.md) page. To follow one real change through every gate, see [Trace one change end to end](Trace-One-Change-End-to-End.md).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > CI, tests and the cost gate
+
+Previous: [Doppler and secrets](Doppler-and-Secrets.md) / Next: [Threat model](Threat-Model.md)
+
+In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
+
+- [Start here if you are new](Start-Here-If-You-Are-New.md) / [What is the cloud](What-Is-the-Cloud.md) / [Networking basics](Networking-Basics-for-This-Project.md) / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / [How money works](How-Money-Works-in-the-Cloud.md) / [Enterprise habits](Enterprise-Engineering-Habits.md) / [Architecture overview](Architecture-Overview.md) / [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / [Twingate](Twingate.md) / [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / [Droplet hardening](Droplet-Hardening.md) / [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / [Spacelift](Spacelift.md) / [Doppler and secrets](Doppler-and-Secrets.md) / **CI, tests and the cost gate** / [Threat model](Threat-Model.md) / [Lessons learned](Lessons-Learned.md) / [Roadmap](Roadmap.md)
+
+Related pages:
+
+- [Spacelift](Spacelift.md)
+- [Lessons learned](Lessons-Learned.md)
+- [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
+- [Roadmap](Roadmap.md)
+<!-- END GENERATED PAGE NAV bottom -->

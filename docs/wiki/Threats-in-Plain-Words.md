@@ -1,5 +1,9 @@
 # Threats in plain words: vulnerabilities, exploits, phishing, malware and compliance
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Threats in plain words
+<!-- END GENERATED PAGE NAV top -->
+
 Side page to the start-from-zero pages. Read it at core step 11 ([Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md)) if "CVE-2018-13379" or "exploited" reads like noise, or at any point you meet these words and want each one told apart, with a real, dated case. Next: [Threat model](Threat-Model.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -439,3 +443,18 @@ Read 2026-10-22 with read-only requests to public pages (no logins), or run loca
 | Exercises 1 to 3 and the link-reading exercise in Bash: outputs described | Run on Linux with Python 3.13 on 2026-10-22 | Run 2026-10-22 |
 
 Next: [Threat model](Threat-Model.md), step 19 of the core path on the [Reading order](Reading-Order.md) page.
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Threats in plain words
+
+In this group: [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling), 6 pages
+
+- **Threats in plain words** / [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) / [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md) / [Threat model exercise](Threat-Model-Exercise.md) / [Threat Dragon exercise](Threat-Dragon-Exercise.md) / [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
+
+Related pages:
+
+- [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md)
+- [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md)
+- [Threat model exercise](Threat-Model-Exercise.md)
+- [Threat Dragon exercise](Threat-Dragon-Exercise.md)
+<!-- END GENERATED PAGE NAV bottom -->

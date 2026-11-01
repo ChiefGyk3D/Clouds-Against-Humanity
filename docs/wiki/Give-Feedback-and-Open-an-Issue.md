@@ -4,6 +4,10 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Start here](Contents.md#start-here) > Give feedback
+<!-- END GENERATED PAGE NAV top -->
+
 This project is one person's open-source education effort. It will have mistakes: a claim that has gone out of date, a vendor page that changed after it was written, a command that works on my machine and not on yours. Those are exactly what I want to hear about, because you can see them and I cannot. You are not dead until you stop learning, and that includes the lessons themselves.
 
 Reading the pages and doing the free exercises costs nothing, and so does giving feedback. Nothing here is sold and nothing is gated behind a report.
@@ -105,3 +109,18 @@ Retrieved 2026-10-22 from GitHub's documentation.
 The exact wording of the form buttons can change; if your screen differs, trust your screen and tell me.
 
 Next: back to [Reading order](Reading-Order.md), or on to [Git from zero](Git-From-Zero.md) if you are new.
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Start here](Contents.md#start-here) > Give feedback
+
+In this group: [Start here](Contents.md#start-here), 5 pages
+
+- [Home](Home.md) / [Contents](Contents.md) / [Reading order](Reading-Order.md) / [Why this exists](Why-This-Exists.md) / **Give feedback**
+
+Related pages:
+
+- [Why this exists](Why-This-Exists.md)
+- [Reading order](Reading-Order.md)
+- [Contents](Contents.md)
+- [Home](Home.md)
+<!-- END GENERATED PAGE NAV bottom -->

@@ -1,5 +1,11 @@
 # First hour on a new system: updates, automatic updates and a baseline, before anything else
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > First hour on a new system
+
+Previous: [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) / Next: [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Side page to the start-from-zero pages. Read it after [Droplet hardening](Droplet-Hardening.md) (core step 14), or at any point you are about to set up a machine, a virtual machine, a container host or a router and wonder what to do first. It is about the **order** of the first hour. The details of patch cadence, CVE scores and backups are on [Backups, recovery and patching](Backups-Recovery-and-Patching.md); this page does not repeat them. Next: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -603,3 +609,24 @@ All read-only requests; retrieved **2026-10-22**. "Read" means I read the passag
 | `s-1vcpu-512mb-10gb` is $4 a month | [`docs/cost-prices.json`](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost-prices.json) (retrieved 2026-10-21) | Read |
 
 **Not verified, plainly:** the `unattended-upgrades` and `dnf-automatic` exercises (Exercises 1 and 2), the PowerShell stagger pipeline, WSUS groups, managed-Kubernetes node-pool maintenance, the reboot-storm and capacity points (general practice), including that the images named pull and behave as shown; the entire PowerShell and Windows track; Windows and SUSE consumer or scheduling defaults; the commands `apt-mark hold`, `dnf versionlock`, `fwupd`, `dnf updateinfo` and `nmap -sV`; macOS behavior beyond the Apple passage; whether the edge design's unpinned-package test exists; the optional droplet path from start to finish; Debian's own default for `unattended-upgrades` (I did not read Debian's documentation, so the Debian statement is est.); and any claim about how quickly scanners find new services.
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > First hour on a new system
+
+Previous: [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) / Next: [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md)
+
+In this track: [Track 1: Foundations](Contents.md#track-1-foundations), 28 pages
+
+- OS and Linux, git and the terminal: [Git from zero](Git-From-Zero.md) / [The terminal and your first script](Terminal-and-Your-First-Script.md) / [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) / **First hour on a new system** / [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md) / [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md) / [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) / [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md) / [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md)
+- Networking: [How a web request works](How-a-Web-Request-Works.md) / [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) / [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) / [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md) / [IPv6 adoption and handling it safely](IPv6-Adoption-and-Handling-It-Safely.md)
+- Identity and secrets: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) / [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) / [Secrets from day one](Secrets-From-Day-One.md) / [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md)
+- Infrastructure as code: [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md) / [OpenTofu from zero](OpenTofu-From-Zero.md) / [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) / [Spacelift from zero](Spacelift-From-Zero.md) / [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md) / [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md)
+- Web hosting: [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md) / [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) / [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) / [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
+
+Related pages:
+
+- [The terminal and your first script](Terminal-and-Your-First-Script.md)
+- [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md)
+- [Git from zero](Git-From-Zero.md)
+- [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md)
+<!-- END GENERATED PAGE NAV bottom -->

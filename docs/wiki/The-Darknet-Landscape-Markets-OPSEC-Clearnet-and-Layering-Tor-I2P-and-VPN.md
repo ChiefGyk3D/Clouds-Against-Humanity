@@ -1,5 +1,11 @@
 # The darknet landscape: markets as an OPSEC case study, clearnet versus darknet, and layering Tor, I2P and a VPN
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 3: Privacy, anonymity and cryptocurrency](Contents.md#track-3-privacy-anonymity-and-cryptocurrency) > The darknet landscape: markets, OPSEC and layering
+
+Previous: [The browsing setups compared](The-Browsing-Setups-Compared-Tor-Browser-Brave-Whonix-Tails-and-Qubes-with-Whonix.md) / Next: [Blockchain fundamentals](Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Side page to [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md). Read that one first: it explains how Tor and I2P work, who uses them and why the "government backdoor" story does not hold up, and this page does not repeat it. This page is about what is on these networks besides the legitimate uses, told through documented public cases: what a darknet market is, how the best-known ones ended, why most fail, what the real harms were, what the cases teach about operational security (OPSEC), and what happens when you combine Tor, I2P and a VPN. It is an educational and defensive page. It teaches you to read the evidence and to ask the right question first (what am I protecting, and from whom). It does not teach anyone to buy or sell anything.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -305,3 +311,25 @@ Every row carries a status: **Read** means the sentence is on the page named, re
 | The document circulated on the darknet first, and the clearnet site is an archival copy | The maintainer's account in issue 423: found on Dread or some other darknet site years ago, site not remembered | Unsourced beyond his word; the host's own "historical document created on the darknet" wording is consistent but is not a source for where or when it first appeared (**est.**) |
 | dark.fail is an example of a link directory | The maintainer's issue 381 | Read in the issue; not opened (**est.**) |
 | Laws on these tools and on the trades in the cases differ by place | General knowledge | General knowledge; no country checked |
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 3: Privacy, anonymity and cryptocurrency](Contents.md#track-3-privacy-anonymity-and-cryptocurrency) > The darknet landscape: markets, OPSEC and layering
+
+Previous: [The browsing setups compared](The-Browsing-Setups-Compared-Tor-Browser-Brave-Whonix-Tails-and-Qubes-with-Whonix.md) / Next: [Blockchain fundamentals](Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks.md)
+
+In this track: [Track 3: Privacy, anonymity and cryptocurrency](Contents.md#track-3-privacy-anonymity-and-cryptocurrency), 15 pages
+
+- Cryptography and privacy: [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md) / [Privacy, security and anonymity](Privacy-Security-and-Anonymity-Three-Different-Things-and-Why-There-Is-No-Silver-Bullet.md) / [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md)
+- Tor, I2P, VPN and browsing: [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) / [How a VPN works](How-a-VPN-Works-Tunnels-What-It-Hides-What-It-Does-Not-and-What-an-Audit-Proves.md) / [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md) / [How I2P works](How-I2P-Works-Tunnels-Garlic-Routing-and-the-Network-Database.md) / [The browsing setups compared](The-Browsing-Setups-Compared-Tor-Browser-Brave-Whonix-Tails-and-Qubes-with-Whonix.md) / **The darknet landscape: markets, OPSEC and layering**
+- Cryptocurrency: [Blockchain fundamentals](Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks.md) / [How Bitcoin works](How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable.md) / [How Monero works](How-Monero-Works-Compared-with-Bitcoin-and-Ethereum-DeFi-Mixers-Swaps-and-Ransomware.md) / [Wallets and key custody](Wallets-and-Key-Custody-Hot-and-Cold-Hardware-Wallets-Recovery-Shamir-and-Multisig.md) / [Running Monero properly](Running-Monero-Properly-Hardware-Wallet-Qubes-and-Whonix-Offline-Wallet-and-PiNodeXMR.md)
+- Radio and off-grid: [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md)
+
+Related pages:
+
+- [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md)
+- [Threat model](Threat-Model.md)
+- [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md)
+- [Threats in plain words](Threats-in-Plain-Words.md)
+- [Secrets from day one](Secrets-From-Day-One.md)
+- [The browsing setups compared](The-Browsing-Setups-Compared-Tor-Browser-Brave-Whonix-Tails-and-Qubes-with-Whonix.md)
+<!-- END GENERATED PAGE NAV bottom -->

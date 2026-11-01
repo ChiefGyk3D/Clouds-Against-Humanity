@@ -1,5 +1,11 @@
 # Running Monero properly: a hardware wallet, the Qubes and Whonix offline wallet, and PiNodeXMR
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 3: Privacy, anonymity and cryptocurrency](Contents.md#track-3-privacy-anonymity-and-cryptocurrency) > Running Monero properly
+
+Previous: [Wallets and key custody](Wallets-and-Key-Custody-Hot-and-Cold-Hardware-Wallets-Recovery-Shamir-and-Multisig.md) / Next: [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Page five of five in the cryptocurrency set. Read it when you have read how Monero hides a payment and who holds the keys, and the question has become "how do I run a Monero wallet so that one mistake, one piece of malware or one bad node does not cost me the money or the privacy?". It covers what changes when a hardware wallet is used with Monero, a design on Qubes OS and Whonix that keeps the wallet and the hardware wallet in qubes with no network at all and the blockchain in a separate qube whose whole traffic goes over Tor, why a node that is always on (PiNodeXMR) makes the rest easier, the trade-offs between your own node and a remote node you trust, and how to keep that node itself safe. It says, part by part, what a document states and what is only my reading of several documents put together.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -555,3 +561,25 @@ Every row carries a status: **Read** means the statement is on the page named, r
 | A hardware wallet is attached to a qube by passthrough, not as a block device | This page's reading of the Qubes pages | **est.**; none of the pages says so for a wallet |
 | An outdated node may stop working at a network upgrade; a hidden-service key directory is a private key; automatic updates for the base layer | General knowledge | General knowledge; not read on a page today |
 | Qubes are isolated compartments; Qubes is designed under the assumption that software bugs will be exploited, and aims to confine the damage; device isolation of USB controllers | [Qubes OS, Introduction](https://doc.qubes-os.org/en/latest/introduction/intro.html) | Read 2026-11-01 (the introduction text; source file last changed 2026-04-13) |
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 3: Privacy, anonymity and cryptocurrency](Contents.md#track-3-privacy-anonymity-and-cryptocurrency) > Running Monero properly
+
+Previous: [Wallets and key custody](Wallets-and-Key-Custody-Hot-and-Cold-Hardware-Wallets-Recovery-Shamir-and-Multisig.md) / Next: [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md)
+
+In this track: [Track 3: Privacy, anonymity and cryptocurrency](Contents.md#track-3-privacy-anonymity-and-cryptocurrency), 15 pages
+
+- Cryptography and privacy: [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md) / [Privacy, security and anonymity](Privacy-Security-and-Anonymity-Three-Different-Things-and-Why-There-Is-No-Silver-Bullet.md) / [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md)
+- Tor, I2P, VPN and browsing: [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) / [How a VPN works](How-a-VPN-Works-Tunnels-What-It-Hides-What-It-Does-Not-and-What-an-Audit-Proves.md) / [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md) / [How I2P works](How-I2P-Works-Tunnels-Garlic-Routing-and-the-Network-Database.md) / [The browsing setups compared](The-Browsing-Setups-Compared-Tor-Browser-Brave-Whonix-Tails-and-Qubes-with-Whonix.md) / [The darknet landscape: markets, OPSEC and layering](The-Darknet-Landscape-Markets-OPSEC-Clearnet-and-Layering-Tor-I2P-and-VPN.md)
+- Cryptocurrency: [Blockchain fundamentals](Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks.md) / [How Bitcoin works](How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable.md) / [How Monero works](How-Monero-Works-Compared-with-Bitcoin-and-Ethereum-DeFi-Mixers-Swaps-and-Ransomware.md) / [Wallets and key custody](Wallets-and-Key-Custody-Hot-and-Cold-Hardware-Wallets-Recovery-Shamir-and-Multisig.md) / **Running Monero properly**
+- Radio and off-grid: [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md)
+
+Related pages:
+
+- [Wallets and key custody](Wallets-and-Key-Custody-Hot-and-Cold-Hardware-Wallets-Recovery-Shamir-and-Multisig.md)
+- [How Monero works](How-Monero-Works-Compared-with-Bitcoin-and-Ethereum-DeFi-Mixers-Swaps-and-Ransomware.md)
+- [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md)
+- [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md)
+- [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md)
+- [The DMZ and hardening an internet-facing host](The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet.md)
+<!-- END GENERATED PAGE NAV bottom -->

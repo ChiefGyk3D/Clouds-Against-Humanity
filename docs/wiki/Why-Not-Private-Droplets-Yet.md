@@ -2,6 +2,12 @@
 
 > **Status: unverified draft.** The figures come from this repository's own notes (the [phase 0 findings](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-16-multicloud-phase0-findings.md), read 2026-10-16, and the [edge design](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/superpowers/specs/2026-10-19-edge-dmz-design.md), read 2026-10-19) and will change. Nothing here was applied in a real account. Not yet reviewed by the maintainer. Read [Networking basics](Networking-Basics-for-This-Project.md), [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) and [How money works in the cloud](How-Money-Works-in-the-Cloud.md) first.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Why not private droplets (yet)
+
+Previous: [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) / Next: [Why I picked these tools](Why-I-Picked-These-Tools.md)
+<!-- END GENERATED PAGE NAV top -->
+
 A common first reaction to this project's design is: "Why do the connector droplets have public IP addresses? Shouldn't servers like these be private?" It is a fair question. This page gives the honest answer: it is mostly about money, the exposure ends up the same, and there are real tradeoffs.
 
 ## The two designs
@@ -57,3 +63,23 @@ The Roadmap already names when to revisit this: when the ceiling passes roughly 
 - The tradeoff is real: you rely on the firewall staying correct, so the project tests it from the outside.
 
 Back to [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md), [How money works in the cloud](How-Money-Works-in-the-Cloud.md) or the [Roadmap](Roadmap.md).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Why not private droplets (yet)
+
+Previous: [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) / Next: [Why I picked these tools](Why-I-Picked-These-Tools.md)
+
+In this track: [Track 5: Build and operate](Contents.md#track-5-build-and-operate), 31 pages
+
+- Stage guides and design: [Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md) / [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) / [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) / [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) / [Teardown checklist](Teardown-Checklist.md) / [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) / [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) / **Why not private droplets (yet)** / [Why I picked these tools](Why-I-Picked-These-Tools.md) / [From commit to pipeline](From-Commit-to-Pipeline.md) / [Trace one change end to end](Trace-One-Change-End-to-End.md)
+- Other clouds: [Why the clouds differ](Why-the-Clouds-Differ.md) / [AWS: account preparation](Provider-AWS-Account-Preparation.md) / [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) / [AWS: where the money goes](Provider-AWS-Cost-Lesson.md) / [Azure: account preparation](Provider-Azure-Account-Preparation.md) / [Azure: the same four pieces](Provider-Azure-The-Same-Four-Pieces.md) / [Azure: where the money goes](Provider-Azure-Cost-Lesson.md) / [GCP: account preparation](Provider-GCP-Account-Preparation.md) / [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md) / [GCP: where the money goes](Provider-GCP-Cost-Lesson.md)
+- Enterprise practice: [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md) / [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md) / [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md) / [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md) / [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md) / [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
+- Project process: [How this project is planned](How-This-Project-Is-Planned.md) / [Project status](Project-Status.md) / [Repository growth](Repository-Growth.md) / [Screenshots policy](Screenshots-Policy.md)
+
+Related pages:
+
+- [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md)
+- [From commit to pipeline](From-Commit-to-Pipeline.md)
+- [Teardown checklist](Teardown-Checklist.md)
+- [Trace one change end to end](Trace-One-Change-End-to-End.md)
+<!-- END GENERATED PAGE NAV bottom -->

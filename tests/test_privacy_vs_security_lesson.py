@@ -10,6 +10,8 @@ what Monero can defeat would each teach the wrong thing.
 import re
 from pathlib import Path
 
+from wikitext import page_text
+
 ROOT = Path(__file__).resolve().parent.parent
 WIKI = ROOT / "docs" / "wiki"
 NAME = "Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero"
@@ -24,7 +26,7 @@ HOWTO_WORDS = ("tension wrench", "raking", "single pin picking", "how to pick", 
 
 
 def text() -> str:
-    return PAGE.read_text(encoding="utf-8")
+    return page_text(PAGE)  # without the generated navigation blocks (issue #417)
 
 
 def section(body: str, start: str, end: str) -> str:

@@ -4,6 +4,12 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Why I picked these tools
+
+Previous: [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) / Next: [From commit to pipeline](From-Commit-to-Pipeline.md)
+<!-- END GENERATED PAGE NAV top -->
+
 I could have built all of this on open source, and I know that, because Infisical for secrets, Keycloak or Authentik for identity, and NetBird, Headscale or OpenZiti for zero trust all exist and are good. Tailscale's core client is open source too, but its coordination server is not, and Headscale is the community's self-hosted answer to that. So the question you should be asking is why Spacelift, DigitalOcean, Doppler and Twingate, and the answer is that I wanted this to look as close as I could get it to the enterprise environments I have actually worked in.
 
 ## Disclosure first
@@ -54,3 +60,23 @@ DigitalOcean is the one I love for personal use, and I would reach for it and Tw
 None of this is the only way to do it, and a team with different needs, a different budget or a different cloud would build something different and be right. So swap the pieces: the structure of the project (everything as code, secrets out of the repository, no inbound ports, every change reviewed) does not depend on any one of these products.
 
 Next: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md), step 3 of the Understand the design path on the [Reading order](Reading-Order.md) page.
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Why I picked these tools
+
+Previous: [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) / Next: [From commit to pipeline](From-Commit-to-Pipeline.md)
+
+In this track: [Track 5: Build and operate](Contents.md#track-5-build-and-operate), 31 pages
+
+- Stage guides and design: [Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md) / [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) / [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) / [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) / [Teardown checklist](Teardown-Checklist.md) / [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) / [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) / [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) / **Why I picked these tools** / [From commit to pipeline](From-Commit-to-Pipeline.md) / [Trace one change end to end](Trace-One-Change-End-to-End.md)
+- Other clouds: [Why the clouds differ](Why-the-Clouds-Differ.md) / [AWS: account preparation](Provider-AWS-Account-Preparation.md) / [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) / [AWS: where the money goes](Provider-AWS-Cost-Lesson.md) / [Azure: account preparation](Provider-Azure-Account-Preparation.md) / [Azure: the same four pieces](Provider-Azure-The-Same-Four-Pieces.md) / [Azure: where the money goes](Provider-Azure-Cost-Lesson.md) / [GCP: account preparation](Provider-GCP-Account-Preparation.md) / [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md) / [GCP: where the money goes](Provider-GCP-Cost-Lesson.md)
+- Enterprise practice: [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md) / [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md) / [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md) / [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md) / [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md) / [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
+- Project process: [How this project is planned](How-This-Project-Is-Planned.md) / [Project status](Project-Status.md) / [Repository growth](Repository-Growth.md) / [Screenshots policy](Screenshots-Policy.md)
+
+Related pages:
+
+- [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md)
+- [Trace one change end to end](Trace-One-Change-End-to-End.md)
+- [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md)
+- [Teardown checklist](Teardown-Checklist.md)
+<!-- END GENERATED PAGE NAV bottom -->

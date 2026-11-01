@@ -4,6 +4,12 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > OpenTofu, stacks and modules
+
+Previous: [Droplet hardening](Droplet-Hardening.md) / Next: [Spacelift](Spacelift.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Every resource in this project is declared in OpenTofu and nothing is clicked together in a console (the account hardening checklist in stage 0 is the one deliberate exception, because it has to happen before any automation has credentials).
 
 ## Why OpenTofu and not Terraform
@@ -97,3 +103,20 @@ Repeat for `modules/vpc`, `modules/twingate-bootstrap`, `modules/twingate-connec
 You may see "deprecated source" warnings from `tofu test` about `access_group` on `twingate_resource`. The block itself is not deprecated; the provider deprecates two attributes nested inside it, which this repository does not set, and the warning appears where a test reads the whole block. Nothing needs replacing. The provider is pinned to `~> 5.0` (issue #93); the breaking changes in 4.x and 5.x do not touch any resource this repository uses. The stacks are locked and nothing has been applied with the new provider: in the first tracked plan, expect no changes to the Twingate resources beyond provider schema refresh, and treat any create, replace or destroy as a stop-and-read.
 
 Next: [Spacelift](Spacelift.md), step 16 of the core path on the [Reading order](Reading-Order.md) page. The [Terraform reference](Terraform-Reference.md) is the line-by-line lookup page; it is optional on the core path.
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > OpenTofu, stacks and modules
+
+Previous: [Droplet hardening](Droplet-Hardening.md) / Next: [Spacelift](Spacelift.md)
+
+In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
+
+- [Start here if you are new](Start-Here-If-You-Are-New.md) / [What is the cloud](What-Is-the-Cloud.md) / [Networking basics](Networking-Basics-for-This-Project.md) / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / [How money works](How-Money-Works-in-the-Cloud.md) / [Enterprise habits](Enterprise-Engineering-Habits.md) / [Architecture overview](Architecture-Overview.md) / [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / [Twingate](Twingate.md) / [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / [Droplet hardening](Droplet-Hardening.md) / **OpenTofu, stacks and modules** / [Spacelift](Spacelift.md) / [Doppler and secrets](Doppler-and-Secrets.md) / [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / [Threat model](Threat-Model.md) / [Lessons learned](Lessons-Learned.md) / [Roadmap](Roadmap.md)
+
+Related pages:
+
+- [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md)
+- [Doppler and secrets](Doppler-and-Secrets.md)
+- [Twingate](Twingate.md)
+- [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md)
+<!-- END GENERATED PAGE NAV bottom -->

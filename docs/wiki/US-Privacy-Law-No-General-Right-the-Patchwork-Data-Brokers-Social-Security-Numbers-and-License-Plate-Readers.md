@@ -1,5 +1,11 @@
 # US privacy law: no general right to privacy, the patchwork, data brokers, Social Security numbers and license plate readers
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 4: GRC and law](Contents.md#track-4-grc-and-law) > US privacy law and the patchwork
+
+Previous: [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md) / Next: [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Page two of three in the GRC and compliance set. Read it when you want to know what the United States actually has for privacy: what the Constitution does and does not say, which federal laws cover which kinds of data, what the states have added, who the data brokers are and what the law says about them, why the Social Security number is a poor key to a person, and what is documented about license plate readers and Flock. The facts come first, each with a date and a source. Near the end is one clearly headed section with the maintainer's opinion, and each of his four points sits next to what the sources say about it. It ends with a free exercise: pick a state and a kind of data and work out which laws apply, then read how a broker says you can ask for your own data.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -497,3 +503,23 @@ Every row carries a status: **Read** means the statement is on the page named, r
 | A broker's published process for a report, opt-out, freeze and the FACT Act | LexisNexis Risk Solutions, [Consumer Disclosure](https://consumer.risk.lexisnexis.com/) | Read 2026-11-01 (the landing page only) |
 | The acronym ECPA for the 1986 act; the tokenization description; constitutional limits run against the government | General knowledge | General knowledge; not read on a page today |
 | The stance and the rules for the set; the four opinions in the opinion section | The maintainer's framing, issues 402 and 403 (2026-11-01) | Read in the issues; a framing, not a source claim (**est.**) |
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 4: GRC and law](Contents.md#track-4-grc-and-law) > US privacy law and the patchwork
+
+Previous: [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md) / Next: [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md)
+
+In this track: [Track 4: GRC and law](Contents.md#track-4-grc-and-law), 9 pages
+
+- Also here: [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md)
+- GRC, privacy law and data governance: [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md) / **US privacy law and the patchwork** / [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md) / [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md)
+- Continuity, backups and recovery: [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) / [Backups, recovery and patching](Backups-Recovery-and-Patching.md) / [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md) / [RAID: continuity, not a backup](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md)
+
+Related pages:
+
+- [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md)
+- [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md)
+- [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md)
+- [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md)
+- [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md)
+<!-- END GENERATED PAGE NAV bottom -->

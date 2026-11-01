@@ -1,5 +1,11 @@
 # Governance, risk and compliance in plain terms: laws, frameworks and attestations
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 4: GRC and law](Contents.md#track-4-grc-and-law) > GRC in plain terms
+
+Previous: [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) / Next: [US privacy law and the patchwork](US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Page one of three in the GRC and compliance set. Read it when a job, a customer or an auditor has put the letters GRC, "SOC 2", "NIST" or "HIPAA" in front of you and you want to know what each one is, who enforces it, and what an engineer is asked to produce. It explains governance, risk and compliance as one loop, the difference between a law, a regulation, a framework, a standard and an attestation, a one-paragraph overview of SOX, PCI DSS, HIPAA and HITECH, GLBA, FISMA and FedRAMP, who owns what, risk methods in brief, controls and evidence, what an audit looks like from the engineer's chair, why compliance is not security (and the reverse), and what non-compliance has cost in documented cases. It ends with a free exercise: take one control from NIST SP 800-53 and write the evidence an auditor would ask for, using this repository as the system.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -410,3 +416,24 @@ Every row carries a status: **Read** means the statement is on the page named, r
 | ITGC, internal audit independence, the audit sequence, expected-loss methods, the list of what to ask a supplier for | General knowledge | General knowledge; not read on a page today |
 | The secure-but-not-compliant story | Constructed by the author for this lesson; no real organization | Constructed; no sourced case found |
 | The stance and the rules for the set (an education page, a factual page, opinions on page two) | The maintainer's framing, issue 402 (2026-11-01) | Read in the issue; a framing, not a source claim (**est.**) |
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 4: GRC and law](Contents.md#track-4-grc-and-law) > GRC in plain terms
+
+Previous: [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) / Next: [US privacy law and the patchwork](US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers.md)
+
+In this track: [Track 4: GRC and law](Contents.md#track-4-grc-and-law), 9 pages
+
+- Also here: [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md)
+- GRC, privacy law and data governance: **GRC in plain terms** / [US privacy law and the patchwork](US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers.md) / [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md) / [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md)
+- Continuity, backups and recovery: [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) / [Backups, recovery and patching](Backups-Recovery-and-Patching.md) / [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md) / [RAID: continuity, not a backup](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md)
+
+Related pages:
+
+- [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md)
+- [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md)
+- [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md)
+- [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md)
+- [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md)
+- [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md)
+<!-- END GENERATED PAGE NAV bottom -->

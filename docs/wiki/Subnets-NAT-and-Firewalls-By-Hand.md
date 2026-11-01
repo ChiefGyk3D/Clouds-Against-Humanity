@@ -1,5 +1,11 @@
 # Subnets, NAT and firewalls by hand
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > Subnets, NAT and firewalls by hand
+
+Previous: [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) / Next: [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Side page to the start-from-zero pages. Read it after [Networking basics](Networking-Basics-for-This-Project.md) (core step 3) and, if "TCP", "port" and "handshake" are fuzzy, after [How a web request works](How-a-Web-Request-Works.md). It reaches ahead to [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) (core step 13), which you can read with fresh eyes once you have done the arithmetic and watched a packet get dropped. It does not repeat what those pages say: it makes you do the work they only describe. Next: [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -1001,3 +1007,24 @@ All read-only requests; retrieved 2026-10-21 unless stated. "Observed" means I r
 Not verified, plainly: the whole PowerShell and Windows track; WSL 2; the `sudo unshare` fallback; the optional cloud path from start to finish, including whether a tag-sourced rule admits the scanner over the private network, whether the `1-65535` port range is accepted, whether `journalctl -k` shows the `log` lines on the droplet, and how long a change takes to apply; any DigitalOcean subnet reservations; and how long a full 65,535-port sweep takes on a real network.
 
 Next: [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md), core step 4 on the [Reading order](Reading-Order.md) page.
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > Subnets, NAT and firewalls by hand
+
+Previous: [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) / Next: [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md)
+
+In this track: [Track 1: Foundations](Contents.md#track-1-foundations), 28 pages
+
+- OS and Linux, git and the terminal: [Git from zero](Git-From-Zero.md) / [The terminal and your first script](Terminal-and-Your-First-Script.md) / [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) / [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md) / [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md) / [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md) / [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) / [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md) / [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md)
+- Networking: [How a web request works](How-a-Web-Request-Works.md) / [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) / **Subnets, NAT and firewalls by hand** / [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md) / [IPv6 adoption and handling it safely](IPv6-Adoption-and-Handling-It-Safely.md)
+- Identity and secrets: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) / [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) / [Secrets from day one](Secrets-From-Day-One.md) / [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md)
+- Infrastructure as code: [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md) / [OpenTofu from zero](OpenTofu-From-Zero.md) / [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) / [Spacelift from zero](Spacelift-From-Zero.md) / [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md) / [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md)
+- Web hosting: [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md) / [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) / [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) / [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
+
+Related pages:
+
+- [How a web request works](How-a-Web-Request-Works.md)
+- [IPv6 adoption and handling it safely](IPv6-Adoption-and-Handling-It-Safely.md)
+- [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md)
+- [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md)
+<!-- END GENERATED PAGE NAV bottom -->

@@ -4,6 +4,12 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Azure: the same four pieces
+
+Previous: [Azure: account preparation](Provider-Azure-Account-Preparation.md) / Next: [Azure: where the money goes](Provider-Azure-Cost-Lesson.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Read [Why the clouds differ](Why-the-Clouds-Differ.md) and [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) first, and skim [the AWS version of this page](Provider-AWS-The-Same-Four-Pieces.md) if you want the comparison. This page walks the four pieces that this project builds on DigitalOcean (a private network, a firewall, a machine, an identity for the machine), points at the DigitalOcean file where each lives, and says what you would build on Azure instead and why it is not a one-line rename.
 
 The method is the exercise: for each piece, **read the DigitalOcean file, predict the Azure resources, then check your list against the reference at the bottom of the piece.**
@@ -135,3 +141,23 @@ On DigitalOcean, `stacks/00-foundation` and `stacks/10-access` are two layers, a
   *Reference: platform services on the two Microsoft-owned addresses (DHCP, DNS, instance metadata, health monitoring). The Azure boot data in this project is `custom_data`, which is not exposed through IMDS (it is written to the machine and readable by local root), so it is not the same exposure. The IMDS exception would matter for Azure's separate *user data* feature, which is readable from IMDS by any local process; that is why the connector token must not go there. The metadata endpoint is the general lesson (a network filter does not cover platform services), and it touches T5 only if the token were put in user data.*
 
 Next: [the Azure cost lesson](Provider-Azure-Cost-Lesson.md).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Azure: the same four pieces
+
+Previous: [Azure: account preparation](Provider-Azure-Account-Preparation.md) / Next: [Azure: where the money goes](Provider-Azure-Cost-Lesson.md)
+
+In this track: [Track 5: Build and operate](Contents.md#track-5-build-and-operate), 31 pages
+
+- Stage guides and design: [Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md) / [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) / [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) / [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) / [Teardown checklist](Teardown-Checklist.md) / [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) / [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) / [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) / [Why I picked these tools](Why-I-Picked-These-Tools.md) / [From commit to pipeline](From-Commit-to-Pipeline.md) / [Trace one change end to end](Trace-One-Change-End-to-End.md)
+- Other clouds: [Why the clouds differ](Why-the-Clouds-Differ.md) / [AWS: account preparation](Provider-AWS-Account-Preparation.md) / [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) / [AWS: where the money goes](Provider-AWS-Cost-Lesson.md) / [Azure: account preparation](Provider-Azure-Account-Preparation.md) / **Azure: the same four pieces** / [Azure: where the money goes](Provider-Azure-Cost-Lesson.md) / [GCP: account preparation](Provider-GCP-Account-Preparation.md) / [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md) / [GCP: where the money goes](Provider-GCP-Cost-Lesson.md)
+- Enterprise practice: [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md) / [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md) / [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md) / [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md) / [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md) / [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
+- Project process: [How this project is planned](How-This-Project-Is-Planned.md) / [Project status](Project-Status.md) / [Repository growth](Repository-Growth.md) / [Screenshots policy](Screenshots-Policy.md)
+
+Related pages:
+
+- [AWS: where the money goes](Provider-AWS-Cost-Lesson.md)
+- [GCP: account preparation](Provider-GCP-Account-Preparation.md)
+- [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md)
+- [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md)
+<!-- END GENERATED PAGE NAV bottom -->
