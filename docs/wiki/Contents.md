@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (134 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (135 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -25,7 +25,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Foundations: identity and secrets](#foundations-identity-and-secrets) (7)
 - [Foundations: infrastructure as code](#foundations-infrastructure-as-code) (7)
 - [Foundations: web hosting](#foundations-web-hosting) (4)
-- [Foundations: security tools and threat modeling](#foundations-security-tools-and-threat-modeling) (6)
+- [Foundations: security tools and threat modeling](#foundations-security-tools-and-threat-modeling) (7)
 - [Foundations: network and host defense](#foundations-network-and-host-defense) (8)
 - [Foundations: deception and honeypots](#foundations-deception-and-honeypots) (11)
 - [Detection and monitoring](#detection-and-monitoring) (13)
@@ -103,10 +103,10 @@ A page with no marker has no such banner. It may still say what was and was not 
 | Page | What it is for and who it is for | Audience | Status |
 | --- | --- | --- | --- |
 | [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) | What an API is, how to read a request, a response and JSON, and what a token is, for readers new to all three. | learner |  |
-| [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md) | Symmetric and asymmetric keys together, MACs, signatures, PKI, at rest versus in transit, key custody, NIST defaults and post-quantum planning, with a free drill. | learner | draft |
 | [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md) | Directories, identity providers, SSO, SAML, OAuth and OIDC in plain words, for readers heading into enterprise identity. | learner |  |
 | [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) | What encoding, hashing, encryption and signing each give you and what they do not, for readers who lump them together. | learner |  |
 | [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md) | Blast radius, assume breach and defense in depth as one mindset question to ask of any system. | learner |  |
+| [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md) | Privacy as blinds and security as locks, Monero as a worked example, privacy law basics, physical security and why lockpicking is a hobby, with a free audit of your desk. | learner | draft |
 | [Secrets from day one](Secrets-From-Day-One.md) | A password manager, Doppler for every asset and the .env rules, as personal habits for anyone about to start writing code. | learner |  |
 | [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) | Confidentiality, integrity and availability in plain words, how real failures map to each, and this project's controls checked against all three. | learner | draft |
 
@@ -141,6 +141,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [Threat model exercise](Threat-Model-Exercise.md) | Build your own threat model of this repository before you open the worked one, for security-minded readers. | security reader |  |
 | [Threat Dragon exercise](Threat-Dragon-Exercise.md) | Draw this pipeline's trust boundaries in OWASP Threat Dragon and attach threats to them, for security-minded readers. | security reader |  |
 | [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md) | The same pipeline viewed through STRIDE, MITRE ATT&CK and MITRE ATLAS, with files to open them, for security-minded readers. | security reader |  |
+| [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) | How Tor and I2P work, who uses them, Tor Browser, Tails, Whonix and Qubes compared, and a Monero node as the privacy-versus-security example. | learner | draft |
 
 ## Foundations: network and host defense
 
