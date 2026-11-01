@@ -1322,6 +1322,19 @@
         "sensitivity": "public",
         "sensitive_in_code": false,
         "status": "exists"
+      },
+      {
+        "name": "onion_service_enabled",
+        "type": "bool",
+        "description": "Optional, default off (issue #391). true, together with workload_enabled, adds a loopback-only static origin and a Tor onion service to the workload host's cloud-init. The flag adds no resource, opens no port and changes no firewall rule. The service key is made on the host and never appears in the plan or the state.",
+        "required": false,
+        "default": false,
+        "validation": "none beyond bool (nullable = false); has no effect while workload_enabled is false",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "false",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
       }
     ],
     "planned/optional-noc-soc (not built yet)": [
@@ -2351,6 +2364,32 @@
         "validation": "a whole port from 1024 to 65535, never 22; non-nullable",
         "set_where": "set by the calling stack (not a user setting)",
         "example": "9443",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "onion_service_enabled",
+        "type": "bool",
+        "description": "Optional, default off (issue #391). true adds a loopback-only static nginx origin and a Tor onion service to the cloud-init. It opens no port to the internet, changes no firewall rule and keeps the service key on the host, out of the plan and the state. Changing it replaces the droplet.",
+        "required": false,
+        "default": false,
+        "validation": "none beyond bool (nullable = false)",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "false",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
+      },
+      {
+        "name": "onion_origin_image",
+        "type": "string",
+        "description": "Static origin image for the onion service, the official Docker Hub library image pinned by tag and by digest (nginx 1.30.6-alpine, digest read from Docker Hub 2026-11-01). Used only when onion_service_enabled is true. Bumping it replaces the droplet.",
+        "required": false,
+        "default": "nginx:1.30.6-alpine@sha256:0e52bd054126cdc040b1276c0af347aeb02a41b9cfe305d6094767ac30e97949",
+        "validation": "nginx:<exact version>-alpine@sha256:<64 hex digits>; never latest, never a tag alone",
+        "set_where": "set by the calling stack (not a user setting)",
+        "example": "nginx:1.30.6-alpine@sha256:0e52bd054126cdc040b1276c0af347aeb02a41b9cfe305d6094767ac30e97949",
         "sensitivity": "public",
         "sensitive_in_code": false,
         "status": "exists"

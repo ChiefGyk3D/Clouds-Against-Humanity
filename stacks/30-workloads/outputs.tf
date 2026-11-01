@@ -25,6 +25,11 @@ output "droplet_name" {
   value = one(module.workload[*].instance_name)
 }
 
+output "onion_service_enabled" {
+  description = "Whether the optional onion service is switched on: true only when both this flag and workload_enabled are true. It never carries the onion address, which only exists on the host."
+  value       = var.workload_enabled && var.onion_service_enabled
+}
+
 output "private_ip" {
   description = "The droplet's VPC address, where the two Twingate resources point."
   value       = one(module.workload[*].private_ip)

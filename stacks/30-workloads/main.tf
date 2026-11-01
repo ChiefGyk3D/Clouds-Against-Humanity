@@ -84,6 +84,9 @@ module "workload" {
   timezone             = var.timezone
   portainer_version    = var.portainer_version
   portainer_port       = local.portainer_port
+
+  # Optional and off by default (issue #391). Adds user_data only; no resource, no rule.
+  onion_service_enabled = var.onion_service_enabled
 }
 
 resource "digitalocean_project_resources" "workload" {
