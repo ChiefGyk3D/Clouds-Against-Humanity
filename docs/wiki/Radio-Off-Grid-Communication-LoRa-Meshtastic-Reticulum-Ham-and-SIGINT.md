@@ -93,7 +93,7 @@ The three systems below are not radios. They are software that sits on LoRa radi
 
 ### Side by side
 
-| | Meshtastic | MeshCore | Reticulum |
+| Aspect | Meshtastic | MeshCore | Reticulum |
 |---|---|---|---|
 | What it is | Firmware and apps for LoRa devices | A C++ routing library with ready firmware and apps | A networking stack, many media |
 | Routing | Managed flooding; next-hop for direct messages since 2.6 | Clients do not repeat; flood to learn a path, then direct | Transport nodes with path tables; announces |
@@ -175,7 +175,7 @@ Everything above is the United States. Other countries have different classes, b
 
 Both share the 462 and 467 MHz channels and both are voice-first. The sources are 47 CFR Part 95 from eCFR (2026-10-29 edition, read 2026-10-31).
 
-| | FRS (Family Radio Service) | GMRS (General Mobile Radio Service) |
+| Topic | FRS (Family Radio Service) | GMRS (General Mobile Radio Service) |
 |---|---|---|
 | License | None: the FCC does not require or accept applications for most Personal Radio Services (95.305) | An individual license is required (95.1705); a new one only for an individual at least 18 years old; the license covers the licensee's immediate family (95.1705(c)); normal term ten years; fees apply |
 | Exam | None | I found none in the sections I read |
