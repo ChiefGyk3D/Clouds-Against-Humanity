@@ -26,7 +26,7 @@ def text() -> str:
 
 
 def register_rows(body: str) -> list[list[str]]:
-    reg = body.split("## Claims register")[1].split("## Maintainer notes to add")[0]
+    reg = body.split("## Claims register")[1]
     rows = [line for line in reg.splitlines() if line.startswith("|") and not line.startswith("|---")]
     return [[c.strip() for c in r.strip("|").split("|")] for r in rows[1:]]
 
@@ -94,7 +94,7 @@ def test_every_claims_register_row_has_a_status():
 
 
 def test_the_register_guard_bites():
-    bad = "## Claims register\n\n| Claim | Source | Status |\n|---|---|---|\n| X | y | maybe |\n\n## Maintainer notes to add\n"
+    bad = "## Claims register\n\n| Claim | Source | Status |\n|---|---|---|\n| X | y | maybe |\n"
     assert rows_missing_status(bad) == ["X"]
 
 
@@ -105,14 +105,6 @@ def test_the_sources_are_cited_with_urls_and_a_date():
                  "github.com/shermand100/PiNodeXMR"):
         assert host in reg, host
     assert reg.count("2026-10-31") >= 20
-
-
-def test_the_maintainer_notes_block_exists_and_is_last():
-    body = text()
-    assert "## Maintainer notes to add" in body
-    tail = body.split("## Maintainer notes to add")[1]
-    assert "\n## " not in tail
-    assert len(re.findall(r"^\d+\. ", tail, re.MULTILINE)) >= 5
 
 
 def test_the_security_review_is_mentioned_only_by_existence():

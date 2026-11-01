@@ -220,6 +220,7 @@ Laws differ by country, and sometimes by state or by network (a school, a compan
 - I did not read I2P's own comparison with Tor, Qubes' threat model page, Whonix's pages on host security or Monero's general "what is Monero" pages, so the page makes no claims on those.
 - The remark that the clearnet holds far more danger than the darknet is the maintainer's view, not something I measured.
 - No country's law was checked.
+- The maintainer's own details are not stated beyond what the issue says: no node setup, hardware, duration or role is described here.
 - GitHub attribution of commits depends on author email addresses, so "no commits attributed to the handle" is about attribution only.
 
 ## Claims register
@@ -256,16 +257,3 @@ Every row carries a status: **Read** means the sentence is on the page named, re
 | The maintainer has run a Monero node over Tor and contributed to PiNodeXMR | Issue 358 (the maintainer's statement) | Read in the issue; not otherwise checked |
 | The clearnet holds more danger than the darknet; much darknet scare content is exaggerated | The maintainer's framing in issue 358 and general knowledge | General knowledge (**est.**; not measured) |
 | Laws on using Tor and I2P differ by place | General knowledge | General knowledge; no country checked |
-
-## Maintainer notes to add
-
-Questions I could not answer from public sources. Answer any you like and the page can be updated.
-
-1. Which of PiNodeXMR's Tor and I2P modes do you run, on what hardware, and for how long? The issue says you ran a node over Tor; the page adds nothing beyond that.
-2. How do you want your PiNodeXMR contributions described? The page says only that you contribute with pull requests, including recent ones, and that one body of work is a security review. I could not tell what is public about that work, so I added nothing more; say if you want it described further.
-3. The upstream commit list shows no commits attributed to your handle. Is that expected? The page states only the attribution fact.
-4. Do you want the "wrong tool for an everyday, always-on setup" Tails position stated more strongly, softened, or tied to a particular example of your own?
-5. Do you use a VPN to your own node in addition to or instead of Tor? PiNodeXMR's Manual says its author has not used the VPN method; the page documents it only as the project does.
-6. Do you want a Whonix or Qubes hands-on exercise, or should this stay a reading lesson?
-7. Which jurisdiction(s) do you want named as examples in the law paragraph, if any? I named none.
-8. Should I2P's own comparison with Tor and Qubes' threat-model page be added to the sources? I did not read them.
