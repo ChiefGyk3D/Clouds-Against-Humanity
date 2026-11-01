@@ -88,7 +88,10 @@ def test_the_special_pages_are_not_listed():
 
 
 def test_the_manifest_has_the_themes_the_issue_asks_for():
-    titles = " ".join(g["title"].lower() for g in gwn.groups_of(manifest()))
+    # Issue #416: the theme groups became topic tracks, so a theme is now a group title or a subgroup title.
+    m = manifest()
+    subgroups = [e["subgroup"] for pages in m["pages"].values() for e in pages if e.get("subgroup")]
+    titles = " ".join([g["title"].lower() for g in gwn.groups_of(m)] + [s.lower() for s in subgroups])
     for theme in (
         "start here", "core path", "os and linux", "networking", "identity and secrets",
         "infrastructure as code", "web hosting", "security tools", "network and host defense",
@@ -237,6 +240,11 @@ def test_the_publisher_copies_the_generated_pages_unchanged_in_kind():
 # -- the collapsed sidebar (issue #362) ----------------------------------------------------------
 
 SIDEBAR_HEADROOM = 25  # lines (one page each, worst case) the committed sidebar must leave under the budget (issue #378)
+# The collection floor for "something was collected": the core path, the five topic tracks, the security tools
+# group and Reference. Issue #416 folded the 15 theme groups into the five tracks, so the old floor of 10 groups
+# (a count of the theme groups) no longer describes the sidebar; the zip(strict=True) beside it still ties
+# every sidebar block to a manifest group.
+MIN_SIDEBAR_GROUPS = 8
 SIDEBAR_GROUP_LINK = re.compile(r"\]\(Contents\.md#([a-z0-9-]+)\)")
 SIDEBAR_ITEM = re.compile(r"^(- |\d+\. )")
 
@@ -264,7 +272,7 @@ def test_the_sidebar_leaves_room_for_twenty_five_more_pages_under_the_budget():
 
 def test_twenty_five_more_unsubgrouped_pages_still_fit_the_budget():
     m = manifest()
-    m["pages"]["os"] += [
+    m["pages"]["foundations"] += [
         {"page": f"Extra{i}", "title": f"Extra {i:02d}", "audience": "learner", "desc": "x"} for i in range(25)
     ]
     assert len(gwn.render_sidebar(m).splitlines()) <= SIDEBAR_LINE_BUDGET
@@ -273,7 +281,7 @@ def test_twenty_five_more_unsubgrouped_pages_still_fit_the_budget():
 def test_each_added_page_adds_exactly_one_sidebar_line_and_is_listed():
     m = manifest()
     before = len(gwn.render_sidebar(m).splitlines())
-    m["pages"]["os"] += [
+    m["pages"]["foundations"] += [
         {"page": f"Extra{i}", "title": f"Extra {i:02d}", "audience": "learner", "desc": "x"} for i in range(5)
     ]
     sidebar = gwn.render_sidebar(m)
@@ -300,7 +308,7 @@ def test_the_sidebar_lists_every_page_and_every_outside_link():
 def test_the_sidebar_listing_check_bites_when_a_page_or_link_is_dropped():
     m = manifest()
     sidebar = gwn.render_sidebar(m)
-    victim = gwn.entries(m, "os")[0]["page"]
+    victim = gwn.entries(m, "foundations")[0]["page"]
     outside = m["links"]["reference"][0]["url"]
     # Rows can hold several links (subgroups), so cut just the one link, not the whole line.
     cut = re.sub(rf"\[[^\]]*\]\({re.escape(victim)}\.md\)", "", sidebar)
@@ -321,7 +329,7 @@ def test_the_sidebar_links_each_page_of_each_group_once_plus_the_full_list():
     m = manifest()
     blocks = group_blocks((WIKI / "_Sidebar.md").read_text())
     shown = [g for g in gwn.groups_of(m) if g["id"] != gwn.TOP_GROUP]
-    assert len(blocks) == len(shown) >= 10
+    assert len(blocks) == len(shown) >= MIN_SIDEBAR_GROUPS
     for group, block in zip(shown, blocks, strict=True):
         expected = len(gwn.entries(m, group["id"])) + len(gwn.link_entries(m, group["id"]))
         assert len(LINK_ANY.findall(block)) == expected + 1, f"{group['id']}: links do not match {expected} pages (+ the Full list link)"
@@ -347,7 +355,7 @@ def test_every_sidebar_group_ends_with_a_link_to_its_contents_anchor_and_the_anc
     headings = {gwn.slug(line[3:]) for line in contents.splitlines() if line.startswith("## ")}
     blocks = group_blocks(sidebar)
     shown = [g for g in gwn.groups_of(manifest()) if g["id"] != gwn.TOP_GROUP]
-    assert len(blocks) == len(shown) >= 10
+    assert len(blocks) == len(shown) >= MIN_SIDEBAR_GROUPS
     for group, block in zip(shown, blocks, strict=True):
         items = [line for line in block.splitlines() if SIDEBAR_ITEM.match(line)]
         found = SIDEBAR_GROUP_LINK.findall(items[-1])
@@ -524,7 +532,7 @@ def test_home_lists_every_manifest_page_in_its_map():
 
 def test_the_home_map_check_bites_when_a_page_is_missing():
     m = manifest()
-    victim = gwn.entries(m, "os")[0]["page"]
+    victim = gwn.entries(m, "foundations")[0]["page"]
     cut = "\n".join(line for line in home_text().splitlines() if not (f"]({victim}.md)" in line and line.startswith(("- ", "1. ", "2. "))))
     assert pages_missing_from_home_map(cut, m) == [victim]
 
@@ -822,3 +830,208 @@ def test_grafana_and_conceptual_pages_carry_no_status_their_banner_does_not_supp
     status = {e["page"]: e.get("status") for pages in manifest()["pages"].values() for e in pages}
     for page in ("Grafana-Dashboards", "Twingate-Service-Accounts-in-CAH", "Zero-Trust-at-Home-Two-Connectors-and-Failover"):
         assert status[page] is None, page
+
+
+# -- the five topic tracks (issue #416) -------------------------------------------------------------
+
+# Each track and the pages the maintainer's brief names for it, as page-name prefixes (each prefix must pick
+# out exactly one page of the track, so a renamed or moved page is noticed).
+TRACKS = {
+    "foundations": (
+        "Track 1: Foundations",
+        (
+            "Terminal-and-Your-First-Script", "Linux-for-Enterprise-Beginners", "First-Hour-on-a-New-System",
+            "Patch-Management", "Windows-Active-Directory", "Virtual-Machines-Hypervisors",
+            "How-a-Web-Request-Works", "Subnets-NAT-and-Firewalls", "IPv6-Adoption", "LAMP-and-LEMP",
+            "WordPress-and-PHP-Security", "APIs-and-Tokens-From-Zero", "Secrets-From-Day-One",
+            "Hashing-Encryption-and-Keys", "OpenTofu-From-Zero", "Plans-State-Drift",
+        ),
+    ),
+    "defend": (
+        "Track 2: Defend and detect",
+        (
+            "Packet-Filters-Compared", "IDS-and-IPS", "File-Integrity-and-Alerting", "Rate-Limiting",
+            "The-DMZ-and-Hardening", "Deception-and-Honeypots-Start-Here", "Deception-and-Honeypots-T-Pot",
+            "Logs-SIEM-and-Detection", "Detection-and-Monitoring-Wazuh", "Wazuh-SIEM-and-Data-Pipelines",
+            "Grafana-Basics", "Grafana-Dashboards", "Build-Your-Own-Mini-SOC",
+        ),
+    ),
+    "privacy": (
+        "Track 3: Privacy, anonymity and cryptocurrency",
+        (
+            "Tor-I2P-and-the-Darknet", "How-a-VPN-Works", "How-Tor-Works-in-Depth", "How-I2P-Works",
+            "The-Darknet-Landscape", "Privacy-Security-and-Anonymity", "The-Browsing-Setups-Compared",
+            "Cryptography-Fundamentals", "Privacy-vs-Security", "Radio-Off-Grid", "Blockchain-Fundamentals",
+            "How-Bitcoin-Works", "How-Monero-Works", "Wallets-and-Key-Custody", "Running-Monero-Properly",
+        ),
+    ),
+    "grc": (
+        "Track 4: GRC and law",
+        (
+            "GRC-Governance-Risk", "US-Privacy-Law", "Privacy-Law-Around-the-World",
+            "Cross-Tenant-Data-Governance", "Business-Continuity", "The-CIA-Triad", "Backups-Deep-Dive",
+            "Backups-Recovery-and-Patching", "RAID-Levels",
+        ),
+    ),
+    "build": (
+        "Track 5: Build and operate",
+        (
+            "Fork-Private-Stacks", "Labs-Break-It", "Build-It-From-Zero", "Teardown-Checklist", "From-Commit-to-Pipeline",
+            "Why-the-Clouds-Differ", "Provider-AWS-Account", "Provider-Azure-Account", "Provider-GCP-Account",
+            "Enterprise-Networks", "Enterprise-Change-Management", "Working-in-a-Company", "Careers-Roles",
+            "How-This-Project-Is-Planned", "Project-Status", "Repository-Growth", "Screenshots-Policy",
+        ),
+    ),
+}
+TRACK_ORDER = ["foundations", "tools", "defend", "privacy", "grc", "build"]
+
+
+def track_problems(m: dict) -> list[str]:
+    """Every way the manifest fails the five-track layout: a track missing or mis-shaped, or a named page not in it."""
+    problems = []
+    groups = {g["id"]: g for g in gwn.groups_of(m)}
+    for gid, (title, prefixes) in TRACKS.items():
+        group = groups.get(gid)
+        if group is None:
+            problems.append(f"no track {gid}")
+            continue
+        if group["title"] != title:
+            problems.append(f"{gid}: title {group['title']!r}")
+        if not (group.get("numbered") and group.get("track") and group.get("order") == "curated" and not group.get("open")):
+            problems.append(f"{gid}: not a numbered, curated, closed track")
+        names = [e["page"] for e in gwn.entries(m, gid)]
+        for prefix in prefixes:
+            hits = [n for n in names if n.startswith(prefix)]
+            if len(hits) != 1:
+                problems.append(f"{gid}: {prefix} matches {len(hits)} pages")
+    return problems
+
+
+def test_the_five_topic_tracks_exist_with_the_pages_the_brief_names():
+    m = manifest()
+    assert sum(len(prefixes) for _, prefixes in TRACKS.values()) >= 70, "the guard collected too few page names"
+    assert track_problems(m) == []
+    order = [g["id"] for g in gwn.groups_of(m)]
+    assert [i for i in order if i in TRACK_ORDER] == TRACK_ORDER
+    assert order.index("core") < order.index("foundations")  # the core path stays the first block
+
+
+def test_the_track_check_bites_when_a_page_or_a_track_is_missing():
+    m = manifest()
+    victim = next(e for e in m["pages"]["privacy"] if e["page"].startswith("How-Monero-Works"))
+    m["pages"]["privacy"].remove(victim)
+    assert track_problems(m) == ["privacy: How-Monero-Works matches 0 pages"]
+    m = manifest()
+    m["groups"] = [g for g in m["groups"] if g["id"] != "grc"]
+    assert track_problems(m) == ["no track grc"]
+    m = manifest()
+    next(g for g in m["groups"] if g["id"] == "build").pop("track")
+    assert any("not a numbered, curated, closed track" in p for p in track_problems(m))
+
+
+def test_every_page_is_in_exactly_one_group_and_one_track_at_most():
+    m = manifest()
+    homes: dict[str, list[str]] = {}
+    for gid, group_entries in m["pages"].items():
+        for e in group_entries:
+            homes.setdefault(e["page"], []).append(gid)
+    assert set(homes) == pages_on_disk()
+    assert not {p: g for p, g in homes.items() if len(g) != 1}
+    in_tracks = [p for p, g in homes.items() if g[0] in TRACKS]
+    assert len(in_tracks) == sum(len(gwn.entries(m, gid)) for gid in TRACKS)
+    assert len(in_tracks) >= 100, "the tracks should hold most of the wiki"
+
+
+def test_the_core_path_is_unchanged_in_size_and_stays_numbered_and_open():
+    m = manifest()
+    core = next(g for g in gwn.groups_of(m) if g["id"] == "core")
+    assert core.get("numbered") and core.get("open") and not core.get("track")
+    assert len(gwn.entries(m, "core")) == 21
+
+
+def test_the_security_tools_group_no_longer_holds_privacy_crypto_or_grc_pages():
+    m = manifest()
+    tools = {e["page"] for e in m["pages"]["tools"]}
+    moved = {e["page"] for gid in ("privacy", "grc") for e in m["pages"][gid]}
+    assert tools and not tools & moved
+    assert len(tools) <= 8, "the basics group should stay a small block"
+    for word in ("Tor", "I2P", "VPN", "Bitcoin", "Monero", "Blockchain", "Wallets", "GRC", "Privacy"):
+        assert not [p for p in tools if word in p], word
+
+
+def test_each_track_is_numbered_in_contents_and_home_and_folded_in_the_sidebar():
+    m = manifest()
+    contents, sidebar, home = gwn.render_contents(m), gwn.render_sidebar(m), gwn.render_home_map(m)
+    titles = {gid: t for gid, (t, _) in TRACKS.items()}
+    for gid, title in titles.items():
+        first = gwn.entries(m, gid)[0]
+        assert f"## {title}\n" in contents and f"### {title}\n" in home
+        assert f"| 1 | [{first['title']}]({first['page']}.md)" in contents
+        assert f"1. [{first['title']}]({first['page']}.md)" in home
+        block = sidebar.split(f"<summary><b>{title}</b>", 1)[1].split("(Contents.md#", 1)[0]
+        assert "<details><summary>" in block, f"{gid}: the sidebar block is not folded into subgroups"
+        assert not re.search(r"^\d+\. ", block, flags=re.MULTILINE), f"{gid}: sidebar rows should not be numbered"
+    assert re.search(r"^1\. \[", sidebar.split("<summary><b>Core path", 1)[1], flags=re.MULTILINE)
+
+
+def test_a_topic_track_may_fold_into_subgroups_but_a_plain_numbered_group_may_not():
+    m = minimal()
+    m["groups"].append({"id": "trk", "title": "Track X", "order": "curated", "numbered": True, "track": True})
+    m["pages"]["trk"] = [{"page": "Tee", "title": "Tee", "audience": "learner", "desc": "A track page.", "subgroup": "Theme"}]
+    assert gwn.validate(m, MINIMAL_PAGES | {"Tee"}) == []
+    sidebar = gwn.render_sidebar(m)
+    assert "<details><summary>Theme (1)</summary>" in sidebar and "- [Tee](Tee.md)" in sidebar
+    assert "| 1 | [Tee](Tee.md)" in gwn.render_contents(m)
+    m["pages"]["core"][0]["subgroup"] = "Early"
+    assert any("numbered" in p and "subgroup" in p for p in gwn.validate(m, MINIMAL_PAGES | {"Tee"}))
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"numbered": False},
+        {"order": "sorted"},
+        {"open": True},
+    ],
+)
+def test_a_track_must_be_numbered_curated_and_closed(change):
+    m = minimal()
+    m["groups"].append({"id": "trk", "title": "Track X", "order": "curated", "numbered": True, "track": True, **change})
+    m["pages"]["trk"] = [{"page": "Tee", "title": "Tee", "audience": "learner", "desc": "A track page."}]
+    assert any("topic track must be" in p for p in gwn.validate(m, MINIMAL_PAGES | {"Tee"}))
+
+
+def test_the_home_goals_cover_every_track_and_the_three_goals_and_point_at_pages_in_them():
+    m = manifest()
+    region = map_region(home_text())
+    assert "### Start here, by topic track and by goal" in region
+    goals = m["goals"]
+    assert len(goals) >= 8, "the guard collected too few goals"
+    for r in goals:
+        line = next((ln for ln in region.splitlines() if ln.startswith(f"- **{r['who']}**")), None)
+        assert line is not None and f"]({r['page']}.md)" in line, r["who"]
+    homes = {e["page"]: gid for gid, entries_ in m["pages"].items() for e in entries_}
+    for number, gid in enumerate(("foundations", "defend", "privacy", "grc", "build"), start=1):
+        track_goal = next(r for r in goals if r["who"].startswith(f"Track {number}"))
+        assert homes[track_goal["page"]] == gid, track_goal
+        assert track_goal["page"] == gwn.entries(m, gid)[0]["page"], "a track goal opens the track at its first page"
+    whos = " ".join(r["who"].lower() for r in goals)
+    for goal in ("privacy and anonymity", "cryptocurrency", "compliance and privacy law"):
+        assert goal in whos, goal
+
+
+def test_the_goals_list_is_validated():
+    m = minimal()
+    m["goals"] = [{"who": "Anyone", "page": "Home"}]
+    assert gwn.validate(m, MINIMAL_PAGES) == []
+    block = gwn.render_home_map(m)
+    assert "### Start here, by topic track and by goal" in block and "- **Anyone**: [Home](Home.md)" in block
+    m["goals"] = [{"who": "Anyone", "page": "Nowhere"}, {"who": "Anyone", "page": "Home"}, {"who": "Odd", "page": "Home", "x": 1}]
+    joined = "\n".join(gwn.validate(m, MINIMAL_PAGES))
+    assert "'Nowhere'" in joined and "listed twice" in joined and "unknown field" in joined
+    m["goals"] = [{"who": "a | b", "page": "Home"}]
+    assert gwn.validate(m, MINIMAL_PAGES)
+    m["goals"] = "not a list"
+    assert any("goals:" in p for p in gwn.validate(m, MINIMAL_PAGES))
+    del m["goals"]
+    assert "by topic track and by goal" not in gwn.render_home_map(m)

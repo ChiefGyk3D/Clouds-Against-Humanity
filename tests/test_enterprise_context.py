@@ -110,7 +110,7 @@ def test_next_lines_follow_the_chain():
 
 
 def test_pages_are_in_contents_and_reading_order_under_enterprise_context():
-    for page, heading in (("Contents", "Foundations: enterprise practice"), ("Reading-Order", "## Enterprise context")):
+    for page, heading in (("Contents", "Track 5: Build and operate"), ("Reading-Order", "## Enterprise context")):
         body = text(page)
         assert heading in body, f"{page}: no enterprise section ({heading})"
         links = [t for t, _ in LINK.findall(body)]

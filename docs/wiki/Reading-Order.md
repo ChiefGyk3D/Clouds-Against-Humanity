@@ -4,6 +4,8 @@ Every path assumes a basic power user: you know how a computer works and have do
 
 Looking for one page rather than a path? [Contents](Contents.md) lists every page of the wiki once, grouped by theme, with a line on what it is for.
 
+Past the core path, the rest of the wiki is arranged as five numbered topic tracks, each a reading order on Contents and a folded block in the sidebar: [Track 1: Foundations](Contents.md#track-1-foundations), [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect), [Track 3: Privacy, anonymity and cryptocurrency](Contents.md#track-3-privacy-anonymity-and-cryptocurrency), [Track 4: GRC and law](Contents.md#track-4-grc-and-law) and [Track 5: Build and operate](Contents.md#track-5-build-and-operate). The tables below stay the authority for the paths they list; a page belongs to exactly one track.
+
 > **Status honesty.** The pages for DigitalOcean, stages 0 and 1, the labs, the threat model and the settings reference describe things that are built and tested. The pages for AWS, Azure and GCP are **unverified drafts**: written from the vendors' own documentation, not applied in a real account, and labeled that way in their first lines and in the title column below. Stages 3 and 4 are planned, not built. Stage 2 is built on the cloud side and merged but never applied, and the five telemetry pages in the detection path are **unverified drafts**: written from the stage 2 design, and none checked against a real deployment.
 
 ## Which path is for me

@@ -39,6 +39,17 @@ All 152 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 - **Running it or watching it**: [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md)
 - **Security-minded**: [Threat model exercise](Threat-Model-Exercise.md)
 
+### Start here, by topic track and by goal
+
+- **Track 1, Foundations: OS, networking, identity, code and web hosting**: [Git from zero](Git-From-Zero.md)
+- **Track 2, Defend and detect: defense, honeypots and monitoring**: [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md)
+- **Track 3, Privacy, anonymity and cryptocurrency**: [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md)
+- **Track 4, GRC and law: risk, privacy law, continuity and backups**: [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md)
+- **Track 5, Build and operate: stages, other clouds, enterprise practice**: [Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md)
+- **Privacy and anonymity**: [Privacy, security and anonymity](Privacy-Security-and-Anonymity-Three-Different-Things-and-Why-There-Is-No-Silver-Bullet.md)
+- **Cryptocurrency, for people in IT**: [Blockchain fundamentals](Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks.md)
+- **Compliance and privacy law**: [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md)
+
 ### Start here
 
 - [Home](Home.md): The front door: what the project is, which path fits you, and a short diagram of how it fits together.
@@ -71,61 +82,38 @@ All 152 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 20. [Lessons learned](Lessons-Learned.md): What broke during the build, what was really going on and what fixed it, for anyone who wants to skip the lost evenings.
 21. [Roadmap](Roadmap.md): The stages from 0 onward, what is built and applied, what is built but unapplied and what is deliberately not planned.
 
-### Foundations: OS and Linux
+### Track 1: Foundations
 
-- [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md) (draft): 3-2-1-1-0, immutable and offline copies, backup key custody, restore testing and what this project would have to back up, with a free restore drill.
-- [Backups, recovery and patching](Backups-Recovery-and-Patching.md): Snapshot versus backup, RPO and RTO, the 3-2-1 rule and patch cadence, for beginners deciding what to protect and how.
-- [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) (draft): BCP versus DR, business impact analysis, RTO and RPO per system, recovery strategies, runbooks, tabletop exercises, postmortems and a worked plan for this project, for learners planning for the day something big breaks.
-- [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md): The order of a new machine's first hour: updates, automatic updates, a baseline, then everything else, for anyone setting up a system.
-- [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) (est. steps): The Linux families, package managers, services, permissions and logs you meet at work, for beginners; commands were not run by the author.
-- [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md): What unattended-upgrades does, how to configure it, where updates are logged, which four events deserve an alert, reboots, testing and rollback, for anyone running a Debian or Ubuntu host.
-- [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md) (draft): What still works when the internet and power are down: LoRa mesh, amateur radio, GMRS, FRS and CB, a legal-first SIGINT overview, and what a radio fallback could do for this project.
-- [RAID: continuity, not a backup](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md) (draft): RAID as a business continuity control and not a backup: levels, parity, the write penalty, rebuilds, the write hole and a computed six-drive exercise, with a free parity drill.
-- [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md): Red, blue and purple teams, the written permission you need before any test, and setting up a lab computer you can safely break.
-- [The terminal and your first script](Terminal-and-Your-First-Script.md): What a terminal, shell and command are, moving around files safely and chaining commands into a first script, for beginners on any operating system.
-- [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) (draft): What a virtual machine is, type 1 and type 2 hypervisors, the desktop and server options, a dated account of the VMware licensing changes, and a first VM with QEMU, for learners who need a lab.
-- [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md): What a virtual machine and a container each isolate, and who patches what under IaaS, PaaS and SaaS, for readers whose terms blur.
-- [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md): Domains, Active Directory, Group Policy, Kerberos and managed Macs, for readers heading to help desk or systems administration.
+1. [Git from zero](Git-From-Zero.md): Make an account with a second factor, then clone, branch, commit, push and open your first pull request; for people who have never used git.
+2. [The terminal and your first script](Terminal-and-Your-First-Script.md): What a terminal, shell and command are, moving around files safely and chaining commands into a first script, for beginners on any operating system.
+3. [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) (est. steps): The Linux families, package managers, services, permissions and logs you meet at work, for beginners; commands were not run by the author.
+4. [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md): The order of a new machine's first hour: updates, automatic updates, a baseline, then everything else, for anyone setting up a system.
+5. [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md): What unattended-upgrades does, how to configure it, where updates are logged, which four events deserve an alert, reboots, testing and rollback, for anyone running a Debian or Ubuntu host.
+6. [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md): Red, blue and purple teams, the written permission you need before any test, and setting up a lab computer you can safely break.
+7. [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) (draft): What a virtual machine is, type 1 and type 2 hypervisors, the desktop and server options, a dated account of the VMware licensing changes, and a first VM with QEMU, for learners who need a lab.
+8. [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md): What a virtual machine and a container each isolate, and who patches what under IaaS, PaaS and SaaS, for readers whose terms blur.
+9. [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md): Domains, Active Directory, Group Policy, Kerberos and managed Macs, for readers heading to help desk or systems administration.
+10. [How a web request works](How-a-Web-Request-Works.md): One HTTPS request from DNS to TLS to the page, and how to read a certificate, for readers after networking basics.
+11. [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md): Who owns what in DNS, the common record types, TTL and putting a site behind Cloudflare, for learners hosting their own website.
+12. [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md): Working out subnets by hand, public versus private addresses, NAT and a default-deny firewall in a local lab, for learners after networking basics.
+13. [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md): Why a server behind a CDN sees the proxy's address, how the real client address is passed on, and the OSI layers, for people running sites behind one.
+14. [IPv6 adoption and handling it safely](IPv6-Adoption-and-Handling-It-Safely.md): IPv6 addressing, why adoption is slow, why this project is IPv4-only and how to handle IPv6 safely in a lab.
+15. [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md): What an API is, how to read a request, a response and JSON, and what a token is, for readers new to all three.
+16. [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md): What encoding, hashing, encryption and signing each give you and what they do not, for readers who lump them together.
+17. [Secrets from day one](Secrets-From-Day-One.md): A password manager, Doppler for every asset and the .env rules, as personal habits for anyone about to start writing code.
+18. [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md): Directories, identity providers, SSO, SAML, OAuth and OIDC in plain words, for readers heading into enterprise identity.
+19. [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md): How to recognize, read and write JSON, YAML and HCL and spot the classic mistakes, for readers before the code starts to look like noise.
+20. [OpenTofu from zero](OpenTofu-From-Zero.md): Lesson 1 of the infrastructure as code track: init, plan, apply and destroy on your own machine, for first-time users.
+21. [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md): Reading a plan like a reviewer, what state is, how drift happens and how to recover, for learners after OpenTofu from zero.
+22. [Spacelift from zero](Spacelift-From-Zero.md): What a hosted infrastructure runner adds to plan and apply, its plan limits and a first stack run and teardown, for learners.
+23. [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md): Why a bigger environment is split into one stack per service, with its costs and benefits, for learners finishing the infrastructure as code track.
+24. [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) (unbuilt): What local dev, staging and production are for, why each gets its own stack, secrets and cost ceiling, and how a change is promoted; staging is planned and not built.
+25. [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md): What a web server, an application runtime and a database each do in a LAMP or LEMP stack, for readers who are new to web hosting.
+26. [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md): Why plugins carry most of a WordPress site's risk, what to harden and what a web application firewall does; also why static sites often win.
+27. [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) (draft): A static and a dynamic site that look the same, how to tell them apart from outside with curl, page source and WhatWeb, what each leaks, and a career note on public work.
+28. [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md): The path from one web server to a scaled design, with caches, a CDN, a WAF and a pipeline, for engineers who run web fleets.
 
-### Foundations: networking
-
-- [How a web request works](How-a-Web-Request-Works.md): One HTTPS request from DNS to TLS to the page, and how to read a certificate, for readers after networking basics.
-- [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md): Who owns what in DNS, the common record types, TTL and putting a site behind Cloudflare, for learners hosting their own website.
-- [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md): Working out subnets by hand, public versus private addresses, NAT and a default-deny firewall in a local lab, for learners after networking basics.
-- [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md): Why a server behind a CDN sees the proxy's address, how the real client address is passed on, and the OSI layers, for people running sites behind one.
-- [IPv6 adoption and handling it safely](IPv6-Adoption-and-Handling-It-Safely.md): IPv6 addressing, why adoption is slow, why this project is IPv4-only and how to handle IPv6 safely in a lab.
-
-### Foundations: identity and secrets
-
-- [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md): What an API is, how to read a request, a response and JSON, and what a token is, for readers new to all three.
-- [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md) (draft): Symmetric and asymmetric keys together, MACs, signatures, PKI, at rest versus in transit, key custody, NIST defaults and post-quantum planning, with a free drill.
-- [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md): Directories, identity providers, SSO, SAML, OAuth and OIDC in plain words, for readers heading into enterprise identity.
-- [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md): What encoding, hashing, encryption and signing each give you and what they do not, for readers who lump them together.
-- [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md): Blast radius, assume breach and defense in depth as one mindset question to ask of any system.
-- [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md) (draft): Page 3 of 3 on GRC: the GDPR, PIPEDA, POPIA and the PIPL compared with the United States, with breach clocks, transfers, dated cases and a four-region exercise.
-- [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md) (draft): Privacy as blinds and security as locks, Monero as a worked example, privacy law basics, physical security and why lockpicking is a hobby, with a free audit of your desk.
-- [Secrets from day one](Secrets-From-Day-One.md): A password manager, Doppler for every asset and the .env rules, as personal habits for anyone about to start writing code.
-- [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) (draft): Confidentiality, integrity and availability in plain words, how real failures map to each, and this project's controls checked against all three.
-- [US privacy law and the patchwork](US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers.md) (draft): Page 2 of 3 on GRC: what the Constitution says about privacy, the federal and state patchwork, data brokers, Social Security numbers and license plate readers, with dated sources and a labeled opinion section.
-
-### Foundations: infrastructure as code
-
-- [Git from zero](Git-From-Zero.md): Make an account with a second factor, then clone, branch, commit, push and open your first pull request; for people who have never used git.
-- [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md): How to recognize, read and write JSON, YAML and HCL and spot the classic mistakes, for readers before the code starts to look like noise.
-- [OpenTofu from zero](OpenTofu-From-Zero.md): Lesson 1 of the infrastructure as code track: init, plan, apply and destroy on your own machine, for first-time users.
-- [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md): Reading a plan like a reviewer, what state is, how drift happens and how to recover, for learners after OpenTofu from zero.
-- [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md): Why a bigger environment is split into one stack per service, with its costs and benefits, for learners finishing the infrastructure as code track.
-- [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) (unbuilt): What local dev, staging and production are for, why each gets its own stack, secrets and cost ceiling, and how a change is promoted; staging is planned and not built.
-- [Spacelift from zero](Spacelift-From-Zero.md): What a hosted infrastructure runner adds to plan and apply, its plan limits and a first stack run and teardown, for learners.
-
-### Foundations: web hosting
-
-- [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md): What a web server, an application runtime and a database each do in a LAMP or LEMP stack, for readers who are new to web hosting.
-- [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md): Why plugins carry most of a WordPress site's risk, what to harden and what a web application firewall does; also why static sites often win.
-- [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) (draft): A static and a dynamic site that look the same, how to tell them apart from outside with curl, page source and WhatWeb, what each leaks, and a career note on public work.
-- [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md): The path from one web server to a scaled design, with caches, a CDN, a WAF and a pipeline, for engineers who run web fleets.
-
-### Foundations: security tools and threat modeling
+### Security tools and threat modeling
 
 - [Threats in plain words](Threats-in-Plain-Words.md): Vulnerabilities, exploits, phishing, malware and compliance told apart with real dated cases, for readers who meet these words as noise.
 - [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md): The rules for using Nmap, OpenVAS, Wireshark, Burp, ZAP and Metasploit, and what each one is for, for learners in an isolated lab.
@@ -133,100 +121,106 @@ All 152 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 - [Threat model exercise](Threat-Model-Exercise.md): Build your own threat model of this repository before you open the worked one, for security-minded readers.
 - [Threat Dragon exercise](Threat-Dragon-Exercise.md): Draw this pipeline's trust boundaries in OWASP Threat Dragon and attach threats to them, for security-minded readers.
 - [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md): The same pipeline viewed through STRIDE, MITRE ATT&CK and MITRE ATLAS, with files to open them, for security-minded readers.
-- [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) (draft): How Tor and I2P work, who uses them, Tor Browser, Tails, Whonix and Qubes compared, and a Monero node as the privacy-versus-security example.
-- [How a VPN works](How-a-VPN-Works-Tunnels-What-It-Hides-What-It-Does-Not-and-What-an-Audit-Proves.md) (draft): A packet with and without a VPN, WireGuard, OpenVPN and IPsec in plain terms, what a VPN moves and does not hide, DNS and IPv6 leaks, what no-logs claims and audits prove, with seven diagrams and two free exercises.
-- [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md) (draft): Circuits, the three hops, guards, directory authorities and the consensus, bridges, onion services and the dated weaknesses, with six diagrams, for readers who want the machinery under Tor.
-- [How I2P works](How-I2P-Works-Tunnels-Garlic-Routing-and-the-Network-Database.md) (draft): One-way tunnels, garlic routing and cloves, the network database and floodfills, reseeding, outproxies, the research on its weak points and an honest comparison with Tor.
-- [Privacy, security and anonymity](Privacy-Security-and-Anonymity-Three-Different-Things-and-Why-There-Is-No-Silver-Bullet.md) (draft): Who can see in, who can get in, who can tell it is you: the data you hand out, correlation, a matrix of six tools, the same behavior over a different pipe, and three imaginary people, with six diagrams.
-- [The browsing setups compared](The-Browsing-Setups-Compared-Tor-Browser-Brave-Whonix-Tails-and-Qubes-with-Whonix.md) (draft): Tor Browser, Brave's Tor window, Whonix, Tails and Qubes with Whonix: trust boundaries, threat models, a matrix of nine threats, Kali and ParrotOS, and the maintainer's view, with six diagrams.
-- [Blockchain fundamentals](Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks.md) (draft): Page 1 of 5 on cryptocurrency: hashes, blocks, nodes, a transaction's life, proof of work and stake, forks, full nodes and what a blockchain is not, with a dated read of the first two Bitcoin blocks.
-- [The darknet landscape: markets, OPSEC and layering](The-Darknet-Landscape-Markets-OPSEC-Clearnet-and-Layering-Tor-I2P-and-VPN.md) (draft): Documented darknet market history and why most fail, the OPSEC trap, clearnet versus onion services, and layering Tor, I2P and a VPN, for learners; educational and defensive only.
-- [How Bitcoin works](How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable.md) (draft): Page 2 of 5 on cryptocurrency: keys, UTXOs and change, fees, mining and confirmations, and why Bitcoin is pseudonymous and traceable, with documented tracing cases and a clustering exercise.
-- [How Monero works](How-Monero-Works-Compared-with-Bitcoin-and-Ethereum-DeFi-Mixers-Swaps-and-Ransomware.md) (draft): Page 3 of 5 on cryptocurrency: Monero's ring signatures, stealth addresses and hidden amounts, Ethereum, DeFi, mixers, Bitcoin-Monero atomic swaps and ransomware, with dated public cases.
-- [Wallets and key custody](Wallets-and-Key-Custody-Hot-and-Cold-Hardware-Wallets-Recovery-Shamir-and-Multisig.md) (draft): Page 4 of 5 on cryptocurrency: hot and cold wallets, the threat model, hardware wallets and a disclosed Trezor affiliate link, recovery phrases, Shamir, multisig, custody, and a no-funds exercise.
-- [Running Monero properly](Running-Monero-Properly-Hardware-Wallet-Qubes-and-Whonix-Offline-Wallet-and-PiNodeXMR.md) (draft): Page 5 of 5 on cryptocurrency: a hardware wallet with Monero, the Qubes and Whonix offline-wallet design, PiNodeXMR as an always-on node and how to secure it, with a paper exercise.
 
-### Foundations: network and host defense
+### Track 2: Defend and detect
 
-- [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md): Lesson D1: stateless versus stateful filtering, then iptables, nftables, UFW and BSD pf compared, for learners with a basic firewall idea.
-- [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md): Lesson D2: what an IDS and an IPS are, where a sensor can watch and why an IPS is riskier, for learners.
-- [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md): Lesson D3: file integrity monitoring, baselines and what to watch, with Tripwire, AIDE, Wazuh, auditd and fail2ban, for learners.
-- [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md): Lesson D4: the main limiting algorithms, what to count by and what each layer can see, for learners who run a service.
-- [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) (draft): How to list every inbound port, address, account, token, dependency and person, how this project shrinks each, how to measure from outside, and what to log and alert on.
-- [Attack surface map: layer by layer](Attack-Surface-Map-Layer-by-Layer.md) (draft): The cloud account, Spacelift and CI, Doppler, Twingate, droplets, telemetry, edge and web tier: what to aim at, the control, the test, and what to log.
-- [The DMZ and hardening an internet-facing host](The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet.md) (draft): What a DMZ is, what may talk to what in this project's unbuilt edge design, how to harden a public host, and what to log and alert on.
-- [DMZ hardening checklist](DMZ-Hardening-Checklist.md) (draft): A one-page printable checklist for hardening an internet-facing host, each line naming the repository check that covers it, plus what to log and what should alert.
+1. [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md): Lesson D1: stateless versus stateful filtering, then iptables, nftables, UFW and BSD pf compared, for learners with a basic firewall idea.
+2. [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md): Lesson D2: what an IDS and an IPS are, where a sensor can watch and why an IPS is riskier, for learners.
+3. [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md): Lesson D3: file integrity monitoring, baselines and what to watch, with Tripwire, AIDE, Wazuh, auditd and fail2ban, for learners.
+4. [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md): Lesson D4: the main limiting algorithms, what to count by and what each layer can see, for learners who run a service.
+5. [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md): Blast radius, assume breach and defense in depth as one mindset question to ask of any system.
+6. [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) (draft): How to list every inbound port, address, account, token, dependency and person, how this project shrinks each, how to measure from outside, and what to log and alert on.
+7. [Attack surface map: layer by layer](Attack-Surface-Map-Layer-by-Layer.md) (draft): The cloud account, Spacelift and CI, Doppler, Twingate, droplets, telemetry, edge and web tier: what to aim at, the control, the test, and what to log.
+8. [The DMZ and hardening an internet-facing host](The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet.md) (draft): What a DMZ is, what may talk to what in this project's unbuilt edge design, how to harden a public host, and what to log and alert on.
+9. [DMZ hardening checklist](DMZ-Hardening-Checklist.md) (draft): A one-page printable checklist for hardening an internet-facing host, each line naming the repository check that covers it, plus what to log and what should alert.
+10. [Deception and honeypots: start here](Deception-and-Honeypots-Start-Here.md): The hub for the deception track: what it covers, the three tracks of lessons and the safety rules that come first.
+11. [What deception is](Deception-and-Honeypots-What-Deception-Is.md) (est. steps): Lessons 1 and 2: decoys, lures, honeytokens and honeypots, and low versus high interaction; reading and paper exercises only.
+12. [Deception safety and law](Deception-and-Honeypots-Safety-and-Law.md) (est. steps): Lesson 6: the eight minimums for running a decoy that attracts real attackers; read it before any hands-on lesson. Not legal advice.
+13. [Plant a canary token](Deception-and-Honeypots-Plant-a-Canary.md): Lesson 3: build a local tripwire with a bait document, a link and a fake login and trip it yourself.
+14. [Honeyfiles on a host you own](Deception-and-Honeypots-Honeyfiles-on-Your-Host.md): Lesson 4: build a decoy file and a watcher that alerts when it is touched, on a host you own.
+15. [Deception alerts in the SIEM](Deception-and-Honeypots-Alerts-in-the-SIEM.md): Lesson 5: write detection logic over synthetic honeypot events and map it to ATT&CK, for learners wiring decoys into a SIEM.
+16. [Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md): Lesson 10: design an isolated honeynet segment on paper and in a checker before installing anything, for home lab owners.
+17. [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md) (est. steps): Lesson 11: what the T-Pot honeypot bundle contains and how to keep it internal-only on your own hardware; nothing here was run.
+18. [Anatomy of a cloud honeypot](Deception-and-Honeypots-Cloud-Sensor-Anatomy.md) (est. steps): Lesson 7: what a small internet-facing honeypot in your own cloud account needs to be safe; written from reading, nothing built.
+19. [Cloud Cowrie for a weekend](Deception-and-Honeypots-Cloud-Cowrie-Weekend.md) (est. steps): Lesson 8: build, run and tear down a small Cowrie honeypot in your own cloud account for a fixed window; cloud steps were never run.
+20. [Read what arrived: Cowrie logs](Deception-and-Honeypots-Read-the-Sensor-Logs.md): Lesson 9: read Cowrie logs with jq or PowerShell, count what visitors tried and spot a visitor who touched your decoy.
+21. [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md): What this two-machine example leaves out and how a company would answer the same questions, for readers asking how it would be watched.
+22. [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md): What a log, a metric, a trace and an alert are, and how a log line becomes a rule, for learners new to detection.
+23. [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) (unbuilt): Detection after prevention fails, with Wazuh and the wider tool landscape; shipping logs is stage 2 and not built.
+24. [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) (est. steps): What the Wazuh agent, server, indexer and dashboard each do and how a log line becomes an alert, with a free toy pipeline; the Wazuh parts were written from reading.
+25. [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) (draft): Logs, metrics and traces, and why telemetry crosses a trust boundary; an unverified draft for engineers planning stage 2.
+26. [Multiple sites and identity](Multiple-Sites-and-Identity.md) (draft): What a site is, what breaks at two, and why a new site should be a settings file and not new code; an unverified draft for engineers.
+27. [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) (draft): How telemetry moves between the cloud and the home SIEM without breaking the no-listener promise; an unverified draft for engineers.
+28. [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) (draft): Ask what question each panel answers and what it would look like if the answer were bad; an unverified draft for operators.
+29. [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) (est. steps): What a data source is, connecting Grafana to Prometheus, SQL and OpenSearch with a read-only account, then one panel and one alert; written from reading, not run.
+30. [Grafana dashboards](Grafana-Dashboards.md): The three dashboards this repository ships and which question each answers; only tried with synthetic data.
+31. [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md): A hands-on synthetic multi-site monitoring stack where you predict what a silent site does, for builders.
+32. [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) (draft): A springboard for building a small cloud security monitoring stack with a cost ceiling you set; an unverified draft for builders.
+33. [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) (unbuilt): What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied.
 
-### Foundations: deception and honeypots
+### Track 3: Privacy, anonymity and cryptocurrency
 
-- [Deception and honeypots: start here](Deception-and-Honeypots-Start-Here.md): The hub for the deception track: what it covers, the three tracks of lessons and the safety rules that come first.
-- [What deception is](Deception-and-Honeypots-What-Deception-Is.md) (est. steps): Lessons 1 and 2: decoys, lures, honeytokens and honeypots, and low versus high interaction; reading and paper exercises only.
-- [Deception safety and law](Deception-and-Honeypots-Safety-and-Law.md) (est. steps): Lesson 6: the eight minimums for running a decoy that attracts real attackers; read it before any hands-on lesson. Not legal advice.
-- [Plant a canary token](Deception-and-Honeypots-Plant-a-Canary.md): Lesson 3: build a local tripwire with a bait document, a link and a fake login and trip it yourself.
-- [Honeyfiles on a host you own](Deception-and-Honeypots-Honeyfiles-on-Your-Host.md): Lesson 4: build a decoy file and a watcher that alerts when it is touched, on a host you own.
-- [Deception alerts in the SIEM](Deception-and-Honeypots-Alerts-in-the-SIEM.md): Lesson 5: write detection logic over synthetic honeypot events and map it to ATT&CK, for learners wiring decoys into a SIEM.
-- [Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md): Lesson 10: design an isolated honeynet segment on paper and in a checker before installing anything, for home lab owners.
-- [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md) (est. steps): Lesson 11: what the T-Pot honeypot bundle contains and how to keep it internal-only on your own hardware; nothing here was run.
-- [Anatomy of a cloud honeypot](Deception-and-Honeypots-Cloud-Sensor-Anatomy.md) (est. steps): Lesson 7: what a small internet-facing honeypot in your own cloud account needs to be safe; written from reading, nothing built.
-- [Cloud Cowrie for a weekend](Deception-and-Honeypots-Cloud-Cowrie-Weekend.md) (est. steps): Lesson 8: build, run and tear down a small Cowrie honeypot in your own cloud account for a fixed window; cloud steps were never run.
-- [Read what arrived: Cowrie logs](Deception-and-Honeypots-Read-the-Sensor-Logs.md): Lesson 9: read Cowrie logs with jq or PowerShell, count what visitors tried and spot a visitor who touched your decoy.
+1. [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md) (draft): Symmetric and asymmetric keys together, MACs, signatures, PKI, at rest versus in transit, key custody, NIST defaults and post-quantum planning, with a free drill.
+2. [Privacy, security and anonymity](Privacy-Security-and-Anonymity-Three-Different-Things-and-Why-There-Is-No-Silver-Bullet.md) (draft): Who can see in, who can get in, who can tell it is you: the data you hand out, correlation, a matrix of six tools, the same behavior over a different pipe, and three imaginary people, with six diagrams.
+3. [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md) (draft): Privacy as blinds and security as locks, Monero as a worked example, privacy law basics, physical security and why lockpicking is a hobby, with a free audit of your desk.
+4. [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) (draft): How Tor and I2P work, who uses them, Tor Browser, Tails, Whonix and Qubes compared, and a Monero node as the privacy-versus-security example.
+5. [How a VPN works](How-a-VPN-Works-Tunnels-What-It-Hides-What-It-Does-Not-and-What-an-Audit-Proves.md) (draft): A packet with and without a VPN, WireGuard, OpenVPN and IPsec in plain terms, what a VPN moves and does not hide, DNS and IPv6 leaks, what no-logs claims and audits prove, with seven diagrams and two free exercises.
+6. [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md) (draft): Circuits, the three hops, guards, directory authorities and the consensus, bridges, onion services and the dated weaknesses, with six diagrams, for readers who want the machinery under Tor.
+7. [How I2P works](How-I2P-Works-Tunnels-Garlic-Routing-and-the-Network-Database.md) (draft): One-way tunnels, garlic routing and cloves, the network database and floodfills, reseeding, outproxies, the research on its weak points and an honest comparison with Tor.
+8. [The browsing setups compared](The-Browsing-Setups-Compared-Tor-Browser-Brave-Whonix-Tails-and-Qubes-with-Whonix.md) (draft): Tor Browser, Brave's Tor window, Whonix, Tails and Qubes with Whonix: trust boundaries, threat models, a matrix of nine threats, Kali and ParrotOS, and the maintainer's view, with six diagrams.
+9. [The darknet landscape: markets, OPSEC and layering](The-Darknet-Landscape-Markets-OPSEC-Clearnet-and-Layering-Tor-I2P-and-VPN.md) (draft): Documented darknet market history and why most fail, the OPSEC trap, clearnet versus onion services, and layering Tor, I2P and a VPN, for learners; educational and defensive only.
+10. [Blockchain fundamentals](Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks.md) (draft): Page 1 of 5 on cryptocurrency: hashes, blocks, nodes, a transaction's life, proof of work and stake, forks, full nodes and what a blockchain is not, with a dated read of the first two Bitcoin blocks.
+11. [How Bitcoin works](How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable.md) (draft): Page 2 of 5 on cryptocurrency: keys, UTXOs and change, fees, mining and confirmations, and why Bitcoin is pseudonymous and traceable, with documented tracing cases and a clustering exercise.
+12. [How Monero works](How-Monero-Works-Compared-with-Bitcoin-and-Ethereum-DeFi-Mixers-Swaps-and-Ransomware.md) (draft): Page 3 of 5 on cryptocurrency: Monero's ring signatures, stealth addresses and hidden amounts, Ethereum, DeFi, mixers, Bitcoin-Monero atomic swaps and ransomware, with dated public cases.
+13. [Wallets and key custody](Wallets-and-Key-Custody-Hot-and-Cold-Hardware-Wallets-Recovery-Shamir-and-Multisig.md) (draft): Page 4 of 5 on cryptocurrency: hot and cold wallets, the threat model, hardware wallets and a disclosed Trezor affiliate link, recovery phrases, Shamir, multisig, custody, and a no-funds exercise.
+14. [Running Monero properly](Running-Monero-Properly-Hardware-Wallet-Qubes-and-Whonix-Offline-Wallet-and-PiNodeXMR.md) (draft): Page 5 of 5 on cryptocurrency: a hardware wallet with Monero, the Qubes and Whonix offline-wallet design, PiNodeXMR as an always-on node and how to secure it, with a paper exercise.
+15. [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md) (draft): What still works when the internet and power are down: LoRa mesh, amateur radio, GMRS, FRS and CB, a legal-first SIGINT overview, and what a radio fallback could do for this project.
 
-### Detection and monitoring
+### Track 4: GRC and law
 
-- [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md): What this two-machine example leaves out and how a company would answer the same questions, for readers asking how it would be watched.
-- [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) (unbuilt): Detection after prevention fails, with Wazuh and the wider tool landscape; shipping logs is stage 2 and not built.
-- [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md): What a log, a metric, a trace and an alert are, and how a log line becomes a rule, for learners new to detection.
-- [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) (est. steps): What the Wazuh agent, server, indexer and dashboard each do and how a log line becomes an alert, with a free toy pipeline; the Wazuh parts were written from reading.
-- [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) (draft): Logs, metrics and traces, and why telemetry crosses a trust boundary; an unverified draft for engineers planning stage 2.
-- [Multiple sites and identity](Multiple-Sites-and-Identity.md) (draft): What a site is, what breaks at two, and why a new site should be a settings file and not new code; an unverified draft for engineers.
-- [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) (draft): How telemetry moves between the cloud and the home SIEM without breaking the no-listener promise; an unverified draft for engineers.
-- [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) (draft): Ask what question each panel answers and what it would look like if the answer were bad; an unverified draft for operators.
-- [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) (draft): A springboard for building a small cloud security monitoring stack with a cost ceiling you set; an unverified draft for builders.
-- [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) (unbuilt): What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied.
-- [Grafana dashboards](Grafana-Dashboards.md): The three dashboards this repository ships and which question each answers; only tried with synthetic data.
-- [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) (est. steps): What a data source is, connecting Grafana to Prometheus, SQL and OpenSearch with a read-only account, then one panel and one alert; written from reading, not run.
-- [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md): A hands-on synthetic multi-site monitoring stack where you predict what a silent site does, for builders.
+1. [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) (draft): Confidentiality, integrity and availability in plain words, how real failures map to each, and this project's controls checked against all three.
+2. [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md) (draft): Page 1 of 3 on GRC: the governance, risk and compliance loop, laws versus frameworks versus attestations, SOX, PCI DSS, HIPAA, GLBA and FISMA in brief, roles, evidence, and a CM-3 exercise.
+3. [US privacy law and the patchwork](US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers.md) (draft): Page 2 of 3 on GRC: what the Constitution says about privacy, the federal and state patchwork, data brokers, Social Security numbers and license plate readers, with dated sources and a labeled opinion section.
+4. [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md) (draft): Page 3 of 3 on GRC: the GDPR, PIPEDA, POPIA and the PIPL compared with the United States, with breach clocks, transfers, dated cases and a four-region exercise.
+5. [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md): Tenants, governance, retention, purge and DLP when data crosses an account boundary, for engineers.
+6. [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) (draft): BCP versus DR, business impact analysis, RTO and RPO per system, recovery strategies, runbooks, tabletop exercises, postmortems and a worked plan for this project, for learners planning for the day something big breaks.
+7. [Backups, recovery and patching](Backups-Recovery-and-Patching.md): Snapshot versus backup, RPO and RTO, the 3-2-1 rule and patch cadence, for beginners deciding what to protect and how.
+8. [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md) (draft): 3-2-1-1-0, immutable and offline copies, backup key custody, restore testing and what this project would have to back up, with a free restore drill.
+9. [RAID: continuity, not a backup](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md) (draft): RAID as a business continuity control and not a backup: levels, parity, the write penalty, rebuilds, the write hole and a computed six-drive exercise, with a free parity drill.
 
-### Foundations: enterprise practice
+### Track 5: Build and operate
 
-- [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md): How companies build campus, branch, data center and cloud networks compared with this one VPC, for engineers.
-- [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md): How large organizations run infrastructure differently from this one-account project, for engineers.
-- [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md): Change tickets, CABs and freezes explained for readers who hear them at work; this project uses none of it.
-- [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md): Where this project's Doppler and Twingate choices sit next to enterprise identity and secrets practice, for engineers.
-- [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md): Write a ticket, a change request and a runbook for a real merged change, for learners preparing for company work.
-- [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md) (draft): Page 1 of 3 on GRC: the governance, risk and compliance loop, laws versus frameworks versus attestations, SOX, PCI DSS, HIPAA, GLBA and FISMA in brief, roles, evidence, and a CM-3 exercise.
-- [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md): Roles that surround this work and what to learn next, for readers choosing a direction.
-
-### Foundations: data governance
-
-- [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md): Tenants, governance, retention, purge and DLP when data crosses an account boundary, for engineers.
-
-### Stage guides and design
-
-- [Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md): Make your own private copy, learn which settings are demo values and where the pipeline starts; step 1 of the build track.
-- [Labs: break it on purpose](Labs-Break-It-on-Purpose.md): Five labs where you weaken a safety property on your computer and predict which check will object, for builders.
-- [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md): The stage guides put in order, with accounts named early and a check at each step, ending in teardown; for learners replicating the build.
-- [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md): Where each value belongs: a variable, a tfvars file, Doppler or the cost file, for builders.
-- [Teardown checklist](Teardown-Checklist.md): The order of destruction, what survives it and the checks that prove the bill is zero, for builders.
-- [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md): Where this project uses a Twingate service account and which plan each use needs; nothing was run against an account.
-- [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md): A home lab with two outbound-only connectors that stays reachable when the internet fails over; nothing was tested for this page.
-- [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) (draft): The honest reason the connector droplets have public addresses and what going private would change; an unverified draft.
-- [Why I picked these tools](Why-I-Picked-These-Tools.md): Which tool choices are personal picks and where each would change at work, for engineers weighing alternatives.
-- [From commit to pipeline](From-Commit-to-Pipeline.md): What CI, CD, DevOps and DevSecOps mean here and which gate stops what, for engineers.
-- [Trace one change end to end](Trace-One-Change-End-to-End.md): One real pull request followed through every gate of the pipeline, for engineers.
-
-### Other clouds
-
-- [Why the clouds differ](Why-the-Clouds-Differ.md) (draft): The three differences between AWS, Azure and GCP that change the bill and the design; an unverified draft.
-- [AWS: account preparation](Provider-AWS-Account-Preparation.md) (draft): Finish with an AWS account that is protected, empty and watched, before any infrastructure; an unverified draft.
-- [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) (draft): The network, firewall, machine and machine identity built on AWS; an unverified draft.
-- [AWS: where the money goes](Provider-AWS-Cost-Lesson.md) (draft): The AWS charges that surprise learners, the arithmetic, and how to prove the bill is back to zero; an unverified draft.
-- [Azure: account preparation](Provider-Azure-Account-Preparation.md) (draft): Finish with an Azure subscription that is protected, empty and watched, before any infrastructure; an unverified draft.
-- [Azure: the same four pieces](Provider-Azure-The-Same-Four-Pieces.md) (draft): The network, firewall, machine and machine identity built on Azure; an unverified draft.
-- [Azure: where the money goes](Provider-Azure-Cost-Lesson.md) (draft): The Azure charges that surprise learners, the arithmetic, and how to prove the bill is back to zero; an unverified draft.
-- [GCP: account preparation](Provider-GCP-Account-Preparation.md) (draft): Finish with a Google Cloud project that is protected, empty and watched, before any infrastructure; an unverified draft.
-- [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md) (draft): The network, firewall, machine and machine identity built on GCP; an unverified draft.
-- [GCP: where the money goes](Provider-GCP-Cost-Lesson.md) (draft): Why GCP's no-public-address design can be cheaper, where that stops being true and how to prove the bill is back to zero; an unverified draft.
+1. [Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md): Make your own private copy, learn which settings are demo values and where the pipeline starts; step 1 of the build track.
+2. [Labs: break it on purpose](Labs-Break-It-on-Purpose.md): Five labs where you weaken a safety property on your computer and predict which check will object, for builders.
+3. [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md): The stage guides put in order, with accounts named early and a check at each step, ending in teardown; for learners replicating the build.
+4. [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md): Where each value belongs: a variable, a tfvars file, Doppler or the cost file, for builders.
+5. [Teardown checklist](Teardown-Checklist.md): The order of destruction, what survives it and the checks that prove the bill is zero, for builders.
+6. [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md): Where this project uses a Twingate service account and which plan each use needs; nothing was run against an account.
+7. [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md): A home lab with two outbound-only connectors that stays reachable when the internet fails over; nothing was tested for this page.
+8. [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) (draft): The honest reason the connector droplets have public addresses and what going private would change; an unverified draft.
+9. [Why I picked these tools](Why-I-Picked-These-Tools.md): Which tool choices are personal picks and where each would change at work, for engineers weighing alternatives.
+10. [From commit to pipeline](From-Commit-to-Pipeline.md): What CI, CD, DevOps and DevSecOps mean here and which gate stops what, for engineers.
+11. [Trace one change end to end](Trace-One-Change-End-to-End.md): One real pull request followed through every gate of the pipeline, for engineers.
+12. [Why the clouds differ](Why-the-Clouds-Differ.md) (draft): The three differences between AWS, Azure and GCP that change the bill and the design; an unverified draft.
+13. [AWS: account preparation](Provider-AWS-Account-Preparation.md) (draft): Finish with an AWS account that is protected, empty and watched, before any infrastructure; an unverified draft.
+14. [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) (draft): The network, firewall, machine and machine identity built on AWS; an unverified draft.
+15. [AWS: where the money goes](Provider-AWS-Cost-Lesson.md) (draft): The AWS charges that surprise learners, the arithmetic, and how to prove the bill is back to zero; an unverified draft.
+16. [Azure: account preparation](Provider-Azure-Account-Preparation.md) (draft): Finish with an Azure subscription that is protected, empty and watched, before any infrastructure; an unverified draft.
+17. [Azure: the same four pieces](Provider-Azure-The-Same-Four-Pieces.md) (draft): The network, firewall, machine and machine identity built on Azure; an unverified draft.
+18. [Azure: where the money goes](Provider-Azure-Cost-Lesson.md) (draft): The Azure charges that surprise learners, the arithmetic, and how to prove the bill is back to zero; an unverified draft.
+19. [GCP: account preparation](Provider-GCP-Account-Preparation.md) (draft): Finish with a Google Cloud project that is protected, empty and watched, before any infrastructure; an unverified draft.
+20. [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md) (draft): The network, firewall, machine and machine identity built on GCP; an unverified draft.
+21. [GCP: where the money goes](Provider-GCP-Cost-Lesson.md) (draft): Why GCP's no-public-address design can be cheaper, where that stops being true and how to prove the bill is back to zero; an unverified draft.
+22. [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md): How companies build campus, branch, data center and cloud networks compared with this one VPC, for engineers.
+23. [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md): How large organizations run infrastructure differently from this one-account project, for engineers.
+24. [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md): Change tickets, CABs and freezes explained for readers who hear them at work; this project uses none of it.
+25. [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md): Where this project's Doppler and Twingate choices sit next to enterprise identity and secrets practice, for engineers.
+26. [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md): Write a ticket, a change request and a runbook for a real merged change, for learners preparing for company work.
+27. [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md): Roles that surround this work and what to learn next, for readers choosing a direction.
+28. [How this project is planned](How-This-Project-Is-Planned.md): The written backlog, sprints and definition of done this project uses, for readers curious how the work is run.
+29. [Project status](Project-Status.md): Open issues and pull requests by state, generated from GitHub; a reference page, not a lesson.
+30. [Repository growth](Repository-Growth.md): Stars, forks and weekly merged work drawn from GitHub data, with the as-of date printed.
+31. [Screenshots policy](Screenshots-Policy.md): What may be pictured in the wiki and how to review a picture before it leaks something, for contributors.
 
 ### Reference
 
@@ -238,13 +232,6 @@ All 152 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 - [Secrets runbook](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md): Where each secret is created and wired into Spacelift and Doppler; lives in the repository, not the wiki.
 - [Stage 0 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/00-foundation.md): The author's operating record for stage 0 (project, network, firewall); lives in the repository, not the wiki.
 - [Stage 1 guide](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md): The author's operating record for stage 1 (Twingate access and two connectors); lives in the repository, not the wiki.
-
-### Project process
-
-- [How this project is planned](How-This-Project-Is-Planned.md): The written backlog, sprints and definition of done this project uses, for readers curious how the work is run.
-- [Project status](Project-Status.md): Open issues and pull requests by state, generated from GitHub; a reference page, not a lesson.
-- [Repository growth](Repository-Growth.md): Stars, forks and weekly merged work drawn from GitHub data, with the as-of date printed.
-- [Screenshots policy](Screenshots-Policy.md): What may be pictured in the wiki and how to review a picture before it leaks something, for contributors.
 
 <!-- END GENERATED PAGE MAP -->
 
