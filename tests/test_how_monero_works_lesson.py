@@ -196,6 +196,7 @@ def test_the_page_links_the_existing_lessons_and_names_the_unlinked_siblings_in_
     links = {t for t, _ in LINK.findall(body)}
     for needed in (
         PAGE_ONE,
+        "How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable",
         "Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys",
         "Hashing-Encryption-and-Keys",
         "Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero",
