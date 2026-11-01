@@ -7,14 +7,15 @@ plan, with a table of where this project uses each. A drill whose output differs
 not exist, a sample that contradicts itself, a missing registration or a real address would each teach the wrong thing.
 """
 
+import hashlib
+import math
 import os
 import re
 import shutil
 import subprocess
+import tempfile
 import textwrap
 from pathlib import Path
-
-import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 WIKI = ROOT / "docs" / "wiki"
@@ -292,19 +293,47 @@ def shown_output() -> str:
     return found[0]
 
 
-NEEDED = ("openssl", "gpg", "gpgconf", "sha256sum", "cmp", "xxd", "python3", "awk")
+NEEDED = ("bash", "openssl", "gpg", "gpgconf", "sha256sum", "cmp", "od", "tr", "awk", "python3")
 
 
-@pytest.mark.skipif(any(shutil.which(t) is None for t in NEEDED), reason="openssl 3.x, gpg, GNU coreutils, xxd and python3 are needed")
-def test_the_drill_runs_and_its_output_matches_the_page(tmp_path):
-    path = tmp_path / "crypto_drill.sh"
-    path.write_text(script())
-    done = subprocess.run(["bash", str(path)], capture_output=True, text=True, timeout=180, check=False, env={**os.environ, "TMPDIR": str(tmp_path)})
+def test_every_tool_the_drill_needs_is_installed():
+    # No skip: a runner without these must fail loudly, not quietly stop checking the page.
+    missing = [t for t in NEEDED if shutil.which(t) is None]
+    assert not missing, missing
+    version = subprocess.run(["openssl", "version"], capture_output=True, text=True, check=True).stdout
+    assert re.search(r"OpenSSL 3\.", version), f"the drill needs OpenSSL 3.x (kdf, mac, pkeyutl -rawin): {version}"
+
+
+def run_drill() -> subprocess.CompletedProcess:
+    # A short directory name: gpg-agent sockets live under the lab folder and have a path length limit.
+    base = Path(tempfile.mkdtemp(prefix="cf"))
+    try:
+        path = base / "crypto_drill.sh"
+        path.write_text(script())
+        done = subprocess.run(["bash", str(path)], capture_output=True, text=True, timeout=180, check=False, env={**os.environ, "TMPDIR": str(base)})
+        leftovers = [p.name for p in base.glob("tmp*")]
+        assert not leftovers, f"the script must delete its own lab folder: {leftovers}"
+        return done
+    finally:
+        shutil.rmtree(base, ignore_errors=True)
+
+
+def test_the_drill_runs_and_its_output_matches_the_page():
+    done = run_drill()
     assert done.returncode == 0, done.stderr
     got = [line.rstrip() for line in done.stdout.strip().splitlines()]
     want = [line.rstrip() for line in shown_output().strip().splitlines()]
     assert got == want
-    assert not any(tmp_path.glob("tmp*")), "the script must delete its own lab folder"
+
+
+def test_the_drill_prints_only_version_independent_labels():
+    shown = shown_output()
+    for label in ("CHECK-OK", "CHECK-FAIL", "GPG-REFUSED", "VERIFY-OK", "VERIFY-FAIL"):
+        assert label in shown, label
+    # raw tool wording differs between OpenSSL, GnuPG and coreutils versions and must stay out of the compared text
+    for raw in ("error 20", "error 62", "hostname mismatch", "verification failed", "Bad session key", "manipulated", "WARNING", "Verified Successfully", "FAILED"):
+        assert raw not in shown, raw
+    assert not any(line.startswith("gpg:") for line in shown.splitlines())
 
 
 def test_the_prose_numbers_match_the_printed_output():
@@ -312,9 +341,36 @@ def test_the_prose_numbers_match_the_printed_output():
     shown = shown_output()
     same = re.search(r"same hex digit in the same place: (\d+) of 64", shown).group(1)
     assert f"{same} happen to line up by chance" in body
-    assert "Signature Verified Successfully" in shown and "Bad session key" in shown
-    assert "hostname mismatch" in shown and "unable to get local issuer certificate" in shown
-    assert "domlars" in body and "domlars" in shown
+    assert "pay Alice 900 dollars" in shown and "the safe code is 4417" in shown
+
+
+GENERIC_KEY = re.compile(
+    r"""(?i)[\w.-]{0,50}?(?:access|auth|(?-i:[Aa]pi|API)|credential|creds|key|passw(?:or)?d|secret|token)(?:[ \t\w.-]{0,20})[\s'"]{0,3}"""
+    r"""(?:=|>|:{1,3}=|\|\|:|<=|=>|:|\?=)(?:'|"|\s|=|`){0,5}([\w.=-]{10,150}|[a-z0-9][a-z0-9+/]{11,}={0,3})(?:['"\n\r\s`;]|$)"""
+)
+
+
+def entropy(s: str) -> float:
+    return -sum(s.count(c) / len(s) * math.log2(s.count(c) / len(s)) for c in set(s))
+
+
+def secret_looking(body: str) -> list[str]:
+    """An approximation of gitleaks' generic-api-key rule: a keyword, an assignment, then a long high-entropy value."""
+    return [m.group(1) for line in body.splitlines() for m in GENERIC_KEY.finditer(line) if entropy(m.group(1)) >= 3.5]
+
+
+def test_no_long_random_looking_value_sits_next_to_a_secret_keyword():
+    for name, body in (("page", text()), ("drill", script()), ("test", Path(__file__).read_text(encoding="utf-8"))):
+        found = secret_looking(body)
+        assert not found, f"{name}: {found}"
+
+
+def test_the_secret_guard_bites():
+    random_looking = hashlib.sha256(b"guard").hexdigest()  # built at run time so no literal sits in this file
+    assert secret_looking(f"hmac, right key:  {random_looking}")
+    assert secret_looking(f'API_TOKEN="{random_looking[:40]}"')
+    assert not secret_looking('AES_K="$(derive demo-seed-one 32)"')
+    assert not secret_looking("hmac, same key and same message twice: tags equal")
 
 
 def test_the_drill_never_touches_anything_outside_its_own_folder():

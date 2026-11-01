@@ -8,7 +8,7 @@ Side page to the start-from-zero pages. Read it after [Hashing, encryption and k
 
 > **Prerequisites.** [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) first, then [The terminal and your first script](Terminal-and-Your-First-Script.md) for running a script. The free path needs a Linux machine or WSL 2 with `bash`, GNU `sha256sum` and `cmp`, `openssl` 3.x, `gpg` and `python3` (stock macOS lacks some of the GNU forms, so it is not written for macOS). The TLS exercise needs an internet connection and nothing else. No cloud account, no installs. About 90 minutes with the exercises (est.).
 
-> **Where this runs.** The script works in one folder it creates with `mktemp -d` and deletes at the end, with its own throwaway GnuPG home so your real keyring is not touched. It opens no connection. Every key and passphrase in it is a fixed demo value printed on this page, so they are public and must never protect anything real. The TLS exercise makes one ordinary HTTPS connection to a public example site, the same thing a browser does when you open it, and nothing else.
+> **Where this runs.** The script works in one folder it creates with `mktemp -d` and deletes at the end, with its own throwaway GnuPG home so your real keyring is not touched. It opens no connection. Every demo key is derived inside the script from a readable seed, and the passphrases are obviously fake words, so all of them are public and must never protect anything real. The TLS exercise makes one ordinary HTTPS connection to a public example site, the same thing a browser does when you open it, and nothing else.
 
 ## What you will be able to do
 
@@ -97,7 +97,7 @@ A password is also **not a key.** A key should be random and as long as the ciph
 
 A **digital signature** is made with a private key and checked with the matching public key. It gives three things: the signer held the private key, the data has not changed since signing, and (weakly) the signer cannot easily say it was not them. It hides nothing: the data is readable by anyone. It is made over a hash of the data, which is why it is fast enough for large files.
 
-Experiment 8 signs the note with an Ed25519 key. The signature is 64 bytes whatever the message size, verification of the original says `Signature Verified Successfully`, and verification of the changed note fails. A signature proves only that the key signed. Whether that key belongs to the person you think is a separate question, and the answer is a certificate.
+Experiment 8 signs the note with an Ed25519 key. The signature is 64 bytes whatever the message size, verification of the original is labeled `VERIFY-OK`, and verification of the changed note is labeled `VERIFY-FAIL`. A signature proves only that the key signed. Whether that key belongs to the person you think is a separate question, and the answer is a certificate.
 
 ## Certificates and PKI in plain words
 
@@ -181,7 +181,7 @@ Rules that follow, and that hold for any key in this project:
 | **Reusing a nonce** | With a stream-style mode, two messages under one key and one nonce let an attacker XOR the ciphertexts and strip the key away (experiment 5). With AES-GCM the same mistake can allow forged messages. SP 800-38D calls the uniqueness requirement "almost as important as the secrecy of the key". RFC 8439 says the ChaCha20 nonce "MUST not be repeated for the same key" | Let the library choose nonces; never write your own counter |
 | **A password used as a key** | Passwords are short and guessable | A salted, slow key derivation function (experiment 2), and still a long passphrase |
 | **Expecting secrecy to give integrity** | A changed ciphertext decrypts without an error and the attacker chose the change (experiment 4) | An authenticated mode or a MAC (experiment 6) |
-| **Trusting the output before the check finishes** | A tool can print data and report the failure afterward. Experiment 6 prints the damaged text, then the warning and exit status 2 | Check the exit status; throw the output away on failure |
+| **Trusting the output before the check finishes** | A tool can print data and report the failure afterward. On GnuPG 2.4.7 an edited file in experiment 6 printed damaged text (`domlars` for `dollars`), then a warning and exit status 2; the drill itself prints only a label, because that wording and order can vary by version | Check the exit status; throw the output away on failure |
 | **Encrypting passwords instead of hashing them** | One stolen key reads every password | A salted, slow hash |
 | **Accepting any certificate** | Turns TLS into encryption to an unknown party | Verify the chain and the name; never turn verification off to "make it work" |
 | **Key next to the data** | The lock and the key fall together | A different place, and a different route to reach it |
@@ -230,9 +230,11 @@ The script below runs nine small experiments. Save it as `crypto_drill.sh` and r
 
 ```bash
 #!/usr/bin/env bash
-# crypto_drill.sh - nine small experiments in one throwaway folder. Needs bash, openssl, gpg, sha256sum, cmp, python3.
+# crypto_drill.sh - nine small experiments in one throwaway folder. Needs bash, openssl 3.x, gpg, sha256sum, cmp, od, python3.
 # It reads nothing outside the folder it makes, opens no connection, and deletes the folder at the end.
-# The keys below are fixed demo values so that your output matches this page. Never use them for anything real.
+# Every demo key is derived at run time from a readable seed, so no key bytes are written in this file.
+# The seeds are public, so these keys must never protect anything real.
+# Only stable lines are printed: where tools word an error differently by version, a fixed label is printed instead.
 set -u
 lab="$(mktemp -d)"
 export GNUPGHOME="$lab/gnupg"
@@ -240,8 +242,12 @@ mkdir -m 700 "$GNUPGHOME"
 cleanup() { gpgconf --kill gpg-agent 2>/dev/null; cd / && rm -rf "$lab"; }
 trap cleanup EXIT
 cd "$lab" || exit 1
-KEY=000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f
-IV=000102030405060708090a0b0c0d0e0f
+hex() { od -An -v -tx1 -w64 | tr -d ' \n'; }
+derive() { openssl kdf -keylen "$2" -kdfopt digest:SHA256 -kdfopt pass:"$1" -kdfopt salt:demo-salt -kdfopt iter:1000 -binary PBKDF2 | hex; }
+AES_K="$(derive demo-seed-one 32)"
+AES_K2="$(derive demo-seed-two 32)"
+NONCE="$(derive demo-nonce-seed 16)"
+label() { if "$@" > /dev/null 2>&1; then echo "$LABEL_OK"; else echo "$LABEL_FAIL"; fi; }
 
 echo "== 1. Hashing: one changed byte, a checksum file, and a keyed hash"
 printf 'pay Alice 100 dollars\n' > note.txt
@@ -255,49 +261,49 @@ same=0
 for i in $(seq 0 63); do [ "${a:$i:1}" = "${b:$i:1}" ] && same=$((same + 1)); done
 echo "same hex digit in the same place: $same of 64 (about 4 by chance alone)"
 sha256sum note.txt > note.sha256
-sha256sum -c note.sha256
+LABEL_OK="checksum check, original file: CHECK-OK" LABEL_FAIL="checksum check, original file: CHECK-FAIL" label sha256sum -c note.sha256
 cp note-changed.txt note.txt
-sha256sum -c note.sha256 2>&1
-echo "exit=$?"
+LABEL_OK="checksum check, changed file:  CHECK-OK" LABEL_FAIL="checksum check, changed file:  CHECK-FAIL" label sha256sum -c note.sha256
 printf 'pay Alice 100 dollars\n' > note.txt
-echo "hmac, right key:  $(openssl mac -digest SHA256 -macopt hexkey:$KEY -in note.txt HMAC)"
-echo "hmac, other key:  $(openssl mac -digest SHA256 -macopt hexkey:ff$KEY -in note.txt HMAC)"
-echo "hmac, changed:    $(openssl mac -digest SHA256 -macopt hexkey:$KEY -in note-changed.txt HMAC)"
+tag() { openssl mac -digest SHA256 -macopt hexkey:"$1" -in "$2" HMAC; }
+[ "$(tag "$AES_K" note.txt)" = "$(tag "$AES_K" note.txt)" ] && echo "hmac, same key and same message twice: tags equal"
+[ "$(tag "$AES_K" note.txt)" != "$(tag "$AES_K2" note.txt)" ] && echo "hmac, different key: tags differ"
+[ "$(tag "$AES_K" note.txt)" != "$(tag "$AES_K" note-changed.txt)" ] && echo "hmac, changed message: tags differ"
 
 echo
 echo "== 2. A password is not a key: one password, two salts"
-echo "salt 1: $(openssl kdf -keylen 16 -kdfopt digest:SHA256 -kdfopt pass:hunter2 -kdfopt salt:salt-one -kdfopt iter:600000 -binary PBKDF2 | xxd -p)"
-echo "salt 2: $(openssl kdf -keylen 16 -kdfopt digest:SHA256 -kdfopt pass:hunter2 -kdfopt salt:salt-two -kdfopt iter:600000 -binary PBKDF2 | xxd -p)"
+echo "salt 1: $(openssl kdf -keylen 16 -kdfopt digest:SHA256 -kdfopt pass:hunter2 -kdfopt salt:salt-one -kdfopt iter:600000 -binary PBKDF2 | hex)"
+echo "salt 2: $(openssl kdf -keylen 16 -kdfopt digest:SHA256 -kdfopt pass:hunter2 -kdfopt salt:salt-two -kdfopt iter:600000 -binary PBKDF2 | hex)"
 
 echo
 echo "== 3. ECB shows its pattern, CTR does not"
 printf 'ATTACK AT DAWN!!ATTACK AT DAWN!!ATTACK AT DAWN!!' > pattern.txt
 echo "ECB:"
-openssl enc -aes-256-ecb -K $KEY -in pattern.txt | xxd -p -c 16
+openssl enc -aes-256-ecb -K "$AES_K" -in pattern.txt | od -An -v -tx1 -w16 | tr -d ' '
 echo "CTR:"
-openssl enc -aes-256-ctr -K $KEY -iv $IV -in pattern.txt | xxd -p -c 16
+openssl enc -aes-256-ctr -K "$AES_K" -iv "$NONCE" -in pattern.txt | od -An -v -tx1 -w16 | tr -d ' '
 
 echo
 echo "== 4. Encryption without authentication: an attacker edits the ciphertext"
-openssl enc -aes-256-ctr -K $KEY -iv $IV -in note.txt -out note.ctr
-echo "ciphertext:        $(xxd -p -c 32 note.ctr)"
-echo "decrypted, right key: $(openssl enc -d -aes-256-ctr -K $KEY -iv $IV -in note.ctr)"
-openssl enc -d -aes-256-ctr -K ff$KEY -iv $IV -in note.ctr > wrong.out 2> wrong.err
-echo "decrypted, wrong key: exit=$? and $(wc -c < wrong.out) bytes of $(xxd -p -c 32 wrong.out | cut -c1-16)... (no error)"
+openssl enc -aes-256-ctr -K "$AES_K" -iv "$NONCE" -in note.txt -out note.ctr
+echo "ciphertext:        $(od -An -v -tx1 -w32 note.ctr | tr -d ' ')"
+echo "decrypted, right key: $(openssl enc -d -aes-256-ctr -K "$AES_K" -iv "$NONCE" -in note.ctr)"
+openssl enc -d -aes-256-ctr -K "$AES_K2" -iv "$NONCE" -in note.ctr > wrong.out 2> wrong.err
+echo "decrypted with a different key: exit=$?, $(wc -c < wrong.out) bytes, same as the original: $(cmp -s wrong.out note.txt && echo yes || echo no)"
 python3 -I -c "
 d = bytearray(open('note.ctr', 'rb').read())
 d[10] ^= 0x08
 open('note-edited.ctr', 'wb').write(d)
 "
 printf 'edited ciphertext, decrypted: '
-openssl enc -d -aes-256-ctr -K $KEY -iv $IV -in note-edited.ctr
+openssl enc -d -aes-256-ctr -K "$AES_K" -iv "$NONCE" -in note-edited.ctr
 echo "exit=$?"
 
 echo
 echo "== 5. Reusing a nonce: two messages, one key, one IV"
 printf 'the safe code is 4417\n' > secret.txt
-openssl enc -aes-256-ctr -K $KEY -iv $IV -in note.txt -out c1.bin
-openssl enc -aes-256-ctr -K $KEY -iv $IV -in secret.txt -out c2.bin
+openssl enc -aes-256-ctr -K "$AES_K" -iv "$NONCE" -in note.txt -out c1.bin
+openssl enc -aes-256-ctr -K "$AES_K" -iv "$NONCE" -in secret.txt -out c2.bin
 python3 -I -c "
 c1, c2, known = (open(n, 'rb').read() for n in ('c1.bin', 'c2.bin', 'note.txt'))
 x = bytes(a ^ b for a, b in zip(c1, c2))
@@ -307,73 +313,65 @@ print('known note xor that =', repr(bytes(a ^ b for a, b in zip(x, known))))
 
 echo
 echo "== 6. Authenticated encryption with gpg: wrong passphrase and edited file are refused"
-printf 'demo-passphrase-not-a-secret\n' > pass.txt
+printf 'demo-passphrase-not-real\n' > pass.txt
 chmod 600 pass.txt
-gpgo=(--batch --quiet --pinentry-mode loopback --passphrase-file pass.txt)
-gpg "${gpgo[@]}" --symmetric --cipher-algo AES256 --compress-algo none --output note.gpg note.txt
-echo "right passphrase:"
-gpg "${gpgo[@]}" --decrypt note.gpg 2>&1
-printf 'wrong-passphrase\n' > wrong-pass.txt
-echo "wrong passphrase:"
-gpg --batch --quiet --pinentry-mode loopback --passphrase-file wrong-pass.txt --decrypt note.gpg 2>&1
-echo "exit=$?"
+printf 'another-wrong-phrase\n' > wrong-pass.txt
+gpg_with() { gpg --batch --quiet --pinentry-mode loopback --passphrase-file "$1" "${@:2}"; }
+gpg_with pass.txt --symmetric --cipher-algo AES256 --compress-algo none --output note.gpg note.txt
+printf 'right passphrase: '
+gpg_with pass.txt --decrypt note.gpg 2> /dev/null
+LABEL_OK="wrong passphrase: GPG-OK (unexpected)" LABEL_FAIL="wrong passphrase: GPG-REFUSED" label gpg_with wrong-pass.txt --decrypt note.gpg
 python3 -I -c "
 d = bytearray(open('note.gpg', 'rb').read())
 d[-28] ^= 0x01
 open('note-edited.gpg', 'wb').write(d)
 "
-echo "edited file:"
-gpg "${gpgo[@]}" --decrypt note-edited.gpg 2>&1
-echo "exit=$?"
+LABEL_OK="edited file: GPG-OK (unexpected)" LABEL_FAIL="edited file: GPG-REFUSED" label gpg_with pass.txt --decrypt note-edited.gpg
 
 echo
 echo "== 7. Key exchange: two key pairs, one shared secret, then one symmetric key"
-openssl genpkey -algorithm X25519 -out alice.key
-openssl genpkey -algorithm X25519 -out bob.key
-openssl genpkey -algorithm X25519 -out eve.key
-for n in alice bob eve; do openssl pkey -in $n.key -pubout -out $n.pub; done
-openssl pkeyutl -derive -inkey alice.key -peerkey bob.pub -out alice.secret
-openssl pkeyutl -derive -inkey bob.key -peerkey alice.pub -out bob.secret
-openssl pkeyutl -derive -inkey eve.key -peerkey bob.pub -out eve.secret
-cmp -s alice.secret bob.secret && echo "alice and bob derived the same $(wc -c < alice.secret)-byte secret"
-cmp -s alice.secret eve.secret || echo "eve, who saw both public keys, derived a different one"
-hkdf() { openssl kdf -keylen 32 -kdfopt digest:SHA256 -kdfopt hexkey:"$(xxd -p -c 64 "$1")" -kdfopt info:demo-v1 -binary HKDF | xxd -p -c 64; }
-[ "$(hkdf alice.secret)" = "$(hkdf bob.secret)" ] && echo "an HKDF step turns it into the same 32-byte AES key on both sides"
+openssl genpkey -algorithm X25519 -out alice.pem
+openssl genpkey -algorithm X25519 -out bob.pem
+openssl genpkey -algorithm X25519 -out eve.pem
+for n in alice bob eve; do openssl pkey -in $n.pem -pubout -out $n.pub; done
+openssl pkeyutl -derive -inkey alice.pem -peerkey bob.pub -out alice.shared
+openssl pkeyutl -derive -inkey bob.pem -peerkey alice.pub -out bob.shared
+openssl pkeyutl -derive -inkey eve.pem -peerkey bob.pub -out eve.shared
+cmp -s alice.shared bob.shared && echo "alice and bob derived the same $(wc -c < alice.shared)-byte secret"
+cmp -s alice.shared eve.shared || echo "eve, who saw both public keys, derived a different one"
+hkdf() { openssl kdf -keylen 32 -kdfopt digest:SHA256 -kdfopt hexkey:"$(od -An -v -tx1 -w64 "$1" | tr -d ' \n')" -kdfopt info:demo-v1 -binary HKDF | hex; }
+[ "$(hkdf alice.shared)" = "$(hkdf bob.shared)" ] && echo "an HKDF step turns it into the same 32-byte AES key on both sides"
 
 echo
 echo "== 8. A digital signature"
-openssl genpkey -algorithm ed25519 -out sign.key
-openssl pkey -in sign.key -pubout -out sign.pub
-openssl pkeyutl -sign -inkey sign.key -rawin -in note.txt -out note.sig
+openssl genpkey -algorithm ed25519 -out sign.pem
+openssl pkey -in sign.pem -pubout -out sign.pub
+openssl pkeyutl -sign -inkey sign.pem -rawin -in note.txt -out note.sig
 echo "signature is $(wc -c < note.sig) bytes"
-openssl pkeyutl -verify -pubin -inkey sign.pub -rawin -in note.txt -sigfile note.sig
-openssl pkeyutl -verify -pubin -inkey sign.pub -rawin -in note-changed.txt -sigfile note.sig 2>&1 | grep -E "Verified|Failure"
+LABEL_OK="original note: VERIFY-OK" LABEL_FAIL="original note: VERIFY-FAIL" label openssl pkeyutl -verify -pubin -inkey sign.pub -rawin -in note.txt -sigfile note.sig
+LABEL_OK="changed note:  VERIFY-OK" LABEL_FAIL="changed note:  VERIFY-FAIL" label openssl pkeyutl -verify -pubin -inkey sign.pub -rawin -in note-changed.txt -sigfile note.sig
 
 echo
 echo "== 9. A certificate authority in miniature"
-openssl genpkey -algorithm ed25519 -out ca.key
-openssl req -x509 -new -key ca.key -subj "/CN=Demo Root CA" -days 30 -addext "basicConstraints=critical,CA:TRUE" -addext keyUsage=critical,keyCertSign -out ca.pem
-openssl genpkey -algorithm ed25519 -out site.key
-openssl req -new -key site.key -subj "/CN=demo.example.test" -out site.csr
+openssl genpkey -algorithm ed25519 -out ca.pem
+openssl req -x509 -new -key ca.pem -subj "/CN=Demo Root CA" -days 30 -addext "basicConstraints=critical,CA:TRUE" -addext keyUsage=critical,keyCertSign -out ca.crt
+openssl genpkey -algorithm ed25519 -out site.pem
+openssl req -new -key site.pem -subj "/CN=demo.example.test" -out site.csr
 printf 'subjectAltName=DNS:demo.example.test\nbasicConstraints=CA:FALSE\n' > site.ext
-openssl x509 -req -in site.csr -CA ca.pem -CAkey ca.key -CAcreateserial -days 7 -extfile site.ext -out site.pem 2> /dev/null
-echo "trusted CA, right name:"
-openssl verify -CAfile ca.pem -verify_hostname demo.example.test site.pem
-echo "trusted CA, wrong name:"
-openssl verify -CAfile ca.pem -verify_hostname other.example.test site.pem 2>&1
-echo "no trusted CA at all:"
-openssl verify -no-CApath -no-CAfile -no-CAstore site.pem 2>&1
-openssl genpkey -algorithm ed25519 -out rogue.key
-openssl req -x509 -new -key rogue.key -subj "/CN=Demo Root CA" -days 30 -addext "basicConstraints=critical,CA:TRUE" -addext keyUsage=critical,keyCertSign -out rogue.pem
-echo "a different CA with the same name:"
-openssl verify -CAfile rogue.pem site.pem 2>&1
+openssl x509 -req -in site.csr -CA ca.crt -CAkey ca.pem -CAcreateserial -days 7 -extfile site.ext -out site.crt 2> /dev/null
+LABEL_OK="trusted CA, right name:  VERIFY-OK" LABEL_FAIL="trusted CA, right name:  VERIFY-FAIL" label openssl verify -CAfile ca.crt -verify_hostname demo.example.test site.crt
+LABEL_OK="trusted CA, wrong name:  VERIFY-OK" LABEL_FAIL="trusted CA, wrong name:  VERIFY-FAIL" label openssl verify -CAfile ca.crt -verify_hostname other.example.test site.crt
+LABEL_OK="no trusted CA at all:    VERIFY-OK" LABEL_FAIL="no trusted CA at all:    VERIFY-FAIL" label openssl verify -no-CApath -no-CAfile -no-CAstore site.crt
+openssl genpkey -algorithm ed25519 -out rogue.pem
+openssl req -x509 -new -key rogue.pem -subj "/CN=Demo Root CA" -days 30 -addext "basicConstraints=critical,CA:TRUE" -addext keyUsage=critical,keyCertSign -out rogue.crt
+LABEL_OK="same-name rogue CA:      VERIFY-OK" LABEL_FAIL="same-name rogue CA:      VERIFY-FAIL" label openssl verify -CAfile rogue.crt site.crt
 
 exit 0
 ```
 
-**Predict.** In experiment 4, the attacker changes one byte of the ciphertext without the key. Will the decryption fail, print garbage, or print something readable? In experiment 6, will `gpg` print anything for the edited file?
+**Predict.** In experiment 4, the attacker changes one byte of the ciphertext without the key. Will the decryption fail, print garbage, or print something readable? In experiment 6, will `gpg` accept the edited file?
 
-What it printed on 2026-10-31. Every value is fixed by the script (the keys, IV and passphrases are fixed, and the key pairs in experiments 7 to 9 only appear as equal or unequal), so yours should match line for line, except that another version of `openssl` or `gpg` may word an error message differently:
+What it printed on 2026-10-31. The script prints only lines that do not depend on the tool version: the keys, nonce and passphrases are fixed by the script, the key pairs in experiments 7 to 9 only appear as equal or unequal, and each pass or fail outcome is a fixed label (`CHECK-OK`, `GPG-REFUSED`, `VERIFY-FAIL` and so on) chosen from the tool's exit status, so the raw error wording never appears. Yours should match line for line:
 
 ```text
 == 1. Hashing: one changed byte, a checksum file, and a keyed hash
@@ -381,13 +379,11 @@ original: cbcc2a3b899abc201002a7e235de501eff07d0a23ef1dfb31b9fb52da95ba914
 changed:  c48f4ce32ace842091e1663de03d136e2c3070a595565dcab7bda0f5e14b9a5c
 bytes that differ: 1 (byte 11, octal 61 became 71)
 same hex digit in the same place: 7 of 64 (about 4 by chance alone)
-note.txt: OK
-note.txt: FAILED
-sha256sum: WARNING: 1 computed checksum did NOT match
-exit=1
-hmac, right key:  F88DAE67FB437632E84F3B996C7F7D3486A3E42BBA562F35B7E014A3AA22DF43
-hmac, other key:  EBE46B9A2C2AA5CA54A939FBB2A6DF18A714E2A29412E0D730517D190AC037E2
-hmac, changed:    963D5AB7F829ED8C5A9701F17C3D5B53554437398128A5C381556493B18A2E06
+checksum check, original file: CHECK-OK
+checksum check, changed file:  CHECK-FAIL
+hmac, same key and same message twice: tags equal
+hmac, different key: tags differ
+hmac, changed message: tags differ
 
 == 2. A password is not a key: one password, two salts
 salt 1: 12cd52d051d0b3b176ed30444583b318
@@ -395,19 +391,19 @@ salt 2: 6e169dc955edc5356d796aed4f8e06ea
 
 == 3. ECB shows its pattern, CTR does not
 ECB:
-6c8f4498c9d8b0e3215591a6ac904ac3
-6c8f4498c9d8b0e3215591a6ac904ac3
-6c8f4498c9d8b0e3215591a6ac904ac3
-9f3b7504926f8bd36e3118e903a4cd4a
+805bf34203ee3e4e94036b5fc1128ce3
+805bf34203ee3e4e94036b5fc1128ce3
+805bf34203ee3e4e94036b5fc1128ce3
+194f5a0eea54eda9e3c10e0a4595e852
 CTR:
-1b3a50164bb051d7a40e117c558d87b3
-21a7449480ce781c0136bf1025ab01ee
-5d31231a798eece5efc14fe4b25fe6b3
+0c5e3acae0a393279a645cdb9fcc9f4b
+cc8839d8209d22c7cfa85ec843740ec9
+a5e2e3b9ed24b9f5ba34a0e6e7bef5a5
 
 == 4. Encryption without authentication: an attacker edits the ciphertext
-ciphertext:        2a0f7d77499718f5950e640d32e3c2fd0c9f71a7b08f
+ciphertext:        3d6b17abe284da05ab6429aaf8a2da05e1b00ceb10dc
 decrypted, right key: pay Alice 100 dollars
-decrypted, wrong key: exit=0 and 22 bytes of 6c8c4566acb95bad... (no error)
+decrypted with a different key: exit=0, 22 bytes, same as the original: no
 edited ciphertext, decrypted: pay Alice 900 dollars
 exit=0
 
@@ -416,15 +412,9 @@ c1 xor c2 = 04091c00320d0f0645435e5455000d1c4c5855434400
 known note xor that = b'the safe code is 4417\n'
 
 == 6. Authenticated encryption with gpg: wrong passphrase and edited file are refused
-right passphrase:
-pay Alice 100 dollars
-wrong passphrase:
-gpg: decryption failed: Bad session key
-exit=2
-edited file:
-pay Alice 100 domlars
-gpg: WARNING: encrypted message has been manipulated!
-exit=2
+right passphrase: pay Alice 100 dollars
+wrong passphrase: GPG-REFUSED
+edited file: GPG-REFUSED
 
 == 7. Key exchange: two key pairs, one shared secret, then one symmetric key
 alice and bob derived the same 32-byte secret
@@ -433,37 +423,27 @@ an HKDF step turns it into the same 32-byte AES key on both sides
 
 == 8. A digital signature
 signature is 64 bytes
-Signature Verified Successfully
-Signature Verification Failure
+original note: VERIFY-OK
+changed note:  VERIFY-FAIL
 
 == 9. A certificate authority in miniature
-trusted CA, right name:
-site.pem: OK
-trusted CA, wrong name:
-CN=demo.example.test
-error 62 at 0 depth lookup: hostname mismatch
-error site.pem: verification failed
-no trusted CA at all:
-CN=demo.example.test
-error 20 at 0 depth lookup: unable to get local issuer certificate
-error site.pem: verification failed
-a different CA with the same name:
-CN=demo.example.test
-error 20 at 0 depth lookup: unable to get local issuer certificate
-error site.pem: verification failed
+trusted CA, right name:  VERIFY-OK
+trusted CA, wrong name:  VERIFY-FAIL
+no trusted CA at all:    VERIFY-FAIL
+same-name rogue CA:      VERIFY-FAIL
 ```
 
 **Check.** How to read it:
 
-1. **Hashing.** One byte differs (the `1` in `100` became `9`), and the two SHA-256 values look unrelated. `sha256sum -c` says `OK` for the original and `FAILED` for the changed file, with exit status 1. A different key gives a different HMAC tag, and so does a changed message.
+1. **Hashing.** One byte differs (the `1` in `100` became `9`), and the two SHA-256 values look unrelated. `sha256sum -c` is labeled `CHECK-OK` for the original and `CHECK-FAIL` for the changed file. The same key and message give the same HMAC tag twice; a different key gives a different tag, and so does a changed message. (The script does not print the tags: a tag is derived from a key, and the point is only whether they match.)
 2. **Password and salt.** The same password gives two unrelated 16-byte keys under two salts.
 3. **ECB.** The first three 16-byte blocks of the ECB output are identical because the three plaintext blocks are identical. The CTR output shows no repetition. This is the pattern leak.
-4. **No authentication.** With the wrong key, decryption "succeeds" with exit status 0 and produces 22 bytes of unreadable output. With the right key and one edited byte, the output is `pay Alice 900 dollars` with no error: the attacker flipped one bit of the ciphertext and the same bit flipped in the plaintext. The attacker never needed the key.
+4. **No authentication.** With a different key, decryption "succeeds" with exit status 0 and produces 22 bytes that are not the original. With the right key and one edited byte, the output is `pay Alice 900 dollars` with no error: the attacker flipped one bit of the ciphertext and the same bit flipped in the plaintext. The attacker never needed the key.
 5. **Nonce reuse.** XOR of the two ciphertexts equals the XOR of the two plaintexts, so knowing one message (`pay Alice 100 dollars`) reveals the other (`the safe code is 4417`) without the key.
-6. **Authenticated.** A wrong passphrase gives `decryption failed: Bad session key` and exit status 2. An edited file gives `WARNING: encrypted message has been manipulated!` and exit status 2. **Notice the line above the warning:** `gpg` printed the damaged text first (`domlars`). Trust the exit status and the warning, not the output.
+6. **Authenticated.** A wrong passphrase and an edited file are both refused (`GPG-REFUSED`, chosen from a nonzero exit status), where experiment 4's unauthenticated mode accepted the edit. **Trust the exit status, not the output:** on GnuPG 2.4.7 I saw the edited file print damaged text (`domlars`) before the warning `encrypted message has been manipulated!` and exit status 2. That raw output is not part of the compared text because wording and order differ between versions.
 7. **Key exchange.** Alice and Bob derive the same 32-byte secret from each other's public keys. Eve, who knows both public keys, does not. A KDF step then gives both sides the same AES key.
 8. **Signature.** A 64-byte signature verifies against the original note and fails against the changed one.
-9. **Certificates.** The site certificate is `OK` for the right name and CA. A wrong name fails with `hostname mismatch` (error 62). With no trusted CA the error is `unable to get local issuer certificate` (error 20). A rogue CA with the same name fails the same way, because the check follows the signature, not the label.
+9. **Certificates.** The site certificate verifies (`VERIFY-OK`) for the right name and CA. A wrong name fails, with no trusted CA it fails, and a rogue CA with the same name fails too, because the check follows the signature, not the label. (OpenSSL 3.5.7 worded these as `hostname mismatch` and `unable to get local issuer certificate`; the drill prints labels because the wording differs between versions.)
 
 **Undo.** The script deletes its folder and stops its private `gpg-agent` on exit. Nothing else was changed.
 
