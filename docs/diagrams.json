@@ -185,6 +185,15 @@
   "docs/wiki/images/opsec-for-tor-and-i2p-that-holds-up-identities-layers-metadata-and-habits-diagram-4.png": {
     "sha256": "e23d0e152a5d83946e27752c5d15410a84a3644f6f627b816a4cbff9acd65120"
   },
+  "docs/wiki/images/paper-wallets-generators-and-offline-key-generation-tails-electrum-and-monero-diagram-1.png": {
+    "sha256": "68a8af2715f4fd5afb1caa7c7e3b4633836152521c09889c4ab0b18263d92378"
+  },
+  "docs/wiki/images/paper-wallets-generators-and-offline-key-generation-tails-electrum-and-monero-diagram-2.png": {
+    "sha256": "450ea8996db963584579b05fd07b1661d60ab66d6c8251bb428f0efeca8f0fae"
+  },
+  "docs/wiki/images/paper-wallets-generators-and-offline-key-generation-tails-electrum-and-monero-diagram-3.png": {
+    "sha256": "bb9949f16cc148ba422851e35834bc051d7268436b34b601f97d24fefd337a51"
+  },
   "docs/wiki/images/privacy-law-around-the-world-gdpr-pipeda-popia-and-pipl-compared-with-the-united-states-diagram-1.png": {
     "sha256": "95b5622ac7c6a922e7590d2cd0fa6753805679e081b28b1f2aa5cea4aee5b0b0"
   },
