@@ -138,15 +138,16 @@ file does not match the manifest. -->
 
 - [Full list (13)](Contents.md#detection-and-monitoring)
 </details>
-<details><summary><b>Foundations: enterprise practice</b> (6)</summary>
+<details><summary><b>Foundations: enterprise practice</b> (7)</summary>
 
 - [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md)
 - [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md)
 - [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md)
 - [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md)
 - [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md)
+- [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md) (draft)
 - [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
-- [Full list (6)](Contents.md#foundations-enterprise-practice)
+- [Full list (7)](Contents.md#foundations-enterprise-practice)
 </details>
 <details><summary><b>Foundations: data governance</b> (1)</summary>
 
