@@ -69,7 +69,7 @@ file does not match the manifest. -->
 - [Threat Dragon exercise](Threat-Dragon-Exercise.md)
 - [Full list (6)](Contents.md#security-tools-and-threat-modeling)
 </details>
-<details><summary><b>Track 2: Defend and detect</b> (33)</summary>
+<details><summary><b>Track 2: Defend and detect</b> (34)</summary>
 
 <details><summary>Network and host defense (9)</summary>
 
@@ -83,15 +83,15 @@ file does not match the manifest. -->
 - [Deception alerts in the SIEM](Deception-and-Honeypots-Alerts-in-the-SIEM.md) · [Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md) · [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md) (est. steps) · [Anatomy of a cloud honeypot](Deception-and-Honeypots-Cloud-Sensor-Anatomy.md) (est. steps) · [Cloud Cowrie for a weekend](Deception-and-Honeypots-Cloud-Cowrie-Weekend.md) (est. steps)
 - [Read what arrived: Cowrie logs](Deception-and-Honeypots-Read-the-Sensor-Logs.md)
 </details>
-<details><summary>Detection and monitoring (13)</summary>
+<details><summary>Detection and monitoring (14)</summary>
 
 - [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md) · [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) · [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) (unbuilt) · [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) (est. steps)
-- [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) (draft) · [Multiple sites and identity](Multiple-Sites-and-Identity.md) (draft) · [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) (draft) · [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) (draft)
-- [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) (est. steps) · [Grafana dashboards](Grafana-Dashboards.md) · [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) · [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) (draft)
-- [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) (unbuilt)
+- [Detecting Tor, I2P and VPN on a network](Detecting-and-Managing-Tor-I2P-and-VPN-on-a-Network-the-Defenders-View.md) (draft) · [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) (draft) · [Multiple sites and identity](Multiple-Sites-and-Identity.md) (draft)
+- [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) (draft) · [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) (draft) · [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) (est. steps) · [Grafana dashboards](Grafana-Dashboards.md)
+- [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) · [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) (draft) · [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) (unbuilt)
 </details>
 
-- [Full list (33)](Contents.md#track-2-defend-and-detect)
+- [Full list (34)](Contents.md#track-2-defend-and-detect)
 </details>
 <details><summary><b>Track 3: Privacy, anonymity and cryptocurrency</b> (17)</summary>
 

@@ -38,6 +38,21 @@
   "docs/wiki/images/containers-and-docker-basics-diagram-1.png": {
     "sha256": "ea2dc53f819ff0450c14ec57cd89fdd7c92a0d69aa2ddcb0153d30c6018d6c5f"
   },
+  "docs/wiki/images/detecting-and-managing-tor-i2p-and-vpn-on-a-network-the-defenders-view-diagram-1.png": {
+    "sha256": "f66b171a3d01d71ae62aea4cca3e9203c38c8bc22be20ebbc11bc016bfa331c0"
+  },
+  "docs/wiki/images/detecting-and-managing-tor-i2p-and-vpn-on-a-network-the-defenders-view-diagram-2.png": {
+    "sha256": "0a9c539213430a806b4f7a7a32fb72efe4885e07641ef74de4a919f0b17c051c"
+  },
+  "docs/wiki/images/detecting-and-managing-tor-i2p-and-vpn-on-a-network-the-defenders-view-diagram-3.png": {
+    "sha256": "22c2c44f561e2d846227bd3455aed4487092d2a5f9c65d5b3799bf5af5e07835"
+  },
+  "docs/wiki/images/detecting-and-managing-tor-i2p-and-vpn-on-a-network-the-defenders-view-diagram-4.png": {
+    "sha256": "716da9c84ddd8928793942e6ab48ca59ffb1b3142376dd6e4686e77e71656a65"
+  },
+  "docs/wiki/images/detecting-and-managing-tor-i2p-and-vpn-on-a-network-the-defenders-view-diagram-5.png": {
+    "sha256": "787f12590e3d98016ca296b1eb25b3045d5bd53311172cfef0c78fd48321721d"
+  },
   "docs/wiki/images/digitalocean-network-and-firewalls-diagram-1.png": {
     "sha256": "a2f67631aa20079a931ed0c1479ffbd86f9d732a10686fba76dc0705700122f8"
   },

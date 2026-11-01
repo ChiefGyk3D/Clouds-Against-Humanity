@@ -27,7 +27,7 @@ If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md):
 
 ## Every page, by theme
 
-All 154 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
+All 155 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
 
 ### Start here, by kind of reader
 
@@ -148,15 +148,16 @@ All 154 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 22. [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md): What a log, a metric, a trace and an alert are, and how a log line becomes a rule, for learners new to detection.
 23. [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) (unbuilt): Detection after prevention fails, with Wazuh and the wider tool landscape; shipping logs is stage 2 and not built.
 24. [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) (est. steps): What the Wazuh agent, server, indexer and dashboard each do and how a log line becomes an alert, with a free toy pipeline; the Wazuh parts were written from reading.
-25. [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) (draft): Logs, metrics and traces, and why telemetry crosses a trust boundary; an unverified draft for engineers planning stage 2.
-26. [Multiple sites and identity](Multiple-Sites-and-Identity.md) (draft): What a site is, what breaks at two, and why a new site should be a settings file and not new code; an unverified draft for engineers.
-27. [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) (draft): How telemetry moves between the cloud and the home SIEM without breaking the no-listener promise; an unverified draft for engineers.
-28. [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) (draft): Ask what question each panel answers and what it would look like if the answer were bad; an unverified draft for operators.
-29. [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) (est. steps): What a data source is, connecting Grafana to Prometheus, SQL and OpenSearch with a read-only account, then one panel and one alert; written from reading, not run.
-30. [Grafana dashboards](Grafana-Dashboards.md): The three dashboards this repository ships and which question each answers; only tried with synthetic data.
-31. [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md): A hands-on synthetic multi-site monitoring stack where you predict what a silent site does, for builders.
-32. [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) (draft): A springboard for building a small cloud security monitoring stack with a cost ceiling you set; an unverified draft for builders.
-33. [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) (unbuilt): What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied.
+25. [Detecting Tor, I2P and VPN on a network](Detecting-and-Managing-Tor-I2P-and-VPN-on-a-Network-the-Defenders-View.md) (draft): Page 7 of the VPN, Tor and I2P series: where a network can watch, the public signals and their limits, list matching, blocking as a policy choice and a detection as a lead, with five diagrams and a free script.
+26. [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) (draft): Logs, metrics and traces, and why telemetry crosses a trust boundary; an unverified draft for engineers planning stage 2.
+27. [Multiple sites and identity](Multiple-Sites-and-Identity.md) (draft): What a site is, what breaks at two, and why a new site should be a settings file and not new code; an unverified draft for engineers.
+28. [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) (draft): How telemetry moves between the cloud and the home SIEM without breaking the no-listener promise; an unverified draft for engineers.
+29. [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) (draft): Ask what question each panel answers and what it would look like if the answer were bad; an unverified draft for operators.
+30. [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) (est. steps): What a data source is, connecting Grafana to Prometheus, SQL and OpenSearch with a read-only account, then one panel and one alert; written from reading, not run.
+31. [Grafana dashboards](Grafana-Dashboards.md): The three dashboards this repository ships and which question each answers; only tried with synthetic data.
+32. [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md): A hands-on synthetic multi-site monitoring stack where you predict what a silent site does, for builders.
+33. [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) (draft): A springboard for building a small cloud security monitoring stack with a cost ceiling you set; an unverified draft for builders.
+34. [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) (unbuilt): What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied.
 
 ### Track 3: Privacy, anonymity and cryptocurrency
 
