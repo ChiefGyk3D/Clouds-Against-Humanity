@@ -1,37 +1,49 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Write the wiki Contents page and the sidebar from one manifest (issue #249).
+"""Write the wiki Contents page, the sidebar and the Home page map from one manifest (issue #249).
 
 The manifest, docs/wiki/_nav.yaml, lists every wiki page once, in a theme group, with a
-short title, an audience, an optional status marker and a one-line description. Two files
-are generated from it, so adding a page is one line in one file:
+short title, an audience, an optional status marker and a one-line description. Three
+outputs are generated from it, so adding a page is one line in one file:
 
   docs/wiki/Contents.md   every page, grouped, one line each, with its status marker
-  docs/wiki/_Sidebar.md   a compact sidebar: top links, then one collapsible group each,
-                          with only the core path open by default. A group lists only its
-                          key pages, then a "Full list" link to its section of Contents.md
-                          (issue #362), so the sidebar stops growing with every new page.
+  docs/wiki/_Sidebar.md   the sidebar: top links, then one collapsible group each (<details>
+                          and <summary>, which GitHub's collapsed-sections page documents),
+                          with only the core path open by default. Every group lists EVERY
+                          page, one line each, then a "Full list" link to its section of
+                          Contents.md, so a reader reaches any page from the sidebar (issue #378).
+  docs/wiki/Home.md       the hand-written intro stays; only the block between the BEGIN and
+                          END markers (HOME_BEGIN, HOME_END) is rewritten: a "Start here" line
+                          per kind of reader, then every page grouped like Contents with its
+                          one-line description. Nothing outside the markers is touched, and a
+                          Home.md without exactly one marker pair is an error.
 
-Which pages a group shows in the sidebar (the sidebar line budget is a test, not a goal):
-  - the numbered core path is listed in full (it is the fixed reading path);
-  - any other group shows the entries marked `sidebar: true` in the manifest, in display order;
-  - a group with none marked shows its first DEFAULT_SIDEBAR_PAGES (3) entries in display
-    order, so a new group works with no extra field;
+Order in the sidebar (the sidebar line budget is a test, not a goal):
+  - the numbered core path is listed in full, in reading order;
+  - any other group lists the entries marked `sidebar: true` first (pinned to the top, in display
+    order), then the rest in display order; with none marked it is simply display order;
   - every group ends with "Full list (N)", linking to its heading in Contents.md. The
     section headings of Contents.md are the group titles, so group titles must make
-    distinct anchors (validate checks this). Every page stays in Contents.md.
+    distinct anchors (validate checks this).
+  The sidebar spends one line per page, so it grows with the wiki; the budget test fails
+  before the limit is reached, which is the signal to fold subgroups, not to raise the budget.
+
+The optional top-level `readers` list gives each audience its Start-here page for the Home map
+(every audience exactly once, an existing page).
 
 Parts, kept apart on purpose (the same shape as gen_project_status.py):
 
   load_manifest(text)       parse and reject duplicate keys; PyYAML is imported here only
   validate(manifest, pages) pure: the problems with a manifest against a set of page names
-  render_contents(m), render_sidebar(m)
+  render_contents(m), render_sidebar(m), render_home_map(m)
                             pure: manifest in, Markdown out. No file reads, no clock.
+  apply_home_map(text, block)
+                            pure: swap the block between the markers of a Home.md text.
   main()                    --check is offline and exits 1 when a generated file is stale
                             or the manifest does not match the pages in docs/wiki.
 
 Usage (from anywhere inside a clone):
   python -I scripts/gen_wiki_nav.py --check   exit 1 when stale or inconsistent
-  python -I scripts/gen_wiki_nav.py           rewrite Contents.md and _Sidebar.md
+  python -I scripts/gen_wiki_nav.py           rewrite Contents.md, _Sidebar.md and the Home map
 
 Exit codes: 0 ok, 1 stale or inconsistent (--check) or an unreadable manifest, 2 usage or
 a missing PyYAML.
@@ -49,6 +61,10 @@ WIKI = Path("docs/wiki")
 MANIFEST = WIKI / "_nav.yaml"
 CONTENTS = WIKI / "Contents.md"
 SIDEBAR = WIKI / "_Sidebar.md"
+HOME = WIKI / "Home.md"
+# The generated block of Home.md sits between these two lines; everything else on Home is hand-written.
+HOME_BEGIN = "<!-- BEGIN GENERATED PAGE MAP: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->"
+HOME_END = "<!-- END GENERATED PAGE MAP -->"
 SPECIAL = {"_Sidebar", "_Footer"}  # wiki chrome, not pages a reader navigates to
 
 AUDIENCES = ("everyone", "newcomer", "learner", "builder", "engineer", "operator", "security reader")
@@ -56,8 +72,7 @@ STATUSES = ("draft", "est. steps", "unbuilt")
 ORDERS = ("curated", "sorted")
 MAX_DESC = 220
 MAX_TITLE = 80
-# A group with no entry marked `sidebar: true` shows this many entries (display order) in the sidebar.
-DEFAULT_SIDEBAR_PAGES = 3
+MAX_WHO = 80
 # The group the sidebar shows as a row of links across the top instead of a collapsible block.
 TOP_GROUP = "start"
 TOP_BAR_LABELS = {"Give-Feedback-and-Open-an-Issue": "Give feedback"}
@@ -141,6 +156,37 @@ def _text_problems(where: str, label: str, value: object, limit: int) -> list[st
     if value != value.strip() or "  " in value:
         out.append(f"{where}: {label} has stray spaces")
     return out
+
+
+def _reader_problems(readers: object, listed: set[str]) -> list[str]:
+    """The optional `readers` list: one Start-here page per audience, every audience exactly once."""
+    if readers is None:
+        return []
+    if not isinstance(readers, list):
+        return ["readers: must be a list of {audience, who, page} entries"]
+    problems: list[str] = []
+    covered: list[str] = []
+    for r in readers:
+        if not isinstance(r, dict):
+            problems.append(f"readers: entry {r!r} is not a mapping")
+            continue
+        where = f"readers.{r.get('audience')}"
+        extra = set(r) - {"audience", "who", "page"}
+        if extra:
+            problems.append(f"{where}: unknown field(s) {sorted(extra)}")
+        if r.get("audience") not in AUDIENCES:
+            problems.append(f"{where}: audience {r.get('audience')!r} is not one of {AUDIENCES}")
+        else:
+            covered.append(r["audience"])
+        problems += _text_problems(where, "who", r.get("who"), MAX_WHO)
+        if r.get("page") not in listed:
+            problems.append(f"{where}: page {r.get('page')!r} is not a page in the manifest")
+    for a in sorted({a for a in covered if covered.count(a) > 1}):
+        problems.append(f"readers: audience {a!r} is listed twice")
+    for a in AUDIENCES:
+        if a not in covered:
+            problems.append(f"readers: no start page for audience {a!r}")
+    return problems
 
 
 def validate(manifest: dict, pages: set[str]) -> list[str]:
@@ -227,6 +273,8 @@ def validate(manifest: dict, pages: set[str]) -> list[str]:
                 problems.append(f"groups {anchors[anchor]} and {g['id']} have the same Contents anchor #{anchor}")
             anchors.setdefault(anchor, g["id"])
 
+    problems += _reader_problems(manifest.get("readers"), set(seen))
+
     for name in sorted(pages - set(seen)):
         problems.append(f"orphan: {name}.md is a wiki page but has no manifest entry")
     for name in sorted(set(seen) - pages):
@@ -265,13 +313,17 @@ def sidebar_entries(manifest: dict, group: dict) -> list[dict]:
     """The entries a group shows in the sidebar: see the module docstring for the rule."""
     gid = group["id"]
     pages, extra = entries(manifest, gid), link_entries(manifest, gid)
+    everything = pages + extra
     if group.get("numbered"):
-        return pages + extra
-    marked = [e for e in pages + extra if e.get("sidebar")]
-    return marked or pages[:DEFAULT_SIDEBAR_PAGES]
+        return everything
+    # Marked entries are pinned to the top; the rest follow. Both keep display order, nothing is dropped.
+    return [e for e in everything if e.get("sidebar")] + [e for e in everything if not e.get("sidebar")]
 
 
 def render_sidebar(manifest: dict) -> str:
+    # Line-saving layout (the budget is a test): no blank line between groups, none before
+    # </details>. A blank line is kept after each <summary> because Markdown inside an HTML
+    # block needs it, and between the top row and the first group.
     lines = [
         "<!-- GENERATED from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py. Do not edit this",
         "file by hand: add the page to the manifest and re-run the script. CI fails when this",
@@ -280,18 +332,61 @@ def render_sidebar(manifest: dict) -> str:
     ]
     top = entries(manifest, TOP_GROUP)
     lines.append(" | ".join(f"**[{TOP_BAR_LABELS.get(e['page'], e['title'])}]({e['page']}.md)**" for e in top))
+    lines.append("")
     for group in groups_of(manifest):
         if group["id"] == TOP_GROUP:
             continue
         count = len(entries(manifest, group["id"])) + len(link_entries(manifest, group["id"]))
-        lines += ["", "<details open>" if group.get("open") else "<details>"]
+        lines.append("<details open>" if group.get("open") else "<details>")
         lines += [f"<summary><b>{group['title']}</b> ({count})</summary>", ""]
         for number, e in enumerate(sidebar_entries(manifest, group), start=1):
             numbered = group.get("numbered") and "url" not in e
             lines.append(f"{f'{number}.' if numbered else '-'} {_sidebar_item(e)}")
         lines.append(f"- [Full list ({count})](Contents.md#{slug(group['title'])})")
-        lines += ["", "</details>"]
+        lines.append("</details>")
     return "\n".join(lines) + "\n"
+
+
+def render_home_map(manifest: dict) -> str:
+    """The generated block of Home.md, markers included: a Start-here line per kind of reader, then
+    every page grouped like Contents with its one-line description (and status marker)."""
+    groups = groups_of(manifest)
+    total = sum(len(entries(manifest, g["id"])) for g in groups)
+    titles = {e["page"]: e["title"] for g in groups for e in entries(manifest, g["id"])}
+    out = [
+        HOME_BEGIN,
+        "",
+        "## Every page, by theme",
+        "",
+        (
+            f"All {total} pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what "
+            "each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; "
+            "[Contents](Contents.md) explains the markers."
+        ),
+    ]
+    readers = manifest.get("readers") or []
+    if readers:
+        out += ["", "### Start here, by kind of reader", ""]
+        out += [f"- **{r['who']}**: [{titles[r['page']]}]({r['page']}.md)" for r in readers]
+    for g in groups:
+        pages, extra = entries(manifest, g["id"]), link_entries(manifest, g["id"])
+        out += ["", f"### {g['title']}", ""]
+        for number, e in enumerate(pages, start=1):
+            bullet = f"{number}." if g.get("numbered") else "-"
+            out.append(f"{bullet} [{e['title']}]({e['page']}.md){_suffix(e)}: {e['desc']}")
+        out += [f"- [{e['title']}]({e['url']}): {e['desc']}" for e in extra]
+    out += ["", HOME_END]
+    return "\n".join(out)
+
+
+def apply_home_map(text: str, block: str) -> str:
+    """Replace the block between the markers of a Home.md text; refuse a text without exactly one ordered pair."""
+    if text.count(HOME_BEGIN) != 1 or text.count(HOME_END) != 1:
+        raise ValueError("Home.md needs exactly one BEGIN and one END page-map marker line")
+    start, end = text.index(HOME_BEGIN), text.index(HOME_END)
+    if end < start:
+        raise ValueError("the END page-map marker comes before the BEGIN marker in Home.md")
+    return text[:start] + block + text[end + len(HOME_END):]
 
 
 def _row(cells: list[str]) -> str:
@@ -378,6 +473,14 @@ def check(root: Path) -> list[str]:
             continue
         if current != render(manifest):
             problems.append(f"{path} does not match {MANIFEST}")
+    try:
+        home = (root / HOME).read_text(encoding="utf-8")
+        if home != apply_home_map(home, render_home_map(manifest)):
+            problems.append(f"the page map in {HOME} does not match {MANIFEST}")
+    except OSError:
+        problems.append(f"{HOME} is missing")
+    except ValueError as exc:
+        problems.append(f"{HOME}: {exc}")
     return problems
 
 
@@ -395,7 +498,7 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"gen_wiki_nav: {p}", file=sys.stderr)
             print("gen_wiki_nav: fix the manifest, then re-render with: python -I scripts/gen_wiki_nav.py", file=sys.stderr)
             return 1
-        print(f"gen_wiki_nav: {CONTENTS} and {SIDEBAR} match {MANIFEST}")
+        print(f"gen_wiki_nav: {CONTENTS}, {SIDEBAR} and the {HOME} page map match {MANIFEST}")
         return 0
 
     try:
@@ -411,9 +514,15 @@ def main(argv: list[str] | None = None) -> int:
         for p in problems:
             print(f"gen_wiki_nav: {p}", file=sys.stderr)
         return 1
+    try:  # build Home first: a Home without its markers must stop the run before anything is written
+        home = apply_home_map((root / HOME).read_text(encoding="utf-8"), render_home_map(manifest))
+    except (OSError, ValueError) as exc:
+        print(f"gen_wiki_nav: {HOME}: {exc}", file=sys.stderr)
+        return 1
     (root / CONTENTS).write_text(render_contents(manifest), encoding="utf-8")
     (root / SIDEBAR).write_text(render_sidebar(manifest), encoding="utf-8")
-    print(f"gen_wiki_nav: wrote {CONTENTS} and {SIDEBAR}")
+    (root / HOME).write_text(home, encoding="utf-8")
+    print(f"gen_wiki_nav: wrote {CONTENTS}, {SIDEBAR} and the page map in {HOME}")
     return 0
 
 

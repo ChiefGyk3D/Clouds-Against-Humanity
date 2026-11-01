@@ -2,8 +2,10 @@
 # The wiki navigation manifest (issue #249). One entry per page, one line per entry.
 #
 # Adding a page = one line here, in the group where it belongs, plus its Glossary rows.
-# Then run `python -I scripts/gen_wiki_nav.py` to rewrite docs/wiki/Contents.md and
-# docs/wiki/_Sidebar.md; CI runs `python -I scripts/gen_wiki_nav.py --check`.
+# Then run `python -I scripts/gen_wiki_nav.py` to rewrite docs/wiki/Contents.md,
+# docs/wiki/_Sidebar.md and the page map on docs/wiki/Home.md (only the block between its
+# BEGIN GENERATED PAGE MAP and END GENERATED PAGE MAP lines; the rest of Home is hand-written).
+# CI runs `python -I scripts/gen_wiki_nav.py --check`.
 #
 # Fields of a page entry:
 #   page      the file name without .md (docs/wiki/<page>.md). Every wiki page appears once,
@@ -15,11 +17,19 @@
 #               est. steps  the banner says the steps were written from reading and not run
 #               unbuilt     the banner says the thing it describes is not built or not applied
 #   desc      one line: what the page is for and who it is for.
-#   sidebar   optional, true or false: show this page in the sidebar (issue #362). The sidebar
-#             lists only the marked pages of each group, then a "Full list" link to the group's
-#             section of Contents. A group with none marked shows its first 3 entries. The
-#             numbered core path is always listed in full. Keep it to about 3 or 4 per group
-#             (the entry points and the newest lessons); every page stays on Contents.
+#   sidebar   optional, true or false: pin this page to the top of its group in the sidebar
+#             (issues #362 and #378). The sidebar lists EVERY page of every group, one line
+#             each, in collapsible groups, then a "Full list" link to the group's section of
+#             Contents. Marked pages come first in display order, the rest follow in display
+#             order, and nothing is dropped. The numbered core path is always listed in full,
+#             in reading order. Keep marks to about 3 or 4 per group (the entry points and the
+#             newest lessons). The sidebar costs one line per page and a test caps its length:
+#             when that test fails, fold subgroups; do not raise the cap.
+#
+# Home page map: the generator also writes, on Home, a "Start here" line per kind of reader
+# (the `readers` list at the bottom of this file) and every page grouped like Contents with
+# its desc. A page missing from this file cannot be left off Home, and a test fails if the
+# generated block is stale.
 #
 # Groups: `curated` groups keep the order written here (a reading order); `sorted` groups
 # are kept in title order (case-insensitive) so two additions rarely touch the same line.
@@ -204,3 +214,14 @@ links:
     - {url: "https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/stages/01-access.md", title: "Stage 1 guide", audience: "builder", desc: "The author's operating record for stage 1 (Twingate access and two connectors); lives in the repository, not the wiki."}
     - {url: "https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/spacelift-secrets.md", title: "Secrets runbook", audience: "builder", desc: "Where each secret is created and wired into Spacelift and Doppler; lives in the repository, not the wiki."}
     - {url: "https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md", title: "Cost", audience: "everyone", desc: "The recorded prices and the monthly ceiling behind the cost gate; lives in the repository, not the wiki."}
+
+# One Start-here page per kind of reader (every audience exactly once), shown at the top of the
+# Home page map. `who` is the reader in plain words; `page` must be a page in this manifest.
+readers:
+  - {audience: everyone, who: "Just looking around", page: Reading-Order}
+  - {audience: newcomer, who: "New to cloud, Terraform or zero trust", page: Start-Here-If-You-Are-New}
+  - {audience: learner, who: "Learning a skill from zero (terminal, networking, git, security)", page: Terminal-and-Your-First-Script}
+  - {audience: builder, who: "Building your own copy", page: Fork-Private-Stacks-and-the-Pipeline}
+  - {audience: engineer, who: "An engineer who wants the design", page: Architecture-Overview}
+  - {audience: operator, who: "Running it or watching it", page: Reading-a-Dashboard-as-an-Operator}
+  - {audience: "security reader", who: "Security-minded", page: Threat-Model-Exercise}
