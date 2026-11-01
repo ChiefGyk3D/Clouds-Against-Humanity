@@ -30,6 +30,11 @@ output "onion_service_enabled" {
   value       = var.workload_enabled && var.onion_service_enabled
 }
 
+output "workload_web_resource_names" {
+  description = "Names of the Twingate resources made for workload_web_ports. Empty when the list is empty or the master switch is off."
+  value       = sort([for r in twingate_resource.workload_web : r.name])
+}
+
 output "private_ip" {
   description = "The droplet's VPC address, where the two Twingate resources point."
   value       = one(module.workload[*].private_ip)

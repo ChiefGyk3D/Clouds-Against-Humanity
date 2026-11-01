@@ -13,13 +13,14 @@ Design: [2026-10-11 stage 3 design](../superpowers/specs/2026-10-11-stage-3-work
 | Droplet `workload-<key>-docker` | `modules/docker-host` | `s-1vcpu-2gb`, Ubuntu 24.04, in the core VPC, IPv6 off, backups off, monitoring on, one admin SSH key, tags: baseline and workload |
 | Cloud-init | `modules/docker-host/cloud-init.yaml.tftpl` | Update, baseline, harden, then Docker Engine and Portainer CE (section 3) |
 | Twingate resources | `stacks/30-workloads` | `cah-<key>-workload-ssh` (TCP 22) and `cah-<key>-workload-portainer` (TCP 9443). Each is one private address, one TCP port, UDP denied, ICMP off, granted to the admins group. No Docker API resource, ever |
+| Workload web port resources (optional) | `stacks/30-workloads` (`workload_web.tf`) | `cah-<key>-workload-web-<port>`, one per entry of the variable `workload_web_ports` (default empty, at most 8 whole ports from 1024 to 65535; 22 and 9443 are refused). Same shape as the two above (one private address, one TCP port, UDP denied, ICMP off, admins group), plus one inbound rule per port from the connector tag. Empty list or switch off creates nothing. For SearXNG set `workload_web_ports = [8080]`. Unapplied |
 | Project attachment | `stacks/30-workloads` | The droplet joins the existing project |
 
 Cost: $0.00 while off. When approved, the droplet is $12.00 a month (`s-1vcpu-2gb`, from `docs/cost-prices.json`) on top of the connectors' $12.00, so $24.00 before the Spaces bucket ($5.00, not part of this issue), $29.00 in all as the design says.
 
 ### A documented workload on this host (not applied)
 
-`workloads/searxng/` holds a compose definition for SearXNG and its Valkey cache, written to be deployed on this host through Portainer over Twingate. It is documentation and tests only: nothing has deployed it, it changes no resource, cost entry or approval, and the Twingate resource a laptop would need to reach its web port is a separate change to this stack that has not been made. Its images are pinned by tag and digest, its one published port is bound to the host's private address, and its README states that the memory it needs is unknown. The lesson is [Self-hosting: when and why, with SearXNG](../wiki/Self-Hosting-When-and-Why-with-SearXNG-as-the-Worked-Example.md).
+`workloads/searxng/` holds a compose definition for SearXNG and its Valkey cache, written to be deployed on this host through Portainer over Twingate. It is documentation and tests only: nothing has deployed it, it changes no resource, cost entry or approval, and the Twingate resource a laptop would need to reach its web port exists in this stack only as an unapplied, default-off option (the `workload_web_ports` variable, `[8080]` for SearXNG); nothing is applied. Its images are pinned by tag and digest, its one published port is bound to the host's private address, and its README states that the memory it needs is unknown. The lesson is [Self-hosting: when and why, with SearXNG](../wiki/Self-Hosting-When-and-Why-with-SearXNG-as-the-Worked-Example.md).
 
 ## 2. How the switch is guarded
 

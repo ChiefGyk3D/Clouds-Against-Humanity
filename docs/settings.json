@@ -1335,6 +1335,19 @@
         "sensitivity": "public",
         "sensitive_in_code": false,
         "status": "exists"
+      },
+      {
+        "name": "workload_web_ports",
+        "type": "list(number)",
+        "description": "Optional, default empty (issue #437). Web ports of workloads on the host, for example [8080] for SearXNG. Each port gets one TCP-only Twingate resource on the host's private address (admins group) and one inbound allowance from the connector tag. Empty creates nothing, and so does workload_enabled = false. Nothing is applied.",
+        "required": false,
+        "default": [],
+        "validation": "whole numbers from 1024 to 65535, no duplicates, at most 8, never 22 or 9443 (nullable = false)",
+        "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
+        "example": "[8080]",
+        "sensitivity": "public",
+        "sensitive_in_code": false,
+        "status": "exists"
       }
     ],
     "planned/optional-noc-soc (not built yet)": [

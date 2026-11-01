@@ -228,3 +228,65 @@ def test_only_the_workloads_stack_calls_the_module():
         if re.search(r'source\s*=\s*"(\.\./)+modules/docker-host"', read(tf)):
             callers.append(tf.relative_to(ROOT).as_posix())
     assert callers == ["stacks/30-workloads/main.tf"]
+
+
+# --- the optional workload web ports (issue #437) ---------------------------------
+
+
+def web_port_problems(variables, web):
+    """Guards on the web port list: default empty, switch-gated, connector tag only."""
+    problems = []
+    variables = strip_comments(variables)
+    web = strip_comments(web)
+    found = [b for b in blocks(variables, "variable") if b[0] == ["workload_web_ports"]]
+    if len(found) != 1:
+        return ["workload_web_ports variable missing"]
+    body = found[0][1]
+    if not re.search(r"(?m)^\s*default\s*=\s*\[\]\s*$", body):
+        problems.append("the port list does not default to empty")
+    if not re.search(r"(?m)^\s*nullable\s*=\s*false\s*$", body):
+        problems.append("the port list is nullable")
+    resources = [b for b in blocks(web, "resource") if b[0][0] == "twingate_resource"]
+    if len(resources) != 1:
+        problems.append(f"expected one web Twingate resource, found {len(resources)}")
+    for _, rbody in resources:
+        if not re.search(r"for_each\s*=\s*local\.workload_web_ports\b", rbody):
+            problems.append("the web resource is not driven by local.workload_web_ports")
+        for needle in (r'policy\s*=\s*"RESTRICTED"', r'udp\s*=\s*\{\s*policy\s*=\s*"DENY_ALL"', r"allow_icmp\s*=\s*false", r"module\.workload\[0\]\.private_ip"):
+            if not re.search(needle, rbody):
+                problems.append(f"web resource lacks {needle}")
+    if not re.search(r"workload_web_ports\s*=\s*var\.workload_enabled\s*\?", web):
+        problems.append("the port map is not gated by the master switch")
+    for needle in ("source_addresses", "0.0.0.0", "::/0", "inbound_from_tag_rules"):
+        if needle in web:
+            problems.append(f"uses {needle}")
+    rules = re.findall(r"\{\s*protocol\s*=\s*\"(\w+)\",\s*port_range\s*=\s*([^,]+),\s*tag\s*=\s*([^}\s]+)\s*\}", web)
+    if len(rules) != 1:
+        problems.append(f"expected one rule template, found {len(rules)}")
+    for protocol, port, tag in rules:
+        if protocol != "tcp" or tag != "var.connector_tag" or port != "tostring(p)":
+            problems.append(f"rule {protocol}/{port}/{tag} is not tcp from the connector tag on a listed port")
+    return problems
+
+
+def test_the_web_ports_are_default_empty_switch_gated_and_connector_tag_only():
+    variables = read(STACK / "variables.tf")
+    web = read(STACK / "workload_web.tf")
+    assert web_port_problems(variables, web) == []
+    main = strip_comments(read(STACK / "main.tf"))
+    assert "concat(" in main and "local.workload_web_firewall_rules" in main
+
+
+def test_the_web_port_check_bites():
+    variables = read(STACK / "variables.tf")
+    web = read(STACK / "workload_web.tf")
+    for bad_vars, bad_web in (
+        (variables.replace("default     = []", "default     = [8080]", 1), web),
+        (variables, web.replace("tag = var.connector_tag", "tag = var.baseline_tag", 1)),
+        (variables, web.replace('port_range = tostring(p)', 'port_range = "1-65535"', 1)),
+        (variables, web.replace("var.workload_enabled ?", "true ?", 1)),
+        (variables, web.replace('policy = "DENY_ALL"', 'policy = "ALLOW_ALL"', 1)),
+        (variables, web + "\n# x\nresource \"twingate_resource\" \"extra\" {\n  for_each = local.workload_web_ports\n}\n"),
+        (variables, web.replace("module.workload[0].private_ip", '"0.0.0.0"', 1)),
+    ):
+        assert web_port_problems(bad_vars, bad_web), "a widened web port setup was not noticed"

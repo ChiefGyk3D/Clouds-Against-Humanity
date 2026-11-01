@@ -141,6 +141,34 @@ variable "portainer_version" {
   }
 }
 
+variable "workload_web_ports" {
+  type        = list(number)
+  default     = []
+  nullable    = false
+  description = "Optional, default empty (issue #437). Web ports of workloads on the host, for example [8080] for SearXNG. Each port gets one Twingate resource on the host's private address (TCP only, granted to the admins group) and one firewall allowance from the connector tag. Whole numbers from 1024 to 65535, no duplicates, at most 8, never 22 (SSH) or 9443 (Portainer, which have their own resources). Empty creates nothing, and so does workload_enabled = false. Nothing is applied."
+
+  validation {
+    condition     = alltrue([for p in var.workload_web_ports : p == floor(p) && p >= 1024 && p <= 65535])
+    error_message = "Each workload web port must be a whole number from 1024 to 65535."
+  }
+
+  validation {
+    condition     = length(distinct(var.workload_web_ports)) == length(var.workload_web_ports)
+    error_message = "A workload web port may appear only once."
+  }
+
+  validation {
+    # 9443 is the Portainer port in main.tf (local.portainer_port); a variable cannot read a local.
+    condition     = !contains(var.workload_web_ports, 22) && !contains(var.workload_web_ports, 9443)
+    error_message = "Port 22 and the Portainer port 9443 have their own resources and are not valid workload web ports."
+  }
+
+  validation {
+    condition     = length(var.workload_web_ports) <= 8
+    error_message = "At most 8 workload web ports."
+  }
+}
+
 variable "onion_service_enabled" {
   type        = bool
   default     = false
