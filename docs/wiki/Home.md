@@ -27,7 +27,7 @@ If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md):
 
 ## Every page, by theme
 
-All 147 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
+All 148 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
 
 ### Start here, by kind of reader
 
@@ -101,6 +101,7 @@ All 147 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 - [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md): Directories, identity providers, SSO, SAML, OAuth and OIDC in plain words, for readers heading into enterprise identity.
 - [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md): What encoding, hashing, encryption and signing each give you and what they do not, for readers who lump them together.
 - [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md): Blast radius, assume breach and defense in depth as one mindset question to ask of any system.
+- [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md) (draft): Page 3 of 3 on GRC: the GDPR, PIPEDA, POPIA and the PIPL compared with the United States, with breach clocks, transfers, dated cases and a four-region exercise.
 - [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md) (draft): Privacy as blinds and security as locks, Monero as a worked example, privacy law basics, physical security and why lockpicking is a hobby, with a free audit of your desk.
 - [Secrets from day one](Secrets-From-Day-One.md): A password manager, Doppler for every asset and the .env rules, as personal habits for anyone about to start writing code.
 - [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) (draft): Confidentiality, integrity and availability in plain words, how real failures map to each, and this project's controls checked against all three.
