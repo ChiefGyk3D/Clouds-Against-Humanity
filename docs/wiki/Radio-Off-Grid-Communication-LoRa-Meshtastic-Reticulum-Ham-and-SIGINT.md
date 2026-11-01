@@ -6,11 +6,11 @@
 Previous: [Running Monero properly](Running-Monero-Properly-Hardware-Wallet-Qubes-and-Whonix-Offline-Wallet-and-PiNodeXMR.md)
 <!-- END GENERATED PAGE NAV top -->
 
-Side page to the continuity pages. Read it after [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md), which asks what must keep working, who does what and in what order it comes back, and after [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md), because everything here is about availability and about what a listener can learn. That lesson's contact tree has a hole in it: every channel on it usually needs the internet. This page is about the channels that do not. It covers wifi and the other radios beside it, LoRa mesh systems (Meshtastic, MeshCore and Reticulum), amateur radio, GMRS and FRS, CB, a careful overview of signals intelligence (SIGINT) with the legal rules first, and what a radio fallback could and could not do for this project. For what a key is and how it is lost, read [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md); the cryptography lesson (issue 360) goes deeper and is named here in plain text because it may not be merged yet.
+Side page to the continuity pages. Read it after [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md), which asks what must keep working, who does what and in what order it comes back, and after [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md), because everything here is about availability and about what a listener can learn. That lesson's contact tree has a hole in it: every channel on it usually needs the internet. This page is about the channels that do not. It covers wifi and the other radios beside it, LoRa mesh systems (Meshtastic, MeshCore and Reticulum), Wi-Fi HaLow (the sub-1-GHz Wi-Fi that competes with LoRa for some jobs), amateur radio, GMRS and FRS, CB, a careful overview of signals intelligence (SIGINT) with the legal rules first, and what a radio fallback could and could not do for this project. For what a key is and how it is lost, read [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md); the cryptography lesson (issue 360) goes deeper and is named here in plain text because it may not be merged yet.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-> **Status: unverified draft. Written from reading; no transmitter was keyed and no radio was configured, for this page or in writing it.** On **2026-10-31** I read the project pages, the regulator text and the legal text listed in the [claims register](#claims-register), and I ran exactly one thing: the arithmetic script in [Exercise 2](#exercise-2-run-the-script-and-compare-it-with-your-prediction), which does sums and nothing else. **Not run:** every radio, every firmware and app, every setting in any config shown, a real link or range test, any live emergency procedure, and a tabletop with other people. **Not read:** the FCC's own web pages (they refused a plain download, see the register) and the NSA's SIGINT page (same). The United States rules come from the Code of Federal Regulations as published by eCFR, edition **2026-10-29**, and from the United States Code as published by Cornell's Legal Information Institute, both read on 2026-10-31. Rules change; read the current text before you act. The maintainer's own experience beyond the license class and the five services named below is not stated on this page. This is education and not legal advice, and a lawyer or your regulator has the last word.
+> **Status: unverified draft. Written from reading; no transmitter was keyed and no radio was configured, for this page or in writing it.** On **2026-10-31** I read the project pages, the regulator text and the legal text listed in the [claims register](#claims-register), and I ran exactly one thing: the arithmetic script in [Exercise 2](#exercise-2-run-the-script-and-compare-it-with-your-prediction), which does sums and nothing else. **Not run:** every radio, every firmware and app, every setting in any config shown, a real link or range test, any live emergency procedure, and a tabletop with other people. **Not read:** the FCC's own web pages (they refused a plain download, see the register) and the NSA's SIGINT page (same). The United States rules come from the Code of Federal Regulations as published by eCFR, edition **2026-10-29**, and from the United States Code as published by Cornell's Legal Information Institute, both read on 2026-10-31. Rules change; read the current text before you act. The [Wi-Fi HaLow section](#wi-fi-halow-ieee-80211ah-next-to-lora) was added on **2026-11-01** from the sources the claims register dates that day; I keyed no transmitter and ran nothing for it either. **Not read for HaLow:** the text of the IEEE 802.11ah amendment (only the standard's abstract page), the FCC's own pages, any HaLow product's FCC grant, and any list of HaLow bands outside the United States. The maintainer's own experience beyond the license class and the five services named below is not stated on this page. This is education and not legal advice, and a lawyer or your regulator has the last word.
 
 > **Prerequisites.** [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) for RTO, RPO and a contact tree, and [Networking basics for this project](Networking-Basics-for-This-Project.md) for what a link and a hop are. The exercises need a computer with Python 3 and a pencil. No radio, no account, no cost. About 2 hours (est.).
 
@@ -20,6 +20,7 @@ Side page to the continuity pages. Read it after [Business continuity and disast
 
 - Say which communication paths still work when the internet is down, which also survive a power cut, and what each one needs.
 - Say what LoRa is, and what Meshtastic, MeshCore and Reticulum each are, how their routing differs, and what they can and cannot carry.
+- Say what Wi-Fi HaLow (IEEE 802.11ah) is, how it differs from LoRa and from ordinary Wi-Fi, and when each fits an off-grid job, with the rules read first.
 - Work out the time on air of a LoRa packet and what that does to capacity, with a small script you can read.
 - Name the United States amateur license classes and what a General class license adds, say what emergency communications means in the amateur service, and say where amateur radio does not fit a business.
 - Tell GMRS, FRS and CB apart by license, power and use.
@@ -52,6 +53,7 @@ Ready.gov's power outage page (read 2026-10-31, shown as last updated 06/04/2026
 | CB | No | A vehicle or base supply | Short; line of sight | Rules Read, reach General knowledge |
 | Amateur radio | No | Batteries or a generator | VHF and UHF local; HF regional to worldwide | Read (ARRL says it can work independently of the internet and phone systems) |
 | LoRa mesh (Meshtastic, MeshCore, Reticulum over LoRa) | No | Small batteries or solar | Kilometers, with caveats below | Read (project docs) |
+| Wi-Fi HaLow (sub-1-GHz Wi-Fi) | No, for traffic that stays on the local network | Yes, for a normal access point (General knowledge) | About 1 km, a Wi-Fi Alliance figure; see the HaLow section | Read (Wi-Fi Alliance, IEEE); hardware is newer and less common |
 
 Satellite messengers and satellite phones also exist. I did not read about any, so this page does not cover them.
 
@@ -61,7 +63,7 @@ Wifi is a radio. It is an unlicensed one: 47 CFR 15.247 (read 2026-10-31) covers
 
 1. **Wifi without the internet still works** for devices on the same router: printers, a local server, a chat app you host yourself. What stops is anything that goes out through the uplink, such as your cloud accounts, your identity service and your DNS (General knowledge).
 2. **Wifi is short range and needs mains power** in the router. It is a good last meter and a poor fallback for a neighborhood.
-3. **Every other radio on this page makes a different trade.** Lower frequencies go farther and through more; narrower, slower signals reach farther per watt; licensed services give you rules and sometimes protection from interference; unlicensed ones give you freedom and give up that protection. LoRa and the licensed services below are how people get kilometers on a battery.
+3. **Every other radio on this page makes a different trade.** Lower frequencies go farther and through more; narrower, slower signals reach farther per watt; licensed services give you rules and sometimes protection from interference; unlicensed ones give you freedom and give up that protection. LoRa and the licensed services below are how people get kilometers on a battery. Wi-Fi HaLow is a fourth trade: still Wi-Fi, but in the sub-gigahertz band, with the [HaLow section](#wi-fi-halow-ieee-80211ah-next-to-lora) comparing it with LoRa.
 
 The Meshtastic documentation says Meshtastic uses the radio spectrum designated to LoRa in each region, and that it is not LoRaWAN, Helium or TheThingsNetwork (read 2026-10-31). A LoRaWAN gateway needs an internet backhaul; a Meshtastic mesh does not.
 
@@ -133,6 +135,84 @@ A LoRa link is **slow** and **shared**. Slow: Long Fast's raw rate is about one 
 | GMRS and FRS | Not allowed on GMRS: no coded messages or hidden meanings (95.1733(a)(3)); voice scrambling cannot be certified in new Personal Radio Services transmitters (95.381) | Voice | "10 codes" are permitted on GMRS |
 
 The lesson of the table is the same one the [CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) makes about confidentiality: **encryption protects the content, not the fact that you transmitted.** A radio shouts. Anyone in range can record the shout and, with a direction-finding antenna, point at you (General knowledge).
+
+## Wi-Fi HaLow (IEEE 802.11ah) next to LoRa
+
+The wifi section above compared LoRa with ordinary wifi in a line. There is a third thing between them: **Wi-Fi HaLow**, wifi's own answer to "long range, low power, many devices". Someone who has met LoRa will meet it next, so this section is a comparison and an option, not a how-to. Nothing here transmits and nothing is a setup instruction. Every range and rate figure carries its source and a marker: **vendor figure** (a company or trade group says so), **design goal** (a standard says what it aims for) or **theoretical** (a calculation). All sources were read on 2026-11-01 and are listed in the [claims register](#claims-register).
+
+### What HaLow is, and what it is not
+
+**What it is.** IEEE 802.11ah-2016 is an amendment to the 802.11 wireless LAN standard. IEEE's page for it (read 2026-11-01) says it defines changes to both the physical layer and the medium access control layer "to enable operation of license-exempt IEEE 802.11 wireless networks in frequency bands below 1 GHz, excluding the television (TV) White Space bands, with a transmission range up to 1 km and a minimum data rate of at least 100 Kb/s". Those two numbers are IEEE design goals, not measurements. The page shows it as published 2017-05-05 and marks it "Superseded Standard"; I did not read why, and the amendment's text is behind a subscription, so I did not read it.
+
+The Wi-Fi Alliance, the trade group that certifies wifi products, calls the technology Wi-Fi HaLow (its page, read 2026-11-01; I did not see the phrase "Wi-Fi CERTIFIED HaLow" on it). It says HaLow was introduced in 2017 and "operates in sub-1 GHz spectrum to deliver approximately 1 km range, strong wall penetration, and low-power connectivity for IoT sensors and wearables across industrial, agricultural, smart building, and smart city environments". It lists multi-vendor interoperability, "months-to-years of coin cell battery life" and no proprietary hubs or gateways as benefits, and names narrow band OFDM channels, several power saving modes, native IP support and "latest Wi-Fi security" as the features behind them. These are Alliance claims about the technology, a **vendor figure** and a marketing list, not a test result.
+
+In plain words: it is the same family as the wifi in your laptop, so a HaLow device joins a network, gets an IP address and speaks ordinary internet protocols. What changes is the band. Sub-1-GHz means below 1 GHz, so the signal goes farther and through more, and the channels are narrow, so it carries less. That is the same trade the wifi section above describes, pushed toward range. In the United States, 47 CFR 15.247 covers digitally modulated devices in the 902 to 928 MHz band (see the legal part below), which is the same band Meshtastic's US region uses. That two systems share a band follows from the two sources; how they affect each other in practice I did not measure (**est.**).
+
+**What it is not.**
+
+- **Not LoRa and not LoRaWAN.** It does not use chirp spread spectrum, and a HaLow radio and a LoRa radio cannot talk to each other (General knowledge).
+- **Not a message mesh like Meshtastic.** Normal wifi has an access point and stations (General knowledge). Whether a given HaLow product can relay through other stations, I did not read, so I make no claim.
+- **Not a promise of 1 km.** The Alliance's figure is a **vendor figure** and IEEE's is a **design goal**. Walls, trees, antennas and neighbors take it apart, as they do a LoRa link budget.
+- **Not fast.** Neither page gives a top speed. The IEEE figure is the minimum rate the amendment aims for, not what you will see. I read no throughput figure for any product.
+- **Not exempt from rules.** "License-exempt" means no individual license; the device must still meet the regulator's technical rules (legal part below).
+- **Not the 6 GHz wifi of Wi-Fi 6E and 7.** Those are different bands and different uses.
+
+### HaLow compared with LoRa and the other radios on this page
+
+Two tables, because eight columns do not fit one. Every cell says where it comes from; "above" means a section of this page. The Meshtastic rate is the published raw rate of the default preset, **not** what a message gets after headers, relaying and sharing.
+
+| Technology | What it is | Range, as the source states it | Throughput | Power | Topology |
+|---|---|---|---|---|---|
+| Wi-Fi HaLow | IEEE 802.11ah, sub-1-GHz Wi-Fi | About 1 km (Wi-Fi Alliance, **vendor figure**); up to 1 km (IEEE, **design goal**) | At least 100 kb/s as the amendment's minimum (IEEE, **design goal**); top rate not read | Months to years on a coin cell (Wi-Fi Alliance, **vendor figure**) | Access point and stations on an IP network (General knowledge); relay modes not read |
+| LoRa (physical layer) | A modulation, not a network | Link budget 153 dB for Long Fast (Meshtastic, published); no range promised | 0.34 to 21.88 kbps across the nine Meshtastic presets (published, raw) | Small batteries or solar (above) | None: other systems sit on it |
+| LoRaWAN | LoRa Alliance specification that connects LoRa devices to an IP network | Up to 15 km in rural areas (LoRa Alliance, alliance figure) | Not read | 10 or more years of battery life (LoRa Alliance, alliance figure) | Star of stars: devices, gateways, a network server over IP; a gateway needs an internet backhaul (above and LoRa Alliance) |
+| Meshtastic | Open-source LoRa mesh firmware (above) | Kilometers with caveats; none promised (above) | Long Fast 1.07 kbps raw; about 200 bytes a message (above) | Small batteries or solar (above) | Managed-flooding mesh, hop limit 3 by default (above) |
+| MeshCore | LoRa routing library and firmware (above) | No figure read | Not read | Solar repeaters are described (meshcore.io, above) | Clients do not repeat; repeaters flood to learn a path, then send directly (above) |
+| Wi-Fi at 2.4 and 5 GHz | Ordinary wifi | About one building (above, General knowledge) | The Alliance describes Wi-Fi 5 as multi-gigabit class (**vendor figure**) | Needs mains power at the router (above); the Alliance lists power saving features | Access point and stations |
+| Amateur radio | Licensed service (above) | VHF and UHF local; HF regional to worldwide (above) | Not covered in the sections read | Batteries or a generator (above) | Direct, repeaters, or HF skip; no infrastructure needed |
+| GMRS and FRS | Short-range voice services (above) | Short; line of sight (above) | Voice; brief data only (above) | Batteries; a GMRS repeater needs power (above) | Direct, plus GMRS repeaters |
+| CB | License-free 27 MHz voice (above) | Short; line of sight (above) | Voice | Vehicle or base supply (above) | Direct |
+
+| Technology | Licensing and legal status | Encryption and security model | Typical uses | Equipment cost class (qualitative, no prices) |
+|---|---|---|---|---|
+| Wi-Fi HaLow | License-exempt by design (IEEE); the United States technical rules are in 47 CFR Part 15 (legal part below); other regions differ | The Alliance says "latest Wi-Fi security"; its security page says WPA3 is mandatory for Wi-Fi CERTIFIED devices; which mode a given HaLow product uses I did not verify. Clients authenticate to an access point | IoT sensors and wearables in industrial, agricultural, smart building and smart city settings (Wi-Fi Alliance); cameras are a common idea but not on the page I read (General knowledge) | Newer and less common than ordinary wifi (**est.**) |
+| LoRa (physical layer) | License-exempt in ISM bands, with regional power and duty cycle rules (above) | None: the layer above decides | Whatever the system on top carries | Hobby and industrial parts both exist (**est.**) |
+| LoRaWAN | Unlicensed bands (LoRa Alliance) | The Alliance says "end-to-end security" and "robust encryption protocols"; I read no specification | Metering, building and parking sensors (LoRa Alliance) | Gateways and a network server add infrastructure (**est.**) |
+| Meshtastic | Region rules apply; amateur regions need a license and forbid encryption (above) | Channel keys, shared by everyone on the channel; header in the clear (above) | Short text messages, positions and telemetry (above) | Hobby class, widely available (**est.**) |
+| MeshCore | Region rules apply (above) | Described as end-to-end encrypted; no specification read (above) | Short text, rooms, sensor data (above) | Hobby class (**est.**) |
+| Wi-Fi at 2.4 and 5 GHz | License-exempt (47 CFR 15.247 above) | WPA3 is mandatory for Wi-Fi CERTIFIED devices (Wi-Fi Alliance security page) | Everything on a local network | Mass-market (**est.**) |
+| Amateur radio | License required; no encryption; no business use (above) | None allowed (above) | Emergency communications, long-distance contact (above) | Wide range of hobby and professional gear (**est.**) |
+| GMRS and FRS | GMRS: individual license; FRS: license by rule (above) | No coded messages on GMRS (above) | Short-range voice (above) | Consumer class (**est.**) |
+| CB | License by rule (above) | Not covered in the sections read; plain language is the plan | Short-range voice in vehicles (above) | Consumer class (**est.**) |
+
+What the second table says in a sentence: the security models are different in kind. A HaLow network has an access point that decides who may join, as ordinary wifi does; a Meshtastic channel has one key that everyone on it holds, and the licensed voice services allow no encryption at all. Neither is better by itself. The question is who you need to keep out and who you need to reach. The "cost class" column is a qualitative note, labeled **est.** because I read no price or market-share comparison, and the page names no prices on purpose.
+
+### Which to choose for off-grid and continuity use
+
+This table answers which tool fits a job, not which one wins. All of it is a reading of the tables above, so treat it as a place to start a tabletop, not a design.
+
+| Need | Better fit | Why | Caveat |
+|---|---|---|---|
+| Short text and position messages between people across a town or a trail, on batteries, with no infrastructure | LoRa mesh (Meshtastic or MeshCore) | Built for short messages; no access point; relays | Slow and shared, as the time on air numbers above show |
+| An IP application (a sensor feed, a camera, a small web service) across a farm, campus or site that has power | Wi-Fi HaLow, if the hardware and rules fit | Native IP and a normal network model (Wi-Fi Alliance) | The access point needs power; hardware is newer; top speed not read; camera use is General knowledge |
+| Low-power sensors that report to the internet | LoRaWAN or HaLow | Both target low-power IoT | LoRaWAN needs a gateway with an internet backhaul; this page does not compare them further |
+| Voice or data over regional or worldwide distance, by a licensed person | Amateur HF | Needs no infrastructure | A license, no encryption, no business use |
+| Short voice between a few people | GMRS, FRS or CB | Simple; handhelds | Short range; GMRS needs an individual license |
+| Devices inside one building with power on | Ordinary 2.4 and 5 GHz wifi | Fast and everywhere | Needs mains power and, for the internet, an uplink |
+| Coordination when the internet **and** the mains are gone | LoRa mesh, voice radios, amateur radio | Run from batteries (above) | HaLow on its own is a local-network option: a normal access point needs power, so it helps an outage plan only if that power is planned (**est.**) |
+
+**HaLow hardware is newer and less common.** The Alliance's page quotes ABI Research for 24 million HaLow chipset shipments in 2026, beside 3.8 billion Wi-Fi device shipments in the same year. Those are different units (chips and finished devices), so no precise ratio follows, but the gap is large (**est.**). That is a **vendor figure** from a trade group's page and I did not check it.
+
+**Open-source and vendor support, as read on the day.** One chip vendor publishes a Linux driver for its HaLow parts as an open repository (MorseMicro/morse_driver on GitHub): the API showed a GPL-2.0 license and a last push on 2026-10-24. That shows one vendor ships driver code in the open. It does not show which boards run it, whether Linux itself or OpenWrt support HaLow out of the box (the OpenWrt wiki page I opened had no HaLow content), or what other vendors publish. I did not check whether Meshtastic or MeshCore support HaLow and I make no claim. No vendor is ranked here, and naming one repository as an example is not a recommendation.
+
+### HaLow rules: legal first
+
+This is the United States only, it is education and not legal advice, and the page's existing rule applies: check the current text yourself and keep every live step with a qualified person.
+
+- **The band text I read.** 47 CFR 15.247 (eCFR, current text read 2026-11-01) covers frequency-hopping and digitally modulated devices in 902 to 928 MHz. For digital modulation in that band it says the minimum 6 dB bandwidth must be at least 500 kHz ((a)(2)), the maximum peak conducted output power is 1 watt ((b)(3)), a transmitting antenna with more than 6 dBi of directional gain means the output power must be reduced dB for dB ((b)(4)), and the power spectral density must not exceed 8 dBm in any 3 kHz band ((e)). Its note says these systems share the band on a noninterference basis with Government systems. I quote these only to show that the rules are technical and specific; they are not a statement about any HaLow product.
+- **What I could not read.** Which Part 15 provision a given HaLow product is certified under (15.247 or another) I did not read. The product's FCC equipment authorization, its grant, is what says what that unit may do, and I read none. The FCC's own pages I did not read (they refused a plain download on 2026-10-31, see the register).
+- **Rules in other regions differ.** Sub-1-GHz license-exempt bands differ from country to country, and so do the power and duty cycle rules. IEEE's abstract says only "below 1 GHz" and I read no regional list. The 10 percent duty cycle quoted above for EU_868 is a rule about LoRa in that region and says nothing about HaLow. Check your own regulator's current text.
+- **No steps here.** Nothing on this page tells you how to operate or change a radio. A live test belongs to the person who owns the equipment, after reading the product's documentation and the current rules. Callsigns and grids stay the placeholders N0CALL, N0TST and FN31pr; none is needed here.
 
 ## Amateur (ham) radio
 
@@ -556,11 +636,12 @@ You are done when you can answer these without looking:
 8. Under the statutes you read, name two kinds of radio traffic a hobbyist may receive and one that the exceptions do not cover.
 9. Why is an encrypted mesh message still leaking information, and what does the Meshtastic documentation call recording it now to read it later?
 10. What does this project have for a radio fallback today?
+11. Name two ways Wi-Fi HaLow differs from LoRa, and say why a HaLow access point makes it a poor outage plan on its own.
 
 ## Common mistakes
 
 - **Treating a radio as a replacement for the internet.** It is a second path for people to coordinate.
-- **Believing a published range.** Every range figure comes with conditions; the numbers on this page are floors and illustrations.
+- **Believing a published range.** Every range figure comes with conditions; the numbers on this page are floors and illustrations. The 1 km for Wi-Fi HaLow is a vendor figure and an IEEE design goal.
 - **Sending secrets over a mesh** because it is "encrypted". Keys leak, headers do not hide, and the default key is public.
 - **Encrypting on a service that forbids it**, or broadcasting from a service that is not a broadcaster.
 - **Assuming "listening" and "using what I heard" have the same rules.**
@@ -598,6 +679,14 @@ Every source claim on this page, with where it was read. Statuses: **Read** mean
 | Operator classes, Novice and Advanced no longer issued, exam elements, frequency tables, power limit, prohibited transmissions, call sign timing, safety of life, RACES, station license | [47 CFR Part 97 (eCFR)](https://www.ecfr.gov/current/title-47/part-97): sections 97.1, 97.5, 97.9, 97.17, 97.103, 97.113, 97.119, 97.301, 97.313, 97.403, 97.407, 97.501 | Read 2026-10-31, edition 2026-10-29 |
 | GMRS, FRS and CB: license by rule, individual GMRS license, channels, power, antenna, data, identification, prohibited uses, CB channel 9, height, amplifiers, conversation limits | [47 CFR Part 95 (eCFR)](https://www.ecfr.gov/current/title-47/part-95): sections 95.305, 95.333, 95.381, 95.531, 95.563, 95.567, 95.587, 95.905, 95.931, 95.933, 95.939, 95.941, 95.957, 95.963, 95.967, 95.1705, 95.1731, 95.1733, 95.1749, 95.1751, 95.1763, 95.1767 | Read 2026-10-31, edition 2026-10-29 |
 | Unlicensed bands named for digital devices | [47 CFR 15.247 (eCFR)](https://www.ecfr.gov/current/title-47/section-15.247) | Read 2026-10-31, edition 2026-10-29 |
+| HaLow: what 802.11ah defines (sub-1-GHz license-exempt operation, up to 1 km and at least 100 kb/s as design goals), published 2017-05-05, marked superseded | [IEEE SA, IEEE 802.11ah-2016](https://standards.ieee.org/ieee/802.11ah/4960/) (abstract page only; the first address I tried returned a "removed or temporarily unavailable" page) | Read 2026-11-01; the amendment text is behind a subscription and was not read |
+| HaLow: introduced 2017, sub-1-GHz, about 1 km, wall penetration, coin cell battery life, features, 24 million HaLow chipsets shipped in 2026 against 3.8 billion Wi-Fi devices (ABI Research, quoted by the Alliance) | [Wi-Fi Alliance, Wi-Fi (MAC/PHY)](https://www.wi-fi.org/wi-fi-macphy) (HaLow section; the address `discover-wi-fi/wi-fi-halow` redirects there; page copyright 2026) | Read 2026-11-01; vendor figures, not checked |
+| WPA3 is mandatory for Wi-Fi CERTIFIED devices | [Wi-Fi Alliance, Security](https://www.wi-fi.org/security) | Read 2026-11-01; whether a given HaLow product uses WPA3 not verified |
+| LoRaWAN: unlicensed bands, up to 15 km in rural areas, 10 or more years of battery life, star-of-stars architecture, gateways over IP, security wording | [LoRa Alliance, About LoRaWAN](https://lora-alliance.org/about-lorawan/) (no page date) | Read 2026-11-01; alliance figures; no specification read |
+| HaLow: 47 CFR 15.247 for digital modulation in 902 to 928 MHz: (a)(2), (b)(3), (b)(4), (e), the noninterference note | [47 CFR 15.247 (eCFR)](https://www.ecfr.gov/current/title-47/section-15.247) | Read 2026-11-01, current text; I did not re-check the edition date |
+| HaLow: one vendor's open Linux driver repository, GPL-2.0, last push 2026-10-24 | GitHub API for MorseMicro/morse_driver | Read 2026-11-01; no vendor ranked; mainline Linux and OpenWrt support not shown |
+| HaLow: access point and station topology, cameras as a use, WPA3 session keys, cost class, band sharing with LoRa, no LoRa interoperability | None | General knowledge; **est.** |
+| HaLow: the amendment text, throughput figures, relay or mesh modes, regional band lists, any product's FCC grant, FCC web pages, Meshtastic or MeshCore support for HaLow | None | Not read |
 | Volunteer examiners, remote exams, $35 application fee, Technician pool update in 2026 | [ARRL, Licensing, Education and Training](https://www.arrl.org/licensing-education-training) (copyright 2026; no page date) | Read 2026-10-31 |
 | ARES, training and go kits, RACES, memoranda of understanding, independence from the internet and phone systems | [ARRL, ARES](https://www.arrl.org/ares) (copyright 2026; no page date) | Read 2026-10-31 |
 | Interception offense, definitions, "readily accessible to the general public" | [18 U.S.C. 2511](https://www.law.cornell.edu/uscode/text/18/2511) and [2510](https://www.law.cornell.edu/uscode/text/18/2510) | Read 2026-10-31; penalty sections not read |
