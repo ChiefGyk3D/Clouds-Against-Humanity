@@ -27,13 +27,13 @@ Previous: [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Reco
 - [Where to next](#where-to-next)
 <!-- END GENERATED PAGE CONTENTS -->
 
-Lesson I3 of the four-lesson infrastructure-as-code track. The track: I1 "OpenTofu from zero: init, plan, apply, destroy" (`OpenTofu-From-Zero`), I2 "Plans, state, drift and recovery" (`Plans-State-Drift-and-Recovery`), **I3 this page**, I4 "Build and destroy a stack per service" (`Build-and-Destroy-Stack-Per-Service`). The other three are written at the same time and are plain text here until they merge; the names in code are their page names. A foundations side page to [Spacelift](Spacelift.md); no step of the core path is renumbered.
+Lesson I3 of the four-lesson infrastructure-as-code track. The track: I1 [OpenTofu from zero: init, plan, apply, destroy](OpenTofu-From-Zero.md), I2 [Plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md), **I3 this page**, I4 [Build and destroy a stack per service](Build-and-Destroy-Stack-Per-Service.md). A foundations side page to [Spacelift](Spacelift.md); no step of the core path is renumbered.
 
 > **Status: written from vendor documentation; the free local exercises were run once, the Spacelift console exercises were not.** On **2026-10-22** the author read the Spacelift pricing and documentation pages listed in the [claims register](#claims-register) with read-only `curl`, and ran the free local exercises (Exercises 1 and 2) on Linux with OpenTofu 1.12.6, pasting trimmed output from that run. The own-account path (Exercises 3 to 11) uses menu names as the documentation gave them that day; **nobody has run it against a real Spacelift account for this page**, so every console step, every message it shows and every statement about what the free plan lets you do is marked **est.** unless the claims register says it was read. Vendor pages change; if your screen disagrees, trust your screen and the vendor's current page, and tell the project (see [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md)). Windows PowerShell commands are **est.** (not run; no PowerShell was available when this was written).
 
-> **Prerequisites.** "OpenTofu from zero" (I1) and "Plans, state, drift and recovery" (I2), once they merge, or the same ideas from [What is infrastructure as code](What-Is-Infrastructure-as-Code.md): plan, apply, state. [Git from zero](Git-From-Zero.md) for branches, commits and pushes, and [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) for pull requests. A terminal ([The terminal and your first script](Terminal-and-Your-First-Script.md)). The free theory path needs no account. The own-account path needs a GitHub account and a Spacelift account, both yours. About 90 minutes for reading and the free local exercises (est.); the own-account path adds about three hours (est.), most of it waiting for runs and clicking.
+> **Prerequisites.** [OpenTofu from zero](OpenTofu-From-Zero.md) (I1) and [Plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) (I2), or the same ideas from [What is infrastructure as code](What-Is-Infrastructure-as-Code.md): plan, apply, state. [Git from zero](Git-From-Zero.md) for branches, commits and pushes, and [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) for pull requests. A terminal ([The terminal and your first script](Terminal-and-Your-First-Script.md)). The free theory path needs no account. The own-account path needs a GitHub account and a Spacelift account, both yours. About 90 minutes for reading and the free local exercises (est.); the own-account path adds about three hours (est.), most of it waiting for runs and clicking.
 
-> **I1, I2 and I4 are written at the same time as this page by other authors.** They are named but not linked until they merge. This page does not depend on their text; it repeats the three words it needs (plan, apply, state) where it uses them.
+> **I1, I2 and I4 were written at the same time as this page by other authors.** This page does not depend on their text; it repeats the three words it needs (plan, apply, state) where it uses them.
 
 ## Read this first: what this lesson touches, and what it never touches
 
@@ -649,7 +649,7 @@ Read-only requests with `curl`; all retrieved **2026-10-22** unless stated. "Rea
 
 Lesson I4, "Build and destroy a stack per service", takes the same loop and makes it repeatable. Meanwhile, [Spacelift](Spacelift.md) shows the real run lifecycle this project uses, and [Teardown checklist](Teardown-Checklist.md) shows the same destroy-before-delete order applied to the project's own stacks.
 
-Next: lesson I4, Build and destroy a stack per service (planned; its page name is `Build-and-Destroy-Stack-Per-Service`, not linked until it merges).
+Next: lesson I4, [Build and destroy a stack per service](Build-and-Destroy-Stack-Per-Service.md).
 
 <!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
 Where you are: [Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > Spacelift from zero

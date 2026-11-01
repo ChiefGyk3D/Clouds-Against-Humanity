@@ -31,7 +31,7 @@ Side page to the start-from-zero pages, and lesson W1 of a four-lesson web-hosti
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-> **The track.** W1 is this page. The other three are written at the same time and may not be merged yet, so their links can be dead until they are: W2 [WordPress, PHP security, WAF and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md), W3 [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) and W4 [WordPress at scale: CDN, WAF and CI](WordPress-at-Scale-CDN-WAF-and-CI.md). They are kept out of the closing navigation line on purpose, because a test checks that line.
+> **The track.** W1 is this page. The other three are: W2 [WordPress, PHP security, WAF and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md), W3 [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) and W4 [WordPress at scale: CDN, WAF and CI](WordPress-at-Scale-CDN-WAF-and-CI.md). They are kept out of the closing navigation line on purpose, because a test checks that line.
 
 > **Status: the server parts were run natively on Linux; the container build was not run.** On **2026-10-22** the author ran, on one Linux machine, Nginx 1.26.3, Apache 2.4.69 (with the `event` MPM, and with `prefork` plus `mod_php` 8.4.26), MariaDB 11.8.8, OpenTofu 1.12.6 with a cached `hashicorp/local` 2.9.1 provider, and the load script below, all bound to `127.0.0.1`, and pasted trimmed output. **Not run:** the container images (no image was pulled; only that each tag exists on Docker Hub was checked, on 2026-10-22), WordPress, PHP-FPM, WP-CLI, MySQL, every PowerShell command, and the whole optional droplet path. Everything not run is marked **est.** (estimate). The memory and speed numbers in the [measured table](#what-i-measured-without-wordpress) come from a static page and a two-line PHP script, **not** from WordPress, so they show the shape of the difference and nothing more.
 
@@ -183,7 +183,7 @@ The rule behind the two orders: build from the bottom of the dependency list up,
 ### Three ways to build it
 
 1. **By hand.** Type each step yourself, as the exercises below do. Slowest, and the best way to learn what each piece does.
-2. **One OpenTofu stack per piece.** Each piece is its own **stack** (its own folder, its own state file, applied and destroyed on its own). You can build the database today and the web server next week. This is how the project splits its own services; see [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md), [OpenTofu from zero](OpenTofu-From-Zero.md) and [Build and destroy: a stack per service](Build-and-Destroy-Stack-Per-Service.md) (the last two may not be merged yet).
+2. **One OpenTofu stack per piece.** Each piece is its own **stack** (its own folder, its own state file, applied and destroyed on its own). You can build the database today and the web server next week. This is how the project splits its own services; see [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md), [OpenTofu from zero](OpenTofu-From-Zero.md) and [Build and destroy: a stack per service](Build-and-Destroy-Stack-Per-Service.md).
 3. **One composed launch.** One folder calls every piece, one state file, one apply, one destroy: an "enterprise launch" of the whole architecture. Quickest to repeat, hardest to understand the first time, and one mistake touches everything.
 
 The layout used below:

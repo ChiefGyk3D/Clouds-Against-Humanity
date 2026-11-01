@@ -136,11 +136,14 @@ def test_every_linked_wiki_page_exists_and_every_anchor_resolves():
         assert needed in named, needed
 
 
-def test_the_tor_and_i2p_lesson_is_named_in_plain_text_not_linked():
-    # That lesson (issue 358) does not exist yet, and a link to a missing page would break the wiki.
+def test_the_tor_and_i2p_lesson_is_linked_now_that_it_exists():
+    # That lesson (issue 358) is in the wiki, so it is linked, and the old 'not written yet' statement is gone.
     body = text()
     assert "Tor and I2P" in body
-    assert not re.search(r"Tor[-A-Za-z0-9]*I2P[-A-Za-z0-9]*\.md", body)
+    targets = [t for t, _ in LINK.findall(body) if re.fullmatch(r"Tor[-A-Za-z0-9]*I2P[-A-Za-z0-9]*", t)]
+    assert targets, "the Tor and I2P lesson exists and must be linked"
+    assert all((WIKI / f"{t}.md").is_file() for t in targets), targets
+    assert "not written yet" not in body and "named here in plain text" not in body
     assert "Plan-for-Failure-Blast-Radius" not in body, "tests/test_blast_radius_lesson.py caps links to that lesson"
 
 

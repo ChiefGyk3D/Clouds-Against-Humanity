@@ -949,8 +949,6 @@ The rest of the lab is removed at the end of the next section. If you want to st
 
 This lesson stops short of a real cloud on purpose, because the first bill is the one you remember. When you are ready, lesson I4, [Build and destroy: a stack per service](Build-and-Destroy-Stack-Per-Service.md), repeats Exercise 7 against your own account with small, costed resources, one stack per service, and the cost and teardown steps come first on that page. The Spacelift side is lesson I3, [Spacelift from zero](Spacelift-From-Zero.md). Neither is needed to finish this page, and nothing here uses a Spacelift account.
 
-> I2, I3 and I4 are written alongside this page. Until they are merged, the three links in this section may not resolve yet.
-
 ## Build it, break it, detect it, defend it
 
 The same loop the [labs](Labs-Break-It-on-Purpose.md) use, applied to infrastructure code. Use the `first` folder from Exercise 2.

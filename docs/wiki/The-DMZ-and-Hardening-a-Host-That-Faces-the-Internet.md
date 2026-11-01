@@ -85,7 +85,7 @@ Two things in that table are easy to misread. First, "the host firewall drops it
 | 10 | File integrity and "what changed" checks | See the logging and alerting section below | **Design / recommendation** | none |
 | 11 | Logs go somewhere the host cannot rewrite | See below | **Design.** Nothing ships logs today | none |
 
-The patching step has a lesson of its own, the patch management lesson tracked as issue #325, which is not written yet. This page only notes that the edge turns on automatic security updates and a staggered reboot; the cadence, the emergencies and the reasons for the windows belong there, and [Backups, recovery and patching](Backups-Recovery-and-Patching.md#patching-cadence-emergencies-and-windows) is the page that exists today.
+The patching step has a lesson of its own, [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md) (tracked as issue #325). This page only notes that the edge turns on automatic security updates and a staggered reboot; the cadence, the emergencies and the reasons for the windows belong there, and [Backups, recovery and patching](Backups-Recovery-and-Patching.md#patching-cadence-emergencies-and-windows) also covers patching.
 
 ### Why "no SSH" and not "key-only SSH"
 
@@ -214,7 +214,7 @@ Every project claim above was read on 2026-10-30 in this repository. Nothing was
 | ntfy alerts on the measurement path outage | design section 3.5 (risk 7) | Read |
 | "A login on this host means the design was bypassed" and the file-change alert | My inference from the design | Recommendation, not in the repository |
 | Reading of "a place the host cannot rewrite" as write-only, size-limited, authenticated | My interpretation of design section 4.6.1 | Interpretation |
-| The patch management lesson (issue #325) | Named only; not written | Not read |
+| The [patch management lesson](Patch-Management-and-Automatic-Security-Updates.md) (issue #325) | Linked only; its text was not read for this page | Not read |
 
 Back to [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md), the [Threat model](Threat-Model.md) or [Droplet hardening](Droplet-Hardening.md).
 

@@ -160,12 +160,23 @@ def test_every_linked_wiki_page_exists_and_the_series_and_tool_pages_are_linked(
         assert needed in links, needed
 
 
-def test_the_unwritten_pages_are_named_in_plain_text_not_linked():
+def test_the_opsec_page_is_linked_now_that_it_exists():
     body = text()
-    for plain in ("operational security for Tor and I2P", "series page 6", "Whonix and Qubes exercises", "issue 372"):
+    for named in ("operational security for Tor and I2P", "series page 6"):
+        assert named in body, named
+    found = {t for t in LINK.findall(body) if t.startswith("OPSEC-for-Tor-and-I2P-")}
+    assert found, "series page 6 exists and must be linked"
+    assert all((WIKI / f"{t}.md").exists() for t in found), found
+    # The stale statement that the OPSEC page is being written is gone.
+    assert "being written at the same time" not in body
+
+
+def test_the_whonix_and_qubes_exercises_are_still_named_in_plain_text_not_linked():
+    # Issue 372 is not written, so there is no page to link; this stays plain text until there is.
+    body = text()
+    for plain in ("Whonix and Qubes exercises", "issue 372"):
         assert plain in body, plain
-    # No link target carries the names of the pages that are not merged.
-    unmerged = {t for t in LINK.findall(body) if re.search(r"OPSEC-for|Whonix-and-Qubes|Exercise", t)}
+    unmerged = {t for t in LINK.findall(body) if re.search(r"Whonix-and-Qubes|Exercise", t)}
     assert not unmerged, unmerged
 
 

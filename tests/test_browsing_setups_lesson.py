@@ -168,12 +168,24 @@ def test_every_linked_wiki_page_exists_and_the_finished_siblings_are_linked():
         assert needed in links, needed
 
 
-def test_the_unwritten_series_pages_are_named_in_plain_text_not_linked():
+def test_the_later_series_pages_are_linked_now_that_they_exist():
     body = text()
-    for plain in ("operational security for Tor and I2P", "detecting and managing Tor, I2P and VPN traffic on a network",
-                  "hands-on Whonix and Qubes exercises"):
-        assert plain in body, plain
-    linked_series = {t for t in LINK.findall(body) if re.search(r"OPSEC-for|Detecting|Exercise", t)}
+    for named in ("operational security for Tor and I2P", "detecting and managing Tor, I2P and VPN traffic on a network"):
+        assert named in body, named
+    links = set(LINK.findall(body))
+    for prefix in ("OPSEC-for-Tor-and-I2P-", "Detecting-and-Managing-Tor-I2P-and-VPN-"):
+        found = {t for t in links if t.startswith(prefix)}
+        assert found, f"the series page {prefix} exists and must be linked"
+        assert all((WIKI / f"{t}.md").exists() for t in found), found
+    # The stale statement that these pages are not written yet is gone.
+    assert "The two pages not written yet" not in body
+
+
+def test_the_whonix_and_qubes_exercises_are_still_named_in_plain_text_not_linked():
+    # Issue 372 is not written, so there is no page to link; this stays plain text until there is.
+    body = text()
+    assert "hands-on Whonix and Qubes exercises" in body
+    linked_series = {t for t in LINK.findall(body) if re.search(r"Exercise", t)}
     assert not linked_series, linked_series
 
 

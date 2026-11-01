@@ -32,7 +32,7 @@ Previous: [Packet filters compared](Packet-Filters-Compared-iptables-nftables-uf
 
 Second of four lessons in the network and host defense track. Read it after [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) (what a firewall rule is) and [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) (what a log line, a rule and a false positive are), and alongside [Threats in plain words](Threats-in-Plain-Words.md) and [Security tools basics](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md), the page about the tools that make the traffic this page watches for.
 
-The other three lessons in the track are written at the same time as this one: [Packet filters compared: iptables, nftables, UFW and pf](Packet-Filters-Compared-iptables-nftables-ufw-pf.md), [File integrity and alerting: Tripwire, AIDE and Wazuh](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) and [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md). Those three links may not resolve until the pages merge. Nothing on this page depends on them.
+The other three lessons in the track are [Packet filters compared: iptables, nftables, UFW and pf](Packet-Filters-Compared-iptables-nftables-ufw-pf.md), [File integrity and alerting: Tripwire, AIDE and Wazuh](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) and [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md). Nothing on this page depends on them.
 
 Next: [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md).
 
@@ -236,7 +236,7 @@ Many small sites meet an IDS first as a package on the firewall, not as a server
 - **pfSense**: Netgate's documentation says pfSense "can act in an Intrusion Detection System (IDS) / Intrusion Prevention System (IPS) role with add-on packages like Snort and Suricata", and that the two packages "share many design similarities" ([pfSense IDS / IPS](https://docs.netgate.com/pfsense/en/latest/packages/snort/index.html), page last updated June 30, 2022, read 2026-10-22). The [package list](https://docs.netgate.com/pfsense/en/latest/packages/list.html) describes Suricata as "A high performance network IDS/IPS and security monitoring engine by OISF". I did not read the package's own settings pages, so I say nothing here about its modes or defaults.
 - **OPNsense**: The manual says its IPS "is based on Suricata and utilizes Netmap to enhance performance". Its settings page offers a packet-capture mode for IDS (alerts only), a Netmap mode for IPS (alerts and discards), and a Divert mode for IPS that works through firewall rules. It warns that with no rulesets downloaded "the system is active without any rules", that IPS mode wants hardware offloading features disabled, and that "it usually does not improve security to use the WAN interface when in IPS mode because it would drop the packet that would have also been dropped by the firewall". It can ship the EVE log to syslog ([OPNsense IDS and IPS](https://docs.opnsense.org/manual/ips.html), read 2026-10-22).
 
-How this ties to the rest of the track: the appliance's packet filter is the firewall layer ([Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md); this link may not resolve until that page merges), and the IDS package is the content-inspection layer on the same box. They share a CPU, so a busy rule set competes with routing. They also share a failure domain: if the box is compromised, so are both.
+How this ties to the rest of the track: the appliance's packet filter is the firewall layer ([Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md)), and the IDS package is the content-inspection layer on the same box. They share a CPU, so a busy rule set competes with routing. They also share a failure domain: if the box is compromised, so are both.
 
 ## How alerts reach a SIEM
 
@@ -941,7 +941,7 @@ The same loop the rest of the project uses ([Why this exists](Why-This-Exists.md
 
 **Evade.** Ask for `/CAH-LAB/PROBE` (Exercise 8). The rule loads and the canary on the normal capture passes, and the upper-case request goes by with no alert. A canary built from one fixed capture does not see this class of gap; it needs a test set with variants.
 
-**Defend.** Add `nocase`, raise `rev` to 2, and put the upper-case capture in the canary set. Make a loading failure fatal where you can (`--set engine.init-failure-fatal=yes`) and alert on `rules_failed`. Tune the noisy rule with an owner and a reason, as in Exercise 5. Ship `eve.json` off the box, so that a sensor taken over still leaves a record. Then pair it with something that fails differently, such as a host agent ([the next lessons in this track](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md); this link may not resolve until it merges).
+**Defend.** Add `nocase`, raise `rev` to 2, and put the upper-case capture in the canary set. Make a loading failure fatal where you can (`--set engine.init-failure-fatal=yes`) and alert on `rules_failed`. Tune the noisy rule with an owner and a reason, as in Exercise 5. Ship `eve.json` off the box, so that a sensor taken over still leaves a record. Then pair it with something that fails differently, such as a host agent ([the next lessons in this track](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md)).
 
 **Undo.** Delete the output folders and the captures. `podman rmi docker.io/jasonish/suricata:8.0.7` removes the image.
 
@@ -1022,7 +1022,7 @@ The same loop the rest of the project uses ([Why this exists](Why-This-Exists.md
 - [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) is the rule-writing and tuning vocabulary used here, on log lines instead of packets.
 - [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) is the filter layer in front of the content-inspection layer.
 - [Security tools basics](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) is the traffic a sensor like this would flag: a scan, a web scanner.
-- The track's other lessons: [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md), [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) and [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md). They may not resolve until they merge.
+- The track's other lessons: [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md), [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) and [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md).
 
 ## Claims register
 

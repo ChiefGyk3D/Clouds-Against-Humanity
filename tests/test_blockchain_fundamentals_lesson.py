@@ -129,10 +129,14 @@ def test_every_linked_wiki_page_exists_and_every_anchor_is_a_real_heading():
     assert not bad, bad
 
 
-def test_the_page_links_the_existing_lessons_and_names_the_unwritten_siblings_in_plain_text():
+def test_the_page_links_the_existing_lessons_and_the_set_siblings_now_that_they_exist():
     body = text()
     links = {t for t, _ in LINK.findall(body)}
     for needed in (
+        "How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable",
+        "How-Monero-Works-Compared-with-Bitcoin-and-Ethereum-DeFi-Mixers-Swaps-and-Ransomware",
+        "Wallets-and-Key-Custody-Hot-and-Cold-Hardware-Wallets-Recovery-Shamir-and-Multisig",
+        "Running-Monero-Properly-Hardware-Wallet-Qubes-and-Whonix-Offline-Wallet-and-PiNodeXMR",
         "Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys",
         "Hashing-Encryption-and-Keys",
         "Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero",
@@ -145,6 +149,9 @@ def test_the_page_links_the_existing_lessons_and_names_the_unwritten_siblings_in
     assert "#what-pinodexmr-documents" in body, "the PiNodeXMR example on the overview page is linked"
     for issue in ("397", "398", "399", "400", "372"):
         assert issue in body, f"issue {issue} is named"
+    assert all((WIKI / f"{t}.md").is_file() for t in links), "a linked page is missing"
+    # The stale statement that the set pages are not written yet is gone.
+    assert "Pages that are not written yet" not in body
 
 
 def test_the_lesson_is_registered_in_contents_reading_order_and_nav():

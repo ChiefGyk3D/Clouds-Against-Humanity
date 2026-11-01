@@ -6,7 +6,7 @@
 Next: [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md)
 <!-- END GENERATED PAGE NAV top -->
 
-Side page to the start-from-zero pages. Read it before [Backups, recovery and patching](Backups-Recovery-and-Patching.md) if "what are we protecting, and from what" is still fuzzy, or at any point you want one short checklist to hold against a system. It names the three properties that almost every security control is for, shows how real failures map onto them, and then checks this repository's own controls against them, with the file that implements each. It does not repeat the pages it points at. Next: the lessons on business continuity and on disaster recovery (named here in plain text; they are issues 356 and 357 and are not written yet).
+Side page to the start-from-zero pages. Read it before [Backups, recovery and patching](Backups-Recovery-and-Patching.md) if "what are we protecting, and from what" is still fuzzy, or at any point you want one short checklist to hold against a system. It names the three properties that almost every security control is for, shows how real failures map onto them, and then checks this repository's own controls against them, with the file that implements each. It does not repeat the pages it points at. Next: the lessons on [business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) and on the [backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md) (issues 356 and 357).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
@@ -234,8 +234,7 @@ You are the one who wants to cause harm and you have one foothold. Which propert
 
 ## Leading into business continuity and disaster recovery
 
-Availability is the property the next two lessons are about, and they will be written as issues 356 and 357: **business continuity** (how the work carries on while something is broken) and **disaster recovery** (how you get the systems back). Both start from questions this page already asked: which property would hurt most to lose, and how long can you live without it. The existing page [Backups, recovery and patching](Backups-Recovery-and-Patching.md) is the hands-on piece to read first: it turns "recovery point" and "recovery time" into numbers you measure, and the restore exercise in this lesson was a one-minute version of its first exercise. When the two new lessons exist they will be linked from here; until then they are named, not linked.
-
+Availability is the property the next two lessons are about, and they were written as issues 356 and 357: **business continuity** (how the work carries on while something is broken) and **disaster recovery** (how you get the systems back), which share one lesson, [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) (issue 356), and the [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md) (issue 357). Both start from questions this page already asked: which property would hurt most to lose, and how long can you live without it. The existing page [Backups, recovery and patching](Backups-Recovery-and-Patching.md) is the hands-on piece to read first: it turns "recovery point" and "recovery time" into numbers you measure, and the restore exercise in this lesson was a one-minute version of its first exercise.
 ## Checkpoint
 
 - Say each of the three properties in one plain sentence, from memory.

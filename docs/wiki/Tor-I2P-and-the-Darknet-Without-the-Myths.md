@@ -228,7 +228,7 @@ None of this means "do not bother." It means these tools answer a narrow questio
 
 ## Worked example: a Monero node over Tor and I2P
 
-Monero is a cryptocurrency that is designed around privacy. It is a good place to see privacy and security side by side, because running a node involves both: *privacy* (can someone tell that this transaction came from my address?) and *security* (can someone get into my node, or my wallet?). The lesson on privacy versus security, not yet written, will treat the difference in general; this section shows one concrete case.
+Monero is a cryptocurrency that is designed around privacy. It is a good place to see privacy and security side by side, because running a node involves both: *privacy* (can someone tell that this transaction came from my address?) and *security* (can someone get into my node, or my wallet?). The lesson on [privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md) treats the difference in general; this section shows one concrete case.
 
 > **Whose words.** The issue behind this lesson says the maintainer has run a Monero node over Tor and has contributed to the PiNodeXMR project. That is repeated here as his own statement from the issue, with nothing added. Everything below about how Monero and PiNodeXMR work comes from those projects' own documents, read on 2026-10-31.
 
