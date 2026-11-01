@@ -214,7 +214,7 @@ def test_project_claims_hold_in_the_files():
     assert "PasswordAuthentication no" in cloud_init and "fingerprint" in cloud_init
     assert re.search(r'condition\s*=\s*var\.acl == "private"', read("modules/spaces-bucket/variables.tf"))
     assert "*.tfstate" in read(".gitignore")
-    unencrypted = [p for p in ROOT.rglob("*.tf") if ".claude" not in p.parts and re.search(r"^\s*encryption\s*\{", p.read_text(encoding="utf-8"), re.M)]
+    unencrypted = [p for p in ROOT.rglob("*.tf") if ".claude" not in p.parts and re.search(r"^\s*encryption\s*\{", p.read_text(encoding="utf-8"), re.MULTILINE)]
     assert not unencrypted, f"the page says no encryption block exists in any .tf file: {unencrypted}"
 
 
