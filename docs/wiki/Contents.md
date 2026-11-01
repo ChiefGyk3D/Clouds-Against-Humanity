@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (152 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (153 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -22,7 +22,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Core path: read in this order](#core-path-read-in-this-order) (21)
 - [Track 1: Foundations](#track-1-foundations) (28)
 - [Security tools and threat modeling](#security-tools-and-threat-modeling) (6)
-- [Track 2: Defend and detect](#track-2-defend-and-detect) (33)
+- [Track 2: Defend and detect](#track-2-defend-and-detect) (34)
 - [Track 3: Privacy, anonymity and cryptocurrency](#track-3-privacy-anonymity-and-cryptocurrency) (15)
 - [Track 4: GRC and law](#track-4-grc-and-law) (9)
 - [Track 5: Build and operate](#track-5-build-and-operate) (31)
@@ -136,15 +136,16 @@ A page with no marker has no such banner. It may still say what was and was not 
 | 22 | [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) | What a log, a metric, a trace and an alert are, and how a log line becomes a rule, for learners new to detection. | learner |  |
 | 23 | [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) | Detection after prevention fails, with Wazuh and the wider tool landscape; shipping logs is stage 2 and not built. | engineer | unbuilt |
 | 24 | [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) | What the Wazuh agent, server, indexer and dashboard each do and how a log line becomes an alert, with a free toy pipeline; the Wazuh parts were written from reading. | learner | est. steps |
-| 25 | [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) | Logs, metrics and traces, and why telemetry crosses a trust boundary; an unverified draft for engineers planning stage 2. | engineer | draft |
-| 26 | [Multiple sites and identity](Multiple-Sites-and-Identity.md) | What a site is, what breaks at two, and why a new site should be a settings file and not new code; an unverified draft for engineers. | engineer | draft |
-| 27 | [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) | How telemetry moves between the cloud and the home SIEM without breaking the no-listener promise; an unverified draft for engineers. | engineer | draft |
-| 28 | [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) | Ask what question each panel answers and what it would look like if the answer were bad; an unverified draft for operators. | operator | draft |
-| 29 | [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) | What a data source is, connecting Grafana to Prometheus, SQL and OpenSearch with a read-only account, then one panel and one alert; written from reading, not run. | builder | est. steps |
-| 30 | [Grafana dashboards](Grafana-Dashboards.md) | The three dashboards this repository ships and which question each answers; only tried with synthetic data. | operator |  |
-| 31 | [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) | A hands-on synthetic multi-site monitoring stack where you predict what a silent site does, for builders. | builder |  |
-| 32 | [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) | A springboard for building a small cloud security monitoring stack with a cost ceiling you set; an unverified draft for builders. | builder | draft |
-| 33 | [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) | What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied. | operator | unbuilt |
+| 25 | [Detecting Tor, I2P and VPN on a network](Detecting-and-Managing-Tor-I2P-and-VPN-on-a-Network-the-Defenders-View.md) | Page 7 of the VPN, Tor and I2P series: where a network can watch, the public signals and their limits, list matching, blocking as a policy choice and a detection as a lead, with five diagrams and a free script. | learner | draft |
+| 26 | [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) | Logs, metrics and traces, and why telemetry crosses a trust boundary; an unverified draft for engineers planning stage 2. | engineer | draft |
+| 27 | [Multiple sites and identity](Multiple-Sites-and-Identity.md) | What a site is, what breaks at two, and why a new site should be a settings file and not new code; an unverified draft for engineers. | engineer | draft |
+| 28 | [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) | How telemetry moves between the cloud and the home SIEM without breaking the no-listener promise; an unverified draft for engineers. | engineer | draft |
+| 29 | [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) | Ask what question each panel answers and what it would look like if the answer were bad; an unverified draft for operators. | operator | draft |
+| 30 | [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) | What a data source is, connecting Grafana to Prometheus, SQL and OpenSearch with a read-only account, then one panel and one alert; written from reading, not run. | builder | est. steps |
+| 31 | [Grafana dashboards](Grafana-Dashboards.md) | The three dashboards this repository ships and which question each answers; only tried with synthetic data. | operator |  |
+| 32 | [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) | A hands-on synthetic multi-site monitoring stack where you predict what a silent site does, for builders. | builder |  |
+| 33 | [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) | A springboard for building a small cloud security monitoring stack with a cost ceiling you set; an unverified draft for builders. | builder | draft |
+| 34 | [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) | What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied. | operator | unbuilt |
 
 ## Track 3: Privacy, anonymity and cryptocurrency
 
