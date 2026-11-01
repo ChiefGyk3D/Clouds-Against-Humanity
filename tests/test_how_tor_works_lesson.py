@@ -85,6 +85,18 @@ def test_every_linked_wiki_page_exists_and_the_overview_and_sibling_lessons_are_
     assert "Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys" in links
 
 
+def test_the_other_series_pages_are_linked_now_that_they_exist():
+    body = text()
+    links = set(LINK.findall(body))
+    for prefix in ("How-a-VPN-Works-", "How-I2P-Works-", "Privacy-Security-and-Anonymity-", "The-Browsing-Setups-Compared-",
+                   "OPSEC-for-Tor-and-I2P-", "Detecting-and-Managing-Tor-I2P-and-VPN-", "The-Darknet-Landscape-"):
+        found = {t for t in links if t.startswith(prefix)}
+        assert found, f"the page {prefix} exists and must be linked"
+        assert all((WIKI / f"{t}.md").exists() for t in found), found
+    # The stale statements that these pages are written separately and not linked are gone.
+    assert "named here in plain text" not in body and "tracked separately" not in body and "Until they exist" not in body
+
+
 def test_the_lesson_is_registered_in_contents_reading_order_and_nav():
     nav = (WIKI / "_nav.yaml").read_text(encoding="utf-8")
     assert f"page: {NAME}," in nav

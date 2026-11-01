@@ -98,8 +98,14 @@ def test_the_page_says_the_edge_is_design_only():
     assert "issue #325" in t and "(issue #325" in t
 
 
-def test_the_page_names_the_patch_lesson_without_linking_it():
-    assert not re.search(r"\]\([^)]*(?:325|[Pp]atch-[Mm]anagement)[^)]*\)", text())
+def test_the_page_links_the_patch_lesson_now_that_it_exists():
+    t = text()
+    target = "Patch-Management-and-Automatic-Security-Updates"
+    assert f"]({target}.md)" in t, "the patch management lesson exists, so it must be linked"
+    assert (WIKI / f"{target}.md").is_file()
+    # The stale statements that the lesson is not written are gone; the issue number stays.
+    assert "which is not written yet" not in t and "Named only; not written" not in t
+    assert "issue #325" in t
 
 
 def test_the_page_uses_no_real_address():

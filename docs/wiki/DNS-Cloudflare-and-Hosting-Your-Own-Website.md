@@ -34,7 +34,7 @@ Side page to the start-from-zero pages, and the third lesson of a four-lesson we
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-> **The track.** W1 is [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md), W2 is [WordPress and PHP security, WAF and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md), W3 is this page, and W4 is [WordPress at scale: CDN, WAF and CI](WordPress-at-Scale-CDN-WAF-and-CI.md). The four are written at the same time. **Until each of those pages is merged, the links to it on this page lead nowhere.** That is why the closing pointer at the top and bottom of this page names a page that already exists, and why nothing on this page depends on reading the others first: where W1's web server is needed, a three-line static site does the job.
+> **The track.** W1 is [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md), W2 is [WordPress and PHP security, WAF and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md), W3 is this page, and W4 is [WordPress at scale: CDN, WAF and CI](WordPress-at-Scale-CDN-WAF-and-CI.md). Nothing on this page depends on reading the others first: where W1's web server is needed, a three-line static site does the job.
 
 > **Status: the free local DNS lab and the OpenTofu example were run once on Linux; the Cloudflare dashboard steps and the whole own-account path were not run.** On **2026-10-22** the author ran the local lab with `dnsmasq` 2.91, `dig` 9.20.29 and OpenTofu 1.12.6, and pasted trimmed output from that run. The read-only queries against public DNS were run the same day. The vendor facts (Cloudflare, DigitalOcean, AWS, the RFCs, PHP) were read from the vendor's own pages on **2026-10-22** with read-only `curl`; each is in the [claims register](#claims-register) with its URL. **Not run:** every PowerShell command (no Windows machine; written from Microsoft's documentation and marked **est.**), every Cloudflare dashboard click (written from Cloudflare's documentation, so button names may have moved), and the droplet, firewall and certificate steps (written from `doctl` and nginx documentation, never applied; run them expecting to fix something). Output varies with your versions, your resolver and the date.
 
@@ -257,7 +257,7 @@ The pieces, in the order a visitor meets them: **domain** (registrar), **DNS zon
 
 ### Build the origin
 
-The origin is "a small droplet running the W1 stack, or a static site". The W1 lesson is [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md). If it is not merged yet, use the static version here: the same nginx, no PHP and no database, which also has the smallest attack surface of any option.
+The origin is "a small droplet running the W1 stack, or a static site". The W1 lesson is [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md). If you do not want PHP and a database yet, use the static version here: the same nginx, no PHP and no database, which also has the smallest attack surface of any option.
 
 Cost and teardown first: one `s-1vcpu-1gb` droplet is $6 a month at list price (`docs/cost-prices.json`), billed while it exists even if powered off, and destroying it ends billing. Set a reminder for the day you plan to destroy it.
 
@@ -375,7 +375,7 @@ The build order reads: domain, then server and firewall together, then DNS recor
 ### Three ways to do it
 
 1. **By hand.** This page's walkthrough and the dashboard. Slowest, teaches the most, and the easiest way to understand what each step changes. Nothing is remembered between runs except your notes.
-2. **One OpenTofu stack per piece.** The maintainer has ruled that each service is its own OpenTofu stack with its own build and destroy, so a piece can be created and destroyed without touching the others. The method is taught in [OpenTofu from zero](OpenTofu-From-Zero.md) and [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md). **Until those pages are merged, those two links lead nowhere**; [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) already exists and explains how this project lays out stacks. **No web-hosting stack exists in this repository yet; the examples below are teaching code, not shipped infrastructure.**
+2. **One OpenTofu stack per piece.** The maintainer has ruled that each service is its own OpenTofu stack with its own build and destroy, so a piece can be created and destroyed without touching the others. The method is taught in [OpenTofu from zero](OpenTofu-From-Zero.md) and [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md). [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) explains how this project lays out stacks. **No web-hosting stack exists in this repository yet; the examples below are teaching code, not shipped infrastructure.**
 3. **One composed launch.** A single configuration that calls every piece in order and one command that destroys them all in reverse. The least typing and the least learning; use it after you have done the pieces once. A composed launch has to respect the same ordering: records are created after the server's address is known and destroyed before the server is.
 
 Whichever you pick, destroy in the destroy order above, and prove it with read-only listings.
@@ -996,7 +996,7 @@ Not verified, plainly: every PowerShell command; macOS; Windows and WSL behavior
 
 Next: [Droplet hardening](Droplet-Hardening.md), core step 14 on the [Reading order](Reading-Order.md) page.
 
-In this track, W4 is [WordPress at scale: CDN, WAF and CI](WordPress-at-Scale-CDN-WAF-and-CI.md) once it is merged.
+In this track, W4 is [WordPress at scale: CDN, WAF and CI](WordPress-at-Scale-CDN-WAF-and-CI.md).
 
 <!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
 Where you are: [Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > DNS, Cloudflare and hosting your own website

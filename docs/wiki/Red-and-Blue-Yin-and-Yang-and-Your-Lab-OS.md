@@ -25,8 +25,7 @@ Previous: [Patch management and automatic security updates](Patch-Management-and
 
 Side page to the foundations pages. Read it after [Threats in plain words](Threats-in-Plain-Words.md) and before you touch any security tool: it says how to think about attack and defense as one subject, what you must have in writing before you test anything, and how to set up a lab computer you can break without breaking anything else. It is lesson 1 of 2. Next: [Threat frameworks: STRIDE, ATT&CK and ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md).
 
-Lesson 2 is [Security tools basics: Nmap, OpenVAS, Burp and Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md). It is written alongside this lesson, so that link may not resolve until lesson 2 merges.
-
+Lesson 2 is [Security tools basics: Nmap, OpenVAS, Burp and Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md).
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
 > **Status: written from vendor and standards pages read on 2026-10-22; the local commands marked "ran" were run once on Linux on that date, everything else is unrun (**est.**).** No Windows machine, no VirtualBox, no libvirt and no PowerShell were available to the author, so every Windows step, every VirtualBox step, every libvirt step and every PowerShell line is a draft built from documentation, not something a person ran. The only commands run were the CPU and device checks in Exercise 2 and the `qemu-img` snapshot practice in Exercise 3. This is not legal advice. This is not a penetration testing course: it is the foundation for one, and the next lesson stays at the same basic level.
@@ -601,7 +600,7 @@ Retrieved 2026-10-22 with read-only requests, unless stated.
 
 Not verified, plainly: any law beyond the two sections named, the Education edition of Windows, anything about macOS, anything about wireless adapters in a VM, and every Windows or VirtualBox step.
 
-Next: [Threat frameworks: STRIDE, ATT&CK and ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md), then come back for lesson 2 when it merges.
+Next: [Threat frameworks: STRIDE, ATT&CK and ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md), then [Security tools basics](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) for lesson 2.
 
 <!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
 Where you are: [Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > Red and blue, and choosing your lab OS

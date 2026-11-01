@@ -253,7 +253,8 @@ def test_sibling_lessons_are_linked_by_exact_name_but_not_from_the_next_line():
         assert f"]({name}.md" in page, name
     nxt = [line for line in page.splitlines() if line.startswith("Next:")]
     assert len(nxt) == 1 and "Packet-Filters" not in nxt[0] and "File-Integrity" not in nxt[0] and "Rate-Limiting" not in nxt[0]
-    assert "may not resolve until" in page
+    # The sibling lessons are in the wiki, so the old 'may not resolve until it merges' caveat is gone (issue #444).
+    assert "may not resolve until" not in page
 
 
 def test_the_lesson_is_linked_from_the_navigation_and_the_glossary_has_the_new_terms():

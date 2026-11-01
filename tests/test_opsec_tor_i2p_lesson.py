@@ -178,11 +178,21 @@ def test_every_linked_wiki_page_exists_and_the_finished_siblings_are_linked():
         assert needed in links, needed
 
 
-def test_the_unwritten_pages_are_named_in_plain_text_not_linked():
+def test_the_detecting_page_is_linked_now_that_it_exists():
     body = text()
-    for plain in ("detecting and managing Tor, I2P and VPN traffic on a network", "hands-on Whonix and Qubes exercises"):
-        assert plain in body, plain
-    linked = {t for t in LINK.findall(body) if re.search(r"Detecting|Exercise", t)}
+    assert "detecting and managing Tor, I2P and VPN traffic on a network" in body
+    found = {t for t in LINK.findall(body) if t.startswith("Detecting-and-Managing-Tor-I2P-and-VPN-")}
+    assert found, "the series page 7 exists and must be linked"
+    assert all((WIKI / f"{t}.md").exists() for t in found), found
+    # The stale statement that the last page is not written yet is gone.
+    assert "The last page is not written yet" not in body
+
+
+def test_the_whonix_and_qubes_exercises_are_still_named_in_plain_text_not_linked():
+    # Issue 372 is not written, so there is no page to link; this stays plain text until there is.
+    body = text()
+    assert "hands-on Whonix and Qubes exercises" in body
+    linked = {t for t in LINK.findall(body) if re.search(r"Exercise", t)}
     assert not linked, linked
 
 

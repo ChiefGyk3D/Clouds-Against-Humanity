@@ -315,7 +315,8 @@ def test_only_loopback_and_documentation_addresses_appear():
 def test_the_companion_link_is_present_and_kept_out_of_the_next_line():
     text = page_text()
     assert "Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md" in text
-    assert "may not resolve until" in text
+    # The companion page is in the wiki, so the old 'may not resolve until it merges' caveat is gone (issue #444).
+    assert "may not resolve until" not in text
     for line in text.splitlines():
         if "Next:" in line:
             assert "Red-and-Blue-Yin-and-Yang" not in line

@@ -158,12 +158,17 @@ def test_the_five_failure_shapes_are_mapped():
         assert event in block, event
 
 
-def test_the_lesson_leads_into_the_next_two_lessons_by_name_only():
+def test_the_lesson_leads_into_the_next_two_lessons_and_links_them_now_that_they_exist():
     body = text()
     tail = body.split("## Leading into business continuity and disaster recovery")[1].split("## Checkpoint")[0]
     assert "issues 356 and 357" in body
     assert "business continuity" in tail and "disaster recovery" in tail
-    assert "named, not linked" in tail
+    targets = {t for t in LINK.findall(tail)}
+    for needed in ("Business-Continuity-and-Disaster-Recovery-BCP-and-DR",
+                   "Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing"):
+        assert needed in targets, f"the lesson {needed} exists, so the tail must link it"
+        assert (WIKI / f"{needed}.md").is_file()
+    assert "named, not linked" not in tail and "will be written" not in tail
 
 
 def test_every_claims_register_row_has_a_status():

@@ -165,6 +165,14 @@ def test_page_links_both_siem_repositories_and_pfsense_docs():
     assert "https://docs.netgate.com/pfsense/en/latest/" in text
 
 
+def test_related_lessons_exist_and_the_stale_may_not_open_yet_banner_is_gone():
+    text = page()
+    for target in ("Packet-Filters-Compared-iptables-nftables-ufw-pf", "Rate-Limiting-at-Every-Layer"):
+        assert f"]({target}.md)" in text, target
+        assert (WIKI / f"{target}.md").is_file(), target
+    assert "may not open yet" not in text and "leads nowhere" not in text
+
+
 def test_page_has_the_required_sections():
     text = page()
     for heading in (

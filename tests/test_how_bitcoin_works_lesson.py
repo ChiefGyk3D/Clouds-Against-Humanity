@@ -242,6 +242,12 @@ def test_the_page_links_the_existing_lessons_and_names_the_siblings_correctly():
         assert "Blockchain fundamentals" in body and "issue 396" in body
     for issue in ("396", "398", "399", "400", "372"):
         assert issue in body, f"issue {issue} is named"
+    # Pages three, four and five are in the wiki, so they are linked, and the stale statement is gone.
+    for prefix in ("How-Monero-Works-", "Wallets-and-Key-Custody-", "Running-Monero-Properly-"):
+        found = {t for t in links if t.startswith(prefix)}
+        assert found, f"the page {prefix} exists and must be linked"
+        assert all((WIKI / f"{t}.md").is_file() for t in found), found
+    assert "Pages not in the wiki yet" not in body
 
 
 def test_the_lesson_is_registered_in_contents_reading_order_and_nav():

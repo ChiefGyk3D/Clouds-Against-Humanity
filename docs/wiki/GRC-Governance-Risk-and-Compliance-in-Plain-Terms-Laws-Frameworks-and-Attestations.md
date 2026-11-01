@@ -55,7 +55,7 @@ Page one of three in the GRC and compliance set. Read it when a job, a customer 
 
 ## Where this page sits in the set
 
-The maintainer asked for this set on 2026-11-01. This is page one (issue 402), the foundation. Page two (issue 403) covers privacy law in the United States and page three (issue 404) covers privacy law around the world; neither is in the wiki yet, so both are named in plain text and not linked. Where this page touches privacy it stays at the level of what a control or a rule asks for.
+The maintainer asked for this set on 2026-11-01. This is page one (issue 402), the foundation. Page two (issue 403) covers [privacy law in the United States](US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers.md) and page three (issue 404) covers [privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md). Where this page touches privacy it stays at the level of what a control or a rule asks for.
 
 ## What the wiki already says (and the gap)
 

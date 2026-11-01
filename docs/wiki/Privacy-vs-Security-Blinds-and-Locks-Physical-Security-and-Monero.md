@@ -6,7 +6,7 @@
 Previous: [Privacy, security and anonymity](Privacy-Security-and-Anonymity-Three-Different-Things-and-Why-There-Is-No-Silver-Bullet.md) / Next: [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md)
 <!-- END GENERATED PAGE NAV top -->
 
-Side page to the start-from-zero pages. Read it after [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) and [Threat model](Threat-Model.md), or at any point you have caught yourself saying "it is private, so it is secure" (or the other way round). It sets out one picture, blinds and drapes against locks and alarms, and uses it three ways: the overlap and the differences, Monero as a worked example, and the physical side of security, where a door, a drive in a drawer and a badge are all part of the system. It does not repeat the pages it points at. Next: the lesson on Tor and I2P and the lesson on cryptography (named here in plain text; they are issues 358 and 360 and are not merged yet).
+Side page to the start-from-zero pages. Read it after [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) and [Threat model](Threat-Model.md), or at any point you have caught yourself saying "it is private, so it is secure" (or the other way round). It sets out one picture, blinds and drapes against locks and alarms, and uses it three ways: the overlap and the differences, Monero as a worked example, and the physical side of security, where a door, a drive in a drawer and a badge are all part of the system. It does not repeat the pages it points at. Next: the [lesson on Tor and I2P](Tor-I2P-and-the-Darknet-Without-the-Myths.md) and the [lesson on cryptography](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md) (issues 358 and 360).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
@@ -36,7 +36,7 @@ Side page to the start-from-zero pages. Read it after [The CIA triad](The-CIA-Tr
 | Keys and secrets | [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) and [Secrets from day one](Secrets-From-Day-One.md) | Key custody as a lock and as a privacy tool at once, in the Monero example. |
 | Watching a system | [Detection and monitoring](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) and [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) | The privacy cost of watching: logs and cameras see people. |
 | What you may and may not do | [Deception safety and law](Deception-and-Honeypots-Safety-and-Law.md) | The same "check your own law" habit, applied to lockpicking and personal data. |
-| Hiding the network path | Not yet. The lesson on Tor and I2P is issue 358. | Named here only; this page does not teach it. |
+| Hiding the network path | [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) (issue 358). | Pointed to only; this page does not teach it. |
 
 ## Blinds and locks: the picture
 
@@ -117,7 +117,7 @@ The same project's pages describe things the user must do or trust, and each is 
 
 A privacy feature is not a security control and a security control is not a privacy feature, even inside one product. Monero's own pages describe both lists, and the second one is as long as the first. The way to read any "private" product is the same: ask what is hidden, from whom, then ask who holds the keys, whom you must trust to use it, what runs on your device and who checks the software. A hidden record does not stop a stolen seed. A strong lock does not hide what the record says.
 
-The lesson on Tor and I2P (issue 358, not merged yet) covers hiding the network path, which the Monero pages above mention as one way to reduce what a node can learn. The lesson on cryptography (issue 360) covers the primitives underneath.
+The [lesson on Tor and I2P](Tor-I2P-and-the-Darknet-Without-the-Myths.md) (issue 358) covers hiding the network path, which the Monero pages above mention as one way to reduce what a node can learn. The [lesson on cryptography](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md) (issue 360) covers the primitives underneath.
 
 ## Privacy law basics, at a high level
 

@@ -86,10 +86,16 @@ def test_the_blast_radius_lesson_is_not_linked_so_its_link_cap_holds():
     assert "Plan-for-Failure-Blast-Radius" not in text()
 
 
-def test_the_sibling_lessons_are_named_by_issue_and_not_linked():
+def test_the_sibling_lessons_are_linked_now_that_they_exist():
     body = text()
-    assert "issues 358 and 360" in body and "not merged yet" in body
-    assert not re.search(r"\]\((?:Tor|I2P|Cryptography)[A-Za-z0-9_-]*\.md", body)
+    links = set(LINK.findall(body))
+    tor = "Tor-I2P-and-the-Darknet-Without-the-Myths"
+    crypto = "Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys"
+    assert tor in links and crypto in links
+    assert (WIKI / f"{tor}.md").is_file() and (WIKI / f"{crypto}.md").is_file()
+    # The issue numbers stay where they carry meaning; the stale statements are gone.
+    assert "issue 358" in body and "issue 360" in body
+    assert "not merged yet" not in body and "Not yet. The lesson on Tor" not in body
 
 
 def test_the_lesson_is_registered_in_contents_reading_order_and_the_sidebar():

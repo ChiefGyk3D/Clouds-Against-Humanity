@@ -162,8 +162,11 @@ def test_the_page_links_the_existing_lessons_and_names_the_siblings_in_plain_tex
         assert needed in links, needed
     for issue in ("402", "403", "404"):
         assert issue in body, f"issue {issue} is named"
-    # Pages two and three are not in the wiki yet; they are named in plain text until they are.
-    assert not [p for p in WIKI.glob("*.md") if "Privacy-Law" in p.name and p.name in body]
+    # Pages two and three are in the wiki, so they are linked and the stale statement is gone.
+    for prefix in ("US-Privacy-Law-", "Privacy-Law-Around-the-World-"):
+        assert any(t.startswith(prefix) for t in links), f"the page {prefix} exists and must be linked"
+        assert all((WIKI / f"{t}.md").is_file() for t in links if t.startswith(prefix))
+    assert "neither is in the wiki yet" not in body
 
 
 def test_the_lesson_is_registered_in_contents_reading_order_and_nav():

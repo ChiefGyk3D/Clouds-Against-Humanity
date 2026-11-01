@@ -146,13 +146,18 @@ def test_every_linked_wiki_page_exists_and_the_finished_siblings_are_linked():
         assert needed in links, needed
 
 
-def test_the_unwritten_series_pages_are_named_in_plain_text_not_linked():
+def test_the_later_series_pages_are_linked_now_that_they_exist():
     body = text()
-    for plain in ("the browsing setups compared", "operational security for Tor and I2P",
+    for named in ("the browsing setups compared", "operational security for Tor and I2P",
                   "detecting and managing Tor, I2P and VPN traffic on a network"):
-        assert plain in body, plain
-    linked_series = {t for t in LINK.findall(body) if re.search(r"Browsing|OPSEC-for|Detecting", t)}
-    assert not linked_series, linked_series
+        assert named in body, named
+    links = set(LINK.findall(body))
+    for prefix in ("The-Browsing-Setups-Compared-", "OPSEC-for-Tor-and-I2P-", "Detecting-and-Managing-Tor-I2P-and-VPN-"):
+        found = {t for t in links if t.startswith(prefix)}
+        assert found, f"the series page {prefix} exists and must be linked"
+        assert all((WIKI / f"{t}.md").exists() for t in found), found
+    # The stale statement that these pages are not written yet is gone.
+    assert "not written yet" not in body and "plain text, not linked" not in body
 
 
 def test_a_page_with_a_link_cap_is_not_linked():

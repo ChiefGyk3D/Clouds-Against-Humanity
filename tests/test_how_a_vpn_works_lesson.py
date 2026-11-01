@@ -120,14 +120,19 @@ def test_every_linked_wiki_page_exists_and_the_finished_siblings_are_linked():
         assert needed in links, needed
 
 
-def test_the_unwritten_series_pages_are_named_in_plain_text_not_linked():
+def test_the_other_series_pages_are_linked_now_that_they_exist():
     body = text()
-    for plain in ("privacy, security and anonymity and why there is no silver bullet", "the browsing setups compared",
+    for named in ("privacy, security and anonymity and why there is no silver bullet", "the browsing setups compared",
                   "operational security for Tor and I2P", "detecting and managing Tor, I2P and VPN traffic on a network"):
-        assert plain in body, plain
-    # The only wiki pages with series names in their targets are the finished ones.
-    linked_series = {t for t in LINK.findall(body) if re.search(r"Browsing|OPSEC-for|Detecting|Silver", t)}
-    assert not linked_series, linked_series
+        assert named in body, named
+    links = set(LINK.findall(body))
+    for prefix in ("Privacy-Security-and-Anonymity-", "The-Browsing-Setups-Compared-", "OPSEC-for-Tor-and-I2P-",
+                   "Detecting-and-Managing-Tor-I2P-and-VPN-"):
+        found = {t for t in links if t.startswith(prefix)}
+        assert found, f"the series page {prefix} exists and must be linked"
+        assert all((WIKI / f"{t}.md").exists() for t in found), found
+    # The stale statement that these pages are not written yet is gone.
+    assert "not written yet" not in body and "plain text, not linked" not in body
 
 
 def test_the_lesson_is_registered_in_contents_reading_order_and_nav():

@@ -30,8 +30,7 @@ Next: [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md)
 
 Side page to the start-from-zero pages. Read it after [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md), which teaches the ideas (default deny, stateful, allow by source and port) with one tool, `nft`. This page keeps those ideas and compares the tools that carry them out: the Linux family (`iptables` with `ipset`, `nftables`, UFW, firewalld) and the BSD family (`pf`, and the pfSense and OPNsense firewalls built around it). Next: [Detection and monitoring: Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md).
 
-This is the first of four lessons in a network and host defense track. The other three are [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md), [File integrity and alerting: Tripwire, AIDE, Wazuh](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) and [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md). They are being written at the same time as this page, so those three links may not resolve until they are merged.
-
+This is the first of four lessons in a network and host defense track. The other three are [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md), [File integrity and alerting: Tripwire, AIDE, Wazuh](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) and [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
@@ -1042,7 +1041,7 @@ All read-only requests; retrieved 2026-10-22 unless stated. "Read" means I read 
 
 ## Where to next
 
-The next lesson in this track, [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md), adds the layer that reads what a packet filter cannot; [rate limiting at every layer](Rate-Limiting-at-Every-Layer.md) takes the one rule you wrote here and puts it at the CDN, the proxy, the application and the kernel (those links may not resolve until the pages are merged). In the core path, [Detection and monitoring](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) shows where firewall logs end up.
+The next lesson in this track, [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md), adds the layer that reads what a packet filter cannot; [rate limiting at every layer](Rate-Limiting-at-Every-Layer.md) takes the one rule you wrote here and puts it at the CDN, the proxy, the application and the kernel. In the core path, [Detection and monitoring](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) shows where firewall logs end up.
 
 <!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
 Where you are: [Home](Home.md) > [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect) > Packet filters compared

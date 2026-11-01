@@ -29,7 +29,7 @@
 
 Side page to the threat pages. Read it after [Threats in plain words](Threats-in-Plain-Words.md) and [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md), and alongside [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md).
 
-Its companion, [Red and blue as yin and yang, and your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md), covers authorization and the lab machine first; that link may not resolve until that page merges.
+Its companion, [Red and blue as yin and yang, and your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md), covers authorization and the lab machine first.
 
 Next: [Deception and honeypots: start here](Deception-and-Honeypots-Start-Here.md).
 
@@ -58,7 +58,7 @@ That is his observation, and this page is built on it. It is **not** a pentestin
 
 ## Authorization and scope come first
 
-Every tool here can be used to break the law. The short version of the rules (the full version is in the companion page [Red and blue as yin and yang, and your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md), which may not resolve until it merges; read it first when it does):
+Every tool here can be used to break the law. The short version of the rules (the full version is in the companion page [Red and blue as yin and yang, and your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md); read it first):
 
 1. **Own it, or have written permission.** Scan and test only machines and networks that are yours, or where the owner has given you written permission that names what you may test, when, and from where. "It was open" and "I was only looking" are not permission. This is the same stance as [Deception safety and law](Deception-and-Honeypots-Safety-and-Law.md). The law differs by country and this page is not legal advice.
 2. **Scope is a list.** Written permission names addresses and dates. Anything not on the list is out of scope, even if it is next door.
@@ -84,7 +84,7 @@ Metasploit **Framework** is the free, open-source tool. **Metasploit Pro** is a 
 
 ## Where each tool sits in the whole system
 
-The companion page has the enterprise picture. Keep it open: [Red and blue as yin and yang, and your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md) has the reference architecture diagram and a table that maps each box to a lesson (that page is written at the same time as this one; I have not read its final headings, so I name no section; may not resolve until it merges). Use this table to place each tool on that picture and name the control that would catch or contain what it finds:
+The companion page has the enterprise picture. Keep it open: [Red and blue as yin and yang, and your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md) has the reference architecture diagram and a table that maps each box to a lesson (I have not read that page's final headings, so I name no section). Use this table to place each tool on that picture and name the control that would catch or contain what it finds:
 
 | Tool | Where it sits | What it looks at | The control that catches or contains the finding |
 |---|---|---|---|

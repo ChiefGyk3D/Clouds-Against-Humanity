@@ -31,8 +31,7 @@ Previous: [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md) /
 
 Lesson D3 of the network and host defense track, and a foundations side page to [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) and [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md). Read it after those two, and after [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) if "hash" and "signature" are still blurry.
 
-The track has four lessons. D1 is [Packet filters compared: iptables, nftables, UFW and pf](Packet-Filters-Compared-iptables-nftables-ufw-pf.md), D2 is [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md), this is D3, and D4 is [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md). Those three pages were written at the same time as this one, so their links may not resolve until they merge.
-
+The track has four lessons. D1 is [Packet filters compared: iptables, nftables, UFW and pf](Packet-Filters-Compared-iptables-nftables-ufw-pf.md), D2 is [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md), this is D3, and D4 is [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md).
 Next: [Deception and honeypots: start here](Deception-and-Honeypots-Start-Here.md), where the same watching idea is turned into bait.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -194,7 +193,7 @@ Think about it as a rate limit built out of three parts: a log (D3-style evidenc
 
 - It acts **after** the failures are written, so it lowers the number of guesses, it does not stop the first few. Its own README says it "cannot eliminate the risk presented by weak authentication" and points to two-factor or key-based login.
 - **A ban is an automatic action on untrusted input.** Put your own management address in `ignoreip`, or a typo locks you out of your own server. Anything an outsider can make appear in a log can influence what gets banned (est.: for example a service that logs a client-supplied name or address field); only feed it logs whose source address you trust.
-- **Where else could this limit live?** Before the application (a proxy, a load balancer, a CDN), inside the application, in the kernel's connection tracking. Each sees different things and fails differently. That comparison is [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md) (D4; may not resolve until it merges). The packet filter fail2ban talks to is in [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md) (D1; same caveat).
+- **Where else could this limit live?** Before the application (a proxy, a load balancer, a CDN), inside the application, in the kernel's connection tracking. Each sees different things and fails differently. That comparison is [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md) (D4). The packet filter fail2ban talks to is in [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md) (D1).
 
 A minimal jail, **est., not run** (needs the package, administrator rights, and a machine you own). Addresses are documentation addresses:
 

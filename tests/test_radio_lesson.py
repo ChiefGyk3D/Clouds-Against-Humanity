@@ -146,12 +146,15 @@ def test_every_linked_wiki_page_exists():
     assert not missing, missing
 
 
-def test_the_continuity_lesson_is_linked_and_the_unmerged_and_capped_ones_are_plain_text():
-    body = text()
+def test_the_continuity_and_cryptography_lessons_are_linked_and_the_capped_one_is_plain_text():
+    body = page_text(PAGE)  # the author's text, without the generated navigation blocks (issue #417)
     assert "Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md" in body
     assert "The-CIA-Triad-Confidentiality-Integrity-Availability.md" in body
-    # the cryptography lesson (issue 360) may not be merged yet, and the blast radius lesson has a link cap that is full
+    # the cryptography lesson (issue 360) is in the wiki, so it is linked; the blast radius lesson has a link cap that is full
     assert "cryptography lesson" in body
+    crypto = "Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys"
+    assert f"]({crypto}.md)" in body and (WIKI / f"{crypto}.md").is_file()
+    assert "may not be merged yet" not in body
     assert f"{BLAST}.md" not in body
     assert "blast radius and assuming breach" in body
 
