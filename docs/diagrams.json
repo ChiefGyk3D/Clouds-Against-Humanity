@@ -56,6 +56,15 @@
   "docs/wiki/images/git-github-and-pull-requests-diagram-1.png": {
     "sha256": "70d3bb49dacda55881fcbb0a3b6431a197bfd27d60f703b209626df76cb00310"
   },
+  "docs/wiki/images/grc-governance-risk-and-compliance-in-plain-terms-laws-frameworks-and-attestations-diagram-1.png": {
+    "sha256": "e04535b2b4d94afc57874de82094debfef0c1be8577a24b8a92646597fe068ae"
+  },
+  "docs/wiki/images/grc-governance-risk-and-compliance-in-plain-terms-laws-frameworks-and-attestations-diagram-2.png": {
+    "sha256": "6b303e12db1843e33ddeb2caf54d15dd36946471c187e4fea186c66ef5563aa1"
+  },
+  "docs/wiki/images/grc-governance-risk-and-compliance-in-plain-terms-laws-frameworks-and-attestations-diagram-3.png": {
+    "sha256": "3f115a2a5d7935c952b26d4c5ec2ecd4e87dab44b900c70a40fed63bed98f7fa"
+  },
   "docs/wiki/images/home-diagram-1.png": {
     "sha256": "64a67622aa75222a3e25fb53f47c4013c6a7f53f9a342da59a447ed32f531897"
   },
@@ -169,6 +178,18 @@
   },
   "docs/wiki/images/roadmap-diagram-1.png": {
     "sha256": "f0965f8bfa6def3709d42ee8fcb9488a4a31c1a4ee56931c903e299910ede914"
+  },
+  "docs/wiki/images/running-monero-properly-hardware-wallet-qubes-and-whonix-offline-wallet-and-pinodexmr-diagram-1.png": {
+    "sha256": "0cd26e15656106bb56ecfe331a470dd5ce9b1f4e5c3ed574e41caa2c09edd0d8"
+  },
+  "docs/wiki/images/running-monero-properly-hardware-wallet-qubes-and-whonix-offline-wallet-and-pinodexmr-diagram-2.png": {
+    "sha256": "ae402e343bf70439bae237c3447a76a733f9d9ae148a8e46482496e643e3886d"
+  },
+  "docs/wiki/images/running-monero-properly-hardware-wallet-qubes-and-whonix-offline-wallet-and-pinodexmr-diagram-3.png": {
+    "sha256": "8f01aebb4216f14f5bd7244b6b15557bad96c8306b28b31357f2d0ac61f8975d"
+  },
+  "docs/wiki/images/running-monero-properly-hardware-wallet-qubes-and-whonix-offline-wallet-and-pinodexmr-diagram-4.png": {
+    "sha256": "2719f2ace44655bdb225ccfd8bc75be7d3fc10ce83a504314a9e758ffb3f3755"
   },
   "docs/wiki/images/spacelift-diagram-1.png": {
     "sha256": "1d327efc62d44ffed0cf714da7d41fae3707ed04d5b9e5d6e6600bf18b285f9b"

@@ -27,7 +27,7 @@ If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md):
 
 ## Every page, by theme
 
-All 146 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
+All 148 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
 
 ### Start here, by kind of reader
 
@@ -140,6 +140,7 @@ All 146 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 - [How Bitcoin works](How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable.md) (draft): Page 2 of 5 on cryptocurrency: keys, UTXOs and change, fees, mining and confirmations, and why Bitcoin is pseudonymous and traceable, with documented tracing cases and a clustering exercise.
 - [How Monero works](How-Monero-Works-Compared-with-Bitcoin-and-Ethereum-DeFi-Mixers-Swaps-and-Ransomware.md) (draft): Page 3 of 5 on cryptocurrency: Monero's ring signatures, stealth addresses and hidden amounts, Ethereum, DeFi, mixers, Bitcoin-Monero atomic swaps and ransomware, with dated public cases.
 - [Wallets and key custody](Wallets-and-Key-Custody-Hot-and-Cold-Hardware-Wallets-Recovery-Shamir-and-Multisig.md) (draft): Page 4 of 5 on cryptocurrency: hot and cold wallets, the threat model, hardware wallets and a disclosed Trezor affiliate link, recovery phrases, Shamir, multisig, custody, and a no-funds exercise.
+- [Running Monero properly](Running-Monero-Properly-Hardware-Wallet-Qubes-and-Whonix-Offline-Wallet-and-PiNodeXMR.md) (draft): Page 5 of 5 on cryptocurrency: a hardware wallet with Monero, the Qubes and Whonix offline-wallet design, PiNodeXMR as an always-on node and how to secure it, with a paper exercise.
 
 ### Foundations: network and host defense
 
@@ -189,6 +190,7 @@ All 146 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 - [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md): Change tickets, CABs and freezes explained for readers who hear them at work; this project uses none of it.
 - [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md): Where this project's Doppler and Twingate choices sit next to enterprise identity and secrets practice, for engineers.
 - [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md): Write a ticket, a change request and a runbook for a real merged change, for learners preparing for company work.
+- [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md) (draft): Page 1 of 3 on GRC: the governance, risk and compliance loop, laws versus frameworks versus attestations, SOX, PCI DSS, HIPAA, GLBA and FISMA in brief, roles, evidence, and a CM-3 exercise.
 - [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md): Roles that surround this work and what to learn next, for readers choosing a direction.
 
 ### Foundations: data governance

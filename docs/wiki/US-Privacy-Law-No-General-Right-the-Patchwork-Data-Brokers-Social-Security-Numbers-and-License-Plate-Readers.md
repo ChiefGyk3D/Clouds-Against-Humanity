@@ -25,7 +25,7 @@ Page two of three in the GRC and compliance set. Read it when you want to know w
 
 ## Where this page sits in the set
 
-The maintainer asked for this set on 2026-11-01. Page one (issue 402, governance, risk and compliance in plain terms; the wiki's entry is titled GRC in plain terms) is the foundation and carries the vocabulary used here: law, regulation, framework, control, evidence. It is not on the wiki's main branch as I write, so I name it in plain text and do not link it; a later merge turns the name into a link. This is page two (issue 403). Page three (issue 404) covers privacy law around the world and is not in the wiki yet, so it is named in plain text too. Where this page touches another country, it does so only for the single comparison the maintainer's opinion makes.
+The maintainer asked for this set on 2026-11-01. Page one (issue 402, [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md)) is the foundation and carries the vocabulary used here: law, regulation, framework, control, evidence. This is page two (issue 403). Page three (issue 404) covers privacy law around the world and is not in the wiki yet, so it is named in plain text too. Where this page touches another country, it does so only for the single comparison the maintainer's opinion makes.
 
 ## What the wiki already says (and the gap)
 
