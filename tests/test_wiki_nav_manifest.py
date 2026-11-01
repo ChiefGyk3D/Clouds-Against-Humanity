@@ -177,15 +177,20 @@ def test_sidebar_stays_inside_its_line_budget():
 def test_collapsed_sidebar_fits_one_screen():
     """Rows a reader sees with every group closed: the top row, the open core path, and one summary per group."""
     text = re.sub(r"<!--.*?-->", "", (WIKI / "_Sidebar.md").read_text(), flags=re.DOTALL)
-    visible, closed = 0, False
+    # Issue #378: a summary shares its line with <details>, and groups hold nested subgroups, so track depth.
+    visible, stack = 0, []  # one flag per open <details> block we are inside: True when it is collapsed
     for line in text.splitlines():
         if not line.strip():
             continue
-        if line.startswith("<details>"):
-            closed = True
-        elif line.startswith(("<details open>", "</details>")):
-            closed = False
-        elif line.startswith("<summary>") or not closed:
+        hidden = any(stack)
+        if line.startswith("</details>"):
+            stack.pop()
+            continue
+        if line.startswith("<details"):
+            if not hidden:
+                visible += 1  # the summary of a block that is itself on screen
+            stack.append(not line.startswith("<details open>"))
+        elif not hidden:
             visible += 1
     assert visible <= COLLAPSED_ROW_BUDGET, f"{visible} rows visible when collapsed, budget {COLLAPSED_ROW_BUDGET}"
 
@@ -231,7 +236,7 @@ def test_the_publisher_copies_the_generated_pages_unchanged_in_kind():
 
 # -- the collapsed sidebar (issue #362) ----------------------------------------------------------
 
-SIDEBAR_HEADROOM = 4  # lines the committed sidebar must leave under the budget (it lists every page now, issue #378)
+SIDEBAR_HEADROOM = 25  # lines (one page each, worst case) the committed sidebar must leave under the budget (issue #378)
 SIDEBAR_GROUP_LINK = re.compile(r"\]\(Contents\.md#([a-z0-9-]+)\)")
 SIDEBAR_ITEM = re.compile(r"^(- |\d+\. )")
 
@@ -250,10 +255,19 @@ def ref_block(sidebar: str) -> str:
     return sidebar.split("<summary><b>Reference</b>", 1)[1].split("</details>", 1)[0]
 
 
-def test_the_sidebar_leaves_a_little_room_under_the_budget():
-    # Issue #378: the sidebar lists every page, so it grows with the wiki; the headroom is a few lines, not forty pages.
+def test_the_sidebar_leaves_room_for_twenty_five_more_pages_under_the_budget():
+    # Issue #378: the sidebar lists every page, so it grows with the wiki. Subgroups pack several links per
+    # line; the margin is 25 pages at the worst case of one line each (a page with no subgroup).
     lines = (WIKI / "_Sidebar.md").read_text().splitlines()
     assert len(lines) <= SIDEBAR_LINE_BUDGET - SIDEBAR_HEADROOM, f"{len(lines)} lines"
+
+
+def test_twenty_five_more_unsubgrouped_pages_still_fit_the_budget():
+    m = manifest()
+    m["pages"]["os"] += [
+        {"page": f"Extra{i}", "title": f"Extra {i:02d}", "audience": "learner", "desc": "x"} for i in range(25)
+    ]
+    assert len(gwn.render_sidebar(m).splitlines()) <= SIDEBAR_LINE_BUDGET
 
 
 def test_each_added_page_adds_exactly_one_sidebar_line_and_is_listed():
@@ -292,16 +306,23 @@ def test_the_sidebar_listing_check_bites_when_a_page_or_link_is_dropped():
     assert unlisted_in_sidebar(cut, m) == [victim, outside]
 
 
-def test_the_sidebar_has_one_line_per_page_in_each_group():
+GROUP_START = re.compile(r"(?m)^<details(?: open)?><summary><b>")
+LINK_ANY = re.compile(r"\]\((?:[A-Za-z0-9_-]+\.md(?:#[^)]*)?|https://[^)]+)\)")
+
+
+def group_blocks(sidebar: str) -> list[str]:
+    """The text of each top-level group (nested subgroup blocks stay inside their group)."""
+    return [b.rsplit("</details>", 1)[0] for b in GROUP_START.split(sidebar)[1:]]
+
+
+def test_the_sidebar_links_each_page_of_each_group_once_plus_the_full_list():
     m = manifest()
-    sidebar = (WIKI / "_Sidebar.md").read_text()
-    blocks = sidebar.split("<details")[1:]
+    blocks = group_blocks((WIKI / "_Sidebar.md").read_text())
     shown = [g for g in gwn.groups_of(m) if g["id"] != gwn.TOP_GROUP]
     assert len(blocks) == len(shown) >= 10
     for group, block in zip(shown, blocks, strict=True):
-        items = [line for line in block.split("</details>")[0].splitlines() if SIDEBAR_ITEM.match(line)]
         expected = len(gwn.entries(m, group["id"])) + len(gwn.link_entries(m, group["id"]))
-        assert len(items) == expected + 1, f"{group['id']}: {len(items)} items for {expected} pages (+ the Full list link)"
+        assert len(LINK_ANY.findall(block)) == expected + 1, f"{group['id']}: links do not match {expected} pages (+ the Full list link)"
 
 
 def test_the_sidebar_never_lists_a_page_the_nav_does_not_know():
@@ -322,11 +343,11 @@ def test_every_sidebar_group_ends_with_a_link_to_its_contents_anchor_and_the_anc
     sidebar = (WIKI / "_Sidebar.md").read_text()
     contents = (WIKI / "Contents.md").read_text()
     headings = {gwn.slug(line[3:]) for line in contents.splitlines() if line.startswith("## ")}
-    blocks = sidebar.split("<details")[1:]
+    blocks = group_blocks(sidebar)
     shown = [g for g in gwn.groups_of(manifest()) if g["id"] != gwn.TOP_GROUP]
     assert len(blocks) == len(shown) >= 10
     for group, block in zip(shown, blocks, strict=True):
-        items = [line for line in block.split("</details>")[0].splitlines() if SIDEBAR_ITEM.match(line)]
+        items = [line for line in block.splitlines() if SIDEBAR_ITEM.match(line)]
         found = SIDEBAR_GROUP_LINK.findall(items[-1])
         assert found == [gwn.slug(group["title"])], f"{group['id']}: last item is {items[-1]!r}"
         assert found[0] in headings, f"{group['id']}: no Contents heading for #{found[0]}"
@@ -356,6 +377,82 @@ def test_marked_pages_are_pinned_to_the_top_then_the_rest_follow_in_display_orde
     shown = re.findall(r"\]\((P\d\d)\.md\)", ref_block(gwn.render_sidebar(m)))
     assert shown == ["P04", "P09"] + [f"P{i:02d}" for i in range(12) if i not in (4, 9)]
     assert len(shown) == len(set(shown)) == 12
+
+
+def subgroup_manifest(pages: int = 12, **marks) -> dict:
+    """bulk_group with every entry in one subgroup called 'Series' (unless a mark says otherwise)."""
+    m = bulk_group(pages, **marks)
+    for e in m["pages"]["ref"]:
+        e.setdefault("subgroup", "Series")
+    return m
+
+
+def subgroup_block(sidebar: str) -> str:
+    return ref_block(sidebar).split("<details><summary>", 1)[1]
+
+
+def test_a_subgroup_is_a_nested_details_block_with_its_title_and_count():
+    sidebar = gwn.render_sidebar(subgroup_manifest(12))
+    assert "<details><summary>Series (12)</summary>\n\n- [P00](P00.md)" in sidebar
+    assert sidebar.count("<details") == sidebar.count("</details>") == sidebar.count("<summary>")
+
+
+def test_a_subgroup_packs_several_links_per_line_within_the_documented_limits():
+    m = subgroup_manifest(23)
+    lines = [ln for ln in subgroup_block(gwn.render_sidebar(m)).split("</details>", 1)[0].splitlines() if ln.startswith("- ")]
+    assert len(lines) < 23 and len(lines) == -(-23 // gwn.SIDEBAR_PACK_LINKS)
+    for ln in lines:
+        assert 1 <= len(re.findall(r"\]\(P\d\d\.md\)", ln)) <= gwn.SIDEBAR_PACK_LINKS
+        assert " · " in ln or ln.count("](") == 1
+    shown = re.findall(r"\]\((P\d\d)\.md\)", "\n".join(lines))
+    assert shown == [f"P{i:02d}" for i in range(23)]
+
+
+def test_a_long_title_wraps_a_packed_line_by_characters_before_the_link_limit():
+    m = subgroup_manifest(6)
+    for e in m["pages"]["ref"]:
+        e["title"] = "T" * (gwn.SIDEBAR_PACK_CHARS // 2 - 5)
+    lines = [ln for ln in subgroup_block(gwn.render_sidebar(m)).split("</details>", 1)[0].splitlines() if ln.startswith("- ")]
+    assert len(lines) == 3 and all(ln.count("](") == 2 for ln in lines)
+
+
+def test_pinned_pages_come_first_inside_a_subgroup_and_ungrouped_pages_come_before_subgroups():
+    m = subgroup_manifest(8, P06={"sidebar": True, "subgroup": "Series"}, P01={"subgroup": None})
+    del m["pages"]["ref"][1]["subgroup"]  # P01 stays ungrouped
+    shown = re.findall(r"\]\((P\d\d)\.md\)", ref_block(gwn.render_sidebar(m)))
+    assert shown[0] == "P01"  # the ungrouped page is listed before the nested block
+    assert shown[1] == "P06"  # then the pinned page leads its subgroup
+    assert sorted(shown) == [f"P{i:02d}" for i in range(8)]
+
+
+def test_a_subgroup_never_hides_the_full_list_link_which_stays_last():
+    block = gwn.render_sidebar(subgroup_manifest(9)).split("<summary><b>Reference</b>", 1)[1].rsplit("</details>", 1)[0]
+    items = [ln for ln in block.splitlines() if SIDEBAR_ITEM.match(ln)]
+    assert "(Contents.md#reference)" in items[-1]
+
+
+def test_a_subgroup_must_be_plain_text_and_is_refused_on_the_core_path_and_the_start_group():
+    m = minimal()
+    m["pages"]["ref"][0]["subgroup"] = "a | b"
+    assert any("subgroup" in p for p in gwn.validate(m, MINIMAL_PAGES))
+    m = minimal()
+    m["pages"]["core"][0]["subgroup"] = "Early"
+    assert any("numbered" in p and "subgroup" in p for p in gwn.validate(m, MINIMAL_PAGES))
+    m = minimal()
+    m["pages"]["start"][0]["subgroup"] = "Top"
+    assert any("subgroup" in p for p in gwn.validate(m, MINIMAL_PAGES))
+    m = minimal()
+    m["pages"]["ref"][0]["subgroup"] = "Fine title"
+    assert gwn.validate(m, MINIMAL_PAGES) == []
+
+
+def test_the_committed_manifest_folds_pages_into_subgroups_and_the_core_path_stays_whole():
+    m = manifest()
+    assert sum(1 for pages in m["pages"].values() for e in pages if e.get("subgroup")) >= 30
+    assert not any(e.get("subgroup") for e in m["pages"]["core"])
+    sidebar = (WIKI / "_Sidebar.md").read_text()
+    core = sidebar.split("<summary><b>Core path", 1)[1].split("</details>", 1)[0]
+    assert "<details>" not in core and len(re.findall(r"^\d+\. \[", core, flags=re.MULTILINE)) == 21
 
 
 def test_the_group_link_counts_every_page_and_points_at_the_contents_heading():

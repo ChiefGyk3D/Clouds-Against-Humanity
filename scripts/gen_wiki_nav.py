@@ -24,8 +24,15 @@ Order in the sidebar (the sidebar line budget is a test, not a goal):
   - every group ends with "Full list (N)", linking to its heading in Contents.md. The
     section headings of Contents.md are the group titles, so group titles must make
     distinct anchors (validate checks this).
-  The sidebar spends one line per page, so it grows with the wiki; the budget test fails
-  before the limit is reached, which is the signal to fold subgroups, not to raise the budget.
+  - an entry may carry `subgroup: "Title"` (not on the core path or the start group). Entries
+    with no subgroup are listed first, one per line; then each subgroup is a nested
+    `<details><summary>Title (n)</summary>` in order of first appearance, whose rows pack up to
+    SIDEBAR_PACK_LINKS (5) links, and at most SIDEBAR_PACK_CHARS (170) characters of visible
+    text, per line, joined by a middle dot. A group with no subgroup field is one page per line.
+  A page with no subgroup costs one line, a subgroup costs three lines plus its rows, and the
+  budget test fails before the limit is reached: that is the signal to fold more pages into
+  subgroups, not to raise the budget. The first summary line of every block shares its line
+  with <details>, which saves a line per block.
 
 The optional top-level `readers` list gives each audience its Start-here page for the Home map
 (every audience exactly once, an existing page).
@@ -73,6 +80,9 @@ ORDERS = ("curated", "sorted")
 MAX_DESC = 220
 MAX_TITLE = 80
 MAX_WHO = 80
+# A subgroup row in the sidebar holds at most this many links and this many characters of visible text.
+SIDEBAR_PACK_LINKS = 5
+SIDEBAR_PACK_CHARS = 170
 # The group the sidebar shows as a row of links across the top instead of a collapsible block.
 TOP_GROUP = "start"
 TOP_BAR_LABELS = {"Give-Feedback-and-Open-an-Issue": "Give feedback"}
@@ -232,7 +242,7 @@ def validate(manifest: dict, pages: set[str]) -> list[str]:
                 continue
             name = e.get("page")
             where = f"pages.{gid}.{name}"
-            extra = set(e) - {"page", "title", "audience", "status", "desc", "sidebar"}
+            extra = set(e) - {"page", "title", "audience", "status", "desc", "sidebar", "subgroup"}
             if extra:
                 problems.append(f"{where}: unknown field(s) {sorted(extra)}")
             if not isinstance(name, str) or not PAGE_NAME.match(name):
@@ -251,6 +261,12 @@ def validate(manifest: dict, pages: set[str]) -> list[str]:
                 problems.append(f"{where}: status {e['status']!r} is not one of {STATUSES}")
             if "sidebar" in e and not isinstance(e["sidebar"], bool):
                 problems.append(f"{where}: sidebar must be true or false")
+            if "subgroup" in e:
+                problems += _text_problems(where, "subgroup", e["subgroup"], MAX_TITLE)
+                if gid == TOP_GROUP:
+                    problems.append(f"{where}: the {TOP_GROUP!r} group is the sidebar's top row and takes no subgroup")
+                if any(g.get("id") == gid and g.get("numbered") for g in groups if isinstance(g, dict)):
+                    problems.append(f"{where}: a numbered group is a reading path and takes no subgroup")
 
     for gid, group_links in (manifest.get("links") or {}).items():
         for e in group_links or []:
@@ -320,10 +336,28 @@ def sidebar_entries(manifest: dict, group: dict) -> list[dict]:
     return [e for e in everything if e.get("sidebar")] + [e for e in everything if not e.get("sidebar")]
 
 
+def _pack(members: list[dict]) -> list[str]:
+    """Pack links into rows joined by " · ": at most SIDEBAR_PACK_LINKS links and SIDEBAR_PACK_CHARS
+    characters of visible text (titles, status suffixes and separators) per row; order is kept."""
+    rows: list[list[str]] = []
+    widths: list[int] = []
+    for e in members:
+        item = _sidebar_item(e)
+        visible = len(e["title"]) + (0 if "url" in e else len(_suffix(e)))
+        if rows and len(rows[-1]) < SIDEBAR_PACK_LINKS and widths[-1] + 3 + visible <= SIDEBAR_PACK_CHARS:
+            rows[-1].append(item)
+            widths[-1] += 3 + visible
+        else:
+            rows.append([item])
+            widths.append(visible)
+    return [" · ".join(row) for row in rows]
+
+
 def render_sidebar(manifest: dict) -> str:
-    # Line-saving layout (the budget is a test): no blank line between groups, none before
-    # </details>. A blank line is kept after each <summary> because Markdown inside an HTML
-    # block needs it, and between the top row and the first group.
+    # Line-saving layout (the budget is a test): the <summary> shares its line with <details>, no
+    # blank line between groups, none before </details>. A blank line is kept after each summary
+    # because Markdown inside an HTML block needs it, and between the top row and the first group.
+    # A page with a `subgroup` goes into a nested <details> whose rows pack several links each.
     lines = [
         "<!-- GENERATED from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py. Do not edit this",
         "file by hand: add the page to the manifest and re-run the script. CI fails when this",
@@ -337,11 +371,23 @@ def render_sidebar(manifest: dict) -> str:
         if group["id"] == TOP_GROUP:
             continue
         count = len(entries(manifest, group["id"])) + len(link_entries(manifest, group["id"]))
-        lines.append("<details open>" if group.get("open") else "<details>")
-        lines += [f"<summary><b>{group['title']}</b> ({count})</summary>", ""]
-        for number, e in enumerate(sidebar_entries(manifest, group), start=1):
+        opener = "<details open>" if group.get("open") else "<details>"
+        lines += [f"{opener}<summary><b>{group['title']}</b> ({count})</summary>", ""]
+        shown = sidebar_entries(manifest, group)
+        flat = [e for e in shown if not e.get("subgroup")]
+        for number, e in enumerate(flat, start=1):
             numbered = group.get("numbered") and "url" not in e
             lines.append(f"{f'{number}.' if numbered else '-'} {_sidebar_item(e)}")
+        subgroups: dict[str, list[dict]] = {}
+        for e in shown:
+            if e.get("subgroup"):
+                subgroups.setdefault(e["subgroup"], []).append(e)
+        for title, members in subgroups.items():
+            lines += [f"<details><summary>{title} ({len(members)})</summary>", ""]
+            lines += [f"- {row}" for row in _pack(members)]
+            lines.append("</details>")
+        if subgroups:
+            lines.append("")  # an HTML block runs to the next blank line, so the Full list link needs one before it
         lines.append(f"- [Full list ({count})](Contents.md#{slug(group['title'])})")
         lines.append("</details>")
     return "\n".join(lines) + "\n"
