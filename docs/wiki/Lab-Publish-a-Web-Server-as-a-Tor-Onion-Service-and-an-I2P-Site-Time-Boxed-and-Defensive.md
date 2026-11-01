@@ -6,6 +6,24 @@
 Previous: [The darknet landscape: markets, OPSEC and layering](The-Darknet-Landscape-Markets-OPSEC-Clearnet-and-Layering-Tor-I2P-and-VPN.md) / Next: [Blockchain fundamentals](Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The series, and what this page is part of](#the-series-and-what-this-page-is-part-of)
+- [Which web server, and why](#which-web-server-and-why)
+- [The idea: one more layer in front of an ordinary web server](#the-idea-one-more-layer-in-front-of-an-ordinary-web-server)
+- [The threat model, stated first](#the-threat-model-stated-first)
+- [Form 1: a local lab on a VM or a Raspberry Pi](#form-1-a-local-lab-on-a-vm-or-a-raspberry-pi)
+- [The mistakes that expose a service, and how to check each one](#the-mistakes-that-expose-a-service-and-how-to-check-each-one)
+- [Keys are secrets](#keys-are-secrets)
+- [Form 2: the optional cloud flag in OpenTofu](#form-2-the-optional-cloud-flag-in-opentofu)
+- [On premises: what proper infrastructure means, and where this page stops](#on-premises-what-proper-infrastructure-means-and-where-this-page-stops)
+- [Exercises](#exercises)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 A lab that follows the seven-page Tor, I2P and VPN series. Read it when you have met onion services and I2P sites in [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md) and [How I2P works](How-I2P-Works-Tunnels-Garlic-Routing-and-the-Network-Database.md) and want to see how little is special about them: an onion service and an I2P site are one more layer in front of an ordinary web server. You will put one static page behind both on a throwaway VM or Raspberry Pi, look at the files and logs, check the origin for the mistakes that expose a service, and tear everything down. A second section shows the same idea as an optional OpenTofu flag, off by default, that this repository tests with mocked providers and never applies.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

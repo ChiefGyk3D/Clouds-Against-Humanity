@@ -6,6 +6,31 @@
 Previous: [US privacy law and the patchwork](US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers.md) / Next: [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Where this page sits in the set](#where-this-page-sits-in-the-set)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [The same ideas under four names](#the-same-ideas-under-four-names)
+- [The European Union: the GDPR](#the-european-union-the-gdpr)
+- [Canada: PIPEDA](#canada-pipeda)
+- [South Africa: POPIA](#south-africa-popia)
+- [China: the PIPL](#china-the-pipl)
+- [A few others, briefly](#a-few-others-briefly)
+- [Which law governs which region](#which-law-governs-which-region)
+- [The comparison table](#the-comparison-table)
+- [Breach clocks across jurisdictions](#breach-clocks-across-jurisdictions)
+- [Moving personal data across borders](#moving-personal-data-across-borders)
+- [Concepts a defender must know](#concepts-a-defender-must-know)
+- [What this means for an engineer or a SOC](#what-this-means-for-an-engineer-or-a-soc)
+- [What non-compliance has cost: documented cases](#what-non-compliance-has-cost-documented-cases)
+- [Free exercise: a company with customers in four regions](#free-exercise-a-company-with-customers-in-four-regions)
+- [Exercises](#exercises)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Page three of three in the GRC and compliance set. Read it when a customer, a contract or an incident has put "GDPR", "PIPEDA", "POPIA" or "PIPL" in front of you and you want to know what each law is, who enforces it, what it asks an engineer or a SOC to do, and how it differs from the patchwork in the United States. It covers the European Union's General Data Protection Regulation, Canada's Personal Information Protection and Electronic Documents Act, South Africa's Protection of Personal Information Act and China's Personal Information Protection Law, each from its own text, with the regulators' own pages and dated enforcement cases. It adds a short note on the United Kingdom and Brazil, a comparison table, three diagrams (which law governs which region, breach notification clocks, and transfer mechanisms), the concepts a defender must know, and a free exercise: a made-up company with customers in four regions, worked out for which laws apply, the shortest breach clock and what goes in the incident response plan.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

@@ -6,6 +6,28 @@
 Previous: [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md) / Next: [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [What a virtual machine is, and why use one](#what-a-virtual-machine-is-and-why-use-one)
+- [Type 1 and type 2, honestly](#type-1-and-type-2-honestly)
+- [The desktop choices](#the-desktop-choices)
+- [VMware after Broadcom: a dated account](#vmware-after-broadcom-a-dated-account)
+- [The bigger options: a tour](#the-bigger-options-a-tour)
+- [Networking: NAT, bridged, host-only](#networking-nat-bridged-host-only)
+- [Snapshots: an undo button that is not a backup](#snapshots-an-undo-button-that-is-not-a-backup)
+- [Sizing a host for a lab](#sizing-a-host-for-a-lab)
+- [Nested virtualization](#nested-virtualization)
+- [The safety rule for malware and recon labs](#the-safety-rule-for-malware-and-recon-labs)
+- [Free path: a first VM with QEMU and a small Linux ISO](#free-path-a-first-vm-with-qemu-and-a-small-linux-iso)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it when a lesson says "in a virtual machine" or "on a Linux host" and you do not have one yet, or when you keep hearing "type 1", "KVM", "Proxmox" or "what happened to VMware" and want the words sorted out. It sits beside [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md), which draws a VM next to a container and the cloud service models; this page is about the machines you run on **your own** computer or server. Next: [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

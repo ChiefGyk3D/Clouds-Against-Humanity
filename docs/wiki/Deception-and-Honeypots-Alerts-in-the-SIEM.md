@@ -6,6 +6,19 @@
 Previous: [Honeyfiles on a host you own](Deception-and-Honeypots-Honeyfiles-on-Your-Host.md) / Next: [Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [How a decoy event becomes an alert](#how-a-decoy-event-becomes-an-alert)
+- [Exercises](#exercises)
+- [Mapping to ATT&CK](#mapping-to-attck)
+- [The same logic as a Wazuh rule: an unverified draft](#the-same-logic-as-a-wazuh-rule-an-unverified-draft)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Lesson 5 of the [deception and honeypots track](Deception-and-Honeypots-Start-Here.md). A foundations side page to [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) and [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md). You work on **synthetic** events made on your own computer, write the detection logic as a small program you can run, and then read a draft of the same logic as Wazuh rules. Next: back to the [track hub](Deception-and-Honeypots-Start-Here.md), which says what the later tracks need.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

@@ -6,6 +6,27 @@
 Previous: [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md) / Next: [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Where this project already touches these ideas (and the gaps)](#where-this-project-already-touches-these-ideas-and-the-gaps)
+- [First, the words](#first-the-words)
+- [Why this stack is a large attack surface](#why-this-stack-is-a-large-attack-surface)
+- [The PHP runtime: versions, support and the October 2026 case](#the-php-runtime-versions-support-and-the-october-2026-case)
+- [Side discussion: memory safety, and why Rust keeps getting adopted](#side-discussion-memory-safety-and-why-rust-keeps-getting-adopted)
+- [Hardening PHP](#hardening-php)
+- [Hardening WordPress](#hardening-wordpress)
+- [WAFs: what they do, what they cannot](#wafs-what-they-do-what-they-cannot)
+- [Why static sites win so often](#why-static-sites-win-so-often)
+- [A threat model of a WordPress site](#a-threat-model-of-a-wordpress-site)
+- [Hands-on, free path: your own computer only](#hands-on-free-path-your-own-computer-only)
+- [Build it, break it, detect it, evade it, defend it](#build-it-break-it-detect-it-evade-it-defend-it)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to [Droplet hardening](Droplet-Hardening.md), and lesson 2 of a four-lesson web-hosting track. Read it when you have a LAMP or LEMP stack (or are about to run one) and want to know what makes it risky, what to harden, what a web application firewall (WAF) really does, and why a plain folder of files is so often the better answer. Next: [Threat model](Threat-Model.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

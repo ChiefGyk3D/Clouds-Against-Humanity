@@ -6,6 +6,33 @@
 Previous: [How Bitcoin works](How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable.md) / Next: [Wallets and key custody](Wallets-and-Key-Custody-Hot-and-Cold-Hardware-Wallets-Recovery-Shamir-and-Multisig.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Where this page sits in the set](#where-this-page-sits-in-the-set)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [Monero's design goals and a short history](#moneros-design-goals-and-a-short-history)
+- [Ring signatures: a real input hidden among decoys](#ring-signatures-a-real-input-hidden-among-decoys)
+- [Stealth addresses: a one-time address for every payment](#stealth-addresses-a-one-time-address-for-every-payment)
+- [RingCT: hidden amounts](#ringct-hidden-amounts)
+- [View keys and spend keys](#view-keys-and-spend-keys)
+- [How a Monero transaction travels: Dandelion++, Tor and I2P](#how-a-monero-transaction-travels-dandelion-tor-and-i2p)
+- [What Monero does not hide, and the limits researchers have documented](#what-monero-does-not-hide-and-the-limits-researchers-have-documented)
+- [A dated read: a Bitcoin and a Monero transaction side by side](#a-dated-read-a-bitcoin-and-a-monero-transaction-side-by-side)
+- [Ethereum: accounts, contracts, gas and what a trace looks like](#ethereum-accounts-contracts-gas-and-what-a-trace-looks-like)
+- [DeFi in concept, and why code and custody make it a security topic](#defi-in-concept-and-why-code-and-custody-make-it-a-security-topic)
+- [Mixers and tumblers in concept](#mixers-and-tumblers-in-concept)
+- [Atomic swaps: exchanging coins across two chains with no middleman](#atomic-swaps-exchanging-coins-across-two-chains-with-no-middleman)
+- [Bitcoin, Ethereum and Monero side by side](#bitcoin-ethereum-and-monero-side-by-side)
+- [Why ransomware actors use cryptocurrency, and what defenders do about it](#why-ransomware-actors-use-cryptocurrency-and-what-defenders-do-about-it)
+- [Free exercise: compare a Bitcoin and a Monero transaction](#free-exercise-compare-a-bitcoin-and-a-monero-transaction)
+- [Free exercise: a swap timeline with a failed counterparty](#free-exercise-a-swap-timeline-with-a-failed-counterparty)
+- [Exercises](#exercises)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Page three of five in the cryptocurrency set. Read it when a Monero request in a ransom note, an investigation that goes quiet at a privacy coin, a bridge or contract failure, or a mixer in a threat report has put these words in your job. It explains how Monero tries to be private by default (ring signatures, stealth addresses and hidden amounts, with view keys and spend keys), how a Monero transaction travels, and what it does not hide. It sets that beside Bitcoin and Ethereum in a dated, side-by-side read of public data, covers decentralized finance (DeFi) and mixers in concept with documented cases, explains atomic swaps between Bitcoin and Monero and what they change for an analyst, and ends with why ransomware makes all of this job knowledge.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

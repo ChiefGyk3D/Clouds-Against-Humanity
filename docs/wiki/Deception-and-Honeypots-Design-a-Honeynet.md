@@ -6,6 +6,26 @@
 Previous: [Deception alerts in the SIEM](Deception-and-Honeypots-Alerts-in-the-SIEM.md) / Next: [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What a honeynet is, and why design first](#what-a-honeynet-is-and-why-design-first)
+- [Three places a decoy can live](#three-places-a-decoy-can-live)
+- [Isolation, in layers](#isolation-in-layers)
+- [Managing it: a ZTNA or VPN path, and nothing else](#managing-it-a-ztna-or-vpn-path-and-nothing-else)
+- [If you ever decide to open it to the internet](#if-you-ever-decide-to-open-it-to-the-internet)
+- [What the rules look like](#what-the-rules-look-like)
+- [Exercise 1: draw it](#exercise-1-draw-it)
+- [Exercise 2: test your rules with a checker](#exercise-2-test-your-rules-with-a-checker)
+- [Exercise 3: break it on purpose](#exercise-3-break-it-on-purpose)
+- [Exercise 4 (optional): prove the real firewall, before you install anything](#exercise-4-optional-prove-the-real-firewall-before-you-install-anything)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Common mistakes](#common-mistakes)
+- [What this page does not prove](#what-this-page-does-not-prove)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Lesson 10 of the [deception and honeypots track](Deception-and-Honeypots-Start-Here.md) and the first page of track 3, the path for **your own hardware or home lab**. A foundations side page to [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md). It is a design lesson: you decide where a decoy machine may live, who may reach it, what it may reach, and how you manage it, and you test the design with a small program before you build anything. Next: [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md), lesson 11.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

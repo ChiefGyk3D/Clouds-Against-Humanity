@@ -6,6 +6,24 @@
 Previous: [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) / Next: [Detecting Tor, I2P and VPN on a network](Detecting-and-Managing-Tor-I2P-and-VPN-on-a-Network-the-Defenders-View.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [Cost first: a free path and a paid path](#cost-first-a-free-path-and-a-paid-path)
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The four pieces](#the-four-pieces)
+- [How one log line becomes an alert](#how-one-log-line-becomes-an-alert)
+- [Cloud side first: where the connectors' logs enter](#cloud-side-first-where-the-connectors-logs-enter)
+- [A decoder and a rule, simply](#a-decoder-and-a-rule-simply)
+- [Exercises: the pipeline on your own computer](#exercises-the-pipeline-on-your-own-computer)
+- [Where a pipeline breaks, and how you tell](#where-a-pipeline-breaks-and-how-you-tell)
+- [Later: the logging server at home, over ssh](#later-the-logging-server-at-home-over-ssh)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Common mistakes](#common-mistakes)
+- [Try it yourself](#try-it-yourself)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 A foundations side page in the detection group, for issue #321. Read it after [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) and [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md), and before you build anything in [Build your own mini SOC](Build-Your-Own-Mini-SOC.md). It starts on the **cloud side** (what a connector writes and how it would reach a manager) and only at the end looks at the logging server at home. Next: [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

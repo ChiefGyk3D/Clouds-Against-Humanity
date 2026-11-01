@@ -6,6 +6,31 @@
 Previous: [Secrets from day one](Secrets-From-Day-One.md) / Next: [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [Three questions: authentication, authorization, accounting](#three-questions-authentication-authorization-accounting)
+- [Directory, identity provider, single sign-on: one picture](#directory-identity-provider-single-sign-on-one-picture)
+- [SAML, step by step](#saml-step-by-step)
+- [OAuth 2.0: delegated access, not sign-in](#oauth-20-delegated-access-not-sign-in)
+- [OpenID Connect: OAuth plus "who you are"](#openid-connect-oauth-plus-who-you-are)
+- [SCIM: creating and removing accounts automatically](#scim-creating-and-removing-accounts-automatically)
+- [Groups, roles, and mapping people to access](#groups-roles-and-mapping-people-to-access)
+- [MFA, and why some MFA resists phishing](#mfa-and-why-some-mfa-resists-phishing)
+- [The identity lifecycle: joiner, mover, leaver](#the-identity-lifecycle-joiner-mover-leaver)
+- [Service accounts and non-human identities](#service-accounts-and-non-human-identities)
+- [Conditional access](#conditional-access)
+- [Why identity is "the new perimeter", and how ZTNA uses the IdP](#why-identity-is-the-new-perimeter-and-how-ztna-uses-the-idp)
+- [Free theory path: a lab on your own computer](#free-theory-path-a-lab-on-your-own-computer)
+- [Optional: your own identity provider, locally (your own computer)](#optional-your-own-identity-provider-locally-your-own-computer)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Common mistakes](#common-mistakes)
+- [Checkpoint](#checkpoint)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it after [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) (core step 4) when "single sign-on", "SAML", "OIDC" or "identity provider" are only words to you, and before [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md), which assumes you know them. It does not repeat the token lesson: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) covers what a token, a scope and a JWT are, and [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) covers what a signature is. This page is about the sign-in itself: who vouches for you, how an application is told, and how that breaks. Next: [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

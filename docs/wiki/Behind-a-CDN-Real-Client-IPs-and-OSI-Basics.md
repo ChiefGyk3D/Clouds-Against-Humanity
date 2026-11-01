@@ -6,6 +6,26 @@
 Previous: [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) / Next: [IPv6 adoption and handling it safely](IPv6-Adoption-and-Handling-It-Safely.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Why this page exists](#why-this-page-exists)
+- [The problem: every request comes from the proxy](#the-problem-every-request-comes-from-the-proxy)
+- [How the real address is passed along](#how-the-real-address-is-passed-along)
+- [The trust problem](#the-trust-problem)
+- [Setting it up, component by component](#setting-it-up-component-by-component)
+- [Why an IP address is a weak identifier](#why-an-ip-address-is-a-weak-identifier)
+- [OSI and TCP/IP for cloud people](#osi-and-tcpip-for-cloud-people)
+- [Free hands-on lab: a toy CDN, an origin and a login limit on your own computer](#free-hands-on-lab-a-toy-cdn-an-origin-and-a-login-limit-on-your-own-computer)
+- [Optional: the same fix on your own Cloudflare account](#optional-the-same-fix-on-your-own-cloudflare-account)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Threat model](#threat-model)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it after [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) (which puts a site behind Cloudflare and locks the server to it) and [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md), and beside [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md), whose loopback lab this page borrows its vocabulary from. It answers one practical question (when a CDN stands in front of your server, whose address does your server see, and what breaks if it sees the wrong one?) and then two bigger ones that the answer leads to: how much an IP address can tell you about anybody, and where in the layered model of networking each of this project's controls sits. Next: [Reading order](Reading-Order.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

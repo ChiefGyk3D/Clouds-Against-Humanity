@@ -6,6 +6,31 @@
 Previous: [Git from zero](Git-From-Zero.md) / Next: [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Pick your track](#pick-your-track)
+- [What a terminal, a shell, a prompt and a command are](#what-a-terminal-a-shell-a-prompt-and-a-command-are)
+- [Open a terminal](#open-a-terminal)
+- [Move around: the commands you will use daily](#move-around-the-commands-you-will-use-daily)
+- [Read, search and chain: files, pipes and redirects](#read-search-and-chain-files-pipes-and-redirects)
+- [Environment variables and PATH](#environment-variables-and-path)
+- [Exit codes, and why CI lives on them](#exit-codes-and-why-ci-lives-on-them)
+- [Quoting pitfalls](#quoting-pitfalls)
+- [File permissions, briefly](#file-permissions-briefly)
+- [Your first script](#your-first-script)
+- [Reading a failure](#reading-a-failure)
+- [Make it safe](#make-it-safe)
+- [Lint it](#lint-it)
+- [Put it in version control](#put-it-in-version-control)
+- [Automation is a script plus a trigger](#automation-is-a-script-plus-a-trigger)
+- [Exercises](#exercises)
+- [Build it, break it, detect it, evade it, defend it](#build-it-break-it-detect-it-evade-it-defend-it)
+- [What to read next](#what-to-read-next)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it after [Git from zero](Git-From-Zero.md) (which opens a terminal for the first time) and before the commands on [Droplet hardening](Droplet-Hardening.md) and [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) start to look like another language. It pairs with [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md), which starts where this one ends. Next: [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

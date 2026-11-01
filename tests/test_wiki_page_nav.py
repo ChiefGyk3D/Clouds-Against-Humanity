@@ -142,7 +142,11 @@ def test_stripping_the_blocks_and_inserting_them_again_gives_the_same_page():
     for name in pages_with_nav():
         stripped = page_text(WIKI / f"{name}.md")
         assert "GENERATED PAGE NAV" not in stripped, name
-        assert gwn.apply_page_nav(stripped, gwn.render_page_nav(m, name)) == text_of(name), name
+        # Issue #441: the longest pages also carry a contents block, which page_text() strips too, so the
+        # round trip puts back both generated blocks (the navigation blocks, then the contents block).
+        restored = gwn.apply_page_nav(stripped, gwn.render_page_nav(m, name))
+        restored = gwn.apply_page_contents(restored, gwn.render_page_contents(stripped))
+        assert restored == text_of(name), name
 
 
 def test_previous_and_next_agree_within_every_group_with_a_reading_order():

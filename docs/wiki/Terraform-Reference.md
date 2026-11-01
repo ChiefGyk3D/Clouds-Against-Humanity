@@ -10,6 +10,24 @@
 Previous: [Settings reference](Settings-Reference.md) / Next: [Troubleshooting index](Troubleshooting-Index.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [The building blocks in one table](#the-building-blocks-in-one-table)
+- [How a value travels](#how-a-value-travels)
+- [modules/vpc](#modulesvpc)
+- [modules/firewall](#modulesfirewall)
+- [modules/twingate-bootstrap](#modulestwingate-bootstrap)
+- [modules/twingate-connector](#modulestwingate-connector)
+- [modules/aws/*](#modulesaws)
+- [stacks/aws/00-foundation and stacks/aws/10-access](#stacksaws00-foundation-and-stacksaws10-access)
+- [stacks/00-foundation](#stacks00-foundation)
+- [stacks/10-access](#stacks10-access)
+- [The cloud-init template, field by field](#the-cloud-init-template-field-by-field)
+- [Reading the plan before you confirm](#reading-the-plan-before-you-confirm)
+- [Related pages](#related-pages)
+<!-- END GENERATED PAGE CONTENTS -->
+
 This page walks through every variable, resource, data source, local, module call and output in the repository, file by file, and says why each one exists. It is written for someone learning OpenTofu who wants to read the real code next to a plain-language explanation. For the bigger picture (why layers, why stacks) see [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md).
 
 OpenTofu is the open-source fork of Terraform. The language (HCL) is identical, so everything here applies to both. The word "Terraform" in a file name, a Spacelift setting or a provider name means the same thing.

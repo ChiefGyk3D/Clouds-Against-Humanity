@@ -6,6 +6,28 @@
 Previous: [Backups, recovery and patching](Backups-Recovery-and-Patching.md) / Next: [RAID: continuity, not a backup](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [RAID is business continuity, not a backup](#raid-is-business-continuity-not-a-backup)
+- [From 3-2-1 to 3-2-1-1-0](#from-3-2-1-to-3-2-1-1-0)
+- [Backup types: full, incremental, differential](#backup-types-full-incremental-differential)
+- [Immutable and offline copies](#immutable-and-offline-copies)
+- [Encryption and key custody](#encryption-and-key-custody)
+- [Backing up the backup system itself](#backing-up-the-backup-system-itself)
+- [Restore testing](#restore-testing)
+- [Retention and legal holds](#retention-and-legal-holds)
+- [The ransomware angle](#the-ransomware-angle)
+- [Cloud traps](#cloud-traps)
+- [Where this shows up in this project](#where-this-shows-up-in-this-project)
+- [Free path: a restore drill on your own computer](#free-path-a-restore-drill-on-your-own-computer)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. **A RAID array is a business continuity solution, not a backup:** it keeps a system running through some drive failures, and it counts as at most one copy of your data, so none of the digits below is met by adding drives to an array. Read it after [Backups, recovery and patching](Backups-Recovery-and-Patching.md), which teaches snapshot versus backup, RPO and RTO, the plain 3-2-1 rule and a first timed restore, and after [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md), because availability is the property all of this protects. This page does not repeat them. It takes up what they leave open: why RAID is not one of the copies, the two extra digits of 3-2-1-1-0, what an immutable copy really protects against, who holds the key to an encrypted backup, backing up the backup system itself, how often to test a restore, how long to keep copies, the ransomware angle, the traps in cloud backups, and what this project would have to back up. Next: the lesson on [business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md), which covers how the work carries on and how the systems come back, and the lesson on [RAID](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md), which covers how arrays work and why they are a continuity control.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

@@ -10,6 +10,25 @@
 Previous: [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md) / Next: [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Why patch automatically](#why-patch-automatically)
+- [What unattended-upgrades does](#what-unattended-upgrades-does)
+- [Configure it](#configure-it)
+- [Where the results are logged](#where-the-results-are-logged)
+- [What deserves an alert](#what-deserves-an-alert)
+- [Reboot handling](#reboot-handling)
+- [Testing a patch before production](#testing-a-patch-before-production)
+- [Rolling back](#rolling-back)
+- [The limits of automatic updating](#the-limits-of-automatic-updating)
+- [Free path: a container, a log and a script](#free-path-a-container-a-log-and-a-script)
+- [Predict, then check](#predict-then-check)
+- [Try it yourself](#try-it-yourself)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 **Prerequisites:** [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md) (why updates come first, the table of mechanisms for every system, and the staggered windows) and [Backups, recovery and patching](Backups-Recovery-and-Patching.md) (cadence, emergency patches, and a backup you have restored). [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) helps with the alerting half. To run the exercises you need Podman or Docker on a Linux or macOS computer; they cost nothing and touch no cloud.
 
 Those two pages say *that* you should patch and give the vocabulary. This page is about the machinery on one Debian or Ubuntu host and the part people leave out: how you find out that it worked, that it broke, or that it quietly stopped.

@@ -6,6 +6,24 @@
 Previous: [Wallets and key custody](Wallets-and-Key-Custody-Hot-and-Cold-Hardware-Wallets-Recovery-Shamir-and-Multisig.md) / Next: [Running Monero properly](Running-Monero-Properly-Hardware-Wallet-Qubes-and-Whonix-Offline-Wallet-and-PiNodeXMR.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Where this page sits in the set](#where-this-page-sits-in-the-set)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [What a paper wallet is](#what-a-paper-wallet-is)
+- [Why paper wallets were popular, and why the advice changed](#why-paper-wallets-were-popular-and-why-the-advice-changed)
+- [Where the sources disagree](#where-the-sources-disagree)
+- [Paper wallet generators](#paper-wallet-generators)
+- [Generating keys fully offline](#generating-keys-fully-offline)
+- [Protecting the paper](#protecting-the-paper)
+- [Free exercise: an offline-generation checklist for a stated threat model](#free-exercise-an-offline-generation-checklist-for-a-stated-threat-model)
+- [Exercises](#exercises)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 An addition to the cryptocurrency set (issue 431), read after [Wallets and key custody](Wallets-and-Key-Custody-Hot-and-Cold-Hardware-Wallets-Recovery-Shamir-and-Multisig.md). Read it when someone asks "can I just keep my keys on paper, made on a computer that never touches the internet?" and you want the answer with the sources attached. It says what a paper wallet is, why many wallet projects and security writers now steer newcomers away from it, where the sources disagree, what a paper wallet generator is and why one reached over the internet is the dangerous version, how to judge a generator, and then a full offline procedure for Bitcoin and for Monero that a reader can rehearse with a throwaway wallet. It ends with a free exercise: write an offline-generation checklist for a stated threat model and say what an attacker would need at each step.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

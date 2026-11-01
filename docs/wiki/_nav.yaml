@@ -54,6 +54,12 @@
 # security tools groups have no reading order, so their pages get the breadcrumb and no neighbors.
 # A page with no markers gets them inserted once; after that only the text between them is rewritten.
 #
+# In-page contents block (issue #441): a page whose own text (the generated blocks taken out) is over
+# 300 lines also gets a third block, between BEGIN GENERATED PAGE CONTENTS and END GENERATED PAGE
+# CONTENTS, right after the top navigation block. It is built from the page's headings, not from this
+# file: a link to each "##" heading, and also each "###" heading (nested under its "##") on a page with
+# fewer than 6 "##" headings. It adds no heading. Change the page's headings, then re-run the generator.
+#
 # Fallback rule for Related when a page has no `related` list: up to 4 other pages of the same group,
 # not counting the Previous and Next page (shown beside it) in a group with a reading order. Pages of the
 # same subgroup come first, then the rest of the group; within each, the nearest page in the group's order

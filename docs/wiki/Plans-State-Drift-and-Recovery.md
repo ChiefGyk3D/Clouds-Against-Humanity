@@ -6,6 +6,26 @@
 Previous: [OpenTofu from zero](OpenTofu-From-Zero.md) / Next: [Spacelift from zero](Spacelift-From-Zero.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Where this project already touches these ideas (and the gaps)](#where-this-project-already-touches-these-ideas-and-the-gaps)
+- [Two paths through this page](#two-paths-through-this-page)
+- [Reading a plan like a reviewer](#reading-a-plan-like-a-reviewer)
+- [State: the record, the map and the secret](#state-the-record-the-map-and-the-secret)
+- [Drift](#drift)
+- [Changing the map without changing the world](#changing-the-map-without-changing-the-world)
+- [Four classic disasters (concept level)](#four-classic-disasters-concept-level)
+- [Saved plans, and why CI applies the file](#saved-plans-and-why-ci-applies-the-file)
+- [Hands-on: free exercises](#hands-on-free-exercises)
+- [Optional: put the scratch state in a bucket of your own](#optional-put-the-scratch-state-in-a-bucket-of-your-own)
+- [Build it, break it, detect it, evade it, defend it](#build-it-break-it-detect-it-evade-it-defend-it)
+- [Checkpoint](#checkpoint)
+- [Claims register](#claims-register)
+- [Where to next](#where-to-next)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the infrastructure-as-code pages, and lesson 2 of 4 in the infrastructure-as-code track. Read it after [OpenTofu from zero: init, plan, apply, destroy](OpenTofu-From-Zero.md) (lesson 1) and [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) (core step 5), and before [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) (core step 15) if reading a plan, the state file or the word "drift" still feels like guessing.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

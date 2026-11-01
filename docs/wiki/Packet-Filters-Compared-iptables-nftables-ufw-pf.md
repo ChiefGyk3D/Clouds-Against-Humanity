@@ -6,6 +6,28 @@
 Next: [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Where the wiki already touches this (and the gap)](#where-the-wiki-already-touches-this-and-the-gap)
+- [What a packet filter is](#what-a-packet-filter-is)
+- [The Linux family](#the-linux-family)
+- [BSD pf](#bsd-pf)
+- [Windows, in one paragraph](#windows-in-one-paragraph)
+- [The same policy, four ways](#the-same-policy-four-ways)
+- [The comparison](#the-comparison)
+- [Why the author runs pf (and pfSense)](#why-the-author-runs-pf-and-pfsense)
+- [Think at each level](#think-at-each-level)
+- [Free path: a lab on your own computer](#free-path-a-lab-on-your-own-computer)
+- [Build, break, detect, evade, defend (the firewall loop)](#build-break-detect-evade-defend-the-firewall-loop)
+- [Threat model of the firewall itself](#threat-model-of-the-firewall-itself)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+- [Where to next](#where-to-next)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it after [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md), which teaches the ideas (default deny, stateful, allow by source and port) with one tool, `nft`. This page keeps those ideas and compares the tools that carry them out: the Linux family (`iptables` with `ipset`, `nftables`, UFW, firewalld) and the BSD family (`pf`, and the pfSense and OPNsense firewalls built around it). Next: [Detection and monitoring: Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md).
 
 This is the first of four lessons in a network and host defense track. The other three are [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md), [File integrity and alerting: Tripwire, AIDE, Wazuh](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) and [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md). They are being written at the same time as this page, so those three links may not resolve until they are merged.

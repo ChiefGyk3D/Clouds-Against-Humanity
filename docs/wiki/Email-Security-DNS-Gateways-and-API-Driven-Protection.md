@@ -4,6 +4,28 @@
 [Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Email security
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Why this page exists](#why-this-page-exists)
+- [Cost, honestly](#cost-honestly)
+- [How a message travels](#how-a-message-travels)
+- [DNS records: what each does and what it fails at](#dns-records-what-each-does-and-what-it-fails-at)
+- [Two kinds of email security product](#two-kinds-of-email-security-product)
+- [Attacks seen in email](#attacks-seen-in-email)
+- [Triage a reported phish](#triage-a-reported-phish)
+- [Should you run your own email server?](#should-you-run-your-own-email-server)
+- [Build it piece by piece, and what it costs](#build-it-piece-by-piece-and-what-it-costs)
+- [Free theory path: a local lab](#free-theory-path-a-local-lab)
+- [Optional: your own accounts](#optional-your-own-accounts)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Threat model](#threat-model)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it after [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md), whose short section on email records this page goes deeper on, and beside [Threats in plain words](Threats-in-Plain-Words.md), whose phishing entry it expands. It answers four questions in order: how does a message actually travel and what do the DNS records do to it; what are the two kinds of email security product (a gateway in front of Microsoft 365, and a product that connects by API) and what can each see; what do the attacks seen in email look like and how do you triage one; and should you run your own mail server. Next: [Reading order](Reading-Order.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

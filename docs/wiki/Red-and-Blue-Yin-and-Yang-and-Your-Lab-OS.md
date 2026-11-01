@@ -6,6 +6,23 @@
 Previous: [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md) / Next: [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Red and blue, and the idea of yin and yang](#red-and-blue-and-the-idea-of-yin-and-yang)
+- [Think in systems: the enterprise picture](#think-in-systems-the-enterprise-picture)
+- [Ground rules before any tool](#ground-rules-before-any-tool)
+- [Choosing a lab operating system](#choosing-a-lab-operating-system)
+- [Where to run it: five small explainers](#where-to-run-it-five-small-explainers)
+- [A safe network for the lab](#a-safe-network-for-the-lab)
+- [Hands-on, free path: your own computer only](#hands-on-free-path-your-own-computer-only)
+- [Build it, break it, detect it, evade it, defend it](#build-it-break-it-detect-it-evade-it-defend-it)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the foundations pages. Read it after [Threats in plain words](Threats-in-Plain-Words.md) and before you touch any security tool: it says how to think about attack and defense as one subject, what you must have in writing before you test anything, and how to set up a lab computer you can break without breaking anything else. It is lesson 1 of 2. Next: [Threat frameworks: STRIDE, ATT&CK and ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md).
 
 Lesson 2 is [Security tools basics: Nmap, OpenVAS, Burp and Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md). It is written alongside this lesson, so that link may not resolve until lesson 2 merges.

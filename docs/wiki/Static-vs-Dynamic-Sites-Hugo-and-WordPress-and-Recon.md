@@ -6,6 +6,22 @@
 Previous: [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) / Next: [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [In plain words](#in-plain-words)
+- [What is different underneath](#what-is-different-underneath)
+- [Telling them apart from outside](#telling-them-apart-from-outside)
+- [The tools](#the-tools)
+- [What a site leaks, and the one change that removes it](#what-a-site-leaks-and-the-one-change-that-removes-it)
+- [Free path: two look-alike sites on your own computer](#free-path-two-look-alike-sites-on-your-own-computer)
+- [Why keep a blog, and a note on getting work](#why-keep-a-blog-and-a-note-on-getting-work)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the web pages. Read it after [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) (which argues why a static site often wins) and beside [Security tools basics](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) (which has the rules for using any recon tool). The WordPress lab it points to is [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md). The red and blue tools track is issue [#221](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues/221). Next: [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

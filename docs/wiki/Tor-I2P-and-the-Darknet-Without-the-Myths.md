@@ -6,6 +6,26 @@
 Previous: [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md) / Next: [How a VPN works](How-a-VPN-Works-Tunnels-What-It-Hides-What-It-Does-Not-and-What-an-Audit-Proves.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [The calm version first](#the-calm-version-first)
+- [Tor in plain words](#tor-in-plain-words)
+- [I2P and garlic routing in plain words](#i2p-and-garlic-routing-in-plain-words)
+- [Onion services](#onion-services)
+- [Who uses these networks](#who-uses-these-networks)
+- [The myth: "Tor is a government backdoor, because the government paid for it"](#the-myth-tor-is-a-government-backdoor-because-the-government-paid-for-it)
+- [The tools and what each is for](#the-tools-and-what-each-is-for)
+- [What none of these protect against](#what-none-of-these-protect-against)
+- [Worked example: a Monero node over Tor and I2P](#worked-example-a-monero-node-over-tor-and-i2p)
+- [The law in one paragraph](#the-law-in-one-paragraph)
+- [Exercises (reading only, nothing to install)](#exercises-reading-only-nothing-to-install)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it when "Tor", "I2P", "the dark web" or "onion service" are only scary words to you, or when you keep hearing "use Tails" or "use Whonix" and want to know what each tool is for and what it cannot do. It explains how the two networks work in plain words, who uses them and why, how the three privacy operating systems differ, and then uses a Monero node as the worked example of where privacy and security overlap and where they come apart. It sits beside [Threats in plain words](Threats-in-Plain-Words.md), which covers the clearnet threats this page keeps pointing at. Two lessons it builds toward are written: [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md) and [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

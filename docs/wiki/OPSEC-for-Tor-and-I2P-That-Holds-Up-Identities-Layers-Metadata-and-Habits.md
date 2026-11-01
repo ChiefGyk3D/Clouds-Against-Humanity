@@ -6,6 +6,33 @@
 Previous: [The browsing setups compared](The-Browsing-Setups-Compared-Tor-Browser-Brave-Whonix-Tails-and-Qubes-with-Whonix.md) / Next: [The darknet landscape: markets, OPSEC and layering](The-Darknet-Landscape-Markets-OPSEC-Clearnet-and-Layering-Tor-I2P-and-VPN.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The series, and what this page is part of](#the-series-and-what-this-page-is-part-of)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [The idea in one paragraph](#the-idea-in-one-paragraph)
+- [Threat model first, then tools](#threat-model-first-then-tools)
+- [The four layers of an identity](#the-four-layers-of-an-identity)
+- [The Tor Project's own advice, one rule at a time](#the-tor-projects-own-advice-one-rule-at-a-time)
+- [One identity per compartment](#one-identity-per-compartment)
+- [Logins: the exception and what it costs](#logins-the-exception-and-what-it-costs)
+- [Files, photos and metadata](#files-photos-and-metadata)
+- [Writing style and timing](#writing-style-and-timing)
+- [I2P: the same habits, a different pipe](#i2p-the-same-habits-a-different-pipe)
+- [Documented mistakes, by date and source](#documented-mistakes-by-date-and-source)
+- [OPSEC theater: effort with no threat model](#opsec-theater-effort-with-no-threat-model)
+- [A checklist for a beginner who wants to browse privately](#a-checklist-for-a-beginner-who-wants-to-browse-privately)
+- [A checklist for a journalist or a person at risk](#a-checklist-for-a-journalist-or-a-person-at-risk)
+- [Organizations that help people at risk](#organizations-that-help-people-at-risk)
+- [Exercises](#exercises)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Page 6 of a seven-page series on VPNs, Tor and I2P. Read it when you know how Tor and I2P hide your network address and you want to know what is left that can still identify you. The answer is most of it: your device, your accounts and your habits. This page draws the four layers of an identity (device, network, account, behavior) and where each one leaks, goes through the Tor Project's own browsing advice one rule at a time with the reason behind each, tells three documented cases of mistakes by date and source (with no person named), and gives two separate checklists, one for a beginner who just wants to browse privately and one for a journalist or a person at risk. It ends with organizations that help people at risk, because a web page is not a trainer.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

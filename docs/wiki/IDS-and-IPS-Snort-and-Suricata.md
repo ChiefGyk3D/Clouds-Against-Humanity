@@ -6,6 +6,30 @@
 Previous: [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md) / Next: [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The words, in plain language](#the-words-in-plain-language)
+- [Snort 2, Snort 3 and Suricata](#snort-2-snort-3-and-suricata)
+- [Reading a rule](#reading-a-rule)
+- [Where rules come from](#where-rules-come-from)
+- [Tuning](#tuning)
+- [Performance and sizing, at a concept level](#performance-and-sizing-at-a-concept-level)
+- [IDS and IPS on a firewall appliance: pfSense and OPNsense](#ids-and-ips-on-a-firewall-appliance-pfsense-and-opnsense)
+- [How alerts reach a SIEM](#how-alerts-reach-a-siem)
+- [Free path: a sensor on your own computer, offline](#free-path-a-sensor-on-your-own-computer-offline)
+- [Optional: a live sensor in a disposable virtual machine (shown, not run)](#optional-a-live-sensor-in-a-disposable-virtual-machine-shown-not-run)
+- [Tamper and evade: how an attacker gets past a sensor (concept level)](#tamper-and-evade-how-an-attacker-gets-past-a-sensor-concept-level)
+- [Threat model of the IDS itself](#threat-model-of-the-ids-itself)
+- [Build, break, detect, evade, defend (the local loop)](#build-break-detect-evade-defend-the-local-loop)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [What this page does not prove](#what-this-page-does-not-prove)
+- [Where this shows up in this project](#where-this-shows-up-in-this-project)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Second of four lessons in the network and host defense track. Read it after [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) (what a firewall rule is) and [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) (what a log line, a rule and a false positive are), and alongside [Threats in plain words](Threats-in-Plain-Words.md) and [Security tools basics](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md), the page about the tools that make the traffic this page watches for.
 
 The other three lessons in the track are written at the same time as this one: [Packet filters compared: iptables, nftables, UFW and pf](Packet-Filters-Compared-iptables-nftables-ufw-pf.md), [File integrity and alerting: Tripwire, AIDE and Wazuh](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) and [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md). Those three links may not resolve until the pages merge. Nothing on this page depends on them.

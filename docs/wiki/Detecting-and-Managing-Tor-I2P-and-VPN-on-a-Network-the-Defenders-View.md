@@ -6,6 +6,31 @@
 Previous: [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) / Next: [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The series, and what this page is part of](#the-series-and-what-this-page-is-part-of)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [Why a defender might care, and who else is on these networks](#why-a-defender-might-care-and-who-else-is-on-these-networks)
+- [The threat model, stated first](#the-threat-model-stated-first)
+- [Where detection can happen](#where-detection-can-happen)
+- [Tor: what is public and what is not](#tor-what-is-public-and-what-is-not)
+- [I2P: what is public and what is not](#i2p-what-is-public-and-what-is-not)
+- [VPNs: ports, protocols and providers](#vpns-ports-protocols-and-providers)
+- [DNS, SNI and TLS fingerprints, and their limits](#dns-sni-and-tls-fingerprints-and-their-limits)
+- [Endpoint signals](#endpoint-signals)
+- [Monitoring and alerting with the tools the wiki teaches](#monitoring-and-alerting-with-the-tools-the-wiki-teaches)
+- [Known false positives and false negatives](#known-false-positives-and-false-negatives)
+- [Blocking, allow-listing or watching: a policy choice](#blocking-allow-listing-or-watching-a-policy-choice)
+- [A detection is a lead, not proof: the incident-response angle](#a-detection-is-a-lead-not-proof-the-incident-response-angle)
+- [What defenders cannot see](#what-defenders-cannot-see)
+- [What this means for the series' message](#what-this-means-for-the-series-message)
+- [Exercise: match a synthetic log to a synthetic relay list](#exercise-match-a-synthetic-log-to-a-synthetic-relay-list)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Page 7 of a seven-page series on VPNs, Tor and I2P. Read it when you run or advise a network (a home lab, a small business, a school, a library, an enterprise) and someone asks "can we see Tor?", "should we block VPNs?" or "this log line matches a Tor list, now what?". The earlier pages explain the three tools from the user's side. This page takes the defender's seat: what is publicly documented that a network can match on, how to turn it into alerts with the tools the wiki already teaches, what each signal gets wrong, what blocking costs, what a detection is worth and what a network cannot see. It gives no way to avoid detection.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

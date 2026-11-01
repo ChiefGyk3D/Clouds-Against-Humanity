@@ -6,6 +6,25 @@
 Previous: [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md) / Next: [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The maintainer's framing, in his words](#the-maintainers-framing-in-his-words)
+- [In plain words](#in-plain-words)
+- [Three ideas, defined once](#three-ideas-defined-once)
+- [Why defenders have to be right every time](#why-defenders-have-to-be-right-every-time)
+- [Contain, detect, recover, and prevent](#contain-detect-recover-and-prevent)
+- [Where this shows up in this project](#where-this-shows-up-in-this-project)
+- [What does not count as protection](#what-does-not-count-as-protection)
+- [Honest limits](#honest-limits)
+- [Free path: a lab with nothing to lose](#free-path-a-lab-with-nothing-to-lose)
+- [Build, break, detect, evade, defend (the local loop)](#build-break-detect-evade-defend-the-local-loop)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it after [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) (core step 4, where least privilege is introduced), or at any point you are about to design, build or review a system and want one question to ask of it. It is about a **mindset**, and then it shows that the mindset is the reason for many choices you have already met in this wiki. It links those pages instead of repeating them. Next: [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

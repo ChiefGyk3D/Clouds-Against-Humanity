@@ -6,6 +6,26 @@
 Previous: [OPSEC for Tor and I2P](OPSEC-for-Tor-and-I2P-That-Holds-Up-Identities-Layers-Metadata-and-Habits.md) / Next: [Lab: publish a web server as an onion service and an I2P site](Lab-Publish-a-Web-Server-as-a-Tor-Onion-Service-and-an-I2P-Site-Time-Boxed-and-Defensive.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [What a darknet market is](#what-a-darknet-market-is)
+- [The documented history, in dates](#the-documented-history-in-dates)
+- [Why most of them fail](#why-most-of-them-fail)
+- [The Darknet Market Bible and what kind of document it is](#the-darknet-market-bible-and-what-kind-of-document-it-is)
+- [The OPSEC trap: perfect technique without a threat model](#the-opsec-trap-perfect-technique-without-a-threat-model)
+- [The kinds of services on the darknet](#the-kinds-of-services-on-the-darknet)
+- [Clearnet versus darknet: how the connection differs](#clearnet-versus-darknet-how-the-connection-differs)
+- [Layering Tor, I2P and a VPN](#layering-tor-i2p-and-a-vpn)
+- [What law enforcement can and cannot do, in public cases](#what-law-enforcement-can-and-cannot-do-in-public-cases)
+- [The law in general terms](#the-law-in-general-terms)
+- [Free exercises (reading only, nothing to install)](#free-exercises-reading-only-nothing-to-install)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md). Read that one first: it explains how Tor and I2P work, who uses them and why the "government backdoor" story does not hold up, and this page does not repeat it. This page is about what is on these networks besides the legitimate uses, told through documented public cases: what a darknet market is, how the best-known ones ended, why most fail, what the real harms were, what the cases teach about operational security (OPSEC), and what happens when you combine Tor, I2P and a VPN. It is an educational and defensive page. It teaches you to read the evidence and to ask the right question first (what am I protecting, and from whom). It does not teach anyone to buy or sell anything.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

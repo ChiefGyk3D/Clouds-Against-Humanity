@@ -6,6 +6,28 @@
 Previous: [Spacelift from zero](Spacelift-From-Zero.md) / Next: [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [Why one stack per service](#why-one-stack-per-service)
+- [What the layout looks like](#what-the-layout-looks-like)
+- [Passing values between stacks](#passing-values-between-stacks)
+- [Build order and reverse destroy order](#build-order-and-reverse-destroy-order)
+- [Tag everything, so teardown can be proven](#tag-everything-so-teardown-can-be-proven)
+- [Cost counters: a number per stack, and one for the whole](#cost-counters-a-number-per-stack-and-one-for-the-whole)
+- [How this project does it](#how-this-project-does-it)
+- [If you are terraforming an entire infrastructure](#if-you-are-terraforming-an-entire-infrastructure)
+- [Lessons-learned: what makes a destroy fail or leave a bill](#lessons-learned-what-makes-a-destroy-fail-or-leave-a-bill)
+- [Free path: five stacks in a scratch folder](#free-path-five-stacks-in-a-scratch-folder)
+- [Optional: the same shape on your own cloud account](#optional-the-same-shape-on-your-own-cloud-account)
+- [Optional: run the same stacks through Spacelift](#optional-run-the-same-stacks-through-spacelift)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) (core step 15), and the fourth lesson of a four-lesson infrastructure-as-code track: [OpenTofu from zero](OpenTofu-From-Zero.md), then [plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md), then [Spacelift from zero](Spacelift-From-Zero.md), then this page. It teaches how to split an environment into one stack per service, how to wire the stacks together, and how to build and destroy the whole set without leaving a bill behind.
 
 Next: [Teardown checklist](Teardown-Checklist.md).

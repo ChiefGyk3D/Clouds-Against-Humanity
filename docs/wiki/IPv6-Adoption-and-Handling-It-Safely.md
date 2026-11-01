@@ -6,6 +6,32 @@
 Previous: [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md) / Next: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [First, the words](#first-the-words)
+- [The big picture, in one table](#the-big-picture-in-one-table)
+- [Addressing in practice](#addressing-in-practice)
+- [SLAAC, DHCPv6 and router advertisements](#slaac-dhcpv6-and-router-advertisements)
+- [Neighbor discovery, and why ICMPv6 must not be blocked wholesale](#neighbor-discovery-and-why-icmpv6-must-not-be-blocked-wholesale)
+- [The lab: four pretend machines on one pretend switch](#the-lab-four-pretend-machines-on-one-pretend-switch)
+- [NAT66, no NAT, and what "NAT is not a firewall" means](#nat66-no-nat-and-what-nat-is-not-a-firewall-means)
+- [Security implications](#security-implications)
+- [Why adoption is slow](#why-adoption-is-slow)
+- [Why the author has not adopted IPv6](#why-the-author-has-not-adopted-ipv6)
+- [What this project does, and why](#what-this-project-does-and-why)
+- [Turning it on deliberately: everything that must change together](#turning-it-on-deliberately-everything-that-must-change-together)
+- [If IPv6 is disabled on your router (as the maintainer's pfSense has it)](#if-ipv6-is-disabled-on-your-router-as-the-maintainers-pfsense-has-it)
+- [Optional: your own cloud machine with IPv6 (own-account path)](#optional-your-own-cloud-machine-with-ipv6-own-account-path)
+- [A threat model of a dual-stack host](#a-threat-model-of-a-dual-stack-host)
+- [Build, break, detect, evade, defend (the dual-stack loop)](#build-break-detect-evade-defend-the-dual-stack-loop)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the networking pages. Read it after [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) (addresses, CIDR, NAT, default deny) and beside [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md), which measured the IPv6 firewall hole this page builds on. It answers four questions in order. What is IPv6, for someone who knows basic networking? Why, years after it was ready, is it still not the default everywhere? Why does this project keep it off, and how would you turn it on on purpose? And how do you practice all of that on your own computer without touching anything real? Next: [Reading order](Reading-Order.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

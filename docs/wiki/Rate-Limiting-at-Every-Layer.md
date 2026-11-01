@@ -6,6 +6,31 @@
 Previous: [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) / Next: [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [First, the words](#first-the-words)
+- [Why rate limit](#why-rate-limit)
+- [The algorithms](#the-algorithms)
+- [What to count by](#what-to-count-by)
+- [Think at each level](#think-at-each-level)
+- [When one address is not one attacker](#when-one-address-is-not-one-attacker)
+- [Fail open or fail closed](#fail-open-or-fail-closed)
+- [The honest cost to real people](#the-honest-cost-to-real-people)
+- [Observability: a limit nobody can see is an outage nobody can explain](#observability-a-limit-nobody-can-see-is-an-outage-nobody-can-explain)
+- [Layers must not hide each other](#layers-must-not-hide-each-other)
+- [Only your own lab](#only-your-own-lab)
+- [Free path: a lab on your own computer](#free-path-a-lab-on-your-own-computer)
+- [Optional: your own accounts](#optional-your-own-accounts)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [A threat model for a limiter](#a-threat-model-for-a-limiter)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Lesson D4, the last of four lessons on network and host defense. Read it after [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) and [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md), because it uses their words (NAT, firewall, `429`, token, scope). It is written to be read after [How a web request works](How-a-Web-Request-Works.md) too, since that page names the CDN, the proxy and the load balancer that this page tells apart. The other three lessons in the track are [Packet filters compared: iptables, nftables, UFW and pf](Packet-Filters-Compared-iptables-nftables-ufw-pf.md), [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md) and [File integrity and alerting: Tripwire, AIDE and Wazuh](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md). They were written at the same time as this one, so those three links, and the link to the WordPress lesson below, **may not resolve until they are merged**. This page does not depend on them.
 
 Next: [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md).

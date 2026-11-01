@@ -6,6 +6,31 @@
 Previous: [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [RAID keeps the system running; a backup keeps the data recoverable](#raid-keeps-the-system-running-a-backup-keeps-the-data-recoverable)
+- [The words: striping, mirroring, parity, spares](#the-words-striping-mirroring-parity-spares)
+- [The levels, side by side](#the-levels-side-by-side)
+- [Parity in one XOR, and the price of a small write](#parity-in-one-xor-and-the-price-of-a-small-write)
+- [When a drive fails: degraded, rebuild and the risk window](#when-a-drive-fails-degraded-rebuild-and-the-risk-window)
+- [The write hole and power loss](#the-write-hole-and-power-loss)
+- [Hardware, firmware, software and filesystem RAID](#hardware-firmware-software-and-filesystem-raid)
+- [What RAID does not protect against](#what-raid-does-not-protect-against)
+- [Where RAID sits in a continuity plan](#where-raid-sits-in-a-continuity-plan)
+- [Where this shows up in this project](#where-this-shows-up-in-this-project)
+- [Free path: a parity drill on your own computer](#free-path-a-parity-drill-on-your-own-computer)
+- [Optional: an array on loopback files (shown, not run)](#optional-an-array-on-loopback-files-shown-not-run)
+- [Exercise: size a six-drive shelf on paper](#exercise-size-a-six-drive-shelf-on-paper)
+- [Build, break, detect, evade, defend (on paper)](#build-break-detect-evade-defend-on-paper)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the backup and continuity pages. **RAID is a business continuity control, not a backup.** It keeps a system running through some drive failures, which is availability, the third letter of [the CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md#availability) and a piece of the plan in [business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md). A backup is a separate, restorable copy that survives deletion, corruption, ransomware and the loss of the site, which an array does not. This page teaches RAID in that order: first what it is for and what it cannot do, then how the levels work (striping, mirroring and parity), what a small write costs, what happens when a drive fails and a replacement is rebuilt, why a power cut can leave a silent error, how hardware, software and filesystem RAID differ, where an array belongs in a plan, and a paper exercise with every answer computed. Read it after [Backups, recovery and patching](Backups-Recovery-and-Patching.md) and next to [the backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md), which says an array counts as at most one copy of your data.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

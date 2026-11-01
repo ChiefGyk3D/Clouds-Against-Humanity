@@ -6,6 +6,27 @@
 Previous: [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) / Next: [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Author's note](#authors-note)
+- [The four words](#the-four-words)
+- [The L: Linux](#the-l-linux)
+- [The A and the E: two ways to serve many visitors](#the-a-and-the-e-two-ways-to-serve-many-visitors)
+- [One request, four arrows, four trust boundaries](#one-request-four-arrows-four-trust-boundaries)
+- [The M: MariaDB and MySQL](#the-m-mariadb-and-mysql)
+- [The P: PHP versions and support](#the-p-php-versions-and-support)
+- [What Cloudflare says about its own proxy](#what-cloudflare-says-about-its-own-proxy)
+- [Build it piece by piece or all at once](#build-it-piece-by-piece-or-all-at-once)
+- [The free path: build both stacks on your own computer](#the-free-path-build-both-stacks-on-your-own-computer)
+- [Optional: the same stack on one droplet (your own account)](#optional-the-same-stack-on-one-droplet-your-own-account)
+- [Threat model of this stack](#threat-model-of-this-stack)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages, and lesson W1 of a four-lesson web-hosting track. Read it after [Containers and Docker basics](Containers-and-Docker-Basics.md) (core step 7) and [How a web request works](How-a-Web-Request-Works.md), if "web server", "PHP", "database" or "LAMP" are only words to you. It builds the two classic stacks side by side on your own computer, installs WordPress on each, and treats every arrow in the picture as a trust boundary. Next: [Droplet hardening](Droplet-Hardening.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

@@ -6,6 +6,27 @@
 Previous: [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) / Next: [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The ruling this page teaches](#the-ruling-this-page-teaches)
+- [Why this first](#why-this-first)
+- [The worked example: the October 2026 PHP flaws](#the-worked-example-the-october-2026-php-flaws)
+- [What "automatic updates" means, system by system](#what-automatic-updates-means-system-by-system)
+- [Stagger your maintenance windows](#stagger-your-maintenance-windows)
+- [The real risk: a bad update breaks something](#the-real-risk-a-bad-update-breaks-something)
+- [What OS updates do not cover](#what-os-updates-do-not-cover)
+- [Where this shows up in this project](#where-this-shows-up-in-this-project)
+- [Free path: a lab with nothing to lose](#free-path-a-lab-with-nothing-to-lose)
+- [Optional: apply the order on a real droplet (your own account)](#optional-apply-the-order-on-a-real-droplet-your-own-account)
+- [Build, break, detect, evade, defend (the local loop)](#build-break-detect-evade-defend-the-local-loop)
+- [Threat model: the update channel itself](#threat-model-the-update-channel-itself)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it after [Droplet hardening](Droplet-Hardening.md) (core step 14), or at any point you are about to set up a machine, a virtual machine, a container host or a router and wonder what to do first. It is about the **order** of the first hour. The details of patch cadence, CVE scores and backups are on [Backups, recovery and patching](Backups-Recovery-and-Patching.md); this page does not repeat them. Next: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

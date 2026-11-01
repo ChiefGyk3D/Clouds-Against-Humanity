@@ -6,6 +6,30 @@
 Previous: [How a web request works](How-a-Web-Request-Works.md) / Next: [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [Cost, honestly](#cost-honestly)
+- [Names, who owns them, and who answers](#names-who-owns-them-and-who-answers)
+- [The records you will meet](#the-records-you-will-meet)
+- [Email records at concept level](#email-records-at-concept-level)
+- [DNSSEC at concept level](#dnssec-at-concept-level)
+- [Cloudflare: what it is, and why this lesson uses it](#cloudflare-what-it-is-and-why-this-lesson-uses-it)
+- [TLS between the visitor, Cloudflare and your server](#tls-between-the-visitor-cloudflare-and-your-server)
+- [Lock the origin to Cloudflare](#lock-the-origin-to-cloudflare)
+- [Hosting your own website: the walkthrough](#hosting-your-own-website-the-walkthrough)
+- [Build it piece by piece or all at once](#build-it-piece-by-piece-or-all-at-once)
+- [Free theory path: a DNS lab on your own computer](#free-theory-path-a-dns-lab-on-your-own-computer)
+- [A DNS troubleshooting flow](#a-dns-troubleshooting-flow)
+- [DNS as a trust boundary](#dns-as-a-trust-boundary)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages, and the third lesson of a four-lesson web-hosting track. Read it after [How a web request works](How-a-Web-Request-Works.md) (which explains DNS in one section) and [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md), and beside [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md). Next: [Droplet hardening](Droplet-Hardening.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

@@ -6,6 +6,25 @@
 Previous: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) / Next: [Secrets from day one](Secrets-From-Day-One.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The four things beginners mix up](#the-four-things-beginners-mix-up)
+- [Hashing: a fingerprint, not a lock](#hashing-a-fingerprint-not-a-lock)
+- [Passwords are a special case](#passwords-are-a-special-case)
+- [Encryption: keeping it secret](#encryption-keeping-it-secret)
+- [Digital signatures: proof of who and what](#digital-signatures-proof-of-who-and-what)
+- [Key pairs in the wild: SSH keys and TLS certificates](#key-pairs-in-the-wild-ssh-keys-and-tls-certificates)
+- [Keeping keys: storage, passphrases and hardware keys](#keeping-keys-storage-passphrases-and-hardware-keys)
+- ["Encrypted" is not "secure"](#encrypted-is-not-secure)
+- [Beginner mistakes, and what to do instead](#beginner-mistakes-and-what-to-do-instead)
+- [Hands-on, free path: everything local](#hands-on-free-path-everything-local)
+- [Build it, break it, detect it, defend it](#build-it-break-it-detect-it-defend-it)
+- [Checkpoint](#checkpoint)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it before [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) if "hashed", "encrypted", "signed" and "key" all sound like the same thing, or at any point you meet them and want them told apart. When you want the next layer (how symmetric and asymmetric encryption combine, certificates and PKI, data at rest versus in transit, key custody, and what NIST recommends now), read [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md). Next: [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

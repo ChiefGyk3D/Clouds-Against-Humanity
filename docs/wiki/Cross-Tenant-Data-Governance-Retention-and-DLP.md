@@ -6,6 +6,33 @@
 Previous: [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md) / Next: [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [A boundary is an owner](#a-boundary-is-an-owner)
+- [Why data crosses a boundary](#why-data-crosses-a-boundary)
+- [Pull or push, and who owns the key](#pull-or-push-and-who-owns-the-key)
+- [Least privilege for a transfer](#least-privilege-for-a-transfer)
+- [Encryption in transit and at rest](#encryption-in-transit-and-at-rest)
+- [Retention and purge](#retention-and-purge)
+- [The monthly batch](#the-monthly-batch)
+- [PII, classification and minimization](#pii-classification-and-minimization)
+- [DLP in plain words](#dlp-in-plain-words)
+- [Zscaler as a worked example](#zscaler-as-a-worked-example)
+- [Twingate and Zscaler: a different category, not a competition](#twingate-and-zscaler-a-different-category-not-a-competition)
+- [Where this shows up in this project](#where-this-shows-up-in-this-project)
+- [Free path: a lab on your own computer](#free-path-a-lab-on-your-own-computer)
+- [Optional: your own cloud accounts (a pointer, with cost first)](#optional-your-own-cloud-accounts-a-pointer-with-cost-first)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Threat model](#threat-model)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+- [Where to next](#where-to-next)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the enterprise pages. Read it after [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) and [Backups, recovery and patching](Backups-Recovery-and-Patching.md) if "tenant", "retention", "purge" or "DLP" are only words to you, or any time you meet them at work. It moves data between two accounts that belong to different owners, makes it disappear on a schedule, and then builds a toy scanner that looks inside files for things that should not leave. Next: [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

@@ -6,6 +6,23 @@
 Previous: [Paper wallets and offline key generation](Paper-Wallets-Generators-and-Offline-Key-Generation-Tails-Electrum-and-Monero.md) / Next: [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Where this page sits in the set](#where-this-page-sits-in-the-set)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [What the design has to protect](#what-the-design-has-to-protect)
+- [A hardware wallet with Monero](#a-hardware-wallet-with-monero)
+- [The Qubes and Whonix design](#the-qubes-and-whonix-design)
+- [The transaction path](#the-transaction-path)
+- [PiNodeXMR: why an always-on node](#pinodexmr-why-an-always-on-node)
+- [Free exercise: a paper walk-through of the transaction path](#free-exercise-a-paper-walk-through-of-the-transaction-path)
+- [Exercises](#exercises)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Page five of five in the cryptocurrency set. Read it when you have read how Monero hides a payment and who holds the keys, and the question has become "how do I run a Monero wallet so that one mistake, one piece of malware or one bad node does not cost me the money or the privacy?". It covers what changes when a hardware wallet is used with Monero, a design on Qubes OS and Whonix that keeps the wallet and the hardware wallet in qubes with no network at all and the blockchain in a separate qube whose whole traffic goes over Tor, why a node that is always on (PiNodeXMR) makes the rest easier, the trade-offs between your own node and a remote node you trust, and how to keep that node itself safe. It says, part by part, what a document states and what is only my reading of several documents put together.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

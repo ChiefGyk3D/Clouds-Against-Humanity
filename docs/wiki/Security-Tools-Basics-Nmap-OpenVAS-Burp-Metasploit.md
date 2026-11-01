@@ -4,6 +4,29 @@
 [Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Security tools: Nmap, OpenVAS, Burp, Metasploit
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [Why this page exists, in the maintainer's words](#why-this-page-exists-in-the-maintainers-words)
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Authorization and scope come first](#authorization-and-scope-come-first)
+- [The tools in one table](#the-tools-in-one-table)
+- [Where each tool sits in the whole system](#where-each-tool-sits-in-the-whole-system)
+- [Nmap](#nmap)
+- [Greenbone Community Edition and OpenVAS](#greenbone-community-edition-and-openvas)
+- [Wireshark](#wireshark)
+- [Burp Suite Community Edition and OWASP ZAP](#burp-suite-community-edition-and-owasp-zap)
+- [Metasploit Framework (know what it is, and stop there)](#metasploit-framework-know-what-it-is-and-stop-there)
+- [Attack surface, in one table](#attack-surface-in-one-table)
+- [Free path: a lab on your own computer](#free-path-a-lab-on-your-own-computer)
+- [Threat model of the lab itself](#threat-model-of-the-lab-itself)
+- [What this tells you about building systems](#what-this-tells-you-about-building-systems)
+- [Build, break, detect, evade, defend (the local loop)](#build-break-detect-evade-defend-the-local-loop)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the threat pages. Read it after [Threats in plain words](Threats-in-Plain-Words.md) and [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md), and alongside [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md).
 
 Its companion, [Red and blue as yin and yang, and your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md), covers authorization and the lab machine first; that link may not resolve until that page merges.
