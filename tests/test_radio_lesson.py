@@ -14,6 +14,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from wikitext import page_text
+
 ROOT = Path(__file__).resolve().parent.parent
 WIKI = ROOT / "docs" / "wiki"
 NAME = "Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT"
@@ -352,3 +354,113 @@ def test_us_rules_are_dated_and_other_countries_are_pointed_to_their_regulator()
     body = text()
     assert "check your own regulator" in body.lower() or "check your own country's regulator" in body.lower()
     assert "2026-10-29" in body, "the eCFR edition date must be stated"
+
+
+HALOW = "## Wi-Fi HaLow (IEEE 802.11ah) next to LoRa"
+HALOW_HEADS = (
+    "### What HaLow is, and what it is not",
+    "### HaLow compared with LoRa and the other radios on this page",
+    "### Which to choose for off-grid and continuity use",
+    "### HaLow rules: legal first",
+)
+HALOW_ROWS = ("Wi-Fi HaLow", "LoRa (physical layer)", "LoRaWAN", "Meshtastic", "MeshCore", "Wi-Fi at 2.4 and 5 GHz", "Amateur radio", "GMRS and FRS", "CB")
+
+
+def halow_section(body: str) -> str:
+    return body.split(f"\n{HALOW}\n")[1].split("\n## Amateur (ham) radio\n")[0]
+
+
+def tables_in(block: str) -> list[list[str]]:
+    """Each table's header row, found by the line before a |---| separator."""
+    lines = block.splitlines()
+    return [[c.strip() for c in lines[i - 1].strip("|").split("|")] for i, line in enumerate(lines) if line.startswith("|---") and i]
+
+
+def first_cells(block: str) -> list[str]:
+    return [r[0].replace("**", "") for r in table_rows(block)]
+
+
+def test_halow_has_its_own_section_and_subsections_before_the_ham_section():
+    body = page_text(PAGE)
+    assert f"\n{HALOW}\n" in body
+    assert body.index("## LoRa, Meshtastic, MeshCore and Reticulum") < body.index(HALOW) < body.index("\n## Amateur (ham) radio\n")
+    sec = halow_section(body)
+    for head in HALOW_HEADS:
+        assert f"\n{head}\n" in f"\n{sec}", head
+
+
+def test_the_banner_and_intro_say_halow_was_added_and_what_was_not_run():
+    body = page_text(PAGE)
+    banner = body.split("> **Status: unverified draft.")[1].split("\n\n")[0]
+    assert "HaLow" in banner and "2026-11-01" in banner
+    assert "no transmitter was keyed" in banner
+    assert "HaLow" in body.split("## What you will be able to do")[0]
+    assert any("HaLow" in line for line in body.split("## What you will be able to do")[1].split("##")[0].splitlines())
+    assert "Wi-Fi HaLow" in section(body, "## When the internet and the power go out: what still works", "Satellite messengers")
+
+
+def test_the_comparison_tables_name_their_first_cell_and_cover_every_technology_the_issue_named():
+    sec = halow_section(page_text(PAGE))
+    tables = tables_in(sec)
+    assert len(tables) >= 3, "expected two comparison tables and a decision table"
+    assert all(t[0] for t in tables), "every table needs a named first header cell"
+    comparison = sec.split("### HaLow compared with LoRa and the other radios on this page")[1].split("### Which to choose")[0]
+    header_text = " ".join(" ".join(t) for t in tables_in(comparison)).lower()
+    for want in ("range", "throughput", "power", "topology", "licens", "encryption", "typical use", "equipment cost class"):
+        assert want in header_text, want
+    got = first_cells(comparison)
+    for want in HALOW_ROWS:
+        assert want in got, want
+
+
+def test_every_halow_figure_carries_a_source_or_a_marker_and_no_price_appears():
+    sec = halow_section(page_text(PAGE))
+    assert "1 km" in sec and "100 kb/s" in sec
+    for line in sec.splitlines():
+        if "1 km" in line or "100 kb/s" in line or "15 km" in line:
+            assert any(w in line for w in ("vendor", "design", "theoretical", "alliance", "Alliance", "IEEE")), line
+    assert "$" not in sec and "USD" not in sec and "dollar" not in sec.lower()
+    assert "qualitative" in sec.lower()
+
+
+def test_halow_is_described_as_newer_and_less_common_and_no_vendor_is_ranked():
+    sec = halow_section(page_text(PAGE))
+    lowered = sec.lower()
+    assert "newer" in lowered and "less common" in lowered
+    for ranking in ("best", "recommended vendor", "top pick", "fastest chip"):
+        assert ranking not in lowered, ranking
+
+
+def test_the_halow_legal_section_reads_the_rule_text_and_adds_no_transmission_steps():
+    sec = halow_section(page_text(PAGE))
+    legal = sec.split("### HaLow rules: legal first")[1]
+    for needle in ("15.247", "902", "928", "other regions", "not legal advice", "equipment authorization"):
+        assert needle in legal, needle
+    assert not radio_commands_in_shell_blocks(sec)
+    assert not re.search(r"\b(?:set|configure|enable|flash)\b[^.\n]*\b(?:transmit|power|channel|region)\b", legal, re.IGNORECASE), "no configuration steps"
+    assert not foreign_callsigns(sec) and not foreign_grids(sec)
+
+
+def test_the_register_lists_the_halow_sources_read_and_the_ones_not_read():
+    reg = page_text(PAGE).split("## Claims register")[1]
+    for needle in ("wi-fi.org", "standards.ieee.org", "lora-alliance.org", "MorseMicro", "15.247"):
+        row = next((line for line in reg.splitlines() if needle in line and "2026-11-01" in line), "")
+        assert row, needle
+        assert "Read 2026-11-01" in row, needle
+    assert any("HaLow" in line and "Not read" in line for line in reg.splitlines()), "unread HaLow facts must be named"
+    assert "Not verified" in page_text(PAGE) or "Not read" in page_text(PAGE)
+
+
+def test_the_glossary_defines_halow_once_and_sub_ghz_once_and_points_at_real_headings():
+    glossary = (WIKI / "Glossary.md").read_text(encoding="utf-8")
+    for term in ("Wi-Fi HaLow (IEEE 802.11ah)", "Sub-GHz band"):
+        rows = [line for line in glossary.splitlines() if line.startswith(f"| **{term}**")]
+        assert len(rows) == 1, (term, len(rows))
+        assert f"{NAME}.md#" in rows[0], term
+    assert "802.11ah" not in "".join(line for line in glossary.splitlines() if line.startswith("| **802.11ah"))
+
+
+def test_the_halow_table_guards_bite():
+    assert tables_in("| A | B |\n|---|---|\n| x | y |") == [["A", "B"]]
+    assert tables_in("|  | B |\n|---|---|\n| x | y |")[0][0] == ""
+    assert first_cells("| T | U |\n|---|---|\n| **LoRaWAN** | y |") == ["LoRaWAN"]
