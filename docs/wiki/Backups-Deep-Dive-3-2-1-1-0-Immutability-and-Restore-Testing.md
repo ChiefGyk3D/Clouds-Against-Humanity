@@ -1,10 +1,10 @@
 # Backups deep dive: 3-2-1-1-0, immutable copies, key custody and restore testing
 
-Side page to the start-from-zero pages. Read it after [Backups, recovery and patching](Backups-Recovery-and-Patching.md), which teaches snapshot versus backup, RPO and RTO, the plain 3-2-1 rule and a first timed restore, and after [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md), because availability is the property all of this protects. This page does not repeat them. It takes up what they leave open: the two extra digits of 3-2-1-1-0, what an immutable copy really protects against, who holds the key to an encrypted backup, backing up the backup system itself, how often to test a restore, how long to keep copies, the ransomware angle, the traps in cloud backups, and what this project would have to back up. Next: the lesson on business continuity and disaster recovery, which covers how the work carries on and how the systems come back; it is named here in plain text, and this page does not depend on it.
+Side page to the start-from-zero pages. **A RAID array is a business continuity solution, not a backup:** it keeps a system running through some drive failures, and it counts as at most one copy of your data, so none of the digits below is met by adding drives to an array. Read it after [Backups, recovery and patching](Backups-Recovery-and-Patching.md), which teaches snapshot versus backup, RPO and RTO, the plain 3-2-1 rule and a first timed restore, and after [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md), because availability is the property all of this protects. This page does not repeat them. It takes up what they leave open: why RAID is not one of the copies, the two extra digits of 3-2-1-1-0, what an immutable copy really protects against, who holds the key to an encrypted backup, backing up the backup system itself, how often to test a restore, how long to keep copies, the ransomware angle, the traps in cloud backups, and what this project would have to back up. Next: the lesson on [business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md), which covers how the work carries on and how the systems come back, and the lesson on [RAID](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md), which covers how arrays work and why they are a continuity control.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-> **Status: unverified draft. One local script was run; everything else was read, not run.** On **2026-10-31** I ran the Bash script in the free path on a Debian-based Linux machine (GNU bash 5.2.37, GNU coreutils 9.7, GNU tar 1.35, OpenSSL 3.5.7, as an ordinary user) and pasted its output. **Not run:** the script on macOS or Windows, any PowerShell version (none is given), every cloud command shown or named (`aws s3api`, `rclone`, `doppler`, `terraform state pull`, `git clone --mirror`), the restore of anything real in this project, and every control in the project table (I read the files; I applied no stack and called no provider). The standards and vendor pages were downloaded and read on **2026-10-31** and sit in the [claims register](#claims-register) with their URLs and the date each page shows. A time interval or a test frequency that is my own suggestion is marked **est.**; the standards I read do not set one.
+> **Status: unverified draft. One local script was run; everything else was read, not run.** On **2026-10-31** I ran the Bash script in the free path on a Debian-based Linux machine (GNU bash 5.2.37, GNU coreutils 9.7, GNU tar 1.35, OpenSSL 3.5.7, as an ordinary user) and pasted its output. **Not run:** the script on macOS or Windows, any PowerShell version (none is given), every cloud command shown or named (`aws s3api`, `rclone`, `doppler`, `terraform state pull`, `git clone --mirror`), the restore of anything real in this project, and every control in the project table (I read the files; I applied no stack and called no provider). The standards and vendor pages were downloaded and read on **2026-10-31** and sit in the [claims register](#claims-register) with their URLs and the date each page shows. A time interval or a test frequency that is my own suggestion is marked **est.**; the standards I read do not set one. The section on RAID was added on **2026-11-01** for issue 421, from reading only: I read the NIST guide's passage on high availability again, the Linux Raid Wiki's page on protecting data and the 1987 Berkeley report that named RAID, and ran nothing.
 
 > **Prerequisites.** [Backups, recovery and patching](Backups-Recovery-and-Patching.md) first, then [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) for what a key is and [The terminal and your first script](Terminal-and-Your-First-Script.md) for running a script. The free path needs a Linux machine or WSL 2 with `bash`, GNU `tar`, `sha256sum`, `openssl` and `dd` (stock macOS lacks the GNU forms, so it is not written for macOS). No cloud account, no network, no installs. About 90 minutes with the exercise (est.).
 
@@ -12,6 +12,7 @@ Side page to the start-from-zero pages. Read it after [Backups, recovery and pat
 
 ## What you will be able to do
 
+- Say why a RAID array is business continuity and not a backup, name what it does not survive, and say how many copies it counts as.
 - Say what each digit of 3-2-1-1-0 asks for, who added the last two, and what the rule still does not cover.
 - Tell a full, an incremental and a differential backup apart, and say what each one costs you at restore time.
 - Say what an immutable copy stops, and name four things it does not stop.
@@ -31,6 +32,25 @@ Side page to the start-from-zero pages. Read it after [Backups, recovery and pat
 | Why availability matters, and the key-versus-availability trade-off | [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) | The key-custody half in depth. |
 | State, locking, and a lost-state exercise | [Plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) | Where this project's state would have to be copied from, and what exists today. |
 | What a key is and how it is lost | [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) | What losing the key to a backup costs, and how to hold it. |
+| Mirroring, parity and the array that sits under a server | [RAID: levels, parity, rebuilds](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md) | How an array works. This page says what it counts for. |
+
+## RAID is business continuity, not a backup
+
+RAID is not a backup. A RAID array keeps a system running through some drive failures. That is **availability**, the third property of [the CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md#availability), and it belongs with the plan in [business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md), not with the backups. A backup is a separate, restorable copy that survives deletion, corruption, ransomware and the loss of the site. An array does none of those, because it writes every change to every member, including a mistake, an encrypted file and a corrupted block, and its drives sit in one box on one site.
+
+NIST SP 800-34 Rev. 1 (May 2010) lists RAID among the technologies to consider in a recovery strategy, and then states the limit: "HA systems cannot be a replacement for a solid backup strategy, as a corruption of data on a system may propagate through an HA system, making the system unusable. Without a backup of the system separate from the system itself, recovery may not be possible." The Linux Raid Wiki, written by the people who run Linux software RAID, says: "RAID is not a panacea ... Secondly, backup, backup, BACK UP. And keep it off site." And the 1987 report that named RAID, by Patterson, Gibson and Katz, opens its reliability case with the reason arrays were wanted at all: the unreliability of disks "forces computer systems managers to make backup versions of all information every night in case of failure". The array was proposed to keep going through a disk failure, never to replace that nightly backup.
+
+| Event | RAID alone | A separate backup |
+|---|---|---|
+| A drive dies | **Yes**: the array keeps running, degraded, while the drive is replaced | Not needed for this event alone; it is the way back if the rebuild fails |
+| A file is deleted or overwritten | **No**: every drive gets the same change | Yes, if the copy is older than the mistake |
+| Ransomware encrypts the files | **No**: the encrypted data is written to every drive | Yes, if the copy was out of reach of whatever was taken over |
+| Data is corrupted by a bug or a bad write | **No**: the array stores the corruption | Yes, from a copy that predates it |
+| The controller or the whole box fails | **No**: it is one box | Yes, onto other hardware |
+| Fire, flood or theft of the machine | **No**: every drive is in one place | Yes, if one copy is elsewhere |
+| An administrator account is taken over | **No**: the array does what the administrator asks | Yes, if a copy is immutable or offline |
+
+**For 3-2-1-1-0, an array counts as at most one copy**, whatever its level and however many drives it holds. A two-way mirror is not two copies in the sense of the rule, and parity is not a copy at all. Put the array in the continuity plan, where it shortens the outage for a dead drive, and put the backup beside it. How arrays work, what a rebuild risks and a free drill that shows a mirror copying a mistake are on [the RAID lesson](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md).
 
 ## From 3-2-1 to 3-2-1-1-0
 
@@ -360,6 +380,7 @@ How to read it:
 
 | Symptom | Most likely cause | What to check |
 |---|---|---|
+| "We have RAID, so we have a backup" | An array mistaken for a copy: it protects against a dead drive and copies every mistake to every drive | Whether a deleted, encrypted or corrupted file can be restored from somewhere the array's logins cannot reach |
 | "We have 3-2-1" and one login can delete all three copies | The copies share a credential | Who can delete each copy, and with which login |
 | Versioning is on, so "they cannot delete it" | Versioning mistaken for a lock | Whether the same key can permanently delete a version |
 | The immutable copy restores corrupted data | It was made from damaged data | The check you ran before the copy was locked |
@@ -400,5 +421,9 @@ Standards and vendor pages were downloaded and read on **2026-10-31**; repositor
 | Secrets are listed by name and owner; values are not written | `docs/spacelift-secrets.md` | Read 2026-10-31 |
 | Twingate resources, groups and service accounts are defined in code | `stacks/10-access/main.tf`, `stacks/20-telemetry/main.tf` | Read 2026-10-31; not applied |
 | Droplet backups are `false` in the connector module | `modules/twingate-connector/main.tf` | Read 2026-10-31 |
+| A RAID array is a continuity control and not a backup (the maintainer's framing, issue 421); an array counts as at most one copy for 3-2-1-1-0 | The maintainer's comment on issue 421 of 2026-11-01, and the framing section above | Read 2026-11-01 |
+| RAID is among the technologies for a recovery strategy; "HA systems cannot be a replacement for a solid backup strategy"; a backup must be separate from the system itself | [NIST SP 800-34 Rev. 1, May 2010](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-34r1.pdf), sections 3.4.1 and 5.1.6 (read again for the RAID section) | Read 2026-11-01 |
+| "RAID is not a panacea"; "backup, backup, BACK UP. And keep it off site." | [Linux Raid Wiki, How to protect your data](https://raid.wiki.kernel.org/index.php/How_to_protect_your_data) (the site redirects to an archive; page last modified 30 November 2019; marked obsolete) | Read 2026-11-01 |
+| Disk unreliability "forces computer systems managers to make backup versions of all information every night"; arrays proposed to keep running through a disk failure | [Patterson, Gibson and Katz, *A Case for Redundant Arrays of Inexpensive Disks (RAID)*, Berkeley report CSD-87-391, 1987](https://www2.eecs.berkeley.edu/Pubs/TechRpts/1987/CSD-87-391.pdf) (a scan; report pages 1 to 9 and 14 to 17 read) | Read 2026-11-01 |
 | The Bash script and its output | The free path | **Observed** 2026-10-31, GNU bash 5.2.37, coreutils 9.7, tar 1.35, OpenSSL 3.5.7, Linux |
 | The script on macOS, or under another shell | | **Not run** |

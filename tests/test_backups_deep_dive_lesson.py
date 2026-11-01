@@ -25,7 +25,11 @@ LINK = re.compile(r"\]\(([A-Za-z0-9_-]+)\.md(?:#[^)]*)?\)")
 ADDR = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
 PATH_TOKEN = re.compile(r"`((?:modules|stacks|scripts|docs|\.github|\.spacelift|tests)/[A-Za-z0-9_./-]+|board\.yaml|\.gitignore)`")
 STATUS_WORDS = ("Read", "Observed", "Not run", "**est.**", "General knowledge")
+RAID_LESSON = "RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup"
+BCP_LESSON = "Business-Continuity-and-Disaster-Recovery-BCP-and-DR"
+RAID_SECTION = "## RAID is business continuity, not a backup"
 TOPICS = (
+    RAID_SECTION,
     "## From 3-2-1 to 3-2-1-1-0",
     "## Backup types: full, incremental, differential",
     "## Immutable and offline copies",
@@ -115,12 +119,94 @@ def test_every_linked_wiki_page_exists():
     assert not missing, missing
 
 
-def test_the_blast_radius_and_continuity_lessons_are_named_in_plain_text_not_linked():
-    # tests/test_blast_radius_lesson.py caps how many pages may link the blast radius lesson, and the continuity
-    # lesson may not be merged yet, so neither is linked from here.
+def test_the_blast_radius_lesson_is_named_in_plain_text_and_the_continuity_lesson_is_linked():
+    # tests/test_blast_radius_lesson.py caps how many pages may link the blast radius lesson, so it is not linked
+    # from here. The continuity lesson is merged and is linked (issue 421).
     body = text()
     assert "Plan-for-Failure-Blast-Radius" not in body
     assert "business continuity and disaster recovery" in body
+    assert f"]({BCP_LESSON}.md" in body
+    assert f"]({RAID_LESSON}.md" in body
+
+
+def raid_section(body: str) -> str:
+    return section(body, RAID_SECTION, "\n## From 3-2-1 to 3-2-1-1-0")
+
+
+def test_the_page_leads_with_raid_as_continuity_and_not_a_backup():
+    body = text()
+    opening = body.split("> Unfamiliar word or acronym?")[0]
+    assert "RAID" in opening and "not a backup" in opening, "the opening paragraph carries the framing"
+    assert body.index(RAID_SECTION) < body.index("## From 3-2-1 to 3-2-1-1-0"), "the RAID section comes first"
+    assert body.index(RAID_SECTION) < body.index("## Backup types"), "the RAID section comes before the backup types"
+    sec = raid_section(body)
+    for needed in (
+        "business continuity",
+        "availability",
+        "not a backup",
+        "at most one copy",
+        "deletion",
+        "corruption",
+        "ransomware",
+        "site",
+        "SP 800-34",
+        "cannot be a replacement for a solid backup strategy",
+        "Without a backup of the system separate from the system itself",
+        "Linux Raid Wiki",
+        "backup, backup, BACK UP",
+        "RAID is not a panacea",
+        "Patterson",
+        "backup versions of all information every night",
+    ):
+        assert needed in sec, needed
+    for link in (BCP_LESSON, RAID_LESSON, "The-CIA-Triad-Confidentiality-Integrity-Availability"):
+        assert f"]({link}.md" in sec, link
+
+
+def test_the_raid_section_has_a_table_that_says_what_each_event_does_to_raid_and_to_a_backup():
+    sec = raid_section(text())
+    rows = table_rows(sec)
+    assert len(rows) >= 7, "the guard collected too few rows"
+    events = " ".join(r[0] for r in rows).lower()
+    for needed in ("drive", "deleted", "ransomware", "corrupt", "controller", "fire"):
+        assert needed in events, needed
+    # a drive failure is the one row where RAID helps; every other row says RAID does not
+    first = rows[0]
+    assert "Yes" in first[1] and "drive" in first[0].lower()
+    assert sum("**No**" in r[1] for r in rows) >= 5
+    assert sum("**No**" in r[2] for r in rows) <= 2, "a backup is not a cure for everything either"
+
+
+def test_the_raid_section_guard_bites():
+    assert raid_section(f"x\n{RAID_SECTION}\nbody\n\n## From 3-2-1 to 3-2-1-1-0\ny") == "\nbody\n"
+    bad = ["a drive fails", "Yes", "Yes"], ["ransomware", "Yes", "Yes"]
+    assert sum("**No**" in r[1] for r in bad) == 0
+
+
+def test_the_banner_and_summary_say_the_raid_section_was_added_on_2026_11_01_from_reading():
+    body = text()
+    banner = body.split("## What you will be able to do")[0]
+    assert "2026-11-01" in banner and "issue 421" in banner
+    low = body.split("## What you will be able to do")[1].split("## What the wiki already says")[0].lower()
+    assert "raid" in low and "not a backup" in low
+
+
+def test_the_register_carries_the_raid_sources_read_on_2026_11_01():
+    rows = register_rows(text())
+    joined = " ".join(r[1] for r in rows)
+    for host in (
+        "nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-34r1.pdf",
+        "raid.wiki.kernel.org/index.php/How_to_protect_your_data",
+        "www2.eecs.berkeley.edu/Pubs/TechRpts/1987/CSD-87-391.pdf",
+    ):
+        assert host in joined, host
+    assert sum("2026-11-01" in r[-1] for r in rows) >= 3
+    assert not rows_missing_status(rows)
+
+
+def test_the_common_mistakes_table_names_the_raid_is_a_backup_mistake():
+    block = section(text(), "## Common mistakes", "## Claims register")
+    assert any("RAID" in r[0] and "backup" in r[0].lower() for r in table_rows(block))
 
 
 def test_the_lesson_is_registered_in_contents_and_reading_order_not_the_sidebar():
