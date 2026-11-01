@@ -57,16 +57,17 @@ file does not match the manifest. -->
 - [Full list (5)](Contents.md#foundations-networking)
 </details>
 <details>
-<summary><b>Foundations: identity and secrets</b> (7)</summary>
+<summary><b>Foundations: identity and secrets</b> (8)</summary>
 
 - [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md)
 - [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md)
 - [Secrets from day one](Secrets-From-Day-One.md)
+- [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md) (draft)
 - [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md)
 - [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md)
 - [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md) (draft)
 - [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) (draft)
-- [Full list (7)](Contents.md#foundations-identity-and-secrets)
+- [Full list (8)](Contents.md#foundations-identity-and-secrets)
 </details>
 <details>
 <summary><b>Foundations: infrastructure as code</b> (7)</summary>
