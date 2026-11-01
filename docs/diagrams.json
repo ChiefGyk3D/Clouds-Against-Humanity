@@ -275,6 +275,12 @@
   "docs/wiki/images/running-monero-properly-hardware-wallet-qubes-and-whonix-offline-wallet-and-pinodexmr-diagram-4.png": {
     "sha256": "2719f2ace44655bdb225ccfd8bc75be7d3fc10ce83a504314a9e758ffb3f3755"
   },
+  "docs/wiki/images/self-hosting-when-and-why-with-searxng-as-the-worked-example-diagram-1.png": {
+    "sha256": "4cac08c62c18ae5b0a64a80b55015c4bc0f5970b497e795f5f2151b63b15ec8c"
+  },
+  "docs/wiki/images/self-hosting-when-and-why-with-searxng-as-the-worked-example-diagram-2.png": {
+    "sha256": "9dfb916facccc5dbd3df5ff06ae39d3294f45160325e4c5a9328e685e25f7b16"
+  },
   "docs/wiki/images/spacelift-diagram-1.png": {
     "sha256": "1d327efc62d44ffed0cf714da7d41fae3707ed04d5b9e5d6e6600bf18b285f9b"
   },

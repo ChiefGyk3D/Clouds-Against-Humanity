@@ -10,6 +10,10 @@ module and no inbound path of its own.
 that defaults to off, and the stage is not approved. Nothing here has run on a
 real machine.
 
+## Workloads
+
+Workloads are compose stacks deployed in Portainer over Twingate, not by this module. One is written and documented but **not applied**: [`workloads/searxng`](../../workloads/searxng) (SearXNG and its Valkey cache). It needs nothing from this module beyond the host and changes none of its resources. Its README says what was verified and what was not, including that its memory need is unknown.
+
 ## What the cloud-init does, in order
 
 1. **Update.** Package update and upgrade, and unattended upgrades with a

@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: Apache-2.0
+# Limiter settings (SearXNG bot detection). Only what differs from the defaults is written, as the docs advise.
+# Read 2026-11-01 against https://docs.searxng.org/admin/searx.limiter.html. NOT APPLIED.
+
+[botdetection]
+# Users reach this instance directly over Twingate, with no reverse proxy in front, so no network is trusted to
+# set X-Forwarded-For for a client. Only loopback stays, which is the default.
+trusted_proxies = [
+  '127.0.0.0/8',
+  '::1',
+]
+
+[botdetection.ip_limit]
+# link_token is for public instances; this one is not public.
+link_token = false
+
+[botdetection.ip_lists]
+# No pass list for the SearXNG project's own checker: this instance is not listed anywhere.
+pass_searxng_org = false

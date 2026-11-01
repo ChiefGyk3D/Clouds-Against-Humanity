@@ -27,7 +27,7 @@ If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md):
 
 ## Every page, by theme
 
-All 156 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
+All 157 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
 
 ### Start here, by kind of reader
 
@@ -199,32 +199,33 @@ All 156 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 3. [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md): The stage guides put in order, with accounts named early and a check at each step, ending in teardown; for learners replicating the build.
 4. [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md): Where each value belongs: a variable, a tfvars file, Doppler or the cost file, for builders.
 5. [Teardown checklist](Teardown-Checklist.md): The order of destruction, what survives it and the checks that prove the bill is zero, for builders.
-6. [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md): Where this project uses a Twingate service account and which plan each use needs; nothing was run against an account.
-7. [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md): A home lab with two outbound-only connectors that stays reachable when the internet fails over; nothing was tested for this page.
-8. [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) (draft): The honest reason the connector droplets have public addresses and what going private would change; an unverified draft.
-9. [Why I picked these tools](Why-I-Picked-These-Tools.md): Which tool choices are personal picks and where each would change at work, for engineers weighing alternatives.
-10. [From commit to pipeline](From-Commit-to-Pipeline.md): What CI, CD, DevOps and DevSecOps mean here and which gate stops what, for engineers.
-11. [Trace one change end to end](Trace-One-Change-End-to-End.md): One real pull request followed through every gate of the pipeline, for engineers.
-12. [Why the clouds differ](Why-the-Clouds-Differ.md) (draft): The three differences between AWS, Azure and GCP that change the bill and the design; an unverified draft.
-13. [AWS: account preparation](Provider-AWS-Account-Preparation.md) (draft): Finish with an AWS account that is protected, empty and watched, before any infrastructure; an unverified draft.
-14. [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) (draft): The network, firewall, machine and machine identity built on AWS; an unverified draft.
-15. [AWS: where the money goes](Provider-AWS-Cost-Lesson.md) (draft): The AWS charges that surprise learners, the arithmetic, and how to prove the bill is back to zero; an unverified draft.
-16. [Azure: account preparation](Provider-Azure-Account-Preparation.md) (draft): Finish with an Azure subscription that is protected, empty and watched, before any infrastructure; an unverified draft.
-17. [Azure: the same four pieces](Provider-Azure-The-Same-Four-Pieces.md) (draft): The network, firewall, machine and machine identity built on Azure; an unverified draft.
-18. [Azure: where the money goes](Provider-Azure-Cost-Lesson.md) (draft): The Azure charges that surprise learners, the arithmetic, and how to prove the bill is back to zero; an unverified draft.
-19. [GCP: account preparation](Provider-GCP-Account-Preparation.md) (draft): Finish with a Google Cloud project that is protected, empty and watched, before any infrastructure; an unverified draft.
-20. [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md) (draft): The network, firewall, machine and machine identity built on GCP; an unverified draft.
-21. [GCP: where the money goes](Provider-GCP-Cost-Lesson.md) (draft): Why GCP's no-public-address design can be cheaper, where that stops being true and how to prove the bill is back to zero; an unverified draft.
-22. [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md): How companies build campus, branch, data center and cloud networks compared with this one VPC, for engineers.
-23. [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md): How large organizations run infrastructure differently from this one-account project, for engineers.
-24. [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md): Change tickets, CABs and freezes explained for readers who hear them at work; this project uses none of it.
-25. [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md): Where this project's Doppler and Twingate choices sit next to enterprise identity and secrets practice, for engineers.
-26. [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md): Write a ticket, a change request and a runbook for a real merged change, for learners preparing for company work.
-27. [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md): Roles that surround this work and what to learn next, for readers choosing a direction.
-28. [How this project is planned](How-This-Project-Is-Planned.md): The written backlog, sprints and definition of done this project uses, for readers curious how the work is run.
-29. [Project status](Project-Status.md): Open issues and pull requests by state, generated from GitHub; a reference page, not a lesson.
-30. [Repository growth](Repository-Growth.md): Stars, forks and weekly merged work drawn from GitHub data, with the as-of date printed.
-31. [Screenshots policy](Screenshots-Policy.md): What may be pictured in the wiki and how to review a picture before it leaks something, for contributors.
+6. [Self-hosting: when and why, with SearXNG](Self-Hosting-When-and-Why-with-SearXNG-as-the-Worked-Example.md) (draft): The honest trade of running a service yourself, who sees a search query on four paths, a ten-row checklist and a SearXNG lab on loopback, for builders deciding what to host.
+7. [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md): Where this project uses a Twingate service account and which plan each use needs; nothing was run against an account.
+8. [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md): A home lab with two outbound-only connectors that stays reachable when the internet fails over; nothing was tested for this page.
+9. [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) (draft): The honest reason the connector droplets have public addresses and what going private would change; an unverified draft.
+10. [Why I picked these tools](Why-I-Picked-These-Tools.md): Which tool choices are personal picks and where each would change at work, for engineers weighing alternatives.
+11. [From commit to pipeline](From-Commit-to-Pipeline.md): What CI, CD, DevOps and DevSecOps mean here and which gate stops what, for engineers.
+12. [Trace one change end to end](Trace-One-Change-End-to-End.md): One real pull request followed through every gate of the pipeline, for engineers.
+13. [Why the clouds differ](Why-the-Clouds-Differ.md) (draft): The three differences between AWS, Azure and GCP that change the bill and the design; an unverified draft.
+14. [AWS: account preparation](Provider-AWS-Account-Preparation.md) (draft): Finish with an AWS account that is protected, empty and watched, before any infrastructure; an unverified draft.
+15. [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) (draft): The network, firewall, machine and machine identity built on AWS; an unverified draft.
+16. [AWS: where the money goes](Provider-AWS-Cost-Lesson.md) (draft): The AWS charges that surprise learners, the arithmetic, and how to prove the bill is back to zero; an unverified draft.
+17. [Azure: account preparation](Provider-Azure-Account-Preparation.md) (draft): Finish with an Azure subscription that is protected, empty and watched, before any infrastructure; an unverified draft.
+18. [Azure: the same four pieces](Provider-Azure-The-Same-Four-Pieces.md) (draft): The network, firewall, machine and machine identity built on Azure; an unverified draft.
+19. [Azure: where the money goes](Provider-Azure-Cost-Lesson.md) (draft): The Azure charges that surprise learners, the arithmetic, and how to prove the bill is back to zero; an unverified draft.
+20. [GCP: account preparation](Provider-GCP-Account-Preparation.md) (draft): Finish with a Google Cloud project that is protected, empty and watched, before any infrastructure; an unverified draft.
+21. [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md) (draft): The network, firewall, machine and machine identity built on GCP; an unverified draft.
+22. [GCP: where the money goes](Provider-GCP-Cost-Lesson.md) (draft): Why GCP's no-public-address design can be cheaper, where that stops being true and how to prove the bill is back to zero; an unverified draft.
+23. [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md): How companies build campus, branch, data center and cloud networks compared with this one VPC, for engineers.
+24. [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md): How large organizations run infrastructure differently from this one-account project, for engineers.
+25. [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md): Change tickets, CABs and freezes explained for readers who hear them at work; this project uses none of it.
+26. [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md): Where this project's Doppler and Twingate choices sit next to enterprise identity and secrets practice, for engineers.
+27. [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md): Write a ticket, a change request and a runbook for a real merged change, for learners preparing for company work.
+28. [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md): Roles that surround this work and what to learn next, for readers choosing a direction.
+29. [How this project is planned](How-This-Project-Is-Planned.md): The written backlog, sprints and definition of done this project uses, for readers curious how the work is run.
+30. [Project status](Project-Status.md): Open issues and pull requests by state, generated from GitHub; a reference page, not a lesson.
+31. [Repository growth](Repository-Growth.md): Stars, forks and weekly merged work drawn from GitHub data, with the as-of date printed.
+32. [Screenshots policy](Screenshots-Policy.md): What may be pictured in the wiki and how to review a picture before it leaks something, for contributors.
 
 ### Reference
 
