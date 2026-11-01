@@ -226,7 +226,8 @@ def test_the_pages_the_brief_names_have_a_hand_chosen_related_list():
         for e in m["pages"][gid]:
             assert e["page"] in chosen, f"{e['page']} has no related list"
             assert gwn.RELATED_MIN <= len(chosen[e["page"]]) <= gwn.RELATED_MAX
-    assert len(chosen) == 24
+    # 25 since the OPSEC lesson (issue #389) joined the privacy track with a hand-chosen list of its own.
+    assert len(chosen) == 25
     # Jumping between sections works: the lists cross the track boundary both ways.
     by_group = {e["page"]: gid for gid, pages in m["pages"].items() for e in pages}
     assert any(by_group[r] != "privacy" for p, rel in chosen.items() if by_group[p] == "privacy" for r in rel)
