@@ -200,6 +200,15 @@
   "docs/wiki/images/privacy-security-and-anonymity-three-different-things-and-why-there-is-no-silver-bullet-diagram-6.png": {
     "sha256": "3e7a9fb20982383047e8d9dd89dea76c4e9641ac76e2413b7e1be4f11a00e877"
   },
+  "docs/wiki/images/raid-levels-parity-rebuilds-and-why-raid-is-continuity-not-a-backup-diagram-1.png": {
+    "sha256": "3f9246679b5565a7901acb61fdc6e73a0fc5a96902aba8cc7755e9b90c11ceb5"
+  },
+  "docs/wiki/images/raid-levels-parity-rebuilds-and-why-raid-is-continuity-not-a-backup-diagram-2.png": {
+    "sha256": "430cfdd56f202e4722b1b9954b8142a2301594a0519c69773070fd50873ac594"
+  },
+  "docs/wiki/images/raid-levels-parity-rebuilds-and-why-raid-is-continuity-not-a-backup-diagram-3.png": {
+    "sha256": "a2713b40f877a1797d6f8429b8a542d73dc0f1364a75128b3288e1d092b97fe1"
+  },
   "docs/wiki/images/red-and-blue-yin-yang-and-your-lab-os-diagram-1.png": {
     "sha256": "32ea564eae0c1b56fcf7c57ef403c9eca283d1a2dfc96aeb4cfb34b44df63917"
   },
