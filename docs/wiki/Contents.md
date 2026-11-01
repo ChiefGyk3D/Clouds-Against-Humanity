@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (135 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (136 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -22,7 +22,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Core path: read in this order](#core-path-read-in-this-order) (21)
 - [Foundations: OS and Linux](#foundations-os-and-linux) (11)
 - [Foundations: networking](#foundations-networking) (5)
-- [Foundations: identity and secrets](#foundations-identity-and-secrets) (7)
+- [Foundations: identity and secrets](#foundations-identity-and-secrets) (8)
 - [Foundations: infrastructure as code](#foundations-infrastructure-as-code) (7)
 - [Foundations: web hosting](#foundations-web-hosting) (4)
 - [Foundations: security tools and threat modeling](#foundations-security-tools-and-threat-modeling) (7)
@@ -103,6 +103,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | Page | What it is for and who it is for | Audience | Status |
 | --- | --- | --- | --- |
 | [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) | What an API is, how to read a request, a response and JSON, and what a token is, for readers new to all three. | learner |  |
+| [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md) | Symmetric and asymmetric keys together, MACs, signatures, PKI, at rest versus in transit, key custody, NIST defaults and post-quantum planning, with a free drill. | learner | draft |
 | [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md) | Directories, identity providers, SSO, SAML, OAuth and OIDC in plain words, for readers heading into enterprise identity. | learner |  |
 | [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) | What encoding, hashing, encryption and signing each give you and what they do not, for readers who lump them together. | learner |  |
 | [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md) | Blast radius, assume breach and defense in depth as one mindset question to ask of any system. | learner |  |

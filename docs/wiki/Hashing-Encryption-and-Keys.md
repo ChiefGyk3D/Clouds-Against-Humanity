@@ -1,6 +1,6 @@
 # Hashing, encryption and keys: what each one is for
 
-Side page to the start-from-zero pages. Read it before [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) if "hashed", "encrypted", "signed" and "key" all sound like the same thing, or at any point you meet them and want them told apart. Next: [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md).
+Side page to the start-from-zero pages. Read it before [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) if "hashed", "encrypted", "signed" and "key" all sound like the same thing, or at any point you meet them and want them told apart. When you want the next layer (how symmetric and asymmetric encryption combine, certificates and PKI, data at rest versus in transit, key custody, and what NIST recommends now), read [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md). Next: [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
