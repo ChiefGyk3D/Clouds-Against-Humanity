@@ -84,7 +84,7 @@ file does not match the manifest. -->
 - [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
 - [Full list (4)](Contents.md#foundations-web-hosting)
 </details>
-<details><summary><b>Foundations: security tools and threat modeling</b> (10)</summary>
+<details><summary><b>Foundations: security tools and threat modeling</b> (11)</summary>
 
 - [Threats in plain words](Threats-in-Plain-Words.md)
 - [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md)
@@ -96,7 +96,8 @@ file does not match the manifest. -->
 - [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md) (draft)
 - [How I2P works](How-I2P-Works-Tunnels-Garlic-Routing-and-the-Network-Database.md) (draft)
 - [The darknet landscape: markets, OPSEC and layering](The-Darknet-Landscape-Markets-OPSEC-Clearnet-and-Layering-Tor-I2P-and-VPN.md) (draft)
-- [Full list (10)](Contents.md#foundations-security-tools-and-threat-modeling)
+- [How Bitcoin works](How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable.md) (draft)
+- [Full list (11)](Contents.md#foundations-security-tools-and-threat-modeling)
 </details>
 <details><summary><b>Foundations: network and host defense</b> (8)</summary>
 

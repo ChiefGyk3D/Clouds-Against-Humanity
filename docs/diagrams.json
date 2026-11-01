@@ -44,6 +44,21 @@
   "docs/wiki/images/home-diagram-1.png": {
     "sha256": "64a67622aa75222a3e25fb53f47c4013c6a7f53f9a342da59a447ed32f531897"
   },
+  "docs/wiki/images/how-bitcoin-works-keys-utxos-mining-and-why-it-is-pseudonymous-and-traceable-diagram-1.png": {
+    "sha256": "11c3b31b2e6f72cb2b57b2e0929f8785a836ed8249c11b8c33befec34f496750"
+  },
+  "docs/wiki/images/how-bitcoin-works-keys-utxos-mining-and-why-it-is-pseudonymous-and-traceable-diagram-2.png": {
+    "sha256": "225fa30b0633754678a4e18972330d58808ddb4d48b5357ccddc0b1340a874a6"
+  },
+  "docs/wiki/images/how-bitcoin-works-keys-utxos-mining-and-why-it-is-pseudonymous-and-traceable-diagram-3.png": {
+    "sha256": "2b5de18277fb81a7dc857a8ae03d9d6972ec7ba521bfc319c9c43c1257d2ef70"
+  },
+  "docs/wiki/images/how-bitcoin-works-keys-utxos-mining-and-why-it-is-pseudonymous-and-traceable-diagram-4.png": {
+    "sha256": "f134a7edd82ea1e40bee76cf4af5dcb587337516a0193147a84d3b709eb6ad4d"
+  },
+  "docs/wiki/images/how-bitcoin-works-keys-utxos-mining-and-why-it-is-pseudonymous-and-traceable-diagram-5.png": {
+    "sha256": "6a01eb0c97f5d7b11a1ae1bd07bffa0d20a5c5a3b5a48ec05902b776b6be6955"
+  },
   "docs/wiki/images/how-i2p-works-tunnels-garlic-routing-and-the-network-database-diagram-1.png": {
     "sha256": "0d919892e333ef667326ab498bffa8a38af8790541b278162cf12485c1bcaed8"
   },
