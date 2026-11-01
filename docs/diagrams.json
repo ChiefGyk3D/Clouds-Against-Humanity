@@ -257,6 +257,15 @@
   "docs/wiki/images/twingate-diagram-1.png": {
     "sha256": "897606c875b07769119f5ac11f12aa13d0debb225cf6283e9ff653a788c07385"
   },
+  "docs/wiki/images/us-privacy-law-no-general-right-the-patchwork-data-brokers-social-security-numbers-and-license-plate-readers-diagram-1.png": {
+    "sha256": "33813318fb8c0cc75489edca692fa34c81a6614a937870bc69885cdce15d7b95"
+  },
+  "docs/wiki/images/us-privacy-law-no-general-right-the-patchwork-data-brokers-social-security-numbers-and-license-plate-readers-diagram-2.png": {
+    "sha256": "74a1a7d0833776c1500908dc301da1b681d6746298db5d1cf5c361d0efcd2463"
+  },
+  "docs/wiki/images/us-privacy-law-no-general-right-the-patchwork-data-brokers-social-security-numbers-and-license-plate-readers-diagram-3.png": {
+    "sha256": "61755ffb185925252be21dd1dabc67d172a361f905dc2266a02a5e30f10b93ee"
+  },
   "docs/wiki/images/wallets-and-key-custody-hot-and-cold-hardware-wallets-recovery-shamir-and-multisig-diagram-1.png": {
     "sha256": "ef51b5975b62ad6ca93ba068f067af2ab3bd988d2b9912387ba2fe90012ea559"
   },

@@ -27,7 +27,7 @@ If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md):
 
 ## Every page, by theme
 
-All 150 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
+All 151 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
 
 ### Start here, by kind of reader
 
@@ -105,6 +105,7 @@ All 150 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 - [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md) (draft): Privacy as blinds and security as locks, Monero as a worked example, privacy law basics, physical security and why lockpicking is a hobby, with a free audit of your desk.
 - [Secrets from day one](Secrets-From-Day-One.md): A password manager, Doppler for every asset and the .env rules, as personal habits for anyone about to start writing code.
 - [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) (draft): Confidentiality, integrity and availability in plain words, how real failures map to each, and this project's controls checked against all three.
+- [US privacy law and the patchwork](US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers.md) (draft): Page 2 of 3 on GRC: what the Constitution says about privacy, the federal and state patchwork, data brokers, Social Security numbers and license plate readers, with dated sources and a labeled opinion section.
 
 ### Foundations: infrastructure as code
 
