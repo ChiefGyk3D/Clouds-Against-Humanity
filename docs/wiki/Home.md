@@ -27,7 +27,7 @@ If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md):
 
 ## Every page, by theme
 
-All 142 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
+All 143 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
 
 ### Start here, by kind of reader
 
@@ -131,6 +131,7 @@ All 142 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 - [Threat Dragon exercise](Threat-Dragon-Exercise.md): Draw this pipeline's trust boundaries in OWASP Threat Dragon and attach threats to them, for security-minded readers.
 - [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md): The same pipeline viewed through STRIDE, MITRE ATT&CK and MITRE ATLAS, with files to open them, for security-minded readers.
 - [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) (draft): How Tor and I2P work, who uses them, Tor Browser, Tails, Whonix and Qubes compared, and a Monero node as the privacy-versus-security example.
+- [How a VPN works](How-a-VPN-Works-Tunnels-What-It-Hides-What-It-Does-Not-and-What-an-Audit-Proves.md) (draft): A packet with and without a VPN, WireGuard, OpenVPN and IPsec in plain terms, what a VPN moves and does not hide, DNS and IPv6 leaks, what no-logs claims and audits prove, with seven diagrams and two free exercises.
 - [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md) (draft): Circuits, the three hops, guards, directory authorities and the consensus, bridges, onion services and the dated weaknesses, with six diagrams, for readers who want the machinery under Tor.
 - [How I2P works](How-I2P-Works-Tunnels-Garlic-Routing-and-the-Network-Database.md) (draft): One-way tunnels, garlic routing and cloves, the network database and floodfills, reseeding, outproxies, the research on its weak points and an honest comparison with Tor.
 - [Blockchain fundamentals](Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks.md) (draft): Page 1 of 5 on cryptocurrency: hashes, blocks, nodes, a transaction's life, proof of work and stake, forks, full nodes and what a blockchain is not, with a dated read of the first two Bitcoin blocks.

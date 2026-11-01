@@ -59,6 +59,27 @@
   "docs/wiki/images/home-diagram-1.png": {
     "sha256": "64a67622aa75222a3e25fb53f47c4013c6a7f53f9a342da59a447ed32f531897"
   },
+  "docs/wiki/images/how-a-vpn-works-tunnels-what-it-hides-what-it-does-not-and-what-an-audit-proves-diagram-1.png": {
+    "sha256": "b0467ef0d515095bbcfc309235d7a10c9b584f5d6e4e4e9b93888c76eb64c332"
+  },
+  "docs/wiki/images/how-a-vpn-works-tunnels-what-it-hides-what-it-does-not-and-what-an-audit-proves-diagram-2.png": {
+    "sha256": "d8ed9575f4480d3f29154bc5145306822f92b17ab7df992e00c21592b6c2efd3"
+  },
+  "docs/wiki/images/how-a-vpn-works-tunnels-what-it-hides-what-it-does-not-and-what-an-audit-proves-diagram-3.png": {
+    "sha256": "6c213dda09bd3414daebadaedc57fee506a286f15787d9008b57e763ab314d75"
+  },
+  "docs/wiki/images/how-a-vpn-works-tunnels-what-it-hides-what-it-does-not-and-what-an-audit-proves-diagram-4.png": {
+    "sha256": "3aac38037ae1bcc35223bd5af7a0b9683aaade21f5da650084cd428bea083118"
+  },
+  "docs/wiki/images/how-a-vpn-works-tunnels-what-it-hides-what-it-does-not-and-what-an-audit-proves-diagram-5.png": {
+    "sha256": "a45717044ed7af3bb6a824234f1723e0fdaed1032f868ade6cdc1b883eb5020b"
+  },
+  "docs/wiki/images/how-a-vpn-works-tunnels-what-it-hides-what-it-does-not-and-what-an-audit-proves-diagram-6.png": {
+    "sha256": "3514ce8121ec9304a292cb63dd079c8b54d876dd25d93fd07c6593a8192df913"
+  },
+  "docs/wiki/images/how-a-vpn-works-tunnels-what-it-hides-what-it-does-not-and-what-an-audit-proves-diagram-7.png": {
+    "sha256": "5e21b882c4c9458c03b959915653bad8aaedec3250a3dd0a850bcb910072fba8"
+  },
   "docs/wiki/images/how-bitcoin-works-keys-utxos-mining-and-why-it-is-pseudonymous-and-traceable-diagram-1.png": {
     "sha256": "11c3b31b2e6f72cb2b57b2e0929f8785a836ed8249c11b8c33befec34f496750"
   },

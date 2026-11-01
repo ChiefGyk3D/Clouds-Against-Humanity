@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (142 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (143 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -25,7 +25,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Foundations: identity and secrets](#foundations-identity-and-secrets) (8)
 - [Foundations: infrastructure as code](#foundations-infrastructure-as-code) (7)
 - [Foundations: web hosting](#foundations-web-hosting) (4)
-- [Foundations: security tools and threat modeling](#foundations-security-tools-and-threat-modeling) (12)
+- [Foundations: security tools and threat modeling](#foundations-security-tools-and-threat-modeling) (13)
 - [Foundations: network and host defense](#foundations-network-and-host-defense) (8)
 - [Foundations: deception and honeypots](#foundations-deception-and-honeypots) (11)
 - [Detection and monitoring](#detection-and-monitoring) (13)
@@ -144,6 +144,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [Threat Dragon exercise](Threat-Dragon-Exercise.md) | Draw this pipeline's trust boundaries in OWASP Threat Dragon and attach threats to them, for security-minded readers. | security reader |  |
 | [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md) | The same pipeline viewed through STRIDE, MITRE ATT&CK and MITRE ATLAS, with files to open them, for security-minded readers. | security reader |  |
 | [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) | How Tor and I2P work, who uses them, Tor Browser, Tails, Whonix and Qubes compared, and a Monero node as the privacy-versus-security example. | learner | draft |
+| [How a VPN works](How-a-VPN-Works-Tunnels-What-It-Hides-What-It-Does-Not-and-What-an-Audit-Proves.md) | A packet with and without a VPN, WireGuard, OpenVPN and IPsec in plain terms, what a VPN moves and does not hide, DNS and IPv6 leaks, what no-logs claims and audits prove, with seven diagrams and two free exercises. | learner | draft |
 | [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md) | Circuits, the three hops, guards, directory authorities and the consensus, bridges, onion services and the dated weaknesses, with six diagrams, for readers who want the machinery under Tor. | learner | draft |
 | [How I2P works](How-I2P-Works-Tunnels-Garlic-Routing-and-the-Network-Database.md) | One-way tunnels, garlic routing and cloves, the network database and floodfills, reseeding, outproxies, the research on its weak points and an honest comparison with Tor. | learner | draft |
 | [Blockchain fundamentals](Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks.md) | Page 1 of 5 on cryptocurrency: hashes, blocks, nodes, a transaction's life, proof of work and stake, forks, full nodes and what a blockchain is not, with a dated read of the first two Bitcoin blocks. | learner | draft |
