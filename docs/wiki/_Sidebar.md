@@ -84,20 +84,16 @@ file does not match the manifest. -->
 - [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
 - [Full list (4)](Contents.md#foundations-web-hosting)
 </details>
-<details><summary><b>Foundations: security tools and threat modeling</b> (11)</summary>
+<details><summary><b>Foundations: security tools and threat modeling</b> (12)</summary>
 
-- [Threats in plain words](Threats-in-Plain-Words.md)
-- [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md)
-- [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
-- [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md)
-- [Threat model exercise](Threat-Model-Exercise.md)
-- [Threat Dragon exercise](Threat-Dragon-Exercise.md)
-- [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) (draft)
-- [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md) (draft)
-- [How I2P works](How-I2P-Works-Tunnels-Garlic-Routing-and-the-Network-Database.md) (draft)
-- [Blockchain fundamentals](Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks.md) (draft)
-- [The darknet landscape: markets, OPSEC and layering](The-Darknet-Landscape-Markets-OPSEC-Clearnet-and-Layering-Tor-I2P-and-VPN.md) (draft)
-- [Full list (11)](Contents.md#foundations-security-tools-and-threat-modeling)
+<details><summary>Threats, privacy networks and cryptocurrency (12)</summary>
+
+- [Threats in plain words](Threats-in-Plain-Words.md) · [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) · [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md) · [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md) · [Threat model exercise](Threat-Model-Exercise.md)
+- [Threat Dragon exercise](Threat-Dragon-Exercise.md) · [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) (draft) · [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md) (draft) · [How I2P works](How-I2P-Works-Tunnels-Garlic-Routing-and-the-Network-Database.md) (draft) · [Blockchain fundamentals](Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks.md) (draft)
+- [The darknet landscape: markets, OPSEC and layering](The-Darknet-Landscape-Markets-OPSEC-Clearnet-and-Layering-Tor-I2P-and-VPN.md) (draft) · [How Monero works](How-Monero-Works-Compared-with-Bitcoin-and-Ethereum-DeFi-Mixers-Swaps-and-Ransomware.md) (draft)
+</details>
+
+- [Full list (12)](Contents.md#foundations-security-tools-and-threat-modeling)
 </details>
 <details><summary><b>Foundations: network and host defense</b> (8)</summary>
 
