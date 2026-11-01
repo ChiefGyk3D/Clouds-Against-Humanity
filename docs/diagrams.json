@@ -44,6 +44,24 @@
   "docs/wiki/images/home-diagram-1.png": {
     "sha256": "64a67622aa75222a3e25fb53f47c4013c6a7f53f9a342da59a447ed32f531897"
   },
+  "docs/wiki/images/how-i2p-works-tunnels-garlic-routing-and-the-network-database-diagram-1.png": {
+    "sha256": "0d919892e333ef667326ab498bffa8a38af8790541b278162cf12485c1bcaed8"
+  },
+  "docs/wiki/images/how-i2p-works-tunnels-garlic-routing-and-the-network-database-diagram-2.png": {
+    "sha256": "01ed60fbe5ceff92f6e24929b7882f43578198433eae85ea4d5229cbcf79f8b7"
+  },
+  "docs/wiki/images/how-i2p-works-tunnels-garlic-routing-and-the-network-database-diagram-3.png": {
+    "sha256": "a31fde79b9da03d917296f52fce042b5bed5df4283aa6102126bc275b82f985d"
+  },
+  "docs/wiki/images/how-i2p-works-tunnels-garlic-routing-and-the-network-database-diagram-4.png": {
+    "sha256": "c1cdc4615ebd7275ac8a69b89cb35f1757ddee3bc8fda98220c48699a38df4e5"
+  },
+  "docs/wiki/images/how-i2p-works-tunnels-garlic-routing-and-the-network-database-diagram-5.png": {
+    "sha256": "cde427bb80637d949af9ca07abca6cf14e868badfe88fe32be94ea90fcfbc3d8"
+  },
+  "docs/wiki/images/how-i2p-works-tunnels-garlic-routing-and-the-network-database-diagram-6.png": {
+    "sha256": "c9841a4a65f6dcabcbe8026ecb6eb68c107a903fb63b75236ccc9951af0845f8"
+  },
   "docs/wiki/images/how-tor-works-in-depth-circuits-relays-directory-authorities-and-onion-services-diagram-1.png": {
     "sha256": "e19b017566a6c0e4af99701291c6d1f442b1b50eb260348ca32c5ab1e0c0322a"
   },
