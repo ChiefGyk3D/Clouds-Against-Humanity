@@ -218,6 +218,24 @@
   "docs/wiki/images/terraform-reference-diagram-1.png": {
     "sha256": "8d76d16ffea6d2409e793288aa26cbbb6a2cf3172718cb64f9f28d759f8e0f30"
   },
+  "docs/wiki/images/the-browsing-setups-compared-tor-browser-brave-whonix-tails-and-qubes-with-whonix-diagram-1.png": {
+    "sha256": "a114f9adeb679524eb32a679d63c1dcef590e401ab07c617caba2edd0cf3fd62"
+  },
+  "docs/wiki/images/the-browsing-setups-compared-tor-browser-brave-whonix-tails-and-qubes-with-whonix-diagram-2.png": {
+    "sha256": "d7745035a09a15d85994b1eec06fe967554b4eb0d5188ae8d1e79000e3234f6e"
+  },
+  "docs/wiki/images/the-browsing-setups-compared-tor-browser-brave-whonix-tails-and-qubes-with-whonix-diagram-3.png": {
+    "sha256": "76671c8fad597127f598dd9c1ff4ca6f1687a321dbf48b733809e9d4e7c7cd42"
+  },
+  "docs/wiki/images/the-browsing-setups-compared-tor-browser-brave-whonix-tails-and-qubes-with-whonix-diagram-4.png": {
+    "sha256": "4bb3272b11b9284e414fc33a7dd38fdf9e2387d56681ebccdcb36d581856b59b"
+  },
+  "docs/wiki/images/the-browsing-setups-compared-tor-browser-brave-whonix-tails-and-qubes-with-whonix-diagram-5.png": {
+    "sha256": "a9f13185e047a09ebd2e49f0b93b616eb1704436e3512b1038a1f311eed433f0"
+  },
+  "docs/wiki/images/the-browsing-setups-compared-tor-browser-brave-whonix-tails-and-qubes-with-whonix-diagram-6.png": {
+    "sha256": "19139f7c51f0c1f285a860028457739a583c6ddab2e96d62b27b9241ac05d75e"
+  },
   "docs/wiki/images/threat-model-diagram-1.png": {
     "sha256": "46f0d51a36ef29ce2f660d4aef6602b03fab603bf4c7644aad4a2cca41d948c9"
   },
