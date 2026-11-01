@@ -191,6 +191,18 @@
   "docs/wiki/images/twingate-diagram-1.png": {
     "sha256": "897606c875b07769119f5ac11f12aa13d0debb225cf6283e9ff653a788c07385"
   },
+  "docs/wiki/images/wallets-and-key-custody-hot-and-cold-hardware-wallets-recovery-shamir-and-multisig-diagram-1.png": {
+    "sha256": "ef51b5975b62ad6ca93ba068f067af2ab3bd988d2b9912387ba2fe90012ea559"
+  },
+  "docs/wiki/images/wallets-and-key-custody-hot-and-cold-hardware-wallets-recovery-shamir-and-multisig-diagram-2.png": {
+    "sha256": "817c72c41741d46f022178a6d81fc37db98f08cf41cc5b7c629b08635272997f"
+  },
+  "docs/wiki/images/wallets-and-key-custody-hot-and-cold-hardware-wallets-recovery-shamir-and-multisig-diagram-3.png": {
+    "sha256": "7582f3c0a68f122400c1bddb27fdd26e61924a708ad5772cc974f51735ea8915"
+  },
+  "docs/wiki/images/wallets-and-key-custody-hot-and-cold-hardware-wallets-recovery-shamir-and-multisig-diagram-4.png": {
+    "sha256": "3c1cef4837a68b6843a106a00e6b9eeea4e487475f64587b8e797ec4b2de948f"
+  },
   "docs/wiki/images/what-is-infrastructure-as-code-diagram-1.png": {
     "sha256": "be9827ee42d541af85df9d5d50395e21e42807a58528c16a46f2d8b4951169ce"
   },
