@@ -173,6 +173,15 @@
   "docs/wiki/images/opentofu-stacks-and-modules-diagram-1.png": {
     "sha256": "eac3a9eceeca15af7d24459ca10d06fb43a6892641a92ed485f4504473911b5e"
   },
+  "docs/wiki/images/paper-wallets-generators-and-offline-key-generation-tails-electrum-and-monero-diagram-1.png": {
+    "sha256": "68a8af2715f4fd5afb1caa7c7e3b4633836152521c09889c4ab0b18263d92378"
+  },
+  "docs/wiki/images/paper-wallets-generators-and-offline-key-generation-tails-electrum-and-monero-diagram-2.png": {
+    "sha256": "450ea8996db963584579b05fd07b1661d60ab66d6c8251bb428f0efeca8f0fae"
+  },
+  "docs/wiki/images/paper-wallets-generators-and-offline-key-generation-tails-electrum-and-monero-diagram-3.png": {
+    "sha256": "bb9949f16cc148ba422851e35834bc051d7268436b34b601f97d24fefd337a51"
+  },
   "docs/wiki/images/privacy-law-around-the-world-gdpr-pipeda-popia-and-pipl-compared-with-the-united-states-diagram-1.png": {
     "sha256": "95b5622ac7c6a922e7590d2cd0fa6753805679e081b28b1f2aa5cea4aee5b0b0"
   },
