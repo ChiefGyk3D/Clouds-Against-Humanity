@@ -137,6 +137,98 @@ def test_the_law_paragraph_tells_learners_to_check_their_jurisdiction():
     assert "nothing here is legal advice" in law.lower()
 
 
+MYTH_HEADING = '## The myth: "Tor is a government backdoor, because the government paid for it"'
+URL = re.compile(r"\]\(https://[^)\s]+\)")
+DATE_READ = "2026-11-01"
+SENTENCES = re.compile(r"(?<=\.)\s+")
+SNOWDEN_NEGATION = re.compile(r"\b(no source|does not say|not say)\b")
+# Names that would identify the maintainer's contacts if they appeared in his attributed statement.
+IDENTIFYING = re.compile(
+    r"\b(iran|iraq|syria|egypt|lebanon|jordan|saudi|yemen|turkey|dubai|emirates|qatar|"
+    r"telegram|signal|matrix|discord|whatsapp|session|briar|ricochet|xmpp)\b|\d",
+    re.IGNORECASE,
+)
+
+
+def myth_section(body: str) -> str:
+    return body.split(MYTH_HEADING)[1].split("\n## ")[0]
+
+
+def maintainer_sentence(section: str) -> str:
+    return next(s for s in SENTENCES.split(section) if "personally spoken with LGBTQ people" in s)
+
+
+def myth_rows(body: str) -> list[list[str]]:
+    return [r for r in register_rows(body) if r[0].startswith("Myth section:")]
+
+
+def test_the_myth_section_exists_after_who_uses_these_networks_and_has_its_parts():
+    body = text()
+    assert MYTH_HEADING in body
+    assert body.index("## Who uses these networks") < body.index(MYTH_HEADING) < body.index("## The tools and what each is for")
+    section = myth_section(body)
+    for part in ("### What is true", "### Why funding does not show a backdoor", "### The cover argument",
+                 "### Who relies on it", "### Documented de-anonymizations", "### What is known, and what cannot be proven"):
+        assert part in section, part
+    assert "No one can prove a negative" in section
+
+
+def test_every_myth_claim_has_a_register_row_with_a_url_and_the_read_date():
+    rows = myth_rows(text())
+    assert len(rows) >= 18, "the guard collected too few myth rows"
+    for row in rows:
+        assert URL.search(row[1]) or "maintainer" in row[1], row[0]
+        assert DATE_READ in row[2] or "Read in the issue" in row[2], row[0]
+    sources = " ".join(r[1] for r in rows)
+    for host in ("torproject.org", "freehaven.net", "bbc.com", "propublica.org", "securedrop.org", "freedom.press",
+                 "wired.com", "theguardian.com", "freedom-to-tinker.com"):
+        assert host in sources, host
+    assert sum(DATE_READ in r[2] for r in rows) >= 18
+
+
+def test_the_myth_section_prints_no_onion_address_or_funding_percentage():
+    section = myth_section(text())
+    assert not ONION.findall(section)
+    assert ".onion" not in section, "name where to find an address instead of printing one"
+    assert "no figure or percentage" in section
+    assert not re.search(r"\d+\s*(%|percent)\s+(of (its|their|the)\s+)?(money|funding|budget|revenue)", section)
+
+
+def test_the_maintainer_statement_is_attributed_without_detail():
+    sentence = maintainer_sentence(myth_section(text()))
+    assert "In his own words, the maintainer" in sentence
+    assert "LGBTQ people in the Middle East" in sentence
+    assert "the only safe place to be open" in sentence
+    assert not IDENTIFYING.search(sentence.replace("LGBTQ people in the Middle East", "")), sentence
+
+
+def test_the_maintainer_guard_bites():
+    assert IDENTIFYING.search("He spoke with 12 people in Egypt on Telegram.")
+    assert not IDENTIFYING.search("In his own words, the maintainer has personally spoken with people.")
+
+
+def test_the_page_never_says_the_snowden_documents_went_through_securedrop():
+    section = myth_section(text())
+    checked = 0
+    for paragraph in section.split("\n\n"):
+        if "Snowden" in paragraph and "SecureDrop" in paragraph:
+            checked += 1
+            assert SNOWDEN_NEGATION.search(paragraph), paragraph
+    assert checked >= 1, "the guard collected nothing"
+
+
+def test_the_snowden_guard_bites():
+    bad = "Snowden shared the documents through SecureDrop."
+    assert "Snowden" in bad and "SecureDrop" in bad and not SNOWDEN_NEGATION.search(bad)
+
+
+def test_the_carnegie_mellon_funding_claim_stays_attributed_to_the_tor_project():
+    section = myth_section(text())
+    sentence = next(s for s in SENTENCES.split(section) if "apparently paid by the FBI" in s)
+    assert "Tor Project" in sentence
+    assert "independent report" in section
+
+
 def test_the_sibling_lessons_are_named_in_plain_text_not_linked():
     body = text()
     assert "privacy versus security" in body and "cryptography" in body
