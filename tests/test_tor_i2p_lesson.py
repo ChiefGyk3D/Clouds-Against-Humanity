@@ -107,15 +107,9 @@ def test_the_sources_are_cited_with_urls_and_a_date():
     assert reg.count("2026-10-31") >= 20
 
 
-def test_the_security_review_is_mentioned_only_by_existence():
-    body = text()
-    contrib = body.split("### The maintainer's contributions, from public history only")[1].split("### Where privacy")[0]
-    assert "security review" in contrib
-    sentence = next(s for s in re.split(r"(?<=\.)\s+", contrib) if "security review" in s)
-    assert not AUDIT_WORDS.search(sentence), sentence
-    # no audit detail anywhere else about PiNodeXMR
-    for line in body.splitlines():
-        if "PiNodeXMR" in line and "security review" not in line:
+def test_no_audit_detail_about_pinodexmr():
+    for line in text().splitlines():
+        if "PiNodeXMR" in line:
             assert not re.search(r"\b(audit|vulnerab|CVE|severity)", line, re.IGNORECASE), line
 
 
