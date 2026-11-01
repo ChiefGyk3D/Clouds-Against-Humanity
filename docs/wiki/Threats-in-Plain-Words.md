@@ -4,6 +4,23 @@
 [Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Threats in plain words
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The eight words, with one real case each](#the-eight-words-with-one-real-case-each)
+- [How the words connect](#how-the-words-connect)
+- [Reading a CVE record: the one from core step 11](#reading-a-cve-record-the-one-from-core-step-11)
+- [CVSS: what it says, and what it does not](#cvss-what-it-says-and-what-it-does-not)
+- [KEV: the list of what is being exploited now](#kev-the-list-of-what-is-being-exploited-now)
+- [What SOC 2, ISO 27001 and the NIST frameworks are for](#what-soc-2-iso-27001-and-the-nist-frameworks-are-for)
+- [Hands-on, free path: read public sources and your own made-up list](#hands-on-free-path-read-public-sources-and-your-own-made-up-list)
+- [Spot the phishing lure (offline, no clicking)](#spot-the-phishing-lure-offline-no-clicking)
+- [Build it, break it, detect it, evade it, defend it](#build-it-break-it-detect-it-evade-it-defend-it)
+- [Checkpoint](#checkpoint)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it at core step 11 ([Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md)) if "CVE-2018-13379" or "exploited" reads like noise, or at any point you meet these words and want each one told apart, with a real, dated case. Next: [Threat model](Threat-Model.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

@@ -6,6 +6,31 @@
 Previous: [Lab: publish a web server as an onion service and an I2P site](Lab-Publish-a-Web-Server-as-a-Tor-Onion-Service-and-an-I2P-Site-Time-Boxed-and-Defensive.md) / Next: [How Bitcoin works](How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The stance, the background and where these lessons come from](#the-stance-the-background-and-where-these-lessons-come-from)
+- [The set, and what this page is part of](#the-set-and-what-this-page-is-part-of)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [The idea in one paragraph](#the-idea-in-one-paragraph)
+- [Hashes, blocks and the chain: why tampering shows](#hashes-blocks-and-the-chain-why-tampering-shows)
+- [Merkle trees in plain terms](#merkle-trees-in-plain-terms)
+- [A real snapshot: the first two Bitcoin blocks](#a-real-snapshot-the-first-two-bitcoin-blocks)
+- [Nodes, gossip and the mempool](#nodes-gossip-and-the-mempool)
+- [The life of a transaction, from signing to confirmation](#the-life-of-a-transaction-from-signing-to-confirmation)
+- [Consensus in general: proof of work and proof of stake](#consensus-in-general-proof-of-work-and-proof-of-stake)
+- [Forks and reorganizations](#forks-and-reorganizations)
+- [What "decentralized" does and does not mean](#what-decentralized-does-and-does-not-mean)
+- [Full nodes, light clients and why running your own matters](#full-nodes-light-clients-and-why-running-your-own-matters)
+- [Public and private chains](#public-and-private-chains)
+- [What a blockchain is not](#what-a-blockchain-is-not)
+- [Free exercise: follow one famous transaction](#free-exercise-follow-one-famous-transaction)
+- [Exercises](#exercises)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Page one of five in the cryptocurrency set. Read it when "blockchain" is only a word to you, or when you work in security or IT and cryptocurrency keeps turning up in your job (a ransomware payment, an investigation, a custody question, a threat report) and you want the mechanics before the stories. It explains what a blockchain is, how a block, a hash and a Merkle tree fit together, what a node does, how a transaction becomes part of the record, how a network agrees on one history, what a fork is, what "decentralized" does and does not mean, why running your own full node matters, and what a blockchain is not. It also states the stance of this set and the background the lessons come from, once, here.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

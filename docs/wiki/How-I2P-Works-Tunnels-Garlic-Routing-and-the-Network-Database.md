@@ -6,6 +6,30 @@
 Previous: [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md) / Next: [The browsing setups compared](The-Browsing-Setups-Compared-Tor-Browser-Brave-Whonix-Tails-and-Qubes-with-Whonix.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The series, and what this page is part of](#the-series-and-what-this-page-is-part-of)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [The idea in one paragraph](#the-idea-in-one-paragraph)
+- [Tunnels: one-way paths, one for each direction](#tunnels-one-way-paths-one-for-each-direction)
+- [Garlic routing: bundled messages ("cloves")](#garlic-routing-bundled-messages-cloves)
+- [The network database: how routers and destinations are found](#the-network-database-how-routers-and-destinations-are-found)
+- [Peer profiling: who is allowed into your tunnels](#peer-profiling-who-is-allowed-into-your-tunnels)
+- [Every participant is a router](#every-participant-is-a-router)
+- [Outproxies: why I2P is mostly for the inside](#outproxies-why-i2p-is-mostly-for-the-inside)
+- [Eepsites and names: how a connection to a service looks](#eepsites-and-names-how-a-connection-to-a-service-looks)
+- [Transports: how routers talk to each other](#transports-how-routers-talk-to-each-other)
+- [What I2P is used for](#what-i2p-is-used-for)
+- [What the I2P project and researchers say is weak](#what-the-i2p-project-and-researchers-say-is-weak)
+- [Side by side: Tor circuits and I2P tunnels](#side-by-side-tor-circuits-and-i2p-tunnels)
+- [The honest comparison with Tor](#the-honest-comparison-with-tor)
+- [Exercises (reading only, nothing to install)](#exercises-reading-only-nothing-to-install)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Deep-dive page, third in the Tor, I2P and VPN series. Read it when you have met the word "I2P" (for example in [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md)) and want to know what the network is actually doing: why a message and its reply take different paths, what a "clove" is, how a router finds anybody without a central directory, what a floodfill router is, why I2P is mostly a network of services inside itself, what its own documentation and the academic research say about where it is weak, and how it honestly compares with Tor. The overview lesson explains what the two networks are for; this page does not repeat it, it opens the box.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

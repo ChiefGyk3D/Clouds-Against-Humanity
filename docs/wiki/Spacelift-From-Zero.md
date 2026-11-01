@@ -8,6 +8,25 @@
 Previous: [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) / Next: [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [Read this first: what this lesson touches, and what it never touches](#read-this-first-what-this-lesson-touches-and-what-it-never-touches)
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What a hosted runner is, and the alternatives](#what-a-hosted-runner-is-and-the-alternatives)
+- [Plans, workers and limits, as read on 2026-10-22](#plans-workers-and-limits-as-read-on-2026-10-22)
+- [The pieces, in the order you meet them](#the-pieces-in-the-order-you-meet-them)
+- [Why this project's proposed-run check is red by design](#why-this-projects-proposed-run-check-is-red-by-design)
+- [Free theory path: build and run the scratch stacks on your own computer](#free-theory-path-build-and-run-the-scratch-stacks-on-your-own-computer)
+- [Optional: your own Spacelift account and scratch repository](#optional-your-own-spacelift-account-and-scratch-repository)
+- [Build and destroy a bunch](#build-and-destroy-a-bunch)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Common mistakes](#common-mistakes)
+- [Checkpoint](#checkpoint)
+- [Claims register](#claims-register)
+- [Where to next](#where-to-next)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Lesson I3 of the four-lesson infrastructure-as-code track. The track: I1 "OpenTofu from zero: init, plan, apply, destroy" (`OpenTofu-From-Zero`), I2 "Plans, state, drift and recovery" (`Plans-State-Drift-and-Recovery`), **I3 this page**, I4 "Build and destroy a stack per service" (`Build-and-Destroy-Stack-Per-Service`). The other three are written at the same time and are plain text here until they merge; the names in code are their page names. A foundations side page to [Spacelift](Spacelift.md); no step of the core path is renumbered.
 
 > **Status: written from vendor documentation; the free local exercises were run once, the Spacelift console exercises were not.** On **2026-10-22** the author read the Spacelift pricing and documentation pages listed in the [claims register](#claims-register) with read-only `curl`, and ran the free local exercises (Exercises 1 and 2) on Linux with OpenTofu 1.12.6, pasting trimmed output from that run. The own-account path (Exercises 3 to 11) uses menu names as the documentation gave them that day; **nobody has run it against a real Spacelift account for this page**, so every console step, every message it shows and every statement about what the free plan lets you do is marked **est.** unless the claims register says it was read. Vendor pages change; if your screen disagrees, trust your screen and the vendor's current page, and tell the project (see [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md)). Windows PowerShell commands are **est.** (not run; no PowerShell was available when this was written).

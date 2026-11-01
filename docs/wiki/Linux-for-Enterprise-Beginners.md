@@ -6,6 +6,19 @@
 Previous: [The terminal and your first script](Terminal-and-Your-First-Script.md) / Next: [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Why Linux, and what "a distro" is](#why-linux-and-what-a-distro-is)
+- [The families you will meet](#the-families-you-will-meet)
+- [Survival skills, side by side](#survival-skills-side-by-side)
+- [What this project runs](#what-this-project-runs)
+- [Hands-on, free path: two families in throwaway containers](#hands-on-free-path-two-families-in-throwaway-containers)
+- [Build it, break it, detect it, defend it](#build-it-break-it-detect-it-defend-it)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it before [Droplet hardening](Droplet-Hardening.md) if the Linux commands there look like another language, or alongside [Containers and Docker basics](Containers-and-Docker-Basics.md). Next: [Droplet hardening](Droplet-Hardening.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

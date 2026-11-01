@@ -6,6 +6,20 @@
 Previous: [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md) / Next: [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [Free theory path: the six documents](#free-theory-path-the-six-documents)
+- [Where this appears in this project](#where-this-appears-in-this-project)
+- [Hands-on: a ticket and a change record in your own fork](#hands-on-a-ticket-and-a-change-record-in-your-own-fork)
+- [Build it, break it, detect it, evade it, defend it](#build-it-break-it-detect-it-evade-it-defend-it)
+- [Common mistakes](#common-mistakes)
+- [Checkpoint](#checkpoint)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it after [Enterprise engineering habits](Enterprise-Engineering-Habits.md) (core step 9) and the [Enterprise change management for beginners](Enterprise-Change-Management-for-Beginners.md) page. Those two explain the vocabulary; this page is the practice session: you write the ticket, the change record, the handover note, the runbook step, the post-mortem and the access request, and you learn what to do in your first week. Next: [Architecture overview](Architecture-Overview.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

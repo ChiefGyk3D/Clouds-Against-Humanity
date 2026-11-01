@@ -6,6 +6,21 @@
 Previous: [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md) / Next: [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [What happens when you type a URL](#what-happens-when-you-type-a-url)
+- [Certificates and trust chains in plain language](#certificates-and-trust-chains-in-plain-language)
+- [Where this shows up in this project](#where-this-shows-up-in-this-project)
+- [Free theory path: a lab on your own computer](#free-theory-path-a-lab-on-your-own-computer)
+- [Optional: the same lab across a real network (your own account)](#optional-the-same-lab-across-a-real-network-your-own-account)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it after [Networking basics](Networking-Basics-for-This-Project.md) (core step 3), and before [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) if "TLS", "certificate" or "DNS" are only words to you. It does not repeat what a request and a response look like: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) covers HTTP methods, status codes and headers, and this page links to it and goes deeper on the path underneath. Next: [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

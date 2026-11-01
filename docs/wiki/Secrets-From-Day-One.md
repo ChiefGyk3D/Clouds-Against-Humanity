@@ -6,6 +6,33 @@
 Previous: [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) / Next: [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [The maintainer's rule, in his words](#the-maintainers-rule-in-his-words)
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [Why never hardcode](#why-never-hardcode)
+- [The order: people first, then machines](#the-order-people-first-then-machines)
+- [Step 1: a password manager, from the first day](#step-1-a-password-manager-from-the-first-day)
+- [Step 2: a secrets manager for machines](#step-2-a-secrets-manager-for-machines)
+- [Step 3: the .env rules](#step-3-the-env-rules)
+- [Secret scanning: three layers and their limits](#secret-scanning-three-layers-and-their-limits)
+- [Rotation, expiry and proving a value is dead](#rotation-expiry-and-proving-a-value-is-dead)
+- [Least-privilege tokens](#least-privilege-tokens)
+- [After a leak: revoke, rotate, look, then clean](#after-a-leak-revoke-rotate-look-then-clean)
+- [Solo lab versus enterprise IAM](#solo-lab-versus-enterprise-iam)
+- [The honest limits](#the-honest-limits)
+- [Threat model of the secrets path](#threat-model-of-the-secrets-path)
+- [Hands-on: free and local](#hands-on-free-and-local)
+- [Optional: your own Doppler account (free plan)](#optional-your-own-doppler-account-free-plan)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+- [Where to next](#where-to-next)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it after [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) and [Doppler and secrets](Doppler-and-Secrets.md) (core step 17), and before [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md). It does not repeat them. Those pages say what a secret is and how this project keeps its own out of the repository; this one is about **your** habits: what to set up before the first line of code, where each kind of secret lives, how to catch the one that slipped, and what to do in the first hour after one leaks. Next: [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

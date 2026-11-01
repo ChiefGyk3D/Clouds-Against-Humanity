@@ -6,6 +6,29 @@
 Previous: [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md) / Next: [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [BCP and DR: two plans, not one](#bcp-and-dr-two-plans-not-one)
+- [Business impact analysis](#business-impact-analysis)
+- [RTO, RPO and the time nobody counts](#rto-rpo-and-the-time-nobody-counts)
+- [Recovery strategies: cold, warm, hot, pilot light, active-active](#recovery-strategies-cold-warm-hot-pilot-light-active-active)
+- [Runbooks, contact trees, roles and communications](#runbooks-contact-trees-roles-and-communications)
+- [Testing: a backup is not a recovery](#testing-a-backup-is-not-a-recovery)
+- [Tabletop exercises, and how to run one for free](#tabletop-exercises-and-how-to-run-one-for-free)
+- [Third-party and cloud dependencies](#third-party-and-cloud-dependencies)
+- [Ransomware as a DR scenario](#ransomware-as-a-dr-scenario)
+- [Lessons from public postmortems](#lessons-from-public-postmortems)
+- [A worked plan for this project](#a-worked-plan-for-this-project)
+- [Free exercises](#free-exercises)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+- [Where to next](#where-to-next)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the backup and recovery pages. Read it after [Backups, recovery and patching](Backups-Recovery-and-Patching.md), which teaches you to take a backup, lose the original and time the restore, and after [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md), which teaches you to recover from a lost state file. This page zooms out: when something big breaks, **what must keep working, who does what, and in what order does it come back**. It does not repeat the table on the Enterprise page about [high availability, disaster recovery and backups](Enterprise-Infrastructure-Differences.md#high-availability-disaster-recovery-and-backups); it builds a plan on top of those words and applies it to this project's own pieces.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

@@ -6,6 +6,28 @@
 Previous: [Running Monero properly](Running-Monero-Properly-Hardware-Wallet-Qubes-and-Whonix-Offline-Wallet-and-PiNodeXMR.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [When the internet and the power go out: what still works](#when-the-internet-and-the-power-go-out-what-still-works)
+- [Wi-Fi, and why it is not the only radio](#wi-fi-and-why-it-is-not-the-only-radio)
+- [LoRa, Meshtastic, MeshCore and Reticulum](#lora-meshtastic-meshcore-and-reticulum)
+- [Wi-Fi HaLow (IEEE 802.11ah) next to LoRa](#wi-fi-halow-ieee-80211ah-next-to-lora)
+- [Amateur (ham) radio](#amateur-ham-radio)
+- [GMRS and FRS](#gmrs-and-frs)
+- [Citizens band (CB)](#citizens-band-cb)
+- [Signals intelligence (SIGINT): a careful overview](#signals-intelligence-sigint-a-careful-overview)
+- [Why radio is a common hobby among security people](#why-radio-is-a-common-hobby-among-security-people)
+- [Radio in a continuity plan for this project](#radio-in-a-continuity-plan-for-this-project)
+- [Free exercises: offline, listen-only and simulation](#free-exercises-offline-listen-only-and-simulation)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Where to next](#where-to-next)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the continuity pages. Read it after [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md), which asks what must keep working, who does what and in what order it comes back, and after [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md), because everything here is about availability and about what a listener can learn. That lesson's contact tree has a hole in it: every channel on it usually needs the internet. This page is about the channels that do not. It covers wifi and the other radios beside it, LoRa mesh systems (Meshtastic, MeshCore and Reticulum), Wi-Fi HaLow (the sub-1-GHz Wi-Fi that competes with LoRa for some jobs), amateur radio, GMRS and FRS, CB, a careful overview of signals intelligence (SIGINT) with the legal rules first, and what a radio fallback could and could not do for this project. For what a key is and how it is lost, read [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md); the cryptography lesson (issue 360) goes deeper and is named here in plain text because it may not be merged yet.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

@@ -6,6 +6,26 @@
 Previous: [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) / Next: [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [Four words that sound alike](#four-words-that-sound-alike)
+- [RPO and RTO, in plain words](#rpo-and-rto-in-plain-words)
+- [The 3-2-1 rule, and what it leaves open](#the-3-2-1-rule-and-what-it-leaves-open)
+- [A backup you have not restored is a hope](#a-backup-you-have-not-restored-is-a-hope)
+- [Patching: cadence, emergencies and windows](#patching-cadence-emergencies-and-windows)
+- [Reading a CVE entry and a severity score](#reading-a-cve-entry-and-a-severity-score)
+- [Where this shows up in this project](#where-this-shows-up-in-this-project)
+- [Free path: a lab on your own computer](#free-path-a-lab-on-your-own-computer)
+- [Optional: backups on a real cloud droplet (your own account)](#optional-backups-on-a-real-cloud-droplet-your-own-account)
+- [Build, break, detect, evade, defend (the local loop)](#build-break-detect-evade-defend-the-local-loop)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it after [Droplet hardening](Droplet-Hardening.md) (core step 14), whose "Updates" table it explains from the ground up, and after [How money works in the cloud](How-Money-Works-in-the-Cloud.md) (core step 8) if the price of a backup is new to you. It does not repeat the Enterprise page on [high availability, disaster recovery and backups](Enterprise-Infrastructure-Differences.md#high-availability-disaster-recovery-and-backups); it makes you take a backup, lose the original, and time the way back. If "protect what, from what" is still fuzzy, read [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) first: availability is the property this page is about. When you have run its drill and want more, [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md) takes up 3-2-1-1-0, immutable copies, key custody and restore testing. For the bigger picture (business continuity versus disaster recovery, a recovery order, roles and a tabletop exercise), see [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md). Next: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

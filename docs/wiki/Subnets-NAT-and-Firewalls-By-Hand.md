@@ -6,6 +6,25 @@
 Previous: [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) / Next: [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [Addresses and CIDR, by hand](#addresses-and-cidr-by-hand)
+- [Routing, in plain words](#routing-in-plain-words)
+- [NAT and port forwarding](#nat-and-port-forwarding)
+- [Firewalls](#firewalls)
+- [Reading a rule set](#reading-a-rule-set)
+- [Where this shows up in this project](#where-this-shows-up-in-this-project)
+- [Free path: a lab on your own computer](#free-path-a-lab-on-your-own-computer)
+- [Optional: the same loop on a real cloud firewall (your own account)](#optional-the-same-loop-on-a-real-cloud-firewall-your-own-account)
+- [Build, break, detect, evade, defend (the local loop)](#build-break-detect-evade-defend-the-local-loop)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it after [Networking basics](Networking-Basics-for-This-Project.md) (core step 3) and, if "TCP", "port" and "handshake" are fuzzy, after [How a web request works](How-a-Web-Request-Works.md). It reaches ahead to [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) (core step 13), which you can read with fresh eyes once you have done the arithmetic and watched a packet get dropped. It does not repeat what those pages say: it makes you do the work they only describe. Next: [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

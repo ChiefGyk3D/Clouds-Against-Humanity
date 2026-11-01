@@ -6,6 +6,31 @@
 Previous: [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) / Next: [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The series, and what this page is part of](#the-series-and-what-this-page-is-part-of)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [The idea in one paragraph](#the-idea-in-one-paragraph)
+- [The threat model, stated first](#the-threat-model-stated-first)
+- [The path of a packet, without a VPN and with one](#the-path-of-a-packet-without-a-vpn-and-with-one)
+- [Inside the tunnel: encapsulation](#inside-the-tunnel-encapsulation)
+- [WireGuard, OpenVPN and IPsec in plain terms](#wireguard-openvpn-and-ipsec-in-plain-terms)
+- [Three things called "VPN": consumer, corporate and zero trust](#three-things-called-vpn-consumer-corporate-and-zero-trust)
+- [What a VPN moves: trust from your ISP to the provider](#what-a-vpn-moves-trust-from-your-isp-to-the-provider)
+- [What a VPN protects](#what-a-vpn-protects)
+- [What a VPN does not protect](#what-a-vpn-does-not-protect)
+- [No-logs claims, and what an audit does and does not prove](#no-logs-claims-and-what-an-audit-does-and-does-not-prove)
+- [VPNs and the law, and terms of service, in general terms](#vpns-and-the-law-and-terms-of-service-in-general-terms)
+- [Jurisdictions](#jurisdictions)
+- [Marketing myths, checked](#marketing-myths-checked)
+- [What this means for the series' message](#what-this-means-for-the-series-message)
+- [Exercises](#exercises)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Page 1 of a seven-page series on VPNs, Tor and I2P. Read it when "use a VPN" is advice you keep hearing and you want to know what a VPN actually does to a packet, who can see what with one and without one, what the protocols called WireGuard, OpenVPN and IPsec are, where the protection stops, and what a "no-logs" claim or an audit report really tells you. It is written for a first proper explanation: it opens the box, shows the picture, then says plainly what is and is not protected. It does not recommend or rank any VPN service.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

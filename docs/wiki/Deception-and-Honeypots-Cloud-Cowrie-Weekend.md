@@ -6,6 +6,26 @@
 Previous: [Anatomy of a cloud honeypot](Deception-and-Honeypots-Cloud-Sensor-Anatomy.md) / Next: [Read what arrived: Cowrie logs](Deception-and-Honeypots-Read-the-Sensor-Logs.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The free theory path](#the-free-theory-path)
+- [Cost first](#cost-first)
+- [Teardown first](#teardown-first)
+- [The plan: addresses, ports and two firewalls](#the-plan-addresses-ports-and-two-firewalls)
+- [Exercise 1: make the lure (a honeytoken)](#exercise-1-make-the-lure-a-honeytoken)
+- [Exercise 2: create the firewalls and the server](#exercise-2-create-the-firewalls-and-the-server)
+- [Exercise 3: prepare the server](#exercise-3-prepare-the-server)
+- [Exercise 4: install Cowrie, give it a fake home and a lure](#exercise-4-install-cowrie-give-it-a-fake-home-and-a-lure)
+- [Exercise 5: lock it down, then close the outgoing door](#exercise-5-lock-it-down-then-close-the-outgoing-door)
+- [Exercise 6: open the lure ports and run the window](#exercise-6-open-the-lure-ports-and-run-the-window)
+- [Exercise 7: pull the logs, then tear down](#exercise-7-pull-the-logs-then-tear-down)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Lesson 8 of the [deception and honeypots track](Deception-and-Honeypots-Start-Here.md), the hands-on lesson of **track 2**. You run a small Cowrie honeypot on one cloud server in **your own account**, for a window you set before you start, and you delete it on the end date. A foundations side page to [Anatomy of a cloud honeypot](Deception-and-Honeypots-Cloud-Sensor-Anatomy.md) and [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md). Nothing in this repository deploys it: the lesson shows the steps and you run them. Next: [Read what arrived](Deception-and-Honeypots-Read-the-Sensor-Logs.md), lesson 9.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

@@ -6,6 +6,29 @@
 Previous: [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md) / Next: [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Where the project already touches this (and the gaps)](#where-the-project-already-touches-this-and-the-gaps)
+- [What file integrity monitoring is, and why](#what-file-integrity-monitoring-is-and-why)
+- [What to watch, and what to leave alone](#what-to-watch-and-what-to-leave-alone)
+- [How an attacker attacks the monitor](#how-an-attacker-attacks-the-monitor)
+- [The tools](#the-tools)
+- [The neighbors: bans, summaries and plumbing](#the-neighbors-bans-summaries-and-plumbing)
+- [Alert fatigue: the discipline](#alert-fatigue-the-discipline)
+- [Windows: the same ideas, other names](#windows-the-same-ideas-other-names)
+- [Free path: a lab in a scratch folder](#free-path-a-lab-in-a-scratch-folder)
+- [Optional: Wazuh on a machine of your own](#optional-wazuh-on-a-machine-of-your-own)
+- [Threat model of the FIM and alerting pipeline](#threat-model-of-the-fim-and-alerting-pipeline)
+- [What this tells you about building systems](#what-this-tells-you-about-building-systems)
+- [Build, break, detect, evade, defend (the local loop)](#build-break-detect-evade-defend-the-local-loop)
+- [Where this meets deception](#where-this-meets-deception)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Lesson D3 of the network and host defense track, and a foundations side page to [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) and [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md). Read it after those two, and after [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) if "hash" and "signature" are still blurry.
 
 The track has four lessons. D1 is [Packet filters compared: iptables, nftables, UFW and pf](Packet-Filters-Compared-iptables-nftables-ufw-pf.md), D2 is [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md), this is D3, and D4 is [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md). Those three pages were written at the same time as this one, so their links may not resolve until they merge.

@@ -53,6 +53,15 @@ with no markers gets them inserted once; after that only the text between them i
 rule and the reading orders are explained in the header of docs/wiki/_nav.yaml. Tests that count a
 page's links or read its first lines use strip_page_nav (via tests/wikitext.py) to see the author's text.
 
+In-page contents (issue #441): a page whose author text (all generated blocks taken out) is over TOC_MIN_LINES
+(300) lines gets a third generated block, between TOC_BEGIN and TOC_END ("BEGIN/END GENERATED PAGE CONTENTS"), right
+after its top navigation block. It is a bold label and a list of links to the page's own headings, so it adds no
+heading: the `##` headings, plus the `###` headings (nested under the `##` above them) on a page with fewer than
+TOC_SUBHEADINGS_BELOW (6) `##` headings, where the finer list is what the reader needs. The anchors follow GitHub's rule
+(heading_slug, page_headings: lower case, punctuation dropped, spaces to hyphens, repeats suffixed -1, -2, code
+fences skipped). A page under the threshold, or with nothing to list, carries no block, and one that shrank loses it.
+Tests read pages through tests/wikitext.py page_text(), which strips this block too (strip_generated).
+
 Parts, kept apart on purpose (the same shape as gen_project_status.py):
 
   load_manifest(text)       parse and reject duplicate keys; PyYAML is imported here only
@@ -63,6 +72,8 @@ Parts, kept apart on purpose (the same shape as gen_project_status.py):
                             pure: swap the block between the markers of a Home.md text.
   render_page_nav(m, page), apply_page_nav(text, blocks), strip_page_nav(text)
                             pure: the two blocks of a page, put into (or taken out of) a page text.
+  render_page_contents(text), apply_page_contents(text, block), strip_generated(text)
+                            pure: the contents block of a page (issue #441), put into or taken out of a page text.
   main()                    --check is offline and exits 1 when a generated file is stale
                             or the manifest does not match the pages in docs/wiki.
 
@@ -77,8 +88,10 @@ a missing PyYAML.
 from __future__ import annotations
 
 import argparse
+import html
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -104,6 +117,14 @@ GENERATED_PAGE_START = "<!-- GENERATED"
 RELATED_MIN = 3
 RELATED_MAX = 6
 RELATED_FALLBACK = 4  # how many neighbors stand in for a missing `related:` list
+# The in-page contents block (issue #441): a third generated block, after the top navigation block, on a page whose author
+# text (generated blocks taken out) is over TOC_MIN_LINES lines. It lists the page's `##` headings; a page with fewer than
+# TOC_SUBHEADINGS_BELOW of them also lists its `###` headings, nested under the `##` above. Nothing else is listed.
+TOC_BEGIN = "<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->"
+TOC_END = "<!-- END GENERATED PAGE CONTENTS -->"
+TOC_LABEL = "**On this page:**"
+TOC_MIN_LINES = 300
+TOC_SUBHEADINGS_BELOW = 6
 
 AUDIENCES = ("everyone", "newcomer", "learner", "builder", "engineer", "operator", "security reader")
 STATUSES = ("draft", "est. steps", "unbuilt")
@@ -718,15 +739,147 @@ def apply_page_nav(text: str, blocks: dict[str, str]) -> str:
     return out
 
 
-def strip_page_nav(text: str) -> str:
-    """The page text without the generated blocks and the blank line each leaves behind (for tests that count links
-    or look at the top of a page: the block is navigation, not content)."""
-    for w in NAV_PLACES:
-        begin, end = NAV_BEGIN.format(where=w), NAV_END.format(where=w)
-        while begin in text and end in text:
-            start, stop = text.index(begin), text.index(end) + len(end)
-            text = text[:start].rstrip("\n") + ("\n\n" if text[stop:].strip("\n") and text[:start].strip("\n") else "\n") + text[stop:].lstrip("\n")
+def _strip_block(text: str, begin: str, end: str) -> str:
+    """The text without every block between a BEGIN and an END line, and the blank line each leaves behind."""
+    while begin in text and end in text:
+        start, stop = text.index(begin), text.index(end) + len(end)
+        text = text[:start].rstrip("\n") + ("\n\n" if text[stop:].strip("\n") and text[:start].strip("\n") else "\n") + text[stop:].lstrip("\n")
     return text
+
+
+def strip_page_nav(text: str) -> str:
+    """The page text without the generated navigation blocks and the blank line each leaves behind (for tests that
+    count links or look at the top of a page: the block is navigation, not content)."""
+    for w in NAV_PLACES:
+        text = _strip_block(text, NAV_BEGIN.format(where=w), NAV_END.format(where=w))
+    return text
+
+
+def strip_page_contents(text: str) -> str:
+    """The page text without the generated contents block (issue #441) and the blank line it leaves behind."""
+    return _strip_block(text, TOC_BEGIN, TOC_END)
+
+
+def strip_generated(text: str) -> str:
+    """The author's text: both navigation blocks and the contents block taken out. This is what tests/wikitext.py
+    page_text() returns, and what the contents block's threshold and headings are read from."""
+    return strip_page_contents(strip_page_nav(text))
+
+
+# -- the per-page contents block (issue #441) -----------------------------------------------
+
+
+HEADING_LINE = re.compile(r"^ {0,3}(#{1,6})(?:[ \t]+(.*?))?(?:[ \t]+#+)?[ \t]*$")
+FENCE_OPEN = re.compile(r"^\s*(`{3,}|~{3,})")
+MD_IMAGE = re.compile(r"!\[([^\]]*)\]\([^)]*\)")
+MD_LINK = re.compile(r"\[([^\]]*)\]\([^)]*\)")
+HTML_TAG = re.compile(r"</?[A-Za-z][^>]*>")
+
+
+def _plain_heading(heading: str) -> str:
+    """A heading's text as it reads rendered: images and links reduced to their text, HTML tags dropped,
+    entities decoded. Emphasis and code markers stay (the slugger drops them as punctuation)."""
+    text = MD_IMAGE.sub(r"\1", heading)
+    text = MD_LINK.sub(r"\1", text)
+    return html.unescape(HTML_TAG.sub("", text))
+
+
+def heading_slug(heading: str) -> str:
+    """The anchor GitHub builds from one heading: lower case, then everything dropped that is not a letter,
+    mark, number, connector (underscore), hyphen or space, then each space becomes a hyphen. Two spaces make
+    two hyphens ("Tom & Jerry" is tom--jerry), trailing punctuation just goes. The -1, -2 suffix for a repeat is
+    added by page_headings, which sees the whole page."""
+    kept = [
+        c for c in _plain_heading(heading).lower()
+        if c in "- " or unicodedata.category(c)[0] in "LMN" or unicodedata.category(c) == "Pc"
+    ]
+    return "".join(kept).replace(" ", "-")
+
+
+def page_headings(text: str) -> list[tuple[int, str, str]]:
+    """Every heading of a page text as (level, raw text, anchor), in order. Lines inside a code fence (backticks
+    or tildes, closed by a fence of the same kind at least as long) are not headings, and neither is a line
+    that is indented four spaces or has no space after the hashes. A repeated anchor gets -1, -2, ... and, as
+    on GitHub, a suffixed anchor that is itself taken moves on to the next number."""
+    found: list[tuple[int, str, str]] = []
+    taken: dict[str, int] = {}
+    fence: str | None = None
+    for line in text.split("\n"):
+        opening = FENCE_OPEN.match(line)
+        if fence is not None:
+            if opening and opening.group(1)[0] == fence[0] and len(opening.group(1)) >= len(fence) and not line.strip().strip(fence[0]):
+                fence = None
+            continue
+        if opening:
+            fence = opening.group(1)
+            continue
+        m = HEADING_LINE.match(line)
+        if not m or not (m.group(2) or "").strip():
+            continue
+        base = heading_slug(m.group(2))
+        anchor = base
+        while anchor in taken:
+            taken[base] = taken.get(base, 0) + 1
+            anchor = f"{base}-{taken[base]}"
+        taken[anchor] = 0
+        found.append((len(m.group(1)), m.group(2).strip(), anchor))
+    return found
+
+
+def _contents_text(heading: str) -> str:
+    """The link text for a heading: links and images reduced to their text, stray brackets dropped."""
+    return re.sub(r"\s+", " ", _plain_heading(heading).replace("[", "").replace("]", "")).strip()
+
+
+def render_page_contents(text: str) -> str | None:
+    """The contents block of a page, markers included, or None when the page gets none.
+
+    A page gets one when its author text (the generated blocks taken out) is over TOC_MIN_LINES lines. It lists
+    the `##` headings in order, each a link to its anchor. When the page has fewer than TOC_SUBHEADINGS_BELOW
+    `##` headings it also lists its `###` headings, nested one step under the `##` heading above (or at the top
+    level when there is none yet): a long page with few sections needs the finer list. Deeper levels and the
+    page title are never listed. The block adds no heading (a bold label and a list, like the navigation
+    blocks), so the page's heading levels and its tables are unchanged."""
+    author = strip_generated(text)
+    if len(author.splitlines()) <= TOC_MIN_LINES:
+        return None
+    headings = page_headings(author)
+    levels = (2,) if sum(1 for lvl, _, _ in headings if lvl == 2) >= TOC_SUBHEADINGS_BELOW else (2, 3)
+    lines = []
+    seen_second = False
+    for level, raw, anchor in headings:
+        if level not in levels:
+            continue
+        nested = level == 3 and seen_second
+        seen_second = seen_second or level == 2
+        label = _contents_text(raw) or anchor
+        lines.append(f"{'  ' if nested else ''}- [{label}](#{anchor})")
+    if not lines:
+        return None
+    return "\n".join([TOC_BEGIN, TOC_LABEL, "", *lines, TOC_END])
+
+
+def apply_page_contents(text: str, block: str | None) -> str:
+    """Put the contents block into a page text that already carries its top navigation block: inserted right after
+    that block when the page has none yet, rewritten in place when it has one, removed when `block` is None.
+    A page with a broken, repeated or misplaced marker is an error, not a guess."""
+    begins, ends = text.count(TOC_BEGIN), text.count(TOC_END)
+    if (begins, ends) not in ((0, 0), (1, 1)):
+        raise ValueError("a page needs exactly one BEGIN and one END marker line for its page-contents block, or none")
+    top_end_line = NAV_END.format(where="top")
+    if text.count(top_end_line) != 1:
+        raise ValueError("the page has no top page-nav block for the page-contents block to follow")
+    top_end = text.index(top_end_line) + len(top_end_line)
+    if begins == 0:
+        return text if block is None else text[:top_end] + "\n\n" + block + text[top_end:]
+    start, stop = text.index(TOC_BEGIN), text.index(TOC_END) + len(TOC_END)
+    if stop - len(TOC_END) < start:
+        raise ValueError("the END page-contents marker comes before its BEGIN marker")
+    if start < top_end or start > text.index(NAV_BEGIN.format(where="bottom")):
+        raise ValueError("the page-contents block must come after the top page-nav block and before the bottom one")
+    if block is None:
+        return text[:start].rstrip("\n") + text[stop:]
+    return text[:start] + block + text[stop:]
 
 
 # -- files ------------------------------------------------------------------------------
@@ -786,6 +939,7 @@ def page_nav_plan(root: Path, manifest: dict, problems: list[str]) -> list[tuple
             continue
         try:
             wanted = apply_page_nav(current, render_page_nav(manifest, name))
+            wanted = apply_page_contents(wanted, render_page_contents(wanted))
         except ValueError as exc:
             problems.append(f"{path}: {exc}")
             continue
@@ -842,7 +996,11 @@ def main(argv: list[str] | None = None) -> int:
         if current != wanted:
             (root / path).write_text(wanted, encoding="utf-8")
             changed += 1
-    print(f"gen_wiki_nav: wrote {CONTENTS}, {SIDEBAR}, the page map in {HOME} and the navigation blocks of {len(plan)} pages ({changed} changed)")
+    with_contents = sum(1 for _, _, _, wanted in plan if TOC_BEGIN in wanted)
+    print(
+        f"gen_wiki_nav: wrote {CONTENTS}, {SIDEBAR}, the page map in {HOME} and the navigation blocks of {len(plan)} pages "
+        f"({with_contents} with a contents block, {changed} changed)"
+    )
     return 0
 
 

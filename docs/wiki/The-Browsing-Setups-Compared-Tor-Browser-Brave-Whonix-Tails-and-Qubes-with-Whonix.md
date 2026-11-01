@@ -6,6 +6,28 @@
 Previous: [How I2P works](How-I2P-Works-Tunnels-Garlic-Routing-and-the-Network-Database.md) / Next: [OPSEC for Tor and I2P](OPSEC-for-Tor-and-I2P-That-Holds-Up-Identities-Layers-Metadata-and-Habits.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The series, and what this page is part of](#the-series-and-what-this-page-is-part-of)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [The idea in one paragraph](#the-idea-in-one-paragraph)
+- [Threat models first](#threat-models-first)
+- [The five setups, one at a time](#the-five-setups-one-at-a-time)
+- [The matrix: five setups against nine threats](#the-matrix-five-setups-against-nine-threats)
+- [Why the browser-only model is weaker than Whonix](#why-the-browser-only-model-is-weaker-than-whonix)
+- [Tails: what it is for, and the daily-system question](#tails-what-it-is-for-and-the-daily-system-question)
+- [Kali and ParrotOS: a tool kit and a daily system](#kali-and-parrotos-a-tool-kit-and-a-daily-system)
+- [The maintainer's view: Tails and Kali as a daily system, and the badge](#the-maintainers-view-tails-and-kali-as-a-daily-system-and-the-badge)
+- [Choosing: six situations](#choosing-six-situations)
+- [Exercises](#exercises)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Page 5 of a seven-page series on VPNs, Tor and I2P. Read it when you know that Tor hides your network address and you want to know what to run it in: a browser on the computer you already use, a browser with a Tor window, a pair of virtual machines, a USB stick that forgets everything, or a whole desktop built from isolated virtual machines. It draws the trust boundary of each setup, states the threat model each one fits, puts all five against the same nine threats, and says plainly why the answer is "it depends" and not "the one with the most layers". It also covers Kali and ParrotOS, because "which operating system" is the question that follows, and one clearly marked section is the maintainer's own opinion about running Tails or Kali every day.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

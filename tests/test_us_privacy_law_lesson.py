@@ -16,7 +16,9 @@ import struct
 from datetime import date
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+from wikitext import page_text
+
+ROOT =Path(__file__).resolve().parent.parent
 WIKI = ROOT / "docs" / "wiki"
 NAME = "US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers"
 PAGE = WIKI / f"{NAME}.md"
@@ -51,7 +53,9 @@ def named_people(body: str) -> list[str]:
 
 
 def text() -> str:
-    return PAGE.read_text(encoding="utf-8")
+    # Through page_text(): the generated contents block (issue #441) lists the opinion heading near the top of the
+    # page, which this test's before-and-after-the-facts checks must not see.
+    return page_text(PAGE)
 
 
 def slug(heading: str) -> str:

@@ -6,6 +6,18 @@
 Previous: [Deception safety and law](Deception-and-Honeypots-Safety-and-Law.md) / Next: [Honeyfiles on a host you own](Deception-and-Honeypots-Honeyfiles-on-Your-Host.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What a canary token is](#what-a-canary-token-is)
+- [The local lab](#the-local-lab)
+- [Optional: the hosted service, with a review first](#optional-the-hosted-service-with-a-review-first)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Lesson 3 of the [deception and honeypots track](Deception-and-Honeypots-Start-Here.md). A foundations side page to [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md). You build a tripwire on your own computer first, so you see what a canary token is made of and nothing leaves your machine. A hosted version is described after it, with a terms-and-privacy review as step one. Next: [Honeyfiles on a host you own](Deception-and-Honeypots-Honeyfiles-on-Your-Host.md), lesson 4.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

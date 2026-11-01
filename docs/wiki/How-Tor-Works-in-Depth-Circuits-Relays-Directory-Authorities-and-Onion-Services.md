@@ -6,6 +6,30 @@
 Previous: [How a VPN works](How-a-VPN-Works-Tunnels-What-It-Hides-What-It-Does-Not-and-What-an-Audit-Proves.md) / Next: [How I2P works](How-I2P-Works-Tunnels-Garlic-Routing-and-the-Network-Database.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [Where this sits in the series](#where-this-sits-in-the-series)
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The short version and the threat model](#the-short-version-and-the-threat-model)
+- [The network: relays, flags and who runs them](#the-network-relays-flags-and-who-runs-them)
+- [Directory authorities and the consensus](#directory-authorities-and-the-consensus)
+- [One circuit, hop by hop](#one-circuit-hop-by-hop)
+- [Why three hops](#why-three-hops)
+- [Why guards persist](#why-guards-persist)
+- [Streams, circuit reuse and isolation](#streams-circuit-reuse-and-isolation)
+- [The exit relay and the last leg](#the-exit-relay-and-the-last-leg)
+- [Bridges and pluggable transports](#bridges-and-pluggable-transports)
+- [Onion services](#onion-services)
+- [One request, start to finish](#one-request-start-to-finish)
+- [What is known to break Tor, with dates](#what-is-known-to-break-tor-with-dates)
+- [What Tor Browser adds, and why the browser is the weak link](#what-tor-browser-adds-and-why-the-browser-is-the-weak-link)
+- [What this means for the series' message](#what-this-means-for-the-series-message)
+- [Exercises (reading only, nothing to install)](#exercises-reading-only-nothing-to-install)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Page 2 of a seven-page series on Tor, I2P and VPNs. Read it when the short version in [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) ("a few relays, layers of encryption") is not enough, and you want to see how a circuit is really built, why there are three hops, who decides which relays exist, what a bridge is, how an onion service meets its visitor without either side learning the other's address, and where the known weaknesses are. The overview lesson explains who uses these networks and why; this page does not repeat it. It explains the machinery, with diagrams, then says plainly what the machinery does and does not protect.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

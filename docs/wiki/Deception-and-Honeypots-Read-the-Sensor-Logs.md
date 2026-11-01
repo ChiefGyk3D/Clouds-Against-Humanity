@@ -6,6 +6,26 @@
 Previous: [Cloud Cowrie for a weekend](Deception-and-Honeypots-Cloud-Cowrie-Weekend.md) / Next: [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The free theory path](#the-free-theory-path)
+- [What a sensor log looks like](#what-a-sensor-log-looks-like)
+- [Exercise 1: build an invented sensor log](#exercise-1-build-an-invented-sensor-log)
+- [Exercise 2: count events by type](#exercise-2-count-events-by-type)
+- [Exercise 3: who guessed what, from where](#exercise-3-who-guessed-what-from-where)
+- [Exercise 4: what they typed, and why not to print it raw](#exercise-4-what-they-typed-and-why-not-to-print-it-raw)
+- [Exercise 5: who touched the decoy](#exercise-5-who-touched-the-decoy)
+- [Exercise 6: reuse the detector from lesson 5](#exercise-6-reuse-the-detector-from-lesson-5)
+- [What they did, mapped to ATT&CK](#what-they-did-mapped-to-attck)
+- [Exercise 7: your own sensor's logs (your own account)](#exercise-7-your-own-sensors-logs-your-own-account)
+- [Flip the board: how a visitor spots Cowrie, and how you harden it](#flip-the-board-how-a-visitor-spots-cowrie-and-how-you-harden-it)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Lesson 9 of the [deception and honeypots track](Deception-and-Honeypots-Start-Here.md), the last lesson of **track 2**. You read the JSON log a Cowrie sensor writes, count what visitors tried, catch a visitor who touched your decoy credential, reuse the detector you wrote in lesson 5, and then switch sides: how does a visitor tell it is Cowrie, and what can you change? A foundations side page to [Deception alerts in the SIEM](Deception-and-Honeypots-Alerts-in-the-SIEM.md) and [Cloud Cowrie for a weekend](Deception-and-Honeypots-Cloud-Cowrie-Weekend.md). Next: back to the [track hub](Deception-and-Honeypots-Start-Here.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

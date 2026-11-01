@@ -6,6 +6,28 @@
 Previous: [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md) / Next: [OpenTofu from zero](OpenTofu-From-Zero.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [Why there are so many formats](#why-there-are-so-many-formats)
+- [JSON in this repository](#json-in-this-repository)
+- [YAML: indentation is the structure](#yaml-indentation-is-the-structure)
+- [HCL and OpenTofu syntax](#hcl-and-opentofu-syntax)
+- [TOML, INI, CSV and XML, a paragraph each](#toml-ini-csv-and-xml-a-paragraph-each)
+- [Reading, validating and converting](#reading-validating-and-converting)
+- [Config as code](#config-as-code)
+- [Why YAML in CI breaks on one space](#why-yaml-in-ci-breaks-on-one-space)
+- [A safety note: never `yaml.load` on a file you do not trust](#a-safety-note-never-yamlload-on-a-file-you-do-not-trust)
+- [Free theory path: a lab on your own computer](#free-theory-path-a-lab-on-your-own-computer)
+- [Optional: the same ideas against a real account](#optional-the-same-ideas-against-a-real-account)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Common mistakes](#common-mistakes)
+- [Checkpoint](#checkpoint)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it after [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) (core step 5) and before the YAML workflow on [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) and the `.tf` files on [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) start to look like noise. It does not teach JSON from the ground up: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md#json-in-five-minutes) does that in five minutes, and this page builds on it. Next: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

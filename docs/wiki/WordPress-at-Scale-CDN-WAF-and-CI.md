@@ -6,6 +6,28 @@
 Previous: [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [From one server to a scaled design, one step at a time](#from-one-server-to-a-scaled-design-one-step-at-a-time)
+- [What a CDN, a WAF and a load balancer each do](#what-a-cdn-a-waf-and-a-load-balancer-each-do)
+- [Storage and the database](#storage-and-the-database)
+- [Many sites: multisite and mass hosting](#many-sites-multisite-and-mass-hosting)
+- [Failure modes](#failure-modes)
+- [Threat model of the scaled architecture](#threat-model-of-the-scaled-architecture)
+- [CI/CD for a WordPress fleet: the servers, the code and the content](#cicd-for-a-wordpress-fleet-the-servers-the-code-and-the-content)
+- [Build it piece by piece or all at once](#build-it-piece-by-piece-or-all-at-once)
+- [What the lab is, and is not](#what-the-lab-is-and-is-not)
+- [Free hands-on lab](#free-hands-on-lab)
+- [Optional: the same design on your own account (a pointer)](#optional-the-same-design-on-your-own-account-a-pointer)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Lesson 4 of 4 in the web-hosting track. Read it after the lesson on [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) (lesson 3), and before or beside [From commit to pipeline](From-Commit-to-Pipeline.md), whose pipeline ideas it applies to a web fleet. It does not teach how to install WordPress or secure one site: lessons 1 and 2 do that. It takes the one site you can already run and shows how the same site is run by a company with thousands of them. 
 Next: [Reading order](Reading-Order.md).
 

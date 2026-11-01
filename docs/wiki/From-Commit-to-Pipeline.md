@@ -10,6 +10,19 @@
 Previous: [Why I picked these tools](Why-I-Picked-These-Tools.md) / Next: [Trace one change end to end](Trace-One-Change-End-to-End.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [The idea in three words](#the-idea-in-three-words)
+- [One change, start to finish](#one-change-start-to-finish)
+- [Reusable workflows and Git Your Ship Together](#reusable-workflows-and-git-your-ship-together)
+- [Policy as code: rules a machine can enforce on every plan](#policy-as-code-rules-a-machine-can-enforce-on-every-plan)
+- [Shift left, in plain language](#shift-left-in-plain-language)
+- [Exercises on your own private copy](#exercises-on-your-own-private-copy)
+- [Where this shows up in the repo](#where-this-shows-up-in-the-repo)
+- [Try it yourself](#try-it-yourself)
+<!-- END GENERATED PAGE CONTENTS -->
+
 People say "DevOps" as if it were a tool you install. It is a habit: the way a change gets from someone's head to a running system is written down, automated, and checked at every step, so that nobody has to remember. **DevSecOps** is the same habit with security checks built into the chain instead of added at the end.
 
 This page follows one tiny change through this repository's real chain. It names only checks that exist in `.github/workflows/ci.yml` today. Where something is written but not switched on, it says so.

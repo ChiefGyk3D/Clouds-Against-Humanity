@@ -6,6 +6,31 @@
 Previous: [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) / Next: [US privacy law and the patchwork](US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Where this page sits in the set](#where-this-page-sits-in-the-set)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [Governance, risk and compliance: three words, one loop](#governance-risk-and-compliance-three-words-one-loop)
+- [Law, regulation, framework, standard and attestation](#law-regulation-framework-standard-and-attestation)
+- [What a certification or report does and does not tell you](#what-a-certification-or-report-does-and-does-not-tell-you)
+- [The frameworks at overview level](#the-frameworks-at-overview-level)
+- [Laws and rules you will meet, one paragraph each](#laws-and-rules-you-will-meet-one-paragraph-each)
+- [Attestations and audit reports](#attestations-and-audit-reports)
+- [Who owns what](#who-owns-what)
+- [Risk in brief: likelihood, impact and the register](#risk-in-brief-likelihood-impact-and-the-register)
+- [Controls and evidence](#controls-and-evidence)
+- [An audit from the engineer's chair](#an-audit-from-the-engineers-chair)
+- [Compliance is not security, and security is not compliance](#compliance-is-not-security-and-security-is-not-compliance)
+- [What non-compliance costs: documented cases](#what-non-compliance-costs-documented-cases)
+- [This repository's own gates as evidence](#this-repositorys-own-gates-as-evidence)
+- [Free exercise: one control, the evidence an auditor would ask for](#free-exercise-one-control-the-evidence-an-auditor-would-ask-for)
+- [Exercises](#exercises)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Page one of three in the GRC and compliance set. Read it when a job, a customer or an auditor has put the letters GRC, "SOC 2", "NIST" or "HIPAA" in front of you and you want to know what each one is, who enforces it, and what an engineer is asked to produce. It explains governance, risk and compliance as one loop, the difference between a law, a regulation, a framework, a standard and an attestation, a one-paragraph overview of SOX, PCI DSS, HIPAA and HITECH, GLBA, FISMA and FedRAMP, who owns what, risk methods in brief, controls and evidence, what an audit looks like from the engineer's chair, why compliance is not security (and the reverse), and what non-compliance has cost in documented cases. It ends with a free exercise: take one control from NIST SP 800-53 and write the evidence an auditor would ask for, using this repository as the system.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

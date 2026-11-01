@@ -6,6 +6,27 @@
 Previous: [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md) / Next: [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Where this page sits in the set](#where-this-page-sits-in-the-set)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [What the Constitution does and does not say about privacy](#what-the-constitution-does-and-does-not-say-about-privacy)
+- [The patchwork: laws by sector and by state](#the-patchwork-laws-by-sector-and-by-state)
+- [The federal laws and the FTC in one table](#the-federal-laws-and-the-ftc-in-one-table)
+- [HIPAA and HITECH, a little closer](#hipaa-and-hitech-a-little-closer)
+- [The states](#the-states)
+- [Data brokers](#data-brokers)
+- [Social Security numbers](#social-security-numbers)
+- [License plate readers and Flock](#license-plate-readers-and-flock)
+- [The maintainer's view (on his soap box)](#the-maintainers-view-on-his-soap-box)
+- [Free exercise: which laws apply, and a broker's published process](#free-exercise-which-laws-apply-and-a-brokers-published-process)
+- [Exercises](#exercises)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Page two of three in the GRC and compliance set. Read it when you want to know what the United States actually has for privacy: what the Constitution does and does not say, which federal laws cover which kinds of data, what the states have added, who the data brokers are and what the law says about them, why the Social Security number is a poor key to a person, and what is documented about license plate readers and Flock. The facts come first, each with a date and a source. Near the end is one clearly headed section with the maintainer's opinion, and each of his four points sits next to what the sources say about it. It ends with a free exercise: pick a state and a kind of data and work out which laws apply, then read how a broker says you can ask for your own data.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

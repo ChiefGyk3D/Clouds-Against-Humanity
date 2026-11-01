@@ -6,6 +6,28 @@
 Previous: [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md) / Next: [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The series, and what this page is part of](#the-series-and-what-this-page-is-part-of)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [The idea in one paragraph](#the-idea-in-one-paragraph)
+- [The three questions](#the-three-questions)
+- [Threat modeling first](#threat-modeling-first)
+- [The data you hand out](#the-data-you-hand-out)
+- [Correlation: how small facts become one identity](#correlation-how-small-facts-become-one-identity)
+- [The matrix: what each tool does for each question](#the-matrix-what-each-tool-does-for-each-question)
+- [Same behavior, different pipe](#same-behavior-different-pipe)
+- [Most of being more private is handing out less](#most-of-being-more-private-is-handing-out-less)
+- [Worked example: three imaginary people](#worked-example-three-imaginary-people)
+- [Exercises](#exercises)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Page 4 of a seven-page series on VPNs, Tor and I2P. Read it when you have heard "use a VPN", "use Tor" or "encrypt everything" as if each were one answer to one problem, and you want to know which problem each one answers. It separates three questions that are easy to blur (who can see in, who can get in, who can tell it is you), puts six everyday tools against all three, shows why the same behavior over a different pipe still points at the same person, and works through three imaginary people whose threat models differ. It extends the [privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md) lesson with the third word, anonymity, and does not repeat that lesson.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

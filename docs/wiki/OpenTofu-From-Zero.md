@@ -6,6 +6,30 @@
 Previous: [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md) / Next: [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [The free path and the optional own-account path](#the-free-path-and-the-optional-own-account-path)
+- [What infrastructure as code is, and why](#what-infrastructure-as-code-is-and-why)
+- [Install OpenTofu](#install-opentofu)
+- [The parts of a configuration](#the-parts-of-a-configuration)
+- [The lifecycle: init, fmt, validate, plan, apply, destroy](#the-lifecycle-init-fmt-validate-plan-apply-destroy)
+- [How to read a plan](#how-to-read-a-plan)
+- [The state file in plain words](#the-state-file-in-plain-words)
+- [Many copies: count and for_each](#many-copies-count-and-for_each)
+- [Modules at beginner level](#modules-at-beginner-level)
+- [Tests without building anything: tofu test and mock providers](#tests-without-building-anything-tofu-test-and-mock-providers)
+- [OpenTofu and Terraform](#opentofu-and-terraform)
+- [Hands-on: free exercises](#hands-on-free-exercises)
+- [Optional: your own account](#optional-your-own-account)
+- [Build it, break it, detect it, defend it](#build-it-break-it-detect-it-defend-it)
+- [How this repository uses it](#how-this-repository-uses-it)
+- [Checkpoint](#checkpoint)
+- [Claims register](#claims-register)
+- [Where to next](#where-to-next)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages, and lesson I1 of a four-lesson infrastructure-as-code track. Read it after [What is infrastructure as code](What-Is-Infrastructure-as-Code.md) and before [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md), or at any point you want to type the commands yourself instead of reading about them. Next: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

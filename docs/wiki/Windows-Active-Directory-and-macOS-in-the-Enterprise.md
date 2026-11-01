@@ -6,6 +6,27 @@
 Previous: [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md) / Next: [How a web request works](How-a-Web-Request-Works.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Why most enterprises are Windows-first](#why-most-enterprises-are-windows-first)
+- [First, the words](#first-the-words)
+- [Group Policy: one rule, many computers](#group-policy-one-rule-many-computers)
+- [Kerberos and NTLM at concept level](#kerberos-and-ntlm-at-concept-level)
+- [Entra ID, hybrid identity and single sign-on](#entra-id-hybrid-identity-and-single-sign-on)
+- [The Windows registry, services and the event log](#the-windows-registry-services-and-the-event-log)
+- [PowerShell: the Windows administrator's tool](#powershell-the-windows-administrators-tool)
+- [macOS in the enterprise](#macos-in-the-enterprise)
+- [The security view: why Active Directory is the usual target](#the-security-view-why-active-directory-is-the-usual-target)
+- [Hands-on, free path: read, then read-only commands](#hands-on-free-path-read-then-read-only-commands)
+- [Optional own-hardware path: a disposable Windows evaluation virtual machine](#optional-own-hardware-path-a-disposable-windows-evaluation-virtual-machine)
+- [Build it, break it, detect it, evade it, defend it](#build-it-break-it-detect-it-evade-it-defend-it)
+- [Common mistakes](#common-mistakes)
+- [Checkpoint](#checkpoint)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it after [The terminal and your first script](Terminal-and-Your-First-Script.md) and [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md) if your first job (or the job you want) is helpdesk, desktop support or systems administration, where the machines are Windows laptops and a domain, not Linux droplets. It sits beside [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md), which covers the other half of the fleet. This project itself builds Linux machines in the cloud and does not run a Windows domain, so this page is about the skills around the project, not about the project. Next: [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

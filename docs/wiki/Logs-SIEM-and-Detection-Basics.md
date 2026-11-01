@@ -6,6 +6,24 @@
 Previous: [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md) / Next: [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [A log is one event written down](#a-log-is-one-event-written-down)
+- [Where logs live](#where-logs-live)
+- [Parsing and normalizing](#parsing-and-normalizing)
+- [Rules, baselines and the two ways to be wrong](#rules-baselines-and-the-two-ways-to-be-wrong)
+- [The family of tools, in one table](#the-family-of-tools-in-one-table)
+- [Free path: a lab on your own computer](#free-path-a-lab-on-your-own-computer)
+- [Optional: your own accounts](#optional-your-own-accounts)
+- [Build, break, detect, evade, defend (the local loop)](#build-break-detect-evade-defend-the-local-loop)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the detection pages. Read it after [Droplet hardening](Droplet-Hardening.md) (core step 14) if "log", "SIEM", "rule" and "alert" are only words to you, and before [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) if you want the vocabulary first. It reaches ahead to [Threat model](Threat-Model.md) (core step 19), whose residual risks are the things this page teaches you to notice. It does not repeat what the telemetry pages say: it makes you read a log, find a pattern in it, write a rule and watch that rule be wrong. Next: [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

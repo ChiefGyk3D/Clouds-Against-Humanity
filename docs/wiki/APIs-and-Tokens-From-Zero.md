@@ -6,6 +6,30 @@
 Previous: [IPv6 adoption and handling it safely](IPv6-Adoption-and-Handling-It-Safely.md) / Next: [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Where this project already touches these ideas (and the gaps)](#where-this-project-already-touches-these-ideas-and-the-gaps)
+- [What an API is](#what-an-api-is)
+- [HTTP in ten minutes](#http-in-ten-minutes)
+- [JSON in five minutes](#json-in-five-minutes)
+- [REST, and "just an API"](#rest-and-just-an-api)
+- [Authentication and authorization](#authentication-and-authorization)
+- [The kinds of credential, side by side](#the-kinds-of-credential-side-by-side)
+- [Scopes and least privilege](#scopes-and-least-privilege)
+- [Expiry, rotation and revocation](#expiry-rotation-and-revocation)
+- [Service accounts and personal tokens](#service-accounts-and-personal-tokens)
+- [Where a secret must never live](#where-a-secret-must-never-live)
+- [When a secret leaks: revoke, then rotate, then clean up](#when-a-secret-leaks-revoke-then-rotate-then-clean-up)
+- [Rate limits and pagination](#rate-limits-and-pagination)
+- [Hands-on: free exercises](#hands-on-free-exercises)
+- [Optional: make, test and revoke a real scoped token (your own account)](#optional-make-test-and-revoke-a-real-scoped-token-your-own-account)
+- [Build it, break it, detect it, defend it](#build-it-break-it-detect-it-defend-it)
+- [Checkpoint](#checkpoint)
+- [Where to next](#where-to-next)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it before [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md) if the words API, token or HTTP are new, or at any point you meet them and want them explained properly. Next: [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

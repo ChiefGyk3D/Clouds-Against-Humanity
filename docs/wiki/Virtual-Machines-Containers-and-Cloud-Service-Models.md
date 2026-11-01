@@ -6,6 +6,28 @@
 Previous: [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) / Next: [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [Virtual machines](#virtual-machines)
+- [Containers and images](#containers-and-images)
+- [What isolation each really gives](#what-isolation-each-really-gives)
+- [Containers do not patch themselves](#containers-do-not-patch-themselves)
+- [IaaS, PaaS, SaaS and shared responsibility](#iaas-paas-saas-and-shared-responsibility)
+- [Regions and availability zones](#regions-and-availability-zones)
+- [Sizes, in plain terms](#sizes-in-plain-terms)
+- [What you need to rebuild a lost machine](#what-you-need-to-rebuild-a-lost-machine)
+- [Where this shows up in this project](#where-this-shows-up-in-this-project)
+- [Free path: a lab on your own computer](#free-path-a-lab-on-your-own-computer)
+- [Optional: one small cloud VM (your own account)](#optional-one-small-cloud-vm-your-own-account)
+- [Build, break, detect, evade, defend](#build-break-detect-evade-defend)
+- [Checkpoint](#checkpoint)
+- [Common mistakes](#common-mistakes)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it after [What is the cloud](What-Is-the-Cloud.md) (core step 2) and [Containers and Docker basics](Containers-and-Docker-Basics.md) (core step 7), if a virtual machine, a container and a "managed service" still blur together. It does not repeat the two pages it follows: it draws the stacks side by side, says what each one really isolates, and sorts everything on a map of who patches what. Next: [How money works in the cloud](How-Money-Works-in-the-Cloud.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

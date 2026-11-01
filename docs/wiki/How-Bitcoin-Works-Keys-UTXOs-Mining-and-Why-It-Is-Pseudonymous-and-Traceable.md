@@ -6,6 +6,31 @@
 Previous: [Blockchain fundamentals](Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks.md) / Next: [How Monero works](How-Monero-Works-Compared-with-Bitcoin-and-Ethereum-DeFi-Mixers-Swaps-and-Ransomware.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Where this page sits in the set](#where-this-page-sits-in-the-set)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [The design in plain terms](#the-design-in-plain-terms)
+- [Keys, addresses and signatures](#keys-addresses-and-signatures)
+- [The UTXO model: inputs, outputs and change](#the-utxo-model-inputs-outputs-and-change)
+- [Fees, the mempool and a transaction from keys to block](#fees-the-mempool-and-a-transaction-from-keys-to-block)
+- [Mining, proof of work, difficulty and halvings](#mining-proof-of-work-difficulty-and-halvings)
+- [Confirmations and double spending](#confirmations-and-double-spending)
+- [Full nodes and SPV](#full-nodes-and-spv)
+- [A real snapshot: one famous public transaction](#a-real-snapshot-one-famous-public-transaction)
+- [Pseudonymous is not anonymous](#pseudonymous-is-not-anonymous)
+- [How chain analysis works, in general terms](#how-chain-analysis-works-in-general-terms)
+- [Documented cases: what tracing showed](#documented-cases-what-tracing-showed)
+- [What an analyst can and cannot conclude](#what-an-analyst-can-and-cannot-conclude)
+- [What a ransom payment leaves behind](#what-a-ransom-payment-leaves-behind)
+- [Free exercise: cluster a synthetic graph](#free-exercise-cluster-a-synthetic-graph)
+- [Exercises](#exercises)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Page two of five in the cryptocurrency set. Read it when you work in security or IT and a ransom note, an investigation or a custody question has put a Bitcoin address in front of you. It explains the design in the whitepaper in plain terms, how a key becomes an address and how a signature spends money, the UTXO model with inputs, outputs and change, fees and the mempool, mining, difficulty and halvings (as concepts only), confirmations and double spending, and full nodes versus light clients. Then it takes up the point that matters most for the job: every Bitcoin transaction is public forever, so Bitcoin is pseudonymous, not anonymous. It shows how chain analysis works in general terms, what investigators and researchers have documented in public cases, and what an analyst can and cannot conclude from a payment.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

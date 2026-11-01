@@ -6,6 +6,28 @@
 Next: [Privacy, security and anonymity](Privacy-Security-and-Anonymity-Three-Different-Things-and-Why-There-Is-No-Silver-Bullet.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [What encryption is and is not](#what-encryption-is-and-is-not)
+- [Symmetric and asymmetric: what each is good for](#symmetric-and-asymmetric-what-each-is-good-for)
+- [Hashing is not encryption: salts, passwords and message authentication](#hashing-is-not-encryption-salts-passwords-and-message-authentication)
+- [Digital signatures](#digital-signatures)
+- [Certificates and PKI in plain words](#certificates-and-pki-in-plain-words)
+- [Data at rest, in transit and in use](#data-at-rest-in-transit-and-in-use)
+- [Where this shows up in this project](#where-this-shows-up-in-this-project)
+- [Key management and custody: the hard part](#key-management-and-custody-the-hard-part)
+- [Common mistakes](#common-mistakes)
+- [Modern defaults per NIST](#modern-defaults-per-nist)
+- [Post-quantum planning, as far as NIST publishes it](#post-quantum-planning-as-far-as-nist-publishes-it)
+- [Free path: run the drill, then read a real certificate chain](#free-path-run-the-drill-then-read-a-real-certificate-chain)
+- [Build, break, detect, defend](#build-break-detect-defend)
+- [Checkpoint](#checkpoint)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it after [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md), which tells encoding, hashing, encryption and signing apart and has the first hands-on exercises, and after [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md), because encryption mainly serves confidentiality and does very little for the other two properties by itself. This page does not repeat them. It adds the parts they leave open: how symmetric and asymmetric encryption work together, message authentication, what a certificate authority is, the difference between data at rest, in transit and in use, where this project uses each (and where it uses none), why key custody is the hard part, the mistakes that break good algorithms, what NIST currently recommends, and what NIST has published about post-quantum planning. The lesson on Tor and I2P (issue 358) is separate and not written yet; it is named here in plain text, and this page does not depend on it. Next: [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md), which takes up who holds the key to an encrypted backup.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

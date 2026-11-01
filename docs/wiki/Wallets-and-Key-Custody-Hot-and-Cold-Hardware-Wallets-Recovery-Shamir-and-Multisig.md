@@ -6,6 +6,30 @@
 Previous: [How Monero works](How-Monero-Works-Compared-with-Bitcoin-and-Ethereum-DeFi-Mixers-Swaps-and-Ransomware.md) / Next: [Paper wallets and offline key generation](Paper-Wallets-Generators-and-Offline-Key-Generation-Tails-Electrum-and-Monero.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Where this page sits in the set](#where-this-page-sits-in-the-set)
+- [What the wiki already says (and the gap)](#what-the-wiki-already-says-and-the-gap)
+- [A wallet holds keys, not coins](#a-wallet-holds-keys-not-coins)
+- [Hot, cold and the kinds of wallet](#hot-cold-and-the-kinds-of-wallet)
+- [Before hardware wallets: the Core wallet on a netbook](#before-hardware-wallets-the-core-wallet-on-a-netbook)
+- [The threat model](#the-threat-model)
+- [What a hardware wallet protects, and what it does not](#what-a-hardware-wallet-protects-and-what-it-does-not)
+- [The hardware wallet I recommend: Trezor](#the-hardware-wallet-i-recommend-trezor)
+- [Recovery phrases: BIP39](#recovery-phrases-bip39)
+- [Storing a phrase](#storing-a-phrase)
+- [One seed, many coins: derivation paths and how wallets differ](#one-seed-many-coins-derivation-paths-and-how-wallets-differ)
+- [Shamir secret sharing (SLIP39)](#shamir-secret-sharing-slip39)
+- [Multisignature wallets](#multisignature-wallets)
+- [Custody and institutional custody](#custody-and-institutional-custody)
+- [Free exercise: create, back up, restore and verify with no funds](#free-exercise-create-back-up-restore-and-verify-with-no-funds)
+- [Exercises](#exercises)
+- [Not verified, plainly](#not-verified-plainly)
+- [Claims register](#claims-register)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Page four of five in the cryptocurrency set. Read it when you work in security or IT and the question has become "who holds the keys, and what happens when they are lost, stolen or demanded?". It explains what a wallet actually is (keys, not coins), the hot and cold kinds, the threat model for each, what a hardware wallet really protects and what it does not, how recovery phrases work (BIP39), how to store one, how Shamir secret sharing (SLIP39) and multisignature wallets spread the risk, what custody means for a company, and how wallets differ for Bitcoin, Ethereum and Monero. It passes on the maintainer's recommendation of one hardware wallet, with an affiliate link and a disclosure, and says exactly what I could and could not verify about it.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.

@@ -6,6 +6,23 @@
 Next: [The terminal and your first script](Terminal-and-Your-First-Script.md)
 <!-- END GENERATED PAGE NAV top -->
 
+<!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
+**On this page:**
+
+- [What you will be able to do](#what-you-will-be-able-to-do)
+- [Git and GitHub are not the same thing](#git-and-github-are-not-the-same-thing)
+- [Step 1: make a GitHub account and turn on two-factor authentication](#step-1-make-a-github-account-and-turn-on-two-factor-authentication)
+- [Step 2: make your own copy (a fork)](#step-2-make-your-own-copy-a-fork)
+- [Step 3: pick a way to work](#step-3-pick-a-way-to-work)
+- [The GUI path: GitHub Desktop](#the-gui-path-github-desktop)
+- [The command-line path](#the-command-line-path)
+- [How to read the output](#how-to-read-the-output)
+- [When it goes wrong: the five common errors](#when-it-goes-wrong-the-five-common-errors)
+- [A first exercise on your own fork](#a-first-exercise-on-your-own-fork)
+- [Where to go next](#where-to-go-next)
+- [Try it yourself](#try-it-yourself)
+<!-- END GENERATED PAGE CONTENTS -->
+
 Side page to the start-from-zero pages. Read it before [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) if you have never used git, a terminal or GitHub Desktop. Next: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
