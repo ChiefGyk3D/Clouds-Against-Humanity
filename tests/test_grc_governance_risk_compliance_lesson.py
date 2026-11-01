@@ -402,3 +402,124 @@ def test_no_security_posture_detail_of_this_repository_is_on_the_page_and_the_gu
 def test_the_path_guard_bites():
     assert not (ROOT / "scripts" / "no_such_file.py").exists()
     assert (ROOT / "scripts" / "identifier_check.py").exists()
+
+
+# ---- what a certification or report does and does not tell you (issue 420, change 1) ---------------------------------
+
+CERT = "## What a certification or report does and does not tell you"
+NEXT_AFTER_CERT = "## The frameworks at overview level"
+LAW_SECTION = "## Law, regulation, framework, standard and attestation"
+PASS_FAIL_CLAIM = re.compile(r"\bwould (?:have )?(?:failed|fail|passed|pass)\b|\bfailed (?:a |its |the )?SOC 2\b", re.IGNORECASE)
+NAMES_IN_SOURCES = ("Connor", "Paganini", "Pawlicki", "Linton", "Mayes", "Kindem", "Amato", "Emily Hill", "Sullivan")
+EY_SOURCES = (
+    "theregister.com/2025/10/29/ey_exposes_4tb_sql_database",
+    "securityaffairs.com/184062/data-breach/ernst-young-exposes-4tb-sql-server-backup-publicly-on-microsoft-azure",
+    "techradar.com/pro/security/ey-reportedly-leaked-a-massive-4tb-database-online-exposing-company-secrets-online-for-all-to-see",
+    "nationalcioreview.com/articles-insights/extra-bytes/ernst-young-found-exposing-massive-sql-backup-on-azure",
+)
+NEW_REGISTER_HOSTS = (
+    "assets.ctfassets.net/rb9cdnjh59cm/2paxzm46AxmwDDSZGkdtFS",
+    "journalofaccountancy.com/issues/2026/feb/promises-of-fast-and-easy-threaten-soc-credibility",
+    "journalofaccountancy.com/issues/2026/may/aicpa-guides-peer-reviewers-to-address-soc-2-risks",
+    "journalofaccountancy.com/podcast/2026/apr/the-risks-of-quick",
+    "aicpa-cima.com/cpe-learning/webcast/soc-2-report-walkthrough",
+    "iso.org/certification.html",
+    "dqsglobal.com/en/certify/iso-27001-certification",
+    "PCI_DSS-QRG-v3_2_1.pdf",
+) + EY_SOURCES
+NEW_GLOSSARY_TERMS = (
+    "Carve-out method",
+    "Complementary user entity controls (CUEC)",
+    "SOC 2 Type 1 and Type 2",
+    "Surveillance audit",
+)
+
+
+def cert_section(body: str) -> str:
+    return body.split(CERT)[1].split("\n## ")[0]
+
+
+def pass_fail_claims(body: str) -> list[str]:
+    """A sentence that says a named kind of firm would pass or fail a SOC 2 is a verdict the sources do not give."""
+    return [m.group(0) for m in PASS_FAIL_CLAIM.finditer(body)]
+
+
+def names_found(body: str) -> list[str]:
+    return [n for n in NAMES_IN_SOURCES if n in body]
+
+
+def test_the_certification_section_sits_after_the_attestation_material_and_before_the_frameworks():
+    body = text()
+    assert body.count(CERT) == 1
+    assert body.index(LAW_SECTION) < body.index(CERT) < body.index(NEXT_AFTER_CERT)
+
+
+def test_the_certification_section_covers_snapshot_scope_opinion_cycles_the_gap_and_what_to_ask_for():
+    part = cert_section(text())
+    low = part.lower()
+    assert len(part) > 3000, "the guard collected too little of the section"
+    for needed in (
+        "Type 1",
+        "Type 2",
+        "as of a point in time",
+        "specified period of time",
+        "carve-out",
+        "complementary user entity controls",
+        "exception",
+        "not a certification",
+        "surveillance",
+        "recertification",
+        "three years",
+        "IAF CertSearch",
+        "in between PCI DSS assessments",
+        "Constructed",
+    ):
+        assert needed.lower() in low, needed
+    assert "what to ask for" in low and "scope" in low and "incident" in low and "monitoring" in low
+    assert "not a guarantee" in low or "does not say the organization is secure" in low
+
+
+def test_the_ey_case_is_dated_sourced_and_says_what_is_not_known():
+    part = cert_section(text())
+    for src in EY_SOURCES:
+        assert src in part, src
+    for needed in ("October 29, 2025", "October 30, 2025", "October 31, 2025", "Neo Security", "4 TB", "first 1,000 bytes"):
+        assert needed in part, needed
+    low = part.lower()
+    assert "not known" in low and "how long" in low and "accessed" in low
+    assert "write-up" in low and "could not read" in low, "the primary write-up was not readable and the page says so"
+    assert "does not say" in low, "the page says what the sources do not settle"
+
+
+def test_no_verdict_that_any_firm_would_pass_or_fail_a_soc_2_and_no_person_is_named_and_the_guards_bite():
+    body = text()
+    assert "SOC 2" in body, "the guard collected nothing"
+    assert not pass_fail_claims(body), pass_fail_claims(body)
+    assert not names_found(body), names_found(body)
+    assert pass_fail_claims("a firm like that would have failed a SOC 2 report")
+    assert pass_fail_claims("it would pass")
+    assert not pass_fail_claims("This page does not judge whether any firm passes or fails a SOC 2 report.")
+    assert names_found("said Linton of a firm") == ["Linton"]
+    assert not names_found("a Dutch firm said its researcher")
+
+
+def test_the_new_sources_are_in_the_register_with_a_url_a_date_and_a_status():
+    reg = text().split("## Claims register")[1]
+    for host in NEW_REGISTER_HOSTS:
+        assert host in reg, host
+    assert not rows_missing_status(text())
+    assert not sourced_rows_without_url_and_date(text())
+
+
+def test_the_not_verified_list_names_what_the_new_section_did_not_read():
+    nv = section(text(), "## Not verified, plainly")
+    for needed in ("Neo Security", "accreditation body", "ISO/IEC 27006", "Type 1", "no firm"):
+        assert needed in nv, needed
+
+
+def test_the_new_glossary_terms_exist_once_and_point_at_the_section():
+    gloss = (WIKI / "Glossary.md").read_text(encoding="utf-8").splitlines()
+    for term in NEW_GLOSSARY_TERMS:
+        rows = [line for line in gloss if line.startswith(f"| **{term}**")]
+        assert len(rows) == 1, (term, len(rows))
+        assert f"{NAME}.md#what-a-certification-or-report-does-and-does-not-tell-you" in rows[0], term
