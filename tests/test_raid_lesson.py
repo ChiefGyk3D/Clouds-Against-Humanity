@@ -297,7 +297,7 @@ def test_the_blast_radius_lesson_is_named_in_plain_text_so_its_link_cap_holds():
 def test_the_lesson_is_registered_in_nav_contents_reading_order_home_and_sidebar():
     nav = (WIKI / "_nav.yaml").read_text(encoding="utf-8")
     line = next(row for row in nav.splitlines() if f"page: {NAME}," in row)
-    assert 'status: "draft"' in line and "Recovery, patching, virtual machines and Windows" in line
+    assert 'status: "draft"' in line and 'subgroup: "Continuity, backups and recovery"' in line
     for special in ("Contents.md", "Reading-Order.md", "Home.md", "_Sidebar.md"):
         assert f"{NAME}.md" in (WIKI / special).read_text(encoding="utf-8"), special
 

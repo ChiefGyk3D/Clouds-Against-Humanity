@@ -35,7 +35,13 @@ Order in the sidebar (the sidebar line budget is a test, not a goal):
   with <details>, which saves a line per block.
 
 The optional top-level `readers` list gives each audience its Start-here page for the Home map
-(every audience exactly once, an existing page).
+(every audience exactly once, an existing page). The optional `goals` list (issue #416) adds a
+Start-here line per topic track and per goal ({who, page}; no audience, an existing page).
+
+A group with `numbered: true` and `track: true` is a topic track (issue #416): numbered and curated
+in Contents and Home like the core path, but closed by default and folded into subgroups in the
+sidebar (the core path, with `numbered` alone, is listed in full and takes no subgroup). A page is
+in exactly one group, so a track holds its pages instead of a theme group.
 
 Parts, kept apart on purpose (the same shape as gen_project_status.py):
 
@@ -199,6 +205,32 @@ def _reader_problems(readers: object, listed: set[str]) -> list[str]:
     return problems
 
 
+def _goal_problems(goals: object, listed: set[str]) -> list[str]:
+    """The optional `goals` list (issue #416): a Start-here page per topic track or goal, no audience implied."""
+    if goals is None:
+        return []
+    if not isinstance(goals, list):
+        return ["goals: must be a list of {who, page} entries"]
+    problems: list[str] = []
+    seen_who: list[str] = []
+    for r in goals:
+        if not isinstance(r, dict):
+            problems.append(f"goals: entry {r!r} is not a mapping")
+            continue
+        where = f"goals.{r.get('who')}"
+        extra = set(r) - {"who", "page"}
+        if extra:
+            problems.append(f"{where}: unknown field(s) {sorted(extra)}")
+        problems += _text_problems(where, "who", r.get("who"), MAX_WHO)
+        if isinstance(r.get("who"), str):
+            seen_who.append(r["who"])
+        if r.get("page") not in listed:
+            problems.append(f"{where}: page {r.get('page')!r} is not a page in the manifest")
+    for w in sorted({w for w in seen_who if seen_who.count(w) > 1}):
+        problems.append(f"goals: {w!r} is listed twice")
+    return problems
+
+
 def validate(manifest: dict, pages: set[str]) -> list[str]:
     """Problems with a manifest, given the page names that exist in docs/wiki (minus the special ones).
 
@@ -220,6 +252,8 @@ def validate(manifest: dict, pages: set[str]) -> list[str]:
         problems += _text_problems(f"group {gid}", "title", g.get("title"), MAX_TITLE)
         if g.get("order") not in ORDERS:
             problems.append(f"group {gid}: order must be one of {ORDERS}")
+        if g.get("track") and (not g.get("numbered") or g.get("order") != "curated" or g.get("open")):
+            problems.append(f"group {gid}: a topic track must be numbered, curated and closed by default")
     if TOP_GROUP not in ids:
         problems.append(f"the {TOP_GROUP!r} group is missing (the sidebar's top row comes from it)")
     opened = [g.get("id") for g in groups if g.get("open")]
@@ -265,7 +299,7 @@ def validate(manifest: dict, pages: set[str]) -> list[str]:
                 problems += _text_problems(where, "subgroup", e["subgroup"], MAX_TITLE)
                 if gid == TOP_GROUP:
                     problems.append(f"{where}: the {TOP_GROUP!r} group is the sidebar's top row and takes no subgroup")
-                if any(g.get("id") == gid and g.get("numbered") for g in groups if isinstance(g, dict)):
+                if any(g.get("id") == gid and g.get("numbered") and not g.get("track") for g in groups if isinstance(g, dict)):
                     problems.append(f"{where}: a numbered group is a reading path and takes no subgroup")
 
     for gid, group_links in (manifest.get("links") or {}).items():
@@ -290,6 +324,7 @@ def validate(manifest: dict, pages: set[str]) -> list[str]:
             anchors.setdefault(anchor, g["id"])
 
     problems += _reader_problems(manifest.get("readers"), set(seen))
+    problems += _goal_problems(manifest.get("goals"), set(seen))
 
     for name in sorted(pages - set(seen)):
         problems.append(f"orphan: {name}.md is a wiki page but has no manifest entry")
@@ -330,7 +365,7 @@ def sidebar_entries(manifest: dict, group: dict) -> list[dict]:
     gid = group["id"]
     pages, extra = entries(manifest, gid), link_entries(manifest, gid)
     everything = pages + extra
-    if group.get("numbered"):
+    if group.get("numbered") and not group.get("track"):
         return everything
     # Marked entries are pinned to the top; the rest follow. Both keep display order, nothing is dropped.
     return [e for e in everything if e.get("sidebar")] + [e for e in everything if not e.get("sidebar")]
@@ -376,7 +411,7 @@ def render_sidebar(manifest: dict) -> str:
         shown = sidebar_entries(manifest, group)
         flat = [e for e in shown if not e.get("subgroup")]
         for number, e in enumerate(flat, start=1):
-            numbered = group.get("numbered") and "url" not in e
+            numbered = group.get("numbered") and not group.get("track") and "url" not in e
             lines.append(f"{f'{number}.' if numbered else '-'} {_sidebar_item(e)}")
         subgroups: dict[str, list[dict]] = {}
         for e in shown:
@@ -414,6 +449,10 @@ def render_home_map(manifest: dict) -> str:
     if readers:
         out += ["", "### Start here, by kind of reader", ""]
         out += [f"- **{r['who']}**: [{titles[r['page']]}]({r['page']}.md)" for r in readers]
+    goals = manifest.get("goals") or []
+    if goals:
+        out += ["", "### Start here, by topic track and by goal", ""]
+        out += [f"- **{r['who']}**: [{titles[r['page']]}]({r['page']}.md)" for r in goals]
     for g in groups:
         pages, extra = entries(manifest, g["id"]), link_entries(manifest, g["id"])
         out += ["", f"### {g['title']}", ""]
