@@ -591,7 +591,7 @@ def test_the_certification_view_sits_only_in_the_opinion_section_and_no_would_fa
     low = body.lower()
     for claim in ("would fail", "did fail", "has failed", "failed a soc 2", "failed its soc 2"):
         assert claim not in low, claim
-    assert "pull request 422" in op, "the page-one section is named, not linked, until it is on main"
+    assert f"{GRC1}.md#what-a-certification-or-report-does-and-does-not-tell-you" in op, "page one's section is linked"
     assert not named_people(op)
 
 
