@@ -2,6 +2,12 @@
 
 > Before this page: [Lessons learned](Lessons-Learned.md) tells the stories behind many of these rows, and [Spacelift](Spacelift.md) and [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) explain the machinery that prints the messages.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Reference](Contents.md#reference) > Troubleshooting index
+
+Previous: [Terraform reference](Terraform-Reference.md)
+<!-- END GENERATED PAGE NAV top -->
+
 This page is a lookup table: you see something wrong, you find the row that matches, and the last column says where the fix is written down. Every row comes from something documented in this repository, either a failure that happened during the build or one of the [labs](Labs-Break-It-on-Purpose.md) that breaks things on purpose. Nothing here is a general guess about how these tools can fail. If your symptom is not in the table, that is a gap worth an issue.
 
 Two habits that make the table faster to use:
@@ -162,3 +168,18 @@ Do this before you need the table.
 If your prediction named the wrong rule or the wrong total, write one sentence on what you assumed. The [labs](Labs-Break-It-on-Purpose.md) do the same for the firewall, the VPC range, the push policy and the secrets hook.
 
 Back to [Lessons learned](Lessons-Learned.md), the [Glossary](Glossary.md) or the [Reading order](Reading-Order.md).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Reference](Contents.md#reference) > Troubleshooting index
+
+Previous: [Terraform reference](Terraform-Reference.md)
+
+In this group: [Reference](Contents.md#reference), 4 pages
+
+- [Glossary](Glossary.md) / [Settings reference](Settings-Reference.md) / [Terraform reference](Terraform-Reference.md) / **Troubleshooting index**
+
+Related pages:
+
+- [Settings reference](Settings-Reference.md)
+- [Glossary](Glossary.md)
+<!-- END GENERATED PAGE NAV bottom -->

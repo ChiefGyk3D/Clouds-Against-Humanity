@@ -1,5 +1,11 @@
 # The CIA triad: confidentiality, integrity and availability, with this project as the worked example
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 4: GRC and law](Contents.md#track-4-grc-and-law) > The CIA triad
+
+Next: [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Side page to the start-from-zero pages. Read it before [Backups, recovery and patching](Backups-Recovery-and-Patching.md) if "what are we protecting, and from what" is still fuzzy, or at any point you want one short checklist to hold against a system. It names the three properties that almost every security control is for, shows how real failures map onto them, and then checks this repository's own controls against them, with the file that implements each. It does not repeat the pages it points at. Next: the lessons on business continuity and on disaster recovery (named here in plain text; they are issues 356 and 357 and are not written yet).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -283,3 +289,24 @@ Standards and vendor pages were downloaded and read on **2026-10-31**; the repos
 | No `cosign` or `sigstore` use outside the wiki | A recursive search of the repository, 2026-10-31 | Observed (a case-insensitive search of every text file found no hit except this page) |
 | The Bash script and its output | The free path | **Observed** 2026-10-31, GNU bash 5.2.37, coreutils 9.7, tar 1.35, Linux |
 | The script on macOS, or under another shell | | **Not run** |
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 4: GRC and law](Contents.md#track-4-grc-and-law) > The CIA triad
+
+Next: [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md)
+
+In this track: [Track 4: GRC and law](Contents.md#track-4-grc-and-law), 9 pages
+
+- Also here: **The CIA triad**
+- GRC, privacy law and data governance: [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md) / [US privacy law and the patchwork](US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers.md) / [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md) / [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md)
+- Continuity, backups and recovery: [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) / [Backups, recovery and patching](Backups-Recovery-and-Patching.md) / [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md) / [RAID: continuity, not a backup](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md)
+
+Related pages:
+
+- [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
+- [Threats in plain words](Threats-in-Plain-Words.md)
+- [Threat model](Threat-Model.md)
+- [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md)
+- [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md)
+- [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md)
+<!-- END GENERATED PAGE NAV bottom -->

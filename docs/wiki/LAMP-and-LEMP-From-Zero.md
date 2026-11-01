@@ -1,5 +1,11 @@
 # LAMP and LEMP from zero: web server, PHP runtime, database
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > LAMP and LEMP from zero
+
+Previous: [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) / Next: [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Side page to the start-from-zero pages, and lesson W1 of a four-lesson web-hosting track. Read it after [Containers and Docker basics](Containers-and-Docker-Basics.md) (core step 7) and [How a web request works](How-a-Web-Request-Works.md), if "web server", "PHP", "database" or "LAMP" are only words to you. It builds the two classic stacks side by side on your own computer, installs WordPress on each, and treats every arrow in the picture as a trust boundary. Next: [Droplet hardening](Droplet-Hardening.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -836,3 +842,24 @@ All read-only requests; retrieved 2026-10-22 unless stated.
 Not verified, plainly: the whole container build and every WordPress, PHP-FPM, WP-CLI and MySQL behavior in it; PowerShell and Windows and macOS; the cloud path from start to finish; the OpenTofu cloud version; whether the images you pull are already patched against the October 2026 advisory (check `php -v` inside the container: it must be 8.5.12, 8.4.27, 8.3.36 or 8.2.35, or newer); and what Cloudflare runs today beyond the 2022 post.
 
 Next: [Droplet hardening](Droplet-Hardening.md), core step 14 on the [Reading order](Reading-Order.md) page.
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > LAMP and LEMP from zero
+
+Previous: [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) / Next: [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md)
+
+In this track: [Track 1: Foundations](Contents.md#track-1-foundations), 28 pages
+
+- OS and Linux, git and the terminal: [Git from zero](Git-From-Zero.md) / [The terminal and your first script](Terminal-and-Your-First-Script.md) / [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) / [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md) / [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md) / [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md) / [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) / [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md) / [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md)
+- Networking: [How a web request works](How-a-Web-Request-Works.md) / [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) / [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) / [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md) / [IPv6 adoption and handling it safely](IPv6-Adoption-and-Handling-It-Safely.md)
+- Identity and secrets: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) / [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) / [Secrets from day one](Secrets-From-Day-One.md) / [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md)
+- Infrastructure as code: [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md) / [OpenTofu from zero](OpenTofu-From-Zero.md) / [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) / [Spacelift from zero](Spacelift-From-Zero.md) / [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md) / [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md)
+- Web hosting: **LAMP and LEMP from zero** / [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) / [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) / [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
+
+Related pages:
+
+- [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md)
+- [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
+- [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md)
+- [Spacelift from zero](Spacelift-From-Zero.md)
+<!-- END GENERATED PAGE NAV bottom -->

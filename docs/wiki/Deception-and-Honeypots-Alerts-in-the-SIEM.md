@@ -1,5 +1,11 @@
 # Deception alerts in the SIEM: turn a decoy event into a rule
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect) > Deception alerts in the SIEM
+
+Previous: [Honeyfiles on a host you own](Deception-and-Honeypots-Honeyfiles-on-Your-Host.md) / Next: [Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Lesson 5 of the [deception and honeypots track](Deception-and-Honeypots-Start-Here.md). A foundations side page to [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) and [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md). You work on **synthetic** events made on your own computer, write the detection logic as a small program you can run, and then read a draft of the same logic as Wazuh rules. Next: back to the [track hub](Deception-and-Honeypots-Start-Here.md), which says what the later tracks need.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -371,3 +377,22 @@ Retrieved 2026-10-21 unless stated.
 Not verified, plainly: the whole PowerShell track; macOS; the rules in a real manager; whether real Cowrie output matches the shape here beyond what its documentation says; any Track 2 or 3 behavior.
 
 Next: back to the [track hub](Deception-and-Honeypots-Start-Here.md), which says what [tracks 2 and 3](Deception-and-Honeypots-Start-Here.md#tracks-2-and-3-what-they-will-need) will need.
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect) > Deception alerts in the SIEM
+
+Previous: [Honeyfiles on a host you own](Deception-and-Honeypots-Honeyfiles-on-Your-Host.md) / Next: [Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md)
+
+In this track: [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect), 33 pages
+
+- Network and host defense: [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md) / [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md) / [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) / [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md) / [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md) / [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) / [Attack surface map: layer by layer](Attack-Surface-Map-Layer-by-Layer.md) / [The DMZ and hardening an internet-facing host](The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet.md) / [DMZ hardening checklist](DMZ-Hardening-Checklist.md)
+- Deception and honeypots: [Deception and honeypots: start here](Deception-and-Honeypots-Start-Here.md) / [What deception is](Deception-and-Honeypots-What-Deception-Is.md) / [Deception safety and law](Deception-and-Honeypots-Safety-and-Law.md) / [Plant a canary token](Deception-and-Honeypots-Plant-a-Canary.md) / [Honeyfiles on a host you own](Deception-and-Honeypots-Honeyfiles-on-Your-Host.md) / **Deception alerts in the SIEM** / [Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md) / [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md) / [Anatomy of a cloud honeypot](Deception-and-Honeypots-Cloud-Sensor-Anatomy.md) / [Cloud Cowrie for a weekend](Deception-and-Honeypots-Cloud-Cowrie-Weekend.md) / [Read what arrived: Cowrie logs](Deception-and-Honeypots-Read-the-Sensor-Logs.md)
+- Detection and monitoring: [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md) / [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) / [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) / [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) / [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) / [Multiple sites and identity](Multiple-Sites-and-Identity.md) / [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) / [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) / [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) / [Grafana dashboards](Grafana-Dashboards.md) / [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) / [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) / [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md)
+
+Related pages:
+
+- [Plant a canary token](Deception-and-Honeypots-Plant-a-Canary.md)
+- [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md)
+- [Deception safety and law](Deception-and-Honeypots-Safety-and-Law.md)
+- [Anatomy of a cloud honeypot](Deception-and-Honeypots-Cloud-Sensor-Anatomy.md)
+<!-- END GENERATED PAGE NAV bottom -->

@@ -1,5 +1,11 @@
 # Working in a company: tickets, change, on-call and documentation
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Working in a company: tickets, change, on-call, documentation
+
+Previous: [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md) / Next: [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Side page to the start-from-zero pages. Read it after [Enterprise engineering habits](Enterprise-Engineering-Habits.md) (core step 9) and the [Enterprise change management for beginners](Enterprise-Change-Management-for-Beginners.md) page. Those two explain the vocabulary; this page is the practice session: you write the ticket, the change record, the handover note, the runbook step, the post-mortem and the access request, and you learn what to do in your first week. Next: [Architecture overview](Architecture-Overview.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -679,3 +685,23 @@ All pages were retrieved read-only on **2026-10-22**. Pull request facts come fr
 | The post-mortem, the handover note, the runbook example and the emergency change story | Invented for teaching | **Fictional**; no real incident, person or system |
 
 Next: [Architecture overview](Architecture-Overview.md), or back to [Enterprise engineering habits](Enterprise-Engineering-Habits.md) and the [Reading order](Reading-Order.md).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Working in a company: tickets, change, on-call, documentation
+
+Previous: [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md) / Next: [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
+
+In this track: [Track 5: Build and operate](Contents.md#track-5-build-and-operate), 31 pages
+
+- Stage guides and design: [Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md) / [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) / [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) / [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) / [Teardown checklist](Teardown-Checklist.md) / [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) / [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) / [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) / [Why I picked these tools](Why-I-Picked-These-Tools.md) / [From commit to pipeline](From-Commit-to-Pipeline.md) / [Trace one change end to end](Trace-One-Change-End-to-End.md)
+- Other clouds: [Why the clouds differ](Why-the-Clouds-Differ.md) / [AWS: account preparation](Provider-AWS-Account-Preparation.md) / [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) / [AWS: where the money goes](Provider-AWS-Cost-Lesson.md) / [Azure: account preparation](Provider-Azure-Account-Preparation.md) / [Azure: the same four pieces](Provider-Azure-The-Same-Four-Pieces.md) / [Azure: where the money goes](Provider-Azure-Cost-Lesson.md) / [GCP: account preparation](Provider-GCP-Account-Preparation.md) / [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md) / [GCP: where the money goes](Provider-GCP-Cost-Lesson.md)
+- Enterprise practice: [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md) / [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md) / [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md) / [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md) / **Working in a company: tickets, change, on-call, documentation** / [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
+- Project process: [How this project is planned](How-This-Project-Is-Planned.md) / [Project status](Project-Status.md) / [Repository growth](Repository-Growth.md) / [Screenshots policy](Screenshots-Policy.md)
+
+Related pages:
+
+- [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md)
+- [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md)
+- [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md)
+- [How this project is planned](How-This-Project-Is-Planned.md)
+<!-- END GENERATED PAGE NAV bottom -->

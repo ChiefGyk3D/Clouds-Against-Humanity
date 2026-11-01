@@ -4,6 +4,12 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect) > A small example: the enterprise landscape
+
+Previous: [Read what arrived: Cowrie logs](Deception-and-Honeypots-Read-the-Sensor-Logs.md) / Next: [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Everything in this repository is a deliberately small example: two $6 machines, one person, one cloud account, a handful of tools chosen because they are cheap, have a free or small tier, and are easy to see all at once. That is what makes it a good place to learn. It is also not what you will find at a company.
 
 An enterprise answers the same questions this project answers, usually with different products, often several at once, because it has thousands of people, hundreds of offices and applications, auditors, contracts, and a decade of decisions it cannot undo. If you leave this wiki thinking "the cloud security stack is Twingate, Doppler, Spacelift and DigitalOcean," you have learned the example, not the field.
@@ -123,3 +129,22 @@ Be honest with yourself about what this project does not teach, because it is ea
 - If you work somewhere that uses several of these, ask the person who runs one how it ended up there. The history is usually more instructive than the feature list.
 
 Next: [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md), step 2 of the detection track. For the enterprise context track, continue with [Enterprise networks](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md). Back to the [Reading order](Reading-Order.md).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect) > A small example: the enterprise landscape
+
+Previous: [Read what arrived: Cowrie logs](Deception-and-Honeypots-Read-the-Sensor-Logs.md) / Next: [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md)
+
+In this track: [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect), 33 pages
+
+- Network and host defense: [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md) / [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md) / [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) / [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md) / [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md) / [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) / [Attack surface map: layer by layer](Attack-Surface-Map-Layer-by-Layer.md) / [The DMZ and hardening an internet-facing host](The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet.md) / [DMZ hardening checklist](DMZ-Hardening-Checklist.md)
+- Deception and honeypots: [Deception and honeypots: start here](Deception-and-Honeypots-Start-Here.md) / [What deception is](Deception-and-Honeypots-What-Deception-Is.md) / [Deception safety and law](Deception-and-Honeypots-Safety-and-Law.md) / [Plant a canary token](Deception-and-Honeypots-Plant-a-Canary.md) / [Honeyfiles on a host you own](Deception-and-Honeypots-Honeyfiles-on-Your-Host.md) / [Deception alerts in the SIEM](Deception-and-Honeypots-Alerts-in-the-SIEM.md) / [Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md) / [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md) / [Anatomy of a cloud honeypot](Deception-and-Honeypots-Cloud-Sensor-Anatomy.md) / [Cloud Cowrie for a weekend](Deception-and-Honeypots-Cloud-Cowrie-Weekend.md) / [Read what arrived: Cowrie logs](Deception-and-Honeypots-Read-the-Sensor-Logs.md)
+- Detection and monitoring: **A small example: the enterprise landscape** / [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) / [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) / [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) / [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) / [Multiple sites and identity](Multiple-Sites-and-Identity.md) / [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) / [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) / [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) / [Grafana dashboards](Grafana-Dashboards.md) / [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) / [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) / [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md)
+
+Related pages:
+
+- [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md)
+- [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md)
+- [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md)
+- [Multiple sites and identity](Multiple-Sites-and-Identity.md)
+<!-- END GENERATED PAGE NAV bottom -->

@@ -13,6 +13,8 @@ import re
 import struct
 from pathlib import Path
 
+from wikitext import page_text
+
 ROOT = Path(__file__).resolve().parent.parent
 WIKI = ROOT / "docs" / "wiki"
 NAME = "GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations"
@@ -36,7 +38,7 @@ def british_words(body: str) -> list[str]:
 
 
 def text() -> str:
-    return PAGE.read_text(encoding="utf-8")
+    return page_text(PAGE)  # without the generated navigation blocks (issue #417)
 
 
 def slug(heading: str) -> str:

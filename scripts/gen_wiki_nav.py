@@ -43,6 +43,16 @@ in Contents and Home like the core path, but closed by default and folded into s
 sidebar (the core path, with `numbered` alone, is listed in full and takes no subgroup). A page is
 in exactly one group, so a track holds its pages instead of a theme group.
 
+Page navigation (issue #417): every other page also carries two generated blocks, a short one after
+its first heading and leading quote banners (breadcrumb, previous, next) and the full one at the end
+(previous, next, the rest of its group, related pages), each between a BEGIN GENERATED PAGE NAV and
+an END GENERATED PAGE NAV line (NAV_BEGIN, NAV_END; "top" and "bottom"). Home and Contents get none,
+nor does a page whose first line is a GENERATED comment (another generator writes it whole). A page
+with no markers gets them inserted once; after that only the text between them is rewritten, and
+--check fails when any block is stale. The optional `related` list of a page entry, the fallback
+rule and the reading orders are explained in the header of docs/wiki/_nav.yaml. Tests that count a
+page's links or read its first lines use strip_page_nav (via tests/wikitext.py) to see the author's text.
+
 Parts, kept apart on purpose (the same shape as gen_project_status.py):
 
   load_manifest(text)       parse and reject duplicate keys; PyYAML is imported here only
@@ -51,6 +61,8 @@ Parts, kept apart on purpose (the same shape as gen_project_status.py):
                             pure: manifest in, Markdown out. No file reads, no clock.
   apply_home_map(text, block)
                             pure: swap the block between the markers of a Home.md text.
+  render_page_nav(m, page), apply_page_nav(text, blocks), strip_page_nav(text)
+                            pure: the two blocks of a page, put into (or taken out of) a page text.
   main()                    --check is offline and exits 1 when a generated file is stale
                             or the manifest does not match the pages in docs/wiki.
 
@@ -79,6 +91,19 @@ HOME = WIKI / "Home.md"
 HOME_BEGIN = "<!-- BEGIN GENERATED PAGE MAP: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->"
 HOME_END = "<!-- END GENERATED PAGE MAP -->"
 SPECIAL = {"_Sidebar", "_Footer"}  # wiki chrome, not pages a reader navigates to
+# Page navigation blocks (issue #417): two generated blocks per page, one at the top (breadcrumb, previous and
+# next) and one at the bottom (previous and next, the rest of the track, related pages).
+NAV_BEGIN = "<!-- BEGIN GENERATED PAGE NAV {where}: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->"
+NAV_END = "<!-- END GENERATED PAGE NAV {where} -->"
+NAV_PLACES = ("top", "bottom")
+# Home has its own page map and Contents is the index itself, so neither gets a block. A page whose first line is a
+# GENERATED comment is written whole by another generator (the status, growth and settings pages); a block added
+# here would make that generator's --check fail, so those are left alone too.
+NAV_EXEMPT = {"Home", "Contents"}
+GENERATED_PAGE_START = "<!-- GENERATED"
+RELATED_MIN = 3
+RELATED_MAX = 6
+RELATED_FALLBACK = 4  # how many neighbors stand in for a missing `related:` list
 
 AUDIENCES = ("everyone", "newcomer", "learner", "builder", "engineer", "operator", "security reader")
 STATUSES = ("draft", "est. steps", "unbuilt")
@@ -231,6 +256,24 @@ def _goal_problems(goals: object, listed: set[str]) -> list[str]:
     return problems
 
 
+def _related_problems(where: str, page: object, related: object, listed: set[str]) -> list[str]:
+    """The optional `related` list of a page (issue #417): RELATED_MIN to RELATED_MAX page names that exist, no
+    link to the page itself, none twice."""
+    if not isinstance(related, list) or not all(isinstance(r, str) for r in related):
+        return [f"{where}: related must be a list of page names"]
+    problems = []
+    if not RELATED_MIN <= len(related) <= RELATED_MAX:
+        problems.append(f"{where}: related has {len(related)} entries, it needs {RELATED_MIN} to {RELATED_MAX}")
+    for r in related:
+        if r == page:
+            problems.append(f"{where}: related lists the page itself")
+        elif r not in listed:
+            problems.append(f"{where}: related page {r!r} is not a page in the manifest")
+    for r in sorted({r for r in related if related.count(r) > 1}):
+        problems.append(f"{where}: related lists {r!r} twice")
+    return problems
+
+
 def validate(manifest: dict, pages: set[str]) -> list[str]:
     """Problems with a manifest, given the page names that exist in docs/wiki (minus the special ones).
 
@@ -276,7 +319,7 @@ def validate(manifest: dict, pages: set[str]) -> list[str]:
                 continue
             name = e.get("page")
             where = f"pages.{gid}.{name}"
-            extra = set(e) - {"page", "title", "audience", "status", "desc", "sidebar", "subgroup"}
+            extra = set(e) - {"page", "title", "audience", "status", "desc", "sidebar", "subgroup", "related"}
             if extra:
                 problems.append(f"{where}: unknown field(s) {sorted(extra)}")
             if not isinstance(name, str) or not PAGE_NAME.match(name):
@@ -322,6 +365,11 @@ def validate(manifest: dict, pages: set[str]) -> list[str]:
             if anchor in anchors:
                 problems.append(f"groups {anchors[anchor]} and {g['id']} have the same Contents anchor #{anchor}")
             anchors.setdefault(anchor, g["id"])
+
+    for group_entries in (manifest.get("pages") or {}).values():
+        for e in group_entries or []:
+            if isinstance(e, dict) and "related" in e:
+                problems += _related_problems(f"pages.{e.get('page')}", e.get("page"), e["related"], set(seen))
 
     problems += _reader_problems(manifest.get("readers"), set(seen))
     problems += _goal_problems(manifest.get("goals"), set(seen))
@@ -530,6 +578,157 @@ def render_contents(manifest: dict) -> str:
     return "\n".join(out) + "\n"
 
 
+# -- the per-page navigation blocks (issue #417) ----------------------------------------
+
+
+def has_reading_order(group: dict) -> bool:
+    """A numbered group (the core path, a track) or a sorted one has a reading order; the start group and
+    the curated, unnumbered tools group do not, so their pages get a breadcrumb and no previous or next."""
+    return bool(group.get("numbered")) or group.get("order") == "sorted"
+
+
+def page_home(manifest: dict) -> dict[str, tuple[dict, list[dict], int]]:
+    """Each page name -> (its group, the group's entries in display order, its index in them)."""
+    found = {}
+    for g in groups_of(manifest):
+        ordered = entries(manifest, g["id"])
+        for i, e in enumerate(ordered):
+            found[e["page"]] = (g, ordered, i)
+    return found
+
+
+def related_for(manifest: dict, page: str) -> list[str]:
+    """The pages a page shows as Related: its own `related:` list, else the fallback rule.
+
+    Fallback (deterministic, documented in the manifest header): up to RELATED_FALLBACK other pages of the
+    same group, leaving out the previous and next page (they are shown beside it), taking first the pages of
+    the same subgroup and then the rest, each nearest first by distance in the group's order, earlier before later."""
+    home = page_home(manifest)
+    group, ordered, index = home[page]
+    own = ordered[index]
+    if "related" in own:
+        return list(own["related"])
+    skip = {page}
+    if has_reading_order(group):
+        skip |= {ordered[j]["page"] for j in (index - 1, index + 1) if 0 <= j < len(ordered)}
+    candidates = [(j, e) for j, e in enumerate(ordered) if e["page"] not in skip]
+    candidates.sort(key=lambda je: (je[1].get("subgroup") != own.get("subgroup"), abs(je[0] - index), je[0]))
+    return [e["page"] for _, e in candidates[:RELATED_FALLBACK]]
+
+
+def _link(entry: dict) -> str:
+    return f"[{entry['title']}]({entry['page']}.md)"
+
+
+def _neighbors(group: dict, ordered: list[dict], index: int) -> str:
+    if not has_reading_order(group):
+        return ""
+    parts = []
+    if index > 0:
+        parts.append(f"Previous: {_link(ordered[index - 1])}")
+    if index + 1 < len(ordered):
+        parts.append(f"Next: {_link(ordered[index + 1])}")
+    return " / ".join(parts)
+
+
+def _wrap(where: str, body: list[str]) -> str:
+    return "\n".join([NAV_BEGIN.format(where=where), *body, NAV_END.format(where=where)])
+
+
+def render_page_nav(manifest: dict, page: str) -> dict[str, str]:
+    """The two generated blocks of one page, markers included: {"top": ..., "bottom": ...}."""
+    group, ordered, index = page_home(manifest)[page]
+    me = ordered[index]
+    crumb = f"[Home](Home.md) > [{group['title']}](Contents.md#{slug(group['title'])}) > {me['title']}"
+    neighbors = _neighbors(group, ordered, index)
+
+    top = [crumb] + (["", neighbors] if neighbors else [])
+
+    kind = "track" if group.get("track") or group.get("id") == "core" else "group"
+    bottom = [f"Where you are: {crumb}"]
+    if neighbors:
+        bottom += ["", neighbors]
+    plain = [e for e in ordered if not e.get("subgroup")]
+    subgroups: dict[str, list[dict]] = {}
+    for e in ordered:
+        if e.get("subgroup"):
+            subgroups.setdefault(e["subgroup"], []).append(e)
+
+    def shown(e: dict) -> str:
+        return f"**{e['title']}**" if e["page"] == page else _link(e)
+
+    bottom += ["", f"In this {kind}: [{group['title']}](Contents.md#{slug(group['title'])}), {len(ordered)} pages", ""]
+    if plain:
+        label = "Also here: " if subgroups else ""
+        bottom.append(f"- {label}{' / '.join(shown(e) for e in plain)}")
+    for title, members in subgroups.items():
+        bottom.append(f"- {title}: {' / '.join(shown(e) for e in members)}")
+    titles = {e["page"]: e["title"] for g in groups_of(manifest) for e in entries(manifest, g["id"])}
+    related = related_for(manifest, page)
+    if related:
+        bottom += ["", "Related pages:", ""]
+        bottom += [f"- [{titles[r]}]({r}.md)" for r in related]
+    return {"top": _wrap("top", top), "bottom": _wrap("bottom", bottom)}
+
+
+def has_page_nav(name: str, text: str) -> bool:
+    """Does this page carry the generated blocks? Not Home, Contents or a page another generator writes whole."""
+    return name not in NAV_EXEMPT and name not in SPECIAL and not text.startswith(GENERATED_PAGE_START)
+
+
+def _top_insertion_point(lines: list[str]) -> int:
+    """The line index where the top block goes: after the first heading and after any leading blockquote
+    paragraphs (the status banner, the glossary line, the prerequisites line), so a banner stays where it is."""
+    i = 1
+    while i < len(lines):
+        if not lines[i].strip():
+            i += 1
+        elif lines[i].startswith(">"):
+            while i < len(lines) and lines[i].startswith(">"):
+                i += 1
+        else:
+            break
+    return i
+
+
+def apply_page_nav(text: str, blocks: dict[str, str]) -> str:
+    """Swap the two blocks of a page text for new ones; a text with no markers gets them inserted once
+    (top after the heading and the leading banner quotes, bottom at the end). Anything else is an error."""
+    begins = {w: NAV_BEGIN.format(where=w) for w in NAV_PLACES}
+    ends = {w: NAV_END.format(where=w) for w in NAV_PLACES}
+    counts = [text.count(begins[w]) for w in NAV_PLACES] + [text.count(ends[w]) for w in NAV_PLACES]
+    if counts == [0, 0, 0, 0]:
+        lines = text.split("\n")
+        if not lines or not lines[0].startswith("# "):
+            raise ValueError("the page does not begin with a first-level heading, so the top block has no place")
+        at = _top_insertion_point(lines)
+        before, after = "\n".join(lines[:at]).rstrip("\n"), "\n".join(lines[at:]).strip("\n")
+        top_half = f"{before}\n\n{blocks['top']}\n" + (f"\n{after}" if after else "")
+        return top_half.rstrip("\n") + f"\n\n{blocks['bottom']}\n"
+    if counts != [1, 1, 1, 1]:
+        raise ValueError("a page needs exactly one BEGIN and one END marker line for each of its top and bottom page-nav blocks")
+    out = text
+    for w in NAV_PLACES:
+        start, end = out.index(begins[w]), out.index(ends[w])
+        if end < start:
+            raise ValueError(f"the END page-nav {w} marker comes before its BEGIN marker")
+        out = out[:start] + blocks[w] + out[end + len(ends[w]):]
+    if out.index(begins["top"]) > out.index(begins["bottom"]):
+        raise ValueError("the top page-nav block comes after the bottom one")
+    return out
+
+
+def strip_page_nav(text: str) -> str:
+    """The page text without the generated blocks and the blank line each leaves behind (for tests that count links
+    or look at the top of a page: the block is navigation, not content)."""
+    for w in NAV_PLACES:
+        begin, end = NAV_BEGIN.format(where=w), NAV_END.format(where=w)
+        while begin in text and end in text:
+            start, stop = text.index(begin), text.index(end) + len(end)
+            text = text[:start].rstrip("\n") + ("\n\n" if text[stop:].strip("\n") and text[:start].strip("\n") else "\n") + text[stop:].lstrip("\n")
+    return text
+
+
 # -- files ------------------------------------------------------------------------------
 
 
@@ -566,7 +765,32 @@ def check(root: Path) -> list[str]:
         problems.append(f"{HOME} is missing")
     except ValueError as exc:
         problems.append(f"{HOME}: {exc}")
+    for name, path, current, wanted in page_nav_plan(root, manifest, problems):
+        if current != wanted:
+            problems.append(f"the page navigation blocks in {path} do not match {MANIFEST}")
     return problems
+
+
+def page_nav_plan(root: Path, manifest: dict, problems: list[str]) -> list[tuple[str, Path, str, str]]:
+    """For every page that carries the generated blocks: (name, path, text now, text as it should be).
+    A page that cannot take them is reported in `problems` and left out."""
+    plan = []
+    for name in sorted(wiki_pages(root)):
+        path = WIKI / f"{name}.md"
+        try:
+            current = (root / path).read_text(encoding="utf-8")
+        except OSError:
+            problems.append(f"{path} is missing")
+            continue
+        if not has_page_nav(name, current):
+            continue
+        try:
+            wanted = apply_page_nav(current, render_page_nav(manifest, name))
+        except ValueError as exc:
+            problems.append(f"{path}: {exc}")
+            continue
+        plan.append((name, path, current, wanted))
+    return plan
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -583,7 +807,7 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"gen_wiki_nav: {p}", file=sys.stderr)
             print("gen_wiki_nav: fix the manifest, then re-render with: python -I scripts/gen_wiki_nav.py", file=sys.stderr)
             return 1
-        print(f"gen_wiki_nav: {CONTENTS}, {SIDEBAR} and the {HOME} page map match {MANIFEST}")
+        print(f"gen_wiki_nav: {CONTENTS}, {SIDEBAR}, the {HOME} page map and every page's navigation blocks match {MANIFEST}")
         return 0
 
     try:
@@ -604,10 +828,21 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, ValueError) as exc:
         print(f"gen_wiki_nav: {HOME}: {exc}", file=sys.stderr)
         return 1
+    nav_problems: list[str] = []
+    plan = page_nav_plan(root, manifest, nav_problems)
+    if nav_problems:  # a page that cannot take its blocks stops the run before anything is written
+        for p in nav_problems:
+            print(f"gen_wiki_nav: {p}", file=sys.stderr)
+        return 1
     (root / CONTENTS).write_text(render_contents(manifest), encoding="utf-8")
     (root / SIDEBAR).write_text(render_sidebar(manifest), encoding="utf-8")
     (root / HOME).write_text(home, encoding="utf-8")
-    print(f"gen_wiki_nav: wrote {CONTENTS}, {SIDEBAR} and the page map in {HOME}")
+    changed = 0
+    for _, path, current, wanted in plan:
+        if current != wanted:
+            (root / path).write_text(wanted, encoding="utf-8")
+            changed += 1
+    print(f"gen_wiki_nav: wrote {CONTENTS}, {SIDEBAR}, the page map in {HOME} and the navigation blocks of {len(plan)} pages ({changed} changed)")
     return 0
 
 

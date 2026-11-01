@@ -14,6 +14,8 @@ import json
 import re
 from pathlib import Path
 
+from wikitext import page_text
+
 ROOT = Path(__file__).resolve().parent.parent
 WIKI = ROOT / "docs" / "wiki"
 NAME = "Privacy-Security-and-Anonymity-Three-Different-Things-and-Why-There-Is-No-Silver-Bullet"
@@ -39,7 +41,7 @@ TOOLS = ("A VPN", "Tor", "I2P", "HTTPS", "A password manager", "Disk encryption"
 
 
 def text() -> str:
-    return PAGE.read_text(encoding="utf-8")
+    return page_text(PAGE)  # without the generated navigation blocks (issue #417)
 
 
 def register_rows(body: str) -> list[list[str]]:

@@ -1,5 +1,11 @@
 # Backups, recovery and patching
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 4: GRC and law](Contents.md#track-4-grc-and-law) > Backups, recovery and patching
+
+Previous: [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) / Next: [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Side page to the start-from-zero pages. Read it after [Droplet hardening](Droplet-Hardening.md) (core step 14), whose "Updates" table it explains from the ground up, and after [How money works in the cloud](How-Money-Works-in-the-Cloud.md) (core step 8) if the price of a backup is new to you. It does not repeat the Enterprise page on [high availability, disaster recovery and backups](Enterprise-Infrastructure-Differences.md#high-availability-disaster-recovery-and-backups); it makes you take a backup, lose the original, and time the way back. If "protect what, from what" is still fuzzy, read [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) first: availability is the property this page is about. When you have run its drill and want more, [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md) takes up 3-2-1-1-0, immutable copies, key custody and restore testing. For the bigger picture (business continuity versus disaster recovery, a recovery order, roles and a tabletop exercise), see [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md). Next: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -756,3 +762,24 @@ All read-only requests; retrieved **2026-10-22** unless stated. "Observed" means
 Not verified, plainly: the whole PowerShell and Windows track; macOS (the Bash lab does not support it); every Docker command; the optional own-account path from start to finish, including whether the doctl backup-plan strings are accepted as written, whether the first weekly backup lands inside the window you choose, the time zone of that window, how long a restore takes, whether the host key is unchanged after a restore, and how a retained backup of a destroyed droplet is billed; Patch Gremlin's code and behavior beyond its README; and the DigitalOcean pages' behavior after their stated "last verified" dates.
 
 Next: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md), core step 15 on the [Reading order](Reading-Order.md) page.
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 4: GRC and law](Contents.md#track-4-grc-and-law) > Backups, recovery and patching
+
+Previous: [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) / Next: [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md)
+
+In this track: [Track 4: GRC and law](Contents.md#track-4-grc-and-law), 9 pages
+
+- Also here: [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md)
+- GRC, privacy law and data governance: [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md) / [US privacy law and the patchwork](US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers.md) / [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md) / [Cross-tenant data flows, governance, retention and DLP](Cross-Tenant-Data-Governance-Retention-and-DLP.md)
+- Continuity, backups and recovery: [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) / **Backups, recovery and patching** / [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md) / [RAID: continuity, not a backup](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md)
+
+Related pages:
+
+- [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md)
+- [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md)
+- [RAID: continuity, not a backup](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md)
+- [Teardown checklist](Teardown-Checklist.md)
+- [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md)
+- [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md)
+<!-- END GENERATED PAGE NAV bottom -->

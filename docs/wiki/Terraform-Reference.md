@@ -4,6 +4,12 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Reference](Contents.md#reference) > Terraform reference
+
+Previous: [Settings reference](Settings-Reference.md) / Next: [Troubleshooting index](Troubleshooting-Index.md)
+<!-- END GENERATED PAGE NAV top -->
+
 This page walks through every variable, resource, data source, local, module call and output in the repository, file by file, and says why each one exists. It is written for someone learning OpenTofu who wants to read the real code next to a plain-language explanation. For the bigger picture (why layers, why stacks) see [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md).
 
 OpenTofu is the open-source fork of Terraform. The language (HCL) is identical, so everything here applies to both. The word "Terraform" in a file name, a Spacelift setting or a provider name means the same thing.
@@ -397,3 +403,17 @@ When Spacelift shows a plan, check these against this page:
 - [Spacelift](Spacelift.md): how stacks, dependencies and the hook run these.
 
 Next: [Spacelift](Spacelift.md) if you have not read it, then [Trace one change end to end](Trace-One-Change-End-to-End.md). Back to the [Reading order](Reading-Order.md).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Reference](Contents.md#reference) > Terraform reference
+
+Previous: [Settings reference](Settings-Reference.md) / Next: [Troubleshooting index](Troubleshooting-Index.md)
+
+In this group: [Reference](Contents.md#reference), 4 pages
+
+- [Glossary](Glossary.md) / [Settings reference](Settings-Reference.md) / **Terraform reference** / [Troubleshooting index](Troubleshooting-Index.md)
+
+Related pages:
+
+- [Glossary](Glossary.md)
+<!-- END GENERATED PAGE NAV bottom -->

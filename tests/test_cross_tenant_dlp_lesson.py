@@ -10,6 +10,8 @@ import re
 import sys
 from pathlib import Path
 
+from wikitext import page_text
+
 ROOT = Path(__file__).resolve().parent.parent
 LAB = ROOT / "labs" / "cross-tenant-dlp"
 PAGE = ROOT / "docs" / "wiki" / "Cross-Tenant-Data-Governance-Retention-and-DLP.md"
@@ -63,7 +65,7 @@ def test_lab_files_carry_spdx_and_the_page_links_the_lab():
     for p in (f for f in LAB.glob("*") if f.is_file()):
         if p.suffix in {".py", ".sh", ".txt"}:
             assert "SPDX-License-Identifier: Apache-2.0" in p.read_text()[:300], p.name
-    text = PAGE.read_text()
+    text = page_text(PAGE)  # without the generated navigation blocks (issue #417)
     assert "labs/cross-tenant-dlp" in text and "Next:" in text.splitlines()[2]
     assert "Zscaler" in text and "Twingate" in text and "does not claim it replaces" in text
 

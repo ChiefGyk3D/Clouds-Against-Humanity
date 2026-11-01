@@ -2,6 +2,12 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Fork, private stacks, the pipeline
+
+Next: [Labs: break it on purpose](Labs-Break-It-on-Purpose.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Build track, step 1. Prerequisites: the eight primers and the core path through [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md), because this page leans on [Spacelift](Spacelift.md) and [Doppler](Doppler-and-Secrets.md). Next: [Labs: break it on purpose](Labs-Break-It-on-Purpose.md).
 
 > Before this page: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) explains what a pull request and a CI check are. This page assumes you have read it, and that you have skimmed [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md).
@@ -288,3 +294,23 @@ Writing your own answers into your private repository, next to the code, is the 
 - Write down, in your private repository, three settings from the table that you changed and one sentence each on why. A year from now that file is the answer to "why is it like this?".
 
 Next: [Labs: break it on purpose](Labs-Break-It-on-Purpose.md), step 2 of the build track on the [Reading order](Reading-Order.md) page. The plan for other clouds is tracked in [issue #22](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/issues/22); those pages start at [Why the clouds differ](Why-the-Clouds-Differ.md) (unverified drafts).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Fork, private stacks, the pipeline
+
+Next: [Labs: break it on purpose](Labs-Break-It-on-Purpose.md)
+
+In this track: [Track 5: Build and operate](Contents.md#track-5-build-and-operate), 31 pages
+
+- Stage guides and design: **Fork, private stacks, the pipeline** / [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) / [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) / [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) / [Teardown checklist](Teardown-Checklist.md) / [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) / [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) / [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) / [Why I picked these tools](Why-I-Picked-These-Tools.md) / [From commit to pipeline](From-Commit-to-Pipeline.md) / [Trace one change end to end](Trace-One-Change-End-to-End.md)
+- Other clouds: [Why the clouds differ](Why-the-Clouds-Differ.md) / [AWS: account preparation](Provider-AWS-Account-Preparation.md) / [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) / [AWS: where the money goes](Provider-AWS-Cost-Lesson.md) / [Azure: account preparation](Provider-Azure-Account-Preparation.md) / [Azure: the same four pieces](Provider-Azure-The-Same-Four-Pieces.md) / [Azure: where the money goes](Provider-Azure-Cost-Lesson.md) / [GCP: account preparation](Provider-GCP-Account-Preparation.md) / [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md) / [GCP: where the money goes](Provider-GCP-Cost-Lesson.md)
+- Enterprise practice: [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md) / [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md) / [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md) / [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md) / [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md) / [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
+- Project process: [How this project is planned](How-This-Project-Is-Planned.md) / [Project status](Project-Status.md) / [Repository growth](Repository-Growth.md) / [Screenshots policy](Screenshots-Policy.md)
+
+Related pages:
+
+- [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md)
+- [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md)
+- [Teardown checklist](Teardown-Checklist.md)
+- [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md)
+<!-- END GENERATED PAGE NAV bottom -->

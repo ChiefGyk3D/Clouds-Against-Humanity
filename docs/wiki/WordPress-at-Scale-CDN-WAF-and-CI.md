@@ -1,5 +1,11 @@
 # WordPress at scale: CDN, WAF, caching and CI
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > WordPress at scale: CDN, WAF, caching and CI
+
+Previous: [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Lesson 4 of 4 in the web-hosting track. Read it after the lesson on [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) (lesson 3), and before or beside [From commit to pipeline](From-Commit-to-Pipeline.md), whose pipeline ideas it applies to a web fleet. It does not teach how to install WordPress or secure one site: lessons 1 and 2 do that. It takes the one site you can already run and shows how the same site is run by a company with thousands of them. 
 Next: [Reading order](Reading-Order.md).
 
@@ -885,3 +891,24 @@ All read-only requests; retrieved 2026-10-22 unless stated.
 Not verified, plainly: the PowerShell scripts (`lab.ps1`, `ci_local.ps1`); Docker Desktop, macOS and Windows; WordPress itself under any of this (the lab uses a stand-in); real CDN and WAF behavior on any provider (the lab builds equivalents in Nginx); the cost totals as a whole (each line is from a page or file, the sums are mine); anything in the own-account parts, none of which was applied; `act`; the example workflow on GitHub (it lives under `labs/`, so it never ran); and the details of the two PHP vulnerabilities beyond the project's advisory text.
 
 Next: [Reading order](Reading-Order.md), to choose the next page. Back to [From commit to pipeline](From-Commit-to-Pipeline.md) for the pipeline this page builds on.
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > WordPress at scale: CDN, WAF, caching and CI
+
+Previous: [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md)
+
+In this track: [Track 1: Foundations](Contents.md#track-1-foundations), 28 pages
+
+- OS and Linux, git and the terminal: [Git from zero](Git-From-Zero.md) / [The terminal and your first script](Terminal-and-Your-First-Script.md) / [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) / [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md) / [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md) / [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md) / [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) / [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md) / [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md)
+- Networking: [How a web request works](How-a-Web-Request-Works.md) / [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) / [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) / [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md) / [IPv6 adoption and handling it safely](IPv6-Adoption-and-Handling-It-Safely.md)
+- Identity and secrets: [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) / [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) / [Secrets from day one](Secrets-From-Day-One.md) / [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md)
+- Infrastructure as code: [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md) / [OpenTofu from zero](OpenTofu-From-Zero.md) / [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) / [Spacelift from zero](Spacelift-From-Zero.md) / [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md) / [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md)
+- Web hosting: [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md) / [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) / [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) / **WordPress at scale: CDN, WAF, caching and CI**
+
+Related pages:
+
+- [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md)
+- [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md)
+- [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md)
+- [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md)
+<!-- END GENERATED PAGE NAV bottom -->

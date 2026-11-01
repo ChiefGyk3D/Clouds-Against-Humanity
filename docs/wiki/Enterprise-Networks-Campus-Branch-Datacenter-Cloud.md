@@ -4,6 +4,12 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Enterprise networks: campus, branch, data center, cloud
+
+Previous: [GCP: where the money goes](Provider-GCP-Cost-Lesson.md) / Next: [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md)
+<!-- END GENERATED PAGE NAV top -->
+
 **Prerequisites:** [Networking basics for this project](Networking-Basics-for-This-Project.md) (addresses, CIDR, ports, stateful firewalls), [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) and [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md).
 
 This repository has one network: a VPC with a range of 256 addresses, two small machines in it, and a firewall that lets nothing in. A company has hundreds of networks of several different kinds, and most of the work of a network engineer is deciding how those networks join, what may cross between them, and how anyone can tell. This page names the shapes and the vocabulary. It is the page to read before a job interview that says "hybrid network" in the description.
@@ -154,3 +160,23 @@ Status is one of: `Verified <date>` (checked against the named source on that da
 | SD-WAN products use IPsec between sites | UNVERIFIED | varies by product |
 
 Next: [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md). Back to the [Reading order](Reading-Order.md).
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Enterprise networks: campus, branch, data center, cloud
+
+Previous: [GCP: where the money goes](Provider-GCP-Cost-Lesson.md) / Next: [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md)
+
+In this track: [Track 5: Build and operate](Contents.md#track-5-build-and-operate), 31 pages
+
+- Stage guides and design: [Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md) / [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) / [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) / [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) / [Teardown checklist](Teardown-Checklist.md) / [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) / [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) / [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) / [Why I picked these tools](Why-I-Picked-These-Tools.md) / [From commit to pipeline](From-Commit-to-Pipeline.md) / [Trace one change end to end](Trace-One-Change-End-to-End.md)
+- Other clouds: [Why the clouds differ](Why-the-Clouds-Differ.md) / [AWS: account preparation](Provider-AWS-Account-Preparation.md) / [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) / [AWS: where the money goes](Provider-AWS-Cost-Lesson.md) / [Azure: account preparation](Provider-Azure-Account-Preparation.md) / [Azure: the same four pieces](Provider-Azure-The-Same-Four-Pieces.md) / [Azure: where the money goes](Provider-Azure-Cost-Lesson.md) / [GCP: account preparation](Provider-GCP-Account-Preparation.md) / [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md) / [GCP: where the money goes](Provider-GCP-Cost-Lesson.md)
+- Enterprise practice: **Enterprise networks: campus, branch, data center, cloud** / [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md) / [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md) / [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md) / [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md) / [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
+- Project process: [How this project is planned](How-This-Project-Is-Planned.md) / [Project status](Project-Status.md) / [Repository growth](Repository-Growth.md) / [Screenshots policy](Screenshots-Policy.md)
+
+Related pages:
+
+- [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md)
+- [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md)
+- [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md)
+- [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
+<!-- END GENERATED PAGE NAV bottom -->

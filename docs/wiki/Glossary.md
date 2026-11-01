@@ -1,5 +1,11 @@
 # Glossary
 
+<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+[Home](Home.md) > [Reference](Contents.md#reference) > Glossary
+
+Next: [Settings reference](Settings-Reference.md)
+<!-- END GENERATED PAGE NAV top -->
+
 Every term the wiki uses, in plain language, with a pointer to the page that explains it properly. Terms a newcomer is likely to meet first are marked **(basics)**; the start-from-zero pages introduce them in order, beginning at [Start here if you are new](Start-Here-If-You-Are-New.md).
 
 | Term | Meaning |
@@ -788,3 +794,18 @@ Every term the wiki uses, in plain language, with a pointer to the page that exp
 | **Zero-day** | A vulnerability being used against targets before the maker has a patch, or before the maker knew of it. The word is about timing, not severity. [Threats in plain words](Threats-in-Plain-Words.md#zero-day) |
 | **Zone (DNS)** | The set of records one DNS host answers for, starting at a name and covering what is below it that has not been delegated elsewhere. [DNS and Cloudflare: names and who answers](DNS-Cloudflare-and-Hosting-Your-Own-Website.md#names-who-owns-them-and-who-answers) |
 | **ZTNA** | Zero trust network access: per-user, per-resource access decided on every connection, with no implicit trust from network location. Twingate is the ZTNA product here. [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md#what-ztna-does-instead) |
+
+<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
+Where you are: [Home](Home.md) > [Reference](Contents.md#reference) > Glossary
+
+Next: [Settings reference](Settings-Reference.md)
+
+In this group: [Reference](Contents.md#reference), 4 pages
+
+- **Glossary** / [Settings reference](Settings-Reference.md) / [Terraform reference](Terraform-Reference.md) / [Troubleshooting index](Troubleshooting-Index.md)
+
+Related pages:
+
+- [Terraform reference](Terraform-Reference.md)
+- [Troubleshooting index](Troubleshooting-Index.md)
+<!-- END GENERATED PAGE NAV bottom -->
