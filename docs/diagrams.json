@@ -14,6 +14,21 @@
   "docs/wiki/images/architecture-overview-diagram-4.png": {
     "sha256": "e3311302f8cca095ab63360c2de33d7fb8dacd01d039562808996c991f8fa80a"
   },
+  "docs/wiki/images/blockchain-fundamentals-hashes-blocks-nodes-consensus-and-forks-diagram-1.png": {
+    "sha256": "9d59ed6866b7dc11795a88486954403153b6c3c59e7c68f356bdbd5ceba3c93d"
+  },
+  "docs/wiki/images/blockchain-fundamentals-hashes-blocks-nodes-consensus-and-forks-diagram-2.png": {
+    "sha256": "e5b924ebd638bdfa62d19a678ac419e6cdddabf75490e12c0bd1d67e1a94f9a9"
+  },
+  "docs/wiki/images/blockchain-fundamentals-hashes-blocks-nodes-consensus-and-forks-diagram-3.png": {
+    "sha256": "9399c79b9ea7df55be37dc61c8146e6a90b1adc4b38e0466fc0b1508090a217c"
+  },
+  "docs/wiki/images/blockchain-fundamentals-hashes-blocks-nodes-consensus-and-forks-diagram-4.png": {
+    "sha256": "2beea995c8f4591e5b4bf50d5584ace5779b0f18ea4718504168ac2d5d100777"
+  },
+  "docs/wiki/images/blockchain-fundamentals-hashes-blocks-nodes-consensus-and-forks-diagram-5.png": {
+    "sha256": "c6420a355e0c8f9911aab99f59b3173a582e9e319fbf729bbe19d61774a869ea"
+  },
   "docs/wiki/images/ci-tests-and-cost-gate-diagram-1.png": {
     "sha256": "ad44896c9bd9cf6d870396ee888b0fcba158f93f3dcad06f580a7b92e70bde23"
   },
