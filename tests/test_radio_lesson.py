@@ -39,7 +39,6 @@ TOPICS = (
     "## Radio in a continuity plan for this project",
     "## Free exercises: offline, listen-only and simulation",
     "## Claims register",
-    "## Maintainer notes to add",
 )
 
 
@@ -61,7 +60,7 @@ def cited_paths(cell: str) -> list[str]:
 
 
 def register_rows(body: str) -> list[list[str]]:
-    return table_rows(body.split("## Claims register")[1].split("## Maintainer notes to add")[0])
+    return table_rows(body.split("## Claims register")[1])
 
 
 def rows_missing_status(rows: list[list[str]]) -> list[str]:
@@ -340,10 +339,10 @@ def test_the_legal_rules_come_before_the_overview_in_the_sigint_section():
         assert needle in sec, needle
 
 
-def test_the_maintainer_block_is_questions_and_the_facts_are_only_the_allowed_ones():
+def test_the_maintainer_facts_are_only_the_allowed_ones_and_no_to_do_list_is_published():
     body = text()
-    block = body.split("## Maintainer notes to add")[1]
-    assert block.count("?") >= 4
+    assert "Maintainer notes to add" not in body
+    assert "beyond the license class and the five services" in body
     assert "Meshtastic, MeshCore, Reticulum, ham radio and GMRS" in body
     assert "General class" in body
     assert not re.search(r"\b(?:my|his) (?:node|radio|repeater|antenna|rig)s?\b", body, re.IGNORECASE)

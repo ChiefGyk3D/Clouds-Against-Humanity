@@ -4,7 +4,7 @@ Side page to the continuity pages. Read it after [Business continuity and disast
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-> **Status: unverified draft. Written from reading; no transmitter was keyed and no radio was configured, for this page or in writing it.** On **2026-10-31** I read the project pages, the regulator text and the legal text listed in the [claims register](#claims-register), and I ran exactly one thing: the arithmetic script in [Exercise 2](#exercise-2-run-the-script-and-compare-it-with-your-prediction), which does sums and nothing else. **Not run:** every radio, every firmware and app, every setting in any config shown, a real link or range test, any live emergency procedure, and a tabletop with other people. **Not read:** the FCC's own web pages (they refused a plain download, see the register) and the NSA's SIGINT page (same). The United States rules come from the Code of Federal Regulations as published by eCFR, edition **2026-10-29**, and from the United States Code as published by Cornell's Legal Information Institute, both read on 2026-10-31. Rules change; read the current text before you act. This is education and not legal advice, and a lawyer or your regulator has the last word.
+> **Status: unverified draft. Written from reading; no transmitter was keyed and no radio was configured, for this page or in writing it.** On **2026-10-31** I read the project pages, the regulator text and the legal text listed in the [claims register](#claims-register), and I ran exactly one thing: the arithmetic script in [Exercise 2](#exercise-2-run-the-script-and-compare-it-with-your-prediction), which does sums and nothing else. **Not run:** every radio, every firmware and app, every setting in any config shown, a real link or range test, any live emergency procedure, and a tabletop with other people. **Not read:** the FCC's own web pages (they refused a plain download, see the register) and the NSA's SIGINT page (same). The United States rules come from the Code of Federal Regulations as published by eCFR, edition **2026-10-29**, and from the United States Code as published by Cornell's Legal Information Institute, both read on 2026-10-31. Rules change; read the current text before you act. The maintainer's own experience beyond the license class and the five services named below is not stated on this page. This is education and not legal advice, and a lawyer or your regulator has the last word.
 
 > **Prerequisites.** [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) for RTO, RPO and a contact tree, and [Networking basics for this project](Networking-Basics-for-This-Project.md) for what a link and a hop are. The exercises need a computer with Python 3 and a pencil. No radio, no account, no cost. About 2 hours (est.).
 
@@ -609,13 +609,3 @@ Every source claim on this page, with where it was read. Statuses: **Read** mean
 | Log shipping uses Twingate to a home manager; agent buffering not checked | `docs/stages/02-telemetry.md`, `docs/wiki/Stage-2-Home-Side-Runbook.md` | Read 2026-10-31 in this repository |
 | The script and its two outputs | This page, Exercise 2 | Observed 2026-10-31, Python 3.13.5 |
 | Maintainer facts: General class license; runs Meshtastic, MeshCore, Reticulum, ham radio and GMRS | The maintainer's own answers, 2026-10-31 | Stated by the maintainer; nothing else about his gear or experience is claimed |
-
-## Maintainer notes to add
-
-Nothing below is claimed on this page. These are questions for the maintainer, whose answers (without callsigns, grids, locations, counts or schedules) can be added to the next version of the page.
-
-1. Which of these services do you use for what kind of message: ham, GMRS, Meshtastic, MeshCore, Reticulum? (Types of use, not setups.)
-2. What surprised you most about running a mesh, in range, in capacity, or in who else was on it?
-3. Has a radio path ever been your fallback in a real outage, and what failed first?
-4. Should this project ever have a radio gateway, and if so, which rules would you want the page to state first?
-5. Is there a rule of thumb you give new hams about encryption, identification or business use that the page should repeat?
