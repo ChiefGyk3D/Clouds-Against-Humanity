@@ -113,6 +113,30 @@
   "docs/wiki/images/how-i2p-works-tunnels-garlic-routing-and-the-network-database-diagram-6.png": {
     "sha256": "c9841a4a65f6dcabcbe8026ecb6eb68c107a903fb63b75236ccc9951af0845f8"
   },
+  "docs/wiki/images/how-monero-works-compared-with-bitcoin-and-ethereum-defi-mixers-swaps-and-ransomware-diagram-1.png": {
+    "sha256": "e7aee6d550a49fdaae4836545c574b7a500d4518f3d071aa08cc38d1afef4d4c"
+  },
+  "docs/wiki/images/how-monero-works-compared-with-bitcoin-and-ethereum-defi-mixers-swaps-and-ransomware-diagram-2.png": {
+    "sha256": "5944c7cebdeb7dfe130995a315767c46a8c5d6c05615a6a50de5e34ce3b54620"
+  },
+  "docs/wiki/images/how-monero-works-compared-with-bitcoin-and-ethereum-defi-mixers-swaps-and-ransomware-diagram-3.png": {
+    "sha256": "16c6a0f1b49c3dee10fa671484ce0a6d2ab2525954313d3c23835f14dce18829"
+  },
+  "docs/wiki/images/how-monero-works-compared-with-bitcoin-and-ethereum-defi-mixers-swaps-and-ransomware-diagram-4.png": {
+    "sha256": "677aff580b0f449fc10b42bb08c83d48889ca232bac4996a4fbd2777d1d161a9"
+  },
+  "docs/wiki/images/how-monero-works-compared-with-bitcoin-and-ethereum-defi-mixers-swaps-and-ransomware-diagram-5.png": {
+    "sha256": "ff91dfaef08e46be5a7a841883fb45eef7384c9abe51aab230dda2487bb4cec4"
+  },
+  "docs/wiki/images/how-monero-works-compared-with-bitcoin-and-ethereum-defi-mixers-swaps-and-ransomware-diagram-6.png": {
+    "sha256": "54a8ad7270157d3adb187c26f175754660cd3a3bd433b24511d22710defd1059"
+  },
+  "docs/wiki/images/how-monero-works-compared-with-bitcoin-and-ethereum-defi-mixers-swaps-and-ransomware-diagram-7.png": {
+    "sha256": "08e4de2540f3ce84161a02e25232d00bc9dae4b5ff5f2a84248199d142981a71"
+  },
+  "docs/wiki/images/how-monero-works-compared-with-bitcoin-and-ethereum-defi-mixers-swaps-and-ransomware-diagram-8.png": {
+    "sha256": "5f5a8a21f4b62c2a314e94786a8df49ac1db557809223b831d05526a5102eed1"
+  },
   "docs/wiki/images/how-tor-works-in-depth-circuits-relays-directory-authorities-and-onion-services-diagram-1.png": {
     "sha256": "e19b017566a6c0e4af99701291c6d1f442b1b50eb260348ca32c5ab1e0c0322a"
   },
