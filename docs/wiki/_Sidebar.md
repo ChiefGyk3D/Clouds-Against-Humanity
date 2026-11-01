@@ -52,18 +52,18 @@ file does not match the manifest. -->
 - [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md)
 - [Full list (5)](Contents.md#foundations-networking)
 </details>
-<details><summary><b>Foundations: identity and secrets</b> (9)</summary>
+<details><summary><b>Foundations: identity and secrets</b> (10)</summary>
 
 - [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md)
 - [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md)
 - [Secrets from day one](Secrets-From-Day-One.md)
-<details><summary>Identity, risk and privacy (6)</summary>
+<details><summary>Identity, risk and privacy (7)</summary>
 
-- [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md) (draft) · [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md) · [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md) · [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md) (draft)
-- [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) (draft) · [US privacy law and the patchwork](US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers.md) (draft)
+- [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md) (draft) · [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md) · [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md) · [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md) (draft)
+- [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md) (draft) · [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) (draft) · [US privacy law and the patchwork](US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers.md) (draft)
 </details>
 
-- [Full list (9)](Contents.md#foundations-identity-and-secrets)
+- [Full list (10)](Contents.md#foundations-identity-and-secrets)
 </details>
 <details><summary><b>Foundations: infrastructure as code</b> (7)</summary>
 
@@ -84,17 +84,18 @@ file does not match the manifest. -->
 - [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
 - [Full list (4)](Contents.md#foundations-web-hosting)
 </details>
-<details><summary><b>Foundations: security tools and threat modeling</b> (16)</summary>
+<details><summary><b>Foundations: security tools and threat modeling</b> (18)</summary>
 
-<details><summary>Threats, privacy networks and cryptocurrency (16)</summary>
+<details><summary>Threats, privacy networks and cryptocurrency (18)</summary>
 
 - [Threats in plain words](Threats-in-Plain-Words.md) · [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) · [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md) · [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md) · [Threat model exercise](Threat-Model-Exercise.md)
 - [Threat Dragon exercise](Threat-Dragon-Exercise.md) · [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) (draft) · [How a VPN works](How-a-VPN-Works-Tunnels-What-It-Hides-What-It-Does-Not-and-What-an-Audit-Proves.md) (draft) · [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md) (draft) · [How I2P works](How-I2P-Works-Tunnels-Garlic-Routing-and-the-Network-Database.md) (draft)
-- [Blockchain fundamentals](Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks.md) (draft) · [The darknet landscape: markets, OPSEC and layering](The-Darknet-Landscape-Markets-OPSEC-Clearnet-and-Layering-Tor-I2P-and-VPN.md) (draft) · [How Bitcoin works](How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable.md) (draft) · [How Monero works](How-Monero-Works-Compared-with-Bitcoin-and-Ethereum-DeFi-Mixers-Swaps-and-Ransomware.md) (draft)
-- [Wallets and key custody](Wallets-and-Key-Custody-Hot-and-Cold-Hardware-Wallets-Recovery-Shamir-and-Multisig.md) (draft) · [Running Monero properly](Running-Monero-Properly-Hardware-Wallet-Qubes-and-Whonix-Offline-Wallet-and-PiNodeXMR.md) (draft)
+- [Privacy, security and anonymity](Privacy-Security-and-Anonymity-Three-Different-Things-and-Why-There-Is-No-Silver-Bullet.md) (draft) · [The browsing setups compared](The-Browsing-Setups-Compared-Tor-Browser-Brave-Whonix-Tails-and-Qubes-with-Whonix.md) (draft) · [Blockchain fundamentals](Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks.md) (draft)
+- [The darknet landscape: markets, OPSEC and layering](The-Darknet-Landscape-Markets-OPSEC-Clearnet-and-Layering-Tor-I2P-and-VPN.md) (draft) · [How Bitcoin works](How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable.md) (draft) · [How Monero works](How-Monero-Works-Compared-with-Bitcoin-and-Ethereum-DeFi-Mixers-Swaps-and-Ransomware.md) (draft) · [Wallets and key custody](Wallets-and-Key-Custody-Hot-and-Cold-Hardware-Wallets-Recovery-Shamir-and-Multisig.md) (draft)
+- [Running Monero properly](Running-Monero-Properly-Hardware-Wallet-Qubes-and-Whonix-Offline-Wallet-and-PiNodeXMR.md) (draft)
 </details>
 
-- [Full list (16)](Contents.md#foundations-security-tools-and-threat-modeling)
+- [Full list (18)](Contents.md#foundations-security-tools-and-threat-modeling)
 </details>
 <details><summary><b>Foundations: network and host defense</b> (8)</summary>
 

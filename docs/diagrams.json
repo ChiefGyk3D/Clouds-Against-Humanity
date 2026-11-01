@@ -173,6 +173,33 @@
   "docs/wiki/images/opentofu-stacks-and-modules-diagram-1.png": {
     "sha256": "eac3a9eceeca15af7d24459ca10d06fb43a6892641a92ed485f4504473911b5e"
   },
+  "docs/wiki/images/privacy-law-around-the-world-gdpr-pipeda-popia-and-pipl-compared-with-the-united-states-diagram-1.png": {
+    "sha256": "95b5622ac7c6a922e7590d2cd0fa6753805679e081b28b1f2aa5cea4aee5b0b0"
+  },
+  "docs/wiki/images/privacy-law-around-the-world-gdpr-pipeda-popia-and-pipl-compared-with-the-united-states-diagram-2.png": {
+    "sha256": "a12c6cede4975449414123031bbc5bd55e21ebb2790fc8d80eb3b6a4a89a4f1a"
+  },
+  "docs/wiki/images/privacy-law-around-the-world-gdpr-pipeda-popia-and-pipl-compared-with-the-united-states-diagram-3.png": {
+    "sha256": "c105724800dccdd41e8fe8be36c329b28653b5a93d91cf6e0af25119098377f4"
+  },
+  "docs/wiki/images/privacy-security-and-anonymity-three-different-things-and-why-there-is-no-silver-bullet-diagram-1.png": {
+    "sha256": "709dd6c09ee836f09cd97fd0b761c83090a18e9e8dedb4278a10082ce940a2d6"
+  },
+  "docs/wiki/images/privacy-security-and-anonymity-three-different-things-and-why-there-is-no-silver-bullet-diagram-2.png": {
+    "sha256": "fd96b24f7e519a4bc0b690c367a33c4b54a112a8434ecd28381ce98c291d9515"
+  },
+  "docs/wiki/images/privacy-security-and-anonymity-three-different-things-and-why-there-is-no-silver-bullet-diagram-3.png": {
+    "sha256": "899b9259f173c9c7d5cc8404ad416e7890dc8cdc8dd9b56fdf2498f66aade9ef"
+  },
+  "docs/wiki/images/privacy-security-and-anonymity-three-different-things-and-why-there-is-no-silver-bullet-diagram-4.png": {
+    "sha256": "ac580c8cd8c33193996d9a2cc7673dba8d8bc50d423b95522ebad5cccc7b346d"
+  },
+  "docs/wiki/images/privacy-security-and-anonymity-three-different-things-and-why-there-is-no-silver-bullet-diagram-5.png": {
+    "sha256": "b639a871a14fa56e126d3b393c3b49e7b110f8cc885c75a5dd4e09ad66f7d8c5"
+  },
+  "docs/wiki/images/privacy-security-and-anonymity-three-different-things-and-why-there-is-no-silver-bullet-diagram-6.png": {
+    "sha256": "3e7a9fb20982383047e8d9dd89dea76c4e9641ac76e2413b7e1be4f11a00e877"
+  },
   "docs/wiki/images/red-and-blue-yin-yang-and-your-lab-os-diagram-1.png": {
     "sha256": "32ea564eae0c1b56fcf7c57ef403c9eca283d1a2dfc96aeb4cfb34b44df63917"
   },
@@ -199,6 +226,24 @@
   },
   "docs/wiki/images/terraform-reference-diagram-1.png": {
     "sha256": "8d76d16ffea6d2409e793288aa26cbbb6a2cf3172718cb64f9f28d759f8e0f30"
+  },
+  "docs/wiki/images/the-browsing-setups-compared-tor-browser-brave-whonix-tails-and-qubes-with-whonix-diagram-1.png": {
+    "sha256": "a114f9adeb679524eb32a679d63c1dcef590e401ab07c617caba2edd0cf3fd62"
+  },
+  "docs/wiki/images/the-browsing-setups-compared-tor-browser-brave-whonix-tails-and-qubes-with-whonix-diagram-2.png": {
+    "sha256": "d7745035a09a15d85994b1eec06fe967554b4eb0d5188ae8d1e79000e3234f6e"
+  },
+  "docs/wiki/images/the-browsing-setups-compared-tor-browser-brave-whonix-tails-and-qubes-with-whonix-diagram-3.png": {
+    "sha256": "76671c8fad597127f598dd9c1ff4ca6f1687a321dbf48b733809e9d4e7c7cd42"
+  },
+  "docs/wiki/images/the-browsing-setups-compared-tor-browser-brave-whonix-tails-and-qubes-with-whonix-diagram-4.png": {
+    "sha256": "4bb3272b11b9284e414fc33a7dd38fdf9e2387d56681ebccdcb36d581856b59b"
+  },
+  "docs/wiki/images/the-browsing-setups-compared-tor-browser-brave-whonix-tails-and-qubes-with-whonix-diagram-5.png": {
+    "sha256": "a9f13185e047a09ebd2e49f0b93b616eb1704436e3512b1038a1f311eed433f0"
+  },
+  "docs/wiki/images/the-browsing-setups-compared-tor-browser-brave-whonix-tails-and-qubes-with-whonix-diagram-6.png": {
+    "sha256": "19139f7c51f0c1f285a860028457739a583c6ddab2e96d62b27b9241ac05d75e"
   },
   "docs/wiki/images/threat-model-diagram-1.png": {
     "sha256": "46f0d51a36ef29ce2f660d4aef6602b03fab603bf4c7644aad4a2cca41d948c9"

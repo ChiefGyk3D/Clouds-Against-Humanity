@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (148 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (151 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -22,10 +22,10 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Core path: read in this order](#core-path-read-in-this-order) (21)
 - [Foundations: OS and Linux](#foundations-os-and-linux) (12)
 - [Foundations: networking](#foundations-networking) (5)
-- [Foundations: identity and secrets](#foundations-identity-and-secrets) (9)
+- [Foundations: identity and secrets](#foundations-identity-and-secrets) (10)
 - [Foundations: infrastructure as code](#foundations-infrastructure-as-code) (7)
 - [Foundations: web hosting](#foundations-web-hosting) (4)
-- [Foundations: security tools and threat modeling](#foundations-security-tools-and-threat-modeling) (16)
+- [Foundations: security tools and threat modeling](#foundations-security-tools-and-threat-modeling) (18)
 - [Foundations: network and host defense](#foundations-network-and-host-defense) (8)
 - [Foundations: deception and honeypots](#foundations-deception-and-honeypots) (11)
 - [Detection and monitoring](#detection-and-monitoring) (13)
@@ -108,6 +108,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md) | Directories, identity providers, SSO, SAML, OAuth and OIDC in plain words, for readers heading into enterprise identity. | learner |  |
 | [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) | What encoding, hashing, encryption and signing each give you and what they do not, for readers who lump them together. | learner |  |
 | [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md) | Blast radius, assume breach and defense in depth as one mindset question to ask of any system. | learner |  |
+| [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md) | Page 3 of 3 on GRC: the GDPR, PIPEDA, POPIA and the PIPL compared with the United States, with breach clocks, transfers, dated cases and a four-region exercise. | learner | draft |
 | [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md) | Privacy as blinds and security as locks, Monero as a worked example, privacy law basics, physical security and why lockpicking is a hobby, with a free audit of your desk. | learner | draft |
 | [Secrets from day one](Secrets-From-Day-One.md) | A password manager, Doppler for every asset and the .env rules, as personal habits for anyone about to start writing code. | learner |  |
 | [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md) | Confidentiality, integrity and availability in plain words, how real failures map to each, and this project's controls checked against all three. | learner | draft |
@@ -148,6 +149,8 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [How a VPN works](How-a-VPN-Works-Tunnels-What-It-Hides-What-It-Does-Not-and-What-an-Audit-Proves.md) | A packet with and without a VPN, WireGuard, OpenVPN and IPsec in plain terms, what a VPN moves and does not hide, DNS and IPv6 leaks, what no-logs claims and audits prove, with seven diagrams and two free exercises. | learner | draft |
 | [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md) | Circuits, the three hops, guards, directory authorities and the consensus, bridges, onion services and the dated weaknesses, with six diagrams, for readers who want the machinery under Tor. | learner | draft |
 | [How I2P works](How-I2P-Works-Tunnels-Garlic-Routing-and-the-Network-Database.md) | One-way tunnels, garlic routing and cloves, the network database and floodfills, reseeding, outproxies, the research on its weak points and an honest comparison with Tor. | learner | draft |
+| [Privacy, security and anonymity](Privacy-Security-and-Anonymity-Three-Different-Things-and-Why-There-Is-No-Silver-Bullet.md) | Who can see in, who can get in, who can tell it is you: the data you hand out, correlation, a matrix of six tools, the same behavior over a different pipe, and three imaginary people, with six diagrams. | learner | draft |
+| [The browsing setups compared](The-Browsing-Setups-Compared-Tor-Browser-Brave-Whonix-Tails-and-Qubes-with-Whonix.md) | Tor Browser, Brave's Tor window, Whonix, Tails and Qubes with Whonix: trust boundaries, threat models, a matrix of nine threats, Kali and ParrotOS, and the maintainer's view, with six diagrams. | learner | draft |
 | [Blockchain fundamentals](Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks.md) | Page 1 of 5 on cryptocurrency: hashes, blocks, nodes, a transaction's life, proof of work and stake, forks, full nodes and what a blockchain is not, with a dated read of the first two Bitcoin blocks. | learner | draft |
 | [The darknet landscape: markets, OPSEC and layering](The-Darknet-Landscape-Markets-OPSEC-Clearnet-and-Layering-Tor-I2P-and-VPN.md) | Documented darknet market history and why most fail, the OPSEC trap, clearnet versus onion services, and layering Tor, I2P and a VPN, for learners; educational and defensive only. | learner | draft |
 | [How Bitcoin works](How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable.md) | Page 2 of 5 on cryptocurrency: keys, UTXOs and change, fees, mining and confirmations, and why Bitcoin is pseudonymous and traceable, with documented tracing cases and a clustering exercise. | learner | draft |
