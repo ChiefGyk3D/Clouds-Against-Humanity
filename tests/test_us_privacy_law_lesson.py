@@ -579,6 +579,30 @@ def test_the_people_guard_bites():
     assert not named_people("the county sheriff's office said")
 
 
+CERT_VIEW = "In my view, a certification or an attestation report is only a snapshot"
+CERT_NOTE = "depends on its scope and criteria, which public reporting does not settle"
+
+
+def test_the_certification_view_sits_only_in_the_opinion_section_and_no_would_fail_claim_is_made():
+    body = text()
+    op = section(body, OPINION)
+    assert body.count(CERT_VIEW) == 1 and CERT_VIEW in op, "the view is in the opinion section and nowhere else"
+    assert CERT_NOTE in op and "no source I read says that firm failed" in op
+    low = body.lower()
+    for claim in ("would fail", "did fail", "has failed", "failed a soc 2", "failed its soc 2"):
+        assert claim not in low, claim
+    assert f"{GRC1}.md#what-a-certification-or-report-does-and-does-not-tell-you" in op, "page one's section is linked"
+    assert not named_people(op)
+    assert "I read no source on the exposure itself" not in body, "page one now carries sources on the exposure"
+    assert "the sourced account of the exposure with what is and is not known about it" in op
+
+
+def test_the_certification_guard_bites():
+    outside = "facts. " + CERT_VIEW + " more"
+    assert outside.count(CERT_VIEW) == 1 and CERT_VIEW not in "## x\nopinion only"
+    assert "would fail" in "the firm would fail a SOC 2".lower()
+
+
 # ---- the opinion ---------------------------------------------------------------------------------------------------
 
 

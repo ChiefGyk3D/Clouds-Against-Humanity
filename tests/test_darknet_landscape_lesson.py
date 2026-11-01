@@ -50,7 +50,7 @@ def web_rows_missing_url_or_date(body: str) -> list[str]:
     """Every row not about this wiki, the issue or general knowledge needs a URL and a read date."""
     bad = []
     for r in register_rows(body):
-        if "General knowledge" in r[-1] or "issue 381" in r[1] or "(this wiki)" in r[1]:
+        if "General knowledge" in r[-1] or "issue 381" in r[1] or "issue 423" in r[1] or "(this wiki)" in r[1]:
             continue
         if not URL.search(r[1]) or READ_DATE not in r[-1]:
             bad.append(r[0])
@@ -173,14 +173,66 @@ def test_the_register_guards_bite():
     assert web_rows_missing_url_or_date(no_date) == ["Z"]
 
 
-def test_the_darknet_market_bible_is_described_by_kind_only():
-    section = text().split("## The Darknet Market Bible and what kind of document it is")[1].split("\n## ")[0]
-    assert "Unverified" in section
-    assert "did not read the document itself" in section
-    assert "does not summarize its procedures" in section
-    rows = {r[0]: r for r in register_rows(text())}
-    bible = next(r for k, r in rows.items() if "Darknet Market Bible" in k)
-    assert "issue 381" in bible[1] and "**est.**" in bible[2]
+BIBLE_HEADING = "## The Darknet Market Bible and what kind of document it is"
+# Names of markets and directories that the Bible section has no reason to print.
+BIBLE_FORBIDDEN_NAMES = ("Silk Road", "AlphaBay", "Hansa", "Incognito", "DarkMarket", "Hydra", "Evolution",
+                         "Wall Street", "dark.fail", "Hidden Wiki")
+BIBLE_OVERREACH = re.compile(
+    r"\b(?:read|reviewed|studied)\b[^.\n]{0,40}\b(?:whole|full|entire|every|all\s+(?:of\s+)?(?:its|the))\b",
+    re.IGNORECASE,
+)
+
+
+def bible_section(body: str) -> str:
+    """The Bible section up to its first subsection (the principles subsection is judged elsewhere)."""
+    return body.split(BIBLE_HEADING)[1].split("\n## ")[0].split("\n### ")[0]
+
+
+def bible_section_problems(section: str) -> list[str]:
+    """What is wrong with the Bible section: it must say plainly what was read and reproduce nothing operational."""
+    problems = []
+    for needle in ("Introduction page only", "2024-12-29", "certificate", "I read no other page",
+                   "does not summarize its procedures", "archival", "unsourced beyond"):
+        if needle not in section:
+            problems.append(f"missing: {needle}")
+    if "Dread" not in section or "no address" not in section:
+        problems.append("Dread must be named as a kind of forum, with no address")
+    if BIBLE_OVERREACH.search(section):
+        problems.append("claims to have read more than the Introduction")
+    if re.search(r"https?://|\]\(", section) or ".onion" in section or ADDR.search(section):
+        problems.append("link or address in the section")
+    problems.extend(f"name: {n}" for n in BIBLE_FORBIDDEN_NAMES if n in section)
+    return problems
+
+
+def test_the_darknet_market_bible_is_described_from_its_introduction_only():
+    body = text()
+    section = bible_section(body)
+    assert len(section.splitlines()) >= 5, "the guard collected too little text"
+    assert not bible_section_problems(section), bible_section_problems(section)
+    assert "did not read the document itself" not in body
+    rows = {r[0]: r for r in register_rows(body)}
+    kind = next(r for k, r in rows.items() if "Darknet Market Bible" in k and "issue 381" in r[1])
+    assert "**est.**" in kind[2]
+    intro = next(r for k, r in rows.items() if "Introduction" in k and "issue 423" in r[1])
+    assert "2024-12-29" in intro[1] and "Internet Archive" in intro[1] and "plain text" in intro[1]
+    assert not URL.search(intro[1]), "the Introduction is cited in plain text, not linked"
+    assert "Read 2026-11-01" in intro[2] and "Introduction page only" in intro[2]
+    circulated = next(r for k, r in rows.items() if "circulated" in k and "issue 423" in r[1])
+    assert "Unsourced" in circulated[2] and "maintainer" in circulated[1]
+
+
+def test_the_bible_guard_bites():
+    good = bible_section(text())
+    assert not bible_section_problems(good)
+    assert bible_section_problems(good.replace("Introduction page only", "whole document"))
+    assert bible_section_problems(good + "\nI read the entire guide.")
+    assert bible_section_problems(good + "\nI read all of its pages.")
+    assert bible_section_problems(good + "\nSee [it](https://example.org/x).")
+    assert bible_section_problems(good + "\nIt lists AlphaBay.")
+    assert bible_section_problems(good + "\nHost " + "192.0.2.7")
+    assert bible_section_problems(good.replace("2024-12-29", "some day"))
+    assert bible_section_problems(good.replace("Dread", "a forum"))
 
 
 def test_the_four_principles_and_the_trap_are_present_and_threat_model_comes_first():
