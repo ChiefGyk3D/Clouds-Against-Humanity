@@ -203,7 +203,7 @@ def test_glossary_rows_point_at_real_headings_and_no_term_is_defined_twice():
             anchors.update(re.findall(rf"{NAME}\.md#([a-z0-9-]+)", line))
     assert rows >= 4, "expected glossary rows for the new terms"
     assert anchors and anchors <= heads, sorted(anchors - heads)
-    # Other glossary terms may already repeat; the terms this page adds must each be defined exactly once.
+    # tests/test_glossary_terms.py bars every repeated term; the terms this page adds must each be defined exactly once.
     assert len(mine) == rows, "every row that links this page starts with a bold term"
     dupes = sorted({t for t in mine if terms.count(t) > 1})
     assert not dupes, dupes

@@ -298,7 +298,7 @@ def test_glossary_rows_point_at_real_headings_and_no_term_is_defined_twice():
             anchors.update(re.findall(rf"{NAME}\.md#([a-z0-9-]+)", line))
     assert rows >= 8, "expected glossary rows for the new terms"
     assert anchors and anchors <= heads, sorted(anchors - heads)
-    # The glossary already has older repeated terms; this page must not add a second row for any term it defines.
+    # tests/test_glossary_terms.py bars every repeated term; this page must not add a second row for any term it defines.
     mine = [
         line.split("**")[1].strip().lower()
         for line in (WIKI / "Glossary.md").read_text(encoding="utf-8").splitlines()
