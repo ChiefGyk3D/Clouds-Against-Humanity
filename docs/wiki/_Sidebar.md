@@ -130,13 +130,13 @@ file does not match the manifest. -->
 
 - [Full list (9)](Contents.md#track-4-grc-and-law)
 </details>
-<details><summary><b>Track 5: Build and operate</b> (31)</summary>
+<details><summary><b>Track 5: Build and operate</b> (32)</summary>
 
-<details><summary>Stage guides and design (11)</summary>
+<details><summary>Stage guides and design (12)</summary>
 
 - [Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md) · [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) · [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) · [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) · [Teardown checklist](Teardown-Checklist.md)
-- [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) · [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) · [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) (draft) · [Why I picked these tools](Why-I-Picked-These-Tools.md)
-- [From commit to pipeline](From-Commit-to-Pipeline.md) · [Trace one change end to end](Trace-One-Change-End-to-End.md)
+- [Self-hosting: when and why, with SearXNG](Self-Hosting-When-and-Why-with-SearXNG-as-the-Worked-Example.md) (draft) · [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) · [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md)
+- [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) (draft) · [Why I picked these tools](Why-I-Picked-These-Tools.md) · [From commit to pipeline](From-Commit-to-Pipeline.md) · [Trace one change end to end](Trace-One-Change-End-to-End.md)
 </details>
 <details><summary>Other clouds (10)</summary>
 
@@ -154,7 +154,7 @@ file does not match the manifest. -->
 - [How this project is planned](How-This-Project-Is-Planned.md) · [Project status](Project-Status.md) · [Repository growth](Repository-Growth.md) · [Screenshots policy](Screenshots-Policy.md)
 </details>
 
-- [Full list (31)](Contents.md#track-5-build-and-operate)
+- [Full list (32)](Contents.md#track-5-build-and-operate)
 </details>
 <details><summary><b>Reference</b> (8)</summary>
 

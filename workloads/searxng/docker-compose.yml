@@ -1,0 +1,62 @@
+# SPDX-License-Identifier: Apache-2.0
+# SearXNG and its Valkey cache, a stage 3 workload for the docker host. NOT APPLIED: nothing has deployed this.
+# Deploy it through Portainer over Twingate (see README.md). Written 2026-11-01 from SearXNG's container
+# documentation and its upstream compose template; see the README for what was and was not verified.
+#
+# Rules this file keeps (tests/test_searxng_workload.py checks each one):
+#   - Both images are pinned by exact tag AND digest, read from the registry on 2026-11-01.
+#   - The one published port is bound to the host's private address, SEARXNG_BIND, which has no default: compose
+#     stops if it is unset. Docker's default for an unqualified port is every host address.
+#   - The cache publishes nothing and sits on an internal network that has no route out.
+#   - No secret is in this file. SEARXNG_SECRET is a required variable, set in the Portainer stack environment.
+#   - The limiter is on and the instance is not public; the environment here must never say otherwise.
+
+name: searxng
+
+services:
+  core:
+    container_name: searxng-core
+    image: docker.io/searxng/searxng:2026.11.1-8b35dcd2e@sha256:4b106e61eeb9e216ac96c85591338c1e9ceb5a84c26f72cd18b8ba8f0f52093c
+    restart: unless-stopped
+    depends_on:
+      - valkey
+    ports:
+      - "${SEARXNG_BIND:?set SEARXNG_BIND to the host private address}:8080:8080"
+    environment:
+      # These override the same keys in settings.yml (SearXNG's server and valkey settings pages).
+      SEARXNG_SECRET: ${SEARXNG_SECRET:?set SEARXNG_SECRET in the stack environment, value from Doppler}
+      SEARXNG_LIMITER: "true"
+      SEARXNG_PUBLIC_INSTANCE: "false"
+      SEARXNG_VALKEY_URL: valkey://valkey:6379/0
+    volumes:
+      # The two files from this directory, copied to SEARXNG_CONFIG_DIR on the host (README, step 2).
+      - ${SEARXNG_CONFIG_DIR:-/opt/cah/searxng/config}:/etc/searxng
+      - core-data:/var/cache/searxng
+    mem_limit: ${SEARXNG_CORE_MEM:?set SEARXNG_CORE_MEM, a starting ceiling to tune, see env.example}
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - frontend
+      - backend
+
+  valkey:
+    container_name: searxng-valkey
+    image: docker.io/valkey/valkey:9.1.3-alpine@sha256:bf09d58e96d6b4524a15396b65b242bbe18beebbcc15a04d8ee75ddac62fae0b
+    # The limiter's counters are short-lived, so nothing is saved to disk: a restart starts the counters again.
+    command: valkey-server --save "" --appendonly no --loglevel warning
+    restart: unless-stopped
+    mem_limit: ${SEARXNG_VALKEY_MEM:?set SEARXNG_VALKEY_MEM, a starting ceiling to tune, see env.example}
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks:
+      - backend
+
+networks:
+  frontend: {}
+  backend:
+    internal: true
+
+volumes:
+  core-data:

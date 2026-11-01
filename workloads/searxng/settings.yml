@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: Apache-2.0
+# SearXNG settings for the private stage 3 instance. NOT APPLIED. Read 2026-11-01 against
+# https://docs.searxng.org/admin/settings/settings_server.html and the pages beside it.
+# Keys not set here keep SearXNG's defaults (use_default_settings).
+use_default_settings: true
+
+general:
+  debug: false
+  instance_name: "Private search"
+
+search:
+  # HTML only: no json, csv or rss output, so the instance is a web page for people and not an API.
+  formats:
+    - html
+
+server:
+  # The limiter (SearXNG's bot detection and rate limit) is on. It needs the valkey URL below.
+  limiter: true
+  # Not a public instance. Setting this to true turns on features that only a public instance needs.
+  public_instance: false
+  image_proxy: false
+  # A placeholder. The real value is the SEARXNG_SECRET environment variable, which overrides this key and is
+  # set in the Portainer stack environment from Doppler. Never write the real key in this file.
+  secret_key: "replaced-at-deploy-by-SEARXNG_SECRET"
+
+valkey:
+  # The cache service of the compose file, on an internal network with no published port and no password.
+  url: valkey://valkey:6379/0
+
+# Outgoing requests leave from the droplet's own address, as SearXNG's docs describe.
+# Optional Tor path, OFF by default (README, section "The optional Tor proxy"). To turn it on you would need
+# a Tor client you run yourself and a reviewed change; use socks5h:// so names are resolved by the proxy.
+#
+# outgoing:
+#   using_tor_proxy: true
+#   proxies:
+#     all://:
+#       - socks5h://tor-client:9050
+#   extra_proxy_timeout: 10.0
