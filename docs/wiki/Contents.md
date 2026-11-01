@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (133 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (134 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -25,7 +25,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Foundations: identity and secrets](#foundations-identity-and-secrets) (6)
 - [Foundations: infrastructure as code](#foundations-infrastructure-as-code) (7)
 - [Foundations: web hosting](#foundations-web-hosting) (4)
-- [Foundations: security tools and threat modeling](#foundations-security-tools-and-threat-modeling) (6)
+- [Foundations: security tools and threat modeling](#foundations-security-tools-and-threat-modeling) (7)
 - [Foundations: network and host defense](#foundations-network-and-host-defense) (8)
 - [Foundations: deception and honeypots](#foundations-deception-and-honeypots) (11)
 - [Detection and monitoring](#detection-and-monitoring) (13)
@@ -140,6 +140,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [Threat model exercise](Threat-Model-Exercise.md) | Build your own threat model of this repository before you open the worked one, for security-minded readers. | security reader |  |
 | [Threat Dragon exercise](Threat-Dragon-Exercise.md) | Draw this pipeline's trust boundaries in OWASP Threat Dragon and attach threats to them, for security-minded readers. | security reader |  |
 | [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md) | The same pipeline viewed through STRIDE, MITRE ATT&CK and MITRE ATLAS, with files to open them, for security-minded readers. | security reader |  |
+| [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) | How Tor and I2P work, who uses them, Tor Browser, Tails, Whonix and Qubes compared, and a Monero node as the privacy-versus-security example. | learner | draft |
 
 ## Foundations: network and host defense
 
