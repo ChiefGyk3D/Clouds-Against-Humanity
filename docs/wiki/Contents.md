@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (136 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (137 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -20,7 +20,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 
 - [Start here](#start-here) (5)
 - [Core path: read in this order](#core-path-read-in-this-order) (21)
-- [Foundations: OS and Linux](#foundations-os-and-linux) (11)
+- [Foundations: OS and Linux](#foundations-os-and-linux) (12)
 - [Foundations: networking](#foundations-networking) (5)
 - [Foundations: identity and secrets](#foundations-identity-and-secrets) (8)
 - [Foundations: infrastructure as code](#foundations-infrastructure-as-code) (7)
@@ -82,6 +82,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md) | The order of a new machine's first hour: updates, automatic updates, a baseline, then everything else, for anyone setting up a system. | learner |  |
 | [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) | The Linux families, package managers, services, permissions and logs you meet at work, for beginners; commands were not run by the author. | learner | est. steps |
 | [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md) | What unattended-upgrades does, how to configure it, where updates are logged, which four events deserve an alert, reboots, testing and rollback, for anyone running a Debian or Ubuntu host. | learner |  |
+| [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md) | What still works when the internet and power are down: LoRa mesh, amateur radio, GMRS, FRS and CB, a legal-first SIGINT overview, and what a radio fallback could do for this project. | learner | draft |
 | [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md) | Red, blue and purple teams, the written permission you need before any test, and setting up a lab computer you can safely break. | learner |  |
 | [The terminal and your first script](Terminal-and-Your-First-Script.md) | What a terminal, shell and command are, moving around files safely and chaining commands into a first script, for beginners on any operating system. | learner |  |
 | [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) | What a virtual machine is, type 1 and type 2 hypervisors, the desktop and server options, a dated account of the VMware licensing changes, and a first VM with QEMU, for learners who need a lab. | learner | draft |

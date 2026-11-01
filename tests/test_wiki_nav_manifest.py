@@ -302,7 +302,9 @@ def test_the_sidebar_listing_check_bites_when_a_page_or_link_is_dropped():
     sidebar = gwn.render_sidebar(m)
     victim = gwn.entries(m, "os")[0]["page"]
     outside = m["links"]["reference"][0]["url"]
-    cut = "\n".join(line for line in sidebar.splitlines() if f"]({victim}.md)" not in line and outside not in line)
+    # Rows can hold several links (subgroups), so cut just the one link, not the whole line.
+    cut = re.sub(rf"\[[^\]]*\]\({re.escape(victim)}\.md\)", "", sidebar)
+    cut = "\n".join(line for line in cut.splitlines() if outside not in line)
     assert unlisted_in_sidebar(cut, m) == [victim, outside]
 
 

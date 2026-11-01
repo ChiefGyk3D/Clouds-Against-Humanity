@@ -560,5 +560,6 @@ Every vendor and standards claim on this page, with where it was read. Statuses:
 
 - [Backups, recovery and patching](Backups-Recovery-and-Patching.md) for the restore drill, if you skipped it.
 - [Enterprise change management for beginners](Enterprise-Change-Management-for-Beginners.md), whose emergency changes are what an incident looks like from the change process.
+- [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md), for a contact tree whose second channel needs neither the internet nor the mains.
 - [Teardown checklist](Teardown-Checklist.md), which is a recovery plan for a planned ending.
 - [Threat model](Threat-Model.md), to ask which of these scenarios are the likely ones.

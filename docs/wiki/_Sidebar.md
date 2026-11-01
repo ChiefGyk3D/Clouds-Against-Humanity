@@ -29,19 +29,19 @@ file does not match the manifest. -->
 21. [Roadmap](Roadmap.md)
 - [Full list (21)](Contents.md#core-path-read-in-this-order)
 </details>
-<details><summary><b>Foundations: OS and Linux</b> (11)</summary>
+<details><summary><b>Foundations: OS and Linux</b> (12)</summary>
 
 - [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) (est. steps)
 - [The terminal and your first script](Terminal-and-Your-First-Script.md)
 - [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) (draft)
-<details><summary>Recovery, patching, virtual machines and Windows (8)</summary>
+<details><summary>Recovery, patching, virtual machines and Windows (9)</summary>
 
 - [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md) (draft) · [Backups, recovery and patching](Backups-Recovery-and-Patching.md) · [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) (draft) · [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md)
-- [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md) · [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md) · [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md)
-- [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md)
+- [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md) · [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md) (draft) · [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md)
+- [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md) · [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md)
 </details>
 
-- [Full list (11)](Contents.md#foundations-os-and-linux)
+- [Full list (12)](Contents.md#foundations-os-and-linux)
 </details>
 <details><summary><b>Foundations: networking</b> (5)</summary>
 
