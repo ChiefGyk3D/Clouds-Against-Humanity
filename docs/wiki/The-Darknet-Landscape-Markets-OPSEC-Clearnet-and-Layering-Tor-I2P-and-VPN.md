@@ -105,7 +105,16 @@ The sources name harms that do not depend on your view of drug policy:
 
 ## The Darknet Market Bible and what kind of document it is
 
-The maintainer's issue for this page names the **Darknet Market Bible** as a well-known community document about operational security for people who use these markets. **Unverified:** I searched for a reputable page that describes it (a news article, a court filing or a research paper) and found none that I could read, I did not read the document itself, and I will not describe its contents, its authors, its length or its dates. This page says only what the issue says: it exists, it is a long community-written OPSEC guide, and it is known.
+The maintainer's issue for this page names the **Darknet Market Bible** as a well-known community document about operational security for people who use these markets. **Partly read, Introduction page only:** I searched for a reputable page that describes it (a news article, a court filing or a research paper) and found none that I could read. I then read the document's Introduction page, in the Internet Archive's saved copy captured on 2024-12-29 (the capture date shown in the saved copy's address). I did not use the live site, because it failed a certificate check. I read no other page, and I will not describe its procedures, its other contents, its authors, its length or its dates.
+
+What that one page says, at the level of principles:
+
+- It presents itself as a complete guide for buyers on darknet markets, built on operational security practice.
+- It says there is never 100 percent security, and claims that following it exactly makes an arrest hard.
+- It says the setup takes hours to learn, that it is not for everyone, and that people with little computer experience should stay away from these markets or risk legal trouble.
+- The site's host describes itself as "hosting, for research and archival purposes, an historical document created on the darknet by anonymous authors", and says it does not recommend, support, endorse, participate in or earn money from the activities described.
+
+The maintainer's own account, **unsourced beyond his word:** he first found the document years ago on Dread or some other darknet site and does not remember which, so it circulated on the darknet before the clearnet site, and he read it again on that site. Dread is named here only as the kind of forum where such a document is found, with no address. The host's wording above is consistent with that, but I found no source that says where or when the document first appeared, and this page makes no other claim about that.
 
 Two things are worth taking from that, neither of which needs the document:
 
@@ -253,7 +262,7 @@ Laws differ by country, state and network. In many places running Tor or I2P as 
 ## Not verified, plainly
 
 - Nothing was run (see the banner). No onion or I2P service, VPN or network was touched.
-- **The Darknet Market Bible:** I found no reputable page describing it and did not read it. Everything about it on this page rests on the maintainer's issue, and I describe no contents.
+- **The Darknet Market Bible:** I found no reputable page describing it. I read its Introduction page only, in the Internet Archive's copy captured on 2024-12-29, because the live site failed a certificate check. I read no other page and describe no procedures. Where it first appeared is the maintainer's account alone (unsourced beyond his word).
 - **dark.fail, the Hidden Wiki and Dread:** I did not open any of them. Dread and DeepDotWeb facts come from Wikipedia, which cites news reports I did not read. The October 2026 Dread incident is from Wikipedia alone.
 - **Hydra (2022), Wall Street Market (2019) and the DeepDotWeb seizure (2019)** are secondary only. The Justice Department's and Europol's own releases for them were not read.
 - **Live pages that block automated downloads.** The Justice Department's own pages blocked my download. The AlphaBay, Silk Road indictment, Silk Road forfeiture, FBI conviction and Dark HunTor texts, and the Incognito release, were read in the Internet Archive's saved copies; the Second Circuit opinion was read in an archived copy of a legal publisher's page. I have not checked those against the live pages. The Europol and The Verge releases are also archived copies.
@@ -292,5 +301,7 @@ Every row carries a status: **Read** means the sentence is on the page named, re
 | Onion-Location header: how a site advertises its onion address; valid only on an HTTPS page that is not itself an onion site; Tor Browser shows a purple pill | Tor Project, [Onion-Location](https://community.torproject.org/onion-services/advanced/onion-location/) | Read 2026-11-01 |
 | Onion service structure, six relays, address is a key | [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) (this wiki), from the Tor Project's own overview | Read 2026-10-31 on that page; not re-read here |
 | The "Darknet Market Bible" is a well-known community OPSEC document | The maintainer's issue 381 | Read in the issue; no other source found (**est.**) |
+| The Bible's Introduction page: a guide for buyers built on operational security, no complete security, hours to learn, not for everyone; the host's "research and archival purposes" statement | The Introduction page of the Darknet Market Bible, cited in plain text and not linked: the Internet Archive's saved copy captured 2024-12-29 (issue 423); the live site failed a certificate check and was not used | Read 2026-11-01 (Introduction page only; no other page read) |
+| The document circulated on the darknet first, and the clearnet site is an archival copy | The maintainer's account in issue 423: found on Dread or some other darknet site years ago, site not remembered | Unsourced beyond his word; the host's own "historical document created on the darknet" wording is consistent but is not a source for where or when it first appeared (**est.**) |
 | dark.fail is an example of a link directory | The maintainer's issue 381 | Read in the issue; not opened (**est.**) |
 | Laws on these tools and on the trades in the cases differ by place | General knowledge | General knowledge; no country checked |
