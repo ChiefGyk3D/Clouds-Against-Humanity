@@ -83,12 +83,12 @@ file does not match the manifest. -->
 </details>
 
 <details>
-<summary><b>Foundations: security tools and threat modeling</b> (6)</summary>
+<summary><b>Foundations: security tools and threat modeling</b> (7)</summary>
 
 - [Threats in plain words](Threats-in-Plain-Words.md)
 - [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md)
 - [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
-- [Full list (6)](Contents.md#foundations-security-tools-and-threat-modeling)
+- [Full list (7)](Contents.md#foundations-security-tools-and-threat-modeling)
 
 </details>
 
