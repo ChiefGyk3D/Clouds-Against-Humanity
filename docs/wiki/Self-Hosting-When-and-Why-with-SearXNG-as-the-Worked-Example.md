@@ -257,7 +257,7 @@ Every claim that could be wrong, with its source and status. "Read" means read f
 - That the limiter works as intended when many users reach the instance through one address, such as a Twingate connector. The limiter counts requests per client address, so they may all look like one client (**est.**).
 - That the query text does not appear in the container's logs at these settings.
 - What memory the services use, and whether they fit the droplet.
-- That a Twingate resource and a path to the instance exist; that is a change outside this page.
+- That a path to the instance exists. A Twingate resource for the web port now exists as an unapplied, default-off option in the stage 3 stack (the `workload_web_ports` variable, `[8080]` for SearXNG), but nothing is applied, stage 3 is not approved, and no path has been tested.
 - That SearXNG's engines work today from a hosting provider's address: engines change and block addresses.
 - Published research on search privacy was not read for this page; the claims about what each party sees are from the SearXNG documentation or general knowledge, and are marked so.
 

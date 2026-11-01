@@ -345,3 +345,149 @@ run "the_onion_flag_with_the_master_switch_changes_no_firewall_rule" {
     error_message = "The onion flag adds no Twingate resource."
   }
 }
+
+# --- the optional workload web ports (issue #437; default empty, nothing applied) --
+
+run "the_web_port_list_defaults_to_empty_and_creates_nothing" {
+  command = plan
+  assert {
+    condition     = length(var.workload_web_ports) == 0 && length(twingate_resource.workload_web) == 0
+    error_message = "workload_web_ports must default to empty and create no Twingate resource."
+  }
+}
+
+run "ports_with_the_master_switch_off_create_nothing" {
+  command = plan
+  variables {
+    workload_web_ports = [8080, 8081]
+  }
+  assert {
+    condition     = length(twingate_resource.workload_web) == 0 && length(module.workload_firewall) == 0
+    error_message = "With the master switch off the port list must create no resource and no rule."
+  }
+}
+
+run "an_empty_list_leaves_the_enabled_rule_set_unchanged" {
+  command = plan
+  variables {
+    workload_enabled = true
+  }
+  expect_failures = [output.workload_enabled]
+  assert {
+    condition     = length(twingate_resource.workload_web) == 0 && module.workload_firewall[0].inbound_rules == tolist(["tcp/22/cah-connector-tor1", "tcp/9443/cah-connector-tor1"])
+    error_message = "With the list empty the inbound set is exactly SSH and Portainer and no web resource exists."
+  }
+}
+
+run "ports_plan_one_narrow_resource_each" {
+  command = plan
+  variables {
+    workload_enabled   = true
+    workload_web_ports = [8080, 8443]
+  }
+  expect_failures = [output.workload_enabled]
+  assert {
+    condition     = length(twingate_resource.workload_web) == 2 && twingate_resource.workload_web["8080"].name == "cah-tor1-workload-web-8080" && twingate_resource.workload_web["8443"].name == "cah-tor1-workload-web-8443"
+    error_message = "One resource per port, named cah-<key>-workload-web-<port>."
+  }
+  assert {
+    condition     = twingate_resource.workload_web["8080"].protocols.tcp.policy == "RESTRICTED" && twingate_resource.workload_web["8080"].protocols.tcp.ports == toset(["8080"]) && twingate_resource.workload_web["8080"].protocols.udp.policy == "DENY_ALL" && twingate_resource.workload_web["8080"].protocols.allow_icmp == false
+    error_message = "A web resource allows its one TCP port only."
+  }
+  assert {
+    condition     = output.workload_web_resource_names == tolist(["cah-tor1-workload-web-8080", "cah-tor1-workload-web-8443"])
+    error_message = "The output lists the web resource names."
+  }
+  assert {
+    condition     = twingate_resource.workload_web["8443"].remote_network_id == "remote-network-test"
+    error_message = "Web resources live in the given remote network."
+  }
+}
+
+run "the_firewall_allowance_is_the_connector_tag_and_the_listed_ports_only" {
+  command = plan
+  variables {
+    workload_enabled   = true
+    workload_web_ports = [8080, 8443]
+  }
+  expect_failures = [output.workload_enabled]
+  assert {
+    condition     = module.workload_firewall[0].inbound_rules == tolist(["tcp/22/cah-connector-tor1", "tcp/8080/cah-connector-tor1", "tcp/8443/cah-connector-tor1", "tcp/9443/cah-connector-tor1"])
+    error_message = "Inbound is SSH, Portainer and exactly the listed ports, each from the connector tag."
+  }
+  assert {
+    condition     = module.workload_firewall[0].source_members == tolist(["cah-connector-tor1"])
+    error_message = "The only source of any inbound rule is the connector tag."
+  }
+  assert {
+    condition     = module.workload_firewall[0].outbound_rules == tolist(["tcp/443/0.0.0.0/0,::/0", "tcp/53/0.0.0.0/0,::/0", "tcp/80/0.0.0.0/0,::/0", "udp/123/0.0.0.0/0,::/0", "udp/53/0.0.0.0/0,::/0"])
+    error_message = "The ports add no outbound rule."
+  }
+}
+
+run "port_22_is_refused" {
+  command = plan
+  variables {
+    workload_web_ports = [22]
+  }
+  expect_failures = [var.workload_web_ports]
+}
+
+run "the_portainer_port_is_refused" {
+  command = plan
+  variables {
+    workload_web_ports = [9443]
+  }
+  expect_failures = [var.workload_web_ports]
+}
+
+run "a_privileged_port_is_refused" {
+  command = plan
+  variables {
+    workload_web_ports = [1023]
+  }
+  expect_failures = [var.workload_web_ports]
+}
+
+run "a_port_above_65535_is_refused" {
+  command = plan
+  variables {
+    workload_web_ports = [65536]
+  }
+  expect_failures = [var.workload_web_ports]
+}
+
+run "a_fractional_port_is_refused" {
+  command = plan
+  variables {
+    workload_web_ports = [8080.5]
+  }
+  expect_failures = [var.workload_web_ports]
+}
+
+run "duplicate_ports_are_refused" {
+  command = plan
+  variables {
+    workload_web_ports = [8080, 8080]
+  }
+  expect_failures = [var.workload_web_ports]
+}
+
+run "more_than_eight_ports_are_refused" {
+  command = plan
+  variables {
+    workload_web_ports = [8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008, 8009]
+  }
+  expect_failures = [var.workload_web_ports]
+}
+
+run "eight_ports_are_accepted" {
+  command = plan
+  variables {
+    workload_web_ports = [8001, 8002, 8003, 8004, 8005, 8006, 8007, 8008]
+  }
+  assert {
+    condition     = length(var.workload_web_ports) == 8
+    error_message = "Eight ports is the cap and must be accepted."
+  }
+}
