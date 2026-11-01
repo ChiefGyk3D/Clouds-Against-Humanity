@@ -93,16 +93,16 @@ file does not match the manifest. -->
 
 - [Full list (33)](Contents.md#track-2-defend-and-detect)
 </details>
-<details><summary><b>Track 3: Privacy, anonymity and cryptocurrency</b> (15)</summary>
+<details><summary><b>Track 3: Privacy, anonymity and cryptocurrency</b> (16)</summary>
 
 <details><summary>Cryptography and privacy (3)</summary>
 
 - [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md) (draft) · [Privacy, security and anonymity](Privacy-Security-and-Anonymity-Three-Different-Things-and-Why-There-Is-No-Silver-Bullet.md) (draft) · [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md) (draft)
 </details>
-<details><summary>Tor, I2P, VPN and browsing (6)</summary>
+<details><summary>Tor, I2P, VPN and browsing (7)</summary>
 
 - [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) (draft) · [How a VPN works](How-a-VPN-Works-Tunnels-What-It-Hides-What-It-Does-Not-and-What-an-Audit-Proves.md) (draft) · [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md) (draft) · [How I2P works](How-I2P-Works-Tunnels-Garlic-Routing-and-the-Network-Database.md) (draft)
-- [The browsing setups compared](The-Browsing-Setups-Compared-Tor-Browser-Brave-Whonix-Tails-and-Qubes-with-Whonix.md) (draft) · [The darknet landscape: markets, OPSEC and layering](The-Darknet-Landscape-Markets-OPSEC-Clearnet-and-Layering-Tor-I2P-and-VPN.md) (draft)
+- [The browsing setups compared](The-Browsing-Setups-Compared-Tor-Browser-Brave-Whonix-Tails-and-Qubes-with-Whonix.md) (draft) · [OPSEC for Tor and I2P](OPSEC-for-Tor-and-I2P-That-Holds-Up-Identities-Layers-Metadata-and-Habits.md) (draft) · [The darknet landscape: markets, OPSEC and layering](The-Darknet-Landscape-Markets-OPSEC-Clearnet-and-Layering-Tor-I2P-and-VPN.md) (draft)
 </details>
 <details><summary>Cryptocurrency (5)</summary>
 
@@ -113,7 +113,7 @@ file does not match the manifest. -->
 - [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md) (draft)
 </details>
 
-- [Full list (15)](Contents.md#track-3-privacy-anonymity-and-cryptocurrency)
+- [Full list (16)](Contents.md#track-3-privacy-anonymity-and-cryptocurrency)
 </details>
 <details><summary><b>Track 4: GRC and law</b> (9)</summary>
 

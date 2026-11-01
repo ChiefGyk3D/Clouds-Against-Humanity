@@ -173,6 +173,18 @@
   "docs/wiki/images/opentofu-stacks-and-modules-diagram-1.png": {
     "sha256": "eac3a9eceeca15af7d24459ca10d06fb43a6892641a92ed485f4504473911b5e"
   },
+  "docs/wiki/images/opsec-for-tor-and-i2p-that-holds-up-identities-layers-metadata-and-habits-diagram-1.png": {
+    "sha256": "48e73a91af65431f30f1574459c542e741c8b1144970e10e2a15363ea9aaca6a"
+  },
+  "docs/wiki/images/opsec-for-tor-and-i2p-that-holds-up-identities-layers-metadata-and-habits-diagram-2.png": {
+    "sha256": "cced805208a7b51715e1ab49a7ecae89585cf05f7aec549483a0f840c45c229f"
+  },
+  "docs/wiki/images/opsec-for-tor-and-i2p-that-holds-up-identities-layers-metadata-and-habits-diagram-3.png": {
+    "sha256": "15b3d17cf93332f6a7e307619b752274ed38cafc19d2a369377e0033b8a5503b"
+  },
+  "docs/wiki/images/opsec-for-tor-and-i2p-that-holds-up-identities-layers-metadata-and-habits-diagram-4.png": {
+    "sha256": "e23d0e152a5d83946e27752c5d15410a84a3644f6f627b816a4cbff9acd65120"
+  },
   "docs/wiki/images/privacy-law-around-the-world-gdpr-pipeda-popia-and-pipl-compared-with-the-united-states-diagram-1.png": {
     "sha256": "95b5622ac7c6a922e7590d2cd0fa6753805679e081b28b1f2aa5cea4aee5b0b0"
   },

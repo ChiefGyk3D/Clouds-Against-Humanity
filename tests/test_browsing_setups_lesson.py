@@ -15,6 +15,8 @@ import json
 import re
 from pathlib import Path
 
+from wikitext import page_text
+
 ROOT = Path(__file__).resolve().parent.parent
 WIKI = ROOT / "docs" / "wiki"
 NAME = "The-Browsing-Setups-Compared-Tor-Browser-Brave-Whonix-Tails-and-Qubes-with-Whonix"
@@ -45,7 +47,9 @@ OPINION_WORDS = ("larp", "skid", "poser")
 
 
 def text() -> str:
-    return PAGE.read_text(encoding="utf-8")
+    # The author's text without the generated navigation blocks (issue #417): the bottom block links the next page in
+    # the track, which is now the OPSEC lesson (issue #389), and the series page is meant to be named in plain text.
+    return page_text(PAGE)
 
 
 def register_rows(body: str) -> list[list[str]]:
