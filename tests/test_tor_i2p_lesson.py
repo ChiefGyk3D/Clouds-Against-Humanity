@@ -223,7 +223,11 @@ def test_the_carnegie_mellon_funding_claim_stays_attributed_to_the_tor_project()
     assert "independent report" in section
 
 
-def test_the_sibling_lessons_are_named_in_plain_text_not_linked():
+def test_the_sibling_lessons_are_linked_now_that_they_exist():
     body = text()
-    assert "privacy versus security" in body and "cryptography" in body
-    assert "issues 359 and 360" in body
+    privacy = "Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero"
+    crypto = "Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys"
+    links = set(LINK.findall(body))
+    assert privacy in links and crypto in links
+    assert (WIKI / f"{privacy}.md").is_file() and (WIKI / f"{crypto}.md").is_file()
+    assert "issues 359 and 360" not in body and "not written yet" not in body
