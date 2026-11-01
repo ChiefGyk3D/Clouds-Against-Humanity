@@ -301,8 +301,16 @@ def test_the_recommendation_states_what_was_and_was_not_verified_about_open_sour
     assert "open source" in part.lower() and "GPLv3" in part and "LGPLv3" in part
     assert "reproducible-build" in part or "reproducible build" in part.lower()
     assert "Raspberry Pi Zero" in part
-    assert "unverified" in part.lower() and "found no match" in part
+    assert "PiTrezor" in part and "community project" in part and "not Trezor's project" in part
     assert "Supported by what I read" in part and "Not supported by what I read" in part
+    assert "anybody that has your SD card can access your seed words and private key" in part, "the author's own caveat"
+    assert "not vetted by security professionals" in part, "the Wasabi Wallet post's caution"
+    assert "we leave further investigation to others" in part, "WalletScrutiny's limit"
+    assert "diy" in part.lower()
+    assert "archive copy" in part, "the Wasabi host did not load, and the page says so"
+    assert "The maintainer's account (not a source)" in part and "built one himself" in part
+    assert "that it has none is my reading (est.)" in part, "the secure-element point is marked as the author's reading"
+    assert "The advice to buy the real device stands" in part
     assert "development purposes only" in part, "the emulator is for development only"
     assert "DIY" in part, "Trezor's own wording about DIY builds is quoted"
     assert "buy only from the manufacturer or its authorized channels" in body.lower()
@@ -310,6 +318,46 @@ def test_the_recommendation_states_what_was_and_was_not_verified_about_open_sour
         assert check in part.lower() + section(body, RECOMMEND).lower(), check
     assert "trezor.io/resellers" in body
     assert "I read no other vendor's documentation" in part
+
+
+PI_OVERCLAIMS = (
+    "protection of the real hardware",
+    "same protection",
+    "as secure as",
+    "equivalent wallet",
+    "equals the real device",
+    "identical to the real",
+    "just as secure",
+)
+PI_NEGATORS = ("not supported", "do not read", "does not", "lacks", "stands", "no source")
+
+
+def pi_overclaims(body: str) -> list[str]:
+    """Phrases that put the Pi build level with the real device, with no refusal in the 250 characters around them."""
+    bad = []
+    for phrase in PI_OVERCLAIMS:
+        for m in re.finditer(re.escape(phrase), body, re.IGNORECASE):
+            context = body[max(0, m.start() - 250) : m.end() + 250].lower()
+            if not any(n in context for n in PI_NEGATORS):
+                bad.append(phrase)
+    return bad
+
+
+def test_the_page_does_not_claim_the_pi_build_equals_the_real_device():
+    body = text()
+    assert "protection of the real hardware" in body, "the guard collected nothing: the refusal sentence is gone"
+    assert pi_overclaims(body) == []
+    # The attributed claims stay attributed to a source or marked as a reading.
+    assert body.count("PiTrezor") >= 8
+
+
+def test_the_pi_overclaim_guard_bites():
+    assert pi_overclaims("A PiTrezor gives the same protection as the real device.") == ["same protection"]
+    assert pi_overclaims("The Pi build is just as secure, and cheaper.") == ["just as secure"]
+    assert pi_overclaims("It is an equivalent wallet, and cheaper.") == ["equivalent wallet"]
+    assert pi_overclaims("Not supported: that it gives the protection of the real hardware.") == []
+    far = "It is as secure as the real device." + " filler" * 200 + " not supported"
+    assert pi_overclaims(far) == ["as secure as"], "a refusal far away does not count"
 
 
 def test_no_other_vendor_is_named_or_attacked_and_the_pi_is_not_stated_as_fact():
@@ -572,6 +620,9 @@ def test_every_sourced_row_has_a_url_and_the_read_date():
         "trezor.io/resellers",
         "trezor.io/security",
         "trezor.io/affiliate",
+        "pitrezor.com/2018/02/pitrezor-homemade-trezor-bitcoin-wallet.html",
+        "blog.wasabiwallet.io/diy-hardware-wallets-part-ii/",
+        "old.walletscrutiny.com/hardware/pitrezor",
     ):
         assert host in reg, host
     assert reg.count(DATE) >= 30
@@ -588,8 +639,17 @@ def test_the_register_guards_bite():
 
 def test_the_unverified_items_are_marked_in_the_register():
     rows = {r[0]: r for r in register_rows(text())}
-    pi = next(r for k, r in rows.items() if k.startswith("A Raspberry Pi Zero"))
-    assert "unverified" in pi[2].lower() and "**est.**" in pi[2]
+    port = next(r for k, r in rows.items() if k.startswith("A community project (PiTrezor)"))
+    assert "pitrezor.com" in port[1] and "Read 2026-11-01" in port[2] and "the fork's code not read" in port[2]
+    wasabi = next(r for k, r in rows.items() if k.startswith("PiTrezor is a port that is not vetted"))
+    assert "blog.wasabiwallet.io" in wasabi[1] and "archive copy" in wasabi[2]
+    scrutiny = next(r for k, r in rows.items() if k.startswith("PiTrezor's verdict"))
+    assert "walletscrutiny.com/hardware/pitrezor" in scrutiny[1] and "Read 2026-11-01" in scrutiny[2]
+    his = next(r for k, r in rows.items() if k.startswith("The maintainer built a PiTrezor"))
+    assert "**est.**" in his[2] and "not independently checked" in his[2], "his account is marked as his"
+    reading = next(r for k, r in rows.items() if k.startswith("A Pi Zero has no secure element"))
+    assert "**est.**" in reading[2] and "no source I read states it" in reading[2]
+    assert not any(k.startswith("A Raspberry Pi Zero can reproduce") for k in rows), "the old unsourced row is replaced"
     link = next(r for k, r in rows.items() if k.startswith('"No cost to the reader"'))
     assert "**est.**" in link[2]
 
