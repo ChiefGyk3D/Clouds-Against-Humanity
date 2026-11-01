@@ -100,28 +100,32 @@ Read the picture left to right. The amounts are made up (synthetic, in bitcoin) 
 
 **The mempool.** A node keeps valid transactions that are not yet in a block in a memory pool. The guide says unconfirmed transactions "have no permanent status", sit in non-persistent memory, and "tend to slowly disappear" if never mined. Each node has its own pool; page one covers gossip and the mempool in detail.
 
-![Diagram, From keys to block: a private key makes an address, a wallet signs a transaction, nodes hold it in the mempool, and a miner puts it in a block](images/how-bitcoin-works-keys-utxos-mining-and-why-it-is-pseudonymous-and-traceable-diagram-2.png)
+![Diagram, From keys to block: a key makes an address, a wallet signs a transaction, nodes hold it in the mempool, and a miner puts it in a block](images/how-bitcoin-works-keys-utxos-mining-and-why-it-is-pseudonymous-and-traceable-diagram-2.png)
 
 <details>
 <summary>Diagram source (Mermaid)</summary>
 
 ```mermaid
-flowchart TB
+flowchart LR
     subgraph recv["Receiver's wallet"]
+        direction TB
         k1["Private key<br/>256 random bits"]:::secret --> k2["Public key"]:::plain --> k3["Address: hash of the<br/>public key, plus version<br/>and checksum"]:::plain
     end
     subgraph send["Sender's wallet"]
-        t1["Build the transaction:<br/>inputs name earlier outputs,<br/>outputs lock to the address"]:::plain --> t2["Sign with the<br/>sender's private key"]:::secret
+        direction TB
+        t1["Build the transaction:<br/>inputs name earlier<br/>outputs, outputs lock<br/>to the address"]:::plain --> t2["Sign with the<br/>sender's private key"]:::secret
     end
     subgraph net["Network"]
-        n1["Nodes check the signature<br/>and that the outputs<br/>are unspent"]:::net --> n2["Mempool:<br/>waiting for a miner"]:::net
+        direction TB
+        n1["Nodes check the<br/>signature and that the<br/>outputs are unspent"]:::net --> n2["Mempool:<br/>waiting for a miner"]:::net
     end
     subgraph blk["Miner and chain"]
-        m1["Miner picks transactions,<br/>searches for a header hash<br/>below the target"]:::net --> m2["In a block:<br/>1 confirmation"]:::ok --> m3["More blocks on top:<br/>more confirmations"]:::ok
+        direction TB
+        m1["Miner picks<br/>transactions, searches<br/>for a header hash<br/>below the target"]:::net --> m2["In a block:<br/>1 confirmation"]:::ok --> m3["More blocks on top:<br/>more confirmations"]:::ok
     end
-    k3 -- "address given to the sender" --> t1
-    t2 --> n1
-    n2 --> m1
+    recv -- "address given<br/>to the sender" --> send
+    send --> net
+    net --> blk
 
     classDef secret fill:#3a1a1a,stroke:#f87171,color:#fee2e2
     classDef plain fill:#1e1b3a,stroke:#a78bfa,color:#ede9fe
@@ -219,7 +223,7 @@ The word "unlikely" matters. Several parties can build one transaction together,
 
 ### Change detection
 
-A second heuristic uses the change output. Meiklejohn and colleagues describe an **idiom of use**, not a rule of the protocol: wallet software makes a fresh change address and never reuses it, so a new address in the outputs, next to one already seen, is probably the change and belongs to the spender. Their definition is strict: the output must be a first appearance, the transaction must not be a coin generation, no output may repeat an input address, and if more than one output looks new, nothing is labelled. They say plainly that it "does lack robustness in the face of changing (or adversarial) patterns in the network", and that falsely linking even a few change addresses "might collapse the entire graph into large superclusters". Their first version had a false positive rate of about 13 percent of labelled change addresses; refinements brought it to 1 percent, then 0.28 percent after waiting a day and 0.17 percent after waiting a week. Even then, the clustering produced a single "giant super-cluster" of 1.6 million public keys that mixed several services, before they added more exceptions. That is the honest picture: useful, tuned, and fragile.
+A second heuristic uses the change output. Meiklejohn and colleagues describe an **idiom of use**, not a rule of the protocol: wallet software makes a fresh change address and never reuses it, so a new address in the outputs, next to one already seen, is probably the change and belongs to the spender. Their definition is strict: the output must be a first appearance, the transaction must not be a coin generation, no output may repeat an input address, and if more than one output looks new, nothing is labeled. They say plainly that it "does lack robustness in the face of changing (or adversarial) patterns in the network", and that falsely linking even a few change addresses "might collapse the entire graph into large superclusters". Their first version had a false positive rate of about 13 percent of labeled change addresses; refinements brought it to 1 percent, then 0.28 percent after waiting a day and 0.17 percent after waiting a week. Even then, the clustering produced a single "giant super-cluster" of 1.6 million public keys that mixed several services, before they added more exceptions. That is the honest picture: useful, tuned, and fragile.
 
 ### Clustering and tagging
 
@@ -266,7 +270,7 @@ flowchart LR
 
 </details>
 
-Every name in this picture is a made-up label, and no chain data is used. Green addresses are spent together in T1 and T2, and A2 appears in both, so the common-input rule puts A1, A2 and A3 in one cluster. The amber addresses are the labelled change outputs, added by the change rule. The pink box is a tag: attribution data from outside the chain says X1 is a deposit address of a service. The red box is the warning case: G1, H1 and J1 are spent together, but three equal outputs are the pattern of a joint transaction, so whether they have one owner is not proved. The exercise below uses the same data.
+Every name in this picture is a made-up label, and no chain data is used. Green addresses are spent together in T1 and T2, and A2 appears in both, so the common-input rule puts A1, A2 and A3 in one cluster. The amber addresses are the labeled change outputs, added by the change rule. The pink box is a tag: attribution data from outside the chain says X1 is a deposit address of a service. The red box is the warning case: G1, H1 and J1 are spent together, but three equal outputs are the pattern of a joint transaction, so whether they have one owner is not proved. The exercise below uses the same data.
 
 Clustering is a multiplier. Meiklejohn and colleagues: "if we labeled one public key as belonging to [a service], we can now transitively taint the entire cluster containing this public key as belonging to [that service] as well." Paquet-Clouston and colleagues state the dependency: "if one can attribute a single address within a cluster containing hundred of thousands of addresses, one can attribute the entire cluster", but "without this information, clusters remain anonymous and inferences about their real-world nature are impossible". They also report, citing a master's thesis I did not read (Nick, 2015), that the common-input rule recovered on average about 68.59 percent of the addresses of a wallet in a ground-truth set of about 37,000 wallets. It is a second-hand figure, and it says clustering is neither complete nor empty.
 
@@ -331,14 +335,22 @@ This diagram uses only what the press release says. The solid arrows are the doc
 
 ```mermaid
 flowchart TB
-    t["Theft, April 11 2012<br/>3,171 BTC in four installments<br/>2,902, 165, 17 and 87"]:::victim
-    w["Coins sit still in the<br/>thief's address until<br/>March 15 2013"]:::plain
-    ag["Aggregated with other small<br/>addresses into one large one"]:::plain
-    p1["Peeling chain: each hop sends<br/>a small peel to one address<br/>and the rest to a new<br/>change address"]:::trace
-    e1["After 10 hops: a peel to<br/>a known exchange,<br/>Bitcoin-24"]:::tag
-    e2["10 hops later: a peel to<br/>a known exchange,<br/>Mt. Gox"]:::tag
-    tot["In all, 374.49 BTC seen going<br/>to known exchanges, directly<br/>off the main chain"]:::ok
-    t --> w --> ag --> p1 --> e1 --> e2 --> tot
+    subgraph s1["The theft and the wait"]
+        direction LR
+        t["Theft, April 11 2012<br/>3,171 BTC in four<br/>installments: 2,902,<br/>165, 17 and 87"]:::victim
+        w["Coins sit still in the<br/>thief's address until<br/>March 15 2013"]:::plain
+        ag["Aggregated with other<br/>small addresses into<br/>one large one"]:::plain
+        t --> w --> ag
+    end
+    subgraph s2["Following the chain"]
+        direction LR
+        p1["Peeling chain: each hop<br/>sends a small peel to one<br/>address and the rest to<br/>a new change address"]:::trace
+        e1["After 10 hops: a peel<br/>to a known exchange,<br/>Bitcoin-24"]:::tag
+        e2["10 hops later: a peel<br/>to a known exchange,<br/>Mt. Gox"]:::tag
+        tot["In all, 374.49 BTC seen<br/>going to known exchanges,<br/>directly off the main chain"]:::ok
+        p1 --> e1 --> e2 --> tot
+    end
+    s1 --> s2
 
     classDef victim fill:#3a1a1a,stroke:#f87171,color:#fee2e2
     classDef plain fill:#1e1b3a,stroke:#a78bfa,color:#ede9fe
@@ -392,7 +404,7 @@ Goal: apply the common-input rule and a change rule to a small made-up transacti
 Outside information: X1 carries a tag from a source outside the chain, "a deposit address of Exchange X" (invented for this exercise). A2 received two separate payments, so it appears as an input in T1 and again in T2.
 
 1. **Common-input rule.** Which addresses form a cluster of more than one? Show the transitive step.
-2. **Change rule.** For each transaction, which output, if any, is labelled change under this rule: exactly one output is new (not seen before and not an input here), and no output repeats an input? Say why T3 and T4 get no label.
+2. **Change rule.** For each transaction, which output, if any, is labeled change under this rule: exactly one output is new (not seen before and not an input here), and no output repeats an input? Say why T3 and T4 get no label.
 3. **After the change rule.** What is the final cluster that contains A1?
 4. **What flowed.** From which cluster to which tagged address did value move, and in which transaction?
 5. **What is not proved.** Give at least three things the data does not establish.

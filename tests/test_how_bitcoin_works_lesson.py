@@ -181,7 +181,7 @@ def change_labels(rows, seen: set[str]) -> dict[str, str]:
 
 
 def merged(clusters: set[frozenset[str]], change: dict[str, str], rows) -> set[frozenset[str]]:
-    """Add each labelled change address to the cluster of its transaction's inputs."""
+    """Add each labeled change address to the cluster of its transaction's inputs."""
     result = [set(c) for c in clusters]
     for tx, ins, _outs, _fee in rows:
         if tx in change:
@@ -388,7 +388,7 @@ def test_the_exercise_guard_bites():
     wrong = {frozenset({"A1", "A2"})}
     assert wrong != {c for c in common_input_clusters(chained) if len(c) > 1}, "a wrong key would be caught"
     two_new = [("T1", [("A1", Decimal(1))], [("B1", Decimal("0.5")), ("B2", Decimal("0.5"))], Decimal(0))]
-    assert change_labels(two_new, set()) == {}, "two new outputs: ambiguous, so nothing is labelled"
+    assert change_labels(two_new, set()) == {}, "two new outputs: ambiguous, so nothing is labeled"
     self_change = [("T1", [("A1", Decimal(1))], [("A1", Decimal("0.5")), ("B2", Decimal("0.5"))], Decimal(0))]
     assert change_labels(self_change, set()) == {}, "an output that repeats an input is skipped"
 
@@ -401,7 +401,7 @@ def test_every_diagram_has_alt_text_a_source_and_a_picture_that_exists():
     manifest = json.loads((ROOT / "docs" / "diagrams.json").read_text())
     for m in found:
         alt = m["alt"].strip()
-        assert 20 <= len(alt) <= 170, alt
+        assert 20 <= len(alt) <= 150, alt
         assert alt.lower() not in {"diagram", "image", "picture"}, alt
         png = (PAGE.parent / m["path"]).resolve()
         assert png.is_file(), m["path"]
