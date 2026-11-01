@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: Apache-2.0
+# Overrides for /etc/i2pd/i2pd.conf on the lab VM (issue 391). Written from reading, not run.
+# Keep the lines the package already has (ipv4, ipv6, reseed verify) and add or change these.
+# i2pd opens transport ports for other routers by design; everything below is about what it does NOT need to open.
+
+# Do not carry other people's traffic from a throwaway lab router.
+notransit = true
+
+# The router's own local services. A publishing router needs none of them.
+[http]
+# The web console lists your tunnels and your site's address. Loopback only, never a tunnel target.
+address = 127.0.0.1
+port = 7070
+
+[httpproxy]
+enabled = false
+
+[socksproxy]
+enabled = false
+
+[sam]
+enabled = false
+
+[bob]
+enabled = false
+
+[i2cp]
+enabled = false
+
+[i2pcontrol]
+enabled = false

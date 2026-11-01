@@ -114,3 +114,21 @@ variable "portainer_port" {
     error_message = "portainer_port must be a whole port from 1024 to 65535 (never a privileged port, and never SSH's 22)."
   }
 }
+
+variable "onion_service_enabled" {
+  type        = bool
+  default     = false
+  nullable    = false
+  description = "Optional, default off (issue #391; lab lesson in the wiki: Lab, publish a web server as a Tor onion service and an I2P site). true adds to the cloud-init a static nginx origin published on 127.0.0.1:8080 only, and a Tor package whose one version 3 onion service forwards to that loopback port. The flag opens no port to the internet and changes no firewall rule, and the service key is made on the host and never appears in the plan or the state. Changing it changes user_data, which replaces the droplet. UNAPPLIED and untested on a real machine."
+}
+
+variable "onion_origin_image" {
+  type        = string
+  default     = "nginx:1.30.6-alpine@sha256:0e52bd054126cdc040b1276c0af347aeb02a41b9cfe305d6094767ac30e97949"
+  description = "Static origin image for the onion service, the official Docker Hub library image pinned by tag and by digest (nginx 1.30.6-alpine, the multi-arch index digest read from Docker Hub on 2026-11-01, the same tag the WordPress-at-scale lab uses). The cloud-init puts the registry and library path in front. Used only when onion_service_enabled is true. Bumped in a reviewed change, which replaces the droplet."
+
+  validation {
+    condition     = can(regex("^nginx:[0-9]+\\.[0-9]+\\.[0-9]+-alpine@sha256:[0-9a-f]{64}$", var.onion_origin_image))
+    error_message = "onion_origin_image must be nginx:<exact version>-alpine@sha256:<64 hex digits>: pinned by tag and by digest, never latest."
+  }
+}

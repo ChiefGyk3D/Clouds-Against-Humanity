@@ -34,5 +34,7 @@ resource "digitalocean_droplet" "workload" {
     docker_key_fingerprint = var.docker_apt_key_fingerprint
     portainer_version      = var.portainer_version
     portainer_port         = var.portainer_port
+    onion_service_enabled  = var.onion_service_enabled
+    onion_origin_image     = var.onion_origin_image
   })
 }

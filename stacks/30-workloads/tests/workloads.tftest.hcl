@@ -287,3 +287,61 @@ run "a_floating_portainer_version_is_refused" {
   }
   expect_failures = [var.portainer_version]
 }
+
+# --- the optional onion service flag (issue #391; default off, nothing applied) --
+
+run "the_onion_flag_defaults_to_off_and_the_effective_output_is_false" {
+  command = plan
+  assert {
+    condition     = var.onion_service_enabled == false && output.onion_service_enabled == false
+    error_message = "onion_service_enabled must default to false."
+  }
+}
+
+run "the_onion_flag_is_handed_to_the_module_and_to_nothing_else" {
+  command = plan
+  assert {
+    condition     = length(regexall("onion_service_enabled\\s*=\\s*var\\.onion_service_enabled", file("${path.module}/main.tf"))) == 1
+    error_message = "main.tf must pass onion_service_enabled to the docker-host module, once."
+  }
+  assert {
+    condition     = length(regexall("onion_origin_image", file("${path.module}/main.tf"))) == 0
+    error_message = "The stack does not choose the origin image: the module's pinned default applies."
+  }
+}
+
+run "the_onion_flag_alone_creates_nothing" {
+  command = plan
+  variables {
+    onion_service_enabled = true
+  }
+  assert {
+    condition     = length(module.workload) == 0 && length(module.workload_firewall) == 0 && length(digitalocean_tag.workload) == 0
+    error_message = "With the master switch off the onion flag must create nothing."
+  }
+  assert {
+    condition     = output.onion_service_enabled == false
+    error_message = "The effective output is true only when both switches are on."
+  }
+}
+
+run "the_onion_flag_with_the_master_switch_changes_no_firewall_rule" {
+  command = plan
+  variables {
+    workload_enabled      = true
+    onion_service_enabled = true
+  }
+  expect_failures = [output.workload_enabled]
+  assert {
+    condition     = output.onion_service_enabled == true
+    error_message = "Both switches on: the effective output is true."
+  }
+  assert {
+    condition     = module.workload_firewall[0].inbound_rules == tolist(["tcp/22/cah-connector-tor1", "tcp/9443/cah-connector-tor1"]) && module.workload_firewall[0].outbound_rules == tolist(["tcp/443/0.0.0.0/0,::/0", "tcp/53/0.0.0.0/0,::/0", "tcp/80/0.0.0.0/0,::/0", "udp/123/0.0.0.0/0,::/0", "udp/53/0.0.0.0/0,::/0"])
+    error_message = "The onion flag must not add, remove or widen any firewall rule."
+  }
+  assert {
+    condition     = length(regexall("\"twingate_resource\"", file("${path.module}/main.tf"))) == 2
+    error_message = "The onion flag adds no Twingate resource."
+  }
+}

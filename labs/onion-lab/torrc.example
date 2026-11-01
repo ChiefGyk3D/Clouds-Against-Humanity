@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: Apache-2.0
+# Lab torrc for the onion service lesson (issue 391). Written from reading, not run on the real network.
+# Copy it to /etc/tor/torrc on a throwaway VM or Raspberry Pi. It holds no key and no address: Tor makes both.
+#
+# Tor is a client here. No ORPort, so this machine is not a relay, an exit or a bridge, and nothing listens for Tor traffic.
+SocksPort 0
+Log notice syslog
+
+# One version 3 onion service. Tor creates this directory (mode 0700, owned by the Tor user) and writes the service's
+# secret and public key files and the "hostname" file into it. Back it up and guard it like a password: whoever holds
+# the secret key file IS this address. Never commit it, never paste its contents or the address anywhere public.
+HiddenServiceDir /var/lib/tor/onion-lab/
+HiddenServiceVersion 3
+
+# Visitors reach virtual port 80; Tor hands each connection to the web server on this machine's loopback address.
+# The web server must listen on 127.0.0.1 only (see nginx-onion-lab.conf).
+HiddenServicePort 80 127.0.0.1:8080
+
+# Optional on a VM whose firewall lets Tor out on web ports only (the cloud flag uses this line):
+# ReachableAddresses *:443,*:80

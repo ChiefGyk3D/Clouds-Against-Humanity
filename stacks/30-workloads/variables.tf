@@ -140,3 +140,10 @@ variable "portainer_version" {
     error_message = "portainer_version must be an exact version such as 2.45.3, never latest, a range or a variant."
   }
 }
+
+variable "onion_service_enabled" {
+  type        = bool
+  default     = false
+  nullable    = false
+  description = "Optional, default off (issue #391). true, together with workload_enabled, adds a loopback-only static origin and a Tor onion service to the workload host's cloud-init. The flag adds no resource, opens no port and changes no firewall rule, so the cost gate sees the same droplet. The service key is made on the host and never appears in the plan or the state. Nothing is applied."
+}
