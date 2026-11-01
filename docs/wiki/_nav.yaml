@@ -119,6 +119,7 @@ pages:
     - {page: Threat-Model-Exercise, title: "Threat model exercise", audience: "security reader", desc: "Build your own threat model of this repository before you open the worked one, for security-minded readers."}
     - {page: Threat-Dragon-Exercise, title: "Threat Dragon exercise", audience: "security reader", desc: "Draw this pipeline's trust boundaries in OWASP Threat Dragon and attach threats to them, for security-minded readers."}
     - {page: Threat-Frameworks-STRIDE-ATTACK-ATLAS, title: "Threat frameworks: STRIDE, ATT&CK, ATLAS", audience: "security reader", desc: "The same pipeline viewed through STRIDE, MITRE ATT&CK and MITRE ATLAS, with files to open them, for security-minded readers.", sidebar: true}
+    - {page: Tor-I2P-and-the-Darknet-Without-the-Myths, title: "Tor, I2P and the darknet without the myths", audience: "learner", status: "draft", desc: "How Tor and I2P work, who uses them, Tor Browser, Tails, Whonix and Qubes compared, and a Monero node as the privacy-versus-security example."}
   defense:
     - {page: Packet-Filters-Compared-iptables-nftables-ufw-pf, title: "Packet filters compared", audience: "learner", desc: "Lesson D1: stateless versus stateful filtering, then iptables, nftables, UFW and BSD pf compared, for learners with a basic firewall idea.", sidebar: true}
     - {page: IDS-and-IPS-Snort-and-Suricata, title: "IDS and IPS: Snort and Suricata", audience: "learner", desc: "Lesson D2: what an IDS and an IPS are, where a sensor can watch and why an IPS is riskier, for learners.", sidebar: true}
