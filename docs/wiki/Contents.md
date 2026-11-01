@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (140 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (141 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -25,7 +25,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Foundations: identity and secrets](#foundations-identity-and-secrets) (8)
 - [Foundations: infrastructure as code](#foundations-infrastructure-as-code) (7)
 - [Foundations: web hosting](#foundations-web-hosting) (4)
-- [Foundations: security tools and threat modeling](#foundations-security-tools-and-threat-modeling) (10)
+- [Foundations: security tools and threat modeling](#foundations-security-tools-and-threat-modeling) (11)
 - [Foundations: network and host defense](#foundations-network-and-host-defense) (8)
 - [Foundations: deception and honeypots](#foundations-deception-and-honeypots) (11)
 - [Detection and monitoring](#detection-and-monitoring) (13)
@@ -146,6 +146,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [Tor, I2P and the darknet without the myths](Tor-I2P-and-the-Darknet-Without-the-Myths.md) | How Tor and I2P work, who uses them, Tor Browser, Tails, Whonix and Qubes compared, and a Monero node as the privacy-versus-security example. | learner | draft |
 | [How Tor works in depth](How-Tor-Works-in-Depth-Circuits-Relays-Directory-Authorities-and-Onion-Services.md) | Circuits, the three hops, guards, directory authorities and the consensus, bridges, onion services and the dated weaknesses, with six diagrams, for readers who want the machinery under Tor. | learner | draft |
 | [How I2P works](How-I2P-Works-Tunnels-Garlic-Routing-and-the-Network-Database.md) | One-way tunnels, garlic routing and cloves, the network database and floodfills, reseeding, outproxies, the research on its weak points and an honest comparison with Tor. | learner | draft |
+| [Blockchain fundamentals](Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks.md) | Page 1 of 5 on cryptocurrency: hashes, blocks, nodes, a transaction's life, proof of work and stake, forks, full nodes and what a blockchain is not, with a dated read of the first two Bitcoin blocks. | learner | draft |
 | [The darknet landscape: markets, OPSEC and layering](The-Darknet-Landscape-Markets-OPSEC-Clearnet-and-Layering-Tor-I2P-and-VPN.md) | Documented darknet market history and why most fail, the OPSEC trap, clearnet versus onion services, and layering Tor, I2P and a VPN, for learners; educational and defensive only. | learner | draft |
 
 ## Foundations: network and host defense
