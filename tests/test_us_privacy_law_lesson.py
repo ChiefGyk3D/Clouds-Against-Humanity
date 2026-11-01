@@ -593,6 +593,8 @@ def test_the_certification_view_sits_only_in_the_opinion_section_and_no_would_fa
         assert claim not in low, claim
     assert f"{GRC1}.md#what-a-certification-or-report-does-and-does-not-tell-you" in op, "page one's section is linked"
     assert not named_people(op)
+    assert "I read no source on the exposure itself" not in body, "page one now carries sources on the exposure"
+    assert "the sourced account of the exposure with what is and is not known about it" in op
 
 
 def test_the_certification_guard_bites():
