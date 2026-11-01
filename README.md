@@ -155,6 +155,7 @@ Clouds-Against-Humanity/
   SECURITY.md, CONTRIBUTING.md             private security reporting; how to give feedback and contribute
   .spacelift/policies/                     Spacelift push and plan policies and their OPA tests
   labs/demo-monitoring/                    synthetic Prometheus + Grafana demo: two sites, dashboards, alert rules and their promtool tests (no real hosts)
+  workloads/searxng/                       SearXNG compose, settings and README for the stage 3 host: written and tested offline, not applied
   docs/wiki/                               the wiki pages (source of truth)
   docs/stages/                             operator guides: decisions, verify, rollback, per stage  (00-foundation, 01-access, 02-telemetry, aws-access)
   docs/cost.md                             cost gate explained

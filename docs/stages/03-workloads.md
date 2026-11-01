@@ -17,6 +17,10 @@ Design: [2026-10-11 stage 3 design](../superpowers/specs/2026-10-11-stage-3-work
 
 Cost: $0.00 while off. When approved, the droplet is $12.00 a month (`s-1vcpu-2gb`, from `docs/cost-prices.json`) on top of the connectors' $12.00, so $24.00 before the Spaces bucket ($5.00, not part of this issue), $29.00 in all as the design says.
 
+### A documented workload on this host (not applied)
+
+`workloads/searxng/` holds a compose definition for SearXNG and its Valkey cache, written to be deployed on this host through Portainer over Twingate. It is documentation and tests only: nothing has deployed it, it changes no resource, cost entry or approval, and the Twingate resource a laptop would need to reach its web port is a separate change to this stack that has not been made. Its images are pinned by tag and digest, its one published port is bound to the host's private address, and its README states that the memory it needs is unknown. The lesson is [Self-hosting: when and why, with SearXNG](../wiki/Self-Hosting-When-and-Why-with-SearXNG-as-the-Worked-Example.md).
+
 ## 2. How the switch is guarded
 
 1. Every resource, data source and module call in `stacks/30-workloads/main.tf` has `count = local.on`, and `on` is `var.workload_enabled ? 1 : 0`. `tests/test_workloads_stack.py` fails if a block lacks it.
