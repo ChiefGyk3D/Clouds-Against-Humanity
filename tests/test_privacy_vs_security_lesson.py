@@ -90,14 +90,15 @@ def test_the_sibling_lessons_are_named_by_issue_and_not_linked():
     assert not re.search(r"\]\((?:Tor|I2P|Cryptography)[A-Za-z0-9_-]*\.md", body)
 
 
-def test_the_lesson_is_registered_in_contents_and_reading_order_but_not_the_sidebar():
+def test_the_lesson_is_registered_in_contents_reading_order_and_the_sidebar():
     nav = (WIKI / "_nav.yaml").read_text(encoding="utf-8")
     entry = nav.split(f"page: {NAME},")[1].split("\n")[0]
     assert 'status: "draft"' in entry
     assert "sidebar" not in entry
     for special in ("Contents.md", "Reading-Order.md"):
         assert f"{NAME}.md" in (WIKI / special).read_text(encoding="utf-8"), special
-    assert NAME not in (WIKI / "_Sidebar.md").read_text(encoding="utf-8")
+    # Issue #378: the sidebar lists every page, so the lesson is in it (it is still not pinned to the top).
+    assert NAME in (WIKI / "_Sidebar.md").read_text(encoding="utf-8")
 
 
 def test_glossary_rows_point_at_real_headings():

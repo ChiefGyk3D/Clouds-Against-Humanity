@@ -7,6 +7,8 @@ What is proved:
 - Contents.md and _Sidebar.md are exactly what gen_wiki_nav.py renders, so they are
   reproducible and --check passes on the committed files;
 - Contents has a link for every page, and the sidebar fits its line budget;
+- the sidebar lists every page in a collapsible group and Home carries a generated map of every
+  page between markers (issue #378);
 - the manifest keeps its own rules: sorted groups stay sorted, statuses and audiences come
   from the allowed lists, descriptions stay one plain line;
 - the checks bite: hostile manifests (duplicate key, orphan, dead entry, bad status, a pipe
@@ -175,15 +177,20 @@ def test_sidebar_stays_inside_its_line_budget():
 def test_collapsed_sidebar_fits_one_screen():
     """Rows a reader sees with every group closed: the top row, the open core path, and one summary per group."""
     text = re.sub(r"<!--.*?-->", "", (WIKI / "_Sidebar.md").read_text(), flags=re.DOTALL)
-    visible, closed = 0, False
+    # Issue #378: a summary shares its line with <details>, and groups hold nested subgroups, so track depth.
+    visible, stack = 0, []  # one flag per open <details> block we are inside: True when it is collapsed
     for line in text.splitlines():
         if not line.strip():
             continue
-        if line.startswith("<details>"):
-            closed = True
-        elif line.startswith(("<details open>", "</details>")):
-            closed = False
-        elif line.startswith("<summary>") or not closed:
+        hidden = any(stack)
+        if line.startswith("</details>"):
+            stack.pop()
+            continue
+        if line.startswith("<details"):
+            if not hidden:
+                visible += 1  # the summary of a block that is itself on screen
+            stack.append(not line.startswith("<details open>"))
+        elif not hidden:
             visible += 1
     assert visible <= COLLAPSED_ROW_BUDGET, f"{visible} rows visible when collapsed, budget {COLLAPSED_ROW_BUDGET}"
 
@@ -199,7 +206,7 @@ def test_sidebar_keeps_the_links_the_other_tests_and_pages_rely_on():
     text = (WIKI / "_Sidebar.md").read_text()
     for page in ("Home", "Contents", "Reading-Order", "Why-This-Exists", "Screenshots-Policy", "Repository-Growth", "Glossary"):
         assert f"({page}.md)" in text, page
-    # The outside links are not key pages; they stay one click away on the Contents page (issue #362).
+    # The outside links are listed in the sidebar too (issue #378) and stay on the Contents page.
     contents = (WIKI / "Contents.md").read_text()
     assert "docs/stages/00-foundation.md" in contents and "docs/cost.md" in contents
 
@@ -229,7 +236,7 @@ def test_the_publisher_copies_the_generated_pages_unchanged_in_kind():
 
 # -- the collapsed sidebar (issue #362) ----------------------------------------------------------
 
-SIDEBAR_HEADROOM = 40  # lines the committed sidebar must leave under the budget
+SIDEBAR_HEADROOM = 25  # lines (one page each, worst case) the committed sidebar must leave under the budget (issue #378)
 SIDEBAR_GROUP_LINK = re.compile(r"\]\(Contents\.md#([a-z0-9-]+)\)")
 SIDEBAR_ITEM = re.compile(r"^(- |\d+\. )")
 
@@ -248,20 +255,76 @@ def ref_block(sidebar: str) -> str:
     return sidebar.split("<summary><b>Reference</b>", 1)[1].split("</details>", 1)[0]
 
 
-def test_the_sidebar_leaves_room_for_forty_more_pages_under_the_budget():
+def test_the_sidebar_leaves_room_for_twenty_five_more_pages_under_the_budget():
+    # Issue #378: the sidebar lists every page, so it grows with the wiki. Subgroups pack several links per
+    # line; the margin is 25 pages at the worst case of one line each (a page with no subgroup).
     lines = (WIKI / "_Sidebar.md").read_text().splitlines()
     assert len(lines) <= SIDEBAR_LINE_BUDGET - SIDEBAR_HEADROOM, f"{len(lines)} lines"
 
 
-def test_forty_more_unmarked_pages_do_not_grow_the_committed_sidebar():
+def test_twenty_five_more_unsubgrouped_pages_still_fit_the_budget():
+    m = manifest()
+    m["pages"]["os"] += [
+        {"page": f"Extra{i}", "title": f"Extra {i:02d}", "audience": "learner", "desc": "x"} for i in range(25)
+    ]
+    assert len(gwn.render_sidebar(m).splitlines()) <= SIDEBAR_LINE_BUDGET
+
+
+def test_each_added_page_adds_exactly_one_sidebar_line_and_is_listed():
     m = manifest()
     before = len(gwn.render_sidebar(m).splitlines())
     m["pages"]["os"] += [
-        {"page": f"Extra{i}", "title": f"Extra {i:02d}", "audience": "learner", "desc": "x"} for i in range(40)
+        {"page": f"Extra{i}", "title": f"Extra {i:02d}", "audience": "learner", "desc": "x"} for i in range(5)
     ]
-    after = len(gwn.render_sidebar(m).splitlines())
-    assert after == before, "unmarked pages must not add sidebar lines once a group already shows its key pages"
-    assert after <= SIDEBAR_LINE_BUDGET
+    sidebar = gwn.render_sidebar(m)
+    assert len(sidebar.splitlines()) == before + 5
+    for i in range(5):
+        assert f"](Extra{i}.md)" in sidebar
+
+
+def unlisted_in_sidebar(sidebar: str, m: dict) -> list[str]:
+    """Every manifest page (and outside link) the sidebar text does not link."""
+    listed = set(PAGE_LINK.findall(sidebar))
+    missing = sorted(set(gwn.all_page_names(m)) - listed)
+    for links in (m.get("links") or {}).values():
+        missing += [e["url"] for e in links if e["url"] not in sidebar]
+    return missing
+
+
+def test_the_sidebar_lists_every_page_and_every_outside_link():
+    sidebar = (WIKI / "_Sidebar.md").read_text()
+    assert PAGE_LINK.findall(sidebar), "expected the sidebar to link pages"
+    assert unlisted_in_sidebar(sidebar, manifest()) == []
+
+
+def test_the_sidebar_listing_check_bites_when_a_page_or_link_is_dropped():
+    m = manifest()
+    sidebar = gwn.render_sidebar(m)
+    victim = gwn.entries(m, "os")[0]["page"]
+    outside = m["links"]["reference"][0]["url"]
+    # Rows can hold several links (subgroups), so cut just the one link, not the whole line.
+    cut = re.sub(rf"\[[^\]]*\]\({re.escape(victim)}\.md\)", "", sidebar)
+    cut = "\n".join(line for line in cut.splitlines() if outside not in line)
+    assert unlisted_in_sidebar(cut, m) == [victim, outside]
+
+
+GROUP_START = re.compile(r"(?m)^<details(?: open)?><summary><b>")
+LINK_ANY = re.compile(r"\]\((?:[A-Za-z0-9_-]+\.md(?:#[^)]*)?|https://[^)]+)\)")
+
+
+def group_blocks(sidebar: str) -> list[str]:
+    """The text of each top-level group (nested subgroup blocks stay inside their group)."""
+    return [b.rsplit("</details>", 1)[0] for b in GROUP_START.split(sidebar)[1:]]
+
+
+def test_the_sidebar_links_each_page_of_each_group_once_plus_the_full_list():
+    m = manifest()
+    blocks = group_blocks((WIKI / "_Sidebar.md").read_text())
+    shown = [g for g in gwn.groups_of(m) if g["id"] != gwn.TOP_GROUP]
+    assert len(blocks) == len(shown) >= 10
+    for group, block in zip(shown, blocks, strict=True):
+        expected = len(gwn.entries(m, group["id"])) + len(gwn.link_entries(m, group["id"]))
+        assert len(LINK_ANY.findall(block)) == expected + 1, f"{group['id']}: links do not match {expected} pages (+ the Full list link)"
 
 
 def test_the_sidebar_never_lists_a_page_the_nav_does_not_know():
@@ -282,11 +345,11 @@ def test_every_sidebar_group_ends_with_a_link_to_its_contents_anchor_and_the_anc
     sidebar = (WIKI / "_Sidebar.md").read_text()
     contents = (WIKI / "Contents.md").read_text()
     headings = {gwn.slug(line[3:]) for line in contents.splitlines() if line.startswith("## ")}
-    blocks = sidebar.split("<details")[1:]
+    blocks = group_blocks(sidebar)
     shown = [g for g in gwn.groups_of(manifest()) if g["id"] != gwn.TOP_GROUP]
     assert len(blocks) == len(shown) >= 10
     for group, block in zip(shown, blocks, strict=True):
-        items = [line for line in block.split("</details>")[0].splitlines() if SIDEBAR_ITEM.match(line)]
+        items = [line for line in block.splitlines() if SIDEBAR_ITEM.match(line)]
         found = SIDEBAR_GROUP_LINK.findall(items[-1])
         assert found == [gwn.slug(group["title"])], f"{group['id']}: last item is {items[-1]!r}"
         assert found[0] in headings, f"{group['id']}: no Contents heading for #{found[0]}"
@@ -297,24 +360,101 @@ def test_group_titles_make_distinct_contents_anchors():
     assert len(slugs) == len(set(slugs))
 
 
-def test_a_group_with_no_marked_page_shows_its_first_pages_by_the_documented_default():
+def test_a_group_with_no_marked_page_lists_every_page_in_display_order():
+    # Issue #378 replaced the "first three" default: every group lists every page.
     m = bulk_group(12)
     shown = re.findall(r"\]\((P\d\d)\.md\)", ref_block(gwn.render_sidebar(m)))
-    assert shown == [f"P{i:02d}" for i in range(gwn.DEFAULT_SIDEBAR_PAGES)]
-    assert 1 <= gwn.DEFAULT_SIDEBAR_PAGES <= 6
+    assert shown == [f"P{i:02d}" for i in range(12)]
 
 
-def test_the_default_follows_display_order_for_a_sorted_group():
+def test_display_order_for_a_sorted_group_is_title_order_in_the_sidebar():
     m = bulk_group(8)
-    m["pages"]["ref"].reverse()  # written out of order; a sorted group still shows the first in title order
+    m["pages"]["ref"].reverse()  # written out of order; a sorted group still lists in title order
     shown = re.findall(r"\]\((P\d\d)\.md\)", ref_block(gwn.render_sidebar(m)))
-    assert shown == [f"P{i:02d}" for i in range(gwn.DEFAULT_SIDEBAR_PAGES)]
+    assert shown == [f"P{i:02d}" for i in range(8)]
 
 
-def test_marked_pages_replace_the_default_and_keep_display_order():
+def test_marked_pages_are_pinned_to_the_top_then_the_rest_follow_in_display_order():
     m = bulk_group(12, P09={"sidebar": True}, P04={"sidebar": True})
     shown = re.findall(r"\]\((P\d\d)\.md\)", ref_block(gwn.render_sidebar(m)))
-    assert shown == ["P04", "P09"]
+    assert shown == ["P04", "P09"] + [f"P{i:02d}" for i in range(12) if i not in (4, 9)]
+    assert len(shown) == len(set(shown)) == 12
+
+
+def subgroup_manifest(pages: int = 12, **marks) -> dict:
+    """bulk_group with every entry in one subgroup called 'Series' (unless a mark says otherwise)."""
+    m = bulk_group(pages, **marks)
+    for e in m["pages"]["ref"]:
+        e.setdefault("subgroup", "Series")
+    return m
+
+
+def subgroup_block(sidebar: str) -> str:
+    return ref_block(sidebar).split("<details><summary>", 1)[1]
+
+
+def test_a_subgroup_is_a_nested_details_block_with_its_title_and_count():
+    sidebar = gwn.render_sidebar(subgroup_manifest(12))
+    assert "<details><summary>Series (12)</summary>\n\n- [P00](P00.md)" in sidebar
+    assert sidebar.count("<details") == sidebar.count("</details>") == sidebar.count("<summary>")
+
+
+def test_a_subgroup_packs_several_links_per_line_within_the_documented_limits():
+    m = subgroup_manifest(23)
+    lines = [ln for ln in subgroup_block(gwn.render_sidebar(m)).split("</details>", 1)[0].splitlines() if ln.startswith("- ")]
+    assert len(lines) < 23 and len(lines) == -(-23 // gwn.SIDEBAR_PACK_LINKS)
+    for ln in lines:
+        assert 1 <= len(re.findall(r"\]\(P\d\d\.md\)", ln)) <= gwn.SIDEBAR_PACK_LINKS
+        assert " · " in ln or ln.count("](") == 1
+    shown = re.findall(r"\]\((P\d\d)\.md\)", "\n".join(lines))
+    assert shown == [f"P{i:02d}" for i in range(23)]
+
+
+def test_a_long_title_wraps_a_packed_line_by_characters_before_the_link_limit():
+    m = subgroup_manifest(6)
+    for e in m["pages"]["ref"]:
+        e["title"] = "T" * (gwn.SIDEBAR_PACK_CHARS // 2 - 5)
+    lines = [ln for ln in subgroup_block(gwn.render_sidebar(m)).split("</details>", 1)[0].splitlines() if ln.startswith("- ")]
+    assert len(lines) == 3 and all(ln.count("](") == 2 for ln in lines)
+
+
+def test_pinned_pages_come_first_inside_a_subgroup_and_ungrouped_pages_come_before_subgroups():
+    m = subgroup_manifest(8, P06={"sidebar": True, "subgroup": "Series"}, P01={"subgroup": None})
+    del m["pages"]["ref"][1]["subgroup"]  # P01 stays ungrouped
+    shown = re.findall(r"\]\((P\d\d)\.md\)", ref_block(gwn.render_sidebar(m)))
+    assert shown[0] == "P01"  # the ungrouped page is listed before the nested block
+    assert shown[1] == "P06"  # then the pinned page leads its subgroup
+    assert sorted(shown) == [f"P{i:02d}" for i in range(8)]
+
+
+def test_a_subgroup_never_hides_the_full_list_link_which_stays_last():
+    block = gwn.render_sidebar(subgroup_manifest(9)).split("<summary><b>Reference</b>", 1)[1].rsplit("</details>", 1)[0]
+    items = [ln for ln in block.splitlines() if SIDEBAR_ITEM.match(ln)]
+    assert "(Contents.md#reference)" in items[-1]
+
+
+def test_a_subgroup_must_be_plain_text_and_is_refused_on_the_core_path_and_the_start_group():
+    m = minimal()
+    m["pages"]["ref"][0]["subgroup"] = "a | b"
+    assert any("subgroup" in p for p in gwn.validate(m, MINIMAL_PAGES))
+    m = minimal()
+    m["pages"]["core"][0]["subgroup"] = "Early"
+    assert any("numbered" in p and "subgroup" in p for p in gwn.validate(m, MINIMAL_PAGES))
+    m = minimal()
+    m["pages"]["start"][0]["subgroup"] = "Top"
+    assert any("subgroup" in p for p in gwn.validate(m, MINIMAL_PAGES))
+    m = minimal()
+    m["pages"]["ref"][0]["subgroup"] = "Fine title"
+    assert gwn.validate(m, MINIMAL_PAGES) == []
+
+
+def test_the_committed_manifest_folds_pages_into_subgroups_and_the_core_path_stays_whole():
+    m = manifest()
+    assert sum(1 for pages in m["pages"].values() for e in pages if e.get("subgroup")) >= 30
+    assert not any(e.get("subgroup") for e in m["pages"]["core"])
+    sidebar = (WIKI / "_Sidebar.md").read_text()
+    core = sidebar.split("<summary><b>Core path", 1)[1].split("</details>", 1)[0]
+    assert "<details>" not in core and len(re.findall(r"^\d+\. \[", core, flags=re.MULTILINE)) == 21
 
 
 def test_the_group_link_counts_every_page_and_points_at_the_contents_heading():
@@ -353,6 +493,167 @@ def test_the_committed_manifest_marks_key_pages():
     marked = [e["page"] for pages in manifest()["pages"].values() for e in pages if e.get("sidebar")]
     assert marked, "expected key pages to be marked"
     assert set(marked) <= pages_on_disk()
+
+
+# -- the Home page map (issue #378) -----------------------------------------------------------
+
+HOME_SIZE_BUDGET = 100_000  # bytes; our own cap (the wiki docs state no size limit for a page), well under any render limit
+HEADING = re.compile(r"^(#{1,6})\s+(.*?)\s*$", re.MULTILINE)
+
+
+def home_text() -> str:
+    return (WIKI / "Home.md").read_text(encoding="utf-8")
+
+
+def map_region(text: str) -> str:
+    assert text.count(gwn.HOME_BEGIN) == 1 and text.count(gwn.HOME_END) == 1, "Home needs exactly one pair of map markers"
+    return text.split(gwn.HOME_BEGIN, 1)[1].split(gwn.HOME_END, 1)[0]
+
+
+def pages_missing_from_home_map(text: str, m: dict) -> list[str]:
+    """Manifest pages that the generated map region of a Home text does not link."""
+    linked = set(PAGE_LINK.findall(map_region(text)))
+    return sorted(set(gwn.all_page_names(m)) - linked)
+
+
+def test_home_lists_every_manifest_page_in_its_map():
+    region = map_region(home_text())
+    assert PAGE_LINK.findall(region), "the guard collected no links from the Home map"
+    assert pages_missing_from_home_map(home_text(), manifest()) == []
+
+
+def test_the_home_map_check_bites_when_a_page_is_missing():
+    m = manifest()
+    victim = gwn.entries(m, "os")[0]["page"]
+    cut = "\n".join(line for line in home_text().splitlines() if not (f"]({victim}.md)" in line and line.startswith(("- ", "1. ", "2. "))))
+    assert pages_missing_from_home_map(cut, m) == [victim]
+
+
+def test_home_matches_what_the_generator_renders_between_the_markers():
+    m = manifest()
+    text = home_text()
+    assert gwn.apply_home_map(text, gwn.render_home_map(m)) == text
+
+
+def test_home_map_groups_are_the_contents_groups_in_the_same_order():
+    m = manifest()
+    contents = [line[3:] for line in (WIKI / "Contents.md").read_text().splitlines() if line.startswith("## ") and line != "## Groups"]
+    in_home = [mt.group(2) for mt in HEADING.finditer(map_region(home_text())) if mt.group(1) == "###" and mt.group(2) in contents]
+    assert in_home == contents == [g["title"] for g in gwn.groups_of(m)]
+
+
+def test_home_map_gives_every_page_its_manifest_description_and_status():
+    region = map_region(home_text())
+    for pages in manifest()["pages"].values():
+        for e in pages:
+            row = re.compile(rf"^(- |\d+\. )\[[^\]]*\]\({e['page']}\.md\)")
+            line = next((ln for ln in region.splitlines() if row.match(ln)), None)
+            assert line is not None, e["page"]
+            assert line.endswith(f": {e['desc']}"), e["page"]
+            if "status" in e:
+                assert f"]({e['page']}.md) ({e['status']}): " in line, e["page"]
+            else:
+                assert f"]({e['page']}.md): " in line, e["page"]
+
+
+def test_home_map_includes_the_outside_links_contents_has():
+    region = map_region(home_text())
+    urls = [e["url"] for links in manifest()["links"].values() for e in links]
+    assert urls and all(f"]({u})" in region for u in urls)
+
+
+def test_home_names_a_start_here_page_for_every_kind_of_reader():
+    m = manifest()
+    region = map_region(home_text())
+    readers = m["readers"]
+    assert {r["audience"] for r in readers} == set(gwn.AUDIENCES)
+    for r in readers:
+        line = next((ln for ln in region.splitlines() if ln.startswith(f"- **{r['who']}**")), None)
+        assert line is not None and f"]({r['page']}.md)" in line, r["audience"]
+    assert "Start here, by kind of reader" in region
+
+
+def test_home_keeps_its_hand_written_intro_and_path_table():
+    text = home_text()
+    start = text.index(gwn.HOME_BEGIN)
+    before = text[:start]
+    assert before.startswith("# Clouds Against Humanity\n")
+    assert "## Pick a path" in before and "| You are... | Start with | Then |" in before
+    assert "## Current state" in text[text.index(gwn.HOME_END):]
+
+
+def test_home_stays_inside_its_size_budget():
+    size = len(home_text().encode("utf-8"))
+    assert size <= HOME_SIZE_BUDGET, f"Home is {size} bytes, budget {HOME_SIZE_BUDGET}"
+
+
+def test_home_has_no_duplicate_heading_anchors():
+    anchors = [gwn.slug(mt.group(2)) for mt in HEADING.finditer(re.sub(r"```.*?```", "", home_text(), flags=re.DOTALL))]
+    dupes = sorted({a for a in anchors if anchors.count(a) > 1})
+    assert not dupes, f"duplicate Home anchors (GitHub would rename the second): {dupes}"
+
+
+def test_apply_home_map_rewrites_only_between_the_markers():
+    block = f"{gwn.HOME_BEGIN}\nNEW\n{gwn.HOME_END}"
+    text = f"intro\n\n{gwn.HOME_BEGIN}\nOLD\n{gwn.HOME_END}\n\ntail\n"
+    assert gwn.apply_home_map(text, block) == f"intro\n\n{block}\n\ntail\n"
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "no markers at all\n",
+        f"{gwn.HOME_BEGIN}\nonly a begin\n",
+        f"{gwn.HOME_END}\nend first\n{gwn.HOME_BEGIN}\n",
+        f"{gwn.HOME_BEGIN}\na\n{gwn.HOME_END}\n{gwn.HOME_BEGIN}\nb\n{gwn.HOME_END}\n",
+    ],
+)
+def test_missing_misordered_or_repeated_markers_are_refused(text):
+    with pytest.raises(ValueError, match="marker"):
+        gwn.apply_home_map(text, "x")
+
+
+def test_a_new_manifest_page_lands_in_the_home_map():
+    m = minimal()
+    m["pages"]["ref"].append({"page": "Zed", "title": "Zed", "audience": "everyone", "desc": "The last page."})
+    block = gwn.render_home_map(m)
+    assert "- [Zed](Zed.md): The last page." in block
+    assert "1. [One](One.md): The first page." in block
+    assert "- [Berry](Berry.md) (draft): Another page." in block
+
+
+def test_a_stale_or_unmarked_home_is_refused_by_check(tmp_path):
+    wiki = tmp_path / "docs" / "wiki"
+    wiki.mkdir(parents=True)
+    import yaml
+    m = minimal()
+    m["pages"]["start"].append({"page": "Contents", "title": "Contents", "audience": "everyone", "desc": "Index."})
+    (wiki / "_nav.yaml").write_text(yaml.safe_dump(m))
+    for name in ("One", "Apple", "Berry", "Contents"):
+        (wiki / f"{name}.md").write_text(f"# {name}\n")
+    (wiki / "Home.md").write_text("# Home\n\nno markers yet\n")
+    assert gwn.main(["--root", str(tmp_path)]) == 1  # no markers: the write is refused, nothing is invented
+    (wiki / "Home.md").write_text(f"# Home\n\nhand-written\n\n{gwn.HOME_BEGIN}\n{gwn.HOME_END}\n\nmore\n")
+    assert gwn.main(["--root", str(tmp_path)]) == 0
+    assert gwn.main(["--root", str(tmp_path), "--check"]) == 0
+    home = (wiki / "Home.md").read_text()
+    assert home.startswith("# Home\n\nhand-written\n\n") and home.endswith("\n\nmore\n") and "](Berry.md)" in home
+    (wiki / "Home.md").write_text(home.replace("](Berry.md)", "](Apple.md)"))
+    assert gwn.main(["--root", str(tmp_path), "--check"]) == 1
+
+
+def test_the_readers_block_must_cover_every_audience_once_with_known_pages():
+    m = minimal()
+    m["readers"] = [{"audience": "everyone", "who": "Anyone", "page": "Home"}]
+    joined = "\n".join(gwn.validate(m, MINIMAL_PAGES))
+    assert "readers: no start page for audience" in joined
+    m["readers"] = [{"audience": a, "who": a.title(), "page": "Nowhere"} for a in gwn.AUDIENCES] + [{"audience": "wizards", "who": "W", "page": "Home"}]
+    joined = "\n".join(gwn.validate(m, MINIMAL_PAGES))
+    assert "'Nowhere'" in joined and "wizards" in joined
+    m["readers"] = [{"audience": a, "who": a.title(), "page": "Home"} for a in gwn.AUDIENCES]
+    assert gwn.validate(m, MINIMAL_PAGES) == []
+    m["readers"].append({"audience": "builder", "who": "Again", "page": "Home"})
+    assert any("twice" in p for p in gwn.validate(m, MINIMAL_PAGES))
 
 
 # -- the checks bite --------------------------------------------------------------------------
@@ -461,6 +762,8 @@ def test_check_reports_a_stale_generated_file(tmp_path):
     (tmp_path / "docs" / "wiki").mkdir(parents=True)
     for name in ("Home", "One", "Apple", "Berry"):
         (tmp_path / "docs" / "wiki" / f"{name}.md").write_text(f"# {name}\n")
+    # Home carries the generated map between markers (issue #378); the fixture needs the pair.
+    (tmp_path / "docs" / "wiki" / "Home.md").write_text(f"# Home\n\n{gwn.HOME_BEGIN}\n{gwn.HOME_END}\n")
     m = minimal()
     import yaml
     (tmp_path / "docs" / "wiki" / "_nav.yaml").write_text(yaml.safe_dump(m))

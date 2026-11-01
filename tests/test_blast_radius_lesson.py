@@ -133,7 +133,8 @@ def test_glossary_defines_assume_breach_and_defense_in_depth():
 
 
 def test_at_least_four_existing_pages_link_the_lesson_at_first_use():
-    users = [p.name for p in WIKI.glob("*.md") if p != PAGE and p.name not in {"Glossary.md", "_Sidebar.md", "Reading-Order.md"} and PAGE.name in p.read_text()]
+    users = [p.name for p in WIKI.glob("*.md") if p != PAGE and p.name not in {"Glossary.md", "_Sidebar.md", "Reading-Order.md", "Home.md"} and PAGE.name in p.read_text()]
+    # Home.md is excluded like the other navigation pages: since issue #378 its generated map links every page.
     # 9, not 8: issue #230 added the required links from Droplet hardening and the threats lesson.
     assert 4 <= len(users) <= 9, users
 
