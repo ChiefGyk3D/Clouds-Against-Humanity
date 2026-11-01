@@ -60,10 +60,12 @@ module "workload_firewall" {
   resource_key = var.resource_key
   purpose      = "host"
   tag          = digitalocean_tag.workload[0].name
-  inbound_from_other_tags = [
+  # SSH and Portainer, then the optional workload web ports (workload_web.tf;
+  # empty by default), each from the connector tag.
+  inbound_from_other_tags = concat([
     { protocol = "tcp", port_range = local.ssh_port, tag = var.connector_tag },
     { protocol = "tcp", port_range = tostring(local.portainer_port), tag = var.connector_tag },
-  ]
+  ], local.workload_web_firewall_rules)
 }
 
 # user_data comes from the module's cloud-init: a change to it replaces the droplet.
