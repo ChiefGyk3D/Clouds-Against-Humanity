@@ -33,12 +33,12 @@ file does not match the manifest. -->
 </details>
 
 <details>
-<summary><b>Foundations: OS and Linux</b> (11)</summary>
+<summary><b>Foundations: OS and Linux</b> (12)</summary>
 
 - [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) (est. steps)
 - [The terminal and your first script](Terminal-and-Your-First-Script.md)
 - [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) (draft)
-- [Full list (11)](Contents.md#foundations-os-and-linux)
+- [Full list (12)](Contents.md#foundations-os-and-linux)
 
 </details>
 

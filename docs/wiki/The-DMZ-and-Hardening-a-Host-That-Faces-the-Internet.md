@@ -1,6 +1,6 @@
 # The DMZ, and hardening a host that faces the internet
 
-Side page to the security and defense pages. Read it after [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) (which asks what there is to attack) and the Plan for failure: blast radius and assuming breach page (which asks what a compromised machine can reach). This page takes the one machine that cannot avoid being reachable, and asks how to build it so that losing it is survivable. Neighbors: [Droplet hardening](Droplet-Hardening.md) (the same ideas on the private connectors) and [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md).
+Side page to the security and defense pages. Read it after [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) (which asks what there is to attack) and the Plan for failure: blast radius and assuming breach page (which asks what a compromised machine can reach). This page takes the one machine that cannot avoid being reachable, and asks how to build it so that losing it is survivable. Neighbors: [Droplet hardening](Droplet-Hardening.md) (the same ideas on the private connectors) and [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md). This page's Reticulum and Meshtastic services run over the internet; for the radio side of those names, and what a real radio fallback would need, see [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
