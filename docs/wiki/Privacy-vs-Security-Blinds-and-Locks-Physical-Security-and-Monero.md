@@ -41,7 +41,7 @@ Think of a house.
 
 Both protect the people inside. They are not the same job, and a house can have one without the other.
 
-| | Privacy (blinds) | Security (locks and alarm) |
+| Point | Privacy (blinds) | Security (locks and alarm) |
 |---|---|---|
 | The question | Who can see into my life, and what do they learn? | Who can get in, change things or break things? |
 | What a failure looks like | Someone knows what you did, where you were, who you talk to | Someone is in your account, your files or your building and can act |
@@ -117,7 +117,7 @@ The lesson on Tor and I2P (issue 358, not merged yet) covers hiding the network 
 
 Not legal advice, and not a summary of your law. Laws differ by country, by state and by what kind of data and organization you are. **Check your own jurisdiction**; if it matters, ask a lawyer or the regulator.
 
-The best-known example is the EU's General Data Protection Regulation (GDPR, Regulation (EU) 2016/679). The European Commission's page says it sets out "7 key principles" for processing personal data: lawfulness, fairness and transparency; purpose limitation; data minimisation; storage limitation; accuracy; integrity and confidentiality; accountability ([Overview of the principles](https://commission.europa.eu/law/law-topic/data-protection/rules-business-and-organisations/principles-gdpr_en), read 2026-10-31, citing Article 5 and Recital 39). Three bear on this lesson.
+The best-known example is the EU's General Data Protection Regulation (GDPR, Regulation (EU) 2016/679). The European Commission's page says it sets out "7 key principles" for processing personal data: lawfulness, fairness and transparency; purpose limitation; data minimization; storage limitation; accuracy; integrity and confidentiality; accountability ([Overview of the principles](https://commission.europa.eu/law/law-topic/data-protection/rules-business-and-organisations/principles-gdpr_en), read 2026-10-31, citing Article 5 and Recital 39). Three bear on this lesson.
 
 - **Purpose limitation.** An organization "may collect and otherwise process personal data only for a specific purpose, which must be indicated to individuals when obtaining their personal data." Data collected for one reason is not free for any other.
 - **Data minimization.** It "must collect and process only the personal data that is necessary to fulfil that purpose." This is the overlap point above, written as a rule.
@@ -162,7 +162,7 @@ Paper is the cheapest to forget. A shredder is a blind and a lock for a page.
 
 ## Why lockpicking is a common hobby in the field
 
-Many people in security pick locks as a hobby ("locksport"). The reasons are plain: a lock is a small, honest model of a security control. Learning how a mechanism can fail teaches you how to choose, test and replace one. The Open Organisation Of Lockpickers (TOOOL), a US nonprofit, puts its purpose as "advancing the general public knowledge about locks and lock picking through teaching, research, and competition" ([TOOOL home page](https://toool.us/), read 2026-10-31). It quotes A.C. Hobbs (1853): "If a lock is not so inviolable as it has hitherto been deemed to be, surely it is to the interest of honest persons to know this fact, because the dishonest are... certain to apply the knowledge practically", and a 2005 conference talk: "exposing bad security is what protects us all."
+Many people in security pick locks as a hobby ("locksport"). The reasons are plain: a lock is a small, honest model of a security control. Learning how a mechanism can fail teaches you how to choose, test and replace one. TOOOL, a US nonprofit lockpicking group (the name is an acronym on its own site), puts its purpose as "advancing the general public knowledge about locks and lock picking through teaching, research, and competition" ([TOOOL home page](https://toool.us/), read 2026-10-31). It quotes A.C. Hobbs (1853): "If a lock is not so inviolable as it has hitherto been deemed to be, surely it is to the interest of honest persons to know this fact, because the dishonest are... certain to apply the knowledge practically", and a 2005 conference talk: "exposing bad security is what protects us all."
 
 **The rules come before anything else.**
 
