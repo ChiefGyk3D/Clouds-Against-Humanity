@@ -339,7 +339,7 @@ test_allowlists_are_empty_by_default if {
 	count(spacelift.address_groups) == 0
 
 	# destroy_allowlist is pinned by its own test further down (issue #450),
-	# not here.
+	# test_destroy_allowlist_is_empty.
 	count(spacelift.whole_service_teardown_stacks) == 0
 }
 
@@ -675,17 +675,13 @@ test_destroy_group_covers_members_in_its_stack_only if {
 	count(in_b) == 2
 }
 
-# Teardown of cah-10-access (issue #450). The shipped destroy_allowlist holds
-# exactly the two addresses the destroy plan shows for that stack, and nothing
-# else. While the teardown is under way, test_destroy_allowlist_is_exactly_teardown_list
-# pins it. No skipped test is used (opa test exits 2 on a skipped test).
-#
-# The follow-up pull request that empties the allowlist deletes that test, adds
-# test_destroy_allowlist_is_empty (count(spacelift.destroy_allowlist) == 0) and
-# sets destroy_allowlist := {} in plan.rego. tests/test_destroy_allowlist_pins.py
-# checks the test names against the shipped allowlist in both directions, so
-# the allowlist cannot be left filled after the teardown, nor emptied without
-# the flip.
+# Teardown of cah-10-access (issue #450) has applied, so the shipped
+# destroy_allowlist is empty again and test_destroy_allowlist_is_empty pins it.
+# The two teardown addresses below are still exercised by overriding the
+# allowlist in the test, so the keyed allowance keeps its coverage. No skipped
+# test is used (opa test exits 2 on a skipped test).
+# tests/test_destroy_allowlist_pins.py checks the test names against the
+# shipped allowlist in both directions.
 
 access_stack := "cah-10-access"
 
@@ -695,8 +691,8 @@ access_firewall := "module.connector_firewall.digitalocean_firewall.this"
 
 teardown_list := {access_stack: [access_network, access_firewall]}
 
-test_destroy_allowlist_is_exactly_teardown_list if {
-	spacelift.destroy_allowlist == teardown_list
+test_destroy_allowlist_is_empty if {
+	count(spacelift.destroy_allowlist) == 0
 }
 
 access_teardown := [
@@ -706,8 +702,15 @@ access_teardown := [
 	delete_of("module.connector_b.digitalocean_droplet.connector", "digitalocean_droplet", {"id": "2", "tags": ["cah-connector-nyc3"]}),
 ]
 
-test_access_teardown_is_allowed_in_access_stack if {
-	count(denied_on(access_stack, access_teardown)) == 0
+# With the teardown list supplied (it is not shipped), the access stack's
+# teardown passes; with the shipped empty list it is denied.
+test_access_teardown_is_allowed_in_access_stack_when_listed if {
+	reasons := spacelift.deny with input as on_stack(access_stack, access_teardown) with data.spacelift.destroy_allowlist as teardown_list
+	count(reasons) == 0
+}
+
+test_access_teardown_is_denied_in_access_stack_with_shipped_allowlist if {
+	count(denied_on(access_stack, access_teardown)) == 2
 }
 
 # The allowlist is keyed by stack: the same addresses elsewhere stay denied.

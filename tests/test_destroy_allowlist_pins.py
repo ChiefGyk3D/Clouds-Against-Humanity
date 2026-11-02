@@ -1,7 +1,7 @@
 """The destroy allowlist in plan.rego is pinned, and cannot be left filled.
 
-Issue #450 adds two addresses to destroy_allowlist for the cah-10-access
-teardown. plan_test.rego pins the allowlist by test name, in both directions:
+Issue #450 added two addresses to destroy_allowlist for the cah-10-access
+teardown and then emptied it again (the shipped state). plan_test.rego pins the allowlist by test name, in both directions:
 
   - allowlist filled: plan_test.rego has test_destroy_allowlist_is_exactly_teardown_list
     (matching the shipped entries) and no test_destroy_allowlist_is_empty;
@@ -103,7 +103,10 @@ TESTS_EMPTY = f"{EMPTY} if {{\n\tcount(spacelift.destroy_allowlist) == 0\n}}\n"
 
 def test_shipped_allowlist_and_tests_agree():
     policy, tests = POLICY.read_text(), POLICY_TESTS.read_text()
-    assert parse_allowlist(policy), "no destroy_allowlist entries were parsed"
+    # Shipped state after the #450 teardown: empty, pinned by the empty test.
+    assert parse_allowlist(policy) == {}
+    assert has_test(tests, EMPTY)
+    assert not has_test(tests, EXACT)
     assert problems(policy, tests) == []
 
 
@@ -113,7 +116,7 @@ def test_shipped_policy_tests_have_no_skipped_test():
 
 def test_allowlist_names_each_address_once():
     allowlist = parse_allowlist(POLICY.read_text())
-    for addresses in allowlist.values():
+    for addresses in [*allowlist.values(), *TEARDOWN.values()]:
         assert len(addresses) == len(set(addresses))
 
 
