@@ -4,9 +4,10 @@
 It answers the questions the lesson lists, for an origin on THIS machine only:
 
   1. Does the origin listen on anything but loopback?
-  2. Do the response headers name the software, a version, a proxy or an address?
+  2. Do the response headers (the front page, a missing page and every probe path) carry a version, an operating system,
+     a proxy hint or an address? A Server header that names only the software is listed for review, not failed.
   3. Does the page load or embed anything from another host, or write an address into its text?
-  4. Do the usual status and debug paths answer?
+  4. Do the usual status and debug paths answer with a 2xx or 3xx status?
 
 It sends plain GET requests to a loopback address and reads `ss -ltn`. It refuses any other target, never touches Tor or I2P,
 and changes nothing. A clean run proves only that these four checks found nothing; it does not prove the service is safe.
@@ -105,6 +106,20 @@ def header_problems(headers):
     return problems
 
 
+def server_review(headers):
+    """Review lines for a Server header that names the software without a version.
+
+    A bare name such as `nginx` is what a stock server sends even with its version hidden, so it is listed for the
+    reader to judge and is not a failure. A version or an operating system is already a failure in header_problems,
+    so it is left out here."""
+    lines = []
+    for name, value in headers:
+        value = value.strip()
+        if name.lower() == "server" and value and not (VERSIONED.search(value) or "(" in value):
+            lines.append(f"header Server names the software: {value}")
+    return lines
+
+
 class Scan(html.parser.HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
@@ -158,7 +173,8 @@ def outbound_links(body):
 
 
 def exposed_paths(results):
-    return sorted(path for path, status in results.items() if status == 200 and path != "/")
+    """Paths whose status is 2xx or 3xx: the page answers, or redirects somewhere (a redirect still tells a visitor the path exists)."""
+    return sorted(path for path, status in results.items() if 200 <= status < 400 and path != "/")
 
 
 def fetch(host, port, path):
@@ -207,14 +223,19 @@ def main(argv=None):
         for link in outbound_links(body):
             print(f"[REVIEW] the page links out to {link} (a click sends a referrer and ends the session's cover)")
         _, miss_headers, _ = fetch(args.host, args.port, "/no-such-page")
-        problems += [p for p in header_problems(miss_headers) if p not in problems]
-        results = {path: fetch(args.host, args.port, path)[0] for path in PROBE_PATHS}
+        probes = {path: fetch(args.host, args.port, path) for path in PROBE_PATHS}
     except OSError as err:
         print(f"check_origin: could not reach the origin: {err}")
         return 2
-    problems += [f"the path {p} answers 200" for p in exposed_paths(results)]
+    responses = [headers, miss_headers] + [probe[1] for probe in probes.values()]
+    problems += [p for p in dict.fromkeys(q for h in responses[1:] for q in header_problems(h)) if p not in problems]
+    reviews = list(dict.fromkeys(line for h in responses for line in server_review(h)))
+    results = {path: probe[0] for path, probe in probes.items()}
+    problems += [f"the path {p} answers {results[p]}" for p in exposed_paths(results)]
     if status != 200:
         problems.append(f"the front page answered {status}, not 200")
+    for line in reviews:
+        print(f"[REVIEW] {line} (no version, so not a failure; hide it if your server can)")
     for p in problems:
         print(f"[FAIL] {p}")
     print(f"{len(problems)} problems")

@@ -1313,12 +1313,12 @@
       {
         "name": "portainer_version",
         "type": "string",
-        "description": "Exact Portainer CE image tag, an LTS release from Portainer's releases page (read 2026-10-31). Bumped in a reviewed change, which replaces the droplet.",
+        "description": "Portainer CE image reference after portainer/portainer-ce:, pinned by exact tag and by digest (2.45.3, an LTS release from Portainer's releases page read 2026-10-31; the multi-arch index digest read from Docker Hub on 2026-11-02). Bumped in a reviewed change, which replaces the droplet.",
         "required": false,
-        "default": "2.45.3",
-        "validation": "an exact version such as 2.45.3; never latest, a range or a variant",
+        "default": "2.45.3@sha256:3609c307943bca8e5c492f69ddd6965df177208b50678a4cff28391c8dd4e96e",
+        "validation": "<exact version>@sha256:<64 hex digits>, such as 2.45.3@sha256:...; never latest, a range, a variant or a tag without its digest",
         "set_where": "tfvars (local plans) or Spacelift stack environment (TF_VAR_*)",
-        "example": "2.45.3",
+        "example": "2.45.3@sha256:3609c307943bca8e5c492f69ddd6965df177208b50678a4cff28391c8dd4e96e",
         "sensitivity": "public",
         "sensitive_in_code": false,
         "status": "exists"
@@ -2358,12 +2358,12 @@
       {
         "name": "portainer_version",
         "type": "string",
-        "description": "Exact Portainer CE image tag (an LTS release, read 2026-10-31). Never latest or a range. Bumping it replaces the droplet.",
+        "description": "Portainer CE image reference after portainer/portainer-ce:, pinned by exact tag and by digest (2.45.3, an LTS release read 2026-10-31; the multi-arch index digest read from Docker Hub on 2026-11-02). Never latest or a range. Bumping it replaces the droplet.",
         "required": false,
-        "default": "2.45.3",
-        "validation": "an exact version such as 2.45.3; never latest, a range or a variant",
+        "default": "2.45.3@sha256:3609c307943bca8e5c492f69ddd6965df177208b50678a4cff28391c8dd4e96e",
+        "validation": "<exact version>@sha256:<64 hex digits>, such as 2.45.3@sha256:...; never latest, a range, a variant or a tag without its digest",
         "set_where": "set by the calling stack (not a user setting)",
-        "example": "2.45.3",
+        "example": "2.45.3@sha256:3609c307943bca8e5c492f69ddd6965df177208b50678a4cff28391c8dd4e96e",
         "sensitivity": "public",
         "sensitive_in_code": false,
         "status": "exists"

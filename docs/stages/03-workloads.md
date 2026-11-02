@@ -37,7 +37,7 @@ The order is the one every stage guide states: update, baseline, harden, then ap
 - **Baseline.** User `cah-admin`, one public key, no password, root locked. sshd: no root login, no password login, `AllowUsers cah-admin`.
 - **Harden.** `sshd -t && systemctl restart ssh` runs before anything is installed.
 - **Docker Engine** from Docker's apt repository. The key file must hold exactly one key and its fingerprint must equal the pin (`docker_apt_key_fingerprint`) before the repository is trusted. `daemon.json`: `live-restore`, capped `json-file` logs, default bind address `127.0.0.1`, and **no `hosts` key**, so the Docker API is the local socket and nothing else.
-- **Portainer CE**, pinned to an exact tag (`portainer_version`), from a compose file owned by cloud-init. Its one published port is `${PORTAINER_BIND:?}:9443:9443`, where the address is the droplet's private VPC address read from the metadata endpoint. If there is no private address nothing starts: there is no wildcard fallback. Memory limit and `no-new-privileges` are set.
+- **Portainer CE**, pinned to an exact tag and image digest (`portainer_version`), from a compose file owned by cloud-init. Its one published port is `${PORTAINER_BIND:?}:9443:9443`, where the address is the droplet's private VPC address read from the metadata endpoint. If there is no private address nothing starts: there is no wildcard fallback. Memory limit and `no-new-privileges` are set.
 - **No credential in user-data.** User-data is readable from the metadata endpoint and ends up in state. The daemons' credentials stay in Doppler (design section 6).
 
 ## 4. Before the switch can be turned on

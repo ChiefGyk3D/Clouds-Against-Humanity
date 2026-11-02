@@ -153,7 +153,7 @@ write_files:
           "max-file": "3"
         }
       }
-  # Portainer CE, pinned to an exact tag. The only published port is bound to
+  # Portainer CE, pinned to an exact tag and an image digest. The only published port is bound to
   # the droplet's private VPC address, which cah-portainer-up writes to .env;
   # ":?" makes compose refuse to start when it is unset, so there is no wildcard
   # fallback. Port 8000 (the Edge agent tunnel) and 9000 (plain HTTP) are not

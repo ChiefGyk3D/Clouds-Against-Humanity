@@ -1640,17 +1640,66 @@ def droplet_backup_problems(rel, block):
     return found
 
 
+HCL_WORD_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_-]*")
+# A provisioner block header after the word: an optional label, then the brace.
+# HCL needs no whitespace between a keyword and a quoted label, between two quoted
+# labels, or before the brace; whitespace is required only before a bare label.
+_WS = r"[ \t\r]*"
+_WS1 = r"[ \t\r]+"
+_QUOTED = r'"[^"\n]*"'
+_BARE = r"[A-Za-z_][A-Za-z0-9_-]*"
+PROVISIONER_TAIL_RE = re.compile(rf"(?:{_WS}{_QUOTED}|{_WS1}{_BARE})?{_WS}\{{")
+# `data "external" "name" {` after the word `data`, in any legal spacing. The first
+# label may be quoted (a backslash in it could spell "external" as an escape, so any
+# escaped first label is treated as external) or bare.
+_EXTERNAL_LABEL = rf'(?:{_WS}"(?:external|[^"\n]*\\[^"\n]*)"|{_WS1}external(?![A-Za-z0-9_-]))'
+# The second label is optional here: a malformed header is refused too (fail closed).
+EXTERNAL_DATA_TAIL_RE = re.compile(rf"{_EXTERNAL_LABEL}(?:{_WS}{_QUOTED}|{_WS}{_BARE})?{_WS}\{{")
+
+
+def run_hook_problems(rel, text):
+    """Provisioner blocks (local-exec, remote-exec, file) and external data
+    sources, wherever they sit. They run commands at apply or plan time, which
+    the gate can neither read nor cost, so each one fails the gate. Quoted
+    strings are skipped and comments and heredocs are already stripped, so the
+    words only count where the configuration is code."""
+    found, i, n = [], 0, len(text)
+    while i < n:
+        if text[i] == '"':
+            i = skip_string(text, i)
+            continue
+        word = HCL_WORD_RE.match(text, i)
+        if not word:
+            i += 1
+            continue
+        line = text.count("\n", 0, i) + 1
+        if word.group(0) == "provisioner" and PROVISIONER_TAIL_RE.match(text, word.end()):
+            found.append(
+                f"{rel}:{line}: a provisioner block runs commands at apply time and is "
+                "refused; the gate cannot read or cost what it does"
+            )
+        elif word.group(0) == "data" and EXTERNAL_DATA_TAIL_RE.match(text, word.end()):
+            found.append(
+                f"{rel}:{line}: an external data source runs a program at plan time and "
+                "is refused; the gate cannot read or cost what it does"
+            )
+        i = word.end()
+    return found
+
+
 def block_problems(root):
     """Everything wrong with how the files themselves read: unreadable HCL,
-    escapes in labels, headers the scanner does not understand, and count or
+    escapes in labels, headers the scanner does not understand, count or
     for_each on a costed resource (the manifest cannot be reconciled with it
-    without a plan)."""
+    without a plan), and provisioners or external data sources anywhere."""
     problems = []
     costed = set().union(*COSTED_TYPES.values())
     for rel, text, error in hcl_files(root):
         if error:
             problems.append(f"{rel}: unreadable HCL, refused: {error}")
             continue
+        if not lab_file(root, rel):
+            problems += run_hook_problems(rel, text)
         try:
             blocks = find_blocks(text)
         except HclError as err:

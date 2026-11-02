@@ -19,7 +19,10 @@ services:
     image: docker.io/searxng/searxng:2026.11.1-8b35dcd2e@sha256:4b106e61eeb9e216ac96c85591338c1e9ceb5a84c26f72cd18b8ba8f0f52093c
     restart: unless-stopped
     depends_on:
-      - valkey
+      valkey:
+        condition: service_started
+      bind-check:
+        condition: service_completed_successfully
     ports:
       - "${SEARXNG_BIND:?set SEARXNG_BIND to the host private address}:8080:8080"
     environment:
@@ -37,6 +40,28 @@ services:
       - no-new-privileges:true
     networks:
       - frontend
+      - backend
+
+  # Runs once before core and exits. It refuses a SEARXNG_BIND that is not a private IPv4 address (10/8, 172.16/12,
+  # 192.168/16, or 127/8 for a laptop), so core, which waits for it, never publishes its port on a wildcard or a public
+  # address. It uses the cache image, which already has a shell, and it publishes nothing.
+  bind-check:
+    container_name: searxng-bind-check
+    image: docker.io/valkey/valkey:9.1.3-alpine@sha256:bf09d58e96d6b4524a15396b65b242bbe18beebbcc15a04d8ee75ddac62fae0b
+    entrypoint:
+      - /bin/sh
+      - -c
+      - 'case "$$SEARXNG_BIND" in *[!0-9.]*|"") echo "SEARXNG_BIND must be a private IPv4 address" >&2; exit 1;; 10.*|127.*|192.168.*|172.1[6-9].*|172.2[0-9].*|172.3[01].*) exit 0;; *) echo "SEARXNG_BIND must be a private IPv4 address" >&2; exit 1;; esac'
+    environment:
+      SEARXNG_BIND: ${SEARXNG_BIND:?set SEARXNG_BIND to the host private address}
+    restart: "no"
+    mem_limit: 16m
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks:
       - backend
 
   valkey:

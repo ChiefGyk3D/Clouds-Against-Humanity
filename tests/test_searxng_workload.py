@@ -7,6 +7,7 @@ public instance flag would each make a private search proxy into something else,
 """
 
 import re
+import subprocess
 import tomllib
 from pathlib import Path
 
@@ -139,16 +140,101 @@ def test_the_workload_files_exist():
         assert p.is_file(), p
 
 
-def test_the_compose_file_parses_and_has_the_two_services():
+def test_the_compose_file_parses_and_has_the_services():
     compose = load()
-    assert set(compose["services"]) == {"core", "valkey"}
+    assert set(compose["services"]) == {"core", "valkey", "bind-check"}
     assert compose["networks"]["backend"]["internal"] is True
 
 
 def test_every_image_is_pinned_by_tag_and_digest():
     refs = images(load())
-    assert len(refs) == 2, "the guard collected too little"
+    assert len(refs) == 3, "the guard collected too little"
     assert not unpinned(load()), unpinned(load())
+
+
+# ---- the bind check: a pre-start step that refuses an address that is not private ------------------------------
+
+
+def bind_check_script(compose: dict) -> str:
+    """The shell text the bind-check service runs, as the shell sees it ($$ is compose's escape for $)."""
+    entry = compose["services"]["bind-check"]["entrypoint"]
+    assert entry[:2] == ["/bin/sh", "-c"] and len(entry) == 3, entry
+    return entry[2].replace("$$", "$")
+
+
+def run_bind_check(script: str, value: str) -> int:
+    done = subprocess.run(["/bin/sh", "-c", script], check=False, env={"SEARXNG_BIND": value, "PATH": "/usr/bin:/bin"}, capture_output=True, text=True, timeout=10)
+    return done.returncode
+
+
+def bind_check_wiring_problems(compose: dict) -> list[str]:
+    bad = []
+    svc = compose["services"].get("bind-check")
+    if svc is None:
+        return ["no bind-check service"]
+    if "restart" not in svc or str(svc["restart"]).strip('"') != "no":
+        bad.append("bind-check restarts")
+    if not REQUIRED_VAR.match(str(svc.get("environment", {}).get("SEARXNG_BIND", ""))):
+        bad.append("bind-check does not require SEARXNG_BIND")
+    if svc.get("ports"):
+        bad.append("bind-check publishes ports")
+    deps = compose["services"]["core"].get("depends_on", {})
+    if not isinstance(deps, dict) or deps.get("bind-check", {}).get("condition") != "service_completed_successfully":
+        bad.append("core does not wait for bind-check to complete successfully")
+    return bad
+
+
+PRIVATE_BINDS = ("10.116.0.5", "10.0.0.1", "192.168.1.20", "172.16.0.2", "172.31.255.1", "127.0.0.1")
+REFUSED_BINDS = (
+    "0.0.0.0",
+    "::",
+    "[::]",
+    "",
+    "8.8.8.8",
+    "172.15.0.1",
+    "172.32.0.1",
+    "192.169.0.1",
+    "100.64.0.1",
+    "10.0.0.1:9999",
+    "10.0.0.1 ",
+    "10.0.0.1,0.0.0.0",
+    "10.example.com",
+    "localhost",
+)
+
+
+def test_the_bind_check_accepts_private_addresses_and_refuses_the_rest():
+    script = bind_check_script(load())
+    for value in PRIVATE_BINDS:
+        assert run_bind_check(script, value) == 0, value
+    for value in REFUSED_BINDS:
+        assert run_bind_check(script, value) != 0, repr(value)
+
+
+def test_the_bind_check_blocks_core_and_publishes_nothing():
+    assert bind_check_wiring_problems(load()) == []
+
+
+def test_the_bind_check_guard_bites():
+    compose = load()
+    script = bind_check_script(compose)
+    # A check that accepts everything, or one that lets a wildcard through, fails the refused list.
+    assert run_bind_check("exit 0", "0.0.0.0") == 0
+    loose = script.replace("10.*", "*", 1)
+    assert loose != script and run_bind_check(loose, "0.0.0.0") == 0
+    # The wiring guard sees each way of letting core start without the check.
+    for mutate in (
+        lambda c: c["services"]["core"].update(depends_on={"valkey": {"condition": "service_started"}}),
+        lambda c: c["services"]["core"].update(depends_on=["valkey", "bind-check"]),
+        lambda c: c["services"]["core"]["depends_on"]["bind-check"].update(condition="service_started"),
+        lambda c: c["services"]["bind-check"].update(restart="unless-stopped"),
+        lambda c: c["services"]["bind-check"]["environment"].update(SEARXNG_BIND="10.0.0.1"),
+        lambda c: c["services"]["bind-check"].update(ports=["10.0.0.1:1:1"]),
+        lambda c: c["services"].pop("bind-check"),
+    ):
+        bad = yaml.safe_load(yaml.safe_dump(compose))
+        mutate(bad)
+        assert bind_check_wiring_problems(bad), mutate
 
 
 def test_the_pins_guard_bites():
