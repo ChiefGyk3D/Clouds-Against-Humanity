@@ -285,6 +285,7 @@ Here is what it prints against the two small servers this page's tests start on 
 ```
 check_origin: 127.0.0.1:8080
 [REVIEW] something listens on every interface: 0.0.0.0:22 (is it supposed to?)
+[REVIEW] header Server names the software: nginx (no version, so not a failure; hide it if your server can)
 0 problems
 ```
 
@@ -303,7 +304,7 @@ check_origin: 127.0.0.1:8080
 6 problems
 ```
 
-The `[REVIEW]` lines are not failures: SSH on port 22 is a listener you may well want, and the script cannot know. A clean run proves only that these four checks found nothing. It does not prove the service is safe.
+The `[REVIEW]` lines are not failures: SSH on port 22 is a listener you may well want, and the script cannot know; a `Server` header that says only `nginx` names the software without a version, which a stock nginx still sends with `server_tokens off`, so it is listed for you to judge. The script reads the headers of every response it gets, including the probe paths, and counts a status of 2xx or 3xx on a probe path as an answer, because a redirect also tells a visitor the path exists. A clean run proves only that these four checks found nothing. It does not prove the service is safe.
 
 ### Step 6: tear it down
 

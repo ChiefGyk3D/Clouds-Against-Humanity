@@ -201,8 +201,16 @@ run "twingate_gets_one_resource_per_port_and_nothing_else" {
     error_message = "Both resources live in the given remote network."
   }
   assert {
-    condition     = length(regexall("\"twingate_resource\"", file("${path.module}/main.tf"))) == 2
-    error_message = "Exactly two Twingate resources: no Docker API resource, ever."
+    condition     = length(regexall("\"twingate_resource\"", file("${path.module}/main.tf"))) + length(regexall("\"twingate_resource\"", file("${path.module}/workload_web.tf"))) + length(regexall("\"twingate_resource\"", file("${path.module}/outputs.tf"))) + length(regexall("\"twingate_resource\"", file("${path.module}/variables.tf"))) == 3
+    error_message = "Exactly three Twingate resource blocks across the stack's files (ssh and Portainer in main.tf, the for_each web resource in workload_web.tf): no Docker API resource, ever."
+  }
+  assert {
+    condition     = length(setintersection(twingate_resource.ssh[0].protocols.tcp.ports, toset(["2375", "2376"]))) == 0 && length(setintersection(twingate_resource.portainer[0].protocols.tcp.ports, toset(["2375", "2376"]))) == 0
+    error_message = "No planned Twingate resource may allow the Docker API ports 2375 or 2376."
+  }
+  assert {
+    condition     = length(regexall("(?i)2375|2376|ALLOW_ALL|[01]\\s*-\\s*65535", file("${path.module}/main.tf"))) + length(regexall("(?i)2375|2376|ALLOW_ALL|[01]\\s*-\\s*65535", file("${path.module}/workload_web.tf"))) == 0
+    error_message = "No rule in the stack may allow the Docker API ports or every port."
   }
 }
 
@@ -288,6 +296,14 @@ run "a_floating_portainer_version_is_refused" {
   expect_failures = [var.portainer_version]
 }
 
+run "a_portainer_tag_without_a_digest_is_refused" {
+  command = plan
+  variables {
+    portainer_version = "2.45.3"
+  }
+  expect_failures = [var.portainer_version]
+}
+
 # --- the optional onion service flag (issue #391; default off, nothing applied) --
 
 run "the_onion_flag_defaults_to_off_and_the_effective_output_is_false" {
@@ -341,7 +357,7 @@ run "the_onion_flag_with_the_master_switch_changes_no_firewall_rule" {
     error_message = "The onion flag must not add, remove or widen any firewall rule."
   }
   assert {
-    condition     = length(regexall("\"twingate_resource\"", file("${path.module}/main.tf"))) == 2
+    condition     = length(regexall("\"twingate_resource\"", file("${path.module}/main.tf"))) + length(regexall("\"twingate_resource\"", file("${path.module}/workload_web.tf"))) == 3
     error_message = "The onion flag adds no Twingate resource."
   }
 }

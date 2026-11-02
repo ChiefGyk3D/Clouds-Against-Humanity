@@ -167,17 +167,66 @@ def test_the_firewall_check_bites():
         assert firewall_problems(bad), "a widened firewall was not noticed"
 
 
-def test_exactly_two_twingate_resources_and_never_a_docker_api_one():
-    main = strip_comments(read(STACK / "main.tf"))
-    found = blocks(main, "resource")
-    twingate = [labels for labels, _ in found if labels[0] == "twingate_resource"]
-    assert sorted(twingate) == [["twingate_resource", "portainer"], ["twingate_resource", "ssh"]]
-    assert "2375" not in main and "2376" not in main
-    for labels, body in found:
-        if labels[0] == "twingate_resource":
-            assert re.search(r'policy\s*=\s*"RESTRICTED"', body)
-            assert re.search(r'udp\s*=\s*\{\s*policy\s*=\s*"DENY_ALL"', body)
-            assert re.search(r"allow_icmp\s*=\s*false", body)
+EXPECTED_TWINGATE = [
+    ["twingate_resource", "portainer"],
+    ["twingate_resource", "ssh"],
+    ["twingate_resource", "workload_web"],
+]
+# A rule that opens the Docker API ports or every port.
+OPEN_PORT_RE = re.compile(r'2375|2376|ALLOW_ALL|\b[01]\s*-\s*65535|"all"|"\*"', re.IGNORECASE)
+
+
+def stack_texts():
+    """{file name: comment-free text} of every .tf file in the stack directory."""
+    return {
+        path.name: strip_comments(read(path))
+        for path in sorted(STACK.glob("*.tf"))
+        if ".terraform" not in path.parts
+    }
+
+
+def twingate_problems(texts):
+    """Every Twingate resource of every file: the set must be the expected one,
+    each narrow (TCP restricted, UDP denied, no ICMP), and no file may name the
+    Docker API ports or an all-ports rule."""
+    problems = []
+    found = []
+    for name, text in texts.items():
+        for labels, body in blocks(text, "resource"):
+            if labels[0] == "twingate_resource":
+                found.append(labels)
+                for needle in (r'policy\s*=\s*"RESTRICTED"', r'udp\s*=\s*\{\s*policy\s*=\s*"DENY_ALL"', r"allow_icmp\s*=\s*false"):
+                    if not re.search(needle, body):
+                        problems.append(f"{name}: {labels[1]} lacks {needle}")
+        if OPEN_PORT_RE.search(text):
+            problems.append(f"{name}: names a Docker API port or an all-ports rule")
+    if sorted(found) != EXPECTED_TWINGATE:
+        problems.append(f"Twingate resources are {sorted(found)}, expected {EXPECTED_TWINGATE}")
+    return problems
+
+
+def test_the_twingate_resources_of_every_file_are_the_expected_narrow_three():
+    texts = stack_texts()
+    assert {"main.tf", "workload_web.tf", "variables.tf", "outputs.tf"} <= set(texts), "the scan lost its files"
+    assert twingate_problems(texts) == []
+
+
+def test_the_twingate_check_sees_a_resource_in_any_file_and_open_ports():
+    texts = stack_texts()
+    extra = 'resource "twingate_resource" "extra" {\n  protocols = {}\n}\n'
+    assert twingate_problems({**texts, "another.tf": extra})
+    assert twingate_problems({**texts, "main.tf": texts["main.tf"] + extra})
+    web = texts["workload_web.tf"]
+    for bad in (
+        web.replace('policy = "RESTRICTED"', 'policy = "ALLOW_ALL"', 1),
+        web.replace("ports  = [each.key]", 'ports  = ["2375"]', 1),
+        web.replace("ports  = [each.key]", 'ports  = ["2376"]', 1),
+        web.replace("ports  = [each.key]", 'ports  = ["1-65535"]', 1),
+        web.replace("ports  = [each.key]", 'ports  = ["0-65535"]', 1),
+        web.replace("allow_icmp = false", "allow_icmp = true", 1),
+    ):
+        assert twingate_problems({**texts, "workload_web.tf": bad}), bad[-200:]
+    assert twingate_problems({k: v for k, v in texts.items() if k != "workload_web.tf"})
 
 
 def test_the_stack_has_no_wildcard_anywhere():
@@ -210,6 +259,36 @@ def test_the_module_pins_portainer_and_never_pipes_an_installer():
     assert "get.docker.com" not in template
     assert not re.search(r"curl[^\n]*\|\s*(ba)?sh", template)
     assert "cah-apt-key-check /root/docker.gpg.key" in template
+
+
+PINNED_PORTAINER_RE = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+@sha256:[0-9a-f]{64}$")
+
+
+def portainer_pin_problems(variables):
+    """The portainer_version default and validation must both demand tag plus digest."""
+    found = [b for b in blocks(strip_comments(variables), "variable") if b[0] == ["portainer_version"]]
+    if len(found) != 1:
+        return ["portainer_version variable missing"]
+    body = found[0][1]
+    problems = []
+    default = re.search(r'(?m)^\s*default\s*=\s*"([^"]*)"\s*$', body)
+    if not default or not PINNED_PORTAINER_RE.match(default.group(1)):
+        problems.append("the default is not <version>@sha256:<64 hex>")
+    if "@sha256:[0-9a-f]{64}$" not in body:
+        problems.append("the validation does not demand a digest")
+    return problems
+
+
+def test_portainer_is_pinned_by_tag_and_digest_in_the_module_and_the_stack():
+    for path in (MODULE / "variables.tf", STACK / "variables.tf"):
+        assert portainer_pin_problems(read(path)) == [], path.as_posix()
+
+
+def test_the_portainer_pin_check_bites():
+    good = read(MODULE / "variables.tf")
+    tag_only = good.replace("@sha256:3609c307943bca8e5c492f69ddd6965df177208b50678a4cff28391c8dd4e96e", "", 1)
+    assert portainer_pin_problems(tag_only)
+    assert portainer_pin_problems(good.replace("@sha256:[0-9a-f]{64}$", "$", 1))
 
 
 def test_the_module_droplet_leaves_backups_off_and_has_no_public_v6():

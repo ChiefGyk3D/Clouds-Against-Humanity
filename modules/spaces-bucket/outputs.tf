@@ -28,9 +28,3 @@ output "access_keys" {
   sensitive   = true
   description = "Access key ids by key name. Sensitive: an id identifies a credential."
 }
-
-output "secret_keys" {
-  value       = { for k, v in digitalocean_spaces_key.this : k => v.secret_key }
-  sensitive   = true
-  description = "Secret keys by key name. Sensitive. They are also in OpenTofu state; store them in Doppler and do not print them."
-}

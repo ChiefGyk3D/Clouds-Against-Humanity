@@ -144,8 +144,8 @@ run "the_docker_daemon_has_no_network_socket_and_binds_loopback_by_default" {
 run "portainer_is_pinned_bound_to_the_private_address_and_limited" {
   command = plan
   assert {
-    condition     = strcontains(digitalocean_droplet.workload.user_data, "image: portainer/portainer-ce:2.45.3")
-    error_message = "Portainer CE must be pinned to an exact version tag."
+    condition     = strcontains(digitalocean_droplet.workload.user_data, "image: portainer/portainer-ce:2.45.3@sha256:3609c307943bca8e5c492f69ddd6965df177208b50678a4cff28391c8dd4e96e")
+    error_message = "Portainer CE must be pinned to an exact version tag and to its image digest."
   }
   assert {
     condition     = strcontains(digitalocean_droplet.workload.user_data, "- \"$${PORTAINER_BIND:?}:9443:9443\"")
@@ -207,7 +207,39 @@ run "latest_is_not_a_portainer_version" {
 run "a_range_is_not_a_portainer_version" {
   command = plan
   variables {
-    portainer_version = "2.45"
+    portainer_version = "2.45@sha256:3609c307943bca8e5c492f69ddd6965df177208b50678a4cff28391c8dd4e96e"
+  }
+  expect_failures = [var.portainer_version]
+}
+
+run "a_tag_without_a_digest_is_not_a_portainer_version" {
+  command = plan
+  variables {
+    portainer_version = "2.45.3"
+  }
+  expect_failures = [var.portainer_version]
+}
+
+run "a_short_or_uppercase_digest_is_not_a_portainer_version" {
+  command = plan
+  variables {
+    portainer_version = "2.45.3@sha256:3609c307943bca8e5c492f69ddd6965df177208b50678a4cff28391c8dd4e96"
+  }
+  expect_failures = [var.portainer_version]
+}
+
+run "a_digest_alone_is_not_a_portainer_version" {
+  command = plan
+  variables {
+    portainer_version = "@sha256:3609c307943bca8e5c492f69ddd6965df177208b50678a4cff28391c8dd4e96e"
+  }
+  expect_failures = [var.portainer_version]
+}
+
+run "a_second_image_reference_is_not_a_portainer_version" {
+  command = plan
+  variables {
+    portainer_version = "2.45.3@sha256:3609c307943bca8e5c492f69ddd6965df177208b50678a4cff28391c8dd4e96e\n  other: image"
   }
   expect_failures = [var.portainer_version]
 }

@@ -17,7 +17,7 @@ import re
 import sys
 from pathlib import Path
 
-from onion_lab_fixtures import Clean, Leaky, serving
+from onion_lab_fixtures import Clean, Leaky, Redirecting, serving
 
 ROOT = Path(__file__).resolve().parent.parent
 LAB = ROOT / "labs" / "onion-lab"
@@ -332,11 +332,49 @@ def test_the_body_check_flags_clearnet_resources_and_names_links_for_review():
     assert c.outbound_links('<a href="https://example.test/">out</a><a href="/in">in</a>') == ["https://example.test/"]
 
 
-def test_the_status_page_check_flags_a_200_and_nothing_else():
+def test_a_bare_server_name_is_listed_for_review_and_a_version_is_a_failure():
+    c = load_checker()
+    assert c.server_review([("Server", "nginx"), ("Content-Type", "text/html")]) == ["header Server names the software: nginx"]
+    assert c.server_review([("server", " Caddy ")]) == ["header Server names the software: Caddy"]
+    assert c.server_review([("Content-Type", "text/html"), ("Server", "")]) == []
+    assert c.server_review([("Content-Type", "text/html")]) == []
+    # A version or an operating system is already a failure in header_problems, so it is not listed twice.
+    assert c.server_review([("Server", "nginx/1.30.6")]) == []
+    assert c.server_review([("Server", "Apache (Ubuntu)")]) == []
+    assert c.header_problems([("Server", "nginx/1.30.6")])
+
+
+def test_the_status_page_check_flags_a_2xx_or_3xx_and_nothing_else():
     c = load_checker()
     assert c.exposed_paths({"/server-status": 404, "/.git/HEAD": 404, "/": 200}) == []
     assert c.exposed_paths({"/server-status": 200, "/.env": 200, "/nginx_status": 403}) == ["/.env", "/server-status"]
+    assert c.exposed_paths({"/.env": 301, "/status": 302, "/stub_status": 204, "/phpinfo.php": 500, "/server-info": 401}) == ["/.env", "/status", "/stub_status"]
+    assert c.exposed_paths({"/.env": 399, "/status": 400, "/server-info": 199}) == ["/.env"]
     assert "/server-status" in c.PROBE_PATHS and "/stub_status" in c.PROBE_PATHS and "/.git/HEAD" in c.PROBE_PATHS
+
+
+def test_the_audit_lists_the_server_name_for_review_without_failing(tmp_path, capsys):
+    c = load_checker()
+    ss = tmp_path / "ss.txt"
+    with serving(Clean) as port:
+        ss.write_text(LOOPBACK_ONLY.format(port=port))
+        assert c.main(["--port", str(port), "--ss-file", str(ss)]) == 0
+    out = capsys.readouterr().out
+    assert out.count("[REVIEW] header Server names the software: nginx") == 1, "once, not once per request"
+    assert "0 problems" in out
+
+
+def test_the_audit_inspects_the_headers_and_status_of_the_probe_responses(tmp_path, capsys):
+    c = load_checker()
+    ss = tmp_path / "ss.txt"
+    with serving(Redirecting) as port:
+        ss.write_text(LOOPBACK_ONLY.format(port=port))
+        assert c.main(["--port", str(port), "--ss-file", str(ss)]) == 1
+    out = capsys.readouterr().out
+    assert "[FAIL] the path /.env answers 301" in out
+    assert "[FAIL] header Location is an absolute address" in out and "/.env/" in out
+    assert "[FAIL] the path /status answers 200" in out
+    assert "2 problems" not in out and "3 problems" in out
 
 
 LOOPBACK_ONLY = "LISTEN 0 511 127.0.0.1:{port} 0.0.0.0:*\n"

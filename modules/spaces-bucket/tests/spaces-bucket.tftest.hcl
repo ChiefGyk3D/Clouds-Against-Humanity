@@ -176,19 +176,19 @@ run "keys_cannot_be_fullaccess_or_empty_grant" {
   }
 }
 
-run "secret_outputs_are_sensitive" {
+run "key_ids_are_sensitive_and_no_output_carries_a_secret_key" {
   command = plan
   variables {
     create_access_keys = true
     access_key_names   = ["penguin-overlord"]
   }
   assert {
-    condition     = issensitive(output.secret_keys)
-    error_message = "secret_keys must be marked sensitive."
-  }
-  assert {
     condition     = issensitive(output.access_keys)
     error_message = "access_keys must be marked sensitive."
+  }
+  assert {
+    condition     = length(regexall("secret_key", file("${path.module}/outputs.tf"))) == 0
+    error_message = "The module must not output a secret key: outputs.tf names no secret_key."
   }
 }
 

@@ -42,8 +42,8 @@ bucket. The prefix per daemon is a convention, not a boundary.
 ## Outputs
 
 `bucket_name`, `region`, `endpoint`, `bucket_domain_name` and `urn` are plain
-strings (the module has no off state: switch it with `count` on the call). `access_keys` and `secret_keys` are maps by key name
-and are marked sensitive. Do not print them; put them in Doppler.
+strings (the module has no off state: switch it with `count` on the call). `access_keys` is a map of key ids by key name
+and is marked sensitive. The module has no output for a secret key.
 
 ## Restore
 

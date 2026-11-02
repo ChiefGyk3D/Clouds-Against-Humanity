@@ -49,6 +49,34 @@ class Clean(http.server.BaseHTTPRequestHandler):
         pass
 
 
+class Redirecting(http.server.BaseHTTPRequestHandler):
+    """A clean front page, a redirect with an absolute Location on one probe path and a 200 on another."""
+
+    server_version = "nginx"
+    sys_version = ""
+
+    def do_GET(self):
+        headers = []
+        if self.path == "/":
+            body, code = b"<p>plain</p>", 200
+        elif self.path == "/.env":
+            body, code = b"", 301
+            headers.append(("Location", "http://example.test:8080/.env/"))
+        elif self.path == "/status":
+            body, code = b"ok", 200
+        else:
+            body, code = b"Not found.", 404
+        self.send_response(code)
+        for name, value in headers:
+            self.send_header(name, value)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, *args):
+        pass
+
+
 @contextlib.contextmanager
 def serving(handler):
     """Yield the port of a loopback server running `handler`; shut it down on exit."""

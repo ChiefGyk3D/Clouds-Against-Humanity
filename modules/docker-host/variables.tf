@@ -94,12 +94,12 @@ variable "docker_apt_key_fingerprint" {
 
 variable "portainer_version" {
   type        = string
-  default     = "2.45.3"
-  description = "Exact Portainer CE image tag (an LTS release from Portainer's releases page, read 2026-10-31). Never latest or a range: Portainer updates only when this is bumped in a reviewed change, which replaces the droplet."
+  default     = "2.45.3@sha256:3609c307943bca8e5c492f69ddd6965df177208b50678a4cff28391c8dd4e96e"
+  description = "Portainer CE image reference after portainer/portainer-ce:, pinned by exact tag and by digest (2.45.3, an LTS release from Portainer's releases page read 2026-10-31; the multi-arch index digest read from Docker Hub on 2026-11-02). Never latest or a range: Portainer updates only when this is bumped in a reviewed change, which replaces the droplet."
 
   validation {
-    condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+$", var.portainer_version))
-    error_message = "portainer_version must be an exact version such as 2.45.3, never latest, a range or a variant."
+    condition     = can(regex("^[0-9]+\\.[0-9]+\\.[0-9]+@sha256:[0-9a-f]{64}$", var.portainer_version))
+    error_message = "portainer_version must be <exact version>@sha256:<64 hex digits> such as 2.45.3@sha256:..., pinned by tag and by digest, never latest, a range or a variant."
   }
 }
 
