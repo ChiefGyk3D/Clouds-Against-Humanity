@@ -1,18 +1,19 @@
 """The destroy allowlist in plan.rego is pinned, and cannot be left filled.
 
 Issue #450 adds two addresses to destroy_allowlist for the cah-10-access
-teardown. plan_test.rego carries a pair of tests, and exactly one is enabled:
+teardown. plan_test.rego pins the allowlist by test name, in both directions:
 
-  test_destroy_allowlist_is_exactly_teardown_list   (while the teardown runs)
-  test_destroy_allowlist_is_empty                   (after it; off by default)
+  - allowlist filled: plan_test.rego has test_destroy_allowlist_is_exactly_teardown_list
+    (matching the shipped entries) and no test_destroy_allowlist_is_empty;
+  - allowlist empty: plan_test.rego has test_destroy_allowlist_is_empty
+    (asserting count(spacelift.destroy_allowlist) == 0) and no teardown-list test.
 
-The disabled one is spelled with a todo_ prefix, which makes OPA skip it. OPA
-is not needed here: this reads both files as text. It fails when both tests are
-on or both are off, when the enabled test does not match the shipped
-allowlist, and when the allowlist is not the exact teardown list while the
-"exactly" test is on. The follow-up pull request flips the pair and empties the
-allowlist; any other combination fails. Each check also runs on a broken
-fixture, so a check that stops biting fails here.
+The follow-up pull request deletes the teardown-list test, adds the empty test
+and sets destroy_allowlist := {}; any other combination fails here. No Rego
+test may use the todo_ prefix: `opa test` exits 2 when any test is skipped, and
+the shared CI job cannot be told otherwise. OPA is not needed here: this reads
+both files as text. Each check also runs on a broken fixture, so a check that
+stops biting fails here.
 """
 
 import re
@@ -29,8 +30,8 @@ TEARDOWN = {
     ]
 }
 
-EXACT = "destroy_allowlist_is_exactly_teardown_list"
-EMPTY = "destroy_allowlist_is_empty"
+EXACT = "test_destroy_allowlist_is_exactly_teardown_list"
+EMPTY = "test_destroy_allowlist_is_empty"
 
 
 def strip_comments(text: str) -> str:
@@ -56,43 +57,58 @@ def parse_allowlist(policy: str) -> dict[str, list[str]]:
     return result
 
 
-def enabled(tests: str, name: str) -> bool:
-    """True when `test_<name>` is a live rule; `todo_test_<name>` is skipped."""
-    return re.search(rf"(?m)^test_{name}\s+if\b", tests) is not None
+def has_test(tests: str, name: str) -> bool:
+    """True when `name` is defined as a live rule."""
+    return re.search(rf"(?m)^{name}\s+if\b", tests) is not None
 
 
-def disabled(tests: str, name: str) -> bool:
-    return re.search(rf"(?m)^todo_test_{name}\s+if\b", tests) is not None
+def body_of(tests: str, name: str) -> str:
+    match = re.search(rf"(?ms)^{name}\s+if\s*\{{(.*?)^\}}", tests)
+    return strip_comments(match.group(1)) if match else ""
+
+
+def skipped_tests(tests: str) -> list[str]:
+    return re.findall(r"(?m)^(todo_\w+)", tests)
 
 
 def problems(policy: str, tests: str) -> list[str]:
     found = []
     allowlist = parse_allowlist(policy)
-    exact_on, empty_on = enabled(tests, EXACT), enabled(tests, EMPTY)
-    if exact_on == empty_on:
-        found.append(f"exactly one of {EXACT} and {EMPTY} must be enabled (exact={exact_on}, empty={empty_on})")
-    if exact_on and not disabled(tests, EMPTY):
-        found.append(f"todo_test_{EMPTY} must exist while {EXACT} is on")
-    if empty_on and not disabled(tests, EXACT):
-        found.append(f"todo_test_{EXACT} must exist while {EMPTY} is on")
-    if exact_on and allowlist != TEARDOWN:
-        found.append(f"destroy_allowlist is {allowlist}, expected exactly {TEARDOWN}")
-    if empty_on and allowlist:
-        found.append(f"destroy_allowlist must be empty after the teardown, found {allowlist}")
+    exact_on, empty_on = has_test(tests, EXACT), has_test(tests, EMPTY)
+    if skipped_tests(tests):
+        found.append(f"skipped (todo_) tests make opa test exit 2: {skipped_tests(tests)}")
+    if allowlist:
+        if not exact_on:
+            found.append(f"destroy_allowlist is filled, so {EXACT} must exist")
+        if empty_on:
+            found.append(f"destroy_allowlist is filled, so {EMPTY} must not exist")
+        if allowlist != TEARDOWN:
+            found.append(f"destroy_allowlist is {allowlist}, expected exactly {TEARDOWN}")
+    else:
+        if not empty_on:
+            found.append(f"destroy_allowlist is empty, so {EMPTY} must exist")
+        elif "count(spacelift.destroy_allowlist) == 0" not in body_of(tests, EMPTY):
+            found.append(f"{EMPTY} must assert count(spacelift.destroy_allowlist) == 0")
+        if exact_on:
+            found.append(f"destroy_allowlist is empty, so {EXACT} must not exist")
     return found
 
 
 # Fixtures: a minimal policy and test file in each state.
 POLICY_FILLED = 'destroy_allowlist := {"cah-10-access": [\n\t"twingate_remote_network.this",\n\t"module.connector_firewall.digitalocean_firewall.this",\n]}\n'
 POLICY_EMPTY = "destroy_allowlist := {}\n"
-TESTS_EXACT_ON = f"test_{EXACT} if {{\n\ttrue\n}}\n\ntodo_test_{EMPTY} if {{\n\ttrue\n}}\n"
-TESTS_EMPTY_ON = f"todo_test_{EXACT} if {{\n\ttrue\n}}\n\ntest_{EMPTY} if {{\n\ttrue\n}}\n"
+TESTS_EXACT = f"{EXACT} if {{\n\ttrue\n}}\n"
+TESTS_EMPTY = f"{EMPTY} if {{\n\tcount(spacelift.destroy_allowlist) == 0\n}}\n"
 
 
 def test_shipped_allowlist_and_tests_agree():
     policy, tests = POLICY.read_text(), POLICY_TESTS.read_text()
     assert parse_allowlist(policy), "no destroy_allowlist entries were parsed"
     assert problems(policy, tests) == []
+
+
+def test_shipped_policy_tests_have_no_skipped_test():
+    assert skipped_tests(POLICY_TESTS.read_text()) == []
 
 
 def test_allowlist_names_each_address_once():
@@ -109,38 +125,49 @@ def test_the_policy_test_file_names_the_same_addresses():
 
 
 def test_filled_allowlist_with_exact_test_is_fine():
-    assert problems(POLICY_FILLED, TESTS_EXACT_ON) == []
+    assert problems(POLICY_FILLED, TESTS_EXACT) == []
 
 
 def test_emptied_allowlist_with_empty_test_is_fine():
-    assert problems(POLICY_EMPTY, TESTS_EMPTY_ON) == []
+    assert problems(POLICY_EMPTY, TESTS_EMPTY) == []
 
 
 def test_guard_bites_when_allowlist_is_left_filled_after_the_flip():
-    assert problems(POLICY_FILLED, TESTS_EMPTY_ON)
+    assert problems(POLICY_FILLED, TESTS_EMPTY)
 
 
 def test_guard_bites_when_allowlist_is_emptied_without_the_flip():
-    assert problems(POLICY_EMPTY, TESTS_EXACT_ON)
+    assert problems(POLICY_EMPTY, TESTS_EXACT)
 
 
-def test_guard_bites_when_both_tests_are_on():
-    both = TESTS_EXACT_ON + f"\ntest_{EMPTY} if {{\n\ttrue\n}}\n"
-    assert problems(POLICY_FILLED, both)
+def test_guard_bites_when_both_tests_exist():
+    assert problems(POLICY_FILLED, TESTS_EXACT + TESTS_EMPTY)
+    assert problems(POLICY_EMPTY, TESTS_EXACT + TESTS_EMPTY)
 
 
-def test_guard_bites_when_both_tests_are_off():
-    neither = f"todo_test_{EXACT} if {{\n\ttrue\n}}\n\ntodo_test_{EMPTY} if {{\n\ttrue\n}}\n"
-    assert problems(POLICY_EMPTY, neither)
+def test_guard_bites_when_neither_test_exists():
+    assert problems(POLICY_FILLED, "")
+    assert problems(POLICY_EMPTY, "")
+
+
+def test_guard_bites_when_the_empty_test_does_not_assert_empty():
+    weak = f"{EMPTY} if {{\n\ttrue\n}}\n"
+    assert problems(POLICY_EMPTY, weak)
 
 
 def test_guard_bites_on_an_extra_or_missing_address():
     extra = POLICY_FILLED.replace("]}", '\t"module.vpc.digitalocean_vpc.this",\n]}')
-    assert problems(extra, TESTS_EXACT_ON)
+    assert problems(extra, TESTS_EXACT)
     missing = 'destroy_allowlist := {"cah-10-access": ["twingate_remote_network.this"]}\n'
-    assert problems(missing, TESTS_EXACT_ON)
+    assert problems(missing, TESTS_EXACT)
 
 
 def test_guard_bites_on_an_address_under_another_stack():
     moved = POLICY_FILLED.replace("cah-10-access", "cah-00-foundation")
-    assert problems(moved, TESTS_EXACT_ON)
+    assert problems(moved, TESTS_EXACT)
+
+
+def test_guard_bites_on_a_todo_prefixed_test():
+    skipped = TESTS_EXACT + f"todo_{EMPTY} if {{\n\ttrue\n}}\n"
+    assert skipped_tests(skipped) == [f"todo_{EMPTY}"]
+    assert problems(POLICY_FILLED, skipped)

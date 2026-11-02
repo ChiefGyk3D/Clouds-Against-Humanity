@@ -338,8 +338,8 @@ test_allowlists_are_empty_by_default if {
 	count(object.keys(spacelift.outbound_allowlist)) == 2
 	count(spacelift.address_groups) == 0
 
-	# destroy_allowlist is pinned by the teardown pair of tests below (issue
-	# #450), not here.
+	# destroy_allowlist is pinned by its own test further down (issue #450),
+	# not here.
 	count(spacelift.whole_service_teardown_stacks) == 0
 }
 
@@ -677,18 +677,15 @@ test_destroy_group_covers_members_in_its_stack_only if {
 
 # Teardown of cah-10-access (issue #450). The shipped destroy_allowlist holds
 # exactly the two addresses the destroy plan shows for that stack, and nothing
-# else. Two tests pin the allowlist, and exactly one of them is enabled:
+# else. While the teardown is under way, test_destroy_allowlist_is_exactly_teardown_list
+# pins it. No skipped test is used (opa test exits 2 on a skipped test).
 #
-#   - test_destroy_allowlist_is_exactly_teardown_list: enabled while the
-#     teardown is under way (this branch).
-#   - todo_test_destroy_allowlist_is_empty: written but switched off by the
-#     todo_ prefix, which makes OPA skip it.
-#
-# The follow-up pull request that empties the allowlist flips both with one
-# edit each to the names: remove "todo_" from the empty test and add "todo_" to
-# the exactly-the-list test. tests/test_destroy_allowlist_pins.py fails if both
-# are on, if both are off, or if the enabled one does not match the shipped
-# allowlist, so the allowlist cannot be left filled after the teardown.
+# The follow-up pull request that empties the allowlist deletes that test, adds
+# test_destroy_allowlist_is_empty (count(spacelift.destroy_allowlist) == 0) and
+# sets destroy_allowlist := {} in plan.rego. tests/test_destroy_allowlist_pins.py
+# checks the test names against the shipped allowlist in both directions, so
+# the allowlist cannot be left filled after the teardown, nor emptied without
+# the flip.
 
 access_stack := "cah-10-access"
 
@@ -700,10 +697,6 @@ teardown_list := {access_stack: [access_network, access_firewall]}
 
 test_destroy_allowlist_is_exactly_teardown_list if {
 	spacelift.destroy_allowlist == teardown_list
-}
-
-todo_test_destroy_allowlist_is_empty if {
-	count(spacelift.destroy_allowlist) == 0
 }
 
 access_teardown := [
