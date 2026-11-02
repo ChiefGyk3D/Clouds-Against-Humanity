@@ -172,7 +172,19 @@ address_groups := {}
 # rule as above: a pull request that names the stack, the address and the
 # reason, reviewed, then the new body pasted into Spacelift. Remove the entry
 # once the change has applied.
-destroy_allowlist := {}
+#
+# TEMPORARY (issue #450): tear down the cah-10-access stack (the two connector
+# droplets, the only billable cloud assets). Both addresses are protected types
+# the destroy plan deletes:
+#   - twingate_remote_network.this: the Twingate site the connectors belong to
+#     (protected type twingate_remote_network).
+#   - module.connector_firewall.digitalocean_firewall.this: the connector
+#     firewall (protected type digitalocean_firewall).
+# A second pull request empties this list again once the destroy has applied.
+destroy_allowlist := {"cah-10-access": [
+	"twingate_remote_network.this",
+	"module.connector_firewall.digitalocean_firewall.this",
+]}
 
 # Stack ids where a whole-service teardown is routine: a plan there that
 # deletes (not replaces) a digitalocean_firewall and the droplet it protects,
