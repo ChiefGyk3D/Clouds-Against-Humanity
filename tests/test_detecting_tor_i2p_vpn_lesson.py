@@ -171,13 +171,26 @@ def test_the_opsec_page_is_linked_now_that_it_exists():
     assert "being written at the same time" not in body
 
 
-def test_the_whonix_and_qubes_exercises_are_still_named_in_plain_text_not_linked():
-    # Issue 372 is not written, so there is no page to link; this stays plain text until there is.
+EXERCISES = "Hands-On-Whonix-and-Qubes-OS-Gateway-Split-Compartments-Disposables-and-Policy-Prompts"
+
+
+def exercise_links(body: str) -> set[str]:
+    return {t for t in LINK.findall(body) if t == EXERCISES}
+
+
+def test_the_whonix_and_qubes_exercises_are_linked_now_that_they_exist():
     body = text()
-    for plain in ("Whonix and Qubes exercises", "issue 372"):
-        assert plain in body, plain
-    unmerged = {t for t in LINK.findall(body) if re.search(r"Whonix-and-Qubes|Exercise", t)}
-    assert not unmerged, unmerged
+    for named in ("Whonix and Qubes exercises", "issue 372"):
+        assert named in body, named
+    assert exercise_links(body) == {EXERCISES}, "the exercises page (issue 372) exists and must be linked"
+    assert (WIKI / f"{EXERCISES}.md").is_file()
+    # The stale statement that the exercises are not written yet is gone.
+    assert "are not written yet, so they are named in plain text" not in body
+
+
+def test_the_exercise_link_guard_bites():
+    assert not exercise_links("the hands-on Whonix and Qubes exercises (issue 372) are not written yet")
+    assert exercise_links(f"the [hands-on Whonix and Qubes exercises]({EXERCISES}.md)")
 
 
 def test_the_lesson_is_registered_in_contents_reading_order_nav_and_the_defend_track():

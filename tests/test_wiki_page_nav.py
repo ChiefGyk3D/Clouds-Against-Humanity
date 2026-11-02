@@ -230,10 +230,11 @@ def test_the_pages_the_brief_names_have_a_hand_chosen_related_list():
         for e in m["pages"][gid]:
             assert e["page"] in chosen, f"{e['page']} has no related list"
             assert gwn.RELATED_MIN <= len(chosen[e["page"]]) <= gwn.RELATED_MAX
-    # 27: every page in the privacy and GRC tracks has a hand-chosen list. The paper wallets lesson (issue #431),
-    # the OPSEC lesson (issue #389) and the onion service lab (issue #391) each joined the privacy track with a
-    # list of its own. The count stays an exact equality: a page that joins either track without a list still fails.
-    assert len(chosen) == 27, "every page in the privacy and GRC tracks has a hand-chosen list"
+    # 28: every page in the privacy and GRC tracks has a hand-chosen list. The paper wallets lesson (issue #431),
+    # the OPSEC lesson (issue #389), the onion service lab (issue #391) and the hands-on Whonix and Qubes lesson
+    # (issue #372) each joined the privacy track with a list of its own. The count stays an exact equality: a page
+    # that joins either track without a list still fails.
+    assert len(chosen) == 28, "every page in the privacy and GRC tracks has a hand-chosen list"
     # Jumping between sections works: the lists cross the track boundary both ways.
     by_group = {e["page"]: gid for gid, pages in m["pages"].items() for e in pages}
     assert any(by_group[r] != "privacy" for p, rel in chosen.items() if by_group[p] == "privacy" for r in rel)

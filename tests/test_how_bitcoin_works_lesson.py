@@ -21,7 +21,8 @@ WIKI = ROOT / "docs" / "wiki"
 NAME = "How-Bitcoin-Works-Keys-UTXOs-Mining-and-Why-It-Is-Pseudonymous-and-Traceable"
 PAGE = WIKI / f"{NAME}.md"
 PAGE_ONE = "Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks"
-LINK = re.compile(r"\]\(([A-Za-z0-9_-]+)\.md(?:#([^)]*))?\)")
+HANDS_ON = "Hands-On-Whonix-and-Qubes-OS-Gateway-Split-Compartments-Disposables-and-Policy-Prompts"
+LINK =re.compile(r"\]\(([A-Za-z0-9_-]+)\.md(?:#([^)]*))?\)")
 # A wallet address in any of the common shapes: legacy Bitcoin, Bech32 Bitcoin, Ethereum and Monero.
 ADDRESS = re.compile(
     r"\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b"
@@ -242,6 +243,8 @@ def test_the_page_links_the_existing_lessons_and_names_the_siblings_correctly():
         assert "Blockchain fundamentals" in body and "issue 396" in body
     for issue in ("396", "398", "399", "400", "372"):
         assert issue in body, f"issue {issue} is named"
+    assert HANDS_ON in links, "the hands-on Whonix and Qubes exercises (issue 372) exist and must be linked"
+    assert "which are not written yet and are named in plain text, not linked" not in body
     # Pages three, four and five are in the wiki, so they are linked, and the stale statement is gone.
     for prefix in ("How-Monero-Works-", "Wallets-and-Key-Custody-", "Running-Monero-Properly-"):
         found = {t for t in links if t.startswith(prefix)}
