@@ -273,6 +273,7 @@ def test_the_page_links_the_four_siblings_and_the_lessons_it_depends_on():
     assert "#what-pinodexmr-documents" in body, "the PiNodeXMR example on the overview page is linked"
     for issue in ("396", "397", "398", "399", "400", "372"):
         assert issue in body, f"issue {issue} is named"
+    assert HANDS_ON in links, "the hands-on Whonix and Qubes exercises (issue 372) exist and must be linked"
 
 
 def test_the_lesson_is_registered_in_contents_reading_order_and_nav():
@@ -657,10 +658,18 @@ def test_the_unverified_items_are_marked_in_the_register():
 # ---- scope and tone ---------------------------------------------------------------------------------------------------
 
 
+HANDS_ON = "Hands-On-Whonix-and-Qubes-OS-Gateway-Split-Compartments-Disposables-and-Policy-Prompts"
+
+
 def test_the_exercise_is_paper_only_and_links_the_hands_on_companion():
     part = section(text(), EXERCISE)
     assert "paper" in part.lower() and "nothing to install" in part.lower()
     assert "issue 372" in text() and "Qubes" in part
+    # The companion (issue 372) exists now, so the exercise links it; the stale "named in plain text" wording is gone.
+    assert HANDS_ON in {t for t, _ in LINK.findall(part)}, "the hands-on companion must be linked from the exercise"
+    assert (WIKI / f"{HANDS_ON}.md").is_file()
+    assert "is the Qubes and Whonix exercises in issue 372" not in part
+    assert not {t for t, _ in LINK.findall("the Qubes and Whonix exercises in issue 372")}, "a plain mention is not a link"
     assert "Not run" in text()
     assert len(tables(text(), EXERCISE)) == 2, "a walk-through table and a threat table"
 

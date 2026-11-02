@@ -181,12 +181,25 @@ def test_the_later_series_pages_are_linked_now_that_they_exist():
     assert "The two pages not written yet" not in body
 
 
-def test_the_whonix_and_qubes_exercises_are_still_named_in_plain_text_not_linked():
-    # Issue 372 is not written, so there is no page to link; this stays plain text until there is.
+EXERCISES = "Hands-On-Whonix-and-Qubes-OS-Gateway-Split-Compartments-Disposables-and-Policy-Prompts"
+
+
+def exercise_links(body: str) -> set[str]:
+    return {t for t in LINK.findall(body) if t == EXERCISES}
+
+
+def test_the_whonix_and_qubes_exercises_are_linked_now_that_they_exist():
     body = text()
     assert "hands-on Whonix and Qubes exercises" in body
-    linked_series = {t for t in LINK.findall(body) if re.search(r"Exercise", t)}
-    assert not linked_series, linked_series
+    assert exercise_links(body) == {EXERCISES}, "the exercises page (issue 372) exists and must be linked"
+    assert (WIKI / f"{EXERCISES}.md").is_file()
+    # The stale statement that the exercises are not written yet is gone.
+    assert "are not written yet, so they are named in plain text" not in body
+
+
+def test_the_exercise_link_guard_bites():
+    assert not exercise_links("the hands-on Whonix and Qubes exercises (issue 372) are not written yet")
+    assert exercise_links(f"the [hands-on Whonix and Qubes exercises]({EXERCISES}.md)")
 
 
 def test_a_page_with_a_link_cap_is_not_linked():

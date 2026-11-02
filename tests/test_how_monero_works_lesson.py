@@ -19,7 +19,8 @@ WIKI = ROOT / "docs" / "wiki"
 NAME = "How-Monero-Works-Compared-with-Bitcoin-and-Ethereum-DeFi-Mixers-Swaps-and-Ransomware"
 PAGE = WIKI / f"{NAME}.md"
 PAGE_ONE = "Blockchain-Fundamentals-Hashes-Blocks-Nodes-Consensus-and-Forks"
-LINK = re.compile(r"\]\(([A-Za-z0-9_-]+)\.md(?:#([^)]*))?\)")
+HANDS_ON = "Hands-On-Whonix-and-Qubes-OS-Gateway-Split-Compartments-Disposables-and-Policy-Prompts"
+LINK =re.compile(r"\]\(([A-Za-z0-9_-]+)\.md(?:#([^)]*))?\)")
 # A wallet address in any of the common shapes: legacy Bitcoin, Bech32 Bitcoin, Ethereum and Monero.
 ADDRESS = re.compile(
     r"\b[13][a-km-zA-HJ-NP-Z1-9]{25,34}\b"
@@ -211,6 +212,8 @@ def test_the_page_links_the_existing_lessons_and_the_set_siblings_now_that_they_
     assert "#what-pinodexmr-documents" in body, "the PiNodeXMR section of the overview lesson is linked"
     for issue in ("397", "399", "400", "372", "398"):
         assert issue in body, f"issue {issue} is named"
+    assert HANDS_ON in links, "the hands-on Whonix and Qubes exercises (issue 372) exist and must be linked"
+    assert "are not written yet, so they are named in plain text, not linked" not in body
     assert all((WIKI / f"{t}.md").is_file() for t in links), "a linked page is missing"
     # The stale statement that page five is not on the main branch is gone.
     assert "is not on the main branch yet" not in body
