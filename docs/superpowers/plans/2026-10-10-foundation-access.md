@@ -1309,7 +1309,7 @@ permissions: {}
 
 jobs:
   tofu:
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/tofu-ci.yml@faba0b7d1ab65e9033bef1acfa93d6d57b5808c0 # v1.21.0
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/tofu-ci.yml@7501cb3fa19d83d0e0a131cb040e7c4da32a9504 # v1.28.0
     permissions:
       contents: read
       id-token: write
@@ -1317,7 +1317,7 @@ jobs:
       directories: "stacks/00-foundation stacks/10-access modules/vpc modules/firewall modules/twingate-connector"
 
   python:
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/python-ci.yml@faba0b7d1ab65e9033bef1acfa93d6d57b5808c0 # v1.21.0
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/python-ci.yml@7501cb3fa19d83d0e0a131cb040e7c4da32a9504 # v1.28.0
     permissions:
       contents: read
       id-token: write
@@ -1330,7 +1330,7 @@ jobs:
       workflow-lint: false
 
   security:
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/security.yml@faba0b7d1ab65e9033bef1acfa93d6d57b5808c0 # v1.21.0
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/security.yml@7501cb3fa19d83d0e0a131cb040e7c4da32a9504 # v1.28.0
     permissions:
       contents: read
       security-events: write
