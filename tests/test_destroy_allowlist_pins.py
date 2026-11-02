@@ -1,7 +1,7 @@
 """The destroy allowlist in plan.rego is pinned, and cannot be left filled.
 
-Issue #450 adds two addresses to destroy_allowlist for the cah-10-access
-teardown. plan_test.rego pins the allowlist by test name, in both directions:
+Issue #450 added two addresses to destroy_allowlist for the cah-10-access
+teardown and then emptied it again (the shipped state). plan_test.rego pins the allowlist by test name, in both directions:
 
   - allowlist filled: plan_test.rego has test_destroy_allowlist_is_exactly_teardown_list
     (matching the shipped entries) and no test_destroy_allowlist_is_empty;
