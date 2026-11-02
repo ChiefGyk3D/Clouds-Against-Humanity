@@ -337,7 +337,9 @@ test_allowlists_are_empty_by_default if {
 	count(spacelift.inbound_allowlist) == 0
 	count(object.keys(spacelift.outbound_allowlist)) == 2
 	count(spacelift.address_groups) == 0
-	count(spacelift.destroy_allowlist) == 0
+
+	# destroy_allowlist is pinned by the teardown pair of tests below (issue
+	# #450), not here.
 	count(spacelift.whole_service_teardown_stacks) == 0
 }
 
@@ -671,6 +673,80 @@ test_destroy_group_covers_members_in_its_stack_only if {
 	count(in_a) == 0
 	in_b := spacelift.deny with input as on_stack("svc-b", changes) with data.spacelift.destroy_allowlist as allow with data.spacelift.address_groups as groups
 	count(in_b) == 2
+}
+
+# Teardown of cah-10-access (issue #450). The shipped destroy_allowlist holds
+# exactly the two addresses the destroy plan shows for that stack, and nothing
+# else. Two tests pin the allowlist, and exactly one of them is enabled:
+#
+#   - test_destroy_allowlist_is_exactly_teardown_list: enabled while the
+#     teardown is under way (this branch).
+#   - todo_test_destroy_allowlist_is_empty: written but switched off by the
+#     todo_ prefix, which makes OPA skip it.
+#
+# The follow-up pull request that empties the allowlist flips both with one
+# edit each to the names: remove "todo_" from the empty test and add "todo_" to
+# the exactly-the-list test. tests/test_destroy_allowlist_pins.py fails if both
+# are on, if both are off, or if the enabled one does not match the shipped
+# allowlist, so the allowlist cannot be left filled after the teardown.
+
+access_stack := "cah-10-access"
+
+access_network := "twingate_remote_network.this"
+
+access_firewall := "module.connector_firewall.digitalocean_firewall.this"
+
+teardown_list := {access_stack: [access_network, access_firewall]}
+
+test_destroy_allowlist_is_exactly_teardown_list if {
+	spacelift.destroy_allowlist == teardown_list
+}
+
+todo_test_destroy_allowlist_is_empty if {
+	count(spacelift.destroy_allowlist) == 0
+}
+
+access_teardown := [
+	delete_of(access_network, "twingate_remote_network", {"name": "access-nyc3"}),
+	delete_of(access_firewall, "digitalocean_firewall", {"name": "access-nyc3-connector", "tags": ["cah-connector-nyc3"]}),
+	delete_of("module.connector_a.digitalocean_droplet.connector", "digitalocean_droplet", {"id": "1", "tags": ["cah-connector-nyc3"]}),
+	delete_of("module.connector_b.digitalocean_droplet.connector", "digitalocean_droplet", {"id": "2", "tags": ["cah-connector-nyc3"]}),
+]
+
+test_access_teardown_is_allowed_in_access_stack if {
+	count(denied_on(access_stack, access_teardown)) == 0
+}
+
+# The allowlist is keyed by stack: the same addresses elsewhere stay denied.
+test_access_teardown_addresses_stay_denied_in_other_stacks if {
+	every id in ["cah-00-foundation", "cah-20-telemetry", "cah-aws-10-access", "svc-a"] {
+		count(denied_on(id, access_teardown)) == 2
+	}
+	count(denied(access_teardown)) == 2
+}
+
+# Every other protected address stays denied, in the access stack too: the
+# foundation stack's network, project and baseline firewall, and an address
+# that only looks like an allowed one.
+foundation_teardown := [
+	delete_of("module.vpc.digitalocean_vpc.this", "digitalocean_vpc", {"name": "core"}),
+	delete_of("digitalocean_project.this", "digitalocean_project", {"name": "cah"}),
+	delete_of("module.baseline_firewall.digitalocean_firewall.this", "digitalocean_firewall", {"name": "baseline"}),
+]
+
+test_foundation_teardown_is_still_denied if {
+	every id in ["cah-00-foundation", access_stack] {
+		count(denied_on(id, foundation_teardown)) == 3
+	}
+}
+
+test_lookalike_addresses_are_still_denied_in_access_stack if {
+	changes := [
+		delete_of("twingate_remote_network.other", "twingate_remote_network", {"name": "x"}),
+		delete_of("module.other.digitalocean_firewall.this", "digitalocean_firewall", {"name": "y"}),
+		delete_of("module.connector_firewall.digitalocean_firewall.other", "digitalocean_firewall", {"name": "z"}),
+	]
+	count(denied_on(access_stack, changes)) == 3
 }
 
 # Whole-service teardown: a firewall delete next to its droplet's delete, in a
