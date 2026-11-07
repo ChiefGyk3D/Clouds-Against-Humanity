@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (160 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (161 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -20,7 +20,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 
 - [Start here](#start-here) (5)
 - [Core path: read in this order](#core-path-read-in-this-order) (21)
-- [Track 1: Foundations](#track-1-foundations) (30)
+- [Track 1: Foundations](#track-1-foundations) (31)
 - [Security tools and threat modeling](#security-tools-and-threat-modeling) (6)
 - [Track 2: Defend and detect](#track-2-defend-and-detect) (34)
 - [Track 3: Privacy, anonymity and cryptocurrency](#track-3-privacy-anonymity-and-cryptocurrency) (19)
@@ -98,6 +98,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | 28 | [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) | Why plugins carry most of a WordPress site's risk, what to harden and what a web application firewall does; also why static sites often win. | learner |  |
 | 29 | [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) | A static and a dynamic site that look the same, how to tell them apart from outside with curl, page source and WhatWeb, what each leaks, and a career note on public work. | learner | draft |
 | 30 | [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md) | The path from one web server to a scaled design, with caches, a CDN, a WAF and a pipeline, for engineers who run web fleets. | engineer |  |
+| 31 | [Autoscaling and elasticity](Autoscaling-and-Elasticity-Scale-Out-Targets-Cooldowns-and-Cost-Caps.md) | Horizontal and vertical scaling, target tracking, step and scheduled policies, cooldowns, flapping, stateless design, health checks, scale to zero, Kubernetes HPA, cost caps and a free local load test. | learner | draft |
 
 ## Security tools and threat modeling
 
