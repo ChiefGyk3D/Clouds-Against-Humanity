@@ -221,10 +221,10 @@ Things I deliberately did not do: score this pipeline against the whole ATT&CK m
 <!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
 Where you are: [Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Threat frameworks: STRIDE, ATT&CK, ATLAS
 
-In this group: [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling), 7 pages
+In this group: [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling), 8 pages
 
 - Also here: [Threats in plain words](Threats-in-Plain-Words.md) / [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) / [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md) / [Threat model exercise](Threat-Model-Exercise.md) / [Threat Dragon exercise](Threat-Dragon-Exercise.md) / **Threat frameworks: STRIDE, ATT&CK, ATLAS**
-- Digital forensics: [Disk forensics with Autopsy and The Sleuth Kit](Disk-Forensics-with-Autopsy-and-The-Sleuth-Kit.md)
+- Digital forensics: [Memory forensics with Volatility 3](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md) / [Disk forensics with Autopsy and The Sleuth Kit](Disk-Forensics-with-Autopsy-and-The-Sleuth-Kit.md)
 
 Related pages:
 
