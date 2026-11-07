@@ -29,7 +29,7 @@ file does not match the manifest. -->
 21. [Roadmap](Roadmap.md)
 - [Full list (21)](Contents.md#core-path-read-in-this-order)
 </details>
-<details><summary><b>Track 1: Foundations</b> (31)</summary>
+<details><summary><b>Track 1: Foundations</b> (32)</summary>
 
 <details><summary>OS and Linux, git and the terminal (11)</summary>
 
@@ -47,10 +47,10 @@ file does not match the manifest. -->
 
 - [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) · [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) · [Secrets from day one](Secrets-From-Day-One.md) · [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md)
 </details>
-<details><summary>Infrastructure as code (6)</summary>
+<details><summary>Infrastructure as code (7)</summary>
 
-- [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md) · [OpenTofu from zero](OpenTofu-From-Zero.md) · [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) · [Spacelift from zero](Spacelift-From-Zero.md) · [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md)
-- [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) (unbuilt)
+- [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md) · [OpenTofu from zero](OpenTofu-From-Zero.md) · [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) · [Ansible: configuration management versus provisioning](Ansible-Configuration-Management-Versus-Provisioning.md) (draft)
+- [Spacelift from zero](Spacelift-From-Zero.md) · [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md) · [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) (unbuilt)
 </details>
 <details><summary>Web hosting (5)</summary>
 
@@ -58,7 +58,7 @@ file does not match the manifest. -->
 - [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md) · [Autoscaling and elasticity](Autoscaling-and-Elasticity-Scale-Out-Targets-Cooldowns-and-Cost-Caps.md) (draft)
 </details>
 
-- [Full list (31)](Contents.md#track-1-foundations)
+- [Full list (32)](Contents.md#track-1-foundations)
 </details>
 <details><summary><b>Security tools and threat modeling</b> (6)</summary>
 
