@@ -59,7 +59,7 @@ Previous: [Digital forensics foundations](Digital-Forensics-Foundations-Evidence
 | Who the client address really is behind a proxy | [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md) | Why a log line's address may be the proxy's, and what that does to a timeline |
 | Hashes and keys | [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) | A hash used as a seal on a file you may have to defend later |
 
-This page is one of a series on digital forensics. The foundations lesson (issue #474), the disk and Autopsy lesson (#475), the memory lesson (#476) and the toolkits lesson (#478) are planned; none exists on this branch, so they are named here in plain text and not linked.
+This page is one of a series on digital forensics. The siblings are the [foundations lesson](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md), the [disk and Autopsy lesson](Disk-Forensics-with-Autopsy-and-The-Sleuth-Kit.md), the [memory lesson](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md) and the [toolkits lesson](DFIR-Toolkits-and-Live-Triage-SIFT-Velociraptor-KAPE-and-the-Incident-Response-Workflow.md).
 
 ## The law and the rule
 
@@ -252,7 +252,7 @@ Put the three kinds of evidence on one axis and look for corroboration, not agre
 
 In the lab, the pcap's `POST /login` at epoch 1794066617 matches the access log's `15:50:17 +0000` to the second, on the same host and clock. That is corroboration. The auth log's seven-minute offset is a different clock and needs the anchor. A good correlation names the clock behind every line.
 
-The disk side (file system timestamps, deleted files, Autopsy) belongs to the disk forensics lesson (#475) and memory to #476; both are named, not linked. The only disk-like evidence I used here is plaso's `filestat`.
+The disk side (file system timestamps, deleted files, Autopsy) belongs to the [disk forensics lesson](Disk-Forensics-with-Autopsy-and-The-Sleuth-Kit.md) and memory to the [memory forensics lesson](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md). The only disk-like evidence I used here is plaso's `filestat`.
 
 ## Writing it up
 
@@ -431,7 +431,7 @@ Retrieved on 2026-11-07. "Read" means I read the page text. "Run" means I ran it
 
 Not verified, plainly: Wireshark's graphical interface; TLS decryption with a key log; any Windows host, event log or tool; journal sealing in use; pcapng; Timesketch; any real case or sample capture; anything about laws outside the United States; the timing of the container steps on your hardware. Every address in the lab is a private container-network address and every credential is invented.
 
-Next: the sibling lessons in the digital forensics series (foundations #474, disk and Autopsy #475, memory #476, toolkits #478) are not written on this branch. Until they land, the nearest pages are [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md), [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md) and [Build your own mini SOC](Build-Your-Own-Mini-SOC.md).
+Next: the sibling lessons in the digital forensics series are [foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md), [disk and Autopsy](Disk-Forensics-with-Autopsy-and-The-Sleuth-Kit.md), [memory](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md) and [toolkits](DFIR-Toolkits-and-Live-Triage-SIFT-Velociraptor-KAPE-and-the-Incident-Response-Workflow.md). Related pages are [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md), [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md) and [Build your own mini SOC](Build-Your-Own-Mini-SOC.md).
 
 <!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
 Where you are: [Home](Home.md) > [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect) > Network, log and timeline forensics

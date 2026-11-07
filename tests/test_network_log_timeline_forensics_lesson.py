@@ -56,7 +56,7 @@ def test_every_linked_wiki_page_exists_and_no_sibling_lesson_is_linked_early():
     links = set(LINK.findall(text()))
     assert len(links) >= 6, "the guard collected too few links"
     assert not sorted(t for t in links if not (WIKI / f"{t}.md").exists())
-    # Sibling forensics lessons are plain text until they exist; the check above already fails on a dead link.
+    # The sibling forensics lessons exist now and are linked; the check above fails on a dead link.
 
 
 def test_the_lesson_is_registered_everywhere():

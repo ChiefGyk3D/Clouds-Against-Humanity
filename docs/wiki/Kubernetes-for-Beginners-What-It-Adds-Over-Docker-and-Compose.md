@@ -139,7 +139,7 @@ The Roadmap's three triggers for moving are: the ceiling moves, a workload needs
 
 Kubernetes is the right answer when the opposite is true: several machines, several people, more than one environment, a need to scale out and in, or a platform team whose job is exactly this.
 
-Scaling pods up and down automatically with a horizontal pod autoscaler (HPA) is its own lesson (issue #461). This page only scales by hand.
+Scaling pods up and down automatically with a horizontal pod autoscaler (HPA) is its own lesson: [Autoscaling and elasticity](Autoscaling-and-Elasticity-Scale-Out-Targets-Cooldowns-and-Cost-Caps.md). This page only scales by hand.
 
 ## Try it yourself: a one-node cluster in a throwaway VM
 

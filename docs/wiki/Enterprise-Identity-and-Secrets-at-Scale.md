@@ -78,6 +78,7 @@ A **secrets manager** stores values encrypted, controls who can read them, recor
 - **Environments:** development, staging and production must hold different values and different access, not one shared set.
 - **Blast radius** ([what it means](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md#three-ideas-defined-once)): a leaked token should expose one thing. Scoping by project and config, as in this repository, is the mechanism.
 - **Certificates** ([what one is and how it is checked](How-a-Web-Request-Works.md#certificates-and-trust-chains-in-plain-language)): a **PKI (public key infrastructure)** issues certificates for servers, devices and people. The failure mode is expiry: an unrenewed internal certificate can take down a service on an ordinary Tuesday. Automation (short-lived certificates, ACME-style renewal) is the cure; a certificate inventory is the minimum.
+- **Keys that must not be copied:** a certificate authority's root key or a code-signing key is worth keeping in a hardware security module, which signs on request and never hands the key over. [Hardware security modules](Hardware-Security-Modules-What-They-Are-and-Building-Your-Own-with-pico2hsm.md) explains the idea and the cloud versions.
 
 ## Audit and access reviews
 

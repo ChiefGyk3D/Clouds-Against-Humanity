@@ -29,7 +29,7 @@
 - [Claims register](#claims-register)
 <!-- END GENERATED PAGE CONTENTS -->
 
-Side page to the security tools lessons. Read it when someone says "pull an image of the disk" or "run it through Autopsy" and you want to know what that means, or when you want to learn disk forensics without paying for a tool. It covers the free pair: The Sleuth Kit (a set of command-line tools) and Autopsy (a graphical program built on top of it). Sibling forensics lessons are being written alongside this one: foundations of forensics (#474), memory forensics (#476), network and log forensics (#477) and forensic toolkits (#478). They are not linked here because they may not exist yet; this page stands alone.
+Side page to the security tools lessons. Read it when someone says "pull an image of the disk" or "run it through Autopsy" and you want to know what that means, or when you want to learn disk forensics without paying for a tool. It covers the free pair: The Sleuth Kit (a set of command-line tools) and Autopsy (a graphical program built on top of it). Sibling forensics lessons: [foundations of forensics](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md), [memory forensics](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md), [network and log forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md) and [forensic toolkits](DFIR-Toolkits-and-Live-Triage-SIFT-Velociraptor-KAPE-and-the-Incident-Response-Workflow.md). This page stands alone.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 

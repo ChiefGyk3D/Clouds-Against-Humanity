@@ -14,7 +14,7 @@ Side page to the foundations track. Read it when you have heard that "there is a
 
 > **Prerequisites.** A terminal ([The terminal and your first script](Terminal-and-Your-First-Script.md)). Knowing what a kernel and a driver are helps; the page explains the rest. Knowing what a CVE is helps ([Threats in plain words](Threats-in-Plain-Words.md)). About 90 minutes for the reading and the exercise (est.).
 
-> **Where this runs, and the rule.** The exercise is read-only on your own machine. Nothing on this page asks you to flash, patch, reset or reconfigure firmware, and it gives no steps for doing so: a bad flash can leave a computer that will not start, and the one protection discussed here (the HAP bit) needs hardware this page does not cover. If you want to change firmware, that is a different lesson, planned in issue #466 (see the end of this page). No real hostnames, serials or addresses appear.
+> **Where this runs, and the rule.** The exercise is read-only on your own machine. Nothing on this page asks you to flash, patch, reset or reconfigure firmware, and it gives no steps for doing so: a bad flash can leave a computer that will not start, and the one protection discussed here (the HAP bit) needs hardware this page does not cover. If you want to change firmware, that is a different lesson, [Open firmware and trustworthy hardware](Open-Firmware-and-Trustworthy-Hardware-coreboot-Heads-Nitrokey-and-Vendors-That-Ship-the-Intel-ME-Disabled.md) (see the end of this page). No real hostnames, serials or addresses appear.
 
 ## What you will be able to do
 
@@ -280,7 +280,7 @@ Retrieved 2026-11-07 with read-only requests unless stated. "Read" means I read 
 
 ## What comes next
 
-A planned lesson, issue #466, covers open firmware: coreboot and similar projects, what they can and cannot replace, and the hardware and risks involved in changing firmware. It does not exist yet, so there is no link.
+[Open firmware and trustworthy hardware](Open-Firmware-and-Trustworthy-Hardware-coreboot-Heads-Nitrokey-and-Vendors-That-Ship-the-Intel-ME-Disabled.md) covers coreboot and similar projects, what they can and cannot replace, and the hardware and risks involved in changing firmware. For the hardware keys that Heads uses as a witness, see [Hardware security keys](Hardware-Security-Keys-YubiKey-Nitrokey-Smart-Cards-and-PIV.md).
 
 <!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
 Where you are: [Home](Home.md) > [Track 1: Foundations](Contents.md#track-1-foundations) > Device firmware security: Intel ME, AMD PSP, MINIX and kernel design

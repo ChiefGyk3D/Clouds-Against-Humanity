@@ -84,7 +84,7 @@ Two more kinds of cost that do not appear on an invoice:
 
 **Vendor lock and free tiers.** A free tier is a marketing budget, and it can end. This project uses four vendors' free tiers. The honest stance is to write down the limits with the date they were checked, and to know what the paid tier would cost or what the exit would look like. The cost page's "not yet verified" list is exactly that.
 
-**Your time.** Running a Kubernetes cluster is free in the sense that the control plane costs $0. It is not free. The [Roadmap](Roadmap.md) says no to Kubernetes for now partly on money and partly on the complexity budget, and that second budget is as real as the first.
+**Your time.** Running a [Kubernetes](Kubernetes-for-Beginners-What-It-Adds-Over-Docker-and-Compose.md) cluster is free in the sense that the control plane costs $0. It is not free. The [Roadmap](Roadmap.md) says no to Kubernetes for now partly on money and partly on the complexity budget, and that second budget is as real as the first. If you wonder what automatic scaling does to a bill, [Autoscaling and elasticity](Autoscaling-and-Elasticity-Scale-Out-Targets-Cooldowns-and-Cost-Caps.md) covers targets, cooldowns and cost caps.
 
 ## Where this shows up in the repo
 

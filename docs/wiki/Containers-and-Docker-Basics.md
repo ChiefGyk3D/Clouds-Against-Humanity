@@ -70,6 +70,8 @@ In the cloud, the question "where does this program keep its state?" becomes the
 
 The word for a machine like that is **disposable** (or "cattle, not pets", in the old joke: you do not name cattle). It is the single biggest shift in thinking between a homelab and a cloud environment, and it is why stage 3 spends as much design on where state lives as on which machine to buy.
 
+When one host is no longer enough, [Kubernetes for beginners](Kubernetes-for-Beginners-What-It-Adds-Over-Docker-and-Compose.md) explains what an orchestrator adds over Compose.
+
 ## Pi-shaped to cloud-shaped
 
 The author's five daemons were written for one Docker container on a Pi. They work. They also carry assumptions that are true on a Pi and false in the cloud:

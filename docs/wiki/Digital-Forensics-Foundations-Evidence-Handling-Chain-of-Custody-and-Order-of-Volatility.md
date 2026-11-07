@@ -14,7 +14,7 @@
 Previous: [Open firmware and trustworthy hardware](Open-Firmware-and-Trustworthy-Hardware-coreboot-Heads-Nitrokey-and-Vendors-That-Ship-the-Intel-ME-Disabled.md) / Next: [Network, log and timeline forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md)
 <!-- END GENERATED PAGE NAV top -->
 
-This is the first of a small forensics series. The sibling lessons (disk examination with Autopsy, memory, network and log evidence, and toolkits with live triage) are written alongside it and are not linked yet; this page is the vocabulary and the habits they all assume.
+This is the first of a small forensics series. The sibling lessons are [disk examination with Autopsy](Disk-Forensics-with-Autopsy-and-The-Sleuth-Kit.md), [memory](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md), [network and log evidence](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md), and [toolkits with live triage](DFIR-Toolkits-and-Live-Triage-SIFT-Velociraptor-KAPE-and-the-Incident-Response-Workflow.md); this page is the vocabulary and the habits they all assume.
 
 ## What you will be able to do
 
@@ -76,7 +76,7 @@ What this changes in practice:
 - **Do not run anything that touches every file's access time**, such as `tar`, RFC 3227 says, because it changes the timestamps you may need.
 - **Cutting the network is not free.** RFC 3227 notes that disconnecting or filtering can trigger "deadman switches" that wipe evidence.
 
-The trade is real: collecting memory from a live machine also changes the machine (your tool loads into memory). ACPO's second principle exists for that case: if you must touch the original, you must be able to explain what you did and what it changed. The memory and live-triage lessons in the series go through how.
+The trade is real: collecting memory from a live machine also changes the machine (your tool loads into memory). ACPO's second principle exists for that case: if you must touch the original, you must be able to explain what you did and what it changed. The [memory](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md) and [live-triage](DFIR-Toolkits-and-Live-Triage-SIFT-Velociraptor-KAPE-and-the-Incident-Response-Workflow.md) lessons in the series go through how.
 
 ## Evidence handling: image, hash, copy
 
