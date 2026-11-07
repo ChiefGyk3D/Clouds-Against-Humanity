@@ -29,14 +29,14 @@ file does not match the manifest. -->
 21. [Roadmap](Roadmap.md)
 - [Full list (21)](Contents.md#core-path-read-in-this-order)
 </details>
-<details><summary><b>Track 1: Foundations</b> (35)</summary>
+<details><summary><b>Track 1: Foundations</b> (36)</summary>
 
-<details><summary>OS and Linux, git and the terminal (11)</summary>
+<details><summary>OS and Linux, git and the terminal (12)</summary>
 
 - [Git from zero](Git-From-Zero.md) · [The terminal and your first script](Terminal-and-Your-First-Script.md) · [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) (est. steps) · [First hour on a new system](First-Hour-on-a-New-System-Updates-and-Baseline.md)
 - [Patch management and automatic security updates](Patch-Management-and-Automatic-Security-Updates.md) · [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md) · [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) (draft)
-- [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md) · [Kubernetes for beginners](Kubernetes-for-Beginners-What-It-Adds-Over-Docker-and-Compose.md) (draft) · [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md)
-- [Cron, systemd timers and init scripts versus systemd](Cron-Systemd-Timers-and-Init-Scripts-vs-Systemd.md) (draft)
+- [Device firmware security: Intel ME, AMD PSP, MINIX and kernel design](Device-Firmware-Security-Intel-ME-AMD-PSP-MINIX-and-Kernel-Design.md) (draft) · [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md) · [Kubernetes for beginners](Kubernetes-for-Beginners-What-It-Adds-Over-Docker-and-Compose.md) (draft)
+- [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md) · [Cron, systemd timers and init scripts versus systemd](Cron-Systemd-Timers-and-Init-Scripts-vs-Systemd.md) (draft)
 </details>
 <details><summary>Networking (5)</summary>
 
@@ -59,7 +59,7 @@ file does not match the manifest. -->
 - [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md) · [Autoscaling and elasticity](Autoscaling-and-Elasticity-Scale-Out-Targets-Cooldowns-and-Cost-Caps.md) (draft)
 </details>
 
-- [Full list (35)](Contents.md#track-1-foundations)
+- [Full list (36)](Contents.md#track-1-foundations)
 </details>
 <details><summary><b>Security tools and threat modeling</b> (6)</summary>
 
