@@ -27,7 +27,7 @@ If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md):
 
 ## Every page, by theme
 
-All 160 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
+All 161 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
 
 ### Start here, by kind of reader
 
@@ -123,6 +123,7 @@ All 160 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 - [Threat model exercise](Threat-Model-Exercise.md): Build your own threat model of this repository before you open the worked one, for security-minded readers.
 - [Threat Dragon exercise](Threat-Dragon-Exercise.md): Draw this pipeline's trust boundaries in OWASP Threat Dragon and attach threats to them, for security-minded readers.
 - [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md): The same pipeline viewed through STRIDE, MITRE ATT&CK and MITRE ATLAS, with files to open them, for security-minded readers.
+- [Disk forensics with Autopsy and The Sleuth Kit](Disk-Forensics-with-Autopsy-and-The-Sleuth-Kit.md) (draft): What The Sleuth Kit and Autopsy are, disk images and hashing first, file systems, deleted files and carving, hash sets, keyword search, timeline, reports, limits, and a free exercise on an image you build.
 
 ### Track 2: Defend and detect
 

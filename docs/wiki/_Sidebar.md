@@ -60,7 +60,7 @@ file does not match the manifest. -->
 
 - [Full list (30)](Contents.md#track-1-foundations)
 </details>
-<details><summary><b>Security tools and threat modeling</b> (6)</summary>
+<details><summary><b>Security tools and threat modeling</b> (7)</summary>
 
 - [Threats in plain words](Threats-in-Plain-Words.md)
 - [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md)
@@ -68,7 +68,12 @@ file does not match the manifest. -->
 - [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md)
 - [Threat model exercise](Threat-Model-Exercise.md)
 - [Threat Dragon exercise](Threat-Dragon-Exercise.md)
-- [Full list (6)](Contents.md#security-tools-and-threat-modeling)
+<details><summary>Digital forensics (1)</summary>
+
+- [Disk forensics with Autopsy and The Sleuth Kit](Disk-Forensics-with-Autopsy-and-The-Sleuth-Kit.md) (draft)
+</details>
+
+- [Full list (7)](Contents.md#security-tools-and-threat-modeling)
 </details>
 <details><summary><b>Track 2: Defend and detect</b> (34)</summary>
 
