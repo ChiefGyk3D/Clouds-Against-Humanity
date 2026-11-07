@@ -140,11 +140,11 @@ So the position here is narrow. Do not say the vendors planted backdoors; there 
 
 ## Turning it off, or down: what exists
 
-Everything here is described at concept level. There are no steps, because the steps need a flash programmer and a wrong move can leave the machine unable to start.
+Everything here is described at concept level. There are no steps, because the steps need a hardware flasher and a wrong move can leave the machine unable to start.
 
 **Do not mistake "off" for what it is.** On current Intel hardware the ME cannot be removed, because it is part of starting the machine. The `me_cleaner` README (read 2026-11-07) says that from Nehalem (ME version 6, 2008/2009) the firmware cannot be removed: "without a valid firmware the PC shuts off forcefully after 30 minutes". Its goal is therefore smaller: modify the firmware image so the ME runs only during boot and is largely idle in normal operation.
 
-**`me_cleaner`.** An open-source Python script that rewrites an ME firmware image to strip most modules. Its README says what it achieves per generation (generation 3, ME 11 onward, keeps four modules needed to boot and leaves about 300 kB), that on some boards "the OEM firmware fails to boot without a valid Intel ME firmware", that other boards boot with "minor inconveniences" such as longer boot times or warnings, and that "the features provided by Intel ME won't be functional anymore". It also says obtaining the original image and flashing the modified one "is usually not trivial" and often needs an external SPI programmer. Caveats from me: I read the README only. I did not check how actively the project is maintained or which of your machines it supports (the README points at a status page I did not read), I did not run it, and I have no verified count of how many people use it. If a site tells you a number, ask for its source.
+**`me_cleaner`.** An open-source Python script that rewrites an ME firmware image to strip most modules. Its README says what it achieves per generation (generation 3, ME 11 onward, keeps four modules needed to boot and leaves about 300 kB), that on some boards "the OEM firmware fails to boot without a valid Intel ME firmware", that other boards boot with "minor inconveniences" such as longer boot times or warnings, and that "the features provided by Intel ME won't be functional anymore". It also says obtaining the original image and flashing the modified one "is usually not trivial" and often needs an external SPI flasher. Caveats from me: I read the README only. I did not check how actively the project is maintained or which of your machines it supports (the README points at a status page I did not read), I did not run it, and I have no verified count of how many people use it. If a site tells you a number, ask for its source.
 
 **OEM and vendor options.** Some vendors have shipped machines with the ME reduced or disabled. Purism's press release of 2017-10-19 says its Librem laptops with coreboot ship with the ME "disabled by default", and says the check is a boot message. That is a vendor statement about its own product; I did not test it, and the release itself admits that "removing the management engine entirely is the next step beyond just disabling it". Other makers (Dell and System76 are the ones I remember from 2017) have offered similar options; I did not read their pages, so that is **est.** and I make no claim about which models.
 
@@ -223,7 +223,7 @@ Using only what Exercises 1 to 5 printed, write two lines: what processor is pre
 3. Nothing in the evidence on this page shows a government is "spying" through it; the evidenced risk is bugs in a privileged component.
 4. There is no statement of the exact model, ME version or platform support, and `me_cleaner` support depends on all three.
 5. No statement of what stopped working (AMT, firmware TPM, protected video, sleep, boot time).
-6. No recovery plan or backup of the original firmware image, and no mention of the external programmer a flash usually needs.
+6. No recovery plan or backup of the original firmware image, and no mention of the external flasher a flash usually needs.
 7. The poster treats the ME as the only firmware risk; the UEFI firmware, the embedded controller and device firmware are not addressed.
 
 </details>
@@ -268,13 +268,13 @@ Retrieved 2026-11-07 with read-only requests unless stated. "Read" means I read 
 | INTEL-SA-00075 is the advisory for CVE-2017-5689 | Memory | **est.** |
 | AMD PSP: since about 2013, ARM Cortex-A5 with TrustZone, in the CPU die; verifies board firmware; provides TPM services and RDRAND; AMD refuses to open source | [Wikipedia: AMD Platform Security Processor](https://en.wikipedia.org/wiki/AMD_Platform_Security_Processor) (secondary; citing AMD's developer guide, HotHardware 2017, Werling and Buhren 2019, none read) | Read (secondary). Details **est.** |
 | PSP uses ARM TrustZone; AGESA reportedly adds a PSP disable option (2017-12-07), unconfirmed by the author | [Phoronix, AMD Reportedly Allows Disabling PSP](https://www.phoronix.com/scan.php?page=news_item&px=AMD-PSP-Disable-Option) (Internet Archive copy; the live page returned 403) | Read |
-| me_cleaner: what it does, what it cannot do, breakage, SPI programmer note | [me_cleaner README](https://github.com/corna/me_cleaner) (raw README text) | Read. Project activity and platform support not checked |
+| me_cleaner: what it does, what it cannot do, breakage, SPI flasher note | [me_cleaner README](https://github.com/corna/me_cleaner) (raw README text) | Read. Project activity and platform support not checked |
 | Number of people who disable the ME or the PSP | None found | Not verified |
 | Purism Librem ships with the ME disabled by default (2017-10-19); "removing entirely is the next step" | [Purism press release](https://puri.sm/posts/purism-librem-laptops-completely-disable-intel-management-engine/) | Read (vendor claim, not tested) |
 | Dell and System76 offered ME-disable options in 2017 | Memory | **est.** |
 | HAP bit: reported by Positive Technologies; HAP is an NSA-developed framework per The Register; Intel's statement; Intel's "does not and will not design backdoors" statement | [The Register, 2017-08-29](https://www.theregister.com/2017/08/29/intel_management_engine_can_be_disabled/) | Read |
 | An AMD statement denying a backdoor | Not found | Not verified |
-| CVE-2018-8934 and -8935 are labelled "backdoor" for the Promontory chipset | NVD records | Read |
+| CVE-2018-8934 and -8935 are labeled "backdoor" for the Promontory chipset | NVD records | Read |
 | Exercises 1 to 5 results | My laptop, 2026-11-07 | Observed (`dmesg` refused; `journalctl` empty) |
 | Exercise 6 output on AMD | n/a | Not run; **est.** |
 
