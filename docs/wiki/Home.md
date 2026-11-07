@@ -27,7 +27,7 @@ If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md):
 
 ## Every page, by theme
 
-All 160 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
+All 161 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
 
 ### Start here, by kind of reader
 
@@ -119,6 +119,7 @@ All 160 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 
 - [Threats in plain words](Threats-in-Plain-Words.md): Vulnerabilities, exploits, phishing, malware and compliance told apart with real dated cases, for readers who meet these words as noise.
 - [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md): The rules for using Nmap, OpenVAS, Wireshark, Burp, ZAP and Metasploit, and what each one is for, for learners in an isolated lab.
+- [Memory forensics with Volatility 3](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md) (draft): Why RAM matters, getting an image from a lab VM, symbol tables, Volatility 3 plugins and their limits, and a free exercise that finds a process you started, for a learner with a VM.
 - [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md): How a message travels, the DNS records and gateways that protect it and whether to run your own mail server, for learners.
 - [Threat model exercise](Threat-Model-Exercise.md): Build your own threat model of this repository before you open the worked one, for security-minded readers.
 - [Threat Dragon exercise](Threat-Dragon-Exercise.md): Draw this pipeline's trust boundaries in OWASP Threat Dragon and attach threats to them, for security-minded readers.

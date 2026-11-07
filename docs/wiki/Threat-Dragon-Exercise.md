@@ -223,9 +223,10 @@ Next: [Threat frameworks: STRIDE, ATT&CK and ATLAS](Threat-Frameworks-STRIDE-ATT
 <!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
 Where you are: [Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Threat Dragon exercise
 
-In this group: [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling), 6 pages
+In this group: [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling), 7 pages
 
-- [Threats in plain words](Threats-in-Plain-Words.md) / [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) / [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md) / [Threat model exercise](Threat-Model-Exercise.md) / **Threat Dragon exercise** / [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
+- Also here: [Threats in plain words](Threats-in-Plain-Words.md) / [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) / [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md) / [Threat model exercise](Threat-Model-Exercise.md) / **Threat Dragon exercise** / [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
+- Digital forensics: [Memory forensics with Volatility 3](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md)
 
 Related pages:
 
