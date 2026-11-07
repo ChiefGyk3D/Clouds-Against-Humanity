@@ -27,7 +27,7 @@ If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md):
 
 ## Every page, by theme
 
-All 164 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
+All 165 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
 
 ### Start here, by kind of reader
 
@@ -164,6 +164,7 @@ All 164 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 32. [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md): A hands-on synthetic multi-site monitoring stack where you predict what a silent site does, for builders.
 33. [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) (draft): A springboard for building a small cloud security monitoring stack with a cost ceiling you set; an unverified draft for builders.
 34. [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) (unbuilt): What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied.
+35. [Network, log and timeline forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md) (draft): Preserving a packet capture as evidence, what a pcap can and cannot prove, streams with tshark, log reliability and tampering, clock skew, time zones and a plaso super timeline, with a free container exercise.
 
 ### Track 3: Privacy, anonymity and cryptocurrency
 

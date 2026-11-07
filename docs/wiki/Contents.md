@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (164 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (165 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -22,7 +22,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Core path: read in this order](#core-path-read-in-this-order) (21)
 - [Track 1: Foundations](#track-1-foundations) (34)
 - [Security tools and threat modeling](#security-tools-and-threat-modeling) (6)
-- [Track 2: Defend and detect](#track-2-defend-and-detect) (34)
+- [Track 2: Defend and detect](#track-2-defend-and-detect) (35)
 - [Track 3: Privacy, anonymity and cryptocurrency](#track-3-privacy-anonymity-and-cryptocurrency) (19)
 - [Track 4: GRC and law](#track-4-grc-and-law) (9)
 - [Track 5: Build and operate](#track-5-build-and-operate) (32)
@@ -152,6 +152,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | 32 | [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) | A hands-on synthetic multi-site monitoring stack where you predict what a silent site does, for builders. | builder |  |
 | 33 | [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) | A springboard for building a small cloud security monitoring stack with a cost ceiling you set; an unverified draft for builders. | builder | draft |
 | 34 | [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) | What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied. | operator | unbuilt |
+| 35 | [Network, log and timeline forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md) | Preserving a packet capture as evidence, what a pcap can and cannot prove, streams with tshark, log reliability and tampering, clock skew, time zones and a plaso super timeline, with a free container exercise. | learner | draft |
 
 ## Track 3: Privacy, anonymity and cryptocurrency
 

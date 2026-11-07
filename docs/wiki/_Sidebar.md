@@ -70,7 +70,7 @@ file does not match the manifest. -->
 - [Threat Dragon exercise](Threat-Dragon-Exercise.md)
 - [Full list (6)](Contents.md#security-tools-and-threat-modeling)
 </details>
-<details><summary><b>Track 2: Defend and detect</b> (34)</summary>
+<details><summary><b>Track 2: Defend and detect</b> (35)</summary>
 
 <details><summary>Network and host defense (9)</summary>
 
@@ -91,8 +91,12 @@ file does not match the manifest. -->
 - [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) (draft) · [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) (draft) · [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) (est. steps) · [Grafana dashboards](Grafana-Dashboards.md)
 - [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) · [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) (draft) · [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) (unbuilt)
 </details>
+<details><summary>Digital forensics (1)</summary>
 
-- [Full list (34)](Contents.md#track-2-defend-and-detect)
+- [Network, log and timeline forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md) (draft)
+</details>
+
+- [Full list (35)](Contents.md#track-2-defend-and-detect)
 </details>
 <details><summary><b>Track 3: Privacy, anonymity and cryptocurrency</b> (19)</summary>
 
