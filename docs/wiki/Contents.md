@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (171 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (172 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -21,7 +21,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Start here](#start-here) (5)
 - [Core path: read in this order](#core-path-read-in-this-order) (21)
 - [Track 1: Foundations](#track-1-foundations) (37)
-- [Security tools and threat modeling](#security-tools-and-threat-modeling) (7)
+- [Security tools and threat modeling](#security-tools-and-threat-modeling) (8)
 - [Track 2: Defend and detect](#track-2-defend-and-detect) (36)
 - [Track 3: Privacy, anonymity and cryptocurrency](#track-3-privacy-anonymity-and-cryptocurrency) (20)
 - [Track 4: GRC and law](#track-4-grc-and-law) (9)
@@ -112,6 +112,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | --- | --- | --- | --- |
 | [Threats in plain words](Threats-in-Plain-Words.md) | Vulnerabilities, exploits, phishing, malware and compliance told apart with real dated cases, for readers who meet these words as noise. | learner |  |
 | [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) | The rules for using Nmap, OpenVAS, Wireshark, Burp, ZAP and Metasploit, and what each one is for, for learners in an isolated lab. | learner |  |
+| [Memory forensics with Volatility 3](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md) | Why RAM matters, getting an image from a lab VM, symbol tables, Volatility 3 plugins and their limits, and a free exercise that finds a process you started, for a learner with a VM. | learner | draft |
 | [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md) | How a message travels, the DNS records and gateways that protect it and whether to run your own mail server, for learners. | learner |  |
 | [Threat model exercise](Threat-Model-Exercise.md) | Build your own threat model of this repository before you open the worked one, for security-minded readers. | security reader |  |
 | [Threat Dragon exercise](Threat-Dragon-Exercise.md) | Draw this pipeline's trust boundaries in OWASP Threat Dragon and attach threats to them, for security-minded readers. | security reader |  |

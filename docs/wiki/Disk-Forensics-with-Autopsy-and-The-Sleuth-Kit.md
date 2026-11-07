@@ -395,15 +395,15 @@ Next: continue on the [Reading order](Reading-Order.md) page.
 <!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
 Where you are: [Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Disk forensics with Autopsy and The Sleuth Kit
 
-In this group: [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling), 7 pages
+In this group: [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling), 8 pages
 
 - Also here: [Threats in plain words](Threats-in-Plain-Words.md) / [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) / [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md) / [Threat model exercise](Threat-Model-Exercise.md) / [Threat Dragon exercise](Threat-Dragon-Exercise.md) / [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
-- Digital forensics: **Disk forensics with Autopsy and The Sleuth Kit**
+- Digital forensics: [Memory forensics with Volatility 3](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md) / **Disk forensics with Autopsy and The Sleuth Kit**
 
 Related pages:
 
+- [Memory forensics with Volatility 3](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md)
 - [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
 - [Threat Dragon exercise](Threat-Dragon-Exercise.md)
 - [Threat model exercise](Threat-Model-Exercise.md)
-- [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md)
 <!-- END GENERATED PAGE NAV bottom -->
