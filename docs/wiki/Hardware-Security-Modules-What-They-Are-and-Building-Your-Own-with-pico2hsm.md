@@ -6,11 +6,11 @@
 Previous: [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md)
 <!-- END GENERATED PAGE NAV top -->
 
-A private key kept as a file can be copied, and the copy signs as you from anyone's machine. A hardware security module (HSM) changes that: the key lives inside a device, the device signs on request, and nobody gets the key itself to copy. This page sorts out what that does and does not buy you, how it differs from a TPM, a smart card, a security key and a cloud KMS, what "certified" means, and then looks at pico2hsm, a hobby HSM firmware for the Raspberry Pi Pico 2 that a friend of mine from my local DEF CON group wrote.
+A private key kept as a file can be copied, and the copy signs as you from anyone's machine. A hardware security module (HSM) changes that: the key lives inside a device, the device signs on request, and nobody gets the key itself to copy. This page sorts out what that does and does not buy you, how it differs from a TPM, a smart card, a security key and a cloud KMS, what "certified" means, and then looks at pico2hsm, a hobby HSM firmware for the Raspberry Pi Pico 2, a project by its maintainer (https://github.com/mcarey42/pico2hsm).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-> **Status: unverified draft. Written from reading; nothing was run on a Pico, and the pico2hsm part is a reading of its repository, not a test of it.** On **2026-11-07** I read the pico2hsm repository's README, SECURITY, QUICKSTART, BUILDING (searched, not read through), ARCHITECTURE, LICENSE, the examples README and the sign-in examples, parts of `docs/` (SINGLE_DEVICE_SETUP, PROVISIONING, SECURITY_SUMMARY, AUDIT_2026-10) and the first part of the CHANGELOG, through the GitHub API at commit `07d2d3b` (committed 2026-11-05, 14:21 UTC), the tip of `main` that day. The newest release that day was **v2.2.0**, published 2026-11-02. **Observed:** the software rehearsal in [the exercise](#exercise-a-key-that-has-no-file), Part A, with OpenSSL 3.5.7 on 2026-11-07. **Not run:** every pico2hsm build, flash and device command (the maintainer has not built it and no Pico 2 was available), `pkcs11-tool`, `pcscd`, GnuPG with a card, `ssh` with a PKCS#11 key, and every cloud HSM and KMS product. Standards and vendor statements were read on 2026-11-07 from the pages named in the [claims register](#claims-register); anything I could not read there is marked **est.** Trust what your terminal prints over what this page says.
+> **Status: unverified draft. Written from reading; nothing was run on a Pico, and the pico2hsm part is a reading of its repository, not a test of it.** On **2026-11-07** these files of the pico2hsm repository were read: README, SECURITY, QUICKSTART, BUILDING (searched, not read through), ARCHITECTURE, LICENSE, the examples README and the sign-in examples, parts of `docs/` (SINGLE_DEVICE_SETUP, PROVISIONING, SECURITY_SUMMARY, AUDIT_2026-10) and the first part of the CHANGELOG, through the GitHub API at commit `07d2d3b` (committed 2026-11-05, 14:21 UTC), the tip of `main` that day. The newest release that day was **v2.2.0**, published 2026-11-02. **Observed:** the software rehearsal in [the exercise](#exercise-a-key-that-has-no-file), Part A, with OpenSSL 3.5.7 on 2026-11-07. **Not run:** every pico2hsm build, flash and device command (the maintainer has not built it and no Pico 2 was available), `pkcs11-tool`, `pcscd`, GnuPG with a card, `ssh` with a PKCS#11 key, and every cloud HSM and KMS product. Standards and vendor statements were read on 2026-11-07 from the pages named in the [claims register](#claims-register); anything that could not be read there is marked **est.** Trust what your terminal prints over what this page says.
 
 > **Prerequisites.** [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md), at least its sections on digital signatures and key management. A terminal ([The terminal and your first script](Terminal-and-Your-First-Script.md)). About 75 minutes for the reading and Part A of the exercise (est.). Part B needs a Raspberry Pi Pico 2 and a USB data cable, about 2 hours the first time (est.), and is **untested**.
 
@@ -59,7 +59,7 @@ What an HSM does not give you:
 
 ## PKCS#11 in concept
 
-PKCS#11 is the long-standing way for programs to talk to a device that holds keys. The current OASIS standard I read is version 3.0, dated 15 June 2020; its abstract says it "defines data types, functions and other basic components of the PKCS #11 Cryptoki interface," and it describes Cryptoki as the interface for "devices that hold cryptographic information and perform cryptographic functions." The names you meet are:
+PKCS#11 is the long-standing way for programs to talk to a device that holds keys. The current OASIS standard read for this page is version 3.0, dated 15 June 2020; its abstract says it "defines data types, functions and other basic components of the PKCS #11 Cryptoki interface," and it describes Cryptoki as the interface for "devices that hold cryptographic information and perform cryptographic functions." The names you meet are:
 
 | Word | What it is |
 |---|---|
@@ -105,18 +105,18 @@ These blur at the edges, and one device can wear several hats. pico2hsm is a goo
 
 **FIPS 140.** FIPS 140-3, published by NIST (document dated March 22, 2019), "provides four increasing, qualitative levels of security: Level 1, Level 2, Level 3, and Level 4," across areas that include physical security, non-invasive security, software and firmware security, sensitive security parameter management, self-tests and life-cycle assurance. It supersedes FIPS 140-2 and aligns with ISO/IEC 19790:2012. A device is **validated**, not merely "compliant," by the Cryptographic Module Validation Program (CMVP), a joint effort of NIST and the Canadian government's national cyber security agency. Accredited independent labs test each module; CMVP began validating to 140-3 on September 22, 2020, stopped accepting new 140-2 submissions after March 31, 2022, and keeps a validated module on its active list for five years. Higher levels require more physical protection (est.): Level 3 is what the cloud services above cite.
 
-**Common Criteria.** A separate international scheme, adopted as ISO/IEC 15408 (the 2022 edition, per the summary I read; the Common Criteria portal itself refused my request on 2026-11-07). It evaluates a product against a security target or a protection profile, to an assurance level (est.). It answers "was this product built and tested to claim these properties," not "is it unbreakable."
+**Common Criteria.** A separate international scheme, adopted as ISO/IEC 15408 (the 2022 edition, per the summary read; the Common Criteria portal itself refused the request on 2026-11-07). It evaluates a product against a security target or a protection profile, to an assurance level (est.). It answers "was this product built and tested to claim these properties," not "is it unbreakable."
 
-**Why a hobby device is not certified hardware.** Certification is a paid, lab-run process tied to one specific hardware and firmware version, and it is about the *module*: its physical design as well as its code. pico2hsm runs on an off-the-shelf microcontroller board. Its own SECURITY.md says so in as many words (quoted below). Writing good code does not make a device validated; the validation is a separate act by a lab, on a specific build, and I found no claim of one in the repository files I read. That is not a flaw to hide, it is a category: a hobby HSM can be excellent for learning and a lab, and still not be something you could use where a rule says "FIPS validated."
+**Why a hobby device is not certified hardware.** Certification is a paid, lab-run process tied to one specific hardware and firmware version, and it is about the *module*: its physical design as well as its code. pico2hsm runs on an off-the-shelf microcontroller board. Its own SECURITY.md says so in as many words (quoted below). Writing good code does not make a device validated; the validation is a separate act by a lab, on a specific build, and no claim of one was found in the repository files read. That is not a flaw to hide, it is a category: a hobby HSM can be excellent for learning and a lab, and still not be something you could use where a rule says "FIPS validated."
 
 ## pico2hsm: what it is
 
-pico2hsm is firmware, written in Rust, for the Raspberry Pi RP2350 microcontroller, by a friend of mine from my local DEF CON group. The project is at <https://github.com/mcarey42/pico2hsm> and is **MIT licensed** (the license file names one copyright holder, 2024 to 2026; I did not count contributors). The GitHub description is "SmartCard-HSM firmware for Raspberry Pi Pico 2 (RP2350)." Read the repository for the truth; this section is a signpost, dated 2026-11-07, and I am not copying its code or documentation.
+pico2hsm is firmware, written in Rust, for the Raspberry Pi RP2350 microcontroller, by its maintainer. The project is at <https://github.com/mcarey42/pico2hsm> and is **MIT licensed** (the license file names one copyright holder, 2024 to 2026; contributors were not counted). The GitHub description is "SmartCard-HSM firmware for Raspberry Pi Pico 2 (RP2350)." Read the repository for the truth; this section is a signpost, dated 2026-11-07, and its code and documentation are not copied here.
 
-What the README says, as I read it:
+What the README says (read 2026-11-07):
 
 - **A USB smart-card reader that is an HSM.** It speaks smart-card protocols over USB CCID, compatible with OpenSC, `pkcs11-tool`, GnuPG and any PKCS#11 application that supports smart cards.
-- **Applets.** SmartCard-HSM (SC-HSM, always on) and PIV are listed as "Hardware-validated"; OpenPGP Card 3.4 is "Hardware-validated"; OpenPGP with Ed25519 and X25519 is listed as "Implemented." The README does not define "hardware-validated"; I read it as "the author tested it on a device," and I did not check how.
+- **Applets.** SmartCard-HSM (SC-HSM, always on) and PIV are listed as "Hardware-validated"; OpenPGP Card 3.4 is "Hardware-validated"; OpenPGP with Ed25519 and X25519 is listed as "Implemented." The README does not define "hardware-validated"; it reads as "the author tested it on a device," and how was not checked.
 - **Boards.** Off-the-shelf RP2350 boards only: the Raspberry Pi Pico 2 (4 MB flash, room for 109 SC-HSM keys, feature flag `pico2_4m`) and several Waveshare boards, some with a 16 MB chip and room for 251 keys. The Pico 2 is the stated primary debug and test target.
 - **Key types.** Elliptic-curve keys (P-256, P-384, P-521, secp256k1) always; RSA 2048, 3072 and 4096 with the `rsa` feature; Ed25519 and X25519 in the OpenPGP applet with its feature. Brainpool curves are refused (SINGLE_DEVICE_SETUP).
 - **Storage.** A journaled keystore on the board's flash (or a microSD card in some builds). Objects are sealed with AES-256-GCM under a key derived from one-time-programmable (OTP) fuses, so a copy of the flash alone does not open them (README, ARCHITECTURE).
@@ -140,13 +140,13 @@ Other limits stated in the repository:
 - **Debug.** A production device with debug left enabled can be read over SWD (PROVISIONING.md).
 - **Platforms.** The examples README says Windows is untested and suggests WSL2.
 
-What I did not find stated, so I make no claim either way: any independent third-party audit (the repository has an internal audit document dated October 2026 and an older security summary labeled a historical snapshot), any FIPS or Common Criteria evaluation, and any statement about how long a given key takes to extract with physical tools.
+Not found stated, so no claim is made either way: any independent third-party audit (the repository has an internal audit document dated October 2026 and an older security summary labeled a historical snapshot), any FIPS or Common Criteria evaluation, and any statement about how long a given key takes to extract with physical tools.
 
-One more thing worth saying fairly. The README describes the project as "production-grade." SECURITY.md describes the hardware limits plainly, and I trust the second more as a guide to what to use it for: a learning device, a lab, a homelab, and, on A4 silicon with careful provisioning, whatever the owner decides is acceptable. That is the project being honest about itself, and it is more than many hobby projects manage.
+One more thing worth saying fairly. The README describes the project as "production-grade." SECURITY.md describes the hardware limits plainly, and the second is the better guide to what to use it for: a learning device, a lab, a homelab, and, on A4 silicon with careful provisioning, whatever the owner decides is acceptable. That is the project being honest about itself, and it is more than many hobby projects manage.
 
 ## Worked uses
 
-Only the ones the repository supports, with what it says and what I did not see.
+Only the ones the repository supports, with what it says and what was not seen.
 
 | Use | What the repository shows | Status |
 |---|---|---|
@@ -154,7 +154,7 @@ Only the ones the repository supports, with what it says and what I did not see.
 | **SSH key** | SINGLE_DEVICE_SETUP, "Use cases": generate a key, then use OpenSSH with the OpenSC PKCS#11 module (`ssh-add -s` or `ssh -I`). | Read. Not run. |
 | **Code and release signing** | Example 04 signs a test file with a GnuPG subkey on the OpenPGP applet and says this covers `git commit -S`. It does not mention release artifacts or Authenticode or any platform signing scheme. | Read. Signing a git tag or a tarball with the card follows from GnuPG (**est.**). Not run. |
 | **Smart-card login (PIV)** | SINGLE_DEVICE_SETUP lists macOS smart card login, Windows Hello for Business and SSH through PIV middleware. Example 03 signs a challenge with a key in PIV slot 9A. | Read. Not run. |
-| **A small lab CA root** | I found no certificate-authority walkthrough in the files I read. The route would be a tool that uses a PKCS#11 module to sign certificate requests (OpenSSL with a PKCS#11 provider, for instance), with the root key on the Pico. That is plausible for a device that speaks PKCS#11, but it is **est.** and not something the project documents. | Not stated by the project. **est.** |
+| **A small lab CA root** | No certificate-authority walkthrough was found in the files read. The route would be a tool that uses a PKCS#11 module to sign certificate requests (OpenSSL with a PKCS#11 provider, for instance), with the root key on the Pico. That is plausible for a device that speaks PKCS#11, but it is **est.** and not something the project documents. | Not stated by the project. **est.** |
 
 The CA case is the interesting one for a lab: a root key you can unplug and put in a drawer is a better teaching model of an offline root than a file on a laptop. If the maintainer tries it, the notes in [the checks section](#for-the-maintainer-checks-to-run-when-you-build-it) say what to record.
 
@@ -164,7 +164,7 @@ The CA case is the interesting one for a lab: a root key you can unplug and put 
 
 ### Part A: the software rehearsal (observed, no hardware)
 
-This is the same flow as the device version, with the private key as a file so you can see what the HSM removes. I ran it on 2026-11-07 with OpenSSL 3.5.7.
+This is the same flow as the device version, with the private key as a file so you can see what the HSM removes. It was run on 2026-11-07 with OpenSSL 3.5.7.
 
 ```bash
 mkdir -p ~/hsmlab && cd ~/hsmlab
@@ -185,21 +185,21 @@ echo "tamper" >> msg.txt
 openssl dgst -sha256 -verify pub.der -keyform DER -signature sig.bin msg.txt
 ```
 
-Expected, and what I saw: `Verified OK` for the first verify, then `Verification failure` and a nonzero exit for the second. Now answer on paper: where is the thing a thief would copy? (`soft.pem`.) In Part B there is no such file for the private key, and that is the whole point.
+Expected, and what was observed: `Verified OK` for the first verify, then `Verification failure` and a nonzero exit for the second. Now answer on paper: where is the thing a thief would copy? (`soft.pem`.) In Part B there is no such file for the private key, and that is the whole point.
 
 Clean up: `rm -r ~/hsmlab`.
 
 ### Part B: the same on a Pico 2 (UNTESTED)
 
-> **Untested.** Nobody has run these steps. They follow the pico2hsm QUICKSTART and SINGLE_DEVICE_SETUP as read on 2026-11-07. Where I add something the repository does not say, it is marked **est.** If a step fails, trust the repository over this page and tell the maintainer so the page can be corrected.
+> **Untested.** Nobody has run these steps. They follow the pico2hsm QUICKSTART and SINGLE_DEVICE_SETUP as read on 2026-11-07. Where this page adds something the repository does not say, it is marked **est.** If a step fails, trust the repository over this page and tell the maintainer so the page can be corrected.
 
 You need a Raspberry Pi Pico 2 (a 4 MB RP2350 board) and a data USB cable (a charge-only cable will not work). Use a spare board: Part B uses a **development** configuration whose storage key is public, and you will not provision it.
 
 1. **Install the tools.** Rust with the `thumbv8m.main-none-eabihf` target, `picotool` version 2.1 or later, `pcscd` and OpenSC (QUICKSTART, step 1 and step 6). Link: <https://github.com/mcarey42/pico2hsm/blob/main/QUICKSTART.md>.
-2. **Get the code at a release tag, not the moving tip** (**est.**, my advice): clone the repository and check out `v2.2.0`, the release I read about. The tip of `main` can carry unreleased changes.
+2. **Get the code at a release tag, not the moving tip** (**est.**, advice from this page): clone the repository and check out `v2.2.0`, the release read about on 2026-11-07. The tip of `main` can carry unreleased changes.
 3. **Check the silicon.** With the board in BOOTSEL mode, run `picotool info -a` and write down the revision. A2 and A3 are acceptable for a lab per the README; A4 is the one it asks for in production.
 4. **Do not provision.** The repository says OTP writes are permanent. Skip secure-boot provisioning entirely for this exercise.
-5. **Build a development image.** The default release build disables the keystore on a blank board. QUICKSTART's note offers two ways, a debug build or a release build with the `insecure-dev-keystore` feature, for the `pico2_4m` board. Pick the second if you have no debug probe, and follow QUICKSTART for the exact commands. Whether the signing-key generation step (QUICKSTART step 3) is required for a development image is not clear to me from the text; do it, since it is harmless on a lab machine, and keep the key file out of version control.
+5. **Build a development image.** The default release build disables the keystore on a blank board. QUICKSTART's note offers two ways, a debug build or a release build with the `insecure-dev-keystore` feature, for the `pico2_4m` board. Pick the second if you have no debug probe, and follow QUICKSTART for the exact commands. Whether the signing-key generation step (QUICKSTART step 3) is required for a development image is not clear from the text; do it, since it is harmless on a lab machine, and keep the key file out of version control.
 6. **Install the partition table, then the firmware**, with `picotool` in BOOTSEL mode, as QUICKSTART step 5 (Method A) describes. Converting the development ELF into a UF2 is shown in the build note; loading it into partition 0 is the same command shape (**est.**).
 7. **Confirm the reader.** `lsusb` and `pkcs11-tool --list-slots` should show a pico2hsm slot (QUICKSTART step 6). If not, check that `pcscd` is running.
 8. **Initialize with your own PINs.** QUICKSTART and the examples print sample PINs; do not reuse them, even on a lab device, so the habit is right. Use `sc-hsm-tool --initialize` with a label, a SO-PIN and a user PIN of your choosing and `--dkek-shares 0` (no backup, since this is a throwaway key).
@@ -252,7 +252,7 @@ Without looking back: say in one sentence what an HSM protects against and what 
 
 ## Claims register
 
-Retrieved 2026-11-07 with read-only requests. "Read" means I read the page or file text. "Observed" means I ran it. Pages I could not read are marked.
+Retrieved 2026-11-07 with read-only requests. "Read" means the page or file text was read. "Observed" means it was run. Pages that could not be read are marked.
 
 | Claim | Source | Status |
 |---|---|---|
@@ -269,7 +269,7 @@ Retrieved 2026-11-07 with read-only requests. "Read" means I read the page or fi
 | Provisioning writes OTP and is permanent; flash replay can roll the store back; debug left enabled exposes RAM | PROVISIONING section 1 | Read |
 | Windows is untested for the examples | [examples README](https://github.com/mcarey42/pico2hsm/blob/main/examples/README.md) | Read |
 | Use cases: SSH via the OpenSC PKCS#11 module, OpenPGP via GnuPG, PIV; example 04 signs with a GnuPG subkey | SINGLE_DEVICE_SETUP "Use cases", examples 02 to 04 | Read. Not run |
-| No third-party audit or FIPS/CC evaluation stated in the files I read; an internal October 2026 audit document exists | [AUDIT_2026-10](https://github.com/mcarey42/pico2hsm/blob/main/docs/AUDIT_2026-10.md), SECURITY_SUMMARY | Read. Absence of a claim: I read selected files, not the whole repository |
+| No third-party audit or FIPS/CC evaluation stated in the files read; an internal October 2026 audit document exists | [AUDIT_2026-10](https://github.com/mcarey42/pico2hsm/blob/main/docs/AUDIT_2026-10.md), SECURITY_SUMMARY | Read. Absence of a claim: selected files were read, not the whole repository |
 | An HSM "processes cryptographic operations and provides secure storage for cryptographic keys"; CloudHSM is single-tenant, FIPS 140-2 or 140-3 Level 3 validated in FIPS mode; data plane is not visible to AWS; customer takes more responsibility | [AWS CloudHSM User Guide: What is AWS CloudHSM?](https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html) | Read |
 | AWS KMS keys are protected by FIPS 140-3 Security Level 3 validated HSMs and never leave KMS unencrypted | [AWS KMS Developer Guide](https://docs.aws.amazon.com/kms/latest/developerguide/overview.html) | Read |
 | PKCS#11 v3.0 OASIS Standard, 15 June 2020; defines the Cryptoki interface; slot, token, session and object sections | [PKCS #11 Specification v3.0](https://docs.oasis-open.org/pkcs11/pkcs11-base/v3.0/os/pkcs11-base-v3.0-os.html) | Read (abstract and table of contents) |
