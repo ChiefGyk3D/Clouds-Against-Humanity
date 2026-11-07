@@ -77,7 +77,7 @@ file does not match the manifest. -->
 
 - [Full list (8)](Contents.md#security-tools-and-threat-modeling)
 </details>
-<details><summary><b>Track 2: Defend and detect</b> (37)</summary>
+<details><summary><b>Track 2: Defend and detect</b> (38)</summary>
 
 <details><summary>Network and host defense (9)</summary>
 
@@ -98,16 +98,16 @@ file does not match the manifest. -->
 - [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) (draft) · [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) (draft) · [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) (est. steps) · [Grafana dashboards](Grafana-Dashboards.md)
 - [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) · [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) (draft) · [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) (unbuilt)
 </details>
+<details><summary>Digital forensics (3)</summary>
+
+- [DFIR toolkits and live triage](DFIR-Toolkits-and-Live-Triage-SIFT-Velociraptor-KAPE-and-the-Incident-Response-Workflow.md) (draft) · [Digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md) (draft) · [Network, log and timeline forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md) (draft)
+</details>
 <details><summary>Device and credential security (1)</summary>
 
 - [Open firmware and trustworthy hardware](Open-Firmware-and-Trustworthy-Hardware-coreboot-Heads-Nitrokey-and-Vendors-That-Ship-the-Intel-ME-Disabled.md) (draft)
 </details>
-<details><summary>Digital forensics (2)</summary>
 
-- [Digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md) (draft) · [Network, log and timeline forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md) (draft)
-</details>
-
-- [Full list (37)](Contents.md#track-2-defend-and-detect)
+- [Full list (38)](Contents.md#track-2-defend-and-detect)
 </details>
 <details><summary><b>Track 3: Privacy, anonymity and cryptocurrency</b> (20)</summary>
 
