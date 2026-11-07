@@ -29,7 +29,7 @@ file does not match the manifest. -->
 21. [Roadmap](Roadmap.md)
 - [Full list (21)](Contents.md#core-path-read-in-this-order)
 </details>
-<details><summary><b>Track 1: Foundations</b> (36)</summary>
+<details><summary><b>Track 1: Foundations</b> (37)</summary>
 
 <details><summary>OS and Linux, git and the terminal (12)</summary>
 
@@ -43,9 +43,10 @@ file does not match the manifest. -->
 - [How a web request works](How-a-Web-Request-Works.md) · [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) · [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md) · [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md)
 - [IPv6 adoption and handling it safely](IPv6-Adoption-and-Handling-It-Safely.md)
 </details>
-<details><summary>Identity and secrets (6)</summary>
+<details><summary>Identity and secrets (7)</summary>
 
-- [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) · [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) · [Secrets from day one](Secrets-From-Day-One.md) · [Password managers and passkeys](Password-Managers-and-Passkeys-What-Each-Protects-and-Where-They-Fail.md) (draft) · [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md)
+- [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) · [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) · [Secrets from day one](Secrets-From-Day-One.md) · [Password managers and passkeys](Password-Managers-and-Passkeys-What-Each-Protects-and-Where-They-Fail.md) (draft)
+- [Disk and file encryption: VeraCrypt, TrueCrypt, BitLocker, FileVault, LUKS](Disk-and-File-Encryption-VeraCrypt-TrueCrypt-History-BitLocker-FileVault-and-LUKS.md) (draft) · [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md)
 - [Hardware security keys: YubiKey, Nitrokey, PIV](Hardware-Security-Keys-YubiKey-Nitrokey-Smart-Cards-and-PIV.md) (draft)
 </details>
 <details><summary>Infrastructure as code (8)</summary>
@@ -59,7 +60,7 @@ file does not match the manifest. -->
 - [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md) · [Autoscaling and elasticity](Autoscaling-and-Elasticity-Scale-Out-Targets-Cooldowns-and-Cost-Caps.md) (draft)
 </details>
 
-- [Full list (36)](Contents.md#track-1-foundations)
+- [Full list (37)](Contents.md#track-1-foundations)
 </details>
 <details><summary><b>Security tools and threat modeling</b> (6)</summary>
 
