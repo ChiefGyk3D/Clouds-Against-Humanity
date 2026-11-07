@@ -153,7 +153,7 @@ Everything above is push. `ansible-pull` flips it: each managed node runs it, fe
 
 ## Ansible, OpenTofu and cloud-init side by side
 
-| | OpenTofu | cloud-init | Ansible |
+| Question | OpenTofu | cloud-init | Ansible |
 |---|---|---|---|
 | Job | Create and destroy resources | Configure a machine as it first boots | Keep an existing machine in a described state |
 | Runs | Where you run it (here, in Spacelift) | On the machine, at first boot | From a control node, or on the machine with `ansible-pull` |
@@ -454,14 +454,14 @@ Retrieved **2026-11-07** with read-only requests. "Read" means I read the page t
 
 | Claim | Source | Status |
 |---|---|---|
-| Agentless tool installed on one control node, manages nodes over SSH, PowerShell remoting and other transports, "no databases or daemons required" | [Ansible installation guide](https://docs.ansible.com/projects/ansible/latest/installation_guide/intro_installation.html) | Read |
+| Agentless tool installed on one control node, manages nodes over SSH, PowerShell remoting and other transports, "no databases or daemons required" | docs.ansible.com, "Ansible installation guide" | Read |
 | Managed node needs Python and an SSH-reachable user with an interactive POSIX shell; Ansible need not be installed on it | Same page, managed node requirements | Read |
 | Control node: nearly any UNIX-like machine with Python; Windows without WSL not supported | Same page, control node requirements | Read |
-| Idempotence quote: when the system is in the described state Ansible does not change anything | [Ansible introduction](https://docs.ansible.com/projects/ansible/latest/getting_started/introduction.html) | Read |
-| Default inventory file `/etc/ansible/hosts`, overridden with `-i` | [Building an inventory](https://docs.ansible.com/projects/ansible/latest/inventory_guide/intro_inventory.html) | Read |
-| Check mode makes no changes; modules without support report nothing and do nothing; diff mode shows before and after | [Check mode and diff mode](https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_checkmode.html) | Read |
-| `ansible-pull` pulls playbooks from a VCS repo and runs them on the target host; useful for extreme scale-out and periodic remediation | [ansible-pull CLI page](https://docs.ansible.com/projects/ansible/latest/cli/ansible-pull.html) | Read; `--help` printed, not run |
-| Vault encrypts and manages sensitive data such as passwords | [Ansible Vault guide](https://docs.ansible.com/projects/ansible/latest/vault_guide/index.html) | Read |
+| Idempotence quote: when the system is in the described state Ansible does not change anything | docs.ansible.com, "Ansible introduction" | Read |
+| Default inventory file `/etc/ansible/hosts`, overridden with `-i` | docs.ansible.com, "Building an inventory" | Read |
+| Check mode makes no changes; modules without support report nothing and do nothing; diff mode shows before and after | docs.ansible.com, "Check mode and diff mode" | Read |
+| `ansible-pull` pulls playbooks from a VCS repo and runs them on the target host; useful for extreme scale-out and periodic remediation | docs.ansible.com, "ansible-pull CLI page" | Read; `--help` printed, not run |
+| Vault encrypts and manages sensitive data such as passwords | docs.ansible.com, "Ansible Vault guide" | Read |
 | ansible-core is licensed GPL version 3 | `COPYING` in the [ansible repository](https://github.com/ansible/ansible) (devel branch) | Read |
 | ansible-core 2.22.0 installs with `pip` and `ansible --version` reports it | Local run | Observed |
 | `ping` returns `pong`, `changed: false` | Local run, Exercise 2 | Observed |
