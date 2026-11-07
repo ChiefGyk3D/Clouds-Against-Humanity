@@ -57,7 +57,10 @@ def test_sibling_forensics_lessons_are_plain_text_not_links():
     body = text()
     for issue in ("#474", "#476", "#477", "#478"):
         assert issue in body, issue
-    assert not re.search(r"\]\((?:[^)]*)(Memory|Network|Toolkits|Foundations)[^)]*Forensic", body)
+    # The generated nav blocks list every page of the "Digital forensics" subgroup once the siblings exist, so the
+    # check is on the hand-written text only: the marked blocks are cut out first.
+    hand_written = re.sub(r"<!-- BEGIN GENERATED .*?<!-- END GENERATED [^>]*-->", "", body, flags=re.DOTALL)
+    assert not re.search(r"\]\((?:[^)]*)(Memory|Network|Toolkits|Foundations)[^)]*Forensic", hand_written)
 
 
 def test_the_lesson_is_registered_everywhere():

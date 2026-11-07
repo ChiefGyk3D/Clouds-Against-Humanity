@@ -92,7 +92,7 @@ As soon as the file exists, record a hash of it (`sha256sum`) and keep the hash 
 
 ## Why acquiring changes memory
 
-You cannot photograph a running machine without the machine moving. RFC 3227 puts it as a principle, section 2: "Minimise changes to the data as you are collecting it" (read 2026-11-07). Three separate causes:
+You cannot photograph a running machine without the machine moving. RFC 3227 puts it as a principle, section 2: "Minimize changes to the data as you are collecting it" (read 2026-11-07). Three separate causes:
 
 1. **The tool needs memory.** A capture program loads, allocates and runs. On a real machine, that overwrites some free pages and pushes some cached data out. Loading LiME means a new kernel module appears in the module list, and it shows up in the image you took.
 2. **The machine keeps running.** A capture of 2 GB takes seconds to minutes, and the system does not stop for it. One page can be captured before a process changes it and another after. The result is not a single instant; it is a smear. Your process list and your network table may describe slightly different moments.
@@ -389,7 +389,7 @@ Retrieved 2026-11-07 with read-only requests, unless stated. "Read" means I read
 | LiME: loadable kernel module, GPL-2.0, formats raw, padded, lime, `insmod` syntax, `path=tcp:` option; latest release v1.12.0 on 2026-03-31 | [LiME on GitHub](https://github.com/504ensicsLabs/LiME) and its release list | Read; not built or run |
 | WinPmem: Apache-2.0, raw output from the mini builds, `winpmem_mini_x64.exe physmem.raw`, signed binaries have write support off, README names Windows 7 to 10; newest listed release `v4.1.dev1` (pre-release, 2024-11-23) | [WinPmem on GitHub](https://github.com/Velocidex/WinPmem) and its release list | Read; not run. Which build suits a current Windows: **est.** |
 | FTK Imager: free, memory capture on a live device; no version shown on the product page; download asks for contact details | [Exterro: FTK Imager](https://exterro.com/digital-forensics-software/ftk-imager) | Read. Menu path and raw output: from a secondary guide, **est.** |
-| RFC 3227 section 2.1 order of volatility; section 2 "Minimise changes to the data as you are collecting it" | [RFC 3227](https://www.rfc-editor.org/rfc/rfc3227.txt) | Read |
+| RFC 3227 section 2.1 order of volatility; section 2 "Minimize changes to the data as you are collecting it" | [RFC 3227](https://www.rfc-editor.org/rfc/rfc3227.txt) | Read |
 | QEMU `dump-guest-memory` wrote a 2,164,394,051-byte ELF core file for a 2 GB guest that Volatility 3 read directly | QEMU 10.0.13 monitor, Volatility 3 2.28.2 | Observed |
 | Two dumps three minutes apart differed in 1,583 of 528,417 pages; `pslist` listed 93 then 90 processes | My comparison script on the two dumps | Observed |
 | `-nic user` with no model gave the Debian cloud guest no network card; `model=virtio-net-pci` worked | Guest console log (cloud-init's device table showed only loopback) | Observed |
