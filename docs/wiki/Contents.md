@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (173 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (174 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -22,7 +22,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Core path: read in this order](#core-path-read-in-this-order) (21)
 - [Track 1: Foundations](#track-1-foundations) (37)
 - [Security tools and threat modeling](#security-tools-and-threat-modeling) (8)
-- [Track 2: Defend and detect](#track-2-defend-and-detect) (37)
+- [Track 2: Defend and detect](#track-2-defend-and-detect) (38)
 - [Track 3: Privacy, anonymity and cryptocurrency](#track-3-privacy-anonymity-and-cryptocurrency) (20)
 - [Track 4: GRC and law](#track-4-grc-and-law) (9)
 - [Track 5: Build and operate](#track-5-build-and-operate) (32)
@@ -156,10 +156,11 @@ A page with no marker has no such banner. It may still say what was and was not 
 | 31 | [Grafana dashboards](Grafana-Dashboards.md) | The three dashboards this repository ships and which question each answers; only tried with synthetic data. | operator |  |
 | 32 | [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) | A hands-on synthetic multi-site monitoring stack where you predict what a silent site does, for builders. | builder |  |
 | 33 | [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) | A springboard for building a small cloud security monitoring stack with a cost ceiling you set; an unverified draft for builders. | builder | draft |
-| 34 | [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) | What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied. | operator | unbuilt |
-| 35 | [Open firmware and trustworthy hardware](Open-Firmware-and-Trustworthy-Hardware-coreboot-Heads-Nitrokey-and-Vendors-That-Ship-the-Intel-ME-Disabled.md) | What firmware is, coreboot, Heads with a Nitrokey, what a TPM and Secure Boot do not prove, and what Novacustom, System76, Purism and Tuxedo claim about the Intel ME, each dated, with a free read-only exercise. | learner | draft |
-| 36 | [Digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md) | Evidence handling, chain of custody and the order of volatility from RFC 3227, NIST SP 800-86 and SWGDE, with a free hash, image and verify exercise on a file you make. | learner | draft |
-| 37 | [Network, log and timeline forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md) | Preserving a packet capture as evidence, what a pcap can and cannot prove, streams with tshark, log reliability and tampering, clock skew, time zones and a plaso super timeline, with a free container exercise. | learner | draft |
+| 34 | [DFIR toolkits and live triage](DFIR-Toolkits-and-Live-Triage-SIFT-Velociraptor-KAPE-and-the-Incident-Response-Workflow.md) | SIFT, CAINE, Velociraptor, KAPE, FTK Imager and plaso from the owners' pages, live triage against dead-box imaging, an incident response workflow, and a free triage exercise on your own machine. | learner | draft |
+| 35 | [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) | What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied. | operator | unbuilt |
+| 36 | [Open firmware and trustworthy hardware](Open-Firmware-and-Trustworthy-Hardware-coreboot-Heads-Nitrokey-and-Vendors-That-Ship-the-Intel-ME-Disabled.md) | What firmware is, coreboot, Heads with a Nitrokey, what a TPM and Secure Boot do not prove, and what Novacustom, System76, Purism and Tuxedo claim about the Intel ME, each dated, with a free read-only exercise. | learner | draft |
+| 37 | [Digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md) | Evidence handling, chain of custody and the order of volatility from RFC 3227, NIST SP 800-86 and SWGDE, with a free hash, image and verify exercise on a file you make. | learner | draft |
+| 38 | [Network, log and timeline forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md) | Preserving a packet capture as evidence, what a pcap can and cannot prove, streams with tshark, log reliability and tampering, clock skew, time zones and a plaso super timeline, with a free container exercise. | learner | draft |
 
 ## Track 3: Privacy, anonymity and cryptocurrency
 
