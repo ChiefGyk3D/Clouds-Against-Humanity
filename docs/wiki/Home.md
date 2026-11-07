@@ -27,7 +27,7 @@ If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md):
 
 ## Every page, by theme
 
-All 167 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
+All 168 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
 
 ### Start here, by kind of reader
 
@@ -189,6 +189,7 @@ All 167 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 17. [Paper wallets and offline key generation](Paper-Wallets-Generators-and-Offline-Key-Generation-Tails-Electrum-and-Monero.md) (draft): An addition to the cryptocurrency set: what a paper wallet is, why the advice changed, how to judge a generator, offline generation with Tails, Electrum and Monero, and a checklist exercise.
 18. [Running Monero properly](Running-Monero-Properly-Hardware-Wallet-Qubes-and-Whonix-Offline-Wallet-and-PiNodeXMR.md) (draft): Page 5 of 5 on cryptocurrency: a hardware wallet with Monero, the Qubes and Whonix offline-wallet design, PiNodeXMR as an always-on node and how to secure it, with a paper exercise.
 19. [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md) (draft): What still works when the internet and power are down: LoRa mesh, amateur radio, GMRS, FRS and CB, a legal-first SIGINT overview, and what a radio fallback could do for this project.
+20. [Hardware security modules and building your own with pico2hsm](Hardware-Security-Modules-What-They-Are-and-Building-Your-Own-with-pico2hsm.md) (draft): What an HSM protects against, PKCS#11, key custody, cloud HSM and KMS against a device in your hand, TPM, smart card and security key, FIPS 140 and Common Criteria, then pico2hsm on a Pico 2 with an untested exercise.
 
 ### Track 4: GRC and law
 

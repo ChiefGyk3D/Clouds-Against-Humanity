@@ -99,11 +99,12 @@ file does not match the manifest. -->
 
 - [Full list (35)](Contents.md#track-2-defend-and-detect)
 </details>
-<details><summary><b>Track 3: Privacy, anonymity and cryptocurrency</b> (19)</summary>
+<details><summary><b>Track 3: Privacy, anonymity and cryptocurrency</b> (20)</summary>
 
-<details><summary>Cryptography and privacy (3)</summary>
+<details><summary>Cryptography and privacy (4)</summary>
 
 - [Cryptography fundamentals](Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys.md) (draft) · [Privacy, security and anonymity](Privacy-Security-and-Anonymity-Three-Different-Things-and-Why-There-Is-No-Silver-Bullet.md) (draft) · [Privacy versus security](Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero.md) (draft)
+- [Hardware security modules and building your own with pico2hsm](Hardware-Security-Modules-What-They-Are-and-Building-Your-Own-with-pico2hsm.md) (draft)
 </details>
 <details><summary>Tor, I2P, VPN and browsing (9)</summary>
 
@@ -121,7 +122,7 @@ file does not match the manifest. -->
 - [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md) (draft)
 </details>
 
-- [Full list (19)](Contents.md#track-3-privacy-anonymity-and-cryptocurrency)
+- [Full list (20)](Contents.md#track-3-privacy-anonymity-and-cryptocurrency)
 </details>
 <details><summary><b>Track 4: GRC and law</b> (9)</summary>
 
