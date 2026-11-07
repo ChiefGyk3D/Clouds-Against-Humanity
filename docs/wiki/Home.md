@@ -27,7 +27,7 @@ If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md):
 
 ## Every page, by theme
 
-All 160 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
+All 161 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
 
 ### Start here, by kind of reader
 
@@ -114,6 +114,7 @@ All 160 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 28. [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md): Why plugins carry most of a WordPress site's risk, what to harden and what a web application firewall does; also why static sites often win.
 29. [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) (draft): A static and a dynamic site that look the same, how to tell them apart from outside with curl, page source and WhatWeb, what each leaks, and a career note on public work.
 30. [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md): The path from one web server to a scaled design, with caches, a CDN, a WAF and a pipeline, for engineers who run web fleets.
+31. [Autoscaling and elasticity](Autoscaling-and-Elasticity-Scale-Out-Targets-Cooldowns-and-Cost-Caps.md) (draft): Horizontal and vertical scaling, target tracking, step and scheduled policies, cooldowns, flapping, stateless design, health checks, scale to zero, Kubernetes HPA, cost caps and a free local load test.
 
 ### Security tools and threat modeling
 
