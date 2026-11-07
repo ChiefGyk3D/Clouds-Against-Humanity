@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (167 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (168 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -23,7 +23,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Track 1: Foundations](#track-1-foundations) (36)
 - [Security tools and threat modeling](#security-tools-and-threat-modeling) (6)
 - [Track 2: Defend and detect](#track-2-defend-and-detect) (35)
-- [Track 3: Privacy, anonymity and cryptocurrency](#track-3-privacy-anonymity-and-cryptocurrency) (19)
+- [Track 3: Privacy, anonymity and cryptocurrency](#track-3-privacy-anonymity-and-cryptocurrency) (20)
 - [Track 4: GRC and law](#track-4-grc-and-law) (9)
 - [Track 5: Build and operate](#track-5-build-and-operate) (32)
 - [Reference](#reference) (8)
@@ -179,6 +179,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | 17 | [Paper wallets and offline key generation](Paper-Wallets-Generators-and-Offline-Key-Generation-Tails-Electrum-and-Monero.md) | An addition to the cryptocurrency set: what a paper wallet is, why the advice changed, how to judge a generator, offline generation with Tails, Electrum and Monero, and a checklist exercise. | learner | draft |
 | 18 | [Running Monero properly](Running-Monero-Properly-Hardware-Wallet-Qubes-and-Whonix-Offline-Wallet-and-PiNodeXMR.md) | Page 5 of 5 on cryptocurrency: a hardware wallet with Monero, the Qubes and Whonix offline-wallet design, PiNodeXMR as an always-on node and how to secure it, with a paper exercise. | learner | draft |
 | 19 | [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md) | What still works when the internet and power are down: LoRa mesh, amateur radio, GMRS, FRS and CB, a legal-first SIGINT overview, and what a radio fallback could do for this project. | learner | draft |
+| 20 | [Hardware security modules and building your own with pico2hsm](Hardware-Security-Modules-What-They-Are-and-Building-Your-Own-with-pico2hsm.md) | What an HSM protects against, PKCS#11, key custody, cloud HSM and KMS against a device in your hand, TPM, smart card and security key, FIPS 140 and Common Criteria, then pico2hsm on a Pico 2 with an untested exercise. | learner | draft |
 
 ## Track 4: GRC and law
 
