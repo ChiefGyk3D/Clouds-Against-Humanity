@@ -27,7 +27,7 @@ If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md):
 
 ## Every page, by theme
 
-All 158 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
+All 159 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
 
 ### Start here, by kind of reader
 
@@ -105,13 +105,14 @@ All 158 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 19. [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md): How to recognize, read and write JSON, YAML and HCL and spot the classic mistakes, for readers before the code starts to look like noise.
 20. [OpenTofu from zero](OpenTofu-From-Zero.md): Lesson 1 of the infrastructure as code track: init, plan, apply and destroy on your own machine, for first-time users.
 21. [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md): Reading a plan like a reviewer, what state is, how drift happens and how to recover, for learners after OpenTofu from zero.
-22. [Spacelift from zero](Spacelift-From-Zero.md): What a hosted infrastructure runner adds to plan and apply, its plan limits and a first stack run and teardown, for learners.
-23. [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md): Why a bigger environment is split into one stack per service, with its costs and benefits, for learners finishing the infrastructure as code track.
-24. [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) (unbuilt): What local dev, staging and production are for, why each gets its own stack, secrets and cost ceiling, and how a change is promoted; staging is planned and not built.
-25. [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md): What a web server, an application runtime and a database each do in a LAMP or LEMP stack, for readers who are new to web hosting.
-26. [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md): Why plugins carry most of a WordPress site's risk, what to harden and what a web application firewall does; also why static sites often win.
-27. [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) (draft): A static and a dynamic site that look the same, how to tell them apart from outside with curl, page source and WhatWeb, what each leaks, and a career note on public work.
-28. [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md): The path from one web server to a scaled design, with caches, a CDN, a WAF and a pipeline, for engineers who run web fleets.
+22. [Native IaC versus open standards](Native-IaC-vs-Open-Standards-CloudFormation-ARM-Bicep-and-OpenTofu.md) (draft): CloudFormation (AWS only), ARM and Bicep (Azure only), Google's Deployment Manager ending, against OpenTofu, Pulumi and Crossplane: the lock-in tradeoff, the limit of portable, and a free lint-only exercise.
+23. [Spacelift from zero](Spacelift-From-Zero.md): What a hosted infrastructure runner adds to plan and apply, its plan limits and a first stack run and teardown, for learners.
+24. [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md): Why a bigger environment is split into one stack per service, with its costs and benefits, for learners finishing the infrastructure as code track.
+25. [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) (unbuilt): What local dev, staging and production are for, why each gets its own stack, secrets and cost ceiling, and how a change is promoted; staging is planned and not built.
+26. [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md): What a web server, an application runtime and a database each do in a LAMP or LEMP stack, for readers who are new to web hosting.
+27. [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md): Why plugins carry most of a WordPress site's risk, what to harden and what a web application firewall does; also why static sites often win.
+28. [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) (draft): A static and a dynamic site that look the same, how to tell them apart from outside with curl, page source and WhatWeb, what each leaks, and a career note on public work.
+29. [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md): The path from one web server to a scaled design, with caches, a CDN, a WAF and a pipeline, for engineers who run web fleets.
 
 ### Security tools and threat modeling
 
