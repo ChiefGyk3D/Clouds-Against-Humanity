@@ -72,7 +72,7 @@ file does not match the manifest. -->
 - [Threat Dragon exercise](Threat-Dragon-Exercise.md)
 - [Full list (6)](Contents.md#security-tools-and-threat-modeling)
 </details>
-<details><summary><b>Track 2: Defend and detect</b> (35)</summary>
+<details><summary><b>Track 2: Defend and detect</b> (36)</summary>
 
 <details><summary>Network and host defense (9)</summary>
 
@@ -97,8 +97,12 @@ file does not match the manifest. -->
 
 - [Open firmware and trustworthy hardware](Open-Firmware-and-Trustworthy-Hardware-coreboot-Heads-Nitrokey-and-Vendors-That-Ship-the-Intel-ME-Disabled.md) (draft)
 </details>
+<details><summary>Digital forensics (1)</summary>
 
-- [Full list (35)](Contents.md#track-2-defend-and-detect)
+- [Digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md) (draft)
+</details>
+
+- [Full list (36)](Contents.md#track-2-defend-and-detect)
 </details>
 <details><summary><b>Track 3: Privacy, anonymity and cryptocurrency</b> (20)</summary>
 
