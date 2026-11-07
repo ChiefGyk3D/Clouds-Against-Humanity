@@ -86,7 +86,7 @@ What the YubiKey 5 Series holds, from the Yubico technical manual (read 2026-11-
 |---|---|---|
 | FIDO2 | Passkeys (discoverable credentials) | Up to 25 on older firmware, 100 on firmware 5.7 and later. A PIN you set yourself. Eight wrong PIN tries lock the FIDO2 application, and only a FIDO2 reset unlocks it. A reset also resets U2F. |
 | OATH | TOTP and HOTP secrets for code generators | 32 on older firmware, 64 on 5.7 and later. |
-| OTP | Yubico OTP and similar | Two slots. Slot 1 comes programmed from the factory with a Yubico OTP credential; a short touch fires slot 1, a three-second touch fires slot 2. |
+| OTP | Yubico OTP and similar | Two slots. Slot 1 comes loaded at the factory with a Yubico OTP credential; a short touch fires slot 1, a three-second touch fires slot 2. |
 | PIV | Keys and certificates in numbered slots (9A, 9C, 9D, 9E and retired slots) | Firmware 5.7 and later adds RSA 3072 and 4096, Ed25519 and X25519. The PIN, PUK and management key all ship with published default values. |
 | OpenPGP | Three keys: sign, encrypt, authenticate | Version 3.4 of the card spec from firmware 5.2.3. RSA-2048, 3072, 4096 and several elliptic curves including Ed25519. Published default PINs here too. |
 
@@ -185,7 +185,7 @@ Nothing here is infallible, and this is the case that proves it for a widely use
 
 This is the part most write-ups skip, and it cuts both ways.
 
-**A YubiKey's firmware cannot be updated.** Not by you, not by Yubico, not with a tool. The advisory FAQ asks why and answers it in Yubico's words: firmware updates "can introduce new vulnerabilities", and by preventing them "your firmware remains secure from the moment it is programmed".
+**A YubiKey's firmware cannot be updated.** Not by you, not by Yubico, not with a tool. The advisory FAQ asks why and answers it in Yubico's words: firmware updates "can introduce new vulnerabilities", and by preventing them "your firmware remains secure from the moment" the key is made.
 
 Look at what that buys and what it costs.
 
@@ -354,14 +354,14 @@ Retrieved 2026-11-07 with read-only requests. "Read" means I read the page text.
 | Affected: YubiKey 5, 5 FIPS, 5 CSPN and Security Key Series before 5.7, Bio before 5.7.2, YubiHSM 2 before 2.4.0; not affected from those versions on | [Yubico: YSA-2024-03](https://www.yubico.com/support/security-advisories/ysa-2024-03/) | Read |
 | Attacker needs physical possession, specialized equipment, target account knowledge, and sometimes PIN, username or password; PIV and OpenPGP elliptic curve signing keys and attestation also affected; RSA or Ed25519 as mitigation | [Yubico: YSA-2024-03](https://www.yubico.com/support/security-advisories/ysa-2024-03/) | Read |
 | Timeline: reported 2024-04-19, 5.7 released 2024-05-21, YubiHSM 2.4 announced 2024-09-02, advisory 2024-09-03; no replacement program; FIDO still recommended; deregister a lost or stolen key | [Yubico: YSA-2024-03](https://www.yubico.com/support/security-advisories/ysa-2024-03/) | Read |
-| Yubico does not allow firmware updates because updates "can introduce new vulnerabilities" and firmware "remains secure from the moment it is programmed" | [Yubico: YSA-2024-03, FAQ](https://www.yubico.com/support/security-advisories/ysa-2024-03/) | Read (Yubico's stated position, quoted in part) |
+| Yubico does not allow firmware updates because updates "can introduce new vulnerabilities" and firmware "remains secure from the moment" the key is made | [Yubico: YSA-2024-03, FAQ](https://www.yubico.com/support/security-advisories/ysa-2024-03/) | Read (Yubico's stated position, quoted in part) |
 | CVE-2024-45678 for the EUCLEAK issue; NVD base score 4.2 under CVSS 3.1 (vector with physical attack vector and high complexity); description names a non-constant-time modular inversion | [NVD: CVE-2024-45678](https://nvd.nist.gov/vuln/detail/CVE-2024-45678) | Read (via the NVD API) |
 | NinjaLab: secure element Infineon SLE78, bug unnoticed 14 years and about 80 Common Criteria evaluations, few local EM captures, demonstrated on YubiKey 5Ci, FIDO clone possible; its own CVE request rejected and MITRE used CVE-2024-45678 | [NinjaLab: EUCLEAK](https://ninjalab.io/eucleak/) | Read (researcher's claims) |
 | YubiKey 5 Series: FIDO2, U2F, smart card, OTP, OpenPGP 3; USB-A, USB-C, NFC, Lightning; IP68 | [Yubico: YubiKey 5 Series](https://www.yubico.com/products/yubikey-5-overview/) | Read |
 | Security Key Series is offered for people wanting only FIDO2/WebAuthn or FIDO U2F; its exact feature list not read | [Yubico: Security Key Series](https://www.yubico.com/products/security-key/) | Read; feature list **est.** |
 | FIDO2: eight wrong PIN attempts lock the application; unlock needs a FIDO2 reset, which also resets U2F; no benefit from regular PIN changes; Yubico recommends a minimum of two keys per site | [Yubico technical manual: FIDO](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-fido.html) | Read |
 | Passkey capacity 25 (older) and 100 (5.7+); OATH 32 and 64; PIV slot algorithms added in 5.7 | [Yubico technical manual: 5.7 firmware](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-firmware-5.7.html); [OATH](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-oath.html) | Read |
-| OTP: two slots, slot 1 factory programmed, touch durations | [Yubico technical manual: OTP](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-otp.html) | Read |
+| OTP: two slots, slot 1 loaded at the factory, touch durations | [Yubico technical manual: OTP](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-otp.html) | Read |
 | OpenPGP card 3.4 from firmware 5.2.3; algorithms; touch policy; default PINs published | [Yubico technical manual: OpenPGP](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-apps-openpgp.html) | Read |
 | PIV is specified by NIST SP 800-73; default PIN, PUK and management key are published and should be changed; slots 9A, 9C, 9D, 9E | [Yubico developers: YubiKey and PIV](https://developers.yubico.com/PIV/Introduction/YubiKey_and_PIV.html) | Read |
 | YubiKey 5 FIPS with firmware 5.7.4 NIST certified for FIPS 140-3 effective 22 May 2026 | [Yubico technical manual: introduction](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-intro.html) | Read |
