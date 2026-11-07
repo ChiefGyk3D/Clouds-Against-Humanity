@@ -29,7 +29,7 @@ file does not match the manifest. -->
 21. [Roadmap](Roadmap.md)
 - [Full list (21)](Contents.md#core-path-read-in-this-order)
 </details>
-<details><summary><b>Track 1: Foundations</b> (28)</summary>
+<details><summary><b>Track 1: Foundations</b> (29)</summary>
 
 <details><summary>OS and Linux, git and the terminal (9)</summary>
 
@@ -51,13 +51,13 @@ file does not match the manifest. -->
 - [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md) · [OpenTofu from zero](OpenTofu-From-Zero.md) · [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) · [Spacelift from zero](Spacelift-From-Zero.md) · [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md)
 - [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) (unbuilt)
 </details>
-<details><summary>Web hosting (4)</summary>
+<details><summary>Web hosting (5)</summary>
 
 - [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md) · [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) · [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) (draft)
-- [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md)
+- [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md) · [Autoscaling and elasticity](Autoscaling-and-Elasticity-Scale-Out-Targets-Cooldowns-and-Cost-Caps.md) (draft)
 </details>
 
-- [Full list (28)](Contents.md#track-1-foundations)
+- [Full list (29)](Contents.md#track-1-foundations)
 </details>
 <details><summary><b>Security tools and threat modeling</b> (6)</summary>
 
