@@ -20,8 +20,8 @@ LINK = re.compile(r"\]\(([A-Za-z0-9_-]+)\.md(?:#[^)]*)?\)")
 ADDR = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
 STATUS_WORDS = ("Read", "Observed", "General knowledge", "**est.**", "**not verified**")
 VENDORS = ("Novacustom", "System76", "Purism", "Tuxedo")
-WRITE_TOKENS = re.compile(r"\bsudo\b|\bflashrom\b|\bifdtool\b|\bme_cleaner\b|\bnvramtool\b|\bdd\b|\bchmod\b|>\s*/(?:sys|dev|boot)", re.I)
-AFFILIATE = re.compile(r"[?&](ref|aff|affiliate|utm_[a-z]+|tag|partner)=", re.I)
+WRITE_TOKENS = re.compile(r"\bsudo\b|\bflashrom\b|\bifdtool\b|\bme_cleaner\b|\bnvramtool\b|\bdd\b|\bchmod\b|>\s*/(?:sys|dev|boot)", re.IGNORECASE)
+AFFILIATE = re.compile(r"[?&](ref|aff|affiliate|utm_[a-z]+|tag|partner)=", re.IGNORECASE)
 
 
 def text() -> str:
