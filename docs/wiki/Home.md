@@ -27,7 +27,7 @@ If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md):
 
 ## Every page, by theme
 
-All 158 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
+All 159 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
 
 ### Start here, by kind of reader
 
@@ -92,26 +92,27 @@ All 158 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 6. [Red and blue, and choosing your lab OS](Red-and-Blue-Yin-and-Yang-and-Your-Lab-OS.md): Red, blue and purple teams, the written permission you need before any test, and setting up a lab computer you can safely break.
 7. [Virtual machines and hypervisors: desktop to datacenter](Virtual-Machines-Hypervisors-Desktop-and-Datacenter-Options.md) (draft): What a virtual machine is, type 1 and type 2 hypervisors, the desktop and server options, a dated account of the VMware licensing changes, and a first VM with QEMU, for learners who need a lab.
 8. [Virtual machines, containers and cloud service models](Virtual-Machines-Containers-and-Cloud-Service-Models.md): What a virtual machine and a container each isolate, and who patches what under IaaS, PaaS and SaaS, for readers whose terms blur.
-9. [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md): Domains, Active Directory, Group Policy, Kerberos and managed Macs, for readers heading to help desk or systems administration.
-10. [How a web request works](How-a-Web-Request-Works.md): One HTTPS request from DNS to TLS to the page, and how to read a certificate, for readers after networking basics.
-11. [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md): Who owns what in DNS, the common record types, TTL and putting a site behind Cloudflare, for learners hosting their own website.
-12. [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md): Working out subnets by hand, public versus private addresses, NAT and a default-deny firewall in a local lab, for learners after networking basics.
-13. [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md): Why a server behind a CDN sees the proxy's address, how the real client address is passed on, and the OSI layers, for people running sites behind one.
-14. [IPv6 adoption and handling it safely](IPv6-Adoption-and-Handling-It-Safely.md): IPv6 addressing, why adoption is slow, why this project is IPv4-only and how to handle IPv6 safely in a lab.
-15. [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md): What an API is, how to read a request, a response and JSON, and what a token is, for readers new to all three.
-16. [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md): What encoding, hashing, encryption and signing each give you and what they do not, for readers who lump them together.
-17. [Secrets from day one](Secrets-From-Day-One.md): A password manager, Doppler for every asset and the .env rules, as personal habits for anyone about to start writing code.
-18. [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md): Directories, identity providers, SSO, SAML, OAuth and OIDC in plain words, for readers heading into enterprise identity.
-19. [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md): How to recognize, read and write JSON, YAML and HCL and spot the classic mistakes, for readers before the code starts to look like noise.
-20. [OpenTofu from zero](OpenTofu-From-Zero.md): Lesson 1 of the infrastructure as code track: init, plan, apply and destroy on your own machine, for first-time users.
-21. [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md): Reading a plan like a reviewer, what state is, how drift happens and how to recover, for learners after OpenTofu from zero.
-22. [Spacelift from zero](Spacelift-From-Zero.md): What a hosted infrastructure runner adds to plan and apply, its plan limits and a first stack run and teardown, for learners.
-23. [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md): Why a bigger environment is split into one stack per service, with its costs and benefits, for learners finishing the infrastructure as code track.
-24. [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) (unbuilt): What local dev, staging and production are for, why each gets its own stack, secrets and cost ceiling, and how a change is promoted; staging is planned and not built.
-25. [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md): What a web server, an application runtime and a database each do in a LAMP or LEMP stack, for readers who are new to web hosting.
-26. [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md): Why plugins carry most of a WordPress site's risk, what to harden and what a web application firewall does; also why static sites often win.
-27. [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) (draft): A static and a dynamic site that look the same, how to tell them apart from outside with curl, page source and WhatWeb, what each leaks, and a career note on public work.
-28. [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md): The path from one web server to a scaled design, with caches, a CDN, a WAF and a pipeline, for engineers who run web fleets.
+9. [Kubernetes for beginners](Kubernetes-for-Beginners-What-It-Adds-Over-Docker-and-Compose.md) (draft): What Kubernetes adds over Docker and Compose: pods, deployments, services, the control plane, managed versus self-run, Helm, secrets, RBAC, the cost, and when Compose on one droplet is enough. Free kind exercise.
+10. [Windows, Active Directory and macOS](Windows-Active-Directory-and-macOS-in-the-Enterprise.md): Domains, Active Directory, Group Policy, Kerberos and managed Macs, for readers heading to help desk or systems administration.
+11. [How a web request works](How-a-Web-Request-Works.md): One HTTPS request from DNS to TLS to the page, and how to read a certificate, for readers after networking basics.
+12. [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md): Who owns what in DNS, the common record types, TTL and putting a site behind Cloudflare, for learners hosting their own website.
+13. [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md): Working out subnets by hand, public versus private addresses, NAT and a default-deny firewall in a local lab, for learners after networking basics.
+14. [Behind a CDN: real client IPs and OSI basics](Behind-a-CDN-Real-Client-IPs-and-OSI-Basics.md): Why a server behind a CDN sees the proxy's address, how the real client address is passed on, and the OSI layers, for people running sites behind one.
+15. [IPv6 adoption and handling it safely](IPv6-Adoption-and-Handling-It-Safely.md): IPv6 addressing, why adoption is slow, why this project is IPv4-only and how to handle IPv6 safely in a lab.
+16. [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md): What an API is, how to read a request, a response and JSON, and what a token is, for readers new to all three.
+17. [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md): What encoding, hashing, encryption and signing each give you and what they do not, for readers who lump them together.
+18. [Secrets from day one](Secrets-From-Day-One.md): A password manager, Doppler for every asset and the .env rules, as personal habits for anyone about to start writing code.
+19. [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md): Directories, identity providers, SSO, SAML, OAuth and OIDC in plain words, for readers heading into enterprise identity.
+20. [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md): How to recognize, read and write JSON, YAML and HCL and spot the classic mistakes, for readers before the code starts to look like noise.
+21. [OpenTofu from zero](OpenTofu-From-Zero.md): Lesson 1 of the infrastructure as code track: init, plan, apply and destroy on your own machine, for first-time users.
+22. [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md): Reading a plan like a reviewer, what state is, how drift happens and how to recover, for learners after OpenTofu from zero.
+23. [Spacelift from zero](Spacelift-From-Zero.md): What a hosted infrastructure runner adds to plan and apply, its plan limits and a first stack run and teardown, for learners.
+24. [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md): Why a bigger environment is split into one stack per service, with its costs and benefits, for learners finishing the infrastructure as code track.
+25. [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) (unbuilt): What local dev, staging and production are for, why each gets its own stack, secrets and cost ceiling, and how a change is promoted; staging is planned and not built.
+26. [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md): What a web server, an application runtime and a database each do in a LAMP or LEMP stack, for readers who are new to web hosting.
+27. [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md): Why plugins carry most of a WordPress site's risk, what to harden and what a web application firewall does; also why static sites often win.
+28. [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) (draft): A static and a dynamic site that look the same, how to tell them apart from outside with curl, page source and WhatWeb, what each leaks, and a career note on public work.
+29. [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md): The path from one web server to a scaled design, with caches, a CDN, a WAF and a pipeline, for engineers who run web fleets.
 
 ### Security tools and threat modeling
 
