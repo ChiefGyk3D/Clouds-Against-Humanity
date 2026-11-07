@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (170 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (171 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -21,7 +21,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Start here](#start-here) (5)
 - [Core path: read in this order](#core-path-read-in-this-order) (21)
 - [Track 1: Foundations](#track-1-foundations) (37)
-- [Security tools and threat modeling](#security-tools-and-threat-modeling) (6)
+- [Security tools and threat modeling](#security-tools-and-threat-modeling) (7)
 - [Track 2: Defend and detect](#track-2-defend-and-detect) (36)
 - [Track 3: Privacy, anonymity and cryptocurrency](#track-3-privacy-anonymity-and-cryptocurrency) (20)
 - [Track 4: GRC and law](#track-4-grc-and-law) (9)
@@ -116,6 +116,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 | [Threat model exercise](Threat-Model-Exercise.md) | Build your own threat model of this repository before you open the worked one, for security-minded readers. | security reader |  |
 | [Threat Dragon exercise](Threat-Dragon-Exercise.md) | Draw this pipeline's trust boundaries in OWASP Threat Dragon and attach threats to them, for security-minded readers. | security reader |  |
 | [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md) | The same pipeline viewed through STRIDE, MITRE ATT&CK and MITRE ATLAS, with files to open them, for security-minded readers. | security reader |  |
+| [Disk forensics with Autopsy and The Sleuth Kit](Disk-Forensics-with-Autopsy-and-The-Sleuth-Kit.md) | What The Sleuth Kit and Autopsy are, disk images and hashing first, file systems, deleted files and carving, hash sets, keyword search, timeline, reports, limits, and a free exercise on an image you build. | learner | draft |
 
 ## Track 2: Defend and detect
 
