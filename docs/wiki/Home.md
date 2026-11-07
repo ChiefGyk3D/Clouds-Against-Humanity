@@ -27,7 +27,7 @@ If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md):
 
 ## Every page, by theme
 
-All 172 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
+All 173 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
 
 ### Start here, by kind of reader
 
@@ -171,6 +171,7 @@ All 172 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 34. [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) (unbuilt): What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied.
 35. [Open firmware and trustworthy hardware](Open-Firmware-and-Trustworthy-Hardware-coreboot-Heads-Nitrokey-and-Vendors-That-Ship-the-Intel-ME-Disabled.md) (draft): What firmware is, coreboot, Heads with a Nitrokey, what a TPM and Secure Boot do not prove, and what Novacustom, System76, Purism and Tuxedo claim about the Intel ME, each dated, with a free read-only exercise.
 36. [Digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md) (draft): Evidence handling, chain of custody and the order of volatility from RFC 3227, NIST SP 800-86 and SWGDE, with a free hash, image and verify exercise on a file you make.
+37. [Network, log and timeline forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md) (draft): Preserving a packet capture as evidence, what a pcap can and cannot prove, streams with tshark, log reliability and tampering, clock skew, time zones and a plaso super timeline, with a free container exercise.
 
 ### Track 3: Privacy, anonymity and cryptocurrency
 

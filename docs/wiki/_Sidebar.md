@@ -77,7 +77,7 @@ file does not match the manifest. -->
 
 - [Full list (8)](Contents.md#security-tools-and-threat-modeling)
 </details>
-<details><summary><b>Track 2: Defend and detect</b> (36)</summary>
+<details><summary><b>Track 2: Defend and detect</b> (37)</summary>
 
 <details><summary>Network and host defense (9)</summary>
 
@@ -102,12 +102,12 @@ file does not match the manifest. -->
 
 - [Open firmware and trustworthy hardware](Open-Firmware-and-Trustworthy-Hardware-coreboot-Heads-Nitrokey-and-Vendors-That-Ship-the-Intel-ME-Disabled.md) (draft)
 </details>
-<details><summary>Digital forensics (1)</summary>
+<details><summary>Digital forensics (2)</summary>
 
-- [Digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md) (draft)
+- [Digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md) (draft) · [Network, log and timeline forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md) (draft)
 </details>
 
-- [Full list (36)](Contents.md#track-2-defend-and-detect)
+- [Full list (37)](Contents.md#track-2-defend-and-detect)
 </details>
 <details><summary><b>Track 3: Privacy, anonymity and cryptocurrency</b> (20)</summary>
 
