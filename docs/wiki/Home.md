@@ -27,7 +27,7 @@ If you only read one page, read [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md):
 
 ## Every page, by theme
 
-All 166 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
+All 167 pages of this wiki, grouped the way [Contents](Contents.md) groups them, with one line on what each is for. Pages marked draft, est. steps or unbuilt say so in their own banner; [Contents](Contents.md) explains the markers.
 
 ### Start here, by kind of reader
 
@@ -166,6 +166,7 @@ All 166 pages of this wiki, grouped the way [Contents](Contents.md) groups them,
 32. [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md): A hands-on synthetic multi-site monitoring stack where you predict what a silent site does, for builders.
 33. [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) (draft): A springboard for building a small cloud security monitoring stack with a cost ceiling you set; an unverified draft for builders.
 34. [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) (unbuilt): What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied.
+35. [Open firmware and trustworthy hardware](Open-Firmware-and-Trustworthy-Hardware-coreboot-Heads-Nitrokey-and-Vendors-That-Ship-the-Intel-ME-Disabled.md) (draft): What firmware is, coreboot, Heads with a Nitrokey, what a TPM and Secure Boot do not prove, and what Novacustom, System76, Purism and Tuxedo claim about the Intel ME, each dated, with a free read-only exercise.
 
 ### Track 3: Privacy, anonymity and cryptocurrency
 
