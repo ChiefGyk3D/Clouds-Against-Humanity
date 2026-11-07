@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (158 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (159 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -20,7 +20,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 
 - [Start here](#start-here) (5)
 - [Core path: read in this order](#core-path-read-in-this-order) (21)
-- [Track 1: Foundations](#track-1-foundations) (28)
+- [Track 1: Foundations](#track-1-foundations) (29)
 - [Security tools and threat modeling](#security-tools-and-threat-modeling) (6)
 - [Track 2: Defend and detect](#track-2-defend-and-detect) (34)
 - [Track 3: Privacy, anonymity and cryptocurrency](#track-3-privacy-anonymity-and-cryptocurrency) (19)
@@ -85,17 +85,18 @@ A page with no marker has no such banner. It may still say what was and was not 
 | 15 | [APIs and tokens from zero](APIs-and-Tokens-From-Zero.md) | What an API is, how to read a request, a response and JSON, and what a token is, for readers new to all three. | learner |  |
 | 16 | [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) | What encoding, hashing, encryption and signing each give you and what they do not, for readers who lump them together. | learner |  |
 | 17 | [Secrets from day one](Secrets-From-Day-One.md) | A password manager, Doppler for every asset and the .env rules, as personal habits for anyone about to start writing code. | learner |  |
-| 18 | [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md) | Directories, identity providers, SSO, SAML, OAuth and OIDC in plain words, for readers heading into enterprise identity. | learner |  |
-| 19 | [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md) | How to recognize, read and write JSON, YAML and HCL and spot the classic mistakes, for readers before the code starts to look like noise. | learner |  |
-| 20 | [OpenTofu from zero](OpenTofu-From-Zero.md) | Lesson 1 of the infrastructure as code track: init, plan, apply and destroy on your own machine, for first-time users. | learner |  |
-| 21 | [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) | Reading a plan like a reviewer, what state is, how drift happens and how to recover, for learners after OpenTofu from zero. | learner |  |
-| 22 | [Spacelift from zero](Spacelift-From-Zero.md) | What a hosted infrastructure runner adds to plan and apply, its plan limits and a first stack run and teardown, for learners. | learner |  |
-| 23 | [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md) | Why a bigger environment is split into one stack per service, with its costs and benefits, for learners finishing the infrastructure as code track. | learner |  |
-| 24 | [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) | What local dev, staging and production are for, why each gets its own stack, secrets and cost ceiling, and how a change is promoted; staging is planned and not built. | engineer | unbuilt |
-| 25 | [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md) | What a web server, an application runtime and a database each do in a LAMP or LEMP stack, for readers who are new to web hosting. | learner |  |
-| 26 | [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) | Why plugins carry most of a WordPress site's risk, what to harden and what a web application firewall does; also why static sites often win. | learner |  |
-| 27 | [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) | A static and a dynamic site that look the same, how to tell them apart from outside with curl, page source and WhatWeb, what each leaks, and a career note on public work. | learner | draft |
-| 28 | [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md) | The path from one web server to a scaled design, with caches, a CDN, a WAF and a pipeline, for engineers who run web fleets. | engineer |  |
+| 18 | [Disk and file encryption: VeraCrypt, TrueCrypt, BitLocker, FileVault, LUKS](Disk-and-File-Encryption-VeraCrypt-TrueCrypt-History-BitLocker-FileVault-and-LUKS.md) | What encryption at rest stops and does not, BitLocker, FileVault and LUKS, VeraCrypt in depth, the TrueCrypt shutdown, audit and fork, and a free VM exercise, for learners protecting laptops and portable files. | learner | draft |
+| 19 | [Enterprise identity: SSO, SAML and OIDC](Enterprise-Identity-SSO-SAML-OIDC.md) | Directories, identity providers, SSO, SAML, OAuth and OIDC in plain words, for readers heading into enterprise identity. | learner |  |
+| 20 | [Data formats: JSON, YAML, HCL](Data-Formats-JSON-YAML-HCL.md) | How to recognize, read and write JSON, YAML and HCL and spot the classic mistakes, for readers before the code starts to look like noise. | learner |  |
+| 21 | [OpenTofu from zero](OpenTofu-From-Zero.md) | Lesson 1 of the infrastructure as code track: init, plan, apply and destroy on your own machine, for first-time users. | learner |  |
+| 22 | [OpenTofu plans, state, drift and recovery](Plans-State-Drift-and-Recovery.md) | Reading a plan like a reviewer, what state is, how drift happens and how to recover, for learners after OpenTofu from zero. | learner |  |
+| 23 | [Spacelift from zero](Spacelift-From-Zero.md) | What a hosted infrastructure runner adds to plan and apply, its plan limits and a first stack run and teardown, for learners. | learner |  |
+| 24 | [Build and destroy: one stack per service](Build-and-Destroy-Stack-Per-Service.md) | Why a bigger environment is split into one stack per service, with its costs and benefits, for learners finishing the infrastructure as code track. | learner |  |
+| 25 | [Environments and promotion](Environments-and-Promotion-Dev-Staging-Production.md) | What local dev, staging and production are for, why each gets its own stack, secrets and cost ceiling, and how a change is promoted; staging is planned and not built. | engineer | unbuilt |
+| 26 | [LAMP and LEMP from zero](LAMP-and-LEMP-From-Zero.md) | What a web server, an application runtime and a database each do in a LAMP or LEMP stack, for readers who are new to web hosting. | learner |  |
+| 27 | [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md) | Why plugins carry most of a WordPress site's risk, what to harden and what a web application firewall does; also why static sites often win. | learner |  |
+| 28 | [Static against dynamic: Hugo, WordPress and recon](Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon.md) | A static and a dynamic site that look the same, how to tell them apart from outside with curl, page source and WhatWeb, what each leaks, and a career note on public work. | learner | draft |
+| 29 | [WordPress at scale: CDN, WAF, caching and CI](WordPress-at-Scale-CDN-WAF-and-CI.md) | The path from one web server to a scaled design, with caches, a CDN, a WAF and a pipeline, for engineers who run web fleets. | engineer |  |
 
 ## Security tools and threat modeling
 
