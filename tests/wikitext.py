@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Read a wiki page without its generated navigation blocks (issue #417).
+"""Read a wiki page without its generated blocks (issue #417, #441, #521).
 
-scripts/gen_wiki_nav.py writes a navigation block at the top and the bottom of every page: links to the
-page's track, its previous and next page and related pages. That is navigation, not lesson content, so a test that
+Since issue #521 the page files carry no navigation block: the publish step adds the links to the page's track,
+its previous and next page and related pages. This helper still strips any such block (a branch from before the
+change may carry one) and the contents block that stays in the long pages. Navigation is not lesson content, so a test that
 counts the links a page makes, names pages it must NOT link, or looks at the first lines of a page reads the page
 through this helper and sees what the author wrote. Since issue #441 the longest pages also carry a generated
 contents block (links to the page's own headings); it is stripped too. The stripping itself is

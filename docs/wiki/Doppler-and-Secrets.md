@@ -6,12 +6,6 @@
 
 > New to environment variables or shell scripts? [The terminal and your first script](Terminal-and-Your-First-Script.md) explains both.
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Doppler and secrets
-
-Previous: [Spacelift](Spacelift.md) / Next: [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md)
-<!-- END GENERATED PAGE NAV top -->
-
 The rule is simple: **nothing in this repository is a credential**, and nothing that identifies the operator's account is in a file either. Every real value lives in Doppler. This page explains where each one lives, how it reaches a run, and how to rotate it.
 
 ## Who holds what
@@ -111,20 +105,3 @@ The full operator guide, including adding secrets and upgrading the pinned CLI, 
 The habits around this page, meaning a password manager first, the `.env` rules, secret scanning and a leak drill you can run, are in the side page [Secrets from day one](Secrets-From-Day-One.md).
 
 Next: [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md), step 18 of the core path on the [Reading order](Reading-Order.md) page.
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Doppler and secrets
-
-Previous: [Spacelift](Spacelift.md) / Next: [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md)
-
-In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
-
-- [Start here if you are new](Start-Here-If-You-Are-New.md) / [What is the cloud](What-Is-the-Cloud.md) / [Networking basics](Networking-Basics-for-This-Project.md) / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / [How money works](How-Money-Works-in-the-Cloud.md) / [Enterprise habits](Enterprise-Engineering-Habits.md) / [Architecture overview](Architecture-Overview.md) / [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / [Twingate](Twingate.md) / [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / [Droplet hardening](Droplet-Hardening.md) / [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / [Spacelift](Spacelift.md) / **Doppler and secrets** / [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / [Threat model](Threat-Model.md) / [Lessons learned](Lessons-Learned.md) / [Roadmap](Roadmap.md)
-
-Related pages:
-
-- [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
-- [Threat model](Threat-Model.md)
-- [Droplet hardening](Droplet-Hardening.md)
-- [Lessons learned](Lessons-Learned.md)
-<!-- END GENERATED PAGE NAV bottom -->

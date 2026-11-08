@@ -42,9 +42,11 @@
 #             answer the next question a reader has; cross-track links are the point. A page with no
 #             `related` list gets the fallback rule below.
 #
-# Page navigation blocks (issue #417): the generator writes two blocks on every page except Home,
-# Contents, the special pages and the pages another generator writes whole (the status, growth and
-# settings pages), each between a BEGIN GENERATED PAGE NAV and an END GENERATED PAGE NAV line (a
+# Page navigation blocks (issue #417, rendered at publish time since issue #521): the wiki publish step
+# (scripts/gen-wiki.sh, through scripts/gen_wiki_nav.py --publish-to) writes two blocks on every
+# published page except Home, Contents, the special pages and the pages another generator writes whole
+# (the status, growth and settings pages). They are NOT stored in docs/wiki/*.md, so adding a page
+# changes this file, Reading-Order, the Glossary, Contents and the sidebar, and no other lesson. Each is between a BEGIN GENERATED PAGE NAV and an END GENERATED PAGE NAV line (a
 # "top" pair and a "bottom" pair). The top block sits after the page's first heading and its leading
 # quote banners; it holds the breadcrumb (Home, the group, the page) and Previous and Next. The
 # bottom block (end of the page) repeats Previous and Next, lists the group's pages (folded by
@@ -52,11 +54,12 @@
 # in a group with a reading order: a numbered group (the core path, a track) in the order written, or
 # a sorted group in title order; the first page has no Previous, the last no Next. The start and
 # security tools groups have no reading order, so their pages get the breadcrumb and no neighbors.
-# A page with no markers gets them inserted once; after that only the text between them is rewritten.
+# --check fails when a page file carries one of these blocks; running the generator removes it.
 #
 # In-page contents block (issue #441): a page whose own text (the generated blocks taken out) is over
 # 300 lines also gets a third block, between BEGIN GENERATED PAGE CONTENTS and END GENERATED PAGE
-# CONTENTS, right after the top navigation block. It is built from the page's headings, not from this
+# CONTENTS, right after the page's first heading and banners (that one stays in the file: it depends on
+# the page alone). It is built from the page's headings, not from this
 # file: a link to each "##" heading, and also each "###" heading (nested under its "##") on a page with
 # fewer than 6 "##" headings. It adds no heading. Change the page's headings, then re-run the generator.
 #

@@ -336,3 +336,58 @@ def test_no_argument_is_a_usage_error():
     result = run()
     assert result.returncode == 2
     assert "usage" in result.stderr
+
+
+# -- the page navigation is rendered here, not stored in the pages (issue #521) -------------------
+
+
+def page_named(prefix: str) -> str:
+    found = sorted(p.stem for p in WIKI.glob(f"{prefix}*.md"))
+    assert len(found) == 1, found
+    return found[0]
+
+
+def test_published_pages_show_previous_next_and_the_track_count_but_the_sources_do_not(tree):
+    import sys
+
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import gen_wiki_nav as gwn
+
+    manifest = gwn.read_manifest(ROOT)
+    home = gwn.page_home(manifest)
+    checked = 0
+    for prefix in ("Kubernetes-for-Beginners", "Cron-Systemd-Timers"):
+        name = page_named(prefix)
+        group, ordered, index = home[name]
+        source = (WIKI / f"{name}.md").read_text()
+        published = (tree / f"{name}.md").read_text()
+        assert "Previous:" not in source and "In this track:" not in source and "GENERATED PAGE NAV" not in source
+        prev_page, next_page = ordered[index - 1]["page"], ordered[index + 1]["page"]
+        assert f"Previous: [{ordered[index - 1]['title']}]({prev_page})" in published
+        assert f"Next: [{ordered[index + 1]['title']}]({next_page})" in published
+        assert f"In this track: [{group['title']}](Contents#{gwn.slug(group['title'])}), {len(ordered)} pages" in published
+        nav_lines = [ln for ln in published.splitlines() if ln.startswith("Previous: [")]
+        assert len(nav_lines) == 2 and nav_lines[0] == nav_lines[1]  # the top block and the bottom block agree
+        assert "Related pages:" in published
+        checked += 1
+    assert checked == 2
+
+
+def test_every_published_page_that_takes_navigation_has_both_blocks_and_the_others_have_none(tree):
+    with_blocks = [p for p in tree.glob("*.md") if "BEGIN GENERATED PAGE NAV top" in p.read_text()]
+    assert len(with_blocks) >= 140, len(with_blocks)
+    for name in ("Home", "Contents", "_Sidebar"):
+        assert "GENERATED PAGE NAV" not in (tree / f"{name}.md").read_text(), name
+    for page in with_blocks:
+        text = page.read_text()
+        assert text.count("BEGIN GENERATED PAGE NAV") == 2 and text.count("END GENERATED PAGE NAV") == 2, page.name
+
+
+def test_a_tree_with_a_manifest_it_cannot_render_is_refused_not_published_without_navigation(tmp_path):
+    result, _ = scratch(
+        tmp_path,
+        {"Page.md": "# Page\n"},
+        prepare=lambda root: (root / "docs" / "wiki" / "_nav.yaml").write_text("groups: []\n"),
+    )
+    assert result.returncode != 0
+    assert "navigation" in result.stderr

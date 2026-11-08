@@ -1,11 +1,5 @@
 # Self-hosting: when and why, with SearXNG as the worked example
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Self-hosting: when and why, with SearXNG
-
-Previous: [Teardown checklist](Teardown-Checklist.md) / Next: [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md)
-<!-- END GENERATED PAGE NAV top -->
-
 Self-hosting means running a service yourself instead of using someone else's copy of it. This page weighs that honestly, using one real service, a private search proxy called SearXNG, as the example all the way through. Read it when you wonder whether to run your own mail, search, password vault or photo server, or when you want to see what "private" does and does not buy. It sits beside the privacy pages and the Docker pages and needs neither to be read first.
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -264,25 +258,3 @@ Every claim that could be wrong, with its source and status. "Read" means read f
 ## Sources
 
 All read on 2026-11-01. SearXNG documentation (version 2026.11.1+8b35dcd2e): [container installation](https://docs.searxng.org/admin/installation-docker.html), [server settings](https://docs.searxng.org/admin/settings/settings_server.html), [valkey settings](https://docs.searxng.org/admin/settings/settings_valkey.html), [outgoing settings](https://docs.searxng.org/admin/settings/settings_outgoing.html), [limiter](https://docs.searxng.org/admin/searx.limiter.html), [bot detection](https://docs.searxng.org/src/searx.botdetection.html), [architecture](https://docs.searxng.org/admin/architecture.html), [why use a private instance](https://docs.searxng.org/own-instance.html), [about](https://docs.searxng.org/user/about.html). SearXNG source: the [compose template](https://raw.githubusercontent.com/searxng/searxng/master/container/docker-compose.yml) and the [default settings](https://raw.githubusercontent.com/searxng/searxng/master/searx/settings.yml). Docker: [port publishing](https://docs.docker.com/engine/network/port-publishing/) and [packet filtering and firewalls](https://docs.docker.com/engine/network/packet-filtering-firewalls/). Digests: the Docker Hub registry API and [tags API](https://hub.docker.com/v2/repositories/searxng/searxng/tags).
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Self-hosting: when and why, with SearXNG
-
-Previous: [Teardown checklist](Teardown-Checklist.md) / Next: [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md)
-
-In this track: [Track 5: Build and operate](Contents.md#track-5-build-and-operate), 32 pages
-
-- Stage guides and design: [Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md) / [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) / [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) / [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) / [Teardown checklist](Teardown-Checklist.md) / **Self-hosting: when and why, with SearXNG** / [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) / [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) / [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) / [Why I picked these tools](Why-I-Picked-These-Tools.md) / [From commit to pipeline](From-Commit-to-Pipeline.md) / [Trace one change end to end](Trace-One-Change-End-to-End.md)
-- Other clouds: [Why the clouds differ](Why-the-Clouds-Differ.md) / [AWS: account preparation](Provider-AWS-Account-Preparation.md) / [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) / [AWS: where the money goes](Provider-AWS-Cost-Lesson.md) / [Azure: account preparation](Provider-Azure-Account-Preparation.md) / [Azure: the same four pieces](Provider-Azure-The-Same-Four-Pieces.md) / [Azure: where the money goes](Provider-Azure-Cost-Lesson.md) / [GCP: account preparation](Provider-GCP-Account-Preparation.md) / [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md) / [GCP: where the money goes](Provider-GCP-Cost-Lesson.md)
-- Enterprise practice: [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md) / [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md) / [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md) / [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md) / [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md) / [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
-- Project process: [How this project is planned](How-This-Project-Is-Planned.md) / [Project status](Project-Status.md) / [Repository growth](Repository-Growth.md) / [Screenshots policy](Screenshots-Policy.md)
-
-Related pages:
-
-- [Containers and Docker (optional)](Containers-and-Docker-Basics.md)
-- [Privacy, security and anonymity](Privacy-Security-and-Anonymity-Three-Different-Things-and-Why-There-Is-No-Silver-Bullet.md)
-- [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
-- [The DMZ and hardening an internet-facing host](The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet.md)
-- [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md)
-- [Doppler and secrets](Doppler-and-Secrets.md)
-<!-- END GENERATED PAGE NAV bottom -->

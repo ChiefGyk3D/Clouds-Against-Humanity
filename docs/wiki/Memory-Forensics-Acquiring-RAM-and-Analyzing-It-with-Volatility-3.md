@@ -8,10 +8,6 @@
 
 > **Where this runs, and the rule.** Everything here happens on your own computer, in a VM you built an hour ago. The guest uses QEMU's default outbound-only network, and the one forwarded port is bound to `127.0.0.1`. Analyze memory from systems you own or are authorized in writing to examine. A memory image holds whatever was in RAM: passwords, keys, other people's messages. Treat the file as sensitive, and delete it when you are done. This page runs no malware; the exercise finds a harmless process you started yourself.
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Memory forensics with Volatility 3
-<!-- END GENERATED PAGE NAV top -->
-
 <!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
 **On this page:**
 
@@ -399,19 +395,3 @@ Retrieved 2026-11-07 with read-only requests, unless stated. "Read" means I read
 | Memory encryption on VMs hides RAM from a hypervisor dump | General knowledge | **est.** |
 | `netscan` versus `netstat` behavior on Windows | General knowledge | **est.** |
 | The Volatility license is not OSI approved | General knowledge | **est.** |
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Memory forensics with Volatility 3
-
-In this group: [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling), 8 pages
-
-- Also here: [Threats in plain words](Threats-in-Plain-Words.md) / [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) / [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md) / [Threat model exercise](Threat-Model-Exercise.md) / [Threat Dragon exercise](Threat-Dragon-Exercise.md) / [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
-- Digital forensics: **Memory forensics with Volatility 3** / [Disk forensics with Autopsy and The Sleuth Kit](Disk-Forensics-with-Autopsy-and-The-Sleuth-Kit.md)
-
-Related pages:
-
-- [Disk forensics with Autopsy and The Sleuth Kit](Disk-Forensics-with-Autopsy-and-The-Sleuth-Kit.md)
-- [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md)
-- [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md)
-- [Threats in plain words](Threats-in-Plain-Words.md)
-<!-- END GENERATED PAGE NAV bottom -->

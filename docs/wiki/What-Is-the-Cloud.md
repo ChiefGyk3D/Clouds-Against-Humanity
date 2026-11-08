@@ -2,12 +2,6 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > What is the cloud
-
-Previous: [Start here if you are new](Start-Here-If-You-Are-New.md) / Next: [Networking basics](Networking-Basics-for-This-Project.md)
-<!-- END GENERATED PAGE NAV top -->
-
 Start-from-zero page 1 of 8. Previous: [Start here](Start-Here-If-You-Are-New.md). Next: [Networking basics for this project](Networking-Basics-for-This-Project.md).
 
 "The cloud is just someone else's computer" is true and almost useless. Yes, a cloud provider owns racks of servers in a building you will never visit. The part that matters is **how** you get to use them: by the hour, through an API, with a public internet address attached, and with a bill that follows whatever you leave running.
@@ -118,20 +112,3 @@ Without spending anything:
 - Look up your own home's public IP address (search "what is my IP") and then look up a private address like `192.168.1.1`. The first is reachable from anywhere; the second only means something inside your house. A droplet has both kinds of address at once, and the next page is about why that matters.
 
 Next: [Networking basics for this project](Networking-Basics-for-This-Project.md).
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > What is the cloud
-
-Previous: [Start here if you are new](Start-Here-If-You-Are-New.md) / Next: [Networking basics](Networking-Basics-for-This-Project.md)
-
-In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
-
-- [Start here if you are new](Start-Here-If-You-Are-New.md) / **What is the cloud** / [Networking basics](Networking-Basics-for-This-Project.md) / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / [How money works](How-Money-Works-in-the-Cloud.md) / [Enterprise habits](Enterprise-Engineering-Habits.md) / [Architecture overview](Architecture-Overview.md) / [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / [Twingate](Twingate.md) / [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / [Droplet hardening](Droplet-Hardening.md) / [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / [Spacelift](Spacelift.md) / [Doppler and secrets](Doppler-and-Secrets.md) / [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / [Threat model](Threat-Model.md) / [Lessons learned](Lessons-Learned.md) / [Roadmap](Roadmap.md)
-
-Related pages:
-
-- [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
-- [Infrastructure as code](What-Is-Infrastructure-as-Code.md)
-- [Git and pull requests](Git-GitHub-and-Pull-Requests.md)
-- [Containers and Docker (optional)](Containers-and-Docker-Basics.md)
-<!-- END GENERATED PAGE NAV bottom -->

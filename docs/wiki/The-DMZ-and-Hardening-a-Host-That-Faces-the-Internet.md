@@ -1,11 +1,5 @@
 # The DMZ, and hardening a host that faces the internet
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect) > The DMZ and hardening an internet-facing host
-
-Previous: [Attack surface map: layer by layer](Attack-Surface-Map-Layer-by-Layer.md) / Next: [DMZ hardening checklist](DMZ-Hardening-Checklist.md)
-<!-- END GENERATED PAGE NAV top -->
-
 Side page to the security and defense pages. Read it after [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) (which asks what there is to attack) and the Plan for failure: blast radius and assuming breach page (which asks what a compromised machine can reach). This page takes the one machine that cannot avoid being reachable, and asks how to build it so that losing it is survivable. Neighbors: [Droplet hardening](Droplet-Hardening.md) (the same ideas on the private connectors) and [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md). This page's Reticulum and Meshtastic services run over the internet; for the radio side of those names, and what a real radio fallback would need, see [Radio and off-grid communication](Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT.md).
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
@@ -217,24 +211,3 @@ Every project claim above was read on 2026-10-30 in this repository. Nothing was
 | The [patch management lesson](Patch-Management-and-Automatic-Security-Updates.md) (issue #325) | Linked only; its text was not read for this page | Not read |
 
 Back to [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md), the [Threat model](Threat-Model.md) or [Droplet hardening](Droplet-Hardening.md).
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect) > The DMZ and hardening an internet-facing host
-
-Previous: [Attack surface map: layer by layer](Attack-Surface-Map-Layer-by-Layer.md) / Next: [DMZ hardening checklist](DMZ-Hardening-Checklist.md)
-
-In this track: [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect), 38 pages
-
-- Network and host defense: [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md) / [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md) / [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) / [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md) / [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md) / [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) / [Attack surface map: layer by layer](Attack-Surface-Map-Layer-by-Layer.md) / **The DMZ and hardening an internet-facing host** / [DMZ hardening checklist](DMZ-Hardening-Checklist.md)
-- Deception and honeypots: [Deception and honeypots: start here](Deception-and-Honeypots-Start-Here.md) / [What deception is](Deception-and-Honeypots-What-Deception-Is.md) / [Deception safety and law](Deception-and-Honeypots-Safety-and-Law.md) / [Plant a canary token](Deception-and-Honeypots-Plant-a-Canary.md) / [Honeyfiles on a host you own](Deception-and-Honeypots-Honeyfiles-on-Your-Host.md) / [Deception alerts in the SIEM](Deception-and-Honeypots-Alerts-in-the-SIEM.md) / [Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md) / [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md) / [Anatomy of a cloud honeypot](Deception-and-Honeypots-Cloud-Sensor-Anatomy.md) / [Cloud Cowrie for a weekend](Deception-and-Honeypots-Cloud-Cowrie-Weekend.md) / [Read what arrived: Cowrie logs](Deception-and-Honeypots-Read-the-Sensor-Logs.md)
-- Detection and monitoring: [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md) / [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) / [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) / [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) / [Detecting Tor, I2P and VPN on a network](Detecting-and-Managing-Tor-I2P-and-VPN-on-a-Network-the-Defenders-View.md) / [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) / [Multiple sites and identity](Multiple-Sites-and-Identity.md) / [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) / [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) / [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) / [Grafana dashboards](Grafana-Dashboards.md) / [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) / [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) / [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md)
-- Digital forensics: [DFIR toolkits and live triage](DFIR-Toolkits-and-Live-Triage-SIFT-Velociraptor-KAPE-and-the-Incident-Response-Workflow.md) / [Digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md) / [Network, log and timeline forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md)
-- Device and credential security: [Open firmware and trustworthy hardware](Open-Firmware-and-Trustworthy-Hardware-coreboot-Heads-Nitrokey-and-Vendors-That-Ship-the-Intel-ME-Disabled.md)
-
-Related pages:
-
-- [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md)
-- [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md)
-- [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md)
-- [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md)
-<!-- END GENERATED PAGE NAV bottom -->

@@ -4,12 +4,6 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Reference](Contents.md#reference) > Terraform reference
-
-Previous: [Settings reference](Settings-Reference.md) / Next: [Troubleshooting index](Troubleshooting-Index.md)
-<!-- END GENERATED PAGE NAV top -->
-
 <!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
 **On this page:**
 
@@ -421,17 +415,3 @@ When Spacelift shows a plan, check these against this page:
 - [Spacelift](Spacelift.md): how stacks, dependencies and the hook run these.
 
 Next: [Spacelift](Spacelift.md) if you have not read it, then [Trace one change end to end](Trace-One-Change-End-to-End.md). Back to the [Reading order](Reading-Order.md).
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Reference](Contents.md#reference) > Terraform reference
-
-Previous: [Settings reference](Settings-Reference.md) / Next: [Troubleshooting index](Troubleshooting-Index.md)
-
-In this group: [Reference](Contents.md#reference), 4 pages
-
-- [Glossary](Glossary.md) / [Settings reference](Settings-Reference.md) / **Terraform reference** / [Troubleshooting index](Troubleshooting-Index.md)
-
-Related pages:
-
-- [Glossary](Glossary.md)
-<!-- END GENERATED PAGE NAV bottom -->

@@ -168,7 +168,7 @@ def test_the_heads_key_table_matches_the_heads_prerequisites_wording():
 
 
 def test_the_page_ends_by_linking_the_firmware_and_hardware_keys_lessons():
-    body = text().split("<!-- BEGIN GENERATED PAGE NAV bottom")[0]
+    body = text()  # the page file ends with its own text: the navigation block is added when the wiki is published (issue #521)
     tail = body.split("## Where this goes next")[1]
     for target in ("Device-Firmware-Security-Intel-ME-AMD-PSP-MINIX-and-Kernel-Design", "Hardware-Security-Keys-YubiKey-Nitrokey-Smart-Cards-and-PIV"):
         assert f"]({target}.md)" in tail, target

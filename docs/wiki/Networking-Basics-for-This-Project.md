@@ -2,12 +2,6 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Networking basics
-
-Previous: [What is the cloud](What-Is-the-Cloud.md) / Next: [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
-<!-- END GENERATED PAGE NAV top -->
-
 Start-from-zero page 2 of 8. Previous: [What is the cloud](What-Is-the-Cloud.md). Next: [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md).
 
 This page covers exactly the networking you need to understand this repository: addresses, ports, what "listening" means, what a firewall does, and why a machine can have a public address and still be unreachable. It is not a networking course. It is the minimum, explained properly.
@@ -132,20 +126,3 @@ Two things about VPCs that surprise people:
 - For the full exercise set, including a free lab where you build a router, a port forward and a default-deny firewall and then break it, see [Subnets, NAT and firewalls by hand](Subnets-NAT-and-Firewalls-By-Hand.md).
 
 Next: [Identity, secrets and zero trust basics](Identity-Secrets-and-Zero-Trust-Basics.md).
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Networking basics
-
-Previous: [What is the cloud](What-Is-the-Cloud.md) / Next: [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
-
-In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
-
-- [Start here if you are new](Start-Here-If-You-Are-New.md) / [What is the cloud](What-Is-the-Cloud.md) / **Networking basics** / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / [How money works](How-Money-Works-in-the-Cloud.md) / [Enterprise habits](Enterprise-Engineering-Habits.md) / [Architecture overview](Architecture-Overview.md) / [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / [Twingate](Twingate.md) / [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / [Droplet hardening](Droplet-Hardening.md) / [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / [Spacelift](Spacelift.md) / [Doppler and secrets](Doppler-and-Secrets.md) / [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / [Threat model](Threat-Model.md) / [Lessons learned](Lessons-Learned.md) / [Roadmap](Roadmap.md)
-
-Related pages:
-
-- [Start here if you are new](Start-Here-If-You-Are-New.md)
-- [Infrastructure as code](What-Is-Infrastructure-as-Code.md)
-- [Git and pull requests](Git-GitHub-and-Pull-Requests.md)
-- [Containers and Docker (optional)](Containers-and-Docker-Basics.md)
-<!-- END GENERATED PAGE NAV bottom -->

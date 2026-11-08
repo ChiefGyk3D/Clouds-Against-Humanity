@@ -6,12 +6,6 @@
 
 > New to the terminal itself (pipes, exit codes, `PATH`)? Start with [The terminal and your first script](Terminal-and-Your-First-Script.md). New to Linux commands, users, `sudo` or file permissions? Read [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) first; it also compares Ubuntu with RHEL, Amazon Linux and SUSE.
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Droplet hardening
-
-Previous: [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / Next: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
-<!-- END GENERATED PAGE NAV top -->
-
 The firewall is the outer wall. This page is about the house: what `modules/twingate-bootstrap/cloud-init.yaml.tftpl` does to a connector droplet on its first boot, before any human could log in.
 
 The guiding idea is that the firewall should never be the only control. If a firewall rule is ever wrong, the host itself should still refuse anything it was not built to accept.
@@ -149,20 +143,3 @@ These are listed in the [stage 1 guide](https://github.com/ChiefGyk3D/Clouds-Aga
 If you will run a website on a droplet, the application layer needs its own hardening: [WordPress and PHP security, WAFs and static sites](WordPress-and-PHP-Security-WAF-and-Static-Sites.md).
 
 Next: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md), step 15 of the core path on the [Reading order](Reading-Order.md) page.
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Droplet hardening
-
-Previous: [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / Next: [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
-
-In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
-
-- [Start here if you are new](Start-Here-If-You-Are-New.md) / [What is the cloud](What-Is-the-Cloud.md) / [Networking basics](Networking-Basics-for-This-Project.md) / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / [How money works](How-Money-Works-in-the-Cloud.md) / [Enterprise habits](Enterprise-Engineering-Habits.md) / [Architecture overview](Architecture-Overview.md) / [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / [Twingate](Twingate.md) / [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / **Droplet hardening** / [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / [Spacelift](Spacelift.md) / [Doppler and secrets](Doppler-and-Secrets.md) / [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / [Threat model](Threat-Model.md) / [Lessons learned](Lessons-Learned.md) / [Roadmap](Roadmap.md)
-
-Related pages:
-
-- [Twingate](Twingate.md)
-- [Spacelift](Spacelift.md)
-- [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md)
-- [Doppler and secrets](Doppler-and-Secrets.md)
-<!-- END GENERATED PAGE NAV bottom -->

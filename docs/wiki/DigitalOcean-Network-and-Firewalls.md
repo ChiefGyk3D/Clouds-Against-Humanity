@@ -4,12 +4,6 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > DigitalOcean network and firewalls
-
-Previous: [Twingate](Twingate.md) / Next: [Droplet hardening](Droplet-Hardening.md)
-<!-- END GENERATED PAGE NAV top -->
-
 Every DigitalOcean droplet gets a public IP address, and you cannot remove it. So the question is not "how do we keep it off the internet" but "how do we make sure nothing on that address answers". The answer is a cloud firewall that is attached by tag and in force from the first boot.
 
 If you want to put a public website on a droplet, the lesson [DNS, Cloudflare and hosting your own website](DNS-Cloudflare-and-Hosting-Your-Own-Website.md) shows how to allow web traffic from a proxy's published ranges only, which is the opposite of this project's zero-inbound baseline and is for your own account, not these stacks.
@@ -109,20 +103,3 @@ Later workload droplets will need an inbound rule allowing their service ports *
 - From connector a over Twingate SSH: `timeout 5 bash -c '</dev/tcp/<connector b private IP>/22' && echo open || echo blocked` prints `open`. Do the same from b to a.
 
 Next: [Droplet hardening](Droplet-Hardening.md), step 14 of the core path on the [Reading order](Reading-Order.md) page.
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > DigitalOcean network and firewalls
-
-Previous: [Twingate](Twingate.md) / Next: [Droplet hardening](Droplet-Hardening.md)
-
-In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
-
-- [Start here if you are new](Start-Here-If-You-Are-New.md) / [What is the cloud](What-Is-the-Cloud.md) / [Networking basics](Networking-Basics-for-This-Project.md) / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / [How money works](How-Money-Works-in-the-Cloud.md) / [Enterprise habits](Enterprise-Engineering-Habits.md) / [Architecture overview](Architecture-Overview.md) / [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / [Twingate](Twingate.md) / **DigitalOcean network and firewalls** / [Droplet hardening](Droplet-Hardening.md) / [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / [Spacelift](Spacelift.md) / [Doppler and secrets](Doppler-and-Secrets.md) / [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / [Threat model](Threat-Model.md) / [Lessons learned](Lessons-Learned.md) / [Roadmap](Roadmap.md)
-
-Related pages:
-
-- [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md)
-- [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
-- [Architecture overview](Architecture-Overview.md)
-- [Spacelift](Spacelift.md)
-<!-- END GENERATED PAGE NAV bottom -->

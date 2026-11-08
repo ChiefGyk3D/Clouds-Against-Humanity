@@ -4,12 +4,6 @@
 
 > New to typing commands, pipes or exit codes? Start with [The terminal and your first script](Terminal-and-Your-First-Script.md). Containers run on a Linux kernel. If distros, package managers or `systemctl` are new, [Linux for enterprise beginners](Linux-for-Enterprise-Beginners.md) is the side page for them.
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Containers and Docker (optional)
-
-Previous: [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / Next: [How money works](How-Money-Works-in-the-Cloud.md)
-<!-- END GENERATED PAGE NAV top -->
-
 Start-from-zero page 6 of 8. Previous: [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md). Next: [How money works in the cloud](How-Money-Works-in-the-Cloud.md).
 
 If you run Docker on a Pi you already know the commands. This page is about the ideas underneath them, because stage 3 of this project moves Pi-shaped containers to the cloud, and the move exposes assumptions that never mattered at home.
@@ -108,20 +102,3 @@ Nothing yet: stage 3 is designed, not built. The design is in `docs/superpowers/
 - Pick one of your own containers and list the assumptions in the table above that it makes. That list is its "cloud-optimized install".
 
 Next: [How money works in the cloud](How-Money-Works-in-the-Cloud.md).
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Containers and Docker (optional)
-
-Previous: [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / Next: [How money works](How-Money-Works-in-the-Cloud.md)
-
-In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
-
-- [Start here if you are new](Start-Here-If-You-Are-New.md) / [What is the cloud](What-Is-the-Cloud.md) / [Networking basics](Networking-Basics-for-This-Project.md) / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / **Containers and Docker (optional)** / [How money works](How-Money-Works-in-the-Cloud.md) / [Enterprise habits](Enterprise-Engineering-Habits.md) / [Architecture overview](Architecture-Overview.md) / [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / [Twingate](Twingate.md) / [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / [Droplet hardening](Droplet-Hardening.md) / [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / [Spacelift](Spacelift.md) / [Doppler and secrets](Doppler-and-Secrets.md) / [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / [Threat model](Threat-Model.md) / [Lessons learned](Lessons-Learned.md) / [Roadmap](Roadmap.md)
-
-Related pages:
-
-- [Infrastructure as code](What-Is-Infrastructure-as-Code.md)
-- [Enterprise habits](Enterprise-Engineering-Habits.md)
-- [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
-- [Architecture overview](Architecture-Overview.md)
-<!-- END GENERATED PAGE NAV bottom -->

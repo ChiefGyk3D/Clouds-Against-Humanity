@@ -6,7 +6,7 @@ What is proved:
   headings suffixed -1, -2, headings inside code blocks ignored; it agrees with every anchor link already on
   the wiki and with the anchor checker's own slugger on every wiki page;
 - a page gets the block exactly when its author text (generated blocks stripped) is over TOC_MIN_LINES, it sits
-  right after the top navigation block, lists the `##` headings (and `###` only on a page with few of them) as
+  right after the first heading and banners (the publish step puts the navigation block above it), lists the `##` headings (and `###` only on a page with few of them) as
   links that resolve, and adds no heading, table or prose;
 - the generator is idempotent, --check fails when a block is stale, appears or should go away, and the page
   prose is never touched;
@@ -23,7 +23,14 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 import gen_wiki_nav as gwn
 import test_markdown_anchors as anchor_checker
-from test_wiki_page_nav import manifest, pages_with_nav, small, text_of, write_tree
+from test_wiki_page_nav import (
+    manifest,
+    pages_with_nav,
+    published,
+    small,
+    text_of,
+    write_tree,
+)
 from wikitext import page_text
 
 WIKI = ROOT / "docs" / "wiki"
@@ -172,13 +179,28 @@ def test_the_committed_blocks_are_what_the_generator_renders_and_a_second_run_ch
         once = gwn.apply_page_contents(text, gwn.render_page_contents(gwn.strip_generated(text)))
         assert once == text, name
         assert gwn.apply_page_contents(once, gwn.render_page_contents(gwn.strip_generated(once))) == once, name
-        assert gwn.apply_page_nav(text, gwn.render_page_nav(m, name)) == text, name
+        assert not gwn.has_nav_blocks(text), name
+        assert gwn.apply_page_nav(once, gwn.render_page_nav(m, name)) == published(name), name
 
 
-def test_the_block_sits_right_after_the_top_navigation_block_and_before_any_prose():
+def test_the_block_sits_right_after_the_heading_and_banners_and_before_any_prose():
     seen = 0
     for name in pages_with_nav():
         text = text_of(name)
+        if gwn.TOC_BEGIN not in text:
+            continue
+        seen += 1
+        head = text.split(gwn.TOC_BEGIN, 1)[0].splitlines()
+        assert head[0].startswith("# "), name
+        assert all(not line.strip() or line.startswith(">") for line in head[1:]), f"{name}: prose before the block"
+        assert text.split(gwn.TOC_BEGIN, 1)[0].endswith("\n\n"), name
+    assert seen >= 60
+
+
+def test_on_the_published_page_the_navigation_block_comes_first_then_the_contents_block():
+    seen = 0
+    for name in pages_with_nav():
+        text = published(name)
         if gwn.TOC_BEGIN not in text:
             continue
         seen += 1
@@ -290,33 +312,31 @@ def test_a_long_page_with_no_listable_heading_gets_no_block():
 def test_apply_inserts_once_replaces_in_place_and_removes_when_none():
     m, _ = small()
     original = long_page("T3", 320)
-    with_nav = gwn.apply_page_nav(original, gwn.render_page_nav(m, "T3"))
     block = gwn.render_page_contents(original)
-    done = gwn.apply_page_contents(with_nav, block)
+    done = gwn.apply_page_contents(original, block)
     assert done.count(gwn.TOC_BEGIN) == 1 and done.count(gwn.TOC_END) == 1
     assert gwn.apply_page_contents(done, block) == done  # idempotent
-    assert gwn.strip_generated(done) == original  # only the blocks were added
-    assert gwn.strip_page_contents(done) == with_nav
+    assert gwn.strip_generated(done) == original  # only the block was added
+    assert gwn.strip_page_contents(done) == original
     stale = done.replace("[Section 2](#section-2)", "[Section TWO](#section-2)")
     assert gwn.apply_page_contents(stale, block) == done
-    assert gwn.apply_page_contents(done, None) == with_nav
+    assert gwn.apply_page_contents(done, None) == original
+    # The navigation block the publish step adds goes above it, and the contents block survives the round trip.
+    published_text = gwn.apply_page_nav(done, gwn.render_page_nav(m, "T3"))
+    assert published_text.index(gwn.NAV_END.format(where="top")) < published_text.index(gwn.TOC_BEGIN)
+    assert gwn.strip_page_nav(published_text) == done
 
 
 def test_apply_refuses_a_page_with_a_broken_or_misplaced_marker():
-    m, _ = small()
     original = long_page("T3", 320)
-    with_nav = gwn.apply_page_nav(original, gwn.render_page_nav(m, "T3"))
     block = gwn.render_page_contents(original)
-    done = gwn.apply_page_contents(with_nav, block)
+    done = gwn.apply_page_contents(original, block)
     with pytest.raises(ValueError, match="marker"):
         gwn.apply_page_contents(done.replace(gwn.TOC_END, ""), block)
     with pytest.raises(ValueError, match="marker"):
         gwn.apply_page_contents(done + block, block)
-    with pytest.raises(ValueError, match="top"):
-        gwn.apply_page_contents(original, block)  # no top navigation block to follow
-    moved = done.replace(block, "").rstrip("\n") + "\n\n" + block + "\n"
-    with pytest.raises(ValueError, match="after the top"):
-        gwn.apply_page_contents(moved, block)
+    with pytest.raises(ValueError, match="heading"):
+        gwn.apply_page_contents("no heading here\n" * 3, block)  # no first-level heading to put the block after
     swapped = done.replace(gwn.TOC_BEGIN, "@@").replace(gwn.TOC_END, gwn.TOC_BEGIN).replace("@@", gwn.TOC_END)
     with pytest.raises(ValueError, match="before"):
         gwn.apply_page_contents(swapped, block)

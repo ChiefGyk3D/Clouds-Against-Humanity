@@ -1,11 +1,5 @@
 # Start here if you are new
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Start here if you are new
-
-Next: [What is the cloud](What-Is-the-Cloud.md)
-<!-- END GENERATED PAGE NAV top -->
-
 This page is for you if you have a Raspberry Pi or an old PC running a few things at home, you have heard words like "cloud", "Terraform", "zero trust" and "CI" without anyone ever explaining them, and this repository is one of your first looks at how infrastructure is built in a professional setting. Nothing on the start-from-zero pages assumes you have worked in IT. They assume you are curious and can type a command.
 
 The rest of the wiki was written for people who already know the vocabulary. It is still the real documentation of this environment, and you will be able to read it by the time you finish these pages.
@@ -94,20 +88,3 @@ I am not anti AI. [Scrum Around and Find Out](https://github.com/ChiefGyk3D/scru
 If something here is wrong, confusing or does not work on your computer, please tell me: [Give feedback and open an issue](Give-Feedback-and-Open-an-Issue.md) shows how, and it costs nothing.
 
 Next: [What is the cloud](What-Is-the-Cloud.md), the first primer. Every path through the wiki is laid out on the [Reading order](Reading-Order.md) page, and [Contents](Contents.md) lists every page once, grouped by theme.
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Start here if you are new
-
-Next: [What is the cloud](What-Is-the-Cloud.md)
-
-In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
-
-- **Start here if you are new** / [What is the cloud](What-Is-the-Cloud.md) / [Networking basics](Networking-Basics-for-This-Project.md) / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / [How money works](How-Money-Works-in-the-Cloud.md) / [Enterprise habits](Enterprise-Engineering-Habits.md) / [Architecture overview](Architecture-Overview.md) / [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / [Twingate](Twingate.md) / [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / [Droplet hardening](Droplet-Hardening.md) / [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / [Spacelift](Spacelift.md) / [Doppler and secrets](Doppler-and-Secrets.md) / [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / [Threat model](Threat-Model.md) / [Lessons learned](Lessons-Learned.md) / [Roadmap](Roadmap.md)
-
-Related pages:
-
-- [Networking basics](Networking-Basics-for-This-Project.md)
-- [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md)
-- [Infrastructure as code](What-Is-Infrastructure-as-Code.md)
-- [Git and pull requests](Git-GitHub-and-Pull-Requests.md)
-<!-- END GENERATED PAGE NAV bottom -->
