@@ -20,11 +20,13 @@ on:
     paths:
       - "docs/wiki/**"
       - "scripts/gen-wiki.sh"
+      - "scripts/gen_wiki_nav.py"
       - ".github/workflows/wiki.yml"
   pull_request:
     paths:
       - "docs/wiki/**"
       - "scripts/gen-wiki.sh"
+      - "scripts/gen_wiki_nav.py"
       - ".github/workflows/wiki.yml"
   workflow_dispatch:
 
@@ -36,5 +38,6 @@ jobs:
     permissions:
       contents: write  # the publish job only, on main; the generate job holds contents: read
     with:
+      install-command: pip install pyyaml==6.0.2  # gen-wiki.sh renders the page navigation from docs/wiki/_nav.yaml
       generate-command: bash scripts/gen-wiki.sh "$OUT_DIR"
       out-dir: wiki-out

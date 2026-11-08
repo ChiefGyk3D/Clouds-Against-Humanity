@@ -43,19 +43,21 @@ in Contents and Home like the core path, but closed by default and folded into s
 sidebar (the core path, with `numbered` alone, is listed in full and takes no subgroup). A page is
 in exactly one group, so a track holds its pages instead of a theme group.
 
-Page navigation (issue #417): every other page also carries two generated blocks, a short one after
-its first heading and leading quote banners (breadcrumb, previous, next) and the full one at the end
-(previous, next, the rest of its group, related pages), each between a BEGIN GENERATED PAGE NAV and
-an END GENERATED PAGE NAV line (NAV_BEGIN, NAV_END; "top" and "bottom"). Home and Contents get none,
-nor does a page whose first line is a GENERATED comment (another generator writes it whole). A page
-with no markers gets them inserted once; after that only the text between them is rewritten, and
---check fails when any block is stale. The optional `related` list of a page entry, the fallback
-rule and the reading orders are explained in the header of docs/wiki/_nav.yaml. Tests that count a
-page's links or read its first lines use strip_page_nav (via tests/wikitext.py) to see the author's text.
+Page navigation (issue #417, moved to the publish step by issue #521): every other page also gets two generated
+blocks when the wiki is published, a short one after its first heading and leading quote banners (breadcrumb,
+previous, next) and the full one at the end (previous, next, the rest of its group, related pages), each between a
+BEGIN GENERATED PAGE NAV and an END GENERATED PAGE NAV line (NAV_BEGIN, NAV_END; "top" and "bottom"). They are NOT
+stored in docs/wiki/*.md: a block lists the neighbors and the whole group, so storing it made every new page rewrite
+28 to 42 other files and every lesson PR conflict with every other. scripts/gen-wiki.sh calls `--publish-to DIR`, which
+renders the pages with their blocks from docs/wiki/_nav.yaml into a staging tree, and publishes that. Home and Contents
+get none, nor does a page whose first line is a GENERATED comment (another generator writes it whole). --check fails
+when a page file still carries a navigation block (running the generator without arguments removes it), and when a
+page cannot take the blocks at publish time. The optional `related` list of a page entry, the fallback rule and the
+reading orders are explained in the header of docs/wiki/_nav.yaml.
 
 In-page contents (issue #441): a page whose author text (all generated blocks taken out) is over TOC_MIN_LINES
 (300) lines gets a third generated block, between TOC_BEGIN and TOC_END ("BEGIN/END GENERATED PAGE CONTENTS"), right
-after its top navigation block. It is a bold label and a list of links to the page's own headings, so it adds no
+after the first heading and the leading quote banners. It is a bold label and a list of links to the page's own headings, so it adds no
 heading: the `##` headings, plus the `###` headings (nested under the `##` above them) on a page with fewer than
 TOC_SUBHEADINGS_BELOW (6) `##` headings, where the finer list is what the reader needs. The anchors follow GitHub's rule
 (heading_slug, page_headings: lower case, punctuation dropped, spaces to hyphens, repeats suffixed -1, -2, code
@@ -72,6 +74,8 @@ Parts, kept apart on purpose (the same shape as gen_project_status.py):
                             pure: swap the block between the markers of a Home.md text.
   render_page_nav(m, page), apply_page_nav(text, blocks), strip_page_nav(text)
                             pure: the two blocks of a page, put into (or taken out of) a page text.
+  render_published_page(m, name, text), publish_pages(root, out)
+                            the publish step (issue #521): pages with their navigation blocks, written to a directory.
   render_page_contents(text), apply_page_contents(text, block), strip_generated(text)
                             pure: the contents block of a page (issue #441), put into or taken out of a page text.
   main()                    --check is offline and exits 1 when a generated file is stale
@@ -79,7 +83,8 @@ Parts, kept apart on purpose (the same shape as gen_project_status.py):
 
 Usage (from anywhere inside a clone):
   python -I scripts/gen_wiki_nav.py --check   exit 1 when stale or inconsistent
-  python -I scripts/gen_wiki_nav.py           rewrite Contents.md, _Sidebar.md and the Home map
+  python -I scripts/gen_wiki_nav.py           rewrite Contents.md, _Sidebar.md, the Home map and the page contents blocks
+  python -I scripts/gen_wiki_nav.py --publish-to DIR   write every page with its navigation blocks into DIR (gen-wiki.sh)
 
 Exit codes: 0 ok, 1 stale or inconsistent (--check) or an unreadable manifest, 2 usage or
 a missing PyYAML.
@@ -859,24 +864,28 @@ def render_page_contents(text: str) -> str | None:
     return "\n".join([TOC_BEGIN, TOC_LABEL, "", *lines, TOC_END])
 
 
+def _insert_after_banners(text: str, block: str) -> str:
+    """Put a block right after the first heading and the leading quote banners, with a blank line each side."""
+    lines = text.split("\n")
+    if not lines or not lines[0].startswith("# "):
+        raise ValueError("the page does not begin with a first-level heading, so the block has no place")
+    at = _top_insertion_point(lines)
+    before, after = "\n".join(lines[:at]).rstrip("\n"), "\n".join(lines[at:]).strip("\n")
+    return (f"{before}\n\n{block}\n" + (f"\n{after}" if after else "")).rstrip("\n") + "\n"
+
+
 def apply_page_contents(text: str, block: str | None) -> str:
-    """Put the contents block into a page text that already carries its top navigation block: inserted right after
-    that block when the page has none yet, rewritten in place when it has one, removed when `block` is None.
-    A page with a broken, repeated or misplaced marker is an error, not a guess."""
+    """Put the contents block into a page text: inserted after the first heading and the leading quote banners when
+    the page has none yet, rewritten in place when it has one, removed when `block` is None. A page with a broken,
+    repeated or reversed marker is an error, not a guess."""
     begins, ends = text.count(TOC_BEGIN), text.count(TOC_END)
     if (begins, ends) not in ((0, 0), (1, 1)):
         raise ValueError("a page needs exactly one BEGIN and one END marker line for its page-contents block, or none")
-    top_end_line = NAV_END.format(where="top")
-    if text.count(top_end_line) != 1:
-        raise ValueError("the page has no top page-nav block for the page-contents block to follow")
-    top_end = text.index(top_end_line) + len(top_end_line)
     if begins == 0:
-        return text if block is None else text[:top_end] + "\n\n" + block + text[top_end:]
+        return text if block is None else _insert_after_banners(text, block)
     start, stop = text.index(TOC_BEGIN), text.index(TOC_END) + len(TOC_END)
     if stop - len(TOC_END) < start:
         raise ValueError("the END page-contents marker comes before its BEGIN marker")
-    if start < top_end or start > text.index(NAV_BEGIN.format(where="bottom")):
-        raise ValueError("the page-contents block must come after the top page-nav block and before the bottom one")
     if block is None:
         return text[:start].rstrip("\n") + text[stop:]
     return text[:start] + block + text[stop:]
@@ -918,15 +927,23 @@ def check(root: Path) -> list[str]:
         problems.append(f"{HOME} is missing")
     except ValueError as exc:
         problems.append(f"{HOME}: {exc}")
-    for name, path, current, wanted in page_nav_plan(root, manifest, problems):
-        if current != wanted:
-            problems.append(f"the page navigation blocks in {path} do not match {MANIFEST}")
+    for name, path, current, wanted in page_contents_plan(root, manifest, problems):
+        if has_nav_blocks(current):
+            problems.append(f"{path} carries a generated navigation block; the publish step writes those now (run scripts/gen_wiki_nav.py to remove it)")
+        elif current != wanted:
+            problems.append(f"the page contents block in {path} does not match the page")
     return problems
 
 
-def page_nav_plan(root: Path, manifest: dict, problems: list[str]) -> list[tuple[str, Path, str, str]]:
-    """For every page that carries the generated blocks: (name, path, text now, text as it should be).
-    A page that cannot take them is reported in `problems` and left out."""
+def has_nav_blocks(text: str) -> bool:
+    return any(NAV_BEGIN.format(where=w) in text or NAV_END.format(where=w) in text for w in NAV_PLACES)
+
+
+def page_contents_plan(root: Path, manifest: dict, problems: list[str]) -> list[tuple[str, Path, str, str]]:
+    """For every page that takes generated blocks: (name, path, text now, text as it should be in the repository).
+    The repository text carries the contents block only; any navigation block left over from before issue #521 is
+    taken out. A page that cannot take its blocks, in the repository or when published, is reported in `problems`
+    and left out."""
     plan = []
     for name in sorted(wiki_pages(root)):
         path = WIKI / f"{name}.md"
@@ -938,8 +955,9 @@ def page_nav_plan(root: Path, manifest: dict, problems: list[str]) -> list[tuple
         if not has_page_nav(name, current):
             continue
         try:
-            wanted = apply_page_nav(current, render_page_nav(manifest, name))
+            wanted = strip_page_nav(current)
             wanted = apply_page_contents(wanted, render_page_contents(wanted))
+            render_published_page(manifest, name, wanted)  # the publish step must be able to take it, too
         except ValueError as exc:
             problems.append(f"{path}: {exc}")
             continue
@@ -947,12 +965,50 @@ def page_nav_plan(root: Path, manifest: dict, problems: list[str]) -> list[tuple
     return plan
 
 
+def render_published_page(manifest: dict, name: str, text: str) -> str:
+    """A page as the wiki shows it: the repository text with the two navigation blocks added (issue #521)."""
+    if not has_page_nav(name, text):
+        return text
+    return apply_page_nav(text, render_page_nav(manifest, name))
+
+
+def publish_pages(root: Path, out: Path) -> int:
+    """Write every docs/wiki page, with its navigation blocks, into `out` (made if missing). Returns the page count."""
+    manifest = read_manifest(root)
+    problems = validate(manifest, wiki_pages(root))
+    if problems:
+        raise ValueError("; ".join(problems))
+    out.mkdir(parents=True, exist_ok=True)
+    count = 0
+    for name in sorted(wiki_pages(root) | SPECIAL):
+        source = root / WIKI / f"{name}.md"
+        if not source.is_file():
+            continue
+        rendered = render_published_page(manifest, name, source.read_text(encoding="utf-8"))
+        (out / f"{name}.md").write_text(rendered, encoding="utf-8")
+        count += 1
+    return count
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--check", action="store_true", help="offline: fail when a generated file is stale")
+    parser.add_argument("--publish-to", metavar="DIR", help="write every page with its navigation blocks into DIR (the wiki publish step)")
     parser.add_argument("--root", default=str(ROOT), help="repository root")
     args = parser.parse_args(argv)
     root = Path(args.root)
+
+    if args.publish_to:
+        try:
+            count = publish_pages(root, Path(args.publish_to))
+        except RuntimeError as exc:
+            print(f"gen_wiki_nav: {exc}", file=sys.stderr)
+            return 2
+        except (OSError, ValueError, TypeError) as exc:
+            print(f"gen_wiki_nav: cannot publish: {exc}", file=sys.stderr)
+            return 1
+        print(f"gen_wiki_nav: wrote {count} pages with their navigation blocks to {args.publish_to}")
+        return 0
 
     if args.check:
         problems = check(root)
@@ -961,7 +1017,7 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"gen_wiki_nav: {p}", file=sys.stderr)
             print("gen_wiki_nav: fix the manifest, then re-render with: python -I scripts/gen_wiki_nav.py", file=sys.stderr)
             return 1
-        print(f"gen_wiki_nav: {CONTENTS}, {SIDEBAR}, the {HOME} page map and every page's navigation blocks match {MANIFEST}")
+        print(f"gen_wiki_nav: {CONTENTS}, {SIDEBAR}, the {HOME} page map and every page's contents block match {MANIFEST}, and no page file carries a navigation block")
         return 0
 
     try:
@@ -983,7 +1039,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"gen_wiki_nav: {HOME}: {exc}", file=sys.stderr)
         return 1
     nav_problems: list[str] = []
-    plan = page_nav_plan(root, manifest, nav_problems)
+    plan = page_contents_plan(root, manifest, nav_problems)
     if nav_problems:  # a page that cannot take its blocks stops the run before anything is written
         for p in nav_problems:
             print(f"gen_wiki_nav: {p}", file=sys.stderr)
@@ -998,7 +1054,7 @@ def main(argv: list[str] | None = None) -> int:
             changed += 1
     with_contents = sum(1 for _, _, _, wanted in plan if TOC_BEGIN in wanted)
     print(
-        f"gen_wiki_nav: wrote {CONTENTS}, {SIDEBAR}, the page map in {HOME} and the navigation blocks of {len(plan)} pages "
+        f"gen_wiki_nav: wrote {CONTENTS}, {SIDEBAR}, the page map in {HOME} and the contents blocks of {len(plan)} pages "
         f"({with_contents} with a contents block, {changed} changed)"
     )
     return 0

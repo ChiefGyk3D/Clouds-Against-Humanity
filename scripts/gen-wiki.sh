@@ -15,6 +15,14 @@
 # OUT_DIR must not exist or must be empty: the whole directory is published, so
 # a leftover file would be published too. A non-empty one is refused.
 #
+# Navigation (issue #521): the pages in docs/wiki hold only hand-written text and
+# the contents block of a long page. The previous/next links, the list of the rest
+# of the group and the "In this track: N pages" count are rendered here, from
+# docs/wiki/_nav.yaml, by scripts/gen_wiki_nav.py --publish-to, so adding a page
+# does not rewrite its neighbors. That needs python3 with PyYAML (the Wiki
+# workflow installs it). A tree with no _nav.yaml (a scratch tree in a test) is
+# published as written.
+#
 # What it changes in each page: relative links such as (Twingate.md) or
 # (Twingate.md#section) become (Twingate) and (Twingate#section), which is how
 # the wiki addresses pages. Absolute links are left alone.
@@ -119,9 +127,20 @@ BEGIN { fence = 0; prev_blank = 1; inlist = 0 }
 }
 '
 
+# Pages with their navigation blocks go to a staging directory; the link rewrite
+# below reads from there. Without a manifest the pages are read as written.
+pages_src=$src
+if [ -f "$src/_nav.yaml" ]; then
+  stage=$(mktemp -d)
+  trap 'rm -rf "$stage"' EXIT
+  python3 -I "$repo_root/scripts/gen_wiki_nav.py" --root "$repo_root" --publish-to "$stage" >&2 \
+    || die "could not render the page navigation from docs/wiki/_nav.yaml"
+  pages_src=$stage
+fi
+
 mkdir -p "$out"
 count=0
-for page in "$src"/*.md; do
+for page in "$pages_src"/*.md; do
   [ -e "$page" ] || continue
   name=$(basename "$page")
   sed -E 's/\]\(([A-Za-z0-9_-]+)\.md(#[^)]*)?\)/](\1\2)/g' "$page" \
