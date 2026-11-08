@@ -13,6 +13,7 @@ config keys (all optional):
   min_register_rows, min_links, min_glossary_rows   thresholds; 0 glossary rows means the page has no glossary terms.
   nav_contains        text the page's _nav.yaml line must carry (its status and subgroup).
   nav_places_skip     navigation files that do not list the page, with the reason in a comment.
+  unrun_marks_extra   extra words that count as the page's mark for what was not run (the page names its own).
   must_link, must_link_prefix   pages (or page-name prefixes) the lesson must link, as links, never as plain text.
 
 A row is {"id", ...assertions}; the assertion keys are documented on `check_row` in test_lesson_guards.py. A row with
@@ -70,8 +71,8 @@ BRIDGE_FORBID = r"-(nic|netdev|net)\s+(bridge|tap)|\bbridge=|--network\s+bridged
 
 PAGES: dict[str, dict] = {
     # ---- pages that have no per-lesson file: the generic checks, plus the statuses they really use ----------------
-    "Attack-Surface-List-Shrink-Measure": {"config": {"status_extra": ("Searched", "est."), "min_glossary_rows": 0}},
-    "Attack-Surface-Map-Layer-by-Layer": {"config": {"status_extra": ("Carried over",), "min_glossary_rows": 0}},
+    "Attack-Surface-List-Shrink-Measure": {"config": {"status_extra": ("Searched", "est."), "unrun_marks_extra": ("est.",), "min_glossary_rows": 0}},
+    "Attack-Surface-Map-Layer-by-Layer": {"config": {"unrun_marks_extra": ("not tested on a real droplet",), "status_extra": ("Carried over",), "min_glossary_rows": 0}},
     "Cryptography-Fundamentals-Symmetric-Asymmetric-Hashing-Certificates-and-Keys": {"config": {"status_extra": ("Listing read", "Title and header read")}},
     "Deception-and-Honeypots-Cloud-Cowrie-Weekend": {"config": {"status_extra": ("The ISC's claim",), "min_glossary_rows": 0}},
     # the Reading-Order page lists the cloud-sensor path of the deception lessons, not this introduction
@@ -84,7 +85,7 @@ PAGES: dict[str, dict] = {
     "Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero": {"config": {"status_extra": ("Nothing run",)}},
     "Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT": {"config": {"status_extra": ("Stated by the maintainer",)}},
     "Static-vs-Dynamic-Sites-Hugo-and-WordPress-and-Recon": {"config": {"status_extra": ("**Est.**", "His words", "**Unverified.**")}},
-    "The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet": {"config": {"status_extra": ("Recommendation", "Interpretation")}},
+    "The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet": {"config": {"unrun_marks_extra": ("**unverified**",), "status_extra": ("Recommendation", "Interpretation")}},
     "Wazuh-SIEM-and-Data-Pipelines": {"config": {"status_extra": ("**UNVERIFIED**",)}},
     # version numbers and lab networks that look like addresses
     "Hands-On-Whonix-and-Qubes-OS-Gateway-Split-Compartments-Disposables-and-Policy-Prompts": {"config": {"addresses_extra": (r"10\.152\.152\.\d+", r"18\.2\.4\.2", r"255\.255\.192\.0")}},

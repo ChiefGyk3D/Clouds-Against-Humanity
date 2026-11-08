@@ -50,6 +50,11 @@ HONEST = re.compile(
 )
 NOT_RUN = re.compile(r"\*\*Not run:\*\*|nothing run|not run|did not run|no command on this page was run|has not been run|have not been run|not built", re.IGNORECASE)
 MARKS = ("**est.**", "UNTESTED", "**Untested", "**not verified**", "Not verified, plainly")
+# "unverified draft" is the banner label every draft page carries, not a statement that something was not run
+UNRUN_SAYS = re.compile(
+    r"did not run|was not run|were not run|not run\b|never run|I did not|could not run|untested|not tested|not verified|unverified(?! draft)",
+    re.IGNORECASE,
+)
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 SIBLING_WORDING = ("plain text until", "They are not linked here")
 NAV_PLACES = ("Contents.md", "_Sidebar.md", "Reading-Order.md")
@@ -142,17 +147,40 @@ def glossary_rows(name: str) -> int:
     return sum(1 for line in read(WIKI / "Glossary.md").splitlines() if f"{name}.md" in line)
 
 
-# The full identifier scan (every pattern, every tracked file) is the repository gate `identifier_check.py --root .`,
-# which already covers these pages; running every pattern again per page would double its cost. This suite reuses the
-# gate's own compiled patterns and allowlist for the kinds that are a secret and not just an identifier.
-SECRET_KINDS = ("AWS access key id", "Azure subscription or tenant id")
-
-
+# The repository gate `identifier_check.py --root .` scans every tracked file with every pattern. This suite applies
+# the gate's own scan_line (all pattern kinds: AWS, Azure, GCP; its placeholder allowlist; its ignore marker) to each
+# lesson page, so a page cannot publish a real-looking account, tenant, project or key id, and adds private keys.
 def identifier_findings(body: str) -> list[str]:
-    kinds = [kind for kind, rx in ic.PATTERNS if kind in SECRET_KINDS for m in rx.finditer(body) if not ic.is_allowed(m.group("v"))]
+    kinds = [kind for line in body.splitlines() for kind in ic.scan_line(line)]
     if PRIVATE_KEY.search(body):
         kinds.append("private key block")
     return kinds
+
+
+def identifier_problem(name: str, body: str) -> str | None:
+    kinds = identifier_findings(body)
+    return fail(name, "no cloud account, tenant, project or key id and no private key (patterns of scripts/identifier_check.py)", kinds) if kinds else None
+
+
+def banner_problem(name: str, body: str, nav_status: str) -> str | None:
+    banner = banner_of(body)
+    if not banner:
+        return fail(name, "status banner", "no '> **Status:' blockquote")
+    if not DATE.search(banner):  # the banner itself, never the introduction
+        return fail(name, "status banner is dated", "no date inside the banner text")
+    if not HONEST.search(banner):
+        return fail(name, "status banner says what was or was not run", banner[:120])
+    if nav_status == "draft" and "unverified draft" not in banner:
+        return fail(name, "draft banner", "nav says draft but the banner does not say 'unverified draft'")
+    return None
+
+
+def unrun_problem(name: str, body: str, extra_marks: tuple[str, ...] = ()) -> str | None:
+    """Anywhere in the page, a statement that something was not run needs an unrun mark somewhere on the page."""
+    hit = UNRUN_SAYS.search(body)
+    if hit and not any(m in body for m in MARKS + tuple(extra_marks)):
+        return fail(name, "an UNTESTED / **est.** / not-verified mark", f"the page says {hit.group(0)!r} but carries no mark")
+    return None
 
 
 def banner_of(body: str) -> str:
@@ -215,28 +243,23 @@ def test_page_addresses_are_documented_placeholders_only(name):
 
 @pytest.mark.parametrize("name", LESSONS)
 def test_page_has_no_identifier_or_private_key(name):
-    kinds = identifier_findings(text(name))
-    assert not kinds, fail(name, "no cloud identifier, key id or private key (scripts/identifier_check.py)", kinds)
+    problem = identifier_problem(name, text(name))
+    assert problem is None, problem
 
 
 @pytest.mark.parametrize("name", LESSONS)
 def test_page_status_banner_says_what_was_and_was_not_run(name):
     body = text(name)
-    banner = banner_of(body)
     nav_status = re.search(r'\bstatus: "([^"]*)"', nav_entries()[name]).group(1)
-    assert banner, fail(name, "status banner", "no '> **Status:' blockquote")
-    assert DATE.search(banner) or DATE.search(body[:3000]), fail(name, "status banner is dated", "no date near the banner")
-    assert HONEST.search(banner), fail(name, "status banner says what was or was not run", banner[:120])
-    if nav_status == "draft":
-        assert "unverified draft" in banner, fail(name, "draft banner", "nav says draft but the banner does not say 'unverified draft'")
-    assert NOT_RUN.search(body[:6000]) or "run" in banner.lower(), fail(name, "says what was not run", "no 'Not run' statement near the top")
+    problem = banner_problem(name, body, nav_status)
+    assert problem is None, problem
+    assert NOT_RUN.search(body[:6000]) or "run" in banner_of(body).lower(), fail(name, "says what was not run", "no 'Not run' statement near the top")
 
 
 @pytest.mark.parametrize("name", LESSONS)
 def test_page_marks_what_was_not_run(name):
-    body = text(name)
-    if NOT_RUN.search(banner_of(body)) or "**Not run:**" in body:
-        assert any(m in body for m in MARKS), fail(name, "an UNTESTED / **est.** / not-verified mark", "the page says something was not run but carries no mark")
+    problem = unrun_problem(name, text(name), cfg(name).get("unrun_marks_extra", ()))
+    assert problem is None, problem
 
 
 @pytest.mark.parametrize("name", LESSONS)
@@ -316,10 +339,40 @@ def test_guard_bites_links_and_anchors():
     assert dead_own_anchors("# Title\n\n[x](#title)") == []
 
 
+UUID_REAL = "3f2a9c1e-7b44-4d0a-9e51-8c6d2b7a1f03"  # shaped like a real id, made up for this test
+
+
 def test_guard_bites_identifiers():
     assert identifier_findings("-----BEGIN RSA PRIVATE KEY-----")
     assert identifier_findings("key " + "AKIA" + "ABCDEFGHIJKLMNOP") == ["AWS access key id"]
     assert not identifier_findings("nothing secret here")
+    # every kind in the gate's pattern list, not just the first Azure form
+    assert identifier_findings(f"az group list --id /subscriptions/{UUID_REAL}/resourceGroups/x") == ["Azure subscription id in a resource path"]
+    assert identifier_findings(f"https://login.microsoftonline.com/{UUID_REAL}/oauth2/v2.0/token") == ["Azure tenant id in a sign-in URL"]
+    assert identifier_findings("arn:aws:iam::" + "210987654321" + ":role/x") == ["AWS ARN account id"]
+    assert "GCP project id" in identifier_findings("project_id = \"real-looking-proj-4821\"")
+    # the documented placeholder forms stay allowed
+    assert not identifier_findings("/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/x")
+    assert not identifier_findings("https://login.microsoftonline.com/11111111-1111-1111-1111-111111111111/oauth2")
+    assert not identifier_findings("arn:aws:iam::123456789012:role/x")
+    name = LESSONS[0]
+    assert "rule" in identifier_problem(name, f"/subscriptions/{UUID_REAL}/x") and name in identifier_problem(name, f"/subscriptions/{UUID_REAL}/x")
+    assert identifier_problem(name, "clean") is None
+
+
+UNDATED = "# T\n\n> **Status: unverified draft. Nothing was run.** No date here.\n\nIntro written on 2026-11-07.\n"
+
+
+def test_guard_bites_banner_date_and_unrun_marker():
+    # the date must be in the banner itself: a date in the introduction does not count
+    problem = banner_problem("P", UNDATED, "draft")
+    assert problem and "P" in problem and "dated" in problem
+    assert banner_problem("P", UNDATED.replace("No date here.", "Read on 2026-11-07."), "draft") is None
+    # an unrun statement anywhere in the page needs a mark
+    middle = "# T\n\n> **Status: unverified draft, 2026-11-07. Nothing was run.**\n\n## Body\n\nI did not run X.\n"
+    problem = unrun_problem("P", middle)
+    assert problem and "P" in problem and "mark" in problem
+    assert unrun_problem("P", middle + "\nThe step is **est.**\n") is None
 
 
 def test_guard_bites_banner():
