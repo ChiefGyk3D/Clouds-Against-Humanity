@@ -16,7 +16,7 @@ The plain command is `python -I -m pytest tests -q`. For a faster full run on a 
 python -I -m pytest tests -q -n auto
 ```
 
-Both modes give the same result: 4519 passed and 8 skipped on 2026-11-07. Measured on an 8-core machine that was already busy (load average about 15), the serial run took 273 s and the `-n auto` run took 90 s. Expect a smaller gap on a quiet machine and a larger one on a machine with more cores. CI still runs the plain serial command.
+Both modes give the same result: 4519 passed and 8 skipped on 2026-11-07. Measured on an 8-core machine that was already busy (load average about 15), the serial run took 273 s and the `-n auto` run took 90 s. Expect a smaller gap on a quiet machine and a larger one on a machine with more cores. CI still runs the plain serial command. `requirements-dev.txt` mirrors the pytest and pyyaml pins in `.github/workflows/ci.yml`, and the two change together; a test fails if they drift apart.
 
 ## What proves a pull request
 
