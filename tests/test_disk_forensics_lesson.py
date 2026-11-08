@@ -53,14 +53,15 @@ def test_every_linked_wiki_page_exists_and_the_gap_check_links_are_present():
         assert needed in links, needed
 
 
-def test_sibling_forensics_lessons_are_plain_text_not_links():
-    body = text()
-    for issue in ("#474", "#476", "#477", "#478"):
-        assert issue in body, issue
-    # The generated nav blocks list every page of the "Digital forensics" subgroup once the siblings exist, so the
-    # check is on the hand-written text only: the marked blocks are cut out first.
-    hand_written = re.sub(r"<!-- BEGIN GENERATED .*?<!-- END GENERATED [^>]*-->", "", body, flags=re.DOTALL)
-    assert not re.search(r"\]\((?:[^)]*)(Memory|Network|Toolkits|Foundations)[^)]*Forensic", hand_written)
+def test_sibling_forensics_lessons_are_linked_and_the_pages_exist():
+    # Was: siblings are plain text. The siblings are on main now, so each is a link to a page that exists.
+    hand_written = re.sub(r"<!-- BEGIN GENERATED .*?<!-- END GENERATED [^>]*-->", "", text(), flags=re.DOTALL)
+    links = set(LINK.findall(hand_written))
+    for prefix in ("Digital-Forensics-Foundations", "Memory-Forensics", "Network-Log-and-Timeline-Forensics", "DFIR-Toolkits"):
+        hits = [t for t in links if t.startswith(prefix)]
+        assert hits, prefix
+        assert all((WIKI / f"{t}.md").exists() for t in hits), prefix
+    assert "They are not linked here" not in hand_written
 
 
 def test_the_lesson_is_registered_everywhere():

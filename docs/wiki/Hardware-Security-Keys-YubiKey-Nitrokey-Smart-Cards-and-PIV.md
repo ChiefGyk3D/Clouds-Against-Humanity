@@ -208,7 +208,7 @@ For a credential that is meant to be rare and physical, I would take loud, local
 - Use the PIN. It was the second lock in the EUCLEAK conditions.
 - If your threat model includes someone with a lab, replace pre-5.7 keys.
 
-A planned set of lessons on firmware security (issues #465 and #466) goes much deeper into how firmware gets signed, updated, attacked and verified. Those pages do not exist yet, so there is nothing to link to. Look for them in the [Contents](Contents.md) when they land.
+The firmware lessons go much deeper into how firmware gets signed, updated, attacked and verified: [Device firmware security](Device-Firmware-Security-Intel-ME-AMD-PSP-MINIX-and-Kernel-Design.md) covers the Intel ME and AMD PSP, and [Open firmware and trustworthy hardware](Open-Firmware-and-Trustworthy-Hardware-coreboot-Heads-Nitrokey-and-Vendors-That-Ship-the-Intel-ME-Disabled.md) covers coreboot, Heads and Nitrokey. For keys that live in a server room or a cloud instead of on your keyring, see [Hardware security modules](Hardware-Security-Modules-What-They-Are-and-Building-Your-Own-with-pico2hsm.md).
 
 ## Exercise 1 (no hardware): a PIN-protected key that cannot leave the token
 

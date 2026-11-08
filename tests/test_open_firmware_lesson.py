@@ -167,9 +167,22 @@ def test_the_heads_key_table_matches_the_heads_prerequisites_wording():
         assert key in body, key
 
 
-def test_the_page_ends_by_pointing_at_the_firmware_lesson_as_plain_text():
+def test_the_page_ends_by_linking_the_firmware_and_hardware_keys_lessons():
     body = text().split("<!-- BEGIN GENERATED PAGE NAV bottom")[0]
     tail = body.split("## Where this goes next")[1]
-    assert "#465" in tail and "no link" in tail
-    assert "](" not in tail, "the springboard must not link a page that does not exist yet"
-    assert "#463" in text()
+    for target in ("Device-Firmware-Security-Intel-ME-AMD-PSP-MINIX-and-Kernel-Design", "Hardware-Security-Keys-YubiKey-Nitrokey-Smart-Cards-and-PIV"):
+        assert f"]({target}.md)" in tail, target
+        assert (WIKI / f"{target}.md").exists(), target
+    assert "no link" not in tail and "not written yet" not in text()
+    assert "Hardware-Security-Keys-YubiKey-Nitrokey-Smart-Cards-and-PIV.md" in text()
+
+
+def test_tuxedo_is_a_dated_user_selectable_option_on_one_model_not_a_shipped_default():
+    body = text()
+    sec = vendor_section(body, "Tuxedo Computers")
+    assert "2018-03-14" in sec and "InfinityBook Pro 13" in sec
+    assert "TUXEDO-disables-Intels-Management-Engine.tuxedo" in sec
+    assert "Ask Tuxedo in writing" not in body
+    assert "ships with the ME disabled" not in body.replace('not "ships with the ME disabled"', "")
+    reg_rows = [r for r in register_rows(body) if "press release" in r[0] and "Tuxedo" in r[0]]
+    assert reg_rows and "2018-03-14" in reg_rows[0][0] and "TUXEDO-disables" in reg_rows[0][1]

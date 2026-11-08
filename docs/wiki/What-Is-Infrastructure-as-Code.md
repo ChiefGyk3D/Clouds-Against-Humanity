@@ -34,7 +34,7 @@ Three things fall out of that immediately:
 
 In 2023 HashiCorp changed Terraform's license from open source to a "source available" license that restricts some uses. The community forked the last open-source version and continued it under the Linux Foundation as **OpenTofu**. Same language, same providers, same commands with `tofu` instead of `terraform`, open license (MPL 2.0).
 
-This project uses OpenTofu. Many pages, settings and file names still say "Terraform" because the ecosystem does (the provider registry, Spacelift's workflow setting, the `.terraform.lock.hcl` file name). When you read "Terraform" here, read "OpenTofu". When you read a job posting that says Terraform, everything you learn here applies.
+This project uses OpenTofu. Many pages, settings and file names still say "Terraform" because the ecosystem does (the provider registry, Spacelift's workflow setting, the `.terraform.lock.hcl` file name). When you read "Terraform" here, read "OpenTofu". When you read a job posting that says Terraform, everything you learn here applies. Terraform and OpenTofu are not the only way in; [Native IaC against open standards](Native-IaC-vs-Open-Standards-CloudFormation-ARM-Bicep-and-OpenTofu.md) compares CloudFormation, ARM, Bicep and OpenTofu.
 
 ## The four words you need
 
@@ -118,7 +118,7 @@ A **stack** (this project's term; Terraform calls it a root module) is a folder 
 
 ## Where cloud-init fits
 
-OpenTofu creates the machine. Something still has to configure what is **on** the machine: users, packages, settings. Tools like Ansible do that by logging in afterwards. This project instead uses **cloud-init**, a standard first-boot mechanism: you hand the machine a text file when you create it, and the machine configures itself before anyone can log in. The file is a template in the repo, filled in by OpenTofu, so the machine's whole setup is in the same review and the same plan. [Droplet hardening](Droplet-Hardening.md) walks through it. The cost is that any change to that file means the machine is rebuilt, which is fine for machines that hold nothing.
+OpenTofu creates the machine. Something still has to configure what is **on** the machine: users, packages, settings. Tools like [Ansible](Ansible-Configuration-Management-Versus-Provisioning.md) do that by logging in afterwards. This project instead uses **cloud-init**, a standard first-boot mechanism: you hand the machine a text file when you create it, and the machine configures itself before anyone can log in. The file is a template in the repo, filled in by OpenTofu, so the machine's whole setup is in the same review and the same plan. [Droplet hardening](Droplet-Hardening.md) walks through it. The cost is that any change to that file means the machine is rebuilt, which is fine for machines that hold nothing.
 
 ## Who runs the tool
 

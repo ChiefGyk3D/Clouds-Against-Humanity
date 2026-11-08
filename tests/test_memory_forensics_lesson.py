@@ -125,8 +125,19 @@ def test_the_page_names_the_plugins_it_ran():
         assert plugin in body, plugin
 
 
-def test_siblings_are_plain_text_not_links():
-    body = text()
-    for n in ("#474", "#475", "#477", "#478", "#465", "#466"):
-        assert n in body, n
-    assert not re.search(r"\]\([^)]*(474|475|477|478|465|466)[^)]*\)", body)
+def test_siblings_and_firmware_lessons_are_linked_and_the_pages_exist():
+    # Was: siblings are plain text until they merge. They are on main now, so each is a link to a page that exists.
+    body = re.sub(r"<!-- BEGIN GENERATED .*?<!-- END GENERATED [^>]*-->", "", text(), flags=re.DOTALL)
+    links = set(LINK.findall(body))
+    for prefix in (
+        "Digital-Forensics-Foundations",
+        "Disk-Forensics",
+        "Network-Log-and-Timeline-Forensics",
+        "DFIR-Toolkits",
+        "Device-Firmware-Security",
+        "Open-Firmware",
+    ):
+        hits = [t for t in links if t.startswith(prefix)]
+        assert hits, prefix
+        assert all((WIKI / f"{t}.md").exists() for t in hits), prefix
+    assert "plain text until they merge" not in body

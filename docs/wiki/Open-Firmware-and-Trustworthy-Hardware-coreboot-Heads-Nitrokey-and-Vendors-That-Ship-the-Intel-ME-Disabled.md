@@ -27,7 +27,7 @@ Before Linux, Windows or macOS starts, a program stored on a flash chip on the m
 
 ## What the wiki already says (and the gap)
 
-[Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) explains hardware security keys in one paragraph, and [Hands-on Whonix and Qubes](Hands-On-Whonix-and-Qubes-OS-Gateway-Split-Compartments-Disposables-and-Policy-Prompts.md) lists a TPM as a requirement for Qubes Anti Evil Maid. The wiki says nothing about what runs before the operating system, which is the gap. Two sibling lessons are planned: a lesson on hardware security keys (issue #463, not written yet, so I give no link) and a lesson on device firmware security, the Intel ME, the AMD PSP and kernel design (issue #465, also not written yet). This page leans on neither; it says what it needs and points at them as plain text.
+[Hashing, encryption and keys](Hashing-Encryption-and-Keys.md) explains hardware security keys in one paragraph, and [Hands-on Whonix and Qubes](Hands-On-Whonix-and-Qubes-OS-Gateway-Split-Compartments-Disposables-and-Policy-Prompts.md) lists a TPM as a requirement for Qubes Anti Evil Maid. The wiki says nothing about what runs before the operating system, which is the gap. Two sibling lessons cover the neighbors: [Hardware security keys: YubiKey, Nitrokey, PIV](Hardware-Security-Keys-YubiKey-Nitrokey-Smart-Cards-and-PIV.md), and [Device firmware security: Intel ME, AMD PSP, MINIX and kernel design](Device-Firmware-Security-Intel-ME-AMD-PSP-MINIX-and-Kernel-Design.md). This page leans on neither; it says what it needs and points at them.
 
 ## Firmware, in plain words
 
@@ -95,7 +95,7 @@ The same page notes that the Nitrokey 3 comes in USB A, A-mini and C, and that t
 
 **Why Nitrokey is called the open-leaning choice.** Nitrokey's about page calls it "the world-leading company in open source security hardware" (the company's own words), says its developments are available to the public so that others "can check and audit" them, says all Nitrokeys are produced in Germany, and describes a Secure Element as optional. I did not check which Nitrokey 3 parts are open, what the Secure Element is, or whether anyone has audited the source. Yubico takes the other side in a post dated 2016-05-16: "The YubiKey hardware with its integral firmware has never been open sourced", the firmware cannot be updated in the field on purpose, and it argues that open source and secure-element certification pull in different directions. That post is about the YubiKey 4 and NEO; whether it still describes the YubiKey 5 I did not check (**est.** that it does). Both positions are arguments, not tests. For this lesson the practical difference is simpler: with Heads, a Nitrokey does the one-time-password check and a YubiKey 5 does not.
 
-The hardware keys lesson (issue #463, not written yet) is the place for FIDO2, PIV and what to buy for logins. Here the key is a witness, nothing more.
+The [hardware security keys lesson](Hardware-Security-Keys-YubiKey-Nitrokey-Smart-Cards-and-PIV.md) is the place for FIDO2, PIV and what to buy for logins. Here the key is a witness, nothing more.
 
 ## The Intel ME and the words vendors use
 
@@ -138,20 +138,21 @@ All pages below were read with `curl` on **2026-11-07**. Several of the vendors'
 
 ### Tuxedo Computers
 
-I could not verify a claim. Here is what I could read and what I could not.
+I could not verify a claim about current models. Here is what I could read and what I could not.
 
-- Tuxedo's pages that `curl` can fetch (home page, "why TUXEDO", news, the notebook category page) are built by script, and none of the text I got says anything about the Intel ME or coreboot. The FAQ page returned an empty shell. If Tuxedo has a statement, it was not in what I could read.
+- Tuxedo's own press release, dated 2018-03-14 ([TUXEDO disables Intel's Management Engine](https://www.tuxedocomputers.com/en/Infos/News/TUXEDO-disables-Intels-Management-Engine.tuxedo), read 2026-11-07 with `curl` and a browser User-Agent), says Tuxedo added a BIOS option that lets users decide for themselves whether to use the Intel ME, and that the InfinityBook Pro 13 was delivered with that firmware from the factory; owners of that model could download the update from their customer account. So this is a user-selectable BIOS option on one model, not "ships with the ME disabled". The release does not say how the disable works (soft or HAP), covers one model in 2018, and says nothing about current models or AMD ones.
+- Tuxedo's other pages that `curl` can fetch (home page, "why TUXEDO", the notebook category page) are built by script, and none of the text I got says anything about the Intel ME or coreboot. The FAQ page returned an empty shell.
 - The notebook category page says it pairs graphics cards with "Intel's or AMD's most powerful processors". So some Tuxedo machines have no Intel ME at all (the AMD case in the table above), and the AMD PSP and AMD's initialization blobs remain.
-- Dasharo's documentation has a release for the Tuxedo InfinityBook S 15 Gen6, version 1.0.0 dated 2022-03-15, built on coreboot 4.16 with edk2, with "Support for Intel ME version 15.0.30.1776" and UEFI Secure Boot. That is a Dasharo release page, not a Tuxedo claim. I do not know whether Tuxedo ships it or whether any current model has it, so I leave "Tuxedo ships the ME disabled" out. Ask Tuxedo in writing, for the exact model, which of absent, neutralized, soft-disabled or HAP-disabled applies, and who made the firmware.
+- Dasharo's documentation has a release for the Tuxedo InfinityBook S 15 Gen6, version 1.0.0 dated 2022-03-15, built on coreboot 4.16 with edk2, with "Support for Intel ME version 15.0.30.1776" and UEFI Secure Boot. That is a Dasharo release page, not a Tuxedo claim. I do not know whether Tuxedo ships it or whether any current model has it, so I leave "Tuxedo ships the ME disabled" out. Whether any current model has a user-selectable ME option, and whether that option is soft-disabled or HAP-disabled, is **est.** until a current Tuxedo page says so.
 
 ### Side by side
 
 | What I read | Novacustom | System76 | Purism | Tuxedo |
 |---|---|---|---|---|
-| What the vendor says about the ME | "Disabled Intel ME" on SecurityTitan; Dasharo offers a setting | Disabled when it does not break functionality | "Neutralized and disabled"; "Disabled" on two models | Nothing I could read |
-| Method named | Soft or HAP (Dasharo menu) | HECI command (soft), not me_cleaner | me_cleaner and the HAP bit | none |
+| What the vendor says about the ME | "Disabled Intel ME" on SecurityTitan; Dasharo offers a setting | Disabled when it does not break functionality | "Neutralized and disabled"; "Disabled" on two models | 2018 press release: a BIOS option lets users disable the ME, InfinityBook Pro 13 only; nothing on current models |
+| Method named | Soft or HAP (Dasharo menu) | HECI command (soft), not me_cleaner | me_cleaner and the HAP bit | not stated |
 | Firmware | Dasharo coreboot with edk2; Heads as a paid variant on three series | System76 Open Firmware: coreboot, edk2 | coreboot with Heads (PureBoot) | not stated on pages I read |
-| Models named | NV41, V54, V56 (Heads); SecurityTitan | A list by model code, some lines not covered | Librem 14, Mini; Librem 11 with PureBoot but no ME claim | none |
+| Models named | NV41, V54, V56 (Heads); SecurityTitan | A list by model code, some lines not covered | Librem 14, Mini; Librem 11 with PureBoot but no ME claim | InfinityBook Pro 13 (2018) |
 | Hardware key | Nitrokey 3 in the Heads setup | not on pages I read | Librem Key | none |
 
 ## What "disabled" leaves behind
@@ -288,15 +289,16 @@ Retrieved on 2026-11-07 with read-only requests. "Read" means I read the page te
 | Purism: neutralized with me_cleaner (about 90-92% of the binary), disabled with the HAP bit, fuses left unset, still working on the ME and FSP, avoids AMT processors; page undated | [Purism: Intel ME](https://puri.sm/learn/intel-me/) | Read |
 | Purism Librem 14 and Librem Mini state a disabled ME, PureBoot and Librem Key; processors named; Librem 11 has PureBoot and no ME statement | [Librem 14](https://puri.sm/products/librem-14/), [Librem Mini](https://puri.sm/products/librem-mini/), [Librem 11](https://puri.sm/products/librem-11/) | Read |
 | Comet Lake is a 2019 and 2020 generation | General knowledge | **est.** |
-| Tuxedo: no ME or coreboot statement in the text I could fetch; sells Intel and AMD; Dasharo release for InfinityBook S 15 Gen6, 2022-03-15 | [Tuxedo notebooks](https://www.tuxedocomputers.com/en/Linux-Hardware/Linux-Notebooks.tuxedo), [Dasharo: Tuxedo IBS15 release notes](https://docs.dasharo.com/variants/tuxedo_ibs15/releases/) | Read. That Tuxedo has no such statement anywhere: **not verified** |
+| Tuxedo: no ME or coreboot statement on its home, "why TUXEDO" or notebook category pages; sells Intel and AMD; Dasharo release for InfinityBook S 15 Gen6, 2022-03-15 | [Tuxedo notebooks](https://www.tuxedocomputers.com/en/Linux-Hardware/Linux-Notebooks.tuxedo), [Dasharo: Tuxedo IBS15 release notes](https://docs.dasharo.com/variants/tuxedo_ibs15/releases/) | Read, for those three pages only. The 2018 press release is the next row; a current-model statement: **not verified** |
+| Tuxedo press release, 2018-03-14: a BIOS option lets users disable the Intel ME themselves; the InfinityBook Pro 13 shipped with that firmware from the factory and existing owners could update; method (soft or HAP) not stated; one model; nothing on current or AMD models | [TUXEDO disables Intel's Management Engine](https://www.tuxedocomputers.com/en/Infos/News/TUXEDO-disables-Intels-Management-Engine.tuxedo), read 2026-11-07 | Read. A current Tuxedo model with this option: **est.** |
 | `SetupMode` 0 means a platform key is enrolled (User Mode) | UEFI convention, not read from the specification | General knowledge |
 | My laptop: UEFI boot, TPM 2.0, Secure Boot off, ME interface present and running, Boot Guard enabled, `fwupdmgr` report | The commands in exercise 1, run on 2026-11-07 | Observed |
 
-Not verified, plainly: that any vendor ships what its page says; any Novacustom, System76, Purism or Tuxedo hardware; whether an ME is really stopped on any machine; booting coreboot or Heads; Heads with any key; the openness of any Nitrokey part; Yubico's current firmware policy; anything on macOS or Windows; and the Tuxedo ME status.
+Not verified, plainly: that any vendor ships what its page says; any Novacustom, System76, Purism or Tuxedo hardware; whether an ME is really stopped on any machine; booting coreboot or Heads; Heads with any key; the openness of any Nitrokey part; Yubico's current firmware policy; anything on macOS or Windows; and the Tuxedo ME status on any current model.
 
 ## Where this goes next
 
-The firmware lesson that comes before this one (issue #465: device firmware security, the Intel ME, the AMD PSP, MINIX and kernel design) is the place for what the Management Engine does and how it has been attacked. It is not written yet, so there is no link. The hardware keys lesson (issue #463) is also not written yet.
+[Device firmware security](Device-Firmware-Security-Intel-ME-AMD-PSP-MINIX-and-Kernel-Design.md) comes before this one: it is the place for what the Management Engine does and how it has been attacked. The [hardware security keys lesson](Hardware-Security-Keys-YubiKey-Nitrokey-Smart-Cards-and-PIV.md) covers the key that Heads uses as a witness.
 
 <!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
 Where you are: [Home](Home.md) > [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect) > Open firmware and trustworthy hardware

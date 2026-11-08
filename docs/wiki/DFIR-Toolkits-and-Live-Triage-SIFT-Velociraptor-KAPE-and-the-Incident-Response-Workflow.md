@@ -51,7 +51,7 @@ Previous: [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) / Next: [Stage 2
 
 > **Where this runs, and the rule.** Only systems you own, or systems you have written permission to examine. Collecting from someone else's computer without that permission can be a crime in many places, and "I was only looking" is not a defense. The exercise reads your own lab machine. It plants one harmless process and removes it. No real evidence, no third-party data, no real addresses appear here. This page is not legal advice.
 
-The lessons that come with this one in the series are plain text until they exist: digital forensics foundations (chain of custody, write blockers, the order of volatility), disk forensics with Autopsy, memory forensics, and network and log forensics. This page does not assume them. Where it needs an idea from one, it says the idea in a sentence.
+The lessons that come with this one in the series are [digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md) (chain of custody, write blockers, the order of volatility), [disk forensics with Autopsy](Disk-Forensics-with-Autopsy-and-The-Sleuth-Kit.md), [memory forensics](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md), and [network and log forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md). This page does not assume them. Where it needs an idea from one, it says the idea in a sentence.
 
 ## What DFIR is, in one paragraph
 
@@ -91,7 +91,7 @@ plaso is the odd one out: it is a back-end. You feed it disk images or collected
 **Live triage** means you work on the running machine. You list processes, connections and logged-in users, copy a short list of important files, and sometimes capture memory. It is fast and it sees what is running right now. What it costs:
 
 - **You change the system by touching it.** Running a command starts a process, reads files (which can update access times), fills memory and may write to disk. A program you run can also be lied to by malware already on the machine.
-- **Order matters.** The more volatile the data, the sooner it should be collected. Memory and network state vanish first; files on disk last. A foundations lesson in the series covers the order of volatility properly. The short version: do not start by copying files if you also want memory.
+- **Order matters.** The more volatile the data, the sooner it should be collected. Memory and network state vanish first; files on disk last. The [foundations lesson](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md) covers the order of volatility properly. The short version: do not start by copying files if you also want memory.
 - **It is not repeatable.** A running system changes every second. A disk image can be checked a hundred times; a process list cannot.
 - **You must write down what you did.** Every command, in order, with the time. Your own footprints are part of the record.
 

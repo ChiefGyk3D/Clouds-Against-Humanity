@@ -162,6 +162,7 @@ The stages end, but the learning does not. Each of these is a project:
 - **Log pipelines.** Parse the journal into fields, write a decoder and a rule from lines you actually captured, and test it with the manager's logtest tool. Drop the noisiest lines on purpose and count what you saved.
 - **ATT&CK-driven coverage.** Map each rule to the MITRE ATT&CK technique it detects (https://attack.mitre.org/), then list the techniques you have no rule for. The [Threat frameworks page](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md) covers STRIDE, ATT&CK and ATLAS; link your coverage table to it.
 - **Another cloud.** Run the same stages on AWS, Azure or GCP and notice what changes: [Why the clouds differ](Why-the-Clouds-Differ.md) is the map, and the budget lessons differ most.
+- **Investigation.** When an alert turns out to be real, the work shifts from detecting to preserving evidence. Start with [Digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md), then [DFIR toolkits and live triage](DFIR-Toolkits-and-Live-Triage-SIFT-Velociraptor-KAPE-and-the-Incident-Response-Workflow.md).
 - **A black-box check.** Add an uptime probe from outside, so something other than the host itself can say the host is not answering.
 
 ## Predict, then check

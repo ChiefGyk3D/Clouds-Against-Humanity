@@ -176,7 +176,7 @@ A Mac at work is usually managed by a **mobile device management (MDM)** service
 - **Supervision.** A stronger level of management available to organization-owned devices; the guide has a page on it (**est.** for what it permits).
 - **Apple's business portal.** Apple Business Manager is now called Apple Business, which Apple's page says combines what Apple Business Manager, Apple Business Essentials and Apple Business Connect did. This is where an organization ties devices it bought to its MDM service, so a new Mac enrolls itself the first time it connects (**est.** for the exact flow).
 - **The keychain.** macOS's store for passwords, certificates and keys. Apple's platform security guide has a "Keychain data protection" page, which describes protection classes that depend on whether the device is unlocked, locked, or past first unlock. In practice a person's saved passwords and some enterprise certificates live there, and an enterprise profile can place certificates into it (**est.**).
-- **FileVault.** Apple's disk encryption; the security guide has a chapter on it. Enterprises typically require it and escrow the recovery key with the MDM service (**est.**).
+- **FileVault.** Apple's disk encryption; the security guide has a chapter on it. Enterprises typically require it and escrow the recovery key with the MDM service (**est.**). [Disk and file encryption](Disk-and-File-Encryption-VeraCrypt-TrueCrypt-History-BitLocker-FileVault-and-LUKS.md) compares it with BitLocker and LUKS.
 
 How the three compare, as a beginner's map. Every cell marked **est.** is general knowledge I did not read from a vendor page.
 

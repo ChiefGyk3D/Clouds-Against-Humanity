@@ -162,7 +162,7 @@ A password manager helps a little with the first rows even without passkeys: aut
 - **Your own copy of the secret.** A password pasted into a chat, a screenshot of a recovery code, a vault file synced to a service with a weak password.
 - **Machines and programs.** A program should read a secrets manager, not your vault ([why](Secrets-From-Day-One.md#what-goes-in-it-and-what-does-not)).
 
-Protecting the file and the device it lives on (full-disk encryption, an encrypted backup, a locked screen) belongs to the planned disk and file encryption lesson, issue #467 in this project's tracker. That page does not exist yet, so this line has no link.
+Protecting the file and the device it lives on (full-disk encryption, an encrypted backup, a locked screen) is the subject of [Disk and file encryption](Disk-and-File-Encryption-VeraCrypt-TrueCrypt-History-BitLocker-FileVault-and-LUKS.md).
 
 ## One setup, as a worked example
 
@@ -276,7 +276,7 @@ Write your own list before you read mine. Mine, from steps 3 to 6 and the KDF di
 2. **Time and hardware for guessing.** There is no server to rate-limit, so the thief can guess as fast as their machines allow, offline. The only brake is the KDF: on my machine the whole open command, including starting the Flatpak, took 1.2 and 1.4 seconds on the two runs, so a guess costs at most about that much on comparable hardware; an attacker with graphics cards and a cheaper path per guess is faster (est.).
 3. **A guessable passphrase.** With a long random passphrase the guessing never ends; with `summer2024` it ends in minutes (est.).
 4. **Nothing else.** No account, no device, no network. That is the strength of the offline file and its weakness: once copied, the file is out of your control forever, so you cannot revoke it. If the passphrase was weak, change every secret in it.
-5. **What they do not need:** your computer. Which is why the planned disk and file encryption lesson matters: where the file sits decides how easy the first step is.
+5. **What they do not need:** your computer. Which is why [disk and file encryption](Disk-and-File-Encryption-VeraCrypt-TrueCrypt-History-BitLocker-FileVault-and-LUKS.md) matters: where the file sits decides how easy the first step is.
 
 ### Clean up
 

@@ -791,7 +791,7 @@ Severity: critical, page the on-call engineer.
 - Why does a seven-minute clock difference make an investigation wrong, even if every log is complete?
 - A teammate says "we have a SIEM, so we're covered". What three questions do you ask?
 
-Answers are in the sections above. (For the last: which sources actually feed it, and which are missing? Which rules run on them, and when did someone last read an alert and act? Where do the logs live if the machine is lost?)
+Answers are in the sections above. Logs are also evidence: [Network, log and timeline forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md) covers how far to trust them and how to build a timeline, and the series starts at [Digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md). (For the last: which sources actually feed it, and which are missing? Which rules run on them, and when did someone last read an alert and act? Where do the logs live if the machine is lost?)
 
 ## Common mistakes
 
