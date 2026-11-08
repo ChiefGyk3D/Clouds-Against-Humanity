@@ -1,0 +1,8 @@
+# Local development tools. This file mirrors the pytest and pyyaml pins CI
+# installs (.github/workflows/ci.yml); the two change together, and
+# tests/test_dev_requirements_pins.py fails if they differ. pytest-xdist and
+# ruff are local additions for the optional fast run (#518).
+pytest==9.2.0
+pyyaml==6.0.2
+pytest-xdist==3.8.0
+ruff==0.17.0
