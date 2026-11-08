@@ -8,8 +8,31 @@ on:
 permissions: {}
 
 jobs:
+  # Docs-only fast path: a pull request whose every changed path is under docs/
+  # or tests/ or is a root Markdown file skips the tofu job. Anything under
+  # .github/ is never docs only, and CI green below counts only that one skip
+  # as a pass.
+  classify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      docs-only: ${{ steps.c.outputs.docs-only }}
+    steps:
+      - id: c
+        uses: ChiefGyk3D/git-your-ship-together/.github/actions/classify-changes@f40a1c9c907130db47508ac5042af94981d588a6 # v1.32.0
+        with:
+          docs-only-patterns: |
+            docs/**
+            tests/**
+            *.md
+
   tofu:
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/tofu-ci.yml@9d6825dd4e0e4d524fca3733f416437bbd7851e1 # v1.31.0
+    needs: classify
+    if: needs.classify.outputs.docs-only != 'true'
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/tofu-ci.yml@f40a1c9c907130db47508ac5042af94981d588a6 # v1.32.0
     permissions:
       contents: read
       id-token: write
@@ -18,6 +41,8 @@ jobs:
       # tofu test in each directory; every test file mocks its providers, so
       # the job needs no credential, which is all a pull request may have.
       test: true
+      # One job per directory, all at once, instead of 17 directories in turn.
+      test-matrix: true
       # opa fmt, check --strict and test over the Spacelift push policy.
       policy-directories: .spacelift/policies
       # The workflow-lint job installs pyflakes with pipx; GYST v1.28.0 runs
@@ -26,7 +51,7 @@ jobs:
       extra-allowed-endpoints: "files.pythonhosted.org:443 pypi.org:443"
 
   python:
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/python-ci.yml@9d6825dd4e0e4d524fca3733f416437bbd7851e1 # v1.31.0
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/python-ci.yml@f40a1c9c907130db47508ac5042af94981d588a6 # v1.32.0
     permissions:
       contents: read
       id-token: write
@@ -48,10 +73,12 @@ jobs:
       lint-install-command: pip install ruff==0.17.0
       lint-command: ruff check scripts tests
       workflow-lint: false
+      # pytest-xdist; the tests share no state (see #518).
+      xdist: true
       docker-build: false
 
   security:
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/security.yml@9d6825dd4e0e4d524fca3733f416437bbd7851e1 # v1.31.0
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/security.yml@f40a1c9c907130db47508ac5042af94981d588a6 # v1.32.0
     permissions:
       contents: read
       security-events: write
@@ -64,14 +91,13 @@ jobs:
   ci-green:
     name: CI green
     if: ${{ always() }}
-    needs: [tofu, python, security]
+    needs: [classify, tofu, python, security]
     runs-on: ubuntu-latest
     permissions: {}
     steps:
-      - name: Fail unless every needed job succeeded
-        env:
-          RESULTS: ${{ join(needs.*.result, ' ') }}
-        run: |
-          for r in $RESULTS; do
-            [ "$r" = "success" ] || { echo "a needed job finished as: $r"; exit 1; }
-          done
+      - uses: ChiefGyk3D/git-your-ship-together/.github/actions/ci-gate@f40a1c9c907130db47508ac5042af94981d588a6 # v1.32.0
+        with:
+          needs: ${{ toJSON(needs) }}
+          required-jobs: classify tofu python security
+          skippable-jobs: tofu
+          classifier-job: classify
