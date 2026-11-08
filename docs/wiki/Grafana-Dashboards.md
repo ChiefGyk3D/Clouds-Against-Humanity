@@ -4,12 +4,6 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect) > Grafana dashboards
-
-Previous: [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) / Next: [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md)
-<!-- END GENERATED PAGE NAV top -->
-
 **Prerequisites:** [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) and [Multiple sites and identity](Multiple-Sites-and-Identity.md).
 
 Starting from an empty Grafana instead? [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) covers data sources, database connections, one panel and one alert.
@@ -105,24 +99,3 @@ Pictures of the Sites overview dashboard (healthy, and with one site silenced) a
 - Change one panel's data source variable to a name that does not exist and read the error. Then run `python -I -m pytest tests/test_dashboards.py` and find which rule would catch it.
 
 Next: [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md), then the [Roadmap](Roadmap.md). Back to the [Reading order](Reading-Order.md).
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect) > Grafana dashboards
-
-Previous: [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) / Next: [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md)
-
-In this track: [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect), 38 pages
-
-- Network and host defense: [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md) / [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md) / [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) / [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md) / [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md) / [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) / [Attack surface map: layer by layer](Attack-Surface-Map-Layer-by-Layer.md) / [The DMZ and hardening an internet-facing host](The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet.md) / [DMZ hardening checklist](DMZ-Hardening-Checklist.md)
-- Deception and honeypots: [Deception and honeypots: start here](Deception-and-Honeypots-Start-Here.md) / [What deception is](Deception-and-Honeypots-What-Deception-Is.md) / [Deception safety and law](Deception-and-Honeypots-Safety-and-Law.md) / [Plant a canary token](Deception-and-Honeypots-Plant-a-Canary.md) / [Honeyfiles on a host you own](Deception-and-Honeypots-Honeyfiles-on-Your-Host.md) / [Deception alerts in the SIEM](Deception-and-Honeypots-Alerts-in-the-SIEM.md) / [Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md) / [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md) / [Anatomy of a cloud honeypot](Deception-and-Honeypots-Cloud-Sensor-Anatomy.md) / [Cloud Cowrie for a weekend](Deception-and-Honeypots-Cloud-Cowrie-Weekend.md) / [Read what arrived: Cowrie logs](Deception-and-Honeypots-Read-the-Sensor-Logs.md)
-- Detection and monitoring: [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md) / [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) / [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) / [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) / [Detecting Tor, I2P and VPN on a network](Detecting-and-Managing-Tor-I2P-and-VPN-on-a-Network-the-Defenders-View.md) / [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) / [Multiple sites and identity](Multiple-Sites-and-Identity.md) / [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) / [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) / [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) / **Grafana dashboards** / [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) / [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) / [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md)
-- Digital forensics: [DFIR toolkits and live triage](DFIR-Toolkits-and-Live-Triage-SIFT-Velociraptor-KAPE-and-the-Incident-Response-Workflow.md) / [Digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md) / [Network, log and timeline forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md)
-- Device and credential security: [Open firmware and trustworthy hardware](Open-Firmware-and-Trustworthy-Hardware-coreboot-Heads-Nitrokey-and-Vendors-That-Ship-the-Intel-ME-Disabled.md)
-
-Related pages:
-
-- [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md)
-- [Build your own mini SOC](Build-Your-Own-Mini-SOC.md)
-- [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md)
-- [Multiple sites and identity](Multiple-Sites-and-Identity.md)
-<!-- END GENERATED PAGE NAV bottom -->

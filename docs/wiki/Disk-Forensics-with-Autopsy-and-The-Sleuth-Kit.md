@@ -1,9 +1,5 @@
 # Disk forensics with Autopsy and The Sleuth Kit: images, deleted files, hash sets and a first finding
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Disk forensics with Autopsy and The Sleuth Kit
-<!-- END GENERATED PAGE NAV top -->
-
 <!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
 **On this page:**
 
@@ -391,19 +387,3 @@ Retrieved 2026-11-07 with read-only requests unless stated. "Read" means I read 
 Not verified, plainly: Autopsy running on any platform; the Linux install steps; NTFS and ext4 behavior; carving; the NSRL import; any Windows or macOS step; the public practice images (not downloaded, sizes and hashes unknown, CFReDS license unread); commercial tool features; and everything marked **est.**
 
 Next: continue on the [Reading order](Reading-Order.md) page.
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Disk forensics with Autopsy and The Sleuth Kit
-
-In this group: [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling), 8 pages
-
-- Also here: [Threats in plain words](Threats-in-Plain-Words.md) / [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) / [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md) / [Threat model exercise](Threat-Model-Exercise.md) / [Threat Dragon exercise](Threat-Dragon-Exercise.md) / [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
-- Digital forensics: [Memory forensics with Volatility 3](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md) / **Disk forensics with Autopsy and The Sleuth Kit**
-
-Related pages:
-
-- [Memory forensics with Volatility 3](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md)
-- [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
-- [Threat Dragon exercise](Threat-Dragon-Exercise.md)
-- [Threat model exercise](Threat-Model-Exercise.md)
-<!-- END GENERATED PAGE NAV bottom -->

@@ -1,9 +1,5 @@
 # Reading order
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Start here](Contents.md#start-here) > Reading order
-<!-- END GENERATED PAGE NAV top -->
-
 Every path assumes a basic power user: you know how a computer works and have done basic networking ([where zero is](Start-Here-If-You-Are-New.md#where-zero-is)). Pick the row that sounds like you. Every path is a numbered list: read in that order. The tables on this page are the authority. A page's **Next** line follows the core path if the page is on it, and otherwise follows the track that page belongs to (build, security, detection or other clouds); when you are on a different track from a page's Next line, follow the table instead. The first path, the core path, is the one to take if you are unsure; the other paths branch off it.
 
 Looking for one page rather than a path? [Contents](Contents.md) lists every page of the wiki once, grouped by theme, with a line on what it is for.
@@ -290,18 +286,3 @@ Operator guides that live in the repository rather than the wiki: [stage 0](http
 ## Keeping this page honest
 
 A test (`tests/test_wiki_navigation.py`) fails if a wiki page is in neither the sidebar nor this page, if the sidebar links to a page that does not exist, if a **Next** line names a page that does not exist, or if a page appears twice within one path above. When you add a wiki page, add it to a path here, and add one line for it to `docs/wiki/_nav.yaml` (then run `python -I scripts/gen_wiki_nav.py`, which rewrites [Contents](Contents.md) and the sidebar), in the same pull request.
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Start here](Contents.md#start-here) > Reading order
-
-In this group: [Start here](Contents.md#start-here), 5 pages
-
-- [Home](Home.md) / [Contents](Contents.md) / **Reading order** / [Why this exists](Why-This-Exists.md) / [Give feedback](Give-Feedback-and-Open-an-Issue.md)
-
-Related pages:
-
-- [Contents](Contents.md)
-- [Why this exists](Why-This-Exists.md)
-- [Home](Home.md)
-- [Give feedback](Give-Feedback-and-Open-an-Issue.md)
-<!-- END GENERATED PAGE NAV bottom -->

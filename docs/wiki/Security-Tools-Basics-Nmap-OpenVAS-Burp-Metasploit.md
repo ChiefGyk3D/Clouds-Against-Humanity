@@ -1,9 +1,5 @@
 # Security tools basics: Nmap, OpenVAS, Burp Suite Community Edition, Metasploit and friends
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Security tools: Nmap, OpenVAS, Burp, Metasploit
-<!-- END GENERATED PAGE NAV top -->
-
 <!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
 **On this page:**
 
@@ -793,19 +789,3 @@ All read-only requests; retrieved 2026-10-22. "Observed" means I ran it that day
 Not verified, plainly: every PowerShell command; anything on Windows or macOS; Burp Suite, ZAP, Wireshark, Greenbone, Metasploit, Nikto and nuclei (none run); the Metasploit module name in Exercise 7; the licenses of Nikto and nuclei; whether `-sS` and `-sC` behave on your system as described; the memory, disk and feed-download cost of Greenbone beyond the documentation's table; the current Nmap release (I ran 7.98 and did not confirm it is the newest); Juice Shop's container (not pulled, to avoid a network pull and image change); and the companion page's final headings (it was being written at the same time).
 
 Next: [Deception and honeypots: start here](Deception-and-Honeypots-Start-Here.md), where the scan you just made is the thing the decoy is waiting for.
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Security tools: Nmap, OpenVAS, Burp, Metasploit
-
-In this group: [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling), 8 pages
-
-- Also here: [Threats in plain words](Threats-in-Plain-Words.md) / **Security tools: Nmap, OpenVAS, Burp, Metasploit** / [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md) / [Threat model exercise](Threat-Model-Exercise.md) / [Threat Dragon exercise](Threat-Dragon-Exercise.md) / [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
-- Digital forensics: [Memory forensics with Volatility 3](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md) / [Disk forensics with Autopsy and The Sleuth Kit](Disk-Forensics-with-Autopsy-and-The-Sleuth-Kit.md)
-
-Related pages:
-
-- [Threats in plain words](Threats-in-Plain-Words.md)
-- [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md)
-- [Threat model exercise](Threat-Model-Exercise.md)
-- [Threat Dragon exercise](Threat-Dragon-Exercise.md)
-<!-- END GENERATED PAGE NAV bottom -->

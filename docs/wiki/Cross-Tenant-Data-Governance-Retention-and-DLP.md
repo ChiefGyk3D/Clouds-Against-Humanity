@@ -1,11 +1,5 @@
 # Cross-tenant data flows, data governance and retention, and DLP
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Track 4: GRC and law](Contents.md#track-4-grc-and-law) > Cross-tenant data flows, governance, retention and DLP
-
-Previous: [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md) / Next: [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md)
-<!-- END GENERATED PAGE NAV top -->
-
 <!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
 **On this page:**
 
@@ -636,24 +630,3 @@ All read-only requests; retrieved **2026-10-22** unless stated. "Read" means I r
 ## Where to next
 
 [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md) is the next step: the roles and secrets this page used without building. For the access half of a cross-boundary flow, [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md).
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Track 4: GRC and law](Contents.md#track-4-grc-and-law) > Cross-tenant data flows, governance, retention and DLP
-
-Previous: [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md) / Next: [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md)
-
-In this track: [Track 4: GRC and law](Contents.md#track-4-grc-and-law), 9 pages
-
-- Also here: [The CIA triad](The-CIA-Triad-Confidentiality-Integrity-Availability.md)
-- GRC, privacy law and data governance: [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md) / [US privacy law and the patchwork](US-Privacy-Law-No-General-Right-the-Patchwork-Data-Brokers-Social-Security-Numbers-and-License-Plate-Readers.md) / [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md) / **Cross-tenant data flows, governance, retention and DLP**
-- Continuity, backups and recovery: [Business continuity and disaster recovery](Business-Continuity-and-Disaster-Recovery-BCP-and-DR.md) / [Backups, recovery and patching](Backups-Recovery-and-Patching.md) / [Backups deep dive](Backups-Deep-Dive-3-2-1-1-0-Immutability-and-Restore-Testing.md) / [RAID: continuity, not a backup](RAID-Levels-Parity-Rebuilds-and-Why-RAID-Is-Continuity-Not-a-Backup.md)
-
-Related pages:
-
-- [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md)
-- [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md)
-- [Backups, recovery and patching](Backups-Recovery-and-Patching.md)
-- [Privacy law around the world](Privacy-Law-Around-the-World-GDPR-PIPEDA-POPIA-and-PIPL-Compared-With-the-United-States.md)
-- [GRC in plain terms](GRC-Governance-Risk-and-Compliance-in-Plain-Terms-Laws-Frameworks-and-Attestations.md)
-- [Doppler and secrets](Doppler-and-Secrets.md)
-<!-- END GENERATED PAGE NAV bottom -->

@@ -4,10 +4,6 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Threat Dragon exercise
-<!-- END GENERATED PAGE NAV top -->
-
 A threat model written as prose hides what a diagram shows at once: which arrows cross a line. [OWASP Threat Dragon](https://owasp.org/www-project-threat-dragon/) is a free, open-source tool for drawing a data flow diagram, marking trust boundaries on it, and attaching threats to the elements. This page gives you a finished model of this repository's pipeline and a set of steps that make you draw, predict and then check.
 
 The format is the one from the other exercise pages: **predict, then check**. Write your answer down first. The gap between your answer and the reference answer is the lesson.
@@ -219,19 +215,3 @@ A model also gets stale. The file in this repository has no way to notice that a
 - Open the ATT&CK model and the STRIDE model side by side and pick one threat. Which of the two helps you decide where to put a detection, and which helps you decide how to change the design? Then read [Threat frameworks](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md) for the third view, the AI tools around this repository.
 
 Next: [Threat frameworks: STRIDE, ATT&CK and ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md) for the same pipeline through two more frameworks, then [Troubleshooting index](Troubleshooting-Index.md) for symptoms and fixes, or the detection track, which starts at [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md). Back to the [Reading order](Reading-Order.md).
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Threat Dragon exercise
-
-In this group: [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling), 8 pages
-
-- Also here: [Threats in plain words](Threats-in-Plain-Words.md) / [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) / [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md) / [Threat model exercise](Threat-Model-Exercise.md) / **Threat Dragon exercise** / [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
-- Digital forensics: [Memory forensics with Volatility 3](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md) / [Disk forensics with Autopsy and The Sleuth Kit](Disk-Forensics-with-Autopsy-and-The-Sleuth-Kit.md)
-
-Related pages:
-
-- [Threat model exercise](Threat-Model-Exercise.md)
-- [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
-- [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md)
-- [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md)
-<!-- END GENERATED PAGE NAV bottom -->

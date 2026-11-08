@@ -4,12 +4,6 @@
 
 > **Status.** The DigitalOcean order and the leftovers in sections 1 and 2 come from stages 0 and 1, which were built, applied and torn down by the author. Stage 2 (`cah-20-telemetry`) is built but never applied, so its line in the order is from the stage guide, not from a real destroy. The AWS, Azure and GCP notes are pointers to those pages' unverified drafts. The read-only commands in section 3 were not run against a live account for this page: check each against your own tool's `--help` before relying on it.
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Teardown checklist
-
-Previous: [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) / Next: [Self-hosting: when and why, with SearXNG](Self-Hosting-When-and-Why-with-SearXNG-as-the-Worked-Example.md)
-<!-- END GENERATED PAGE NAV top -->
-
 Teardown is the step people skip, and it is the one that stops the bill. This page expands step 11 of the build page into a checklist you can tick through. It adds nothing that changes how the stacks work; it puts the order, the leftovers, the proof and the clean-up of credentials in one place.
 
 **Why it matters, in one line.** Billing stops when a resource is gone, not when you stop looking at it. At the prices the repository recorded on 2026-10-10, the two stage 1 droplets are about $12 a month (see [cost](https://github.com/ChiefGyk3D/Clouds-Against-Humanity/blob/main/docs/cost.md)); everything else in stages 0 and 1 is $0 on DigitalOcean. A forgotten droplet is the expensive mistake, and an empty network is not.
@@ -139,23 +133,3 @@ Tick every line. If you cannot tick one, the cost may not have stopped.
 - Pick one row from section 2 and find where, in the repository, the code that does *not* create it lives.
 
 Back to [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) or the [Reading order](Reading-Order.md).
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Teardown checklist
-
-Previous: [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) / Next: [Self-hosting: when and why, with SearXNG](Self-Hosting-When-and-Why-with-SearXNG-as-the-Worked-Example.md)
-
-In this track: [Track 5: Build and operate](Contents.md#track-5-build-and-operate), 32 pages
-
-- Stage guides and design: [Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md) / [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) / [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) / [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) / **Teardown checklist** / [Self-hosting: when and why, with SearXNG](Self-Hosting-When-and-Why-with-SearXNG-as-the-Worked-Example.md) / [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) / [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) / [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) / [Why I picked these tools](Why-I-Picked-These-Tools.md) / [From commit to pipeline](From-Commit-to-Pipeline.md) / [Trace one change end to end](Trace-One-Change-End-to-End.md)
-- Other clouds: [Why the clouds differ](Why-the-Clouds-Differ.md) / [AWS: account preparation](Provider-AWS-Account-Preparation.md) / [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) / [AWS: where the money goes](Provider-AWS-Cost-Lesson.md) / [Azure: account preparation](Provider-Azure-Account-Preparation.md) / [Azure: the same four pieces](Provider-Azure-The-Same-Four-Pieces.md) / [Azure: where the money goes](Provider-Azure-Cost-Lesson.md) / [GCP: account preparation](Provider-GCP-Account-Preparation.md) / [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md) / [GCP: where the money goes](Provider-GCP-Cost-Lesson.md)
-- Enterprise practice: [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md) / [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md) / [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md) / [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md) / [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md) / [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
-- Project process: [How this project is planned](How-This-Project-Is-Planned.md) / [Project status](Project-Status.md) / [Repository growth](Repository-Growth.md) / [Screenshots policy](Screenshots-Policy.md)
-
-Related pages:
-
-- [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md)
-- [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md)
-- [Labs: break it on purpose](Labs-Break-It-on-Purpose.md)
-- [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md)
-<!-- END GENERATED PAGE NAV bottom -->

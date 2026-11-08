@@ -1,11 +1,5 @@
 # Open firmware and trustworthy hardware: coreboot, Heads, Nitrokey and vendors that ship the Intel ME disabled
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect) > Open firmware and trustworthy hardware
-
-Previous: [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) / Next: [Digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md)
-<!-- END GENERATED PAGE NAV top -->
-
 Before Linux, Windows or macOS starts, a program stored on a flash chip on the motherboard has already run. It set up the memory, woke the devices and decided what to hand control to. That program is the firmware, on most laptops it is closed source, and it runs with more privilege than anything you install later. This page covers the open alternative (coreboot), the tool that lets the machine prove to you that its firmware did not change (Heads, with a hardware key), what a TPM and Secure Boot do and do not prove, and four vendors that sell machines with the Intel Management Engine switched off or cut down. For each vendor I read the vendor's own pages and wrote down exactly what they claim, and where I could not read a claim I left it out.
 
 > **Status: unverified draft. Everything here comes from reading vendor and project pages on 2026-11-07, plus a few read-only checks on one Linux laptop. Nothing was flashed. I never built or booted coreboot or Heads, never used a hardware key with Heads, and never touched a machine from any of the four vendors.** The checks I ran, all on 2026-11-07 on one laptop with a Linux kernel and no root access: reading the firmware vendor, version and date from `/sys/class/dmi/id`; testing for `/sys/firmware/efi`; listing `/sys/class/tpm` and reading the TPM version; reading the `SecureBoot` and `SetupMode` EFI variables; listing `/dev/mei*`, `lspci` for the Management Engine interface and `/sys/class/mei/mei0/fw_ver`; `fwupdmgr security --no-unreported-check`; and one `curl` of coreboot's supported-board index. **Not run:** `bootctl` and `mokutil` (neither is installed on that laptop), `tpm2-tools`, `dmidecode`, and anything that needs root. Every vendor statement carries the date I read it in the [claims register](#claims-register); a claim I could not read there is marked **est.** or left out. Trust what your terminal prints over what this page says.
@@ -299,23 +293,3 @@ Not verified, plainly: that any vendor ships what its page says; any Novacustom,
 ## Where this goes next
 
 [Device firmware security](Device-Firmware-Security-Intel-ME-AMD-PSP-MINIX-and-Kernel-Design.md) comes before this one: it is the place for what the Management Engine does and how it has been attacked. The [hardware security keys lesson](Hardware-Security-Keys-YubiKey-Nitrokey-Smart-Cards-and-PIV.md) covers the key that Heads uses as a witness.
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect) > Open firmware and trustworthy hardware
-
-Previous: [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) / Next: [Digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md)
-
-In this track: [Track 2: Defend and detect](Contents.md#track-2-defend-and-detect), 38 pages
-
-- Network and host defense: [Packet filters compared](Packet-Filters-Compared-iptables-nftables-ufw-pf.md) / [IDS and IPS: Snort and Suricata](IDS-and-IPS-Snort-and-Suricata.md) / [File integrity and alerting](File-Integrity-and-Alerting-Tripwire-AIDE-Wazuh.md) / [Rate limiting at every layer](Rate-Limiting-at-Every-Layer.md) / [Plan for failure: blast radius and assuming breach](Plan-for-Failure-Blast-Radius-and-Assuming-Breach.md) / [Attack surface: list, shrink, measure](Attack-Surface-List-Shrink-Measure.md) / [Attack surface map: layer by layer](Attack-Surface-Map-Layer-by-Layer.md) / [The DMZ and hardening an internet-facing host](The-DMZ-and-Hardening-a-Host-That-Faces-the-Internet.md) / [DMZ hardening checklist](DMZ-Hardening-Checklist.md)
-- Deception and honeypots: [Deception and honeypots: start here](Deception-and-Honeypots-Start-Here.md) / [What deception is](Deception-and-Honeypots-What-Deception-Is.md) / [Deception safety and law](Deception-and-Honeypots-Safety-and-Law.md) / [Plant a canary token](Deception-and-Honeypots-Plant-a-Canary.md) / [Honeyfiles on a host you own](Deception-and-Honeypots-Honeyfiles-on-Your-Host.md) / [Deception alerts in the SIEM](Deception-and-Honeypots-Alerts-in-the-SIEM.md) / [Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md) / [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md) / [Anatomy of a cloud honeypot](Deception-and-Honeypots-Cloud-Sensor-Anatomy.md) / [Cloud Cowrie for a weekend](Deception-and-Honeypots-Cloud-Cowrie-Weekend.md) / [Read what arrived: Cowrie logs](Deception-and-Honeypots-Read-the-Sensor-Logs.md)
-- Detection and monitoring: [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md) / [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) / [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) / [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) / [Detecting Tor, I2P and VPN on a network](Detecting-and-Managing-Tor-I2P-and-VPN-on-a-Network-the-Defenders-View.md) / [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) / [Multiple sites and identity](Multiple-Sites-and-Identity.md) / [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) / [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) / [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) / [Grafana dashboards](Grafana-Dashboards.md) / [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) / [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) / [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md)
-- Digital forensics: [DFIR toolkits and live triage](DFIR-Toolkits-and-Live-Triage-SIFT-Velociraptor-KAPE-and-the-Incident-Response-Workflow.md) / [Digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md) / [Network, log and timeline forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md)
-- Device and credential security: **Open firmware and trustworthy hardware**
-
-Related pages:
-
-- [Threat model](Threat-Model.md)
-- [Hashing, encryption and keys](Hashing-Encryption-and-Keys.md)
-- [Hands-on Whonix and Qubes OS](Hands-On-Whonix-and-Qubes-OS-Gateway-Split-Compartments-Disposables-and-Policy-Prompts.md)
-<!-- END GENERATED PAGE NAV bottom -->

@@ -6,12 +6,6 @@
 
 > Side page: [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) says where this project uses a service account and which plan each use needs.
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Twingate
-
-Previous: [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / Next: [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md)
-<!-- END GENERATED PAGE NAV top -->
-
 Twingate is the only way to reach a droplet in this project. This page covers the moving parts, how they are wired up in `stacks/10-access`, and why each choice was made. For the "why not a VPN" argument itself, see [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md).
 
 ## The four pieces
@@ -145,20 +139,3 @@ Replace `module.connector_a.module.bootstrap.twingate_connector_tokens.this` (or
 3. From anywhere outside Twingate: `nmap -Pn -p 22,80,443 <public IP>` reports every port filtered. Scanning your own droplet is fine; scanning other people's is not.
 
 Next: [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md), step 13 of the core path on the [Reading order](Reading-Order.md) page.
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Twingate
-
-Previous: [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / Next: [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md)
-
-In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
-
-- [Start here if you are new](Start-Here-If-You-Are-New.md) / [What is the cloud](What-Is-the-Cloud.md) / [Networking basics](Networking-Basics-for-This-Project.md) / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / [How money works](How-Money-Works-in-the-Cloud.md) / [Enterprise habits](Enterprise-Engineering-Habits.md) / [Architecture overview](Architecture-Overview.md) / [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / **Twingate** / [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / [Droplet hardening](Droplet-Hardening.md) / [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / [Spacelift](Spacelift.md) / [Doppler and secrets](Doppler-and-Secrets.md) / [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / [Threat model](Threat-Model.md) / [Lessons learned](Lessons-Learned.md) / [Roadmap](Roadmap.md)
-
-Related pages:
-
-- [Architecture overview](Architecture-Overview.md)
-- [Droplet hardening](Droplet-Hardening.md)
-- [Enterprise habits](Enterprise-Engineering-Habits.md)
-- [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
-<!-- END GENERATED PAGE NAV bottom -->

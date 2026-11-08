@@ -1,9 +1,5 @@
 # Email security: DNS records, email gateways with Microsoft 365, API-driven cloud email security, and whether to run your own server
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Email security
-<!-- END GENERATED PAGE NAV top -->
-
 <!-- BEGIN GENERATED PAGE CONTENTS: rewritten from the page's own headings by scripts/gen_wiki_nav.py; edit the headings, not this block -->
 **On this page:**
 
@@ -815,19 +811,3 @@ All read-only requests, retrieved **2026-10-22** unless stated.
 **Not verified, plainly:** every PowerShell and Exchange Online command; any Microsoft 365 tenant step; whether the trial asks for a card, and any price after it; Defender license totals; any API-driven product's price, terms of sale or eligibility; Proofpoint's deployment documentation; Microsoft's sender requirements; any provider's SMTP unblock procedure; legal and consent requirements for bulk mail; Tuta's custom-domain support and any Proton or Tuta price; the OpenTofu pieces against a real account (never applied); whether a reserved IP carries the reverse DNS; the contents of the maintainer's link page, which returned an error when fetched from the author's machine; the Ubuntu image slug in the droplet piece (est.); deleting a Microsoft 365 tenant; and any data-processing terms of any vendor named.
 
 Next: [Reading order](Reading-Order.md).
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Email security
-
-In this group: [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling), 8 pages
-
-- Also here: [Threats in plain words](Threats-in-Plain-Words.md) / [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) / **Email security** / [Threat model exercise](Threat-Model-Exercise.md) / [Threat Dragon exercise](Threat-Dragon-Exercise.md) / [Threat frameworks: STRIDE, ATT&CK, ATLAS](Threat-Frameworks-STRIDE-ATTACK-ATLAS.md)
-- Digital forensics: [Memory forensics with Volatility 3](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md) / [Disk forensics with Autopsy and The Sleuth Kit](Disk-Forensics-with-Autopsy-and-The-Sleuth-Kit.md)
-
-Related pages:
-
-- [Threat model exercise](Threat-Model-Exercise.md)
-- [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md)
-- [Threat Dragon exercise](Threat-Dragon-Exercise.md)
-- [Threats in plain words](Threats-in-Plain-Words.md)
-<!-- END GENERATED PAGE NAV bottom -->

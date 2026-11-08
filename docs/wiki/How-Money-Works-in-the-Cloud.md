@@ -1,11 +1,5 @@
 # How money works in the cloud
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > How money works
-
-Previous: [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / Next: [Enterprise habits](Enterprise-Engineering-Habits.md)
-<!-- END GENERATED PAGE NAV top -->
-
 Start-from-zero page 7 of 8. Previous: [Containers and Docker basics](Containers-and-Docker-Basics.md). Next: [Enterprise engineering habits](Enterprise-Engineering-Habits.md).
 
 A Pi costs what it cost once, plus a little electricity. The cloud bills you for everything that exists, for as long as it exists, and sends the invoice at the end of the month. Most learners' first cloud mistake is not a security hole; it is a $40 surprise from something they forgot to delete. This page is how to not do that, and how this project turned its bill into a number that gets reviewed like code.
@@ -105,20 +99,3 @@ Two more kinds of cost that do not appear on an invoice:
 - If you already have a cloud account, open its billing page right now and name every line.
 
 Next: [Enterprise engineering habits](Enterprise-Engineering-Habits.md).
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > How money works
-
-Previous: [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / Next: [Enterprise habits](Enterprise-Engineering-Habits.md)
-
-In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
-
-- [Start here if you are new](Start-Here-If-You-Are-New.md) / [What is the cloud](What-Is-the-Cloud.md) / [Networking basics](Networking-Basics-for-This-Project.md) / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / **How money works** / [Enterprise habits](Enterprise-Engineering-Habits.md) / [Architecture overview](Architecture-Overview.md) / [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / [Twingate](Twingate.md) / [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / [Droplet hardening](Droplet-Hardening.md) / [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / [Spacelift](Spacelift.md) / [Doppler and secrets](Doppler-and-Secrets.md) / [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / [Threat model](Threat-Model.md) / [Lessons learned](Lessons-Learned.md) / [Roadmap](Roadmap.md)
-
-Related pages:
-
-- [Git and pull requests](Git-GitHub-and-Pull-Requests.md)
-- [Architecture overview](Architecture-Overview.md)
-- [Infrastructure as code](What-Is-Infrastructure-as-Code.md)
-- [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md)
-<!-- END GENERATED PAGE NAV bottom -->

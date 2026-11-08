@@ -4,12 +4,6 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it. New to the file formats on this page (HCL, JSON, YAML)? [Data formats and config files](Data-Formats-JSON-YAML-HCL.md) comes first.
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Variables, tfvars and secrets
-
-Previous: [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) / Next: [Teardown checklist](Teardown-Checklist.md)
-<!-- END GENERATED PAGE NAV top -->
-
 The stage 2 settings work started with one question: where does `region` live, and where does the VPC range that must not collide with a homelab live? Every value in this repository has exactly one correct home. Put it in the wrong one and the cost is either a leaked identifier in a public repository or a plan that quietly renames live machines.
 
 ## The decision table
@@ -104,23 +98,3 @@ Try each answer before you read it.
 </details>
 
 Related: [Settings reference](Settings-Reference.md), [Doppler and secrets](Doppler-and-Secrets.md), [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md), [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md).
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Variables, tfvars and secrets
-
-Previous: [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) / Next: [Teardown checklist](Teardown-Checklist.md)
-
-In this track: [Track 5: Build and operate](Contents.md#track-5-build-and-operate), 32 pages
-
-- Stage guides and design: [Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md) / [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) / [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) / **Variables, tfvars and secrets** / [Teardown checklist](Teardown-Checklist.md) / [Self-hosting: when and why, with SearXNG](Self-Hosting-When-and-Why-with-SearXNG-as-the-Worked-Example.md) / [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) / [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) / [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) / [Why I picked these tools](Why-I-Picked-These-Tools.md) / [From commit to pipeline](From-Commit-to-Pipeline.md) / [Trace one change end to end](Trace-One-Change-End-to-End.md)
-- Other clouds: [Why the clouds differ](Why-the-Clouds-Differ.md) / [AWS: account preparation](Provider-AWS-Account-Preparation.md) / [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) / [AWS: where the money goes](Provider-AWS-Cost-Lesson.md) / [Azure: account preparation](Provider-Azure-Account-Preparation.md) / [Azure: the same four pieces](Provider-Azure-The-Same-Four-Pieces.md) / [Azure: where the money goes](Provider-Azure-Cost-Lesson.md) / [GCP: account preparation](Provider-GCP-Account-Preparation.md) / [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md) / [GCP: where the money goes](Provider-GCP-Cost-Lesson.md)
-- Enterprise practice: [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md) / [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md) / [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md) / [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md) / [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md) / [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
-- Project process: [How this project is planned](How-This-Project-Is-Planned.md) / [Project status](Project-Status.md) / [Repository growth](Repository-Growth.md) / [Screenshots policy](Screenshots-Policy.md)
-
-Related pages:
-
-- [Labs: break it on purpose](Labs-Break-It-on-Purpose.md)
-- [Self-hosting: when and why, with SearXNG](Self-Hosting-When-and-Why-with-SearXNG-as-the-Worked-Example.md)
-- [Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md)
-- [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md)
-<!-- END GENERATED PAGE NAV bottom -->

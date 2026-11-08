@@ -4,12 +4,6 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Trace one change end to end
-
-Previous: [From commit to pipeline](From-Commit-to-Pipeline.md) / Next: [Why the clouds differ](Why-the-Clouds-Differ.md)
-<!-- END GENERATED PAGE NAV top -->
-
 The capstone page shows the pipeline as seven boxes. Boxes are easy to agree with and hard to believe. This page follows **one real, small change** through every box, using the pull request's actual files, and then asks what would have stopped three worse versions of it.
 
 The change is pull request **#8, "fix: let each connector open SSH to the other (outbound rule)"**. It was chosen because it is small (one module, one stack, tests), it touched a module rather than only documentation, and it is the second half of a bug whose story is already told in [Lessons learned, "Connector-to-connector SSH timed out, twice"](Lessons-Learned.md#2-connector-to-connector-ssh-timed-out-twice). Pull request #7, "fix: let the connectors reach each other's SSH inside the VPC", was the first half.
@@ -152,23 +146,3 @@ Someone edits a hardening setting in `modules/twingate-bootstrap/cloud-init.yaml
 - Do the same trace for a change that touches `scripts/spacelift/doppler-env.sh`. Which gates behave differently, and why is the review step doing more of the work than it did for #8? [Threat model exercise, "What if 3"](Threat-Model-Exercise.md#what-if-3-a-malicious-pull-request) is the companion.
 
 Next: the [Terraform reference](Terraform-Reference.md) if you want the code behind the stacks in this trace, or the [Threat model exercise](Threat-Model-Exercise.md), whose what-if scenarios reuse this trace. Back to the [Reading order](Reading-Order.md).
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Track 5: Build and operate](Contents.md#track-5-build-and-operate) > Trace one change end to end
-
-Previous: [From commit to pipeline](From-Commit-to-Pipeline.md) / Next: [Why the clouds differ](Why-the-Clouds-Differ.md)
-
-In this track: [Track 5: Build and operate](Contents.md#track-5-build-and-operate), 32 pages
-
-- Stage guides and design: [Fork, private stacks, the pipeline](Fork-Private-Stacks-and-the-Pipeline.md) / [Labs: break it on purpose](Labs-Break-It-on-Purpose.md) / [Build it: zero accounts to stage 1](Build-It-From-Zero-Accounts-to-Stage-1.md) / [Variables, tfvars and secrets](Variables-Tfvars-and-Secrets.md) / [Teardown checklist](Teardown-Checklist.md) / [Self-hosting: when and why, with SearXNG](Self-Hosting-When-and-Why-with-SearXNG-as-the-Worked-Example.md) / [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md) / [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md) / [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md) / [Why I picked these tools](Why-I-Picked-These-Tools.md) / [From commit to pipeline](From-Commit-to-Pipeline.md) / **Trace one change end to end**
-- Other clouds: [Why the clouds differ](Why-the-Clouds-Differ.md) / [AWS: account preparation](Provider-AWS-Account-Preparation.md) / [AWS: the same four pieces](Provider-AWS-The-Same-Four-Pieces.md) / [AWS: where the money goes](Provider-AWS-Cost-Lesson.md) / [Azure: account preparation](Provider-Azure-Account-Preparation.md) / [Azure: the same four pieces](Provider-Azure-The-Same-Four-Pieces.md) / [Azure: where the money goes](Provider-Azure-Cost-Lesson.md) / [GCP: account preparation](Provider-GCP-Account-Preparation.md) / [GCP: the same four pieces](Provider-GCP-The-Same-Four-Pieces.md) / [GCP: where the money goes](Provider-GCP-Cost-Lesson.md)
-- Enterprise practice: [Enterprise networks: campus, branch, data center, cloud](Enterprise-Networks-Campus-Branch-Datacenter-Cloud.md) / [Enterprise infrastructure differences](Enterprise-Infrastructure-Differences.md) / [Enterprise change management (not used here)](Enterprise-Change-Management-for-Beginners.md) / [Enterprise identity and secrets at scale](Enterprise-Identity-and-Secrets-at-Scale.md) / [Working in a company: tickets, change, on-call, documentation](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md) / [Careers, roles and what to learn next](Careers-Roles-and-What-to-Learn-Next.md)
-- Project process: [How this project is planned](How-This-Project-Is-Planned.md) / [Project status](Project-Status.md) / [Repository growth](Repository-Growth.md) / [Screenshots policy](Screenshots-Policy.md)
-
-Related pages:
-
-- [Why I picked these tools](Why-I-Picked-These-Tools.md)
-- [Why not private droplets (yet)](Why-Not-Private-Droplets-Yet.md)
-- [Zero trust at home: two connectors and failover](Zero-Trust-at-Home-Two-Connectors-and-Failover.md)
-- [Twingate service accounts in CAH](Twingate-Service-Accounts-in-CAH.md)
-<!-- END GENERATED PAGE NAV bottom -->

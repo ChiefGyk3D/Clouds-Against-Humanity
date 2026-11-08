@@ -4,10 +4,6 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Threat frameworks: STRIDE, ATT&CK, ATLAS
-<!-- END GENERATED PAGE NAV top -->
-
 You have one model of this pipeline, written with STRIDE. This page adds two more views of the same project and the files to open them: the pipeline mapped to MITRE ATT&CK, and the AI tools that touch this repository mapped to MITRE ATLAS. The point is not that three frameworks are better than one. The point is that each answers a different question, that you should recognize all three when a job or a report uses them, and that this repository is a springboard: the models are small enough to read in an evening and wrong enough in places to be worth fixing.
 
 The format is the usual one: **predict, then check**. Write your answer down first. If words such as exploit, zero-day, ransomware or lateral movement are new, [Threats in plain words](Threats-in-Plain-Words.md) comes first.
@@ -217,19 +213,3 @@ Things I deliberately did not do: score this pipeline against the whole ATT&CK m
 - Pick one STRIDE threat the ATT&CK model left out (the Repudiation ones) and decide whether any technique fits. If none does, write down what that says about what ATT&CK is for.
 - Find one ATLAS threat whose mitigation says "Open" and name the control that would let you mark it Mitigated, and where you would verify it.
 - Take T3 and T7 and say which of the three frameworks you would hand to (a) a developer deciding on a design, (b) a detection engineer writing alerts, (c) someone reviewing how your team uses AI tools.
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling) > Threat frameworks: STRIDE, ATT&CK, ATLAS
-
-In this group: [Security tools and threat modeling](Contents.md#security-tools-and-threat-modeling), 8 pages
-
-- Also here: [Threats in plain words](Threats-in-Plain-Words.md) / [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md) / [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md) / [Threat model exercise](Threat-Model-Exercise.md) / [Threat Dragon exercise](Threat-Dragon-Exercise.md) / **Threat frameworks: STRIDE, ATT&CK, ATLAS**
-- Digital forensics: [Memory forensics with Volatility 3](Memory-Forensics-Acquiring-RAM-and-Analyzing-It-with-Volatility-3.md) / [Disk forensics with Autopsy and The Sleuth Kit](Disk-Forensics-with-Autopsy-and-The-Sleuth-Kit.md)
-
-Related pages:
-
-- [Threat Dragon exercise](Threat-Dragon-Exercise.md)
-- [Threat model exercise](Threat-Model-Exercise.md)
-- [Email security](Email-Security-DNS-Gateways-and-API-Driven-Protection.md)
-- [Security tools: Nmap, OpenVAS, Burp, Metasploit](Security-Tools-Basics-Nmap-OpenVAS-Burp-Metasploit.md)
-<!-- END GENERATED PAGE NAV bottom -->

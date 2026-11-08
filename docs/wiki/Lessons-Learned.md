@@ -4,12 +4,6 @@
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Lessons learned
-
-Previous: [Threat model](Threat-Model.md) / Next: [Roadmap](Roadmap.md)
-<!-- END GENERATED PAGE NAV top -->
-
 Things that broke during the build (and a few traps the guides warn about), what was really going on, and what fixed it. These are the parts most tutorials leave out, and the parts most likely to save you an evening.
 
 ## 1. `curl | bash` reported success and installed nothing useful
@@ -117,20 +111,3 @@ The DigitalOcean account was rebuilt and everything was redeployed. Four things 
 - When a fix is a job every similar repository would need, put it in the shared library first. A copy in one repository is a copy that drifts.
 
 Next: [Roadmap](Roadmap.md), step 21 of the core path on the [Reading order](Reading-Order.md) page.
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Lessons learned
-
-Previous: [Threat model](Threat-Model.md) / Next: [Roadmap](Roadmap.md)
-
-In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
-
-- [Start here if you are new](Start-Here-If-You-Are-New.md) / [What is the cloud](What-Is-the-Cloud.md) / [Networking basics](Networking-Basics-for-This-Project.md) / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / [How money works](How-Money-Works-in-the-Cloud.md) / [Enterprise habits](Enterprise-Engineering-Habits.md) / [Architecture overview](Architecture-Overview.md) / [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / [Twingate](Twingate.md) / [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / [Droplet hardening](Droplet-Hardening.md) / [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / [Spacelift](Spacelift.md) / [Doppler and secrets](Doppler-and-Secrets.md) / [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / [Threat model](Threat-Model.md) / **Lessons learned** / [Roadmap](Roadmap.md)
-
-Related pages:
-
-- [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md)
-- [Doppler and secrets](Doppler-and-Secrets.md)
-- [Spacelift](Spacelift.md)
-- [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md)
-<!-- END GENERATED PAGE NAV bottom -->

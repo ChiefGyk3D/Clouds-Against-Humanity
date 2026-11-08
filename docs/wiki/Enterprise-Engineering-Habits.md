@@ -1,11 +1,5 @@
 # Enterprise engineering habits
 
-<!-- BEGIN GENERATED PAGE NAV top: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-[Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Enterprise habits
-
-Previous: [How money works](How-Money-Works-in-the-Cloud.md) / Next: [Architecture overview](Architecture-Overview.md)
-<!-- END GENERATED PAGE NAV top -->
-
 Start-from-zero page 8 of 8. Previous: [How money works in the cloud](How-Money-Works-in-the-Cloud.md). Next: [Architecture overview](Architecture-Overview.md), step 10 of the core path. The capstone, [Fork, private stacks and the pipeline](Fork-Private-Stacks-and-the-Pipeline.md), opens the build track and comes after the core path.
 
 Reading this repository for the first time, a reasonable reaction is "this is a lot of ceremony for two $6 machines". Pull requests for a one-person project. A threat model for a hobby. A cost gate for a bill smaller than a streaming subscription. A document about every failure.
@@ -107,20 +101,3 @@ Everything else on this page is those three, applied with more people and more m
 You now have the vocabulary the rest of the wiki assumes. Continue with the core path on the [Reading order](Reading-Order.md) page. The [Architecture overview](Architecture-Overview.md) will read as a description of things you understand, and [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) will read as an argument you can evaluate rather than a position you are asked to accept. To practice the habits here as a first-week employee would (a ticket, a change record, a runbook step, a post-mortem, an access request), do [Working in a company](Working-in-a-Company-Tickets-Change-On-Call-and-Documentation.md). When a word does not land, the [Glossary](Glossary.md) is there. When you find a page that still assumes too much, that is a pull request waiting to happen, and [Git, GitHub and pull requests](Git-GitHub-and-Pull-Requests.md) says how.
 
 Next: [Architecture overview](Architecture-Overview.md).
-
-<!-- BEGIN GENERATED PAGE NAV bottom: rewritten from docs/wiki/_nav.yaml by scripts/gen_wiki_nav.py; edit the manifest, not this block -->
-Where you are: [Home](Home.md) > [Core path: read in this order](Contents.md#core-path-read-in-this-order) > Enterprise habits
-
-Previous: [How money works](How-Money-Works-in-the-Cloud.md) / Next: [Architecture overview](Architecture-Overview.md)
-
-In this track: [Core path: read in this order](Contents.md#core-path-read-in-this-order), 21 pages
-
-- [Start here if you are new](Start-Here-If-You-Are-New.md) / [What is the cloud](What-Is-the-Cloud.md) / [Networking basics](Networking-Basics-for-This-Project.md) / [Identity, secrets, zero trust](Identity-Secrets-and-Zero-Trust-Basics.md) / [Infrastructure as code](What-Is-Infrastructure-as-Code.md) / [Git and pull requests](Git-GitHub-and-Pull-Requests.md) / [Containers and Docker (optional)](Containers-and-Docker-Basics.md) / [How money works](How-Money-Works-in-the-Cloud.md) / **Enterprise habits** / [Architecture overview](Architecture-Overview.md) / [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md) / [Twingate](Twingate.md) / [DigitalOcean network and firewalls](DigitalOcean-Network-and-Firewalls.md) / [Droplet hardening](Droplet-Hardening.md) / [OpenTofu, stacks and modules](OpenTofu-Stacks-and-Modules.md) / [Spacelift](Spacelift.md) / [Doppler and secrets](Doppler-and-Secrets.md) / [CI, tests and the cost gate](CI-Tests-and-Cost-Gate.md) / [Threat model](Threat-Model.md) / [Lessons learned](Lessons-Learned.md) / [Roadmap](Roadmap.md)
-
-Related pages:
-
-- [Containers and Docker (optional)](Containers-and-Docker-Basics.md)
-- [Why ZTNA and not a VPN](Why-ZTNA-Not-a-VPN.md)
-- [Git and pull requests](Git-GitHub-and-Pull-Requests.md)
-- [Twingate](Twingate.md)
-<!-- END GENERATED PAGE NAV bottom -->
