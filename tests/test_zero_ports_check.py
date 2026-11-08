@@ -1244,14 +1244,15 @@ def test_setup_fault_on_every_port_is_exit_2_never_0(fault):
     inv = units(1)
     factory = _factory_for(fault)
     clock = Clock()
+    ports = range(1, 200)  # the fault handling does not depend on the range; the full sweep has its own tests (#527)
     acc = zpc.scan(
         inv, lambda a, p, t: zpc.tcp_connect(a, p, t, socket_factory=factory),
         zpc.Budget(), reread=lambda: inv, clock=clock, sleep=clock.sleep,
-        executor_factory=InlineExecutor,
+        executor_factory=InlineExecutor, ports=ports,
     )
-    assert acc.unique == [zpc.MAX_PORT]
+    assert acc.unique == [len(ports)]
     assert acc.counts[0][zpc.TIMEOUT] == 0
-    assert zpc.verdict(acc, 1).code == 2
+    assert zpc.verdict(acc, 1, len(ports)).code == 2
 
 
 @pytest.mark.parametrize("fault", sorted(ANSWER_THEN_CLOSE_FAULTS))
