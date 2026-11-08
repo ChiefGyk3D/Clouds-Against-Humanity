@@ -10,6 +10,7 @@ neither fails, unless it is in ALLOWED with a reason.
 It is a phrase check and not a proof: it catches the common wording, not every possible one.
 """
 
+import functools
 import re
 from pathlib import Path
 
@@ -41,7 +42,9 @@ HONEST = re.compile(
 ALLOWED: dict[tuple[str, str], str] = {}
 
 
-def hits() -> list[tuple[str, int, str]]:
+@functools.cache
+def hits() -> tuple[tuple[str, int, str], ...]:
+    """The scan of the pages, run once per process: the two tests below read the same, unchanging files."""
     found = []
     for path in FILES:
         if path.name in SKIP:
@@ -49,7 +52,7 @@ def hits() -> list[tuple[str, int, str]]:
         for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
             if PORT_MOVE.search(line) and SERVICE.search(line) and not HONEST.search(line):
                 found.append((path.name, n, line.strip()))
-    return found
+    return tuple(found)
 
 
 def allowed(name: str, line: str) -> bool:

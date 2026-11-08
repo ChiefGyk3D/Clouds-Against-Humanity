@@ -11,7 +11,6 @@ download its provider (skipped otherwise). Nothing here touches the network exce
 import asyncio
 import importlib
 import json
-import os
 import re
 import shutil
 import subprocess
@@ -420,16 +419,11 @@ def test_pieces_json_matches_the_price_table():
             assert other["build"] <= p["build"] and other["destroy"] >= p["destroy"]
 
 
+@pytest.mark.slow
 @pytest.mark.skipif(shutil.which("tofu") is None, reason="tofu is not installed")
-def test_tofu_validate(tmp_path):
-    env = dict(os.environ, TF_PLUGIN_CACHE_DIR=str(tmp_path / "plugins"), TF_IN_AUTOMATION="1")
-    (tmp_path / "plugins").mkdir()
-    tree = tmp_path / "lab"
-    shutil.copytree(LAB, tree, ignore=shutil.ignore_patterns(".terraform*", "local"))
+def test_tofu_validate(tofu_lab):
+    env, tree = tofu_lab  # copied and initialized once per session (tests/conftest.py)
     for d in sorted((tree / "cloud").iterdir()) + [tree / "compose"]:
-        init = subprocess.run(["tofu", "init", "-backend=false", "-input=false"], cwd=d, env=env, capture_output=True, text=True, check=False)
-        if init.returncode != 0:
-            pytest.skip("tofu could not download its provider (no network)")
         val = subprocess.run(["tofu", "validate"], cwd=d, env=env, capture_output=True, text=True, check=False)
         assert val.returncode == 0, f"{d.name}: {val.stdout}{val.stderr}"
         fmt = subprocess.run(["tofu", "fmt", "-check"], cwd=d, env=env, capture_output=True, text=True, check=False)
@@ -458,15 +452,6 @@ def test_page_disclosure_and_links():
         assert ip.startswith(("192.0.2.", "198.51.100.", "203.0.113.", "127.0.0.")) or ip == "0.0.0.0", ip
 
 
-def _tofu_env(tmp_path):
-    env = dict(os.environ, TF_PLUGIN_CACHE_DIR=str(tmp_path / "plugins"), TF_IN_AUTOMATION="1", DIGITALOCEAN_TOKEN="lab-placeholder")
-    (tmp_path / "plugins").mkdir(exist_ok=True)
-    tree = tmp_path / "lab"
-    if not tree.exists():
-        shutil.copytree(LAB, tree, ignore=shutil.ignore_patterns(".terraform*", "local"))
-    return env, tree
-
-
 def test_compose_orders_droplet_after_firewall_and_gates_assignment_on_a_known_flag():
     comp = (LAB / "compose" / "main.tf").read_text()
     droplet_block = re.search(r'module "droplet" \{(.*?)\n\}', comp, re.DOTALL).group(1)
@@ -477,13 +462,12 @@ def test_compose_orders_droplet_after_firewall_and_gates_assignment_on_a_known_f
     assert "var.droplet_id !=" not in reserved  # an unknown value cannot decide a count at plan time
 
 
+@pytest.mark.slow
 @pytest.mark.skipif(shutil.which("tofu") is None, reason="tofu is not installed")
-def test_tofu_all_flags_on_plans_five_resources_and_firewall_rejects_ipv6(tmp_path):
-    env, tree = _tofu_env(tmp_path)
+def test_tofu_all_flags_on_plans_five_resources_and_firewall_rejects_ipv6(tofu_lab):
+    shared_env, tree = tofu_lab  # copied and initialized once per session (tests/conftest.py)
+    env = dict(shared_env, DIGITALOCEAN_TOKEN="lab-placeholder")
     comp = tree / "compose"
-    init = subprocess.run(["tofu", "init", "-backend=false", "-input=false"], cwd=comp, env=env, capture_output=True, text=True, check=False)
-    if init.returncode != 0:
-        pytest.skip("tofu could not download its provider (no network)")
     base = ["tofu", "plan", "-input=false", "-lock=false", "-refresh=false", "-no-color"]
     flags = ["enable_project", "enable_firewall", "enable_droplet", "enable_reserved_ip", "enable_dns"]
     args = [a for f in flags for a in ("-var", f"{f}=true")] + ["-var", 'ssh_key_fingerprints=["aa:bb"]']
