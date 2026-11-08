@@ -18,7 +18,7 @@ permissions: {}
 jobs:
   security:
     # Secret scanning, CodeQL for the workflows, dependency review. Pin = commit; comment = version.
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/security.yml@7501cb3fa19d83d0e0a131cb040e7c4da32a9504 # v1.28.0 # git-your-ship-together main at PR 151 (untagged; next release)
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/security.yml@9d6825dd4e0e4d524fca3733f416437bbd7851e1 # v1.31.0 # git-your-ship-together main at PR 151 (untagged; next release)
     permissions:
       contents: read
       security-events: write
@@ -29,7 +29,7 @@ jobs:
 
   scripts:
     # shellcheck and shfmt over the deploy scripts.
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/bash-ci.yml@7501cb3fa19d83d0e0a131cb040e7c4da32a9504 # v1.28.0 # git-your-ship-together main at PR 151 (untagged; next release)
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/bash-ci.yml@9d6825dd4e0e4d524fca3733f416437bbd7851e1 # v1.31.0 # git-your-ship-together main at PR 151 (untagged; next release)
     permissions:
       contents: read
       id-token: write
