@@ -5,7 +5,13 @@ the Reading-Order page and the "Next:" lines honest as pages are added.
 """
 
 import re
+import sys
+import tempfile
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "scripts"))
+import gen_wiki_nav as gwn
 
 WIKI = Path(__file__).resolve().parent.parent / "docs" / "wiki"
 PAGE_LINK = re.compile(r"\]\(([A-Za-z0-9_-]+)\.md(?:#[^)]*)?\)")
@@ -32,15 +38,25 @@ def test_every_page_the_sidebar_links_exists():
 
 
 def test_every_page_named_in_a_next_line_exists():
-    problems = []
-    for page in sorted(WIKI.glob("*.md")):
-        for line in page.read_text().splitlines():
-            if "Next:" not in line:
-                continue
-            for target in PAGE_LINK.findall(line):
-                if target not in pages():
-                    problems.append(f"{page.name}: {target}")
+    """The Next: lines are written by the publish step (issue #521), so they are read from its output."""
+    problems, lines = [], 0
+    with tempfile.TemporaryDirectory() as out:
+        gwn.publish_pages(ROOT, Path(out))
+        for page in sorted(Path(out).glob("*.md")):
+            for line in page.read_text().splitlines():
+                if "Next:" not in line:
+                    continue
+                lines += 1
+                for target in PAGE_LINK.findall(line):
+                    if target not in pages():
+                        problems.append(f"{page.name}: {target}")
+    assert lines >= 200, f"the guard saw only {lines} Next lines"
     assert not problems, f"Next lines name missing pages: {problems}"
+
+
+def test_the_guard_for_next_lines_bites_on_a_missing_page():
+    assert PAGE_LINK.findall("Previous: [A](A.md) / Next: [B](No-Such-Page-Here.md)") == ["A", "No-Such-Page-Here"]
+    assert "No-Such-Page-Here" not in pages()
 
 
 def test_reading_order_lists_no_page_twice_within_one_path():

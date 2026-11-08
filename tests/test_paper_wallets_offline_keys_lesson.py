@@ -6,7 +6,7 @@ cryptocurrency set (issue 431). A banner that claims more than was run, a comman
 run, a real-looking seed phrase, key, address or long hex value, a procedure that generates before the network is
 cut, a generator ranked or endorsed, a dated claim with no date, a diagram with no picture or alt text, a table with
 an unnamed first header cell, or a register row with no URL and no date would each teach or reveal the wrong thing.
-The page is read through tests/wikitext.py page_text(), which strips the generated navigation blocks.
+The page is read through tests/wikitext.py page_text(), which strips the generated blocks (the navigation blocks exist only in the published page, issue #521).
 """
 
 import itertools
@@ -14,6 +14,7 @@ import json
 import re
 from pathlib import Path
 
+from test_wiki_page_nav import published
 from wikitext import page_text
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -180,9 +181,11 @@ def test_the_banner_says_it_was_written_from_documents_and_names_what_was_run_an
     assert "no price talk, no coin shilling and no trading advice" in body.lower()
 
 
-def test_the_page_carries_generated_navigation_blocks_the_test_does_not_see():
+def test_the_page_file_carries_no_navigation_block_and_the_published_page_does():
     raw = PAGE.read_text(encoding="utf-8")
-    assert raw.count("BEGIN GENERATED PAGE NAV top") == 1 and raw.count("BEGIN GENERATED PAGE NAV bottom") == 1
+    assert "BEGIN GENERATED PAGE NAV" not in raw  # issue #521: the publish step writes them
+    shown = published(PAGE.stem)
+    assert shown.count("BEGIN GENERATED PAGE NAV top") == 1 and shown.count("BEGIN GENERATED PAGE NAV bottom") == 1
     assert "BEGIN GENERATED" not in text()
 
 

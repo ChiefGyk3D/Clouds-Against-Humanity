@@ -135,7 +135,7 @@ Clouds-Against-Humanity/
   scripts/carry_metrics_snapshot.sh        the carry half: reads the previous snapshot from the `metrics` branch (size checked before anything is written; fails closed) and prints the tip commit it read
   scripts/publish_metrics_branch.sh        the publish half of the daily growth chart: re-verifies the bundle against the baseline and the previous snapshot, then fast-forward pushes a child commit of the tip it was told to expect to the `metrics` branch (no force, never main)
   scripts/growth-chart-requirements.txt    hash-pinned matplotlib and Pillow for the daily growth chart (pip install --require-hashes)
-  scripts/gen_wiki_nav.py                  writes docs/wiki/Contents.md and docs/wiki/_Sidebar.md from docs/wiki/_nav.yaml (--check fails when stale or when a page is missing from the manifest)
+  scripts/gen_wiki_nav.py                  writes docs/wiki/Contents.md and docs/wiki/_Sidebar.md from docs/wiki/_nav.yaml (--check fails when stale or when a page is missing from the manifest); --publish-to DIR renders the previous/next and track-count blocks for the published wiki
   scripts/gen_example_tests.py             writes each live stack's example.tftest.hcl from its terraform.tfvars.example
   scripts/gen_timezones.py                 regenerates modules/twingate-bootstrap/timezones.txt from the local tz database
   scripts/hcl_variables.py                 helper module: a fail-closed reader of `variable` blocks (used by tests and the generators)

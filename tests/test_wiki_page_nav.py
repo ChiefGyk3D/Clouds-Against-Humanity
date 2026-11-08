@@ -1,11 +1,15 @@
 # SPDX-License-Identifier: Apache-2.0
-"""The generated navigation blocks on every wiki page (issue #417).
+"""The navigation blocks on every published wiki page (issue #417, moved to the publish step by issue #521).
+
+The blocks are not stored in docs/wiki/*.md any more: the publish step (scripts/gen_wiki_nav.py --publish-to, which
+scripts/gen-wiki.sh runs) renders them from docs/wiki/_nav.yaml. The tests below therefore read the PUBLISHED pages
+for everything about the blocks, and the repository pages only to prove they carry none.
 
 What is proved:
-- every page that should carry the blocks has exactly one top and one bottom block, in the right places, and
+- no page file carries a navigation block, and --check fails when one does (the guard bites);
+- every published page that should carry the blocks has exactly one top and one bottom block, in the right places, and
   Home, Contents and the pages another generator writes whole have none;
-- the blocks are what the generator renders, so --check fails when one goes stale and running the generator
-  twice changes nothing;
+- the published pages are the repository pages plus exactly those blocks, and publishing twice changes nothing;
 - previous and next agree (a page's next has it as previous), the first and last pages have one neighbor, and
   a group with no reading order has none;
 - related targets exist, are not the page itself and do not repeat; the fallback rule is deterministic and
@@ -18,6 +22,7 @@ What is proved:
 import copy
 import re
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -43,6 +48,18 @@ def text_of(name: str) -> str:
 
 def pages_with_nav() -> list[str]:
     return sorted(n for n in gwn.wiki_pages(ROOT) if gwn.has_page_nav(n, text_of(n)))
+
+
+_PUBLISHED: dict[str, str] = {}
+
+
+def published(name: str) -> str:
+    """The text of a page as the publish step writes it (blocks added, links not yet rewritten for the wiki)."""
+    if not _PUBLISHED:
+        with tempfile.TemporaryDirectory() as out:
+            assert gwn.publish_pages(ROOT, Path(out)) >= 140
+            _PUBLISHED.update({p.stem: p.read_text(encoding="utf-8") for p in Path(out).glob("*.md")})
+    return _PUBLISHED[name]
 
 
 def block(text: str, where: str) -> str:
@@ -106,11 +123,25 @@ def write_tree(root: Path, m: dict, texts: dict[str, str]) -> Path:
 # -- the committed wiki ------------------------------------------------------------------------
 
 
-def test_every_page_that_should_have_the_blocks_has_exactly_one_top_and_one_bottom():
+def test_no_page_file_carries_a_navigation_block():
+    names = sorted(gwn.wiki_pages(ROOT))
+    assert len(names) >= 140, f"the guard collected only {len(names)} pages"
+    for name in names:
+        assert not gwn.has_nav_blocks(text_of(name)), f"{name}: the block is written by the publish step, not stored"
+    assert gwn.check(ROOT) == []
+
+
+def test_the_no_stored_block_guard_bites():
+    name = pages_with_nav()[0]
+    assert gwn.has_nav_blocks(published(name))  # a page with the blocks is seen as carrying them
+    assert not gwn.has_nav_blocks(text_of(name))
+
+
+def test_every_published_page_that_should_have_the_blocks_has_exactly_one_top_and_one_bottom():
     names = pages_with_nav()
     assert len(names) >= 140, f"the guard collected only {len(names)} pages"
     for name in names:
-        text = text_of(name)
+        text = published(name)
         for where in gwn.NAV_PLACES:
             assert text.count(gwn.NAV_BEGIN.format(where=where)) == 1, f"{name}: {where} BEGIN"
             assert text.count(gwn.NAV_END.format(where=where)) == 1, f"{name}: {where} END"
@@ -123,19 +154,21 @@ def test_home_contents_and_the_pages_other_generators_write_have_no_block():
     assert {"Home", "Contents"} <= set(exempt)
     assert exempt == ["Contents", "Home", "Project-Status", "Repository-Growth", "Settings-Reference"]
     for name in exempt:
-        assert "GENERATED PAGE NAV" not in text_of(name), name
+        assert "GENERATED PAGE NAV" not in published(name), name
+        assert published(name) == text_of(name), f"{name}: published unchanged"
 
 
-def test_the_committed_blocks_are_what_the_generator_renders_and_a_second_run_changes_nothing():
+def test_a_published_page_is_the_repository_page_plus_exactly_the_two_blocks():
     m = manifest()
     for name in pages_with_nav():
         text = text_of(name)
-        assert gwn.apply_page_nav(text, gwn.render_page_nav(m, name)) == text, name
-        again = gwn.apply_page_nav(text, gwn.render_page_nav(copy.deepcopy(m), name))
-        assert again == text, f"{name}: not idempotent"
+        assert gwn.strip_page_nav(published(name)) == text, name
+        assert published(name) == gwn.apply_page_nav(text, gwn.render_page_nav(m, name)), name
+        again = gwn.apply_page_nav(published(name), gwn.render_page_nav(copy.deepcopy(m), name))
+        assert again == published(name), f"{name}: not idempotent"
 
 
-def test_stripping_the_blocks_and_inserting_them_again_gives_the_same_page():
+def test_the_published_page_is_the_stripped_page_with_its_contents_and_navigation_blocks_put_back():
     from wikitext import page_text
 
     m = manifest()
@@ -143,21 +176,21 @@ def test_stripping_the_blocks_and_inserting_them_again_gives_the_same_page():
         stripped = page_text(WIKI / f"{name}.md")
         assert "GENERATED PAGE NAV" not in stripped, name
         # Issue #441: the longest pages also carry a contents block, which page_text() strips too, so the
-        # round trip puts back both generated blocks (the navigation blocks, then the contents block).
-        restored = gwn.apply_page_nav(stripped, gwn.render_page_nav(m, name))
-        restored = gwn.apply_page_contents(restored, gwn.render_page_contents(stripped))
-        assert restored == text_of(name), name
+        # round trip puts back the contents block (kept in the file), then the navigation blocks (publish only).
+        in_file = gwn.apply_page_contents(stripped, gwn.render_page_contents(stripped))
+        assert in_file == text_of(name), name
+        assert gwn.apply_page_nav(in_file, gwn.render_page_nav(m, name)) == published(name), name
 
 
 def test_previous_and_next_agree_within_every_group_with_a_reading_order():
     m = manifest()
     prev, nxt, ordered_groups = {}, {}, 0
     for name in pages_with_nav():
-        top = block(text_of(name), "top")
+        top = block(published(name), "top")
         found_p, found_n = PREV.findall(top), NEXT.findall(top)
         assert len(found_p) <= 1 and len(found_n) <= 1, name
         prev[name], nxt[name] = (found_p or [None])[0], (found_n or [None])[0]
-        assert block(text_of(name), "bottom").count("Previous:") == len(found_p), name
+        assert block(published(name), "bottom").count("Previous:") == len(found_p), name
     for g in gwn.groups_of(m):
         names = [e["page"] for e in gwn.entries(m, g["id"])]
         if not gwn.has_reading_order(g):
@@ -180,9 +213,9 @@ def test_previous_and_next_agree_within_every_group_with_a_reading_order():
 def test_a_page_next_has_it_as_previous():
     pairs = 0
     for name in pages_with_nav():
-        following = NEXT.findall(block(text_of(name), "top"))
+        following = NEXT.findall(block(published(name), "top"))
         if following and following[0] in pages_with_nav():  # a followed page that carries no block has no Previous to check
-            assert PREV.findall(block(text_of(following[0]), "top")) == [name], name
+            assert PREV.findall(block(published(following[0]), "top")) == [name], name
             pairs += 1
     assert pairs >= 100
 
@@ -192,7 +225,7 @@ def test_the_breadcrumb_names_home_the_group_and_the_page_without_linking_the_pa
     homes = {e["page"]: (g, e) for g in gwn.groups_of(m) for e in gwn.entries(m, g["id"])}
     for name in pages_with_nav():
         g, e = homes[name]
-        top = block(text_of(name), "top")
+        top = block(published(name), "top")
         assert f"[Home](Home.md) > [{g['title']}](Contents.md#{gwn.slug(g['title'])}) > {e['title']}\n" in top, name
         assert f"]({name}.md)" not in top, f"{name}: links itself"
 
@@ -200,7 +233,7 @@ def test_the_breadcrumb_names_home_the_group_and_the_page_without_linking_the_pa
 def test_only_the_heading_and_leading_quote_banners_come_before_the_top_block():
     seen = 0
     for name in pages_with_nav():
-        text = text_of(name)
+        text = published(name)
         head = text.split(gwn.NAV_BEGIN.format(where="top"), 1)[0].splitlines()
         assert head[0].startswith("# "), name
         assert all(not line.strip() or line.startswith(">") for line in head[1:]), f"{name}: prose before the top block"
@@ -213,7 +246,7 @@ def test_every_related_target_exists_and_is_not_the_page_itself():
     names = set(gwn.all_page_names(m))
     shown = 0
     for name in pages_with_nav():
-        part = block(text_of(name), "bottom").split("Related pages:", 1)
+        part = block(published(name), "bottom").split("Related pages:", 1)
         if len(part) == 1:
             continue
         targets = PAGE_LINK.findall(part[1])
@@ -365,32 +398,64 @@ def test_a_page_with_a_missing_or_repeated_marker_is_refused():
         gwn.apply_page_nav(swapped, blocks)
 
 
-def test_a_stale_block_fails_check_and_a_rerun_repairs_it_without_touching_the_page(tmp_path):
+def publish(root: Path, out: Path) -> dict[str, str]:
+    assert gwn.main(["--root", str(root), "--publish-to", str(out)]) == 0
+    return {p.stem: p.read_text(encoding="utf-8") for p in out.glob("*.md")}
+
+
+def test_a_stored_block_fails_check_and_a_rerun_removes_it_without_touching_the_page(tmp_path):
     m, texts = small()
     wiki = write_tree(tmp_path, m, texts)
     (wiki / "Home.md").write_text(f"# Home\n\n{gwn.HOME_BEGIN}\n{gwn.HOME_END}\n", encoding="utf-8")
-    assert gwn.main(["--root", str(tmp_path), "--check"]) == 1  # no blocks yet: stale
+    assert gwn.main(["--root", str(tmp_path), "--check"]) == 1  # Contents, sidebar and Home map not written yet
     assert gwn.main(["--root", str(tmp_path)]) == 0
     assert gwn.main(["--root", str(tmp_path), "--check"]) == 0
     page = wiki / "T3.md"
-    good = page.read_text(encoding="utf-8")
-    assert good.count("GENERATED PAGE NAV top") == 2  # BEGIN and END
-    # A hand edit inside a block, a block removed and a block moved are each refused.
-    page.write_text(good.replace("Tee two", "Tee TWO"), encoding="utf-8")
+    assert page.read_text(encoding="utf-8") == texts["T3"]  # the generator adds nothing to a short page
+    # A navigation block left in a page (a branch from before issue #521) is refused, then removed by a rerun.
+    stored = gwn.apply_page_nav(texts["T3"], gwn.render_page_nav(m, "T3"))
+    page.write_text(stored, encoding="utf-8")
     assert gwn.main(["--root", str(tmp_path), "--check"]) == 1
-    page.write_text(good.replace(gwn.NAV_END.format(where="bottom"), ""), encoding="utf-8")
-    assert gwn.main(["--root", str(tmp_path), "--check"]) == 1
-    # Editing the manifest (a title) makes every block that shows it stale.
-    page.write_text(good, encoding="utf-8")
+    assert gwn.main(["--root", str(tmp_path)]) == 0
+    assert page.read_text(encoding="utf-8") == texts["T3"]
+    assert gwn.main(["--root", str(tmp_path), "--check"]) == 0
+
+
+def test_a_manifest_edit_changes_the_published_pages_and_no_page_file(tmp_path):
+    m, texts = small()
+    wiki = write_tree(tmp_path, m, texts)
+    assert gwn.main(["--root", str(tmp_path)]) == 0
+    files = {p.name: p.read_bytes() for p in wiki.iterdir() if p.is_file()}
+    before = publish(tmp_path, tmp_path / "out1")
+    assert "Tee two" in before["T3"] and "Tee second" not in before["T3"]
     m2 = copy.deepcopy(m)
     next(e for e in m2["pages"]["trk"] if e["page"] == "T2")["title"] = "Tee second"
     (wiki / "_nav.yaml").write_text(yaml.safe_dump(m2), encoding="utf-8")
+    files["_nav.yaml"] = (wiki / "_nav.yaml").read_bytes()
+    # Contents and the sidebar show the title, so --check wants them rewritten; the page files stay as they are.
     assert gwn.main(["--root", str(tmp_path), "--check"]) == 1
-    # The rewrite repairs it and keeps the page body byte for byte.
     assert gwn.main(["--root", str(tmp_path)]) == 0
-    assert gwn.main(["--root", str(tmp_path), "--check"]) == 0
-    assert gwn.strip_page_nav(page.read_text(encoding="utf-8")) == texts["T3"]
-    assert "Tee second" in page.read_text(encoding="utf-8")
+    after = publish(tmp_path, tmp_path / "out2")
+    assert "Tee second" in after["T3"] and "Tee second" in after["T1"]
+    changed = sorted(p.name for p in wiki.iterdir() if p.is_file() and p.read_bytes() != files.get(p.name))
+    assert changed == ["Contents.md", "Home.md", "_Sidebar.md"], changed  # the registries only, never a lesson page
+    assert gwn.strip_page_nav(after["T3"]) == texts["T3"]
+
+
+def test_publishing_an_invalid_manifest_or_a_page_without_a_heading_fails_and_writes_nothing_wrong(tmp_path, capsys):
+    m, texts = small()
+    texts["T4"] = "no heading at all\n"
+    write_tree(tmp_path, m, texts)
+    assert gwn.main(["--root", str(tmp_path), "--publish-to", str(tmp_path / "out")]) == 1
+    assert "heading" in capsys.readouterr().err or not (tmp_path / "out" / "T4.md").exists()
+    m2, texts2 = small()
+    m2["pages"]["trk"].append({"page": "Ghost", "title": "Ghost", "audience": "learner", "desc": "x"})
+    root2 = tmp_path / "second"
+    root2.mkdir()
+    write_tree(root2, m2, texts2)
+    assert gwn.main(["--root", str(root2), "--publish-to", str(root2 / "out")]) == 1
+    assert "Ghost" in capsys.readouterr().err
+    assert not (root2 / "out").exists()
 
 
 def test_running_the_generator_twice_changes_nothing(tmp_path):
