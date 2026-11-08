@@ -230,11 +230,41 @@ def test_ci_runs_the_check():
     assert "python -I scripts/gen_wiki_nav.py --check" in ci
 
 
+def publish_loop_head(script: str) -> str:
+    """The `for page in` line of the loop that writes pages into "$out": the nearest one above `> "$out/$name"`."""
+    lines = script.splitlines()
+    writes = [i for i, ln in enumerate(lines) if '> "$out/$name"' in ln]
+    assert len(writes) == 1, "expected exactly one line that writes a page into $out"
+    heads = [ln for ln in lines[: writes[0]] if ln.lstrip().startswith("for page in ")]
+    assert heads, "no page loop above the line that writes into $out"
+    return heads[-1].strip()
+
+
+def pages_src_assignments(script: str) -> list[str]:
+    return [ln.strip() for ln in script.splitlines() if ln.strip().startswith("pages_src=")]
+
+
 def test_the_publisher_copies_the_generated_pages_unchanged_in_kind():
-    """gen-wiki.sh publishes every docs/wiki/*.md; the manifest is YAML and is not a page."""
+    """gen-wiki.sh publishes every docs/wiki/*.md, reading them from pages_src (the source tree, or the staging tree
+    with the navigation blocks when a manifest exists); the manifest is YAML and is not a page. The check is anchored on
+    the loop that writes into "$out", not on a substring another loop (the symlink check) could satisfy."""
     script = (ROOT / "scripts" / "gen-wiki.sh").read_text()
-    assert 'for page in "$src"/*.md' in script
+    assert publish_loop_head(script).startswith('for page in "$pages_src"/*.md')
+    assert pages_src_assignments(script) == ["pages_src=$src", "pages_src=$stage"]
+    assert '--publish-to "$stage"' in script and '[ -f "$src/_nav.yaml" ]' in script
     assert not (WIKI / "_nav.yaml").name.endswith(".md")
+
+
+def test_the_publish_loop_check_bites():
+    script = (ROOT / "scripts" / "gen-wiki.sh").read_text()
+    publish = 'for page in "$pages_src"/*.md; do\n  [ -e "$page" ] || continue\n  name='
+    assert publish in script
+    reverted = script.replace(publish, publish.replace("$pages_src", "$src"))
+    assert not publish_loop_head(reverted).startswith('for page in "$pages_src"/*.md')  # reverting the publish loop is seen
+    symlink_loop = 'for page in "$src"/*.md; do\n  [ -e "$page" ] || [ -L "$page" ] || continue'
+    assert symlink_loop in script
+    other = script.replace(symlink_loop, symlink_loop.replace("*.md", "*.txt"))
+    assert publish_loop_head(other).startswith('for page in "$pages_src"/*.md')  # the symlink-check loop is not the one pinned
 
 
 # -- the collapsed sidebar (issue #362) ----------------------------------------------------------
