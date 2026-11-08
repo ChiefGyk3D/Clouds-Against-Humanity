@@ -8,4 +8,14 @@ Thank you for looking. Contributions here start small, and the most useful one i
 - **Want to send a change?** Corrections to the wiki are welcome as pull requests (edits in the wiki editor are overwritten on the next publish). How work is planned, sized and reviewed is on [How this project is planned](docs/wiki/How-This-Project-Is-Planned.md); the pull request basics are in [Git, GitHub and pull requests](docs/wiki/Git-GitHub-and-Pull-Requests.md). Opening an issue first is a good idea for anything larger than a typo.
 - Spelling is American English, and the tests will tell you if the checks fail: `python -I -m pytest tests -q`.
 
+## Running the tests locally
+
+The plain command is `python -I -m pytest tests -q`. For a faster full run on a multi-core machine, install the pinned development tools (`pip install -r requirements-dev.txt`, ideally in a virtual environment) and add `-n auto`, which uses pytest-xdist to spread the tests over one worker per core:
+
+```
+python -I -m pytest tests -q -n auto
+```
+
+Both modes give the same result: 4519 passed and 8 skipped on 2026-11-07. Measured on an 8-core machine that was already busy (load average about 15), the serial run took 273 s and the `-n auto` run took 90 s. Expect a smaller gap on a quiet machine and a larger one on a machine with more cores. CI still runs the plain serial command.
+
 Licensed under Apache-2.0, see LICENSE.

@@ -1,0 +1,6 @@
+# Local development tools. CI installs its own pins (see .github/workflows/ci.yml);
+# this file only adds pytest-xdist for the optional fast local run (#518).
+pytest==9.2.0
+pyyaml==6.0.2
+pytest-xdist==3.8.0
+ruff==0.17.0
