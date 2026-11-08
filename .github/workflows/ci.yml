@@ -9,7 +9,7 @@ permissions: {}
 
 jobs:
   tofu:
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/tofu-ci.yml@7501cb3fa19d83d0e0a131cb040e7c4da32a9504 # v1.28.0
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/tofu-ci.yml@9d6825dd4e0e4d524fca3733f416437bbd7851e1 # v1.31.0
     permissions:
       contents: read
       id-token: write
@@ -26,7 +26,7 @@ jobs:
       extra-allowed-endpoints: "files.pythonhosted.org:443 pypi.org:443"
 
   python:
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/python-ci.yml@7501cb3fa19d83d0e0a131cb040e7c4da32a9504 # v1.28.0
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/python-ci.yml@9d6825dd4e0e4d524fca3733f416437bbd7851e1 # v1.31.0
     permissions:
       contents: read
       id-token: write
@@ -51,7 +51,7 @@ jobs:
       docker-build: false
 
   security:
-    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/security.yml@7501cb3fa19d83d0e0a131cb040e7c4da32a9504 # v1.28.0
+    uses: ChiefGyk3D/git-your-ship-together/.github/workflows/security.yml@9d6825dd4e0e4d524fca3733f416437bbd7851e1 # v1.31.0
     permissions:
       contents: read
       security-events: write
