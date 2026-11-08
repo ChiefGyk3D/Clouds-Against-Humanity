@@ -320,9 +320,28 @@ def test_tracked_files_are_used_inside_a_repo(tmp_path):
     ],
 )
 def test_pathological_line_scans_fast(line):
-    start = time.perf_counter()
-    ic.find_kinds(line)
-    assert time.perf_counter() - start < 1.0
+    """Near-linear scan time, judged against a benign line of the same length.
+
+    CPU time (not wall time) so a loaded machine cannot fail it, and a ratio
+    against a same-run baseline so the bound scales with the machine. The
+    scanner measures within about 2x of the baseline; quadratic or exponential
+    backtracking is hundreds of times slower, so a bound of 25x still fails it.
+    """
+
+    def cpu_seconds(text: str) -> float:
+        best = float("inf")
+        for _ in range(3):  # best of three drops scheduler noise
+            start = time.process_time()
+            ic.find_kinds(text)
+            best = min(best, time.process_time() - start)
+        return best
+
+    baseline = cpu_seconds("x" * len(line))
+    pathological = cpu_seconds(line)
+    assert pathological <= 25 * max(baseline, 0.001), (
+        f"{pathological:.3f}s CPU for a {len(line)}-character line, "
+        f"benign baseline {baseline:.3f}s"
+    )
 
 
 def test_the_repository_itself_is_clean():
