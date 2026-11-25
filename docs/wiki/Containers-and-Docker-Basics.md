@@ -66,6 +66,8 @@ The word for a machine like that is **disposable** (or "cattle, not pets", in th
 
 When one host is no longer enough, [Kubernetes for beginners](Kubernetes-for-Beginners-What-It-Adds-Over-Docker-and-Compose.md) explains what an orchestrator adds over Compose.
 
+Docker is not the only engine. [Choosing a container engine](Choosing-a-Container-Engine-Docker-Podman-Kubernetes-Portainer-Cockpit.md) compares Docker Engine with Podman and says what Portainer and Cockpit manage and how each is exposed.
+
 ## Pi-shaped to cloud-shaped
 
 The author's five daemons were written for one Docker container on a Pi. They work. They also carry assumptions that are true on a Pi and false in the cloud:

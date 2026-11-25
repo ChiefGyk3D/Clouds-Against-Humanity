@@ -135,6 +135,8 @@ Kubernetes is the right answer when the opposite is true: several machines, seve
 
 Scaling pods up and down automatically with a horizontal pod autoscaler (HPA) is its own lesson: [Autoscaling and elasticity](Autoscaling-and-Elasticity-Scale-Out-Targets-Cooldowns-and-Cost-Caps.md). This page only scales by hand.
 
+The single-host engine under all of this can be Docker or Podman. [Choosing a container engine](Choosing-a-Container-Engine-Docker-Podman-Kubernetes-Portainer-Cockpit.md) compares them, including Podman's `kube play`, which runs Kubernetes YAML on one host without a cluster.
+
 ## Try it yourself: a one-node cluster in a throwaway VM
 
 Free. **Not run** (see the status banner). It follows the `kind` quick start and the Kubernetes Deployment page, as read on 2026-11-07.
