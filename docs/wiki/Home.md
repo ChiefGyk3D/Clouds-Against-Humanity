@@ -374,6 +374,12 @@ You can tip or donate, but you are under no obligation. The biggest way to suppo
 
 If Clouds Against Humanity is useful to you, consider supporting continued development. Everything is also collected at **[support.chiefgyk3d.com](https://support.chiefgyk3d.com)**.
 
+<div align="center">
+
+Support me on [Ko-fi](https://ko-fi.com/A0A4E59UP)
+
+</div>
+
 **Recurring support**
 
 | [![Patreon logo icon](images/support-icon-patreon.png)](https://patreon.com/chiefgyk3d) | [![StreamElements logo icon](images/support-icon-streamelements.png)](https://streamelements.com/chiefgyk3d/tip) | [![Merch store logo icon](images/support-icon-merch.png)](https://shop.chiefgyk3d.com/) |

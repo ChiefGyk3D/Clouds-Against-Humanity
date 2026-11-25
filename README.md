@@ -246,6 +246,12 @@ The loopback-only lab in `labs/cross-tenant-dlp` uses fixed labels (`lab-a`, `la
 If you find Clouds Against Humanity useful, consider supporting continued development.
 Everything is also collected at **[support.chiefgyk3d.com](https://support.chiefgyk3d.com)**.
 
+<div align="center">
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/A0A4E59UP)
+
+</div>
+
 ### Recurring Support
 
 <div align="center">
