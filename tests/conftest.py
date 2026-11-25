@@ -11,7 +11,9 @@ cache, so the digitalocean provider was downloaded twice per run and initialized
 """
 
 import fcntl
+import json
 import os
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -21,7 +23,38 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 LAB = ROOT / "labs" / "email-security"
 
-NO_NETWORK = "tofu could not download its provider (no network)"
+
+def _init_network_error(stderr: str) -> str | None:
+    """Skip only when every error diagnostic is a known provider download failure."""
+    text = re.sub(r"\x1b\[[0-9;]*m", "", stderr)
+    text = re.sub(r"(?m)^[ \t]*│[ \t]?", "", text)
+    diagnostics = re.split(r"(?m)^[ \t]*Error:[ \t]*", text)[1:]
+    if not diagnostics:
+        return None
+    patterns = (
+        r"\bconnection refused\b",
+        r"\bno such host\b|\bcould not resolve host\b",
+        r"\bi/o timeout\b|\bcontext deadline exceeded\b|\bClient\.Timeout exceeded\b",
+        r"\bTLS handshake (?:timeout|failed|failure|error)\b",
+        r"\b(?:network is unreachable|no route to host)\b",
+        r"\b5\d\d (?:Internal Server Error|Not Implemented|Bad Gateway|Service Unavailable|Gateway Timeout)\b"
+        r"|\b(?:HTTP(?:/\d(?:\.\d)?)?|status(?: code)?|response code)[: ]+5\d\d\b",
+    )
+    causes = []
+    for diagnostic in diagnostics:
+        # A quoted provider message in a configuration error is not its title.
+        header = re.match(
+            r"failed to (?:query available provider packages|install provider|request discovery document)"
+            r"(?:[ \t]*\r?\n|:[ \t]*)(.*)", diagnostic.strip(), re.IGNORECASE | re.DOTALL,
+        )
+        if header is None:
+            return None
+        match = next((found for pattern in patterns
+                      if (found := re.search(pattern, header.group(1), re.IGNORECASE))), None)
+        if match is None:
+            return None
+        causes.append(match.group(0))
+    return "; ".join(dict.fromkeys(causes))
 
 
 def pytest_configure(config):
@@ -52,7 +85,7 @@ def tofu_lab(tmp_path_factory):
     share and a file lock lets the first worker build it while the others wait and then reuse it. The
     plugin cache is only written while that lock is held: a plugin cache is not documented as safe for
     two `tofu init` runs at once, so init is serialized rather than given one cache per worker. A
-    failed init (no network) is remembered so the other workers skip at once instead of retrying.
+    init result and its diagnostics are remembered so other workers get the same failure or skip.
     """
     if shutil.which("tofu") is None:
         pytest.skip("tofu is not installed")
@@ -66,13 +99,26 @@ def tofu_lab(tmp_path_factory):
         fcntl.flock(lock, fcntl.LOCK_EX)
         if not state.exists():
             shutil.copytree(LAB, tree, ignore=shutil.ignore_patterns(".terraform*", "local"))
-            verdict = "ok"
+            verdict = {"status": "ok"}
             for d in lab_dirs(tree):
                 init = subprocess.run(["tofu", "init", "-backend=false", "-input=false"], cwd=d, env=env, capture_output=True, text=True, check=False)
                 if init.returncode != 0:
-                    verdict = "no-network"
+                    verdict = {"status": "failed", "directory": str(d.relative_to(tree)),
+                               "stdout": init.stdout, "stderr": init.stderr}
                     break
-            state.write_text(verdict)
-    if state.read_text() != "ok":
-        pytest.skip(NO_NETWORK)
-    return env, tree
+            state.write_text(json.dumps(verdict))
+    try:
+        verdict = json.loads(state.read_text())
+    except (OSError, ValueError) as error:
+        pytest.fail(f"could not read cached tofu init result: {error}", pytrace=False)
+    if verdict == {"status": "ok"}:
+        return env, tree
+    if (not isinstance(verdict, dict) or set(verdict) != {"status", "directory", "stdout", "stderr"}
+            or verdict["status"] != "failed"
+            or not all(isinstance(verdict[key], str) for key in ("directory", "stdout", "stderr"))):
+        pytest.fail("invalid cached tofu init result; refusing to treat it as a network skip", pytrace=False)
+    diagnostic = f"{verdict['directory']}: tofu init failed\n{verdict['stdout']}{verdict['stderr']}"
+    network_error = _init_network_error(verdict["stderr"])
+    if network_error is not None:
+        pytest.skip(f"tofu provider download unavailable ({network_error})\n{diagnostic}")
+    pytest.fail(diagnostic, pytrace=False)
