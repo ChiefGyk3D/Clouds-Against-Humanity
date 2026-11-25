@@ -49,7 +49,6 @@
 | Local models can reduce who receives the prompt | the self-hosting AI lesson | A local model is still untrusted when its output can operate a tool. |
 | AI-specific threats need their own vocabulary | sibling AI lessons | A lab result you can later map to those lessons without pretending the vocabulary is the control. |
 
-<a id="the-actual-thing-text-became-a-tool-request"></a>
 ## How text became a tool request
 
 The app answers a question using three local documents. One document contains this line:
