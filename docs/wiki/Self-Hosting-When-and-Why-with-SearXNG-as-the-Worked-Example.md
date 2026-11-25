@@ -31,6 +31,8 @@ You are the operator. That means the machine, the operating system, the containe
 | You can see exactly what runs | A new thing that can be attacked ([the attack surface](Attack-Surface-List-Shrink-Measure.md)) |
 | A good way to learn how the service works | A bus factor of one: if you are away, nobody else fixes it |
 
+A service with a GPU behind it adds a cost this page does not weigh, memory the model must fit in; [Self-hosting AI: Ollama, FrankenLLM, vLLM and the GPU stack](Self-Hosting-AI-Ollama-FrankenLLM-vLLM-and-the-GPU-Stack-PyTorch-CUDA-ROCm-and-Intel.md) applies the same checklist to a model server.
+
 Self-hosting is not the same as private, and private is not the same as anonymous. [Privacy, security and anonymity](Privacy-Security-and-Anonymity-Three-Different-Things-and-Why-There-Is-No-Silver-Bullet.md) keeps the three apart; this page is about the first two.
 
 ## Who sees what: four paths for one search

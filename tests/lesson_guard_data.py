@@ -82,6 +82,7 @@ PAGES: dict[str, dict] = {
     "Hardware-Security-Keys-YubiKey-Nitrokey-Smart-Cards-and-PIV": {"config": {"status_extra": ("My opinion",)}},
     "Kubernetes-for-Beginners-What-It-Adds-Over-Docker-and-Compose": {"config": {"status_extra": ("Quoted from", "Repeated from")}},
     "Choosing-a-Container-Engine-Docker-Podman-Kubernetes-Portainer-Cockpit": {"config": {"status_extra": ("Stated by the maintainer",)}},
+    "Self-Hosting-AI-Ollama-FrankenLLM-vLLM-and-the-GPU-Stack-PyTorch-CUDA-ROCm-and-Intel": {"config": {"status_extra": ("Repeated from",), "min_glossary_rows": 8}},
     "Linux-for-Enterprise-Beginners": {"config": {"status_extra": ("Matches the vendor pages", "Not re-verified")}},
     "Privacy-vs-Security-Blinds-and-Locks-Physical-Security-and-Monero": {"config": {"status_extra": ("Nothing run",)}},
     "Radio-Off-Grid-Communication-LoRa-Meshtastic-Reticulum-Ham-and-SIGINT": {"config": {"status_extra": ("Stated by the maintainer",)}},
