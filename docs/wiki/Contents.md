@@ -6,7 +6,7 @@ page does not match the manifest. -->
 
 > Unfamiliar word or acronym? The [Glossary](Glossary.md) defines it.
 
-Every page of this wiki appears here once (176 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
+Every page of this wiki appears here once (181 pages), grouped by theme, with a line on what it is for and who it is for. If you do not know where to begin, take the numbered core path; [Reading order](Reading-Order.md) has the same pages with time estimates and checkpoints, and [Start here if you are new](Start-Here-If-You-Are-New.md) is the gentlest first page.
 
 Some pages carry a status marker, copied from the page's own banner:
 
@@ -22,7 +22,7 @@ A page with no marker has no such banner. It may still say what was and was not 
 - [Core path: read in this order](#core-path-read-in-this-order) (21)
 - [Track 1: Foundations](#track-1-foundations) (39)
 - [Security tools and threat modeling](#security-tools-and-threat-modeling) (8)
-- [Track 2: Defend and detect](#track-2-defend-and-detect) (38)
+- [Track 2: Defend and detect](#track-2-defend-and-detect) (43)
 - [Track 3: Privacy, anonymity and cryptocurrency](#track-3-privacy-anonymity-and-cryptocurrency) (20)
 - [Track 4: GRC and law](#track-4-grc-and-law) (9)
 - [Track 5: Build and operate](#track-5-build-and-operate) (32)
@@ -149,20 +149,25 @@ A page with no marker has no such banner. It may still say what was and was not 
 | 22 | [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) | What a log, a metric, a trace and an alert are, and how a log line becomes a rule, for learners new to detection. | learner |  |
 | 23 | [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) | Detection after prevention fails, with Wazuh and the wider tool landscape; shipping logs is stage 2 and not built. | engineer | unbuilt |
 | 24 | [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) | What the Wazuh agent, server, indexer and dashboard each do and how a log line becomes an alert, with a free toy pipeline; the Wazuh parts were written from reading. | learner | est. steps |
-| 25 | [Detecting Tor, I2P and VPN on a network](Detecting-and-Managing-Tor-I2P-and-VPN-on-a-Network-the-Defenders-View.md) | Page 7 of the VPN, Tor and I2P series: where a network can watch, the public signals and their limits, list matching, blocking as a policy choice and a detection as a lead, with five diagrams and a free script. | learner | draft |
-| 26 | [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) | Logs, metrics and traces, and why telemetry crosses a trust boundary; an unverified draft for engineers planning stage 2. | engineer | draft |
-| 27 | [Multiple sites and identity](Multiple-Sites-and-Identity.md) | What a site is, what breaks at two, and why a new site should be a settings file and not new code; an unverified draft for engineers. | engineer | draft |
-| 28 | [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) | How telemetry moves between the cloud and the home SIEM without breaking the no-listener promise; an unverified draft for engineers. | engineer | draft |
-| 29 | [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) | Ask what question each panel answers and what it would look like if the answer were bad; an unverified draft for operators. | operator | draft |
-| 30 | [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) | What a data source is, connecting Grafana to Prometheus, SQL and OpenSearch with a read-only account, then one panel and one alert; written from reading, not run. | builder | est. steps |
-| 31 | [Grafana dashboards](Grafana-Dashboards.md) | The three dashboards this repository ships and which question each answers; only tried with synthetic data. | operator |  |
-| 32 | [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) | A hands-on synthetic multi-site monitoring stack where you predict what a silent site does, for builders. | builder |  |
-| 33 | [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) | A springboard for building a small cloud security monitoring stack with a cost ceiling you set; an unverified draft for builders. | builder | draft |
-| 34 | [DFIR toolkits and live triage](DFIR-Toolkits-and-Live-Triage-SIFT-Velociraptor-KAPE-and-the-Incident-Response-Workflow.md) | SIFT, CAINE, Velociraptor, KAPE, FTK Imager and plaso from the owners' pages, live triage against dead-box imaging, an incident response workflow, and a free triage exercise on your own machine. | learner | draft |
-| 35 | [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) | What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied. | operator | unbuilt |
-| 36 | [Open firmware and trustworthy hardware](Open-Firmware-and-Trustworthy-Hardware-coreboot-Heads-Nitrokey-and-Vendors-That-Ship-the-Intel-ME-Disabled.md) | What firmware is, coreboot, Heads with a Nitrokey, what a TPM and Secure Boot do not prove, and what Novacustom, System76, Purism and Tuxedo claim about the Intel ME, each dated, with a free read-only exercise. | learner | draft |
-| 37 | [Digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md) | Evidence handling, chain of custody and the order of volatility from RFC 3227, NIST SP 800-86 and SWGDE, with a free hash, image and verify exercise on a file you make. | learner | draft |
-| 38 | [Network, log and timeline forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md) | Preserving a packet capture as evidence, what a pcap can and cannot prove, streams with tshark, log reliability and tampering, clock skew, time zones and a plaso super timeline, with a free container exercise. | learner | draft |
+| 25 | [How large language models work, for defenders](How-LLMs-Work-for-Defenders-Tokens-Context-Training-RAG-Agents-and-MCP.md) | Tokens, context windows, training, inference, embeddings, RAG, agents and MCP, with the trust boundaries and logging questions defenders need. | learner | draft |
+| 26 | [Attacks on AI systems](Attacks-on-AI-Systems-OWASP-LLM-Top-10-Prompt-Injection-Poisoning-and-Model-Supply-Chain.md) | Prompt injection, jailbreaks, poisoning, model supply-chain risks and the OWASP LLM Top 10, with safe local tests and defensive controls. | learner | draft |
+| 27 | [Architecting and securing AI systems](Architecting-and-Securing-AI-Systems-Guardrails-Versus-Rules-Least-Privilege-and-Agents.md) | A secure AI application architecture using enforced rules, least privilege, isolation, approval gates, audit logs and bounded agents. | engineer | draft |
+| 28 | [AI in defensive security work](AI-in-Defensive-Security-Work-SOC-Triage-Detection-Writing-Local-Models-and-Limits.md) | Where language models can help with SOC triage, detection writing and reports, where code must supply the facts, and how to keep hostile logs away from authority. | learner | draft |
+| 29 | [Lab: build and attack a local LLM app](Lab-Build-and-Attack-a-Local-LLM-App-Canary-Injection-Rules-and-Guardrails.md) | A contained local lab that observes indirect prompt injection, then compares prompt guidance, an output filter and enforced rules around a harmless fake tool. | learner | draft |
+| 30 | [Detecting Tor, I2P and VPN on a network](Detecting-and-Managing-Tor-I2P-and-VPN-on-a-Network-the-Defenders-View.md) | Page 7 of the VPN, Tor and I2P series: where a network can watch, the public signals and their limits, list matching, blocking as a policy choice and a detection as a lead, with five diagrams and a free script. | learner | draft |
+| 31 | [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) | Logs, metrics and traces, and why telemetry crosses a trust boundary; an unverified draft for engineers planning stage 2. | engineer | draft |
+| 32 | [Multiple sites and identity](Multiple-Sites-and-Identity.md) | What a site is, what breaks at two, and why a new site should be a settings file and not new code; an unverified draft for engineers. | engineer | draft |
+| 33 | [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) | How telemetry moves between the cloud and the home SIEM without breaking the no-listener promise; an unverified draft for engineers. | engineer | draft |
+| 34 | [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) | Ask what question each panel answers and what it would look like if the answer were bad; an unverified draft for operators. | operator | draft |
+| 35 | [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) | What a data source is, connecting Grafana to Prometheus, SQL and OpenSearch with a read-only account, then one panel and one alert; written from reading, not run. | builder | est. steps |
+| 36 | [Grafana dashboards](Grafana-Dashboards.md) | The three dashboards this repository ships and which question each answers; only tried with synthetic data. | operator |  |
+| 37 | [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) | A hands-on synthetic multi-site monitoring stack where you predict what a silent site does, for builders. | builder |  |
+| 38 | [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) | A springboard for building a small cloud security monitoring stack with a cost ceiling you set; an unverified draft for builders. | builder | draft |
+| 39 | [DFIR toolkits and live triage](DFIR-Toolkits-and-Live-Triage-SIFT-Velociraptor-KAPE-and-the-Incident-Response-Workflow.md) | SIFT, CAINE, Velociraptor, KAPE, FTK Imager and plaso from the owners' pages, live triage against dead-box imaging, an incident response workflow, and a free triage exercise on your own machine. | learner | draft |
+| 40 | [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) | What must exist at home before the cloud sends anything, for operators; the design is merged and nothing is applied. | operator | unbuilt |
+| 41 | [Open firmware and trustworthy hardware](Open-Firmware-and-Trustworthy-Hardware-coreboot-Heads-Nitrokey-and-Vendors-That-Ship-the-Intel-ME-Disabled.md) | What firmware is, coreboot, Heads with a Nitrokey, what a TPM and Secure Boot do not prove, and what Novacustom, System76, Purism and Tuxedo claim about the Intel ME, each dated, with a free read-only exercise. | learner | draft |
+| 42 | [Digital forensics foundations](Digital-Forensics-Foundations-Evidence-Handling-Chain-of-Custody-and-Order-of-Volatility.md) | Evidence handling, chain of custody and the order of volatility from RFC 3227, NIST SP 800-86 and SWGDE, with a free hash, image and verify exercise on a file you make. | learner | draft |
+| 43 | [Network, log and timeline forensics](Network-Log-and-Timeline-Forensics-Packet-Captures-Logs-and-Plaso.md) | Preserving a packet capture as evidence, what a pcap can and cannot prove, streams with tshark, log reliability and tampering, clock skew, time zones and a plaso super timeline, with a free container exercise. | learner | draft |
 
 ## Track 3: Privacy, anonymity and cryptocurrency
 
