@@ -376,7 +376,7 @@ If Clouds Against Humanity is useful to you, consider supporting continued devel
 
 <div align="center">
 
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/A0A4E59UP)
+Support me on [Ko-fi](https://ko-fi.com/A0A4E59UP)
 
 </div>
 
