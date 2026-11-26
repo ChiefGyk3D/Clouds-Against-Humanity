@@ -20,10 +20,9 @@ jobs:
       test: true
       # opa fmt, check --strict and test over the Spacelift push policy.
       policy-directories: .spacelift/policies
-      # The workflow-lint job installs pyflakes with pipx; GYST v1.28.0 runs
-      # secretless jobs in block and the tofu-ci default allow-list has no
-      # PyPI hosts.
-      extra-allowed-endpoints: "files.pythonhosted.org:443 pypi.org:443"
+      # The workflow-lint job installs pyflakes with pipx. The tofu-ci default
+      # allow-list at v1.38.0 already includes pypi.org and
+      # files.pythonhosted.org, so no extra endpoints are needed.
 
   python:
     uses: ChiefGyk3D/git-your-ship-together/.github/workflows/python-ci.yml@9e0d7b2e7e8530e2b1bb200ecb4fbf6de021881f # v1.38.0
