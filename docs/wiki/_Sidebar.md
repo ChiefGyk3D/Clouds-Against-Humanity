@@ -78,7 +78,7 @@ file does not match the manifest. -->
 
 - [Full list (8)](Contents.md#security-tools-and-threat-modeling)
 </details>
-<details><summary><b>Track 2: Defend and detect</b> (38)</summary>
+<details><summary><b>Track 2: Defend and detect</b> (43)</summary>
 
 <details><summary>Network and host defense (9)</summary>
 
@@ -92,12 +92,14 @@ file does not match the manifest. -->
 - [Deception alerts in the SIEM](Deception-and-Honeypots-Alerts-in-the-SIEM.md) · [Design a honeynet](Deception-and-Honeypots-Design-a-Honeynet.md) · [T-Pot at home](Deception-and-Honeypots-T-Pot-at-Home.md) (est. steps) · [Anatomy of a cloud honeypot](Deception-and-Honeypots-Cloud-Sensor-Anatomy.md) (est. steps) · [Cloud Cowrie for a weekend](Deception-and-Honeypots-Cloud-Cowrie-Weekend.md) (est. steps)
 - [Read what arrived: Cowrie logs](Deception-and-Honeypots-Read-the-Sensor-Logs.md)
 </details>
-<details><summary>Detection and monitoring (14)</summary>
+<details><summary>Detection and monitoring (19)</summary>
 
 - [A small example: the enterprise landscape](Small-Example-Enterprise-Landscape.md) · [Logs, SIEM and detection basics](Logs-SIEM-and-Detection-Basics.md) · [Detection, Wazuh and the landscape](Detection-and-Monitoring-Wazuh-and-the-Landscape.md) (unbuilt) · [Wazuh SIEM and data pipelines](Wazuh-SIEM-and-Data-Pipelines.md) (est. steps)
-- [Detecting Tor, I2P and VPN on a network](Detecting-and-Managing-Tor-I2P-and-VPN-on-a-Network-the-Defenders-View.md) (draft) · [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) (draft) · [Multiple sites and identity](Multiple-Sites-and-Identity.md) (draft)
-- [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) (draft) · [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) (draft) · [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) (est. steps) · [Grafana dashboards](Grafana-Dashboards.md)
-- [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) · [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) (draft) · [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) (unbuilt)
+- [How large language models work, for defenders](How-LLMs-Work-for-Defenders-Tokens-Context-Training-RAG-Agents-and-MCP.md) (draft) · [Attacks on AI systems](Attacks-on-AI-Systems-OWASP-LLM-Top-10-Prompt-Injection-Poisoning-and-Model-Supply-Chain.md) (draft) · [Architecting and securing AI systems](Architecting-and-Securing-AI-Systems-Guardrails-Versus-Rules-Least-Privilege-and-Agents.md) (draft)
+- [AI in defensive security work](AI-in-Defensive-Security-Work-SOC-Triage-Detection-Writing-Local-Models-and-Limits.md) (draft) · [Lab: build and attack a local LLM app](Lab-Build-and-Attack-a-Local-LLM-App-Canary-Injection-Rules-and-Guardrails.md) (draft) · [Detecting Tor, I2P and VPN on a network](Detecting-and-Managing-Tor-I2P-and-VPN-on-a-Network-the-Defenders-View.md) (draft)
+- [Cloud telemetry: what and why](Cloud-Telemetry-What-and-Why.md) (draft) · [Multiple sites and identity](Multiple-Sites-and-Identity.md) (draft) · [Telemetry crosses the trust boundary](Telemetry-Crosses-the-Trust-Boundary.md) (draft) · [Reading a dashboard as an operator](Reading-a-Dashboard-as-an-Operator.md) (draft)
+- [Grafana basics from a blank page](Grafana-Basics-From-a-Blank-Page.md) (est. steps) · [Grafana dashboards](Grafana-Dashboards.md) · [Lab: synthetic multi-site monitoring stack](Lab-Demo-Monitoring-Stack.md) · [Build your own mini SOC](Build-Your-Own-Mini-SOC.md) (draft)
+- [Stage 2 home-side runbook](Stage-2-Home-Side-Runbook.md) (unbuilt)
 </details>
 <details><summary>Digital forensics (3)</summary>
 
@@ -108,7 +110,7 @@ file does not match the manifest. -->
 - [Open firmware and trustworthy hardware](Open-Firmware-and-Trustworthy-Hardware-coreboot-Heads-Nitrokey-and-Vendors-That-Ship-the-Intel-ME-Disabled.md) (draft)
 </details>
 
-- [Full list (38)](Contents.md#track-2-defend-and-detect)
+- [Full list (43)](Contents.md#track-2-defend-and-detect)
 </details>
 <details><summary><b>Track 3: Privacy, anonymity and cryptocurrency</b> (20)</summary>
 
