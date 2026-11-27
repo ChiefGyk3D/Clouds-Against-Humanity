@@ -1,5 +1,5 @@
 # Clouds Against Humanity
-
+Fix one word in readme
 A small, cheap, locked-down DigitalOcean environment built with OpenTofu, applied by Spacelift, fed secrets by Doppler, and reachable only through Twingate. **No droplet has a single public inbound port open.** There is no VPN, no bastion host and no SSH on the internet.
 
 It is a cloud extension of a homelab, and it exists to teach: this repository is the reference environment, and the lessons that use it live in the wiki.
